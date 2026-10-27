@@ -86,3 +86,38 @@ test('the Forge builds library classes, with their subclasses, spells and featur
   const gone = generateCharacter({ cls: 'Artificer', level: 3 }, 'tink');
   assert.equal(gone.cls, 'Artificer'); assert.equal(gone.stats.hitDice, '3d8');
 });
+
+import { librarySpells } from '../js/library.js';
+import { npcStats } from '../js/npc-stats.js';
+
+test('library spells read their level and classes, and join spellbooks only when asked', () => {
+  const entries = [
+    { id: 's1', kind: 'rule', name: 'Storm Lance', fields: { category: 'Spell', class: 'wizard, sorcerer', level: '1', features: 'A bolt of lightning.' } },
+    { id: 's2', kind: 'rule', name: 'Spark', fields: { category: 'Spell', class: 'Wizard', level: 'cantrip' } },
+    { id: 's3', kind: 'rule', name: 'Gear Ward', fields: { category: 'Spell', class: 'Artificer', level: '2' } },
+    { id: 's4', kind: 'rule', name: 'No Level', fields: { category: 'Spell', class: 'Wizard' } },
+  ];
+  const spells = librarySpells(entries, ['Wizard', 'Sorcerer', 'Artificer']);
+  assert.deepEqual(spells.map((x) => [x.name, x.level, x.classes]), [['Storm Lance', 1, ['Wizard', 'Sorcerer']], ['Spark', 0, ['Wizard']], ['Gear Ward', 2, ['Artificer']]]);
+  setCharacterLibrary(() => ({ species: [], subclasses: [], classes: [], spells }));
+  // Off (characters saved before the option): the spellbook is the SRD one.
+  const off = generateCharacter({ cls: 'Wizard', level: 5 }, 'w1');
+  setCharacterLibrary(() => ({ species: [], subclasses: [], classes: [] }));
+  assert.equal(JSON.stringify(off.stats.spellbook), JSON.stringify(generateCharacter({ cls: 'Wizard', level: 5 }, 'w1').stats.spellbook));
+  // On: across a few seeds, library spells turn up, and only for their classes.
+  setCharacterLibrary(() => ({ species: [], subclasses: [], classes: [], spells }));
+  let seen = new Set();
+  for (let i = 0; i < 12; i++) {
+    const sb = generateCharacter({ cls: 'Wizard', level: 5, libSpells: true }, `w${i}`).stats.spellbook;
+    for (const n of sb.fromLibrary || []) seen.add(n);
+    const all = [...sb.cantrips, ...Object.values(sb.byLevel).flat()];
+    assert.equal(all.length, new Set(all).size, 'no spell twice');
+    assert.ok(!all.includes('Gear Ward'));
+  }
+  assert.ok(seen.has('Storm Lance') && seen.has('Spark'));
+  const cleric = generateCharacter({ cls: 'Cleric', level: 5, libSpells: true }, 'c1').stats.spellbook;
+  assert.equal(cleric.fromLibrary, undefined);
+  // NPC spellcasters use them too.
+  const texts = Array.from({ length: 15 }, (_, i) => npcStats({ role: 'wizard', cls: 'Wizard', level: 5 }, `npc${i}`).spells).join('\n');
+  assert.ok(texts.includes('Storm Lance') || texts.includes('Spark'));
+});

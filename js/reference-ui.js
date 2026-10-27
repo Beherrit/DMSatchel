@@ -3,8 +3,15 @@ import { el, setKids } from './dom.js';
 import { SPECIES, CLASSES, BACKGROUNDS, ORIGIN_FEATS, GENERAL_FEATS, EPIC_BOONS, ABILITY_NAMES, FULL_SLOTS } from './rules2024.js';
 import { MAGIC_ITEMS, RARITIES, RARITY_KEYS, ITEM_TYPES, baseType, itemEntry, concrete } from './magic-items.js';
 import { SPELLS, ORD } from './spells.js';
-import { isGm } from './api.js';
+import { isGm, session } from './api.js';
 import { makeRng } from './rng.js';
+import { world, worldEntries, loadWorld } from './world-store.js';
+import { libraryClasses, librarySpells } from './library.js';
+
+// The open world's library: its classes and spells appear beside the SRD ones, marked as yours.
+const libClasses = () => (world.loaded ? libraryClasses(worldEntries()).filter((c) => !CLASSES[c.name]) : []);
+const libSpells = () => (world.loaded ? librarySpells(worldEntries(), [...Object.keys(CLASSES), ...libClasses().map((c) => c.name)]) : []);
+const yours = (source) => el('span', { class: 'tag lib-source' }, source || 'your library');
 
 const TABS = [['classes', 'Classes'], ['species', 'Species'], ['backgrounds', 'Backgrounds'], ['feats', 'Feats'], ['spells', 'Spells'], ['items', 'Magic items'], ['slots', 'Spell slots']];
 let root, body, filter;
@@ -13,11 +20,11 @@ const card = (title, sub, ...kids) => el('article', { class: 'card ref-card', 'd
 const dl = (rows) => el('dl', { class: 'traits' }, rows.filter(([, v]) => v).flatMap(([k, v]) => [el('dt', {}, k), el('dd', {}, el('span', {}, v))]));
 
 function classes() {
-  return Object.entries(CLASSES).map(([name, c]) => {
+  return [...Object.entries(CLASSES), ...libClasses().map((c) => [c.name, c])].map(([name, c]) => {
     const rows = Array.from({ length: 20 }, (_, i) => i + 1).filter((lv) => c.features[lv] || lv === 3)
       .map((lv) => el('tr', {}, el('td', { class: 'num' }, lv), el('td', {}, [...(lv === 3 ? ['Subclass'] : []), ...(c.features[lv] || [])].join(', '))));
-    return card(name, `d${c.die} hit die · primary ${ABILITY_NAMES[c.priority[0]]}`,
-      dl([['Saving throws', c.saves.map((s) => ABILITY_NAMES[s]).join(', ')], ['Skills', `Choose ${c.skillCount}: ${c.skills.length === 18 ? 'any' : c.skills.join(', ')}`], ['Armor', c.armorProf], ['Weapons', c.weaponProf], ['Tools', c.tools], ['Spellcasting', c.caster ? `${{ full: 'Full caster', half: 'Half caster', pact: 'Pact Magic' }[c.caster]} (${ABILITY_NAMES[c.spellAbility]})` : ''], ['Subclasses', c.subclasses.join(', ')], ['Starting gear', c.gear]]),
+    return card(name, `d${c.die} hit die · primary ${ABILITY_NAMES[c.priority[0]]}${c.library ? ' · from your library' : ''}`,
+      dl([['Saving throws', c.saves.map((s) => ABILITY_NAMES[s]).join(', ')], ['Skills', `Choose ${c.skillCount}: ${c.skills.length === 18 ? 'any' : c.skills.join(', ')}`], ['Armor', c.armorProf], ['Weapons', c.weaponProf], ['Tools', c.tools], ['Spellcasting', c.caster ? `${{ full: 'Full caster', half: 'Half caster', third: 'Third caster', pact: 'Pact Magic' }[c.caster]} (${ABILITY_NAMES[c.spellAbility]})` : ''], ['Subclasses', c.subclasses.join(', ')], ['Starting gear', c.gear]]),
       el('details', {}, el('summary', {}, 'Features by level'), el('div', { class: 'table-wrap' }, el('table', {}, el('thead', {}, el('tr', {}, el('th', {}, 'Level'), el('th', {}, 'Features'))), el('tbody', {}, rows)))));
   });
 }
@@ -52,8 +59,21 @@ function items() {
       isGm() ? el('button', { class: 'btn small ghost world', type: 'button', onclick: () => window.dispatchEvent(new CustomEvent('world:draft', { detail: itemEntry(concrete(i, rng)) })) }, '+ Add to world') : null))];
 }
 function spells() {
-  return Object.entries(SPELLS).filter(([c]) => !['Eldritch Knight', 'Arcane Trickster'].includes(c)).map(([cls, lists]) => card(`${cls} spells`, `${lists.reduce((t, l) => t + l.length, 0)} spells`,
-    ...lists.map((names, lv) => (names.length ? el('div', { class: 'spell-row' }, el('span', { class: 'spell-lv' }, ORD[lv]), el('span', { class: 'spell-names' }, names.map((n) => el('span', { class: 'spell' }, n)))) : null))));
+  const mine = libSpells();
+  // Library classes cast from an SRD list; their cards show that list plus spells added for them by name.
+  const lists = [...Object.entries(SPELLS).filter(([c]) => !['Eldritch Knight', 'Arcane Trickster'].includes(c)),
+    ...libClasses().filter((c) => c.caster).map((c) => [c.name, SPELLS[c.spellsLike] || [], c.spellsLike])];
+  const cards = lists.map(([cls, base, like]) => {
+    const extra = mine.filter((x) => x.classes.includes(cls) || (like && x.classes.includes(like)));
+    const levels = Array.from({ length: 10 }, (_, lv) => [...(base[lv] || []).map((n) => [n, false]), ...extra.filter((x) => x.level === lv && !(base[lv] || []).includes(x.name)).map((x) => [x.name, true])]);
+    return card(`${cls} spells`, `${levels.reduce((t, l) => t + l.length, 0)} spells${like ? ` · the ${like} list` : ''}${extra.length ? ` · ${extra.length} from your library` : ''}`,
+      ...levels.map((names, lv) => (names.length ? el('div', { class: 'spell-row' }, el('span', { class: 'spell-lv' }, ORD[lv]),
+        el('span', { class: 'spell-names' }, names.map(([n, lib]) => el('span', { class: `spell${lib ? ' spell-lib' : ''}`, title: lib ? 'From your library' : null }, n)))) : null)));
+  });
+  const libCard = mine.length ? card('Spells from your library', `${mine.length} spell${mine.length === 1 ? '' : 's'}: the Character Forge and NPC spellcasters can prepare them`,
+    el('ul', { class: 'feature-list' }, [...mine].sort((a, b) => a.level - b.level || a.name.localeCompare(b.name)).map((x) => el('li', {}, el('strong', {}, x.name), ' ',
+      el('span', { class: 'tag' }, x.level ? `${ORD[x.level]} level` : 'cantrip'), ' ', yours(x.source), el('p', { class: 'small' }, `${x.classes.join(', ')}${x.text ? ` · ${x.text.length > 220 ? `${x.text.slice(0, 219)}…` : x.text}` : ''}`))))) : null;
+  return [libCard, ...cards].filter(Boolean);
 }
 function slots() {
   const head = el('tr', {}, el('th', {}, 'Caster level'), ['1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th'].map((s) => el('th', {}, s)));
@@ -67,7 +87,13 @@ export function showReference(tab = 'classes') {
   for (const b of root.querySelectorAll('.subtabs a')) b.setAttribute('aria-current', b.dataset.tab === tab ? 'page' : 'false');
   setKids(body, ...{ classes, species, backgrounds, feats, spells, items, slots }[tab]());
   applyFilter();
+  // Load the open world once, so its library classes and spells show here too.
+  if (!world.loaded && !triedWorld && session.configured !== false && ['classes', 'spells'].includes(tab)) {
+    triedWorld = true;
+    loadWorld().then(() => { if (world.loaded && root.querySelector('.subtabs a[aria-current=page]')?.dataset.tab === tab) showReference(tab); });
+  }
 }
+let triedWorld = false;
 function applyFilter() {
   const q = filter.value.trim().toLowerCase();
   for (const c of body.children) c.hidden = q && !c.classList.contains('ref-filters') && !c.textContent.toLowerCase().includes(q);

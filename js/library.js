@@ -142,3 +142,16 @@ export function classFrom(name, f = {}, extra = {}) {
 export function libraryClasses(entries) {
   return ruleOptions(entries, 'Class').map((e) => classFrom(e.name, e.fields || {}, { entryId: e.id, notes: e.fields?.features || e.summary || '' }));
 }
+
+// ---- spells ---------------------------------------------------------------------------------------
+// Spells from the library: level 0–9 ("cantrip" or blank = 0 only when it says so) and the classes whose lists
+// they join, matched loosely against the class names given ("wizard, sorcerer", "Wizard (2024)").
+export function librarySpells(entries, classNames = []) {
+  return ruleOptions(entries, 'Spell').map((e) => {
+    const raw = String(e.fields?.class || '');
+    const lv = /cantrip/i.test(e.fields?.level || '') ? 0 : num(e.fields?.level);
+    const matched = classNames.filter((c) => raw.toLowerCase().includes(c.toLowerCase()));
+    const classes = matched.length ? matched : raw.split(/\s*[,/&]\s*|\s+and\s+/).map((x) => x.trim()).filter(Boolean);
+    return { name: e.name, level: lv, classes, text: e.fields?.features || e.summary || '', source: e.fields?.source || '', entryId: e.id };
+  }).filter((s) => s.level != null && s.level >= 0 && s.level <= 9 && s.classes.length);
+}

@@ -11,9 +11,9 @@ import { sendToWorld } from './tools.js';
 import { characterFields, featureItem } from './sheet-ui.js';
 import { session, onSession } from './api.js';
 import { world, worldEntries, loadWorld } from './world-store.js';
-import { librarySpecies, librarySubclasses, libraryClasses } from './library.js';
+import { librarySpecies, librarySubclasses, libraryClasses, librarySpells } from './library.js';
 
-let state = { opts: { level: 1, species: 'any', subclass: 'any', cls: 'any', background: 'any', gender: 'any', alignment: 'any', method: 'standard', name: '' }, seed: randomSeed(), salts: {} };
+let state = { opts: { level: 1, species: 'any', subclass: 'any', cls: 'any', background: 'any', gender: 'any', alignment: 'any', method: 'standard', name: '', libSpells: true }, seed: randomSeed(), salts: {} };
 let ch = null;
 let sheet;
 
@@ -24,12 +24,13 @@ function readOpts() {
   const o = state.opts;
   o.level = +$('#c-level').value; o.species = $('#c-species').value; o.cls = $('#c-class').value; o.subclass = $('#c-subclass').value; o.background = $('#c-bg').value;
   o.gender = $('#c-gender').value; o.alignment = $('#c-align').value; o.method = $('#c-method').value; o.name = $('#c-name').value.trim();
+  o.libSpells = $('#c-libspells').checked;
 }
 function writeOpts() {
   const o = state.opts;
   $('#c-level').value = o.level; $('#c-bg').value = o.background;
   fillLibraryOptions();
-  $('#c-gender').value = o.gender; $('#c-align').value = o.alignment; $('#c-method').value = o.method; $('#c-name').value = o.name || '';
+  $('#c-gender').value = o.gender; $('#c-align').value = o.alignment; $('#c-method').value = o.method; $('#c-name').value = o.name || ''; $('#c-libspells').checked = !!o.libSpells;
 }
 
 // Class, species and subclass menus: the SRD options, then the world library's (when a world with a library is
@@ -38,6 +39,7 @@ function fillLibraryOptions() {
   const entries = world.loaded ? worldEntries() : [];
   const libClasses = libraryClasses(entries).filter((c) => !CLASSES[c.name]).map((c) => c.name);
   const libSpecies = librarySpecies(entries), libSubs = librarySubclasses(entries, [...Object.keys(CLASSES), ...libClasses]);
+  $('#c-libspells-wrap').hidden = !librarySpells(entries, [...Object.keys(CLASSES), ...libClasses]).length;
   const opt = (v, t) => el('option', { value: v }, t);
   const keep = (list, v) => (v && !['any', 'library'].includes(v) && !list.includes(v) ? [opt(v, `${v} (not in this world)`)] : []);
   const spSel = $('#c-species');
@@ -105,7 +107,8 @@ function render(isNew) {
     s.spellcasting ? block('Spellcasting', s.spellbook ? renderSpells(spellText(s.spellbook), `forge-${ch.seed}`)
       : el('p', {}, `${ABILITY_NAMES[s.spellcasting.ability]} · save DC ${s.spellcasting.dc} · spell attack ${fmtMod(s.spellcasting.attack)}`),
       s.spellbook ? el('p', { class: 'muted small' }, `${s.spellbook.prepared} spells prepared${s.spellbook.cantrips.length ? `, ${s.spellbook.cantrips.length} cantrips` : ''}. Reroll the list with ↻ on “Spells”.`) : null,
-      s.spellbook ? el('button', { class: 'btn small ghost', type: 'button', onclick: () => bump('spells') }, '↻ Spells') : null) : null,
+      s.spellbook?.fromLibrary ? el('p', { class: 'muted small' }, `From your library: ${s.spellbook.fromLibrary.join(', ')}.`) : null,
+      s.spellbook ? el('button', { class: 'btn small ghost', type: 'button', onclick: () => bump('spells', 'libspells') }, '↻ Spells') : null) : null,
     s.resources.length ? block('Class resources', el('ul', { class: 'plain' }, s.resources.map((x) => el('li', {}, x)))) : null,
     block('Proficiencies', el('p', {}, `Armor: ${ch.armorProf}.`), el('p', {}, `Weapons: ${ch.weaponProf}.`), el('p', {}, `Tools: ${ch.tools.join(', ')}.`), el('p', {}, `Languages: ${ch.languages.join(', ')}.`)),
     block('Equipment', el('p', {}, `From class: ${ch.equipment.cls}.`), el('p', {}, `From background: ${ch.equipment.background}.`), el('p', { class: 'muted' }, 'Either can be swapped for gold: 50 GP for the background, or the class’s gold option.')));
@@ -152,7 +155,8 @@ export function mountCharacters(root) {
       sel('c-gender', 'Character', [['any', 'Any'], ['f', 'She/her'], ['m', 'He/him'], ['x', 'They/them']]),
       sel('c-align', 'Alignment', [['any', 'Any'], ...Object.keys(ALIGNMENTS).map((k) => [k, k])]),
       sel('c-method', 'Ability scores', [['standard', 'Standard array'], ['pointbuy', 'Point buy'], ['roll', '4d6 drop lowest']]),
-      el('div', { class: 'field' }, el('label', { for: 'c-name' }, 'Name (optional)'), el('input', { type: 'text', id: 'c-name', placeholder: 'Leave blank to roll one' }))),
+      el('div', { class: 'field' }, el('label', { for: 'c-name' }, 'Name (optional)'), el('input', { type: 'text', id: 'c-name', placeholder: 'Leave blank to roll one' })),
+      el('label', { class: 'check', id: 'c-libspells-wrap', hidden: true }, el('input', { type: 'checkbox', id: 'c-libspells', checked: true }), ' Spells from my library')),
     el('div', { class: 'btnrow' },
       el('button', { class: 'btn primary', type: 'button', onclick: () => { readOpts(); state.seed = randomSeed(); state.salts = {}; generate(true); } }, 'Roll character'),
       el('button', { class: 'btn', type: 'button', onclick: () => bump('origins', 'upbringing', 'calling', 'life', 'people', 'personality', 'drives', 'hooks') }, 'New backstory'),
@@ -167,11 +171,11 @@ export function mountCharacters(root) {
       el('button', { class: 'btn', type: 'button', onclick: () => { copyText(shareLink()); toast('Link copied: anyone who opens it sees this exact character'); } }, 'Share link')),
     sheet);
   // Changing an option rerolls with the same seed, so the character changes only where it must.
-  for (const id of ['c-level', 'c-species', 'c-subclass', 'c-bg', 'c-gender', 'c-align', 'c-method']) $(`#${id}`, root).addEventListener('change', () => { readOpts(); generate(); });
+  for (const id of ['c-level', 'c-species', 'c-subclass', 'c-bg', 'c-gender', 'c-align', 'c-method', 'c-libspells']) $(`#${id}`, root).addEventListener('change', () => { readOpts(); generate(); });
   // A new class has its own subclasses: refill that menu before rolling.
   $('#c-class', root).addEventListener('change', () => { state.opts.cls = $('#c-class').value; state.opts.subclass = 'any'; fillLibraryOptions(); readOpts(); generate(); });
   // The library lives in the open world: load it (and reload when someone signs in or switches worlds).
-  const refreshLibrary = () => { if (session.configured === false) return; loadWorld(true).then(() => { writeOpts(); if (state.opts.species === 'library' || state.opts.subclass === 'library' || state.opts.cls === 'library' || !SPECIES[state.opts.species] || !CLASSES[state.opts.cls]) generate(); }).catch(() => {}); };
+  const refreshLibrary = () => { if (session.configured === false) return; loadWorld(true).then(() => { writeOpts(); generate(); }).catch(() => {}); };
   let seen = '';
   onSession((s) => { const k = `${s.gm?.id || ''}|${s.worldKey || ''}`; if (k !== seen) { seen = k; refreshLibrary(); } });
   $('#c-name', root).addEventListener('change', () => { readOpts(); generate(); });

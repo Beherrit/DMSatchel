@@ -55,7 +55,7 @@ export function npcStats({ role, ancestry = 'Human', cls = 'auto', level } = {},
   let pick = cls === 'auto' ? classForRole(role, rng) : cls === 'commoner' ? null : { cls, level: level || rng.range(1, 5) };
   if (pick && level) pick.level = level;
   if (!pick) return commoner(SPECIES[ancestry] ? ancestry : 'Human', rng);
-  const ch = generateCharacter({ cls: pick.cls, level: pick.level, species: SPECIES[ancestry] ? ancestry : 'Human' }, seed);
+  const ch = generateCharacter({ cls: pick.cls, level: pick.level, species: SPECIES[ancestry] ? ancestry : 'Human', libSpells: true }, seed);
   const s = ch.stats, a = ch.abilities.scores;
   const conMod = abilityMod(a.Con);
   const lines = [

@@ -3,7 +3,7 @@ import { el } from './dom.js';
 import { api } from './api.js';
 import { KINDS } from './world-schema.js';
 import { setLibraryItems } from './magic-items.js';
-import { libraryItems, librarySpecies, librarySubclasses, libraryClasses } from './library.js';
+import { libraryItems, librarySpecies, librarySubclasses, libraryClasses, librarySpells } from './library.js';
 import { setCharacterLibrary } from './character.js';
 import { CLASSES } from './rules2024.js';
 
@@ -20,11 +20,11 @@ export const world = { entries: new Entries(), info: null, loaded: false, loadin
 export const worldEntries = () => [...world.entries.values()];
 // Loot, shops and the magic item tool also roll items from the world's library.
 setLibraryItems(() => (world.loaded ? libraryItems(worldEntries()) : []));
-// The Character Forge can build characters with the world's library classes, species and subclasses.
+// The Character Forge can build characters with the world's library classes, species, subclasses and spells.
 setCharacterLibrary(() => {
-  if (!world.loaded) return { species: [], subclasses: [], classes: [] };
-  const all = worldEntries(), classes = libraryClasses(all).filter((c) => !CLASSES[c.name]);
-  return { species: librarySpecies(all), subclasses: librarySubclasses(all, [...Object.keys(CLASSES), ...classes.map((c) => c.name)]), classes };
+  if (!world.loaded) return { species: [], subclasses: [], classes: [], spells: [] };
+  const all = worldEntries(), classes = libraryClasses(all).filter((c) => !CLASSES[c.name]), names = [...Object.keys(CLASSES), ...classes.map((c) => c.name)];
+  return { species: librarySpecies(all), subclasses: librarySubclasses(all, names), classes, spells: librarySpells(all, names) };
 });
 export const getEntry = (id) => world.entries.get(id);
 

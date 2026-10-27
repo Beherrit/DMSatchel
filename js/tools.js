@@ -52,6 +52,8 @@ const ancestryOptions = () => [['any', 'Any'], ...ANCESTRIES.map((a) => [a, a])]
 const NPC_LABELS = { look: 'Look', personality: 'Personality', mannerism: 'Mannerism', voice: 'Voice', want: 'Wants', secret: 'Secret', attitude: 'Attitude' };
 function mountNpc(root) {
   let npc;
+  // Spellcasting NPCs can prepare spells from the open world's library.
+  if (session.configured === true && !world.loaded) loadWorld();
   const card = el('article', { class: 'card fresh' });
   root.append(panelHead('NPC Generator', 'Roll a whole character, or reroll a single line with ↻. Save the keepers, or add them to the shared world.'),
     el('div', { class: 'controls' }, select('npc-anc', 'Ancestry', ancestryOptions()),

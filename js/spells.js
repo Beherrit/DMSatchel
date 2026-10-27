@@ -125,7 +125,7 @@ export const slotsFor = (cls, level) => casterSlots(CASTER_OF[cls], level);
 // Choose prepared spells: spread across every level the caster can cast, a few more at the lower levels.
 // `like` ({ list, caster }) is for classes from your library: cast as `caster` from the SRD class `list`'s spells.
 const PREP_FOR = { full: FULL_PREP, half: HALF_PREP, third: THIRD_PREP, pact: PACT_PREP };
-export function spellbook(cls, level, rng, { ability, mod, pb }, like = null) {
+export function spellbook(cls, level, rng, { ability, mod, pb }, like = null, extra = null) {
   const key = like ? like.list : cls;
   const list = SPELLS[key]; const slots = like ? casterSlots(like.caster, level) : slotsFor(cls, level);
   if (!list || !slots) return null;
@@ -143,8 +143,22 @@ export function spellbook(cls, level, rng, { ability, mod, pb }, like = null) {
     if (!Object.keys(weights).length) break;
     const l = rng.pickW(weights); (byLevel[l] ||= []).push(pool[l].shift()); left--;
   }
+  // Spells from your library (extra: { spells: [{ name, level }], rng }) take over some of the picks, using their
+  // own random stream so the SRD picks underneath stay the same. A library spell is as likely as any SRD spell of
+  // its level, and at least one pick in four.
+  const fromLibrary = [];
+  if (extra?.spells?.length) {
+    const xr = extra.rng;
+    for (let l = 0; l <= maxLevel; l++) {
+      const picked = l === 0 ? cantrips : byLevel[l] || [];
+      const mine = extra.spells.filter((x) => x.level === l && !picked.includes(x.name) && !(list[l] || []).includes(x.name)).map((x) => x.name);
+      if (!mine.length || !picked.length) continue;
+      const share = Math.max(0.25, mine.length / (mine.length + (list[l] || []).length));
+      for (let i = 0; i < picked.length && mine.length; i++) if (xr.chance(share)) { picked[i] = mine.splice(xr.range(0, mine.length - 1), 1)[0]; fromLibrary.push(picked[i]); }
+    }
+  }
   for (const l of Object.keys(byLevel)) byLevel[l].sort();
-  return { cls, level, ability, dc: 8 + pb + mod, attack: pb + mod, ...slots, cantrips: cantrips.sort(), byLevel, prepared: count };
+  return { cls, level, ability, dc: 8 + pb + mod, attack: pb + mod, ...slots, cantrips: cantrips.sort(), byLevel, prepared: count, ...(fromLibrary.length ? { fromLibrary } : {}) };
 }
 
 const ABIL = { Int: 'Intelligence', Wis: 'Wisdom', Cha: 'Charisma' };

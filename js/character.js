@@ -21,7 +21,7 @@ import { classFrom } from './library.js';
 // Classes, species and subclasses from the open world's library (set by the world store). They're only used when
 // chosen ("Any from my library" or by name), and they draw from their own random stream, so SRD rolls and saved
 // characters come out exactly as before.
-const NO_LIBRARY = { species: [], subclasses: [], classes: [] };
+const NO_LIBRARY = { species: [], subclasses: [], classes: [], spells: [] };
 let libraryProvider = () => NO_LIBRARY;
 export const setCharacterLibrary = (fn) => { libraryProvider = fn; };
 let lib = NO_LIBRARY;
@@ -467,9 +467,14 @@ export function generateCharacter(opts = {}, seed = 'seed', salts = {}) {
   if (stats.spellcasting) {
     const sa = stats.spellcasting.ability;
     const c = classData(core.cls), how = { ability: sa, mod: mod(ab.scores[sa]), pb: stats.pb };
+    // Library spells for this class (or the list it casts from) join when the option is on; it's off for characters
+    // saved before it existed, so their spells stay put.
+    const lists = [core.cls, c.spellsLike, build.casterKey === 'third' && !c.library ? 'Wizard' : null].filter(Boolean);
+    const mine = opts.libSpells ? lib.spells.filter((x) => x.classes.some((k) => lists.includes(k))) : [];
+    const extra = mine.length ? { spells: mine, rng: R('libspells') } : null;
     // A library class casts like the SRD class whose spell list it borrows.
-    stats.spellbook = c.library ? spellbook(core.cls, level, R('spells'), how, { list: c.spellsLike, caster: c.caster })
-      : spellbook(build.casterKey === 'third' ? core.subclass : core.cls, level, R('spells'), how);
+    stats.spellbook = c.library ? spellbook(core.cls, level, R('spells'), how, { list: c.spellsLike, caster: c.caster }, extra)
+      : spellbook(build.casterKey === 'third' ? core.subclass : core.cls, level, R('spells'), how, null, extra);
   }
 
   const ctx = {

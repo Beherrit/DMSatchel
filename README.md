@@ -82,7 +82,8 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Your library**: short notes on monsters, items, classes, subclasses, species, feats and spells from the books
   your group owns. Bestiary monsters turn up in encounters and dungeons; your items in loot and shops; your classes,
   species and subclasses in the Character Forge (a class form covers hit die, proficiencies, features by level and
-  spellcasting, so the Forge builds the whole character).
+  spellcasting, so the Forge builds the whole character); your spells join class spell lists in the Forge, NPC
+  spellcasting and the Spells reference.
 - **Members-only site**: one switch makes every page and tool need a personal code or invite link.
 - **Hidden entries**: GMs can keep any entry hidden from players while they prep, then reveal it in one click.
 - **Admin**: world owners manage members and roles, rotate invite links, name the world, see recent activity, and
