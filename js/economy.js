@@ -229,3 +229,20 @@ export function stockText(shop) {
   if (shop.notes) lines.push('', shop.notes);
   return lines.join('\n');
 }
+
+// 12345 cp → "123 gp 4 sp 5 cp"
+export function coinText(cp) {
+  const neg = cp < 0; let n = Math.abs(Math.round(cp));
+  const gp = Math.floor(n / 100); n -= gp * 100;
+  const sp = Math.floor(n / 10); const c = n - sp * 10;
+  const parts = [gp && `${gp.toLocaleString('en-US')} gp`, sp && `${sp} sp`, c && `${c} cp`].filter(Boolean);
+  return `${neg ? '−' : ''}${parts.join(' ') || '0 gp'}`;
+}
+
+// "25 gp 3 sp", "12", "1,200" → copper pieces (a bare number means gold).
+export function parseCoins(text) {
+  const t = String(text || '').trim().toLowerCase();
+  if (!t) return 0;
+  if (/^[\d,.]+$/.test(t)) return Math.round(parseFloat(t.replace(/,/g, '')) * 100);
+  return Math.round(parsePrice(t) * 100);
+}

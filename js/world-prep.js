@@ -2,6 +2,7 @@
 // quests in play, clocks about to finish, what's coming on the calendar, the party's state, loose threads, and a
 // scratch pad the GMs share. Route: #world/prep
 import { el, toast, setKids } from './dom.js';
+import { recapButton } from './world-recap.js';
 import { api, isGm, session } from './api.js';
 import { world, worldEntries, getEntry, link, kindLabel, byName, descendantsOf, trail, whenTime, notice, richText } from './world-store.js';
 import { PLACE_KINDS } from './world-schema.js';
@@ -174,7 +175,7 @@ export async function viewPrep(rerender) {
   const next = Math.max(0, ...sessions().map((x) => parseInt(x.fields?.number, 10) || 0)) + 1;
   return el('div', { class: 'w-view prep-view' },
     el('div', { class: 'panel-head row' }, el('div', {}, el('h2', {}, `Prep for session ${next}`), el('p', {}, 'Everything you need before the table: where things stand, what’s about to happen, and your notes.')),
-      el('div', { class: 'btnrow' }, el('button', { class: 'btn primary', type: 'button', onclick: startSession(prep) }, `Start session ${next}`))),
+      el('div', { class: 'btnrow' }, recapButton('btn'), el('button', { class: 'btn primary', type: 'button', onclick: startSession(prep) }, `Start session ${next}`))),
     el('div', { class: 'btnrow prep-actions' }, el('span', { class: 'muted small' }, 'Between sessions:'),
       el('a', { class: 'btn small', href: '#world/clocks' }, 'Faction turn'),
       el('button', { class: 'btn small', type: 'button', onclick: async () => { await letRumorsSpread(); rerender(); } }, 'Let rumors spread'),

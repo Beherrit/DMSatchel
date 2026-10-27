@@ -3,27 +3,13 @@
 import { el, toast, confirmButton, setKids } from './dom.js';
 import { api, isGm, isMember, session } from './api.js';
 import { worldEntries, byName, link, when, richText, setEntryState } from './world-store.js';
-import { parsePrice } from './economy.js';
 import { thumb } from './image-ui.js';
 
 const ACTIVE = (e) => !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
 
-// 12345 cp → "123 gp 4 sp 5 cp"
-export function coinText(cp) {
-  const neg = cp < 0; let n = Math.abs(Math.round(cp));
-  const gp = Math.floor(n / 100); n -= gp * 100;
-  const sp = Math.floor(n / 10); const c = n - sp * 10;
-  const parts = [gp && `${gp.toLocaleString('en-US')} gp`, sp && `${sp} sp`, c && `${c} cp`].filter(Boolean);
-  return `${neg ? '−' : ''}${parts.join(' ') || '0 gp'}`;
-}
-
-// "25 gp 3 sp", "12", "1,200" → copper pieces (a bare number means gold).
-export function parseCoins(text) {
-  const t = String(text || '').trim().toLowerCase();
-  if (!t) return 0;
-  if (/^[\d,.]+$/.test(t)) return Math.round(parseFloat(t.replace(/,/g, '')) * 100);
-  return Math.round(parsePrice(t) * 100);
-}
+// Coin text and parsing live in economy.js (pure, so recaps and tests can use them too).
+export { coinText, parseCoins } from './economy.js';
+import { coinText, parseCoins } from './economy.js';
 
 function members(chars) {
   const active = chars.filter(ACTIVE), former = chars.filter((e) => !ACTIVE(e));

@@ -19,6 +19,7 @@ import { placeHub, viewAtlas, placeCounts } from './world-place.js';
 import { viewParty } from './world-party.js';
 import { viewSchedule, nextSessionLine } from './world-schedule.js';
 import { viewDowntime, downtimeSection } from './world-downtime.js';
+import { recapButton } from './world-recap.js';
 import { viewExport } from './world-export.js';
 import { viewClocks, clocksWidget } from './world-clocks.js';
 import { viewRumors } from './world-rumors.js';
@@ -117,7 +118,8 @@ function viewKind(kind) {
   else list.sort(byName);
   return el('div', { class: 'w-view' },
     el('div', { class: 'panel-head row' }, el('div', {}, el('h2', {}, KINDS[kind].plural), el('p', {}, KINDS[kind].blurb)),
-      isGm() || (isMember() && PLAYER_KINDS.includes(kind)) ? el('a', { class: 'btn primary', href: `#world/new/${kind}` }, `New ${lower(kindLabel(kind))}`)
+      kind === 'session' && isGm() ? el('div', { class: 'btnrow' }, recapButton('btn'), el('a', { class: 'btn primary', href: '#world/new/session' }, 'New session'))
+        : isGm() || (isMember() && PLAYER_KINDS.includes(kind)) ? el('a', { class: 'btn primary', href: `#world/new/${kind}` }, `New ${lower(kindLabel(kind))}`)
         : isMember() ? el('a', { class: 'btn', href: `#world/new/${kind}` }, `Suggest a ${lower(kindLabel(kind))}`) : null),
     list.length ? (kind === 'session' ? sessionList(list) : kind === 'event'
       ? el('ol', { class: 'timeline' }, list.map((e) => el('li', {}, el('span', { class: 'date' }, e.fields.date || e.fields.sort || '—'), el('div', {}, link(e), e.summary ? el('p', {}, e.summary) : null))))
