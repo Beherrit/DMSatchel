@@ -13,6 +13,7 @@ import { viewStandings, standingWidget } from './world-standings.js';
 import { viewTalk, talkWidget } from './world-talk.js';
 import { placeHub, viewAtlas, placeCounts } from './world-place.js';
 import { viewParty } from './world-party.js';
+import { viewExport } from './world-export.js';
 import { viewCalendar, worldCalendar, todayText } from './world-calendar.js';
 import { parseDate, toDays, yearLength } from './calendar.js';
 import { sheetSection } from './sheet-ui.js';
@@ -39,7 +40,7 @@ function renderSide() {
     el('a', { href: '#world', class: 'w-home' }, world.info?.name || 'The World'),
     search,
     isPlayer() ? el('div', { class: 'w-gm w-player' }, el('a', { class: 'btn primary small', href: '#world/new/character' }, '+ My character'), el('a', { class: 'btn small', href: '#world/new/journal' }, '+ Journal entry'),
-      el('a', { class: 'btn ghost small', href: '#world/new/lore' }, 'Suggest an entry'), el('a', { class: 'btn ghost small', href: '#world/mine' }, 'My things')) : null,
+      el('a', { class: 'btn ghost small', href: '#world/new/lore' }, 'Suggest an entry'), el('a', { class: 'btn ghost small', href: '#world/mine' }, 'My things'), el('a', { class: 'btn ghost small', href: '#world/export' }, 'Export')) : null,
     el('nav', { class: 'w-kinds w-tools', 'aria-label': 'World views' },
       el('a', { href: '#world/party', 'data-view': 'party' }, el('span', {}, 'The Party'), el('span', { class: 'count' }, worldEntries().filter((e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status)).length)),
       el('a', { href: '#world/calendar', 'data-view': 'calendar', title: todayText() }, el('span', {}, 'Calendar'), el('span', { class: 'count cal-count' }, worldCalendar() ? todayText().split(', ').pop().replace(/ \d+.*$/, '') : '')),
@@ -50,6 +51,7 @@ function renderSide() {
       isGm() ? el('a', { href: '#world/talk', 'data-view': 'talk' }, el('span', {}, 'GM discussions'), el('span', { class: 'count', id: 'w-talk-count' }, '')) : null),
     el('nav', { class: 'w-kinds', 'aria-label': 'Entry types' }, KIND_ORDER.map((k) => el('a', { href: `#world/k/${k}`, 'data-kind': k }, el('span', {}, KINDS[k].plural), el('span', { class: 'count' }, counts[k] || 0)))),
     isGm() ? el('div', { class: 'w-gm' }, el('a', { class: 'btn primary small', href: '#world/new/npc' }, '+ New entry'), el('a', { class: 'btn ghost small', href: '#world/bin' }, 'Bin'),
+      el('a', { class: 'btn ghost small', href: '#world/export' }, 'Export & print'),
       suggested ? el('a', { class: 'btn small suggest-btn', href: '#world/suggestions' }, `Suggestions (${suggested})`) : null) : null,
     !isMember() && signedIn() ? el('p', { class: 'muted small w-visitor' }, 'You’re browsing as a visitor. Ask the owner for an invite to add things.') : null,
   );
@@ -448,6 +450,7 @@ export async function showWorld(parts, { keepScroll = false } = {}) {
   else if (view === 'talk') node = await viewTalk();
   else if (view === 'suggestions') node = viewSuggestions();
   else if (view === 'party') node = await viewParty(rerenderWorld);
+  else if (view === 'export') node = viewExport();
   else if (view === 'calendar') node = viewCalendar(arg, parts[2], rerenderWorld);
   else if (view === 'mine') node = viewMine();
   else node = viewHome();

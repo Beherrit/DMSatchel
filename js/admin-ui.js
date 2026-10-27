@@ -154,7 +154,8 @@ function backupSection() {
     file.value = '';
   });
   return el('section', { class: 'card' }, el('h3', {}, 'Backup'),
-    el('p', { class: 'muted' }, 'Download the whole world, GM secrets included, as one JSON file. Keep a copy somewhere safe. Importing a backup adds its entries and replaces any with the same id.'),
+    el('p', { class: 'muted' }, el('a', { href: '#world/export' }, 'Export & print'), ' makes a readable Markdown or print copy, for GMs or players. ',
+      'Download the whole world, GM secrets included, as one JSON file. Keep a copy somewhere safe. Importing a backup adds its entries and replaces any with the same id.'),
     el('div', { class: 'btnrow' },
       el('button', { class: 'btn', type: 'button', onclick: async () => {
         try { const r = await api('entries'); download(`world-backup-${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify({ exported: new Date().toISOString(), world: r.world, entries: r.entries }, null, 2), 'application/json'); }

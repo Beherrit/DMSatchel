@@ -58,6 +58,8 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
   pins once a map has a scale.
 - **Dungeons & lairs**: a keyed site in one roll, with monsters fitted to the party, traps, puzzles, treasure and a
   map; GMs can add it to the world with a page per room and a pin on each.
+- **Export & print**: the world, a region or one kind of entry as Markdown or a printable page, as a GM copy or a
+  player-safe copy.
 - **Calendar**: your world's own months, weekdays, moons and holidays. GMs move time forward; events, sessions and
   journals with dates appear on the month grid.
 - **Pictures**: upload a portrait, a town sketch or a handout image to any entry (or paste a link).
