@@ -20,6 +20,7 @@ import { viewParty } from './world-party.js';
 import { viewSchedule, nextSessionLine } from './world-schedule.js';
 import { viewDowntime, downtimeSection } from './world-downtime.js';
 import { recapButton } from './world-recap.js';
+import { showButton, checkShown } from './world-show.js';
 import { viewExport } from './world-export.js';
 import { viewClocks, clocksWidget } from './world-clocks.js';
 import { viewRumors } from './world-rumors.js';
@@ -207,6 +208,7 @@ function viewEntry(id, tab) {
       el('div', {}, el('div', { class: 'eyebrow' }, kindLabel(e.kind), e.fields?.type ? ` · ${e.fields.type}` : ''), el('h2', {}, e.name), stateBadges(e).length ? el('div', { class: 'badges' }, stateBadges(e)) : null),
       !isGm() && e.can_edit ? el('div', { class: 'btnrow' }, el('a', { class: 'btn', href: `#world/edit/${e.id}` }, 'Edit')) : null,
       isGm() ? el('div', { class: 'btnrow' }, el('a', { class: 'btn', href: `#world/edit/${e.id}` }, 'Edit'),
+        showButton(e),
         world.info?.discord && e.visibility !== 'gm' && e.status !== 'suggested' ? confirmButton('Post to Discord', async () => {
           try { await api('settings', { method: 'POST', body: { post: e.id } }); toast(`Posted ${e.name} to Discord`); } catch (err) { toast(err.message, 'bad'); }
         }, 'btn ghost') : null,
@@ -464,7 +466,7 @@ export async function showWorld(parts, { keepScroll = false } = {}) {
         : 'The admin needs to connect the database: add Neon Postgres to the Vercel project and set ADMIN_CODE. See the README for the two steps.'));
     return;
   }
-  if (!world.loaded) { setKids(main, el('p', { class: 'muted' }, 'Loading the world…')); await loadWorld(); }
+  if (!world.loaded) { setKids(main, el('p', { class: 'muted' }, 'Loading the world…')); await loadWorld(); if (world.loaded) setTimeout(checkShown, 300); }
   if (world.error) { setKids(main, notice('Couldn’t load the world', world.error.message, el('button', { class: 'btn', type: 'button', onclick: () => { loadWorld(true).then(() => showWorld(parts)); } }, 'Try again'))); return; }
   renderSide();
   const [view, arg] = parts;
@@ -520,7 +522,9 @@ export function mountWorld(root) {
     if (document.hidden || !location.hash.startsWith('#world') || !world.loaded || syncing) return;
     syncing = true;
     try {
-      const changes = await syncWorld(session.gm?.name);
+      const all = await syncWorld(session.gm?.name);
+      if (all.some((c) => c.shown)) checkShown();
+      const changes = all.filter((c) => !c.shown);
       if (changes.length) {
         const people = [...new Set(changes.map((c) => c.by).filter(Boolean))];
         const one = changes.length === 1 && changes[0];

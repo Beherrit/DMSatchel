@@ -3,6 +3,7 @@
 // PUT {discord_webhook}  (owner) a Discord webhook link; it never leaves the server. Empty string removes it.
 // PATCH {prep: {location_id, notes}}   (GM) session prep: where the party is, and the GMs' scratch pad.
 // POST {post: entryId}   (GM) post an entry's summary and text to the world's Discord channel.
+// PATCH {show: entryId | null}  (GM) show an entry to everyone with the world open (revealing it if hidden), or stop.
 import { route, send, fail, sql, requireOwner, requireGm, postDiscord } from './_lib/core.js';
 import { cleanCalendar } from '../js/calendar.js';
 import { KINDS } from '../js/world-schema.js';
@@ -55,6 +56,20 @@ export default route({
   },
   async PATCH(req, res) {
     if (!requireGm(req, res)) return;
+    if (req.body.show !== undefined) {
+      if (req.body.show === null) { await sql`UPDATE worlds SET shown = NULL WHERE id = ${req.world.id}`; return send(res, 200, { shown: null }); }
+      const e = (await sql`SELECT id, visibility, status FROM entries WHERE id = ${String(req.body.show)} AND world_id = ${req.world.id} AND NOT deleted`)[0];
+      if (!e) return fail(res, 404, 'That entry doesn’t exist.');
+      if (e.status !== 'live') return fail(res, 400, 'Approve this suggestion before showing it.');
+      // Showing something hidden reveals it, so players can open it again later.
+      if (e.visibility === 'gm') {
+        await sql`UPDATE entries SET visibility = 'all', updated_by = ${req.gm.id}, updated_at = now(), version = version + 1 WHERE id = ${e.id}`;
+        await sql`INSERT INTO history (entry_id, gm_id, action) VALUES (${e.id}, ${req.gm.id}, 'reveal')`;
+      }
+      const shown = { entry_id: e.id, at: new Date().toISOString(), by: req.gm.name };
+      await sql`UPDATE worlds SET shown = ${JSON.stringify(shown)} WHERE id = ${req.world.id}`;
+      return send(res, 200, { shown, revealed: e.visibility === 'gm' });
+    }
     if (req.body.prep !== undefined) {
       const p = req.body.prep || {};
       const cur = req.world.prep || {};

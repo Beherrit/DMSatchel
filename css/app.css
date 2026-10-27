@@ -914,3 +914,10 @@ body.gated .mainnav, body.gated #toolnav, body.gated #panels, body.gated #notebo
 .map-viewport.painting { cursor: crosshair }
 .fog-bar { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin: 8px 0 }
 .fog-bar p { flex-basis: 100%; margin: 0 }
+
+/* Shown to the table */
+.show-dialog { width: min(680px, calc(100vw - 32px)) }
+.show-dialog .dialog-body > * { margin: 0 }
+.show-img { display: block; max-width: 100%; max-height: 55vh; margin: 8px auto; border-radius: 6px }
+.show-text { max-height: 40vh; overflow: auto; background: var(--sunk); border-radius: 6px; padding: 10px 12px; margin: 8px 0 }
+.last-shown { margin-top: 6px }

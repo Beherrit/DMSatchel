@@ -130,6 +130,10 @@ export async function syncWorld(me) {
   const r = await api('entries', { query: { since } });
   world.syncedAt = r.now;
   const out = [];
+  if (r.shown !== undefined && stable(r.shown) !== stable(world.info?.shown ?? null)) {
+    world.info = { ...world.info, shown: r.shown };
+    out.push({ entry: { name: 'the table' }, change: 'shown', by: r.shown?.by || null, shown: true });
+  }
   if (r.cal !== undefined && stable(r.cal) !== stable(world.info?.cal ?? null)) {
     world.info = { ...world.info, cal: r.cal };
     out.push({ entry: { name: 'the calendar' }, change: 'edit', by: null, calendar: true });

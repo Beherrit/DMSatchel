@@ -4,6 +4,7 @@ import { el, toast, confirmButton, setKids } from './dom.js';
 import { api, isGm, isMember, session } from './api.js';
 import { worldEntries, byName, link, when, richText, setEntryState } from './world-store.js';
 import { thumb } from './image-ui.js';
+import { lastShownLine } from './world-show.js';
 
 const ACTIVE = (e) => !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
 
@@ -106,7 +107,7 @@ export async function viewParty(rerender) {
   };
   setKids(treasuryBox, treasury(state, chars, reload));
   return el('div', { class: 'w-view party-view' },
-    el('div', { class: 'panel-head' }, el('h2', {}, 'The Party'), el('p', {}, 'Who’s adventuring, what they carry, what they’re chasing and what they’ve found.')),
+    el('div', { class: 'panel-head' }, el('h2', {}, 'The Party'), el('p', {}, 'Who’s adventuring, what they carry, what they’re chasing and what they’ve found.'), lastShownLine()),
     el('div', { class: 'party-grid' },
       el('div', { class: 'party-main' }, members(chars),
         el('section', {}, el('h3', { class: 'section-title' }, 'Current quests'),
