@@ -121,11 +121,14 @@ const NON_COMBAT = ['A merchant caravan, nervous about the road ahead', 'Pilgrim
 const pick = (rng, list) => list[Math.floor(rng() * list.length)];
 
 // One combat encounter for the party, fitted to the XP budget. Returns {groups:[{name, cr, count}], xp, budget, activity, sign}.
-export function rollEncounter({ terrain = ['forest'], level = 3, size = 4, difficulty = 'Moderate', seed } = {}) {
+export function rollEncounter({ terrain = ['forest'], level = 3, size = 4, difficulty = 'Moderate', seed, types } = {}) {
   const rng = makeRng(seed ?? Math.random().toString(36).slice(2)).next;
   const want = budget(level, size, difficulty);
   const terrains = Array.isArray(terrain) ? terrain : [terrain];
-  const pool = CREATURES.filter((c) => c.terrains.some((t) => terrains.includes(t)) && xpFor(c.cr) <= want);
+  const all = CREATURES.filter((c) => c.terrains.some((t) => terrains.includes(t)) && xpFor(c.cr) <= want);
+  // Prefer the given creature types (undead in a crypt, people in a hideout) when enough of them fit.
+  const typed = types?.length ? all.filter((c) => types.includes(c.type)) : [];
+  const pool = typed.length >= 2 ? typed : all;
   if (!pool.length) return null;
   const tries = [];
   for (let i = 0; i < 40; i++) {

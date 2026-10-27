@@ -48,7 +48,7 @@ to the log at the bottom.
     moon phases optional. Timeline view of events by date.
 12. [x] **Encounters and travel helpers per area.** Random encounter table per area (built from its danger
     fields and SRD monsters), weather by season, travel time between pinned places on a map (scale setting).
-13. [ ] **Dungeon and lair generator.** Room-by-room keyed dungeon with traps, monsters and loot, saved as a
+13. [x] **Dungeon and lair generator.** Room-by-room keyed dungeon with traps, monsters and loot, saved as a
     location with child rooms.
 14. [ ] **Export and print.** World or region to Markdown/PDF-friendly print page; player-safe export.
 15. [ ] **Offline and install.** Service worker caching the app shell so tools work offline; installable PWA.
@@ -75,3 +75,4 @@ to the log at the bottom.
 - Images: every entry kind has a Picture field (upload, shrunk in the browser to ≤1200 px JPEG, or an https link); images table in Postgres served by /api/images with access checks (private worlds stay private); portraits on entry pages, thumbnails in lists, avatars in town rosters and the party, pictures on handouts.
 - Calendar: three original presets, editable months/weekdays/moons/holidays/era, today's date on the world front page and sidebar, month grid with exact new and full moons, holidays and dated events/sessions/journals/handouts, day detail with "make this today" and "+ event on this day", time passes (+day, week, month, custom), coming up in the next 60 days, timeline sorted by calendar date, live sync of date changes. Unit tests for date math and parsing.
 - Encounters & travel: ~230 SRD creatures with CR, type and terrain tags; 2024 XP budgets (low/moderate/high); encounter builder (packs, leader plus followers) that never exceeds the budget, with activity and warning signs and D&D Beyond stat block links; chance meetings; d12 area tables saved on regions/areas/towns/places; weather by terrain and season (from the calendar) with the 2024 environment rules; travel pace calculator; map scale and travel times between pins. Unit tests for budgets, terrain and travel.
+- Dungeons & Lairs: nine site types, 5/8/12 rooms, history, five-room-dungeon structure (guardian, puzzle, setback, master, reward/twist) with extra fights, traps, treasure, features and empty rooms for larger sites; monsters fitted to the party and themed by site; traps with DCs and damage by tier; treasure with SRD magic items; connected room graph with secret doors and a flowchart map; Add to world saves the site, a hidden page per room and a map with linked pins. Unit tests for connectivity and layout.

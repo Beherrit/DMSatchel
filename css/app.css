@@ -730,3 +730,18 @@ tr.disabled td { color: var(--muted) }
 .scale-edit[hidden] { display: none }
 .travel-pick { display: grid; gap: 4px; border-top: 1px solid var(--line); padding-top: 8px }
 .travel-pick select { max-width: 100% }
+
+/* ---- dungeons ---- */
+.dungeon { gap: 14px }
+.dg-map { overflow: auto; border-radius: 8px; border: 1px solid var(--line); background: #efe6cf; max-height: 520px }
+.dg-map svg { display: block; max-width: 100%; height: auto; margin: 0 auto }
+.dg-rooms { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px }
+.dg-room { border: 1px solid var(--line); border-left: 4px solid var(--line); border-radius: 8px; padding: 10px 14px; display: grid; gap: 4px }
+.dg-room p { margin: 0 }
+.dg-room h4 { margin: 0 }
+.dg-room.role-boss { border-left-color: var(--danger) }
+.dg-room.role-reward, .dg-room.role-treasure { border-left-color: var(--brass) }
+.dg-room.role-trap { border-left-color: var(--k-thing) }
+.danger-line { color: var(--danger) }
+.treasure-line { color: var(--brass) }
+.dg-save-card { background: var(--sunk) }

@@ -56,6 +56,8 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Encounters & travel**: fights fitted to the party with the 2024 encounter budget (stat blocks open on D&D
   Beyond), chance meetings, weather with its rules, a saved encounter table per area, and travel times between map
   pins once a map has a scale.
+- **Dungeons & lairs**: a keyed site in one roll, with monsters fitted to the party, traps, puzzles, treasure and a
+  map; GMs can add it to the world with a page per room and a pin on each.
 - **Calendar**: your world's own months, weekdays, moons and holidays. GMs move time forward; events, sessions and
   journals with dates appear on the month grid.
 - **Pictures**: upload a portrait, a town sketch or a handout image to any entry (or paste a link).

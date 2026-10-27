@@ -15,7 +15,7 @@ export const KINDS = {
   },
   location: {
     label: 'Location', plural: 'Locations', blurb: 'Dungeons, ruins, taverns, shops and landmarks.',
-    fields: [['type', 'Type', 'select', ['Dungeon', 'Ruin', 'Tavern', 'Shop', 'Temple', 'Landmark', 'Lair', 'Castle', 'Wilderness', 'Other']], ['owner', 'Owner or occupant'], ['shop_type', 'Shop type'], ['features', 'Notable features', 'long'], ['dangers', 'Dangers', 'long'], ['treasure', 'Treasure', 'long'], ['stock', 'Stock & prices', 'long'], ['encounters', 'Encounter table', 'long']],
+    fields: [['type', 'Type', 'select', ['Dungeon', 'Ruin', 'Tavern', 'Shop', 'Temple', 'Landmark', 'Lair', 'Castle', 'Wilderness', 'Room', 'Other']], ['owner', 'Owner or occupant'], ['shop_type', 'Shop type'], ['features', 'Notable features', 'long'], ['dangers', 'Dangers', 'long'], ['treasure', 'Treasure', 'long'], ['stock', 'Stock & prices', 'long'], ['encounters', 'Encounter table', 'long']],
   },
   faction: {
     label: 'Faction', plural: 'Factions', blurb: 'Political powers, cults, armies and secret societies.',
