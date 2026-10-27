@@ -77,6 +77,11 @@ to the log at the bottom.
 25. [x] **Import.** Bring in Markdown notes (one file per entry, or an Obsidian-style folder) and the exported
     Markdown from this app.
 
+28. [ ] **Library classes.** A structured form for whole classes from your books (hit die, proficiencies, saving
+    throws, features by level, spellcasting if any) so the Character Forge can build them, not just show notes.
+29. [ ] **Library spells in spellbooks.** Spells added to the library join the right classes' spell lists in the
+    Forge, NPC spellcasting and the Spells reference.
+
 ## Ideas parking lot
 
 ## Log
