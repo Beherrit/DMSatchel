@@ -14,7 +14,7 @@ const KIND_WORDS = (() => {
     location: ['places', 'place', 'locations', 'dungeons', 'dungeon', 'shops', 'taverns'], faction: ['organizations', 'organisations', 'orgs'], character: ['pcs', 'pc', 'party', 'player characters'],
     deity: ['gods', 'god', 'religion', 'pantheon'], item: ['items', 'magic items', 'loot', 'treasure'], event: ['history', 'timeline', 'events'], session: ['sessions', 'session notes', 'recaps'],
     quest: ['quests', 'adventures', 'plots', 'hooks'], lore: ['lore', 'notes', 'world', 'cultures', 'rules'], creature: ['monsters', 'monster', 'bestiary', 'creatures'], journal: ['journals', 'diary'],
-    clan: ['families', 'houses', 'clans', 'noble houses'], guild: ['guilds'], area: ['areas', 'districts', 'wilderness'], rumor: ['rumors', 'rumours', 'gossip'], handout: ['handouts'] };
+    clan: ['families', 'houses', 'clans', 'noble houses'], guild: ['guilds'], area: ['areas', 'districts', 'wilderness'], rumor: ['rumors', 'rumours', 'gossip'], handout: ['handouts'], downtime: ['between sessions', 'downtime activities'] };
   const map = new Map();
   for (const k of KIND_ORDER) for (const w of [k, KINDS[k].label, KINDS[k].plural, ...(extra[k] || [])]) map.set(norm(w), k);
   return map;

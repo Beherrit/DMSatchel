@@ -1,6 +1,6 @@
 // The shared world: browse, search, read and (for GMs) write entries.
 // Routes: #world · #world/k/<kind> · #world/e/<id> · #world/new/<kind> · #world/edit/<id> · #world/q/<search> · #world/bin
-//         #world/party · #world/schedule · #world/suggestions (GMs) · #world/mine (your characters, journals and suggestions)
+//         #world/party · #world/schedule · #world/downtime[/<character>] · #world/suggestions (GMs) · #world/mine (your characters, journals and suggestions)
 
 import { el, toast, confirmButton, setKids } from './dom.js';
 import { api, session, isGm, isMember, isPlayer, signedIn, onSession } from './api.js';
@@ -18,6 +18,7 @@ import { viewImport } from './world-import.js';
 import { placeHub, viewAtlas, placeCounts } from './world-place.js';
 import { viewParty } from './world-party.js';
 import { viewSchedule, nextSessionLine } from './world-schedule.js';
+import { viewDowntime, downtimeSection } from './world-downtime.js';
 import { viewExport } from './world-export.js';
 import { viewClocks, clocksWidget } from './world-clocks.js';
 import { viewRumors } from './world-rumors.js';
@@ -54,6 +55,7 @@ function renderSide() {
     el('nav', { class: 'w-kinds w-tools', 'aria-label': 'World views' },
       el('a', { href: '#world/party', 'data-view': 'party' }, el('span', {}, 'The Party'), el('span', { class: 'count' }, worldEntries().filter((e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status)).length)),
       isMember() ? el('a', { href: '#world/schedule', 'data-view': 'schedule' }, el('span', {}, 'Next session'), el('span', { class: 'count' }, world.info?.next_session && Date.parse(world.info.next_session) > Date.now() - 86400000 ? new Date(world.info.next_session).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '')) : null,
+      isMember() ? el('a', { href: '#world/downtime', 'data-view': 'downtime' }, el('span', {}, 'Downtime'), el('span', { class: 'count' }, isGm() ? (worldEntries().filter((d) => d.kind === 'downtime' && !d.fields?.resolved).length || '') : '')) : null,
       el('a', { href: '#world/calendar', 'data-view': 'calendar', title: todayText() }, el('span', {}, 'Calendar'), el('span', { class: 'count cal-count' }, worldCalendar() ? todayText().split(', ').pop().replace(/ \d+.*$/, '') : '')),
       el('a', { href: '#world/atlas', 'data-view': 'atlas' }, el('span', {}, 'Atlas'), el('span', { class: 'count' }, worldEntries().filter((e) => PLACE_KINDS.includes(e.kind)).length)),
       el('a', { href: '#world/maps', 'data-view': 'maps' }, el('span', {}, 'Maps'), el('span', { class: 'count' }, (world.maps || []).length)),
@@ -172,6 +174,7 @@ function viewEntry(id, tab) {
     e.kind === 'character' ? ownerLine(e) : null,
     e.kind === 'character' ? sheetSection(e, rerenderWorld) : null,
     e.kind === 'character' ? knownSection(e, rerenderWorld) : null,
+    e.kind === 'character' ? downtimeSection(e) : null,
     e.fields?.stock || (e.kind === 'location' && e.fields?.type === 'Shop' && isGm()) ? el('section', { class: 'card shop-card' },
       el('div', { class: 'entry-head' }, el('h3', {}, 'For sale'), isGm() ? el('button', { class: 'btn small', type: 'button', onclick: async () => {
         const town = trailTown(e);
@@ -342,7 +345,7 @@ function viewEdit(id, kindForNew) {
     collectFields();
     setKids(fieldsBox, ...KINDS[kindSel.value].fields.map((fd) => {
       const [k, label, type, opts] = fd, v = e.fields[k] || '';
-      if (type === 'hidden' || !fieldApplies(fd, e.fields)) return null;
+      if (type === 'hidden' || !fieldApplies(fd, e.fields) || (fd[4]?.gmOnly && !gm)) return null;
       if (type === 'image') return pictureField(v);
       if (type === 'select') {
         const s = el('select', { id: `ff-${k}`, 'data-field': k }, el('option', { value: '' }, '—'), opts.map((o) => el('option', { value: o }, o)));
@@ -484,6 +487,7 @@ export async function showWorld(parts, { keepScroll = false } = {}) {
   else if (view === 'suggestions') node = viewSuggestions();
   else if (view === 'party') { markPartySeen(); node = await viewParty(rerenderWorld); }
   else if (view === 'schedule') node = await viewSchedule(rerenderWorld);
+  else if (view === 'downtime') node = viewDowntime(rerenderWorld, arg);
   else if (view === 'export') node = viewExport();
   else if (view === 'clocks') node = viewClocks();
   else if (view === 'family') node = viewFamily(arg);

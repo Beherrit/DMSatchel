@@ -12,6 +12,9 @@ const CLASS_FIELDS = [['die', 'Hit die', 'select', ['d6', 'd8', 'd10', 'd12']], 
 // Some fields only apply to some categories (a species's speed, a class's hit die): [key, label, type, options, {only}].
 export const fieldApplies = (f, fields) => !f[4]?.only || f[4].only.includes(fields?.category);
 
+export const DOWNTIME_ACTIVITIES = ['Training', 'Crafting', 'Carousing', 'Research', 'Working a job', 'Recuperating', 'Religious service', 'Building contacts',
+  'Scheming', 'Crime', 'Pit fighting', 'Selling loot', 'Buying a magic item', 'Other'];
+
 export const KINDS = {
   region: {
     label: 'Region', plural: 'Regions', blurb: 'Kingdoms, provinces, wilds and seas.',
@@ -71,6 +74,13 @@ export const KINDS = {
     label: 'Journal', plural: 'Journals & Notes', blurb: 'Diaries, session notes, letters and theories, by players and GMs.',
     fields: [['kind', 'Kind', 'select', ['Diary', 'Session notes', 'Letter', 'Theory', 'Rumor heard', 'Party notes', 'Other']], ['character', 'Written by (character)'], ['date', 'Date (in world)']],
   },
+  downtime: {
+    label: 'Downtime', plural: 'Downtime', blurb: 'What characters do between sessions, and how it turned out.',
+    // The player writes what they do (the summary); a GM writes the outcome. GM-only fields are kept by the server
+    // whatever a player sends.
+    fields: [['character', 'Character', 'hidden'], ['activity', 'Activity', 'select', DOWNTIME_ACTIVITIES], ['days', 'Days spent'], ['cost', 'Cost'],
+      ['outcome', 'Outcome (from the GM)', 'long', null, { gmOnly: true }], ['resolved', 'Resolved on', 'hidden', null, { gmOnly: true }]],
+  },
   handout: {
     label: 'Handout', plural: 'Handouts', blurb: 'Letters, maps, notes and clues the GMs hand to the players.',
     fields: [['from', 'From (who wrote or gave it)'], ['found', 'Where or when it was found'], ['text', 'Text of the handout', 'long']],
@@ -114,10 +124,12 @@ export const KINDS = {
 for (const k of Object.values(KINDS)) k.fields.push(['image', 'Picture', 'image']);
 export const isImageRef = (v) => /^\/api\/images\?id=[a-f0-9]{16}$/.test(v) || /^https:\/\/[^\s"'<>]{4,1000}$/.test(v);
 
-export const KIND_ORDER = ['region', 'area', 'settlement', 'location', 'faction', 'guild', 'clan', 'npc', 'character', 'deity', 'item', 'event', 'session', 'journal', 'handout', 'quest', 'rumor', 'lore', 'creature', 'rule'];
+export const KIND_ORDER = ['region', 'area', 'settlement', 'location', 'faction', 'guild', 'clan', 'npc', 'character', 'deity', 'item', 'event', 'session', 'journal', 'downtime', 'handout', 'quest', 'rumor', 'lore', 'creature', 'rule'];
 
 // Kinds a player can create and edit as their own; anything else a player adds is a suggestion for the GMs.
-export const PLAYER_KINDS = ['character', 'journal'];
+export const PLAYER_KINDS = ['character', 'journal', 'downtime'];
+// Fields only a GM can set (a downtime outcome); the server keeps their old values when a player saves.
+export const gmOnlyFields = (kind) => (KINDS[kind]?.fields || []).filter((f) => f[4]?.gmOnly).map(([k]) => k);
 
 // Kinds the party can have a reputation with.
 export const STANDING_KINDS = ['faction', 'guild', 'clan', 'deity', 'settlement', 'area', 'npc'];

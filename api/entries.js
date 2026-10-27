@@ -12,7 +12,7 @@
 //
 // Players never receive: GM-only entries, other people's pending suggestions, secrets, or GM-only links.
 import { route, send, fail, sql, newId, requireGm, requireMember, requireOwner } from './_lib/core.js';
-import { KINDS, isKind, LIMITS, PLAYER_KINDS, isImageRef } from '../js/world-schema.js';
+import { KINDS, isKind, LIMITS, PLAYER_KINDS, isImageRef, gmOnlyFields } from '../js/world-schema.js';
 
 const clip = (v, n) => String(v ?? '').slice(0, n);
 
@@ -140,7 +140,9 @@ export default route({
     if (req.isGmHere) id = await insert(e, req, { owner: req.body.entry?.owner_id ? Number(req.body.entry.owner_id) || null : null });
     else {
       // Players: their own characters and journals go live; anything else waits for a GM's approval.
-      e.secret = ''; e.visibility = 'all'; e.links = e.links.map((l) => ({ ...l, secret: false }));
+      // Downtime can be kept between the player and the GMs; GM-only fields (its outcome) start empty.
+      e.secret = ''; e.visibility = e.kind === 'downtime' && e.visibility === 'gm' ? 'gm' : 'all'; e.links = e.links.map((l) => ({ ...l, secret: false }));
+      for (const k of gmOnlyFields(e.kind)) delete e.fields[k];
       id = await insert(e, req, { owner: req.gm.id, status: PLAYER_KINDS.includes(e.kind) ? 'live' : 'suggested' });
     }
     send(res, 201, { entry: shape(await loadOne(id, req.world.id), req) });
@@ -158,7 +160,9 @@ export default route({
     if (e.parent_id === id) return fail(res, 400, 'An entry can’t be inside itself.');
     if (!req.isGmHere) {
       if (current.status === 'live' && !PLAYER_KINDS.includes(e.kind)) return fail(res, 403, 'Players can’t change an entry into that kind.');
-      e.secret = current.secret; e.visibility = current.visibility; e.links = e.links.map((l) => ({ ...l, secret: false }));
+      e.secret = current.secret; e.links = e.links.map((l) => ({ ...l, secret: false }));
+      e.visibility = e.kind === 'downtime' && current.kind === 'downtime' ? e.visibility : current.visibility;
+      for (const k of gmOnlyFields(e.kind)) { if (current.fields?.[k]) e.fields[k] = current.fields[k]; else delete e.fields[k]; }
     }
     const version = Number(req.body.entry?.version);
     const rows = await sql`UPDATE entries SET kind = ${e.kind}, name = ${e.name}, summary = ${e.summary}, body = ${e.body}, fields = ${JSON.stringify(e.fields)},

@@ -86,6 +86,8 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
   spellcasting and the Spells reference.
 - **Next session**: propose a few dates, everyone answers yes / maybe / no, lock in the best one and post it to
   Discord. The date shows on the world's home page.
+- **Downtime**: players file what their characters do between sessions; GMs write how it went, and it stays on
+  the character's page.
 - **Members-only site**: one switch makes every page and tool need a personal code or invite link.
 - **Hidden entries**: GMs can keep any entry hidden from players while they prep, then reveal it in one click.
 - **Admin**: world owners manage members and roles, rotate invite links, name the world, see recent activity, and

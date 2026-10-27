@@ -897,3 +897,13 @@ body.gated .mainnav, body.gated #toolnav, body.gated #panels, body.gated #notebo
 .sched-locked-tag { background: var(--good); color: #fff }
 .sched-form .label { display: block; font-weight: 600; margin-bottom: 2px }
 .next-session a { font-weight: 600 }
+
+/* Downtime */
+.downtime-list { list-style: none; padding: 0; display: grid; gap: 10px }
+.downtime-item.is-waiting { border-left: 3px solid var(--brass) }
+.downtime-item.is-resolved { border-left: 3px solid var(--good) }
+.downtime-outcome { background: var(--sunk); border-radius: 6px; padding: 8px 10px; margin: 6px 0 }
+.downtime-outcome .label { display: block; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted) }
+.downtime-resolve textarea { width: 100%; margin: 6px 0 }
+.waiting-tag { background: var(--brass); color: #fff }
+.downtime-section { margin-top: 18px }
