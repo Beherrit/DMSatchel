@@ -4,7 +4,7 @@
 
 import { el, toast, confirmButton, setKids } from './dom.js';
 import { api, session, isGm, isMember, isPlayer, signedIn, onSession } from './api.js';
-import { KINDS, KIND_ORDER, LINK_LABELS, STANDING_KINDS, PLACE_KINDS, PLAYER_KINDS } from './world-schema.js';
+import { KINDS, KIND_ORDER, LINK_LABELS, STANDING_KINDS, PLACE_KINDS, PLAYER_KINDS, fieldApplies } from './world-schema.js';
 import { openSignIn } from './signin.js';
 import { world, worldEntries, getEntry, loadWorld, byName, kindLabel, link, when, findByName, mentions, richText, notice, nameList } from './world-store.js';
 import { viewMaps, viewMap, pinsFor } from './world-maps.js';
@@ -152,7 +152,7 @@ function viewEntry(id, tab) {
   const sessions = all.filter((x) => x.kind === 'session' && x.id !== id && (mentions(`${x.body}\n${x.summary}\n${Object.values(x.fields || {}).join('\n')}`).has(id) || (x.links || []).some((l) => l.id === id)))
     .sort((a, b) => (parseFloat(b.fields.number) || 0) - (parseFloat(a.fields.number) || 0));
   const pins = pinsFor(id);
-  const fieldRows = KINDS[e.kind].fields.filter(([k, , type]) => e.fields?.[k] && !['stats', 'spells', 'level', 'stock', 'market', 'encounters'].includes(k) && type !== 'hidden' && type !== 'image' && !(k === 'sheet' && e.fields.forge)).map(([k, label, type]) => [label, e.fields[k], type]);
+  const fieldRows = KINDS[e.kind].fields.filter((fd) => fieldApplies(fd, e.fields)).filter(([k, , type]) => e.fields?.[k] && !['stats', 'spells', 'level', 'stock', 'market', 'encounters'].includes(k) && type !== 'hidden' && type !== 'image' && !(k === 'sheet' && e.fields.forge)).map(([k, label, type]) => [label, e.fields[k], type]);
 
   const history = el('div', { class: 'history', hidden: true });
   const isPlace = PLACE_KINDS.includes(e.kind);
@@ -338,9 +338,9 @@ function viewEdit(id, kindForNew) {
   kindSel.addEventListener('change', updateNote); updateNote();
   function renderFields() {
     collectFields();
-    setKids(fieldsBox, ...KINDS[kindSel.value].fields.map(([k, label, type, opts]) => {
-      const v = e.fields[k] || '';
-      if (type === 'hidden') return null;
+    setKids(fieldsBox, ...KINDS[kindSel.value].fields.map((fd) => {
+      const [k, label, type, opts] = fd, v = e.fields[k] || '';
+      if (type === 'hidden' || !fieldApplies(fd, e.fields)) return null;
       if (type === 'image') return pictureField(v);
       if (type === 'select') {
         const s = el('select', { id: `ff-${k}`, 'data-field': k }, el('option', { value: '' }, '—'), opts.map((o) => el('option', { value: o }, o)));
@@ -355,6 +355,8 @@ function viewEdit(id, kindForNew) {
   }
   function collectFields() { for (const f of fieldsBox.querySelectorAll('[data-field]')) e.fields[f.dataset.field] = f.value; }
   kindSel.addEventListener('change', renderFields);
+  // A rules option's category decides which fields it has (a species's speed, a class's hit die).
+  fieldsBox.addEventListener('change', (ev) => { if (ev.target.dataset?.field === 'category') renderFields(); });
 
   function linkRow(l = { label: 'related to', id: '', secret: false }) {
     const target = l.id ? world.entries.get(l.id) : null;

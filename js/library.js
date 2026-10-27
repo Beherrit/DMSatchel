@@ -68,3 +68,77 @@ export function librarySubclasses(entries, classes = []) {
     return { name: e.name, cls, features: e.fields?.features || e.summary || '', source: e.fields?.source || '', entryId: e.id };
   }).filter((x) => x.cls);
 }
+
+// ---- classes --------------------------------------------------------------------------------------
+// A class from the library, in the shape the Character Forge uses for SRD classes (see CLASSES in rules2024.js).
+// Every field is optional: blanks fall back to sensible defaults, so a half-filled class still builds.
+const ABILS = ['Str', 'Dex', 'Con', 'Int', 'Wis', 'Cha'];
+const ABIL_WORDS = { str: 'Str', strength: 'Str', dex: 'Dex', dexterity: 'Dex', con: 'Con', constitution: 'Con', int: 'Int', intelligence: 'Int', wis: 'Wis', wisdom: 'Wis', cha: 'Cha', charisma: 'Cha' };
+const SKILL_NAMES = ['Acrobatics', 'Animal Handling', 'Arcana', 'Athletics', 'Deception', 'History', 'Insight', 'Intimidation', 'Investigation', 'Medicine', 'Nature', 'Perception', 'Performance', 'Persuasion', 'Religion', 'Sleight of Hand', 'Stealth', 'Survival'];
+const WEARS = { 'No armor': 'none', Leather: 'leather', 'Studded leather': 'studded', 'Leather and shield': 'leather-shield', 'Chain shirt and shield': 'chainshirt-shield', 'Chain mail': 'chainmail', 'Chain mail and shield': 'chainmail-shield', 'Unarmored (Dex + Con)': 'barbarian', 'Unarmored (Dex + Wis)': 'monk' };
+const ARMOR_TRAINING = { leather: 'Light armor', studded: 'Light armor', 'leather-shield': 'Light armor, shields', 'chainshirt-shield': 'Light and medium armor, shields', chainmail: 'All armor', 'chainmail-shield': 'All armor, shields' };
+const CAST = { 'Full caster': 'full', 'Half caster': 'half', 'Third caster': 'third', 'Pact magic': 'pact' };
+const ASI = 'Ability Score Improvement', SUB = 'Subclass feature';
+
+export const abilitiesIn = (text) => [...new Set((String(text || '').toLowerCase().match(/[a-z]+/g) || []).map((w) => ABIL_WORDS[w]).filter(Boolean))];
+
+// "1: Rage, Unarmored Defense", "Level 2 — Reckless Attack: Advantage on Strength attacks…", "3: Subclass".
+// Lines without a level carry on the previous feature's description.
+export function classFeatures(text) {
+  const byLevel = {}, list = [];
+  let last = null;
+  for (const raw of String(text || '').split(/\n+/)) {
+    const l = raw.replace(/^[-•*]\s*/, '').trim();
+    if (!l) continue;
+    const m = l.match(/^(?:level\s*)?(\d{1,2})(?:st|nd|rd|th)?(?:\s*level)?\s*[:.)—–-]\s*(.+)$/i);
+    if (!m || +m[1] < 1 || +m[1] > 20) { if (last) last.text = `${last.text} ${l}`.trim(); continue; }
+    const lv = +m[1], rest = m[2].trim();
+    const d = rest.match(/^([^:—–,]{1,50}?)\s*(?::|\s[—–-]\s)\s*(.+)$/);
+    const items = d ? [[d[1], d[2]]] : rest.split(/\s*[,;]\s*/).filter(Boolean).map((n) => [n, '']);
+    for (const [n, t] of items) {
+      const name = n.trim().replace(/\.$/, '');
+      const f = { level: lv, name: /^(asi|ability score (improvement|increase))$/i.test(name) ? ASI : /\bsubclass\b/i.test(name) ? SUB : /^epic boon$/i.test(name) ? 'Epic Boon' : name, text: t.trim() };
+      (byLevel[lv] ||= []).push(f.name); list.push(f); last = f;
+    }
+  }
+  return { byLevel, list };
+}
+
+const weaponFrom = (text, primary, caster) => {
+  const t = String(text || '').trim();
+  if (!t) return caster && !['Str', 'Dex'].includes(primary) ? ['Quarterstaff', '1d6', 'Str'] : primary === 'Dex' ? ['Shortsword', '1d6', 'Dex'] : ['Longsword', '1d8', 'Str'];
+  const dice = (t.match(/\b\d*d\d+\b/i) || ['1d6'])[0].replace(/^d/i, '1d');
+  const ab = abilitiesIn(t).find((a) => a === 'Str' || a === 'Dex') || (/finesse|bow|crossbow|dart|sling|rapier|dagger|shortsword|scimitar/i.test(t) || primary === 'Dex' ? 'Dex' : 'Str');
+  const name = t.replace(/\b\d*d\d+\b/i, '').replace(/\b(str|dex|strength|dexterity)\b/gi, '').replace(/[(),]+/g, ' ').replace(/\s+/g, ' ').trim() || 'Weapon';
+  return [name, dice, ab];
+};
+
+// Fields → class. Used for library entries and as a stand-in when a saved character's library class is gone.
+export function classFrom(name, f = {}, extra = {}) {
+  const caster = CAST[f.caster] || null;
+  const primary = ABILS.includes(f.primary) ? f.primary : abilitiesIn(f.saves)[0] || 'Str';
+  const spellAbility = ['Int', 'Wis', 'Cha'].includes(f.spellAbility) ? f.spellAbility : ['Int', 'Wis', 'Cha'].includes(primary) ? primary : 'Int';
+  const priority = [...new Set([primary, ...(caster && spellAbility !== primary ? [spellAbility] : []), 'Con', 'Dex', 'Wis', 'Cha', 'Int', 'Str'])];
+  const saves = abilitiesIn(f.saves).slice(0, 2);
+  if (saves.length < 2) for (const a of priority) if (saves.length < 2 && !saves.includes(a)) saves.push(a);
+  const picked = SKILL_NAMES.filter((s) => String(f.skills || '').toLowerCase().includes(s.toLowerCase()));
+  const { byLevel, list } = classFeatures(f.features);
+  const features = Object.fromEntries(Object.entries(byLevel).map(([lv, fs]) => [lv, [...fs]]));
+  // No Ability Score Improvements listed: use the usual levels.
+  if (!list.some((x) => x.name === ASI)) for (const lv of [4, 8, 12, 16]) (features[lv] ||= []).push(ASI);
+  if (!list.some((x) => x.name === 'Epic Boon')) (features[19] ||= []).push('Epic Boon');
+  const subLevel = num(f.sublevel) || list.find((x) => x.name === SUB)?.level || 3;
+  // The first subclass feature is the "Subclass: …" line the Forge adds itself.
+  if (features[subLevel]) features[subLevel] = features[subLevel].filter((x, i, a) => x !== SUB || a.indexOf(SUB) !== i);
+  const spellsLike = ['Bard', 'Cleric', 'Druid', 'Paladin', 'Ranger', 'Sorcerer', 'Warlock', 'Wizard'].includes(f.spellsLike) ? f.spellsLike : { Int: 'Wizard', Wis: 'Cleric', Cha: 'Sorcerer' }[spellAbility];
+  return {
+    name, library: true, die: Math.min(12, Math.max(4, num(f.die) || 8)), priority, saves, skillCount: Math.min(6, num(f.skillCount) || 2), skills: picked.length ? picked : SKILL_NAMES,
+    armorProf: f.armorProf || ARMOR_TRAINING[WEARS[f.wears]] || 'None', weaponProf: f.weaponProf || 'Simple weapons', subclasses: [], armor: WEARS[f.wears] || 'none',
+    weapon: weaponFrom(f.weapon, primary, caster), caster, spellAbility, spellsLike, gear: f.gear || '', features, subclassLevel: Math.min(20, subLevel),
+    featureText: Object.fromEntries(list.filter((x) => x.text).map((x) => [x.name, x.text])), source: f.source || '', ...extra,
+  };
+}
+
+export function libraryClasses(entries) {
+  return ruleOptions(entries, 'Class').map((e) => classFrom(e.name, e.fields || {}, { entryId: e.id, notes: e.fields?.features || e.summary || '' }));
+}

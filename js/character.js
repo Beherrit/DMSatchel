@@ -15,14 +15,19 @@ import {
 } from './rules2024.js';
 import * as T from './lifepath-tables.js';
 import { spellbook, spellText } from './spells.js';
+import { classFrom } from './library.js';
 
 // ---- your library ---------------------------------------------------------------------------------
-// Species and subclasses from the open world's library (set by the world store). They're only used when chosen
-// ("Any from my library" or by name), and they draw from their own random stream, so SRD rolls and saved
+// Classes, species and subclasses from the open world's library (set by the world store). They're only used when
+// chosen ("Any from my library" or by name), and they draw from their own random stream, so SRD rolls and saved
 // characters come out exactly as before.
-let libraryProvider = () => ({ species: [], subclasses: [] });
+const NO_LIBRARY = { species: [], subclasses: [], classes: [] };
+let libraryProvider = () => NO_LIBRARY;
 export const setCharacterLibrary = (fn) => { libraryProvider = fn; };
-let lib = { species: [], subclasses: [] };
+let lib = NO_LIBRARY;
+
+// Class rules by name: an SRD class, a library class, or (if the library entry is gone) a plain stand-in.
+export const classData = (name) => CLASSES[name] || lib.classes.find((c) => c.name === name) || classFrom(name);
 
 // Species rules by name: an SRD species, a library species built on the SRD species it's "similar to", or (if the
 // library entry is gone) a plain human-like stand-in that keeps the name.
@@ -86,14 +91,17 @@ function pickCore(opts, r, lr) {
   // "library" means any species from your library, chosen with its own random stream (lr).
   const fromLib = opts.species === 'library' && lib.species.length ? lr.pick(lib.species).name : null;
   const species = fromLib || (opts.species && !['any', 'library'].includes(opts.species) ? opts.species : r.pickW(SPECIES_WEIGHTS));
-  const cls = opts.cls && opts.cls !== 'any' ? opts.cls : r.pick(Object.keys(CLASSES));
+  const libCls = opts.cls === 'library' && lib.classes.length ? lr.pick(lib.classes).name : null;
+  const cls = libCls || (opts.cls && !['any', 'library'].includes(opts.cls) ? opts.cls : r.pick(Object.keys(CLASSES)));
+  const cd = classData(cls);
   const background = opts.background && opts.background !== 'any' ? opts.background : pickBackground(cls, r);
   const sp = speciesData(species);
   const lineage = sp.lineages ? r.pick(Object.keys(sp.lineages)) : null;
-  let subclass = r.pick(CLASSES[cls].subclasses);
+  let subclass = cd.subclasses.length ? r.pick(cd.subclasses) : null;
   // A chosen subclass (SRD or library) replaces the roll; the roll above still happens so later picks don't shift.
+  // A library class has only library subclasses, so "Any" picks one of those.
   const libSubs = lib.subclasses.filter((s) => s.cls === cls);
-  if (opts.subclass === 'library' && libSubs.length) subclass = lr.pick(libSubs).name;
+  if (libSubs.length && (opts.subclass === 'library' || (cd.library && (!opts.subclass || opts.subclass === 'any')))) subclass = lr.pick(libSubs).name;
   else if (opts.subclass && !['any', 'library'].includes(opts.subclass)) subclass = opts.subclass;
   const alignment = opts.alignment && opts.alignment !== 'any' ? opts.alignment : r.pickW(ALIGNMENTS);
   const gender = opts.gender && opts.gender !== 'any' ? opts.gender : r.pickW({ f: 45, m: 45, x: 10 });
@@ -108,14 +116,14 @@ function pickCore(opts, r, lr) {
 
 // Favor backgrounds whose ability list includes the class's primary ability.
 function pickBackground(cls, r) {
-  const primary = CLASSES[cls].priority[0];
+  const primary = classData(cls).priority[0];
   const weights = {};
   for (const [k, b] of Object.entries(BACKGROUNDS)) weights[k] = b.abilities.includes(primary) ? 4 : 1;
   return r.pickW(weights);
 }
 
 function rollAbilities(opts, core, r) {
-  const c = CLASSES[core.cls];
+  const c = classData(core.cls);
   let raw;
   if (opts.method === 'roll') {
     raw = Array.from({ length: 6 }, () => { const d = [1, 2, 3, 4].map(() => r.range(1, 6)).sort((a, b) => a - b); return d[1] + d[2] + d[3]; });
@@ -136,10 +144,10 @@ function rollAbilities(opts, core, r) {
 }
 
 function levelUps(level, core, ab, r) {
-  const c = CLASSES[core.cls];
+  const c = classData(core.cls);
   const primary = c.priority[0], second = c.priority[1];
   const asiLevels = Object.entries(c.features).filter(([lv, fs]) => +lv <= level && fs.includes('Ability Score Improvement')).map(([lv]) => +lv);
-  const pool = c.caster && !['Paladin', 'Ranger'].includes(core.cls) ? GENERAL_FEATS.caster : core.cls === 'Rogue' || core.cls === 'Bard' ? GENERAL_FEATS.skill : GENERAL_FEATS.martial;
+  const pool = ['full', 'pact'].includes(c.caster) ? GENERAL_FEATS.caster : core.cls === 'Rogue' || core.cls === 'Bard' ? GENERAL_FEATS.skill : GENERAL_FEATS.martial;
   const s = ab.scores, notes = [], feats = [];
   const bump = (a, n) => { const before = s[a]; s[a] = Math.min(20, s[a] + n); return s[a] - before; };
   for (const lv of asiLevels) {
@@ -161,7 +169,7 @@ function levelUps(level, core, ab, r) {
 }
 
 function buildChoices(level, core, ab, r) {
-  const c = CLASSES[core.cls], bg = BACKGROUNDS[core.background];
+  const c = classData(core.cls), bg = BACKGROUNDS[core.background];
   const skills = new Set(bg.skills);
   const sources = Object.fromEntries(bg.skills.map((k) => [k, core.background]));
   const add = (k, why) => { if (!skills.has(k)) { skills.add(k); sources[k] = why; return true; } return false; };
@@ -191,10 +199,10 @@ function buildChoices(level, core, ab, r) {
     choices[name] = core.cls === 'Fighter' && name === 'Fighting Style' ? r.pick(options.slice(0, 3)) : r.pick(options);
   }
 
-  const casterKey = c.caster || (['Eldritch Knight', 'Arcane Trickster'].includes(core.subclass) && level >= 3 ? 'third' : null);
+  const casterKey = (c.caster === 'third' && level < 3 ? null : c.caster) || (['Eldritch Knight', 'Arcane Trickster'].includes(core.subclass) && level >= 3 ? 'third' : null);
   let spells = null;
   if (casterKey) {
-    const list = c.spells || CLASSES.Wizard.spells;
+    const list = c.spells || CLASSES[c.spellsLike]?.spells || CLASSES.Wizard.spells;
     spells = { cantrips: list.cantrips.length ? r.sample(list.cantrips, Math.min(3, list.cantrips.length)) : [], first: r.sample(list.first, Math.min(4, list.first.length)) };
   }
   const langs = ['Common'];
@@ -222,7 +230,7 @@ function acFor(armor, s, choices) {
 }
 
 function derive(level, core, ab, build, ups) {
-  const c = CLASSES[core.cls], sp = speciesData(core.species), s = ab.scores, pb = profBonus(level);
+  const c = classData(core.cls), sp = speciesData(core.species), s = ab.scores, pb = profBonus(level);
   const conMod = mod(s.Con);
   let hp = c.die + conMod + (level - 1) * Math.max(1, c.die / 2 + 1 + conMod);
   if (core.species === 'Dwarf') hp += level;
@@ -280,11 +288,11 @@ function derive(level, core, ab, build, ups) {
 
   const features = [];
   for (let lv = 1; lv <= level; lv++) for (const f of c.features[lv] || []) {
-    if (f === 'Ability Score Improvement' || f === 'Epic Boon') continue;
-    features.push({ level: lv, name: f === 'Subclass feature' ? `${core.subclass} feature` : f });
-    if (lv === 3 && f === (c.features[3] || [])[0]) { /* subclass added below */ }
+    if (f === 'Ability Score Improvement' || f === 'Epic Boon' || (f === 'Subclass feature' && !core.subclass)) continue;
+    features.push({ level: lv, name: f === 'Subclass feature' ? `${core.subclass} feature` : f, ...(c.featureText?.[f] ? { text: c.featureText[f] } : {}) });
   }
-  if (level >= 3) features.push({ level: 3, name: `Subclass: ${core.subclass}` });
+  const subLevel = c.subclassLevel || 3;
+  if (level >= subLevel && core.subclass) features.push({ level: subLevel, name: `Subclass: ${core.subclass}` });
   features.sort((a, b) => a.level - b.level);
 
   const speciesTraits = sp.traits.filter(([, , lv]) => !lv || level >= lv).map(([n, d]) => ({ name: n, text: d }));
@@ -364,7 +372,7 @@ function calling(ctx, r) {
   const items = [fill(r.pick(T.BACKGROUND_WHY[ctx.background]), ctx, r)];
   const mentor = ctx.newName(r);
   const local = { mentor };
-  const why = r.pick(T.CLASS_WHY[ctx.cls]);
+  const why = r.pick(T.CLASS_WHY[ctx.cls] || T.CLASS_WHY_ANY);
   items.push(fill(why, ctx, r, local));
   if (why.includes('{mentor}')) ctx.people.push({ relation: 'Mentor', name: mentor, who: `${mentor}, who trained ${ctx.first} as ${withArticle(ctx.cls.toLowerCase())}` });
   if (ctx.level >= 3 && T.SUBCLASS_FLAVOR[ctx.subclass]) items.push(`As a follower of the ${ctx.subclass}, ${ctx.first} ${fill(T.SUBCLASS_FLAVOR[ctx.subclass], ctx, r)}.`);
@@ -442,7 +450,7 @@ const withArticle = (w) => `${/^[aeiou]/i.test(w) ? 'an' : 'a'} ${w}`;
 
 export function generateCharacter(opts = {}, seed = 'seed', salts = {}) {
   const R = (part) => subRng(seed, `${part}:${salts[part] || 0}`);
-  lib = libraryProvider() || { species: [], subclasses: [] };
+  lib = { ...NO_LIBRARY, ...(libraryProvider() || {}) };
   const level = Math.max(1, Math.min(20, +opts.level || 1));
   const core = pickCore({ ...opts, level }, R('core'), R('library'));
   const stock = nameStock(core.species);
@@ -458,7 +466,10 @@ export function generateCharacter(opts = {}, seed = 'seed', salts = {}) {
   const stats = derive(level, core, ab, build, ups);
   if (stats.spellcasting) {
     const sa = stats.spellcasting.ability;
-    stats.spellbook = spellbook(build.casterKey === 'third' ? core.subclass : core.cls, level, R('spells'), { ability: sa, mod: mod(ab.scores[sa]), pb: stats.pb });
+    const c = classData(core.cls), how = { ability: sa, mod: mod(ab.scores[sa]), pb: stats.pb };
+    // A library class casts like the SRD class whose spell list it borrows.
+    stats.spellbook = c.library ? spellbook(core.cls, level, R('spells'), how, { list: c.spellsLike, caster: c.caster })
+      : spellbook(build.casterKey === 'third' ? core.subclass : core.cls, level, R('spells'), how);
   }
 
   const ctx = {
@@ -477,16 +488,16 @@ export function generateCharacter(opts = {}, seed = 'seed', salts = {}) {
   story.drives = drives(ctx, R('drives'));
   story.hooks = hooks(ctx, R('hooks'));
 
-  const sp = speciesData(core.species), c = CLASSES[core.cls], bg = BACKGROUNDS[core.background];
+  const sp = speciesData(core.species), c = classData(core.cls), bg = BACKGROUNDS[core.background];
   const libSub = lib.subclasses.find((s) => s.cls === core.cls && s.name === core.subclass) || null;
-  const ft = Math.floor(core.heightFt), inch = Math.round((core.heightFt - ft) * 12);
+  const inches = Math.round(core.heightFt * 12), ft = Math.floor(inches / 12), inch = inches % 12;
   const looks = `${core.looks.hair} hair, ${core.looks.eyes} eyes, ${fill(core.looks.mark, ctx, subRng(seed, 'looks'))}`;
   const summary = `${fullName} is ${withArticle(String(core.age))}-year-old ${['Elf', 'Gnome'].includes(core.species) && core.lineage ? core.lineage : core.species}${core.species === 'Dragonborn' ? ` of ${core.lineage.toLowerCase()} ancestry` : ''} ${core.cls.toLowerCase()} from ${town}, once ${withArticle(core.background.toLowerCase())}. ${cap(ctx.pro.they)} ${ctx.pro.plural ? 'want' : 'wants'} to ${ctx.drives[0] || story.drives[0].replace(/^Goal: To /, '').replace(/\.$/, '')}.`;
 
   return {
     seed, salts: { ...salts }, opts: { ...opts, level },
     name: fullName, first, gender: core.gender, pronouns: `${ctx.pro.they}/${ctx.pro.them}`, species: core.species, lineage: core.lineage, cls: core.cls,
-    subclass: level >= 3 ? core.subclass : null, futureSubclass: core.subclass, background: core.background, alignment: core.alignment,
+    subclass: level >= (c.subclassLevel || 3) ? core.subclass : null, futureSubclass: core.subclass, background: core.background, alignment: core.alignment,
     age: core.age, height: `${ft}′${inch}″`, looks, town, region, summary,
     abilities: ab, levelUps: ups.notes, feats: [...build.originFeats.map((f) => ({ name: f, text: ORIGIN_FEATS[f], kind: 'Origin' })), ...ups.feats.map((f) => ({ name: f, kind: 'General' })), ...(ups.boon ? [{ name: ups.boon, kind: 'Epic Boon' }] : [])],
     choices: build.choices, spells: build.spells, languages: build.languages,
@@ -495,7 +506,7 @@ export function generateCharacter(opts = {}, seed = 'seed', salts = {}) {
     stats, story, people: ctx.people,
     size: sp.size,
     // Where library choices came from, so the sheet can show their notes.
-    library: { species: sp.library ? { name: core.species, source: sp.source, like: sp.like } : null, subclass: libSub },
+    library: { species: sp.library ? { name: core.species, source: sp.source, like: sp.like } : null, subclass: libSub, cls: c.library ? { name: core.cls, source: c.source, spellsLike: c.caster ? c.spellsLike : null, subclassLevel: c.subclassLevel } : null },
   };
 }
 
@@ -522,6 +533,7 @@ export function characterText(ch) {
   L.push(`Species traits: ${s.speciesTraits.map((t) => t.name).join(', ')}`);
   L.push(`Class features: ${s.features.map((f) => f.name).join(', ')}`);
   if (ch.library?.subclass) L.push(`${ch.library.subclass.name} (from your library${ch.library.subclass.source ? `, ${ch.library.subclass.source}` : ''}): ${ch.library.subclass.features.replace(/\n+/g, ' ')}`);
+  if (ch.library?.cls) L.push(`${ch.cls} is from your library${ch.library.cls.source ? ` (${ch.library.cls.source})` : ''}${ch.library.cls.spellsLike ? `; spells come from the ${ch.library.cls.spellsLike} list` : ''}.`);
   if (ch.library?.species) L.push(`${ch.species} is from your library${ch.library.species.source ? ` (${ch.library.species.source})` : ''}; names, age and height follow the ${ch.library.species.like}.`);
   if (ch.levelUps.length) L.push(`Level-ups: ${ch.levelUps.join('; ')}`);
   L.push(`Proficiencies: ${ch.armorProf}; ${ch.weaponProf}; tools: ${ch.tools.join(', ')}`);

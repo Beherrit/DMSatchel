@@ -109,23 +109,29 @@ export const cantripsKnown = (cls, level) => { const c = CANTRIPS[cls]; if (!c) 
 export const ORD = ['Cantrips', '1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th'];
 const sign = (n) => (n >= 0 ? `+${n}` : `−${-n}`);
 
-// Spell slots for a class at a level: { slots: [n for 1st..9th] } or { pact: [count, level] }.
-export function slotsFor(cls, level) {
-  if (cls === 'Warlock') return { pact: pactSlots(level) };
-  const caster = { Bard: 1, Cleric: 1, Druid: 1, Sorcerer: 1, Wizard: 1, Paladin: 2, Ranger: 2, 'Eldritch Knight': 3, 'Arcane Trickster': 3 }[cls];
+// Spell slots for a kind of caster ('full', 'half', 'third', 'pact') at a class level: { slots: [n for 1st..9th] }
+// or { pact: [count, level] }.
+const CASTER_OF = { Bard: 'full', Cleric: 'full', Druid: 'full', Sorcerer: 'full', Wizard: 'full', Paladin: 'half', Ranger: 'half', 'Eldritch Knight': 'third', 'Arcane Trickster': 'third', Warlock: 'pact' };
+export function casterSlots(kind, level) {
+  if (kind === 'pact') return { pact: pactSlots(level) };
+  const caster = { full: 1, half: 2, third: 3 }[kind];
   if (!caster) return null;
   const casterLevel = caster === 1 ? level : Math.ceil(level / caster);
   if (caster === 3 && level < 3) return null;
   return { slots: [...(FULL_SLOTS[Math.max(1, casterLevel)] || [])] };
 }
+export const slotsFor = (cls, level) => casterSlots(CASTER_OF[cls], level);
 
 // Choose prepared spells: spread across every level the caster can cast, a few more at the lower levels.
-export function spellbook(cls, level, rng, { ability, mod, pb }) {
-  const list = SPELLS[cls]; const slots = slotsFor(cls, level);
+// `like` ({ list, caster }) is for classes from your library: cast as `caster` from the SRD class `list`'s spells.
+const PREP_FOR = { full: FULL_PREP, half: HALF_PREP, third: THIRD_PREP, pact: PACT_PREP };
+export function spellbook(cls, level, rng, { ability, mod, pb }, like = null) {
+  const key = like ? like.list : cls;
+  const list = SPELLS[key]; const slots = like ? casterSlots(like.caster, level) : slotsFor(cls, level);
   if (!list || !slots) return null;
   const maxLevel = slots.pact ? slots.pact[1] : slots.slots.length;
-  const cantrips = rng.sample(list[0] || [], cantripsKnown(cls, level));
-  const count = (PREPARED[cls] || FULL_PREP)[level] || 0;
+  const cantrips = rng.sample(list[0] || [], cantripsKnown(key, level));
+  const count = (like ? PREP_FOR[like.caster] : PREPARED[cls] || FULL_PREP)[level] || 0;
   const byLevel = {};
   const levels = Array.from({ length: maxLevel }, (_, i) => i + 1).filter((l) => (list[l] || []).length);
   const pool = Object.fromEntries(levels.map((l) => [l, rng.shuffle(list[l])]));

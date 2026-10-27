@@ -8,10 +8,10 @@ import { saveNote } from './notebook.js';
 import { renderSpells } from './statblock-ui.js';
 import { spellText } from './spells.js';
 import { sendToWorld } from './tools.js';
-import { characterFields } from './sheet-ui.js';
+import { characterFields, featureItem } from './sheet-ui.js';
 import { session, onSession } from './api.js';
 import { world, worldEntries, loadWorld } from './world-store.js';
-import { librarySpecies, librarySubclasses } from './library.js';
+import { librarySpecies, librarySubclasses, libraryClasses } from './library.js';
 
 let state = { opts: { level: 1, species: 'any', subclass: 'any', cls: 'any', background: 'any', gender: 'any', alignment: 'any', method: 'standard', name: '' }, seed: randomSeed(), salts: {} };
 let ch = null;
@@ -27,16 +27,17 @@ function readOpts() {
 }
 function writeOpts() {
   const o = state.opts;
-  $('#c-level').value = o.level; $('#c-class').value = o.cls; $('#c-bg').value = o.background;
+  $('#c-level').value = o.level; $('#c-bg').value = o.background;
   fillLibraryOptions();
   $('#c-gender').value = o.gender; $('#c-align').value = o.alignment; $('#c-method').value = o.method; $('#c-name').value = o.name || '';
 }
 
-// Species and subclass menus: the SRD options, then the world library's (when a world with a library is open).
-// A choice that isn't available here (say, from a shared link) stays selectable so it isn't silently lost.
+// Class, species and subclass menus: the SRD options, then the world library's (when a world with a library is
+// open). A choice that isn't available here (say, from a shared link) stays selectable so it isn't silently lost.
 function fillLibraryOptions() {
   const entries = world.loaded ? worldEntries() : [];
-  const libSpecies = librarySpecies(entries), libSubs = librarySubclasses(entries, Object.keys(CLASSES));
+  const libClasses = libraryClasses(entries).filter((c) => !CLASSES[c.name]).map((c) => c.name);
+  const libSpecies = librarySpecies(entries), libSubs = librarySubclasses(entries, [...Object.keys(CLASSES), ...libClasses]);
   const opt = (v, t) => el('option', { value: v }, t);
   const keep = (list, v) => (v && !['any', 'library'].includes(v) && !list.includes(v) ? [opt(v, `${v} (not in this world)`)] : []);
   const spSel = $('#c-species');
@@ -45,14 +46,21 @@ function fillLibraryOptions() {
     libSpecies.length ? el('optgroup', { label: 'From your library' }, opt('library', 'Any from my library'), libSpecies.map((s) => opt(s.name, s.name))) : null,
     keep([...Object.keys(SPECIES), ...libSpecies.map((s) => s.name)], o.species));
   spSel.value = o.species === 'library' && !libSpecies.length ? 'any' : o.species;
-  const cls = state.opts.cls;
+  const clsSel = $('#c-class');
+  setKids(clsSel, opt('any', 'Any'), Object.keys(CLASSES).map((k) => opt(k, k)),
+    libClasses.length ? el('optgroup', { label: 'From your library' }, opt('library', 'Any from my library'), libClasses.map((c) => opt(c, c))) : null,
+    keep([...Object.keys(CLASSES), ...libClasses], o.cls));
+  if (o.cls === 'library' && !libClasses.length) o.cls = 'any';
+  clsSel.value = o.cls;
+  const cls = o.cls;
   const subSel = $('#c-subclass');
-  if (cls === 'any') { setKids(subSel, opt('any', 'Pick a class first')); subSel.disabled = true; subSel.value = 'any'; return; }
+  if (cls === 'any' || cls === 'library') { setKids(subSel, opt('any', 'Pick a class first')); subSel.disabled = true; subSel.value = 'any'; return; }
   subSel.disabled = false;
   const mine = libSubs.filter((s) => s.cls === cls);
-  setKids(subSel, opt('any', 'Any'), CLASSES[cls].subclasses.map((s) => opt(s, s)),
-    mine.length ? el('optgroup', { label: 'From your library' }, opt('library', 'Any from my library'), mine.map((s) => opt(s.name, s.name))) : null,
-    keep([...CLASSES[cls].subclasses, ...mine.map((s) => s.name)], o.subclass));
+  const srd = CLASSES[cls]?.subclasses || [];
+  setKids(subSel, opt('any', srd.length || mine.length ? 'Any' : 'None in your library yet'), srd.map((s) => opt(s, s)),
+    mine.length ? el('optgroup', { label: 'From your library' }, srd.length ? opt('library', 'Any from my library') : null, mine.map((s) => opt(s.name, s.name))) : null,
+    keep([...srd, ...mine.map((s) => s.name)], o.subclass));
   subSel.value = o.subclass === 'library' && !mine.length ? 'any' : o.subclass || 'any';
 }
 
@@ -106,8 +114,9 @@ function render(isNew) {
     block('Feats', el('ul', { class: 'feature-list' }, ch.feats.map((f) => el('li', {}, el('strong', {}, f.name), el('span', { class: 'tag' }, f.kind), f.text ? el('p', {}, f.text) : null)))),
     Object.keys(ch.choices).length ? block('Choices', el('ul', { class: 'plain' }, Object.entries(ch.choices).map(([k, v]) => el('li', {}, el('strong', {}, `${k}: `), v)))) : null,
     block(`${ch.species} traits`, el('ul', { class: 'feature-list' }, s.speciesTraits.map((t) => el('li', {}, el('strong', {}, t.name), el('p', {}, t.text))))),
-    block(`${ch.cls} features`, el('ol', { class: 'level-list' }, s.features.map((f) => el('li', {}, el('span', { class: 'lv' }, f.level), f.name))),
-      ch.subclass ? null : el('p', { class: 'muted' }, `At level 3 they will choose a subclass (rolled: ${ch.futureSubclass}).`)),
+    block(`${ch.cls} features`, el('ol', { class: 'level-list' }, s.features.map(featureItem)),
+      ch.subclass || !ch.futureSubclass ? null : el('p', { class: 'muted' }, `At level ${ch.library?.cls?.subclassLevel || 3} they will choose a subclass (rolled: ${ch.futureSubclass}).`),
+      ch.library?.cls ? el('p', { class: 'muted small' }, `${ch.cls} comes from your library${ch.library.cls.source ? ` (${ch.library.cls.source})` : ''}${ch.library.cls.spellsLike ? `; spells come from the ${ch.library.cls.spellsLike} list` : ''}.`) : null),
     ch.library?.subclass ? block(`${ch.library.subclass.name} (your library)`, el('p', {}, ch.library.subclass.features), ch.library.subclass.source ? el('p', { class: 'muted small' }, ch.library.subclass.source) : null) : null,
     ch.library?.species ? el('p', { class: 'muted small' }, `${ch.species} comes from your library${ch.library.species.source ? ` (${ch.library.species.source})` : ''}: names, age and height follow the ${ch.library.species.like}.`) : null,
     ch.levelUps.length ? block('Level-ups', el('ul', { class: 'plain' }, ch.levelUps.map((x) => el('li', {}, x)))) : null);
@@ -162,7 +171,7 @@ export function mountCharacters(root) {
   // A new class has its own subclasses: refill that menu before rolling.
   $('#c-class', root).addEventListener('change', () => { state.opts.cls = $('#c-class').value; state.opts.subclass = 'any'; fillLibraryOptions(); readOpts(); generate(); });
   // The library lives in the open world: load it (and reload when someone signs in or switches worlds).
-  const refreshLibrary = () => { if (session.configured === false) return; loadWorld(true).then(() => { writeOpts(); if (state.opts.species === 'library' || state.opts.subclass === 'library' || !SPECIES[state.opts.species]) generate(); }).catch(() => {}); };
+  const refreshLibrary = () => { if (session.configured === false) return; loadWorld(true).then(() => { writeOpts(); if (state.opts.species === 'library' || state.opts.subclass === 'library' || state.opts.cls === 'library' || !SPECIES[state.opts.species] || !CLASSES[state.opts.cls]) generate(); }).catch(() => {}); };
   let seen = '';
   onSession((s) => { const k = `${s.gm?.id || ''}|${s.worldKey || ''}`; if (k !== seen) { seen = k; refreshLibrary(); } });
   $('#c-name', root).addEventListener('change', () => { readOpts(); generate(); });

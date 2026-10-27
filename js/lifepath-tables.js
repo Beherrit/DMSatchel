@@ -280,6 +280,16 @@ export const BACKGROUND_WHY = {
 };
 
 // How the character found their class. One or two sentences; may name a mentor ({mentor}).
+// For classes from your library, which have no lines of their own.
+export const CLASS_WHY_ANY = [
+  '{mentor} saw a spark in {first} and spent years teaching {them} everything {they} now know.',
+  '{first} found an old book of techniques in a ruin and practised them alone until they worked.',
+  'An order with few members and many secrets took {first} in after {they} proved {themself} in a crisis.',
+  '{first} was the only one in {their} village with the knack, and {mentor}, a wandering teacher, noticed.',
+  'A debt to {mentor} was paid in training; {first} came out of it with skills {they} never asked for.',
+  'Hard years on the road taught {first} this way of fighting and surviving, one mistake at a time.',
+];
+
 export const CLASS_WHY = {
   Barbarian: [
     'The rage first came when bandits attacked {their} family; {they} remember{s|} nothing until it was over.',

@@ -34,3 +34,55 @@ test('an explicit SRD subclass and a missing library species both work', () => {
   assert.equal(gone.species, 'Stormborn'); assert.equal(gone.stats.speed, 30);
   assert.equal(speciesData('Elf').speed, 30);
 });
+
+import { classFrom, classFeatures, libraryClasses } from '../js/library.js';
+
+const ARTIFICER = { category: 'Class', die: 'd8', primary: 'Int', saves: 'Constitution and Intelligence', skills: 'Arcana, History, Investigation, Medicine, Nature, Perception, Sleight of Hand', skillCount: '2',
+  wears: 'Leather and shield', weapon: 'Light crossbow 1d8', caster: 'Half caster', spellAbility: 'Int', gear: 'Tinker’s tools', source: 'My book',
+  features: '1: Tinkerer’s Magic: Make tiny gadgets.\n1: Spellcasting\n2: Replicate Magic Item — Craft from plans.\nYou can keep two.\n3: Artificer Subclass\n5: Subclass feature\nLevel 7: Flash of Genius' };
+
+test('class features read one level per line, with or without descriptions', () => {
+  const { byLevel, list } = classFeatures('1: Rage, Unarmored Defense\n2nd level - Danger Sense: You sense traps.\nand ambushes.\n4: ASI\n3: Path subclass\nnot a level line');
+  assert.deepEqual(byLevel[1], ['Rage', 'Unarmored Defense']);
+  assert.deepEqual(byLevel[2], ['Danger Sense']);
+  assert.equal(list.find((f) => f.name === 'Danger Sense').text, 'You sense traps. and ambushes.');
+  assert.deepEqual(byLevel[4], ['Ability Score Improvement']);
+  assert.deepEqual(byLevel[3], ['Subclass feature']);
+});
+
+test('a class from the library fills in sensible defaults', () => {
+  const c = classFrom('Artificer', ARTIFICER);
+  assert.equal(c.die, 8); assert.deepEqual(c.saves, ['Con', 'Int']); assert.equal(c.priority[0], 'Int');
+  assert.equal(c.armor, 'leather-shield'); assert.equal(c.armorProf, 'Light armor, shields');
+  assert.deepEqual(c.weapon, ['Light crossbow', '1d8', 'Dex']);
+  assert.equal(c.caster, 'half'); assert.equal(c.spellsLike, 'Wizard');
+  assert.deepEqual(c.features[4], ['Ability Score Improvement']); assert.deepEqual(c.features[19], ['Epic Boon']);
+  assert.deepEqual(c.features[3], []); assert.deepEqual(c.features[5], ['Subclass feature']);
+  const bare = classFrom('Mystery');
+  assert.equal(bare.die, 8); assert.equal(bare.skills.length, 18); assert.equal(bare.caster, null);
+});
+
+test('the Forge builds library classes, with their subclasses, spells and feature notes', () => {
+  const entries = [{ id: 'a', kind: 'rule', name: 'Artificer', fields: ARTIFICER }, { id: 'b', kind: 'rule', name: 'Blood Hunter', fields: { category: 'Class', die: 'd10', primary: 'Dex' } }];
+  const classes = libraryClasses(entries);
+  setCharacterLibrary(() => ({ species: [], subclasses: [{ name: 'Alchemist', cls: 'Artificer', features: 'Potions.', source: 'My book' }], classes }));
+  const ch = generateCharacter({ cls: 'Artificer', level: 7 }, 'tink');
+  assert.equal(ch.cls, 'Artificer'); assert.equal(ch.subclass, 'Alchemist');
+  assert.equal(ch.stats.hitDice, '7d8'); assert.equal(ch.stats.acNote, 'leather armor and shield');
+  assert.equal(ch.stats.spellbook.cls, 'Artificer'); assert.deepEqual(ch.stats.spellbook.slots, [4, 3]);
+  assert.ok(ch.stats.features.some((f) => f.name === 'Replicate Magic Item' && f.text === 'Craft from plans. You can keep two.'));
+  assert.ok(ch.stats.features.some((f) => f.name === 'Subclass: Alchemist' && f.level === 3));
+  assert.ok(ch.stats.features.some((f) => f.name === 'Alchemist feature' && f.level === 5));
+  assert.ok(ch.stats.saves.find((s) => s.ability === 'Int').prof);
+  assert.ok(characterText(ch).includes('Artificer is from your library (My book); spells come from the Wizard list.'));
+  // "Any from my library" resolves to a library class, which rebuilds identically by name.
+  const any = generateCharacter({ cls: 'library', level: 4 }, 'pick');
+  assert.ok(['Artificer', 'Blood Hunter'].includes(any.cls));
+  assert.equal(characterText(any), characterText(generateCharacter({ cls: any.cls, level: 4 }, 'pick')));
+  // A class with no subclasses yet, and one whose library entry is gone, still build.
+  const bh = generateCharacter({ cls: 'Blood Hunter', level: 5 }, 'bh');
+  assert.equal(bh.subclass, null); assert.equal(bh.stats.hitDice, '5d10'); assert.equal(bh.stats.spellcasting, null);
+  setCharacterLibrary(() => ({ species: [], subclasses: [] }));
+  const gone = generateCharacter({ cls: 'Artificer', level: 3 }, 'tink');
+  assert.equal(gone.cls, 'Artificer'); assert.equal(gone.stats.hitDice, '3d8');
+});

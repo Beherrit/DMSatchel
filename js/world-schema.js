@@ -1,5 +1,17 @@
 // What the shared world can hold. Used by the browser and by the API (for validation).
 
+// The Character Forge's numbers for a class from your library (see libraryClasses in library.js).
+export const ARMOR_WORN = ['No armor', 'Leather', 'Studded leather', 'Leather and shield', 'Chain shirt and shield', 'Chain mail', 'Chain mail and shield', 'Unarmored (Dex + Con)', 'Unarmored (Dex + Wis)'];
+export const CASTING = ['None', 'Full caster', 'Half caster', 'Third caster', 'Pact magic'];
+export const SPELL_LISTS = ['Bard', 'Cleric', 'Druid', 'Paladin', 'Ranger', 'Sorcerer', 'Warlock', 'Wizard'];
+const CLASS_FIELDS = [['die', 'Hit die', 'select', ['d6', 'd8', 'd10', 'd12']], ['primary', 'Main ability', 'select', ['Str', 'Dex', 'Con', 'Int', 'Wis', 'Cha']],
+  ['saves', 'Saving throws'], ['skills', 'Skills to choose from'], ['skillCount', 'How many skills'], ['armorProf', 'Armor training'], ['weaponProf', 'Weapon proficiencies'],
+  ['wears', 'Armor worn', 'select', ARMOR_WORN], ['weapon', 'Main weapon'], ['caster', 'Spellcasting', 'select', CASTING],
+  ['spellAbility', 'Spellcasting ability', 'select', ['Int', 'Wis', 'Cha']], ['spellsLike', 'Spell list like', 'select', SPELL_LISTS], ['gear', 'Starting gear'], ['sublevel', 'Subclass at level']];
+
+// Some fields only apply to some categories (a species's speed, a class's hit die): [key, label, type, options, {only}].
+export const fieldApplies = (f, fields) => !f[4]?.only || f[4].only.includes(fields?.category);
+
 export const KINDS = {
   region: {
     label: 'Region', plural: 'Regions', blurb: 'Kingdoms, provinces, wilds and seas.',
@@ -71,11 +83,14 @@ export const KINDS = {
   },
   rule: {
     label: 'Rules option', plural: 'Classes, Species & Feats', blurb: 'Classes, subclasses, species, backgrounds, feats and spells from your books, in short.',
-    fields: [['category', 'Category', 'select', ['Class', 'Subclass', 'Species', 'Background', 'Feat', 'Spell', 'Other']], ['class', 'Class (for subclasses and spells)'], ['level', 'Level'],
+    fields: [['category', 'Category', 'select', ['Class', 'Subclass', 'Species', 'Background', 'Feat', 'Spell', 'Other']],
+      ['class', 'Class', 'text', null, { only: ['Subclass', 'Spell'] }], ['level', 'Level', 'text', null, { only: ['Subclass', 'Spell', 'Feat'] }],
       ['features', 'What it gives', 'long'], ['source', 'Source book'], ['link', 'D&D Beyond link'],
       // Species only: the numbers the Character Forge needs, and an SRD species to borrow names, age and height from.
-      ['size', 'Size (species)', 'select', ['Small', 'Medium', 'Small or Medium', 'Large']], ['speed', 'Speed (species)'], ['darkvision', 'Darkvision (species)'],
-      ['like', 'Similar to (species)', 'select', ['Aasimar', 'Dragonborn', 'Dwarf', 'Elf', 'Gnome', 'Goliath', 'Halfling', 'Human', 'Orc', 'Tiefling']]],
+      ...[['size', 'Size', 'select', ['Small', 'Medium', 'Small or Medium', 'Large']], ['speed', 'Speed'], ['darkvision', 'Darkvision'],
+        ['like', 'Similar to', 'select', ['Aasimar', 'Dragonborn', 'Dwarf', 'Elf', 'Gnome', 'Goliath', 'Halfling', 'Human', 'Orc', 'Tiefling']]].map(([k, l, t = 'text', o = null]) => [k, l, t, o, { only: ['Species'] }]),
+      // Classes only: enough for the Character Forge to build one. Features go in "What it gives", one level per line.
+      ...CLASS_FIELDS.map(([k, l, t = 'text', o = null]) => [k, l, t, o, { only: ['Class'] }])],
   },
   rumor: {
     label: 'Rumor', plural: 'Rumors', blurb: 'Gossip that starts in one town and spreads, changing as it goes.',

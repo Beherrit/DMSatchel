@@ -18,10 +18,13 @@ export function characterOf(e) {
   try { return generateCharacter(f.opts || {}, f.seed, f.salts || {}); } catch { return null; }
 }
 
+// A class feature; library classes can carry a short description of what it does.
+export const featureItem = (f) => el('li', {}, el('span', { class: 'lv' }, f.level), f.name, f.text ? el('p', { class: 'small muted' }, f.text) : null);
+
 // The recipe saved with a Forge character: enough to rebuild it exactly, at any level.
 // "Any from my library" is saved as the option actually picked, so the character rebuilds the same way later.
 export const forgeRecipe = (ch) => JSON.stringify({ seed: ch.seed, salts: ch.salts, opts: {
-  ...ch.opts, ...(ch.opts.species === 'library' ? { species: ch.species } : {}), ...(ch.opts.subclass === 'library' ? { subclass: ch.futureSubclass } : {}),
+  ...ch.opts, ...(ch.opts.species === 'library' ? { species: ch.species } : {}), ...(ch.opts.cls === 'library' ? { cls: ch.cls } : {}), ...(ch.opts.subclass === 'library' ? { subclass: ch.futureSubclass } : {}),
 } });
 
 // Entry fields for a Forge character (used by "Add to world" and by level-up).
@@ -227,7 +230,7 @@ function fullSheet(ch) {
       sec('Feats', el('ul', { class: 'feature-list' }, ch.feats.map((f) => el('li', {}, el('strong', {}, f.name), el('span', { class: 'tag' }, f.kind), f.text ? el('p', {}, f.text) : null)))),
       Object.keys(ch.choices).length ? sec('Choices', el('ul', { class: 'plain' }, Object.entries(ch.choices).map(([k, v]) => el('li', {}, el('strong', {}, `${k}: `), v)))) : null,
       sec(`${ch.species} traits`, el('ul', { class: 'feature-list' }, s.speciesTraits.map((t) => el('li', {}, el('strong', {}, t.name), el('p', {}, t.text))))),
-      sec(`${ch.cls} features`, el('ol', { class: 'level-list' }, s.features.map((f) => el('li', {}, el('span', { class: 'lv' }, f.level), f.name)))),
+      sec(`${ch.cls} features`, el('ol', { class: 'level-list' }, s.features.map(featureItem))),
       ch.library?.subclass ? sec(`${ch.library.subclass.name} (your library)`, el('p', { class: 'small' }, ch.library.subclass.features), ch.library.subclass.source ? el('p', { class: 'muted small' }, ch.library.subclass.source) : null) : null));
 }
 

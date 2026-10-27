@@ -2,7 +2,7 @@
 import { pictureField } from './image-ui.js';
 import { el, toast, setKids, confirmButton } from './dom.js';
 import { api } from './api.js';
-import { KINDS, PLACE_KINDS } from './world-schema.js';
+import { KINDS, PLACE_KINDS, fieldApplies } from './world-schema.js';
 import { world, worldEntries, getEntry, findByName, byName, kindLabel, link, when, createEntry } from './world-store.js';
 import { npcDraft, questDraft, tavernDraft, shopDraft, settlementDraft, areaDraft, orgDraft } from './generators.js';
 import { PIN_ICONS } from './world-maps.js';
@@ -46,9 +46,9 @@ export function buildSection() {
     const parent = d.parent_id && getEntry(d.parent_id);
     const chips = el('div', { class: 'type-chips', role: 'group', 'aria-label': 'What to add' }, TYPES.map(([id, t]) =>
       el('button', { type: 'button', class: 'chip-btn', 'aria-pressed': String(id === current), onclick: () => { current = id; render(); } }, t)));
-    const fieldEls = KINDS[kind].fields.map(([k, l, type, opts]) => {
-      const v = d.fields?.[k] || '';
-      if (type === 'hidden') return null;
+    const fieldEls = KINDS[kind].fields.map((fd) => {
+      const [k, l, type, opts] = fd, v = d.fields?.[k] || '';
+      if (type === 'hidden' || !fieldApplies(fd, d.fields)) return null;
       if (type === 'image') return pictureField(v, { id: 'b-image' });
       if (type === 'select') {
         const s = el('select', { id: `b-${k}`, 'data-field': k }, el('option', { value: '' }, '—'), opts.map((o) => el('option', { value: o }, o)));

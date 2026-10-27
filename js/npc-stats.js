@@ -56,10 +56,10 @@ export function npcStats({ role, ancestry = 'Human', cls = 'auto', level } = {},
   if (pick && level) pick.level = level;
   if (!pick) return commoner(SPECIES[ancestry] ? ancestry : 'Human', rng);
   const ch = generateCharacter({ cls: pick.cls, level: pick.level, species: SPECIES[ancestry] ? ancestry : 'Human' }, seed);
-  const s = ch.stats, a = ch.abilities.scores, c = CLASSES[ch.cls];
+  const s = ch.stats, a = ch.abilities.scores;
   const conMod = abilityMod(a.Con);
   const lines = [
-    `AC ${s.ac} (${s.acNote}) · HP ${s.hp} (${s.level}d${c.die}${conMod ? fmtMod(conMod * s.level) : ''}) · Speed ${s.speed} ft · Initiative ${fmtMod(s.initiative)}`,
+    `AC ${s.ac} (${s.acNote}) · HP ${s.hp} (${s.hitDice}${conMod ? fmtMod(conMod * s.level) : ''}) · Speed ${s.speed} ft · Initiative ${fmtMod(s.initiative)}`,
     abilityLine(a),
     `Saves: ${s.saves.filter((x) => x.prof).map((x) => `${x.ability} ${fmtMod(x.mod)}`).join(', ')}`,
     `Skills: ${s.skills.filter((x) => x.prof).map((x) => `${x.name} ${fmtMod(x.mod)}`).join(', ')}`,
