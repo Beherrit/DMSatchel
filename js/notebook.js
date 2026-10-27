@@ -1,5 +1,5 @@
 // The personal session notebook: things a DM saves from the tools. Kept in this browser.
-import { $, el, toast, copyText, confirmButton, download } from './dom.js';
+import { $, el, toast, copyText, confirmButton, download, setKids } from './dom.js';
 
 const KEY = 'dm-satchel-notes';
 let notes = [];
@@ -19,7 +19,7 @@ export function saveNote(kind, title, body) {
 
 function render() {
   const box = $('#notes'); if (!box) return;
-  box.replaceChildren();
+  setKids(box);
   $('#nb-status').textContent = storageOk ? 'Kept in this browser' : 'Not saved after you close this page';
   if (!notes.length) {
     box.append(el('div', { class: 'empty' }, 'Nothing saved yet. Hit “Save” on any NPC, quest, name, place or loot and it lands here, so you remember what you made up mid-session.'));

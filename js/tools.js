@@ -2,7 +2,7 @@
 // Each tool mounts into its own panel and can save to the notebook or send a draft to the world.
 
 import { makeRng } from './rng.js';
-import { $, el, cap, fmt, copyText, fresh, traitList } from './dom.js';
+import { $, el, cap, fmt, copyText, fresh, traitList, setKids } from './dom.js';
 import { personName, ANCESTRY_WEIGHTS, ANCESTRIES, townName, tavernName, shopName, shipName, groupName, lastName } from './names.js';
 import * as D from './tables.js';
 import { saveNote } from './notebook.js';
@@ -61,7 +61,7 @@ function mountNpc(root) {
     render(true);
   }
   function render(isNew) {
-    card.replaceChildren(
+    setKids(card, 
       el('div', { class: 'eyebrow' }, `${npc.anc} · ${cap(npc.job)}`),
       el('div', { class: 'entry-head' }, el('h3', { class: 'card-title' }, npc.name), el('button', { class: 'reroll', type: 'button', 'aria-label': 'Reroll name', onclick: () => { rollField('name'); render(); } }, '↻')),
       traitList(Object.entries(NPC_LABELS).map(([k, l]) => [k, l, cap(npc[k]), () => { rollField(k); render(); }])),
@@ -102,7 +102,7 @@ function mountQuest(root) {
   }
   function render(isNew) {
     const v = vals();
-    card.replaceChildren(el('div', { class: 'eyebrow' }, $('#q-tier').selectedOptions[0].text), el('h3', { class: 'card-title' }, q.title),
+    setKids(card, el('div', { class: 'eyebrow' }, $('#q-tier').selectedOptions[0].text), el('h3', { class: 'card-title' }, q.title),
       traitList(Object.entries(Q_LABELS).map(([k, l]) => [k, l, v[k], () => { rollField(k); render(); }])),
       actions({ kind: 'Quest', title: () => q.title, text, world: () => ({ kind: 'quest', name: q.title, summary: v.goal,
         fields: { status: 'Available', patron: v.patron, reward: v.reward, stakes: `Opposition: ${v.antagonist}. Complication: ${v.complication}` }, secret: `Twist: ${v.twist}` }) }));
@@ -124,7 +124,7 @@ function mountNames(root) {
   function gen() {
     const kind = $('#n-kind').value, anc = $('#n-anc').value, g = $('#n-gender').value;
     ancWrap.hidden = kind !== 'people'; $('#n-gender').parentElement.hidden = kind !== 'people';
-    out.replaceChildren();
+    setKids(out);
     const seen = new Set();
     for (let i = 0, tries = 0; i < 10 && tries < 80; tries++) {
       let name, sub = '', world = null;
@@ -190,7 +190,7 @@ function mountPlaces(root) {
       : { kind: 'location', name: p.name, summary: `${p.kind}. The owner ${p.quirk}.`, fields: { type: 'Shop', owner: p.owner, features: p.stock.map(([n, c]) => `${n} (${c})`).join('; ') } });
   function render(isNew) {
     const kindLabel = { town: 'Settlement', tavern: 'Tavern', shop: 'Shop' }[p.type];
-    card.replaceChildren(el('div', { class: 'eyebrow' }, kindLabel),
+    setKids(card, el('div', { class: 'eyebrow' }, kindLabel),
       el('div', { class: 'entry-head' }, el('h3', { class: 'card-title' }, p.name), p.type !== 'shop' ? el('button', { class: 'reroll', type: 'button', 'aria-label': 'Reroll name', onclick: () => { roll('name'); render(); } }, '↻') : null),
       traitList(rows().map(([k, l, v]) => [k, l, v, () => { roll(k); render(); }])),
       p.type === 'shop' ? el('div', { class: 'eyebrow' }, 'For sale') : null,
@@ -243,7 +243,7 @@ function mountOrgs(root) {
       ? { kind: 'guild', name: o.name, summary: `The guild of ${o.trade.toLowerCase()}.`, fields: { trade: o.trade, leader: o.leader, hall: cap(o.hall), services: cap(o.services), dues: cap(o.dues), ranks: o.ranks }, secret: o.quirk }
       : { kind: 'clan', name: o.name, summary: `${o.people} family seated at ${o.seat}.`, fields: { ancestry: o.people, head: o.head, seat: cap(o.seat), heraldry: cap(o.heraldry), motto: o.motto, traditions: o.tradition, feuds: cap(o.feud) } });
   function render(isNew) {
-    card.replaceChildren(el('div', { class: 'eyebrow' }, { faction: 'Faction', guild: 'Guild', clan: 'Clan / House' }[o.type]),
+    setKids(card, el('div', { class: 'eyebrow' }, { faction: 'Faction', guild: 'Guild', clan: 'Clan / House' }[o.type]),
       el('div', { class: 'entry-head' }, el('h3', { class: 'card-title' }, o.name), el('button', { class: 'reroll', type: 'button', 'aria-label': 'Reroll name', onclick: () => { roll('name'); render(); } }, '↻')),
       traitList(rows().map(([k, l, v]) => [k, l, v, () => { roll(k); render(); }])),
       actions({ kind: 'Organization', title: () => o.name, text, world }));
@@ -271,7 +271,7 @@ function mountDescribe(root) {
   }
   const text = () => `${ds.env}, ${ds.time.toLowerCase()} (${D.TIME_NOTE[ds.time]})\n${Object.entries(D_LABELS).map(([k, l]) => `${l}: ${ds[k]}`).join('\n')}`;
   function render(isNew) {
-    card.replaceChildren(el('div', { class: 'eyebrow' }, `${ds.env} · ${ds.time}`), el('p', { class: 'card-sub' }, `${cap(D.TIME_NOTE[ds.time])}.`),
+    setKids(card, el('div', { class: 'eyebrow' }, `${ds.env} · ${ds.time}`), el('p', { class: 'card-sub' }, `${cap(D.TIME_NOTE[ds.time])}.`),
       traitList(Object.entries(D_LABELS).map(([k, l]) => [k, l, el('span', { class: 'flavor' }, `${cap(ds[k])}.`), () => { roll(k); render(); }])),
       el('p', { class: 'readaloud' }, `${cap(D.TIME_NOTE[ds.time])}. You see ${ds.see}. You hear ${ds.hear}, and the air smells of ${ds.smell}. ${cap(ds.feel)}.`),
       actions({ kind: 'Description', title: () => `${ds.env} at ${ds.time.toLowerCase()}`, text }));
@@ -287,7 +287,7 @@ function mountHooks(root) {
   const btn = (key, label) => el('button', { class: 'btn primary', type: 'button', onclick: () => rollTable(key) }, label);
   root.append(panelHead('Rumors & Hooks', 'Overheard gossip, adventure seeds, social complications and odd trinkets for pockets and treasure piles.'),
     el('div', { class: 'btnrow' }, btn('rumor', 'Tavern rumor (d20)'), btn('hook', 'Plot hook (d20)'), btn('trinket', 'Trinket (d20)'), btn('complication', 'Social complication (d12)'),
-      el('button', { class: 'btn ghost', type: 'button', onclick: () => feed.replaceChildren() }, 'Clear')), feed);
+      el('button', { class: 'btn ghost', type: 'button', onclick: () => setKids(feed) }, 'Clear')), feed);
   function rollTable(key) {
     const t = D.TABLES[key]; const n = 1 + R(t.die); const text = t.items[(n - 1) % t.items.length];
     const short = text.length > 70 ? `${text.slice(0, 68).trim()}…` : text;
@@ -344,7 +344,7 @@ function mountLoot(root) {
   };
   function render(isNew) {
     const l = loot;
-    card.replaceChildren(el('div', { class: 'eyebrow' }, `${l.hoard ? 'Treasure hoard' : 'Pocket loot'} · ${tierLabel()}`), el('p', { class: 'card-sub' }, `Found ${l.where}.`),
+    setKids(card, el('div', { class: 'eyebrow' }, `${l.hoard ? 'Treasure hoard' : 'Pocket loot'} · ${tierLabel()}`), el('p', { class: 'card-sub' }, `Found ${l.where}.`),
       el('div', { class: 'coins' }, l.coins.map(([c, q]) => el('span', { class: 'coin' }, `${fmt(q)} ${c}`))),
       l.vals.length ? [el('div', { class: 'eyebrow' }, l.vals[0].kind === 'gem' ? 'Gemstones' : 'Art objects'), el('ul', { class: 'loot-list' }, l.vals.map((v) => el('li', {}, el('span', {}, cap(v.name)), el('span', { class: 'v' }, `${fmt(v.each)} gp ea`))))] : null,
       l.items.length ? [el('div', { class: 'eyebrow' }, 'Magic items'), el('ul', { class: 'loot-list' }, l.items.map((it) => el('li', {}, el('span', {}, it.name), el('span', { class: `pill r-${it.r}` }, D.RARITY_LABEL[it.r]))))] : null,

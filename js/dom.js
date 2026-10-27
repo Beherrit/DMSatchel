@@ -17,6 +17,12 @@ export function el(tag, attrs = {}, ...kids) {
   return e;
 }
 
+// replaceChildren that skips null/false and flattens arrays, like el() does.
+export function setKids(node, ...kids) {
+  node.replaceChildren(...kids.flat(Infinity).filter((k) => k != null && k !== false));
+  return node;
+}
+
 export const cap = (s) => (s ? String(s).charAt(0).toUpperCase() + String(s).slice(1) : '');
 export const fmt = (n) => Number(n).toLocaleString('en-US');
 

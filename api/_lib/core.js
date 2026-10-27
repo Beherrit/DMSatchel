@@ -28,6 +28,18 @@ export function ensureSchema() {
         id serial PRIMARY KEY, entry_id text NOT NULL, gm_id int, action text NOT NULL, snapshot jsonb, at timestamptz NOT NULL DEFAULT now())`;
       await sql`CREATE INDEX IF NOT EXISTS history_entry_idx ON history (entry_id, at DESC)`;
       await sql`CREATE TABLE IF NOT EXISTS settings (key text PRIMARY KEY, value jsonb NOT NULL)`;
+      await sql`CREATE TABLE IF NOT EXISTS maps (
+        id text PRIMARY KEY, name text NOT NULL, image text NOT NULL, width int NOT NULL DEFAULT 0, height int NOT NULL DEFAULT 0,
+        pins jsonb NOT NULL DEFAULT '[]', entry_id text, secret boolean NOT NULL DEFAULT false, created_by int, updated_by int,
+        created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now(), version int NOT NULL DEFAULT 1, deleted boolean NOT NULL DEFAULT false)`;
+      await sql`CREATE TABLE IF NOT EXISTS standing_log (
+        id serial PRIMARY KEY, entry_id text NOT NULL, value int NOT NULL, delta int NOT NULL DEFAULT 0, reason text NOT NULL DEFAULT '',
+        session_id text, secret boolean NOT NULL DEFAULT false, gm_id int, at timestamptz NOT NULL DEFAULT now())`;
+      await sql`CREATE INDEX IF NOT EXISTS standing_entry_idx ON standing_log (entry_id, at DESC)`;
+      await sql`CREATE TABLE IF NOT EXISTS comments (
+        id serial PRIMARY KEY, entry_id text NOT NULL, parent_id int, gm_id int, body text NOT NULL, resolved boolean NOT NULL DEFAULT false,
+        created_at timestamptz NOT NULL DEFAULT now(), edited_at timestamptz)`;
+      await sql`CREATE INDEX IF NOT EXISTS comments_entry_idx ON comments (entry_id, created_at)`;
     })().catch((e) => { schemaReady = null; throw e; });
   }
   return schemaReady;

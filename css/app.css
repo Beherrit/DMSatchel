@@ -13,6 +13,8 @@
   --danger: #9E3328;
   --secret-bg: #F3E7E4;
   --r-common: #6B7280; --r-uncommon: #2F7A3A; --r-rare: #2459A6; --r-veryrare: #7A3FA0; --r-legendary: #A8630A;
+  --k-place: #2F6E8E; --k-power: #A3352B; --k-people: #2F7A3A; --k-faith: #8E6210; --k-thing: #7A3FA0; --k-time: #586070;
+  --good: #2F7A3A; --warn: #A8630A;
   --f-display: "IM Fell English SC", "Iowan Old Style", Georgia, serif;
   --f-flavor: "IM Fell English", "Iowan Old Style", Georgia, serif;
   --f-body: "Alegreya Sans", "Gill Sans", "Segoe UI", system-ui, sans-serif;
@@ -23,11 +25,13 @@
   --bg: #131923; --surface: #1B2330; --sunk: #10151d; --ink: #E5E1D5; --muted: #9AA3B2; --line: #2D394A;
   --accent: #5DBDB1; --accent-ink: #0F1A1C; --brass: #D8A846; --danger: #E57B6E; --secret-bg: #2A1E22;
   --r-common: #A3A9B4; --r-uncommon: #7CC48A; --r-rare: #7FA8EC; --r-veryrare: #C29AE6; --r-legendary: #E6AE52;
+  --k-place: #6FB3D6; --k-power: #E8857A; --k-people: #7CC48A; --k-faith: #D8A846; --k-thing: #C29AE6; --k-time: #9AA3B2; --good: #7CC48A; --warn: #E6AE52;
   color-scheme: dark } }
 :root[data-theme="dark"] {
   --bg: #131923; --surface: #1B2330; --sunk: #10151d; --ink: #E5E1D5; --muted: #9AA3B2; --line: #2D394A;
   --accent: #5DBDB1; --accent-ink: #0F1A1C; --brass: #D8A846; --danger: #E57B6E; --secret-bg: #2A1E22;
   --r-common: #A3A9B4; --r-uncommon: #7CC48A; --r-rare: #7FA8EC; --r-veryrare: #C29AE6; --r-legendary: #E6AE52;
+  --k-place: #6FB3D6; --k-power: #E8857A; --k-people: #7CC48A; --k-faith: #D8A846; --k-thing: #C29AE6; --k-time: #9AA3B2; --good: #7CC48A; --warn: #E6AE52;
   color-scheme: dark }
 
 * { box-sizing: border-box }
@@ -191,8 +195,8 @@ textarea { width: 100%; resize: vertical; line-height: 1.45 }
 /* world */
 .w-layout { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 22px; align-items: start }
 @media (max-width: 820px) { .w-layout { grid-template-columns: minmax(0, 1fr) } }
-.w-side { display: grid; gap: 10px; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px) }
-@media (max-width: 820px) { .w-side { position: static } }
+.w-side { display: grid; gap: 10px; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); max-height: calc(100vh - 24px); overflow: auto; padding-right: 2px }
+@media (max-width: 820px) { .w-side { position: static; max-height: none } }
 .w-home { font-family: var(--f-display); font-size: 24px; text-decoration: none; color: var(--ink) }
 .w-side input { width: 100% }
 .w-kinds { display: grid; gap: 1px }
@@ -280,9 +284,124 @@ tr.disabled td { color: var(--muted) }
 .foot { border-top: 1px solid var(--line); padding-top: 12px; color: var(--muted); font-size: 13px; max-width: 90ch }
 @media (prefers-reduced-motion: no-preference) { .fresh { animation: rise .25s ease-out } @keyframes rise { from { transform: translateY(4px); opacity: .4 } } }
 
+/* header search & palette */
+.top-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap }
+.search-btn { color: var(--muted); min-width: 170px; justify-content: space-between }
+.search-btn kbd, .pal-foot kbd { font-family: var(--f-mono); font-size: 12px; border: 1px solid var(--line); border-radius: 4px; padding: 0 5px; background: var(--bg) }
+.palette { width: min(640px, calc(100vw - 32px)); margin-top: 10vh; padding: 0 }
+.palette input { width: 100%; border: none; border-bottom: 1px solid var(--line); border-radius: 0; padding: 14px 16px; font-size: 18px; background: var(--surface) }
+.palette input:focus-visible { outline: none }
+.pal-list { list-style: none; margin: 0; padding: 6px; max-height: 55vh; overflow: auto }
+.pal-list li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0 12px; padding: 7px 10px; border-radius: 6px; cursor: pointer }
+.pal-list li.active { background: var(--sunk) }
+.pal-label { font-weight: 500 } .pal-group { grid-row: 1; grid-column: 2; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted) }
+.pal-hint { grid-column: 1 / -1; font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.pal-empty { color: var(--muted); cursor: default }
+.pal-foot { padding: 6px 14px 10px; border-top: 1px solid var(--line) }
+
+/* kind colors (graph, pins) */
+.k-region, .k-settlement, .k-location { --kc: var(--k-place) }
+.k-faction, .k-guild, .k-clan { --kc: var(--k-power) }
+.k-npc, .k-character { --kc: var(--k-people) }
+.k-deity, .k-quest { --kc: var(--k-faith) }
+.k-item, .k-lore { --kc: var(--k-thing) }
+.k-event, .k-session { --kc: var(--k-time) }
+.w-tools { padding-bottom: 8px; border-bottom: 1px solid var(--line) }
+.linkish { background: none; border: none; padding: 0; color: var(--accent); cursor: pointer; text-align: left }
+
+/* maps */
+.map-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px }
+.map-card { display: grid; gap: 4px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; text-decoration: none; color: var(--ink); padding-bottom: 10px }
+.map-card img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; background: var(--sunk) }
+.map-card > span { padding: 0 12px }
+.map-card-name { font-family: var(--f-display); font-size: 20px }
+.map-card:hover { border-color: var(--accent) }
+.map-view { gap: 10px }
+.map-tools { display: flex; gap: 6px; flex-wrap: wrap }
+.map-tools [aria-pressed="true"] { background: var(--brass); border-color: var(--brass) }
+.map-viewport { position: relative; height: min(72vh, 760px); min-height: 320px; overflow: hidden; border: 1px solid var(--line); border-radius: 10px; background: var(--sunk); touch-action: none; cursor: grab; user-select: none }
+.map-viewport:active { cursor: grabbing }
+.map-viewport.placing { cursor: crosshair; box-shadow: inset 0 0 0 3px var(--brass) }
+.map-stage { position: absolute; left: 0; top: 0; transform-origin: 0 0 }
+.map-stage img { width: 100%; height: 100%; display: block; max-width: none; pointer-events: none }
+.pin-layer { position: absolute; inset: 0; --inv: 1 }
+.pin { position: absolute; transform: translate(-50%, -50%) scale(var(--inv)); transform-origin: center; display: flex; align-items: center; gap: 4px; border: none; background: none; padding: 0; cursor: pointer; color: var(--ink) }
+.pin .glyph { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--surface); border: 2px solid var(--pc, var(--accent)); color: var(--pc, var(--accent)); font-size: 12px; line-height: 1; box-shadow: 0 1px 3px rgb(0 0 0 / .35) }
+.pin-label { position: absolute; left: 26px; white-space: nowrap; font-size: 13px; font-weight: 700; background: color-mix(in srgb, var(--surface) 85%, transparent); padding: 0 5px; border-radius: 4px }
+.no-labels .pin-label { display: none }
+.pin.active .glyph, .pin:hover .glyph, .pin:focus-visible .glyph { background: var(--pc, var(--accent)); color: var(--surface) }
+.pin.secret .glyph { border-style: dashed }
+.pin-city { --pc: var(--k-power) } .pin-town { --pc: var(--k-place) } .pin-port { --pc: var(--k-place) } .pin-dungeon { --pc: var(--k-thing) }
+.pin-temple { --pc: var(--k-faith) } .pin-camp { --pc: var(--k-people) } .pin-danger { --pc: var(--danger) } .pin-poi { --pc: var(--accent) }
+.glyph.pin-city, .glyph.pin-town, .glyph.pin-port, .glyph.pin-dungeon, .glyph.pin-temple, .glyph.pin-camp, .glyph.pin-danger, .glyph.pin-poi { color: var(--pc) }
+.pin-pop { position: absolute; z-index: 3; width: min(290px, calc(100% - 16px)); background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px; display: grid; gap: 6px; box-shadow: 0 6px 24px rgb(0 0 0 / .25); cursor: auto }
+.pin-form { display: grid; gap: 8px } .pin-form input[type="text"], .pin-form select, .pin-form textarea { width: 100% }
+.map-side { display: grid; gap: 6px }
+.pin-list { list-style: none; margin: 0; padding: 0; columns: 3 220px; column-gap: 20px }
+.pin-list li { break-inside: avoid; padding: 2px 0 }
+
+/* relationship web */
+.web-wrap { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 12px; align-items: start }
+@media (max-width: 860px) { .web-wrap { grid-template-columns: minmax(0, 1fr) } }
+.web-svg { width: 100%; height: min(72vh, 760px); min-height: 360px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; touch-action: none; cursor: grab; display: block }
+.web-svg .edge { stroke: var(--line); stroke-width: 1.5 }
+.web-svg .edge.parent { stroke-dasharray: 4 4 } .web-svg .edge.mention { stroke-dasharray: 1 4 } .web-svg .edge.secret { stroke: var(--danger); stroke-dasharray: 6 3; opacity: .7 }
+.web-svg .node { cursor: pointer }
+.web-svg .node circle { fill: var(--kc, var(--accent)); stroke: var(--surface); stroke-width: 2 }
+.web-svg .node text { fill: var(--ink); font-family: var(--f-body); font-size: 12px; paint-order: stroke; stroke: var(--surface); stroke-width: 3px; stroke-linejoin: round; pointer-events: none }
+.web-svg .node.sel circle { stroke: var(--ink); stroke-width: 3 }
+.web-svg .dim { opacity: .15 }
+.web-svg .empty-msg { fill: var(--muted); font-size: 16px }
+.web-info { position: sticky; top: 12px; gap: 8px }
+.web-legend { display: flex; flex-wrap: wrap; gap: 4px 14px }
+.legend-item { display: inline-flex; align-items: center; gap: 5px; font-size: 14px; color: var(--muted) }
+.legend-item .swatch { width: 11px; height: 11px; border-radius: 50%; background: var(--kc) }
+.web-opts { gap: 16px }
+
+/* standings */
+.meter { display: grid; gap: 4px }
+.meter-track { position: relative; height: 12px; border-radius: 999px; background: linear-gradient(90deg, var(--danger), var(--warn) 35%, var(--line) 50%, var(--accent) 65%, var(--good)); display: flex; justify-content: space-between; padding: 0 5px; align-items: center }
+.meter-track .tick { width: 2px; height: 6px; background: color-mix(in srgb, var(--surface) 70%, transparent); border-radius: 1px }
+.meter-track .tick.zero { height: 10px }
+.meter-mark { position: absolute; top: 50%; width: 18px; height: 18px; border-radius: 50%; transform: translate(-50%, -50%); background: var(--surface); border: 3px solid var(--ink); box-shadow: 0 1px 3px rgb(0 0 0 / .3) }
+.meter-label { display: flex; justify-content: space-between; gap: 8px; align-items: baseline }
+.meter-num { font-family: var(--f-mono); font-variant-numeric: tabular-nums; color: var(--muted) }
+.tone-bad .meter-label strong { color: var(--danger) } .tone-warn .meter-label strong { color: var(--warn) } .tone-good .meter-label strong, .tone-ok .meter-label strong { color: var(--good) }
+.meter.compact .meter-track { height: 8px } .meter.compact .meter-mark { width: 14px; height: 14px }
+.standing { gap: 10px }
+.standing summary { cursor: pointer; color: var(--accent) }
+.standing-form { display: grid; gap: 10px; margin-top: 10px }
+.slider-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap }
+.slider-row input[type="range"] { flex: 1 1 200px; accent-color: var(--accent) }
+.standing-log { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px }
+.standing-log li { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; gap: 8px; align-items: start }
+.delta { font-family: var(--f-mono); font-size: 13px; color: var(--muted) } .delta.up { color: var(--good) } .delta.down { color: var(--danger) }
+.standing-board { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px }
+.standing-board .card { gap: 8px; padding: 12px 14px }
+
+/* GM discussion */
+.talk { gap: 10px; border-style: dashed }
+.threads { display: grid; gap: 12px }
+.thread { display: grid; gap: 6px; border-left: 3px solid var(--brass); padding-left: 12px }
+.comment { display: grid; gap: 2px }
+.comment.reply { margin-left: 14px; padding-left: 10px; border-left: 1px solid var(--line) }
+.comment.resolved { opacity: .65 }
+.comment-head { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap }
+.comment-actions { margin-left: auto; display: flex; gap: 2px }
+.comment-body .rich { gap: 4px }
+.composer { display: grid; gap: 6px }
+.talk-list li { display: grid; grid-template-columns: auto auto minmax(0, 1fr) auto; gap: 4px 10px }
+.talk-snippet { color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+@media (max-width: 640px) { .talk-list li { grid-template-columns: minmax(0, 1fr) } .talk-snippet { white-space: normal } }
+
+/* sessions */
+.session-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px }
+.session-list .card { gap: 4px; padding: 14px 16px }
+.session-list a.elink { font-family: var(--f-display); font-size: 22px }
+
 @media print {
   body { background: #fff; color: #000; padding: 0 }
-  .top, .mainnav, .tabs, .notebook, .foot, .controls, .btnrow, .reroll, .panel-head p { display: none !important }
+  .top, .mainnav, .tabs, .notebook, .foot, .controls, .btnrow, .reroll, .panel-head p, .talk, .w-side { display: none !important }
   .layout { display: block }
   .card { border: none; padding: 0 }
   .stat { background: none; border: 1px solid #999 }

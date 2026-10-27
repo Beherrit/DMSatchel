@@ -1,5 +1,5 @@
 // The admin page: GM invite codes, world settings, activity, backups.
-import { el, toast, copyText, download, confirmButton } from './dom.js';
+import { el, toast, copyText, download, confirmButton, setKids } from './dom.js';
 import { api, isAdmin, session } from './api.js';
 import { loadWorld } from './world-ui.js';
 import { openSignIn } from './signin.js';
@@ -25,17 +25,17 @@ async function gmsSection() {
     el('div', { class: 'field' }, el('label', { for: 'a-gm-role' }, 'Role'), role), el('button', { class: 'btn primary', type: 'submit' }, 'Create invite code'));
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    try { const r = await api('gms', { method: 'POST', body: { name: name.value, role: role.value } }); out.replaceChildren(codeBox(r.gm.name, r.code)); name.value = ''; refresh(); }
-    catch (err) { out.replaceChildren(el('p', { class: 'error' }, err.message)); }
+    try { const r = await api('gms', { method: 'POST', body: { name: name.value, role: role.value } }); setKids(out, codeBox(r.gm.name, r.code)); name.value = ''; refresh(); }
+    catch (err) { setKids(out, el('p', { class: 'error' }, err.message)); }
   });
   async function patch(id, body, label) {
-    try { const r = await api('gms', { method: 'PATCH', body: { id, ...body } }); if (r.code) out.replaceChildren(codeBox(r.gm.name, r.code)); else toast(label); refresh(); }
+    try { const r = await api('gms', { method: 'PATCH', body: { id, ...body } }); if (r.code) setKids(out, codeBox(r.gm.name, r.code)); else toast(label); refresh(); }
     catch (err) { toast(err.message, 'bad'); }
   }
   async function refresh() {
     try {
       const r = await api('gms');
-      list.replaceChildren(el('div', { class: 'table-wrap' }, el('table', {},
+      setKids(list, el('div', { class: 'table-wrap' }, el('table', {},
         el('thead', {}, el('tr', {}, ['Name', 'Role', 'Last seen', 'Edits', ''].map((h) => el('th', {}, h)))),
         el('tbody', {}, r.gms.map((g) => el('tr', { class: g.disabled ? 'disabled' : '' },
           el('td', {}, g.name, g.disabled ? el('span', { class: 'tag' }, 'Locked out') : null), el('td', {}, g.role === 'admin' ? 'Admin' : 'GM'), el('td', {}, when(g.last_seen)), el('td', { class: 'num' }, g.edits),
@@ -44,7 +44,7 @@ async function gmsSection() {
             el('button', { class: 'btn small ghost', type: 'button', onclick: () => patch(g.id, { disabled: !g.disabled }, g.disabled ? `${g.name} can sign in again` : `${g.name} is locked out`) }, g.disabled ? 'Unlock' : 'Lock out'),
             el('button', { class: 'btn small ghost', type: 'button', onclick: () => patch(g.id, { role: g.role === 'admin' ? 'gm' : 'admin' }, 'Role changed') }, g.role === 'admin' ? 'Make GM' : 'Make admin'),
           ]))))))));
-    } catch (err) { list.replaceChildren(el('p', { class: 'error' }, err.message)); }
+    } catch (err) { setKids(list, el('p', { class: 'error' }, err.message)); }
   }
   box.append(el('p', { class: 'muted' }, 'Each GM gets a personal code. Their edits carry their name. “New code” replaces a lost code and signs them out everywhere; “Lock out” removes access without deleting their work.'), form, out, list);
   refresh();
@@ -109,12 +109,12 @@ function backupSection() {
 
 export async function showAdmin() {
   if (!isAdmin()) {
-    root.replaceChildren(el('div', { class: 'card empty-state' }, el('h3', {}, 'Admin only'),
+    setKids(root, el('div', { class: 'card empty-state' }, el('h3', {}, 'Admin only'),
       el('p', {}, session.gm ? 'Your account is a GM account. Ask the admin if you need admin access.' : 'Sign in with the admin code to manage GMs and the world.'),
       session.gm ? null : el('button', { class: 'btn primary', type: 'button', onclick: openSignIn }, 'Sign in')));
     return;
   }
-  root.replaceChildren(el('div', { class: 'panel-head' }, el('h2', {}, 'Admin'), el('p', {}, 'Invite GMs, name the world, watch what changes and keep backups.')));
+  setKids(root, el('div', { class: 'panel-head' }, el('h2', {}, 'Admin'), el('p', {}, 'Invite GMs, name the world, watch what changes and keep backups.')));
   const parts = await Promise.all([gmsSection(), settingsSection(), activitySection()]);
   root.append(el('div', { class: 'admin-grid' }, parts[0], parts[1], parts[2], backupSection()));
 }

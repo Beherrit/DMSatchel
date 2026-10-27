@@ -1,0 +1,266 @@
+// World maps: upload a map, pan and zoom it, and pin entries to it.
+// Routes: #world/maps · #world/map/<id> · #world/map/<id>/<pinId>
+import { el, toast, confirmButton, setKids } from './dom.js';
+import { api, isGm } from './api.js';
+import { world, getEntry, findByName, link, kindLabel, notice, nameList, whenTime } from './world-store.js';
+
+export const PIN_ICONS = { city: ['City', '■'], town: ['Town', '●'], port: ['Port', '◗'], dungeon: ['Dungeon', '▼'], temple: ['Temple', '✚'], camp: ['Camp', '▲'], danger: ['Danger', '✕'], poi: ['Point of interest', '◆'] };
+const imageUrl = (m) => `/api/maps?id=${encodeURIComponent(m.id)}&image=1&v=${m.version}`;
+
+export function pinsFor(entryId) {
+  const out = [];
+  for (const map of world.maps || []) for (const pin of map.pins || []) if (pin.entry_id === entryId) out.push({ map, pin });
+  return out;
+}
+
+// Shrink an uploaded image so it fits the server's size limit.
+async function shrink(file) {
+  const bitmap = await createImageBitmap(file);
+  let max = 4000, quality = 0.86, data = '', w = 0, h = 0;
+  for (let i = 0; i < 8; i++) {
+    const scale = Math.min(1, max / Math.max(bitmap.width, bitmap.height));
+    w = Math.round(bitmap.width * scale); h = Math.round(bitmap.height * scale);
+    const c = document.createElement('canvas'); c.width = w; c.height = h;
+    c.getContext('2d').drawImage(bitmap, 0, 0, w, h);
+    data = c.toDataURL('image/jpeg', quality);
+    if (data.length < 3_200_000) break;
+    if (quality > 0.65) quality -= 0.08; else max = Math.round(max * 0.8);
+  }
+  return { data, width: w, height: h };
+}
+
+function imageSize(url) {
+  return new Promise((resolve, reject) => { const i = new Image(); i.onload = () => resolve({ width: i.naturalWidth, height: i.naturalHeight }); i.onerror = () => reject(new Error('That link didn’t load as an image.')); i.src = url; });
+}
+
+function newMapForm() {
+  const status = el('p', { class: 'form-status', role: 'status' });
+  const file = el('input', { type: 'file', id: 'm-file', accept: 'image/*' });
+  const form = el('form', { class: 'card edit-form' },
+    el('h3', {}, 'Add a map'),
+    el('div', { class: 'edit-grid' },
+      el('div', { class: 'field' }, el('label', { for: 'm-name' }, 'Name'), el('input', { type: 'text', id: 'm-name', required: true, placeholder: 'e.g. The Sable Marches' })),
+      el('div', { class: 'field' }, el('label', { for: 'm-entry' }, 'Map of (optional)'), el('input', { type: 'text', id: 'm-entry', list: 'w-names', placeholder: 'A region or city entry' }))),
+    el('div', { class: 'edit-grid' },
+      el('div', { class: 'field' }, el('label', { for: 'm-file' }, 'Upload an image'), file),
+      el('div', { class: 'field' }, el('label', { for: 'm-url' }, 'Or paste an image link'), el('input', { type: 'text', id: 'm-url', placeholder: 'https://…' }))),
+    el('label', { class: 'check' }, el('input', { type: 'checkbox', id: 'm-secret' }), ' GM only (players can’t see this map)'),
+    nameList(), status, el('div', { class: 'btnrow' }, el('button', { class: 'btn primary', type: 'submit' }, 'Add map')));
+  form.addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const name = form.querySelector('#m-name').value.trim();
+    const url = form.querySelector('#m-url').value.trim();
+    const entryName = form.querySelector('#m-entry').value.trim();
+    const entry = entryName ? findByName(entryName) : null;
+    if (entryName && !entry) { status.textContent = `There’s no entry called “${entryName}”.`; status.className = 'form-status error'; return; }
+    try {
+      let image, width, height;
+      if (file.files[0]) { status.textContent = 'Preparing the image…'; ({ data: image, width, height } = await shrink(file.files[0])); }
+      else if (url) { ({ width, height } = await imageSize(url)); image = url; }
+      else throw new Error('Choose an image file or paste a link.');
+      status.textContent = 'Uploading…'; status.className = 'form-status';
+      const r = await api('maps', { method: 'POST', body: { map: { name, image, width, height, entry_id: entry?.id || null, secret: form.querySelector('#m-secret').checked } } });
+      world.maps = [...(world.maps || []), r.map];
+      location.hash = `world/map/${r.map.id}`;
+    } catch (err) { status.textContent = err.message; status.className = 'form-status error'; }
+  });
+  return form;
+}
+
+export function viewMaps() {
+  const maps = world.maps || [];
+  return el('div', { class: 'w-view' },
+    el('div', { class: 'panel-head' }, el('h2', {}, 'Maps'), el('p', {}, 'The world, its cities and dungeons. Pins link to entries; GM-only pins stay hidden from players.')),
+    maps.length ? el('ul', { class: 'map-grid' }, maps.map((m) => el('li', {}, el('a', { class: 'map-card', href: `#world/map/${m.id}` },
+      el('img', { src: imageUrl(m), alt: '', loading: 'lazy' }),
+      el('span', { class: 'map-card-name' }, m.name, m.secret ? el('span', { class: 'tag' }, 'GM only') : null),
+      el('span', { class: 'muted small' }, `${(m.pins || []).length} pins${m.entry_id && getEntry(m.entry_id) ? ` · ${getEntry(m.entry_id).name}` : ''}`)))))
+      : notice('No maps yet', isGm() ? 'Upload a world map, then drop pins for cities, dungeons and anything else.' : 'The GMs haven’t added any maps yet.'),
+    isGm() ? newMapForm() : null);
+}
+
+export async function viewMap(id, focusPin) {
+  let map;
+  try { map = (await api('maps', { query: { id } })).map; } catch (err) { return notice('Couldn’t open the map', err.message); }
+  let pins = map.pins || [];
+  let scale = 1, tx = 0, ty = 0, adding = false, openPin = null;
+
+  const viewport = el('div', { class: 'map-viewport', tabindex: '0', 'aria-label': `${map.name} map. Drag to pan, scroll or pinch to zoom.` });
+  const stage = el('div', { class: 'map-stage' });
+  const img = el('img', { src: imageUrl(map), alt: map.name, draggable: 'false' });
+  const layer = el('div', { class: 'pin-layer' });
+  const pop = el('div', { class: 'pin-pop', hidden: true });
+  stage.append(img, layer); viewport.append(stage, pop);
+  const list = el('ul', { class: 'pin-list' });
+  const status = el('p', { class: 'form-status', role: 'status' });
+  const filter = el('input', { type: 'search', placeholder: 'Find a pin…', 'aria-label': 'Find a pin' });
+
+  const apply = () => { stage.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`; layer.style.setProperty('--inv', String(1 / scale)); };
+  function fit() {
+    const vw = viewport.clientWidth, vh = viewport.clientHeight;
+    const w = map.width || img.naturalWidth || 1000, h = map.height || img.naturalHeight || 1000;
+    stage.style.width = `${w}px`; stage.style.height = `${h}px`;
+    scale = Math.min(vw / w, vh / h); tx = (vw - w * scale) / 2; ty = (vh - h * scale) / 2; apply();
+  }
+  function zoomAt(f, cx, cy) {
+    const ns = Math.min(8, Math.max(0.05, scale * f));
+    tx = cx - (cx - tx) * (ns / scale); ty = cy - (cy - ty) * (ns / scale); scale = ns; apply();
+  }
+  function centerOn(pin) {
+    const w = parseFloat(stage.style.width), h = parseFloat(stage.style.height);
+    scale = Math.max(scale, Math.min(viewport.clientWidth / w, viewport.clientHeight / h) * 2.5);
+    tx = viewport.clientWidth / 2 - pin.x * w * scale; ty = viewport.clientHeight / 2 - pin.y * h * scale; apply();
+  }
+
+  async function save(nextPins, msg) {
+    status.textContent = 'Saving…'; status.className = 'form-status';
+    try {
+      const r = await api('maps', { method: 'PUT', query: { id: map.id }, body: { map: { pins: nextPins, version: map.version } } });
+      map = r.map; pins = map.pins; status.textContent = msg || 'Saved.';
+      const i = (world.maps || []).findIndex((m) => m.id === map.id); if (i >= 0) world.maps[i] = { ...map }; else world.maps = [...(world.maps || []), map];
+      renderPins(); return true;
+    } catch (err) { status.textContent = err.message; status.className = 'form-status error'; return false; }
+  }
+
+  function pinForm(pin, isNew) {
+    const entry = pin.entry_id && getEntry(pin.entry_id);
+    const iconSel = el('select', { id: 'p-icon' }, Object.entries(PIN_ICONS).map(([k, [t, g]]) => el('option', { value: k }, `${g} ${t}`)));
+    iconSel.value = pin.icon || 'poi';
+    const form = el('form', { class: 'pin-form' },
+      el('div', { class: 'field' }, el('label', { for: 'p-entry' }, 'Entry'), el('input', { type: 'text', id: 'p-entry', list: 'w-names', value: entry?.name || '', placeholder: 'Link an entry (optional)' })),
+      el('div', { class: 'field' }, el('label', { for: 'p-label' }, 'Label'), el('input', { type: 'text', id: 'p-label', value: pin.label || '', placeholder: 'Shown on the map' })),
+      el('div', { class: 'field' }, el('label', { for: 'p-icon' }, 'Marker'), iconSel),
+      el('div', { class: 'field' }, el('label', { for: 'p-note' }, 'Note'), el('textarea', { id: 'p-note', rows: 2 }, pin.note || '')),
+      el('label', { class: 'check' }, el('input', { type: 'checkbox', id: 'p-secret', checked: pin.secret || null }), ' GM only'),
+      el('div', { class: 'btnrow' }, el('button', { class: 'btn primary small', type: 'submit' }, isNew ? 'Add pin' : 'Save pin'),
+        el('button', { class: 'btn ghost small', type: 'button', onclick: () => closePop() }, 'Cancel'),
+        isNew ? null : confirmButton('Delete', () => { save(pins.filter((p) => p.id !== pin.id), 'Pin deleted.'); closePop(); })));
+    form.addEventListener('submit', (ev) => {
+      ev.preventDefault();
+      const en = form.querySelector('#p-entry').value.trim();
+      const target = en ? findByName(en) : null;
+      if (en && !target) { toast(`There’s no entry called “${en}”.`, 'bad'); return; }
+      const next = { ...pin, entry_id: target?.id || null, label: form.querySelector('#p-label').value.trim() || target?.name || 'Pin', icon: iconSel.value, note: form.querySelector('#p-note').value, secret: form.querySelector('#p-secret').checked };
+      save(isNew ? [...pins, next] : pins.map((p) => (p.id === pin.id ? next : p)), isNew ? 'Pin added.' : 'Pin saved.');
+      closePop();
+    });
+    return form;
+  }
+
+  function placePop(pin) {
+    const r = viewport.getBoundingClientRect(), s = stage.getBoundingClientRect();
+    const x = s.left - r.left + pin.x * s.width, y = s.top - r.top + pin.y * s.height;
+    pop.style.left = `${Math.min(Math.max(8, x + 14), r.width - 300)}px`;
+    pop.style.top = `${Math.min(Math.max(8, y - 10), Math.max(8, r.height - pop.offsetHeight - 8))}px`;
+  }
+  function showPin(pin, edit) {
+    openPin = pin; pop.hidden = false;
+    const entry = pin.entry_id && getEntry(pin.entry_id);
+    if (edit) setKids(pop, pinForm(pin, !pins.includes(pin)));
+    else {
+      setKids(pop, 
+        el('div', { class: 'entry-head' }, el('strong', {}, pin.label || entry?.name || 'Pin'), el('button', { class: 'reroll', type: 'button', 'aria-label': 'Close', onclick: () => closePop() }, '✕')),
+        entry ? el('p', {}, link(entry), el('span', { class: 'kind-tag' }, kindLabel(entry.kind))) : null,
+        entry?.summary ? el('p', { class: 'muted small' }, entry.summary) : null,
+        pin.note ? el('p', { class: 'small' }, pin.note) : null,
+        pin.secret ? el('p', { class: 'tag' }, 'GM only') : null,
+        isGm() ? el('div', { class: 'btnrow' }, el('button', { class: 'btn small', type: 'button', onclick: () => showPin(pin, true) }, 'Edit pin'),
+          el('button', { class: 'btn small ghost', type: 'button', onclick: () => startMove(pin) }, 'Move')) : null);
+    }
+    placePop(pin);
+    for (const b of layer.children) b.classList.toggle('active', b.dataset.id === pin.id);
+  }
+  function closePop() { openPin = null; pop.hidden = true; for (const b of layer.children) b.classList.remove('active'); renderPins(); }
+
+  let moving = null;
+  function startMove(pin) { moving = pin; adding = false; closePop(); viewport.classList.add('placing'); status.textContent = `Click the map to move “${pin.label}”.`; status.className = 'form-status'; }
+
+  function renderPins() {
+    const q = filter.value.trim().toLowerCase();
+    setKids(layer, ...pins.map((p) => el('button', {
+      class: `pin pin-${p.icon || 'poi'}${p.secret ? ' secret' : ''}`, type: 'button', 'data-id': p.id, style: `left:${p.x * 100}%;top:${p.y * 100}%`,
+      title: p.label, 'aria-label': p.label, onclick: (ev) => { ev.stopPropagation(); showPin(p); },
+    }, el('span', { class: 'glyph', 'aria-hidden': 'true' }, PIN_ICONS[p.icon || 'poi'][1]), el('span', { class: 'pin-label' }, p.label))));
+    const shown = pins.filter((p) => !q || `${p.label} ${getEntry(p.entry_id)?.name || ''}`.toLowerCase().includes(q)).sort((a, b) => String(a.label).localeCompare(String(b.label)));
+    setKids(list, ...(shown.length ? shown.map((p) => el('li', {}, el('button', { class: 'linkish', type: 'button', onclick: () => { centerOn(p); showPin(p); } },
+      el('span', { class: `glyph pin-${p.icon || 'poi'}` }, PIN_ICONS[p.icon || 'poi'][1]), ' ', p.label), p.secret ? el('span', { class: 'tag' }, 'GM') : null))
+      : [el('li', { class: 'muted small' }, pins.length ? 'No pins match.' : 'No pins yet.')]));
+  }
+  filter.addEventListener('input', renderPins);
+
+  // Pan, zoom and place pins.
+  const pointers = new Map(); let last = null, pinchDist = 0, dragged = false;
+  viewport.addEventListener('pointerdown', (ev) => {
+    if (ev.target.closest('.pin, .pin-pop')) return;
+    viewport.setPointerCapture(ev.pointerId); pointers.set(ev.pointerId, ev); last = { x: ev.clientX, y: ev.clientY }; dragged = false;
+    if (pointers.size === 2) { const [a, b] = [...pointers.values()]; pinchDist = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY); }
+  });
+  viewport.addEventListener('pointermove', (ev) => {
+    if (!pointers.has(ev.pointerId)) return;
+    pointers.set(ev.pointerId, ev);
+    if (pointers.size === 2) {
+      const [a, b] = [...pointers.values()]; const dist = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+      const r = viewport.getBoundingClientRect();
+      if (pinchDist) zoomAt(dist / pinchDist, (a.clientX + b.clientX) / 2 - r.left, (a.clientY + b.clientY) / 2 - r.top);
+      pinchDist = dist; dragged = true; return;
+    }
+    const dx = ev.clientX - last.x, dy = ev.clientY - last.y;
+    if (Math.abs(dx) + Math.abs(dy) > 3) dragged = true;
+    tx += dx; ty += dy; last = { x: ev.clientX, y: ev.clientY }; apply();
+    if (openPin) placePop(openPin);
+  });
+  const up = (ev) => {
+    const wasDrag = dragged; pointers.delete(ev.pointerId); if (pointers.size < 2) pinchDist = 0;
+    if (wasDrag || ev.type === 'pointercancel' || ev.target.closest('.pin, .pin-pop')) return;
+    const s = stage.getBoundingClientRect();
+    const x = (ev.clientX - s.left) / s.width, y = (ev.clientY - s.top) / s.height;
+    if (x < 0 || x > 1 || y < 0 || y > 1) return;
+    if (moving) { const m = moving; moving = null; viewport.classList.remove('placing'); save(pins.map((p) => (p.id === m.id ? { ...p, x, y } : p)), 'Pin moved.'); return; }
+    if (adding) {
+      adding = false; viewport.classList.remove('placing'); addBtn.setAttribute('aria-pressed', 'false');
+      showPin({ id: `p${Date.now().toString(36)}${Math.floor(Math.random() * 1e4)}`, x, y, icon: 'poi', label: '', secret: false }, true);
+      return;
+    }
+    if (openPin) closePop();
+  };
+  viewport.addEventListener('pointerup', up); viewport.addEventListener('pointercancel', up);
+  viewport.addEventListener('wheel', (ev) => { ev.preventDefault(); const r = viewport.getBoundingClientRect(); zoomAt(ev.deltaY < 0 ? 1.15 : 1 / 1.15, ev.clientX - r.left, ev.clientY - r.top); if (openPin) placePop(openPin); }, { passive: false });
+  viewport.addEventListener('keydown', (ev) => {
+    const step = 60, c = [viewport.clientWidth / 2, viewport.clientHeight / 2];
+    if (ev.key === '+' || ev.key === '=') zoomAt(1.2, ...c); else if (ev.key === '-') zoomAt(1 / 1.2, ...c);
+    else if (ev.key === 'ArrowLeft') { tx += step; apply(); } else if (ev.key === 'ArrowRight') { tx -= step; apply(); }
+    else if (ev.key === 'ArrowUp') { ty += step; apply(); } else if (ev.key === 'ArrowDown') { ty -= step; apply(); }
+    else if (ev.key === 'Escape') { closePop(); adding = false; moving = null; viewport.classList.remove('placing'); } else return;
+    ev.preventDefault();
+  });
+
+  const addBtn = el('button', { class: 'btn primary small', type: 'button', 'aria-pressed': 'false', onclick: () => {
+    adding = !adding; moving = null; addBtn.setAttribute('aria-pressed', String(adding)); viewport.classList.toggle('placing', adding);
+    status.textContent = adding ? 'Click the map where the pin goes.' : ''; status.className = 'form-status';
+  } }, '+ Add pin');
+  const c = () => [viewport.clientWidth / 2, viewport.clientHeight / 2];
+  const toolbar = el('div', { class: 'map-tools' },
+    el('button', { class: 'btn small', type: 'button', 'aria-label': 'Zoom in', onclick: () => zoomAt(1.3, ...c()) }, '+'),
+    el('button', { class: 'btn small', type: 'button', 'aria-label': 'Zoom out', onclick: () => zoomAt(1 / 1.3, ...c()) }, '−'),
+    el('button', { class: 'btn small', type: 'button', onclick: fit }, 'Fit'),
+    el('button', { class: 'btn small', type: 'button', onclick: () => layer.classList.toggle('no-labels') }, 'Labels'),
+    isGm() ? addBtn : null);
+
+  const entry = map.entry_id && getEntry(map.entry_id);
+  const node = el('div', { class: 'w-view map-view' },
+    el('div', { class: 'panel-head row' }, el('div', {}, el('div', { class: 'eyebrow' }, 'Map', map.secret ? ' · GM only' : ''), el('h2', {}, map.name), entry ? el('p', {}, 'Map of ', link(entry)) : null),
+      isGm() ? el('div', { class: 'btnrow' }, confirmButton('Delete map', async () => {
+        try { await api('maps', { method: 'DELETE', query: { id: map.id } }); world.maps = (world.maps || []).filter((m) => m.id !== map.id); toast('Map deleted'); location.hash = 'world/maps'; }
+        catch (err) { toast(err.message, 'bad'); }
+      }, 'btn ghost small')) : null),
+    toolbar, viewport, status,
+    el('div', { class: 'map-side' }, el('h3', { class: 'section-title' }, 'Pins'), filter, list),
+    el('p', { class: 'muted small' }, `Last changed ${whenTime(map.updated_at)}${map.updated_by ? ` by ${map.updated_by}` : ''}. Drag to pan; scroll, pinch or use + and − to zoom.`),
+    nameList());
+
+  const ready = () => { fit(); renderPins(); const p = focusPin && pins.find((x) => x.id === focusPin); if (p) { centerOn(p); showPin(p); } };
+  if (img.complete && img.naturalWidth) requestAnimationFrame(ready); else img.addEventListener('load', ready, { once: true });
+  img.addEventListener('error', () => { status.textContent = 'The map image didn’t load. If it’s a link, the site hosting it may block embedding.'; status.className = 'form-status error'; });
+  new ResizeObserver(() => { if (img.naturalWidth) fit(); }).observe(viewport);
+  return node;
+}

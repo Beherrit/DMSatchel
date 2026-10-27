@@ -1,54 +1,19 @@
 // The shared world: browse, search, read and (for GMs) write entries.
 // Routes: #world · #world/k/<kind> · #world/e/<id> · #world/new/<kind> · #world/edit/<id> · #world/q/<search> · #world/bin
 
-import { $, el, cap, toast, confirmButton } from './dom.js';
+import { el, toast, confirmButton, setKids } from './dom.js';
 import { api, session, isGm, onSession } from './api.js';
-import { KINDS, KIND_ORDER, LINK_LABELS } from './world-schema.js';
+import { KINDS, KIND_ORDER, LINK_LABELS, STANDING_KINDS } from './world-schema.js';
 import { openSignIn } from './signin.js';
+import { world, worldEntries, loadWorld, byName, kindLabel, link, when, findByName, mentions, richText, notice, nameList } from './world-store.js';
+import { viewMaps, viewMap, pinsFor } from './world-maps.js';
+import { viewWeb } from './world-web.js';
+import { viewStandings, standingWidget } from './world-standings.js';
+import { viewTalk, talkWidget } from './world-talk.js';
 
-const world = { entries: new Map(), info: null, loaded: false, loading: null, error: null };
+export { loadWorld, worldEntries };
 let draft = null;
 let main, side;
-
-export const worldEntries = () => [...world.entries.values()];
-
-export async function loadWorld(force) {
-  if (world.loading && !force) return world.loading;
-  world.loading = (async () => {
-    try {
-      const r = await api('entries');
-      world.entries = new Map(r.entries.map((e) => [e.id, e]));
-      world.info = r.world; world.loaded = true; world.error = null;
-    } catch (e) { world.error = e; }
-    world.loading = null;
-  })();
-  return world.loading;
-}
-
-const byName = (a, b) => a.name.localeCompare(b.name);
-const kindLabel = (k) => KINDS[k]?.label || k;
-const link = (e, text) => el('a', { href: `#world/e/${e.id}`, class: `elink k-${e.kind}` }, text || e.name);
-const when = (iso) => (iso ? new Date(iso).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : '');
-function findByName(name) {
-  const n = name.trim().toLowerCase();
-  return worldEntries().find((e) => e.name.toLowerCase() === n);
-}
-
-// Body text with [[Entry Name]] links.
-function richText(text) {
-  const out = el('div', { class: 'rich' });
-  for (const para of String(text || '').split(/\n{2,}/)) {
-    const p = el('p');
-    String(para).split(/(\[\[[^\]]+\]\])/).forEach((part) => {
-      const m = part.match(/^\[\[([^\]|]+)(?:\|([^\]]+))?\]\]$/);
-      if (!m) { p.append(part); return; }
-      const target = findByName(m[1]);
-      p.append(target ? link(target, m[2] || m[1]) : el('span', { class: 'missing', title: 'No entry with this name yet' }, m[2] || m[1]));
-    });
-    out.append(p);
-  }
-  return out;
-}
 
 // ---- sidebar -----------------------------------------------------------------------------------
 
@@ -56,17 +21,20 @@ function renderSide() {
   const counts = {}; for (const e of world.entries.values()) counts[e.kind] = (counts[e.kind] || 0) + 1;
   const search = el('input', { type: 'search', id: 'w-search', placeholder: 'Search the world…', 'aria-label': 'Search the world' });
   search.addEventListener('keydown', (e) => { if (e.key === 'Enter' && search.value.trim()) location.hash = `world/q/${encodeURIComponent(search.value.trim())}`; });
-  side.replaceChildren(
+  setKids(side, 
     el('a', { href: '#world', class: 'w-home' }, world.info?.name || 'The World'),
     search,
+    el('nav', { class: 'w-kinds w-tools', 'aria-label': 'World views' },
+      el('a', { href: '#world/maps', 'data-view': 'maps' }, el('span', {}, 'Maps'), el('span', { class: 'count' }, (world.maps || []).length)),
+      el('a', { href: '#world/web', 'data-view': 'web' }, el('span', {}, 'Relationship web'), el('span', { class: 'count' }, '◎')),
+      el('a', { href: '#world/standings', 'data-view': 'standings' }, el('span', {}, 'Party standing'), el('span', { class: 'count' }, Object.keys(world.standings?.current || {}).length)),
+      isGm() ? el('a', { href: '#world/talk', 'data-view': 'talk' }, el('span', {}, 'GM discussions'), el('span', { class: 'count', id: 'w-talk-count' }, '')) : null),
     el('nav', { class: 'w-kinds', 'aria-label': 'Entry types' }, KIND_ORDER.map((k) => el('a', { href: `#world/k/${k}`, 'data-kind': k }, el('span', {}, KINDS[k].plural), el('span', { class: 'count' }, counts[k] || 0)))),
     isGm() ? el('div', { class: 'w-gm' }, el('a', { class: 'btn primary small', href: '#world/new/npc' }, '+ New entry'), el('a', { class: 'btn ghost small', href: '#world/bin' }, 'Bin')) : null,
   );
 }
 
 // ---- views -------------------------------------------------------------------------------------
-
-function notice(title, text, ...extra) { return el('div', { class: 'card empty-state' }, el('h3', {}, title), el('p', {}, text), ...extra); }
 
 function viewHome() {
   const all = worldEntries();
@@ -93,14 +61,25 @@ function entryCard(e) {
 function viewKind(kind) {
   if (!KINDS[kind]) return notice('Nothing here', 'That kind of entry doesn’t exist.');
   let list = worldEntries().filter((e) => e.kind === kind);
-  if (kind === 'event') list.sort((a, b) => (parseFloat(a.fields.sort) || 0) - (parseFloat(b.fields.sort) || 0) || byName(a, b)); else list.sort(byName);
+  if (kind === 'event') list.sort((a, b) => (parseFloat(a.fields.sort) || 0) - (parseFloat(b.fields.sort) || 0) || byName(a, b));
+  else if (kind === 'session') list.sort((a, b) => (parseFloat(b.fields.number) || 0) - (parseFloat(a.fields.number) || 0) || String(b.fields.played_on || b.created_at).localeCompare(String(a.fields.played_on || a.created_at)));
+  else list.sort(byName);
   return el('div', { class: 'w-view' },
     el('div', { class: 'panel-head row' }, el('div', {}, el('h2', {}, KINDS[kind].plural), el('p', {}, KINDS[kind].blurb)),
       isGm() ? el('a', { class: 'btn primary', href: `#world/new/${kind}` }, `New ${kindLabel(kind).toLowerCase()}`) : null),
-    list.length ? (kind === 'event'
+    list.length ? (kind === 'session' ? sessionList(list) : kind === 'event'
       ? el('ol', { class: 'timeline' }, list.map((e) => el('li', {}, el('span', { class: 'date' }, e.fields.date || e.fields.sort || '—'), el('div', {}, link(e), e.summary ? el('p', {}, e.summary) : null))))
       : el('ul', { class: 'entry-grid' }, list.map(entryCard)))
       : notice(`No ${KINDS[kind].plural.toLowerCase()} yet`, isGm() ? 'Add the first one.' : 'The GMs haven’t added any yet.'));
+}
+
+function sessionList(list) {
+  return el('ol', { class: 'session-list' }, list.map((e) => el('li', { class: 'card' },
+    el('div', { class: 'entry-head' }, el('span', { class: 'eyebrow' }, [e.fields.number && `Session ${e.fields.number}`, e.fields.played_on, e.fields.world_date].filter(Boolean).join(' · ') || 'Session'),
+      e.fields.gm ? el('span', { class: 'muted small' }, `GM ${e.fields.gm}`) : null),
+    link(e), e.summary ? el('p', {}, e.summary) : null,
+    e.fields.players ? el('p', { class: 'muted small' }, `Players: ${e.fields.players.replace(/\n+/g, ', ')}`) : null,
+    e.fields.xp ? el('p', { class: 'muted small' }, `XP: ${e.fields.xp}`) : null)));
 }
 
 function viewSearch(q) {
@@ -121,6 +100,9 @@ function viewEntry(id) {
   const children = all.filter((x) => x.parent_id === id).sort(byName);
   const out = (e.links || []).map((l) => ({ ...l, target: world.entries.get(l.id) })).filter((l) => l.target);
   const incoming = all.flatMap((x) => (x.links || []).filter((l) => l.id === id).map((l) => ({ ...l, from: x })));
+  const sessions = all.filter((x) => x.kind === 'session' && x.id !== id && (mentions(`${x.body}\n${x.summary}\n${Object.values(x.fields || {}).join('\n')}`).has(id) || (x.links || []).some((l) => l.id === id)))
+    .sort((a, b) => (parseFloat(b.fields.number) || 0) - (parseFloat(a.fields.number) || 0));
+  const pins = pinsFor(id);
   const fieldRows = KINDS[e.kind].fields.filter(([k]) => e.fields?.[k]).map(([k, label, type]) => [label, e.fields[k], type]);
 
   const history = el('div', { class: 'history', hidden: true });
@@ -131,9 +113,9 @@ function viewEntry(id) {
       isGm() ? el('div', { class: 'btnrow' }, el('a', { class: 'btn', href: `#world/edit/${e.id}` }, 'Edit'),
         el('button', { class: 'btn ghost', type: 'button', onclick: async () => {
           history.hidden = !history.hidden; if (history.hidden) return;
-          history.replaceChildren(el('p', { class: 'muted' }, 'Loading history…'));
-          try { const r = await api('activity', { query: { id } }); history.replaceChildren(el('h4', {}, 'History'), el('ul', { class: 'plain' }, r.activity.map((h) => el('li', {}, `${when(h.at)} · ${h.gm || 'Someone'} · ${h.action}`)))); }
-          catch (err) { history.replaceChildren(el('p', { class: 'error' }, err.message)); }
+          setKids(history, el('p', { class: 'muted' }, 'Loading history…'));
+          try { const r = await api('activity', { query: { id } }); setKids(history, el('h4', {}, 'History'), el('ul', { class: 'plain' }, r.activity.map((h) => el('li', {}, `${when(h.at)} · ${h.gm || 'Someone'} · ${h.action}`)))); }
+          catch (err) { setKids(history, el('p', { class: 'error' }, err.message)); }
         } }, 'History')) : null),
     e.summary ? el('p', { class: 'lede' }, e.summary) : null,
     fieldRows.length ? el('dl', { class: 'traits' }, fieldRows.flatMap(([l, v, type]) => [el('dt', {}, l), el('dd', {}, type === 'long' ? richText(v) : el('span', {}, v))])) : null,
@@ -143,24 +125,33 @@ function viewEntry(id) {
       el('ul', { class: 'links' },
         out.map((l) => el('li', { class: l.secret ? 'secret-link' : '' }, el('span', { class: 'rel' }, l.label), ' ', link(l.target), el('span', { class: 'kind-tag' }, kindLabel(l.target.kind)), l.secret ? el('span', { class: 'tag' }, 'GM only') : null)),
         incoming.map((l) => el('li', { class: l.secret ? 'secret-link' : '' }, link(l.from), ' ', el('span', { class: 'rel' }, `is ${l.label}`), ' this', el('span', { class: 'kind-tag' }, kindLabel(l.from.kind)))))) : null,
+    STANDING_KINDS.includes(e.kind) ? standingWidget(e) : null,
+    sessions.length ? el('section', {}, el('h3', { class: 'section-title' }, 'Appears in sessions'),
+      el('ul', { class: 'entry-list' }, sessions.map((x) => el('li', {}, link(x), el('span', { class: 'muted small' }, [x.fields.played_on, x.fields.gm && `GM ${x.fields.gm}`].filter(Boolean).join(' · ')))))) : null,
+    pins.length ? el('section', {}, el('h3', { class: 'section-title' }, 'On the map'),
+      el('ul', { class: 'entry-list' }, pins.map(({ map, pin }) => el('li', {}, el('a', { href: `#world/map/${map.id}/${pin.id}` }, map.name), el('span', { class: 'muted small' }, pin.label || ''))))) : null,
     children.length ? el('section', {}, el('h3', { class: 'section-title' }, `In ${e.name}`), el('ul', { class: 'entry-list' }, children.map((c) => el('li', {}, link(c), el('span', { class: 'kind-tag' }, kindLabel(c.kind)))))) : null,
     e.tags?.length ? el('div', { class: 'tags' }, e.tags.map((t) => el('a', { class: 'tagchip', href: `#world/q/${encodeURIComponent(`#${t}`)}` }, `#${t}`))) : null,
-    el('p', { class: 'muted small' }, `Created${e.created_by ? ` by ${e.created_by}` : ''} ${when(e.created_at)}${e.updated_by ? ` · last edited by ${e.updated_by} ${when(e.updated_at)}` : ''}`),
-    history);
+    el('p', { class: 'muted small' }, `Created${e.created_by ? ` by ${e.created_by}` : ''} ${when(e.created_at)}${e.updated_by ? ` · last edited by ${e.updated_by} ${when(e.updated_at)}` : ''} · `, el('a', { href: `#world/web/${e.id}` }, 'See connections in the web')),
+    history,
+    isGm() ? talkWidget(e) : null);
   return node;
 }
 
 // ---- editing -----------------------------------------------------------------------------------
-
-function nameList() {
-  return el('datalist', { id: 'w-names' }, worldEntries().sort(byName).map((e) => el('option', { value: e.name }, kindLabel(e.kind))));
-}
 
 function viewEdit(id, kindForNew) {
   if (!isGm()) return notice('GMs only', 'Sign in with your invite code to add or change entries.', el('button', { class: 'btn primary', type: 'button', onclick: () => openSignIn() }, 'GM sign in'));
   const existing = id ? world.entries.get(id) : null;
   if (id && !existing) return notice('Entry not found', 'It may have been deleted.');
   const e = existing ? structuredClone(existing) : { kind: KINDS[kindForNew] ? kindForNew : 'npc', name: '', summary: '', body: '', fields: {}, secret: '', tags: [], links: [], parent_id: null, ...(draft || {}) };
+  if (!existing && !draft && e.kind === 'session') {
+    const sessions = worldEntries().filter((x) => x.kind === 'session');
+    const next = Math.max(0, ...sessions.map((x) => parseInt(x.fields.number, 10) || 0)) + 1;
+    e.name = `Session ${next}`;
+    e.fields = { number: String(next), played_on: new Date().toISOString().slice(0, 10), gm: session.gm?.name || '' };
+    e.body = 'What happened:\n\nWho the party met (use [[Names]] so the entries link back to this session):\n';
+  }
   if (!existing) draft = null;
   e.fields = e.fields || {}; e.links = e.links || [];
 
@@ -176,7 +167,7 @@ function viewEdit(id, kindForNew) {
   kindSel.value = e.kind;
   function renderFields() {
     collectFields();
-    fieldsBox.replaceChildren(...KINDS[kindSel.value].fields.map(([k, label, type, opts]) => {
+    setKids(fieldsBox, ...KINDS[kindSel.value].fields.map(([k, label, type, opts]) => {
       const v = e.fields[k] || '';
       if (type === 'select') {
         const s = el('select', { id: `ff-${k}`, 'data-field': k }, el('option', { value: '' }, '—'), opts.map((o) => el('option', { value: o }, o)));
@@ -278,15 +269,15 @@ async function viewBin() {
 
 export async function showWorld(parts) {
   if (session.configured === false || session.configured === 'offline') {
-    side.replaceChildren();
-    main.replaceChildren(notice('The shared world isn’t connected yet',
+    setKids(side);
+    setKids(main, notice('The shared world isn’t connected yet',
       session.configured === 'offline'
         ? 'This copy of the app is running without its server, so the shared world is unavailable. Everything else works.'
         : 'The admin needs to connect the database: add Neon Postgres to the Vercel project and set ADMIN_CODE. See the README for the two steps.'));
     return;
   }
-  if (!world.loaded) { main.replaceChildren(el('p', { class: 'muted' }, 'Loading the world…')); await loadWorld(); }
-  if (world.error) { main.replaceChildren(notice('Couldn’t load the world', world.error.message, el('button', { class: 'btn', type: 'button', onclick: () => { loadWorld(true).then(() => showWorld(parts)); } }, 'Try again'))); return; }
+  if (!world.loaded) { setKids(main, el('p', { class: 'muted' }, 'Loading the world…')); await loadWorld(); }
+  if (world.error) { setKids(main, notice('Couldn’t load the world', world.error.message, el('button', { class: 'btn', type: 'button', onclick: () => { loadWorld(true).then(() => showWorld(parts)); } }, 'Try again'))); return; }
   renderSide();
   const [view, arg] = parts;
   let node;
@@ -296,9 +287,14 @@ export async function showWorld(parts) {
   else if (view === 'edit') node = viewEdit(arg);
   else if (view === 'q') node = viewSearch(decodeURIComponent(arg || ''));
   else if (view === 'bin') node = await viewBin();
+  else if (view === 'maps') node = viewMaps();
+  else if (view === 'map') node = await viewMap(arg, parts[2]);
+  else if (view === 'web') node = viewWeb(arg);
+  else if (view === 'standings') node = viewStandings();
+  else if (view === 'talk') node = await viewTalk();
   else node = viewHome();
-  main.replaceChildren(node);
-  for (const a of side.querySelectorAll('.w-kinds a')) a.classList.toggle('active', (view === 'k' && a.dataset.kind === arg) || (view === 'e' && world.entries.get(arg)?.kind === a.dataset.kind));
+  setKids(main, node);
+  for (const a of side.querySelectorAll('.w-kinds a')) a.classList.toggle('active', Boolean((view === 'k' && a.dataset.kind === arg) || (view === 'e' && world.entries.get(arg)?.kind === a.dataset.kind) || (a.dataset.view && (a.dataset.view === view || (a.dataset.view === 'maps' && view === 'map')))));
   window.scrollTo({ top: 0 });
 }
 

@@ -1,5 +1,5 @@
 // The GM sign-in dialog and the account button in the header.
-import { $, el, toast } from './dom.js';
+import { $, el, toast, setKids } from './dom.js';
 import { session, signIn, signOut, onSession } from './api.js';
 
 let dialog;
@@ -13,7 +13,7 @@ export function openSignIn() {
 
 function renderAccount() {
   const box = $('#account');
-  box.replaceChildren(session.gm
+  setKids(box, session.gm
     ? el('span', { class: 'who' }, el('span', { class: 'who-name' }, session.gm.name), el('span', { class: 'role' }, session.gm.role === 'admin' ? 'Admin' : 'GM'),
       el('button', { class: 'btn small ghost', type: 'button', onclick: async () => { await signOut(); toast('Signed out'); } }, 'Sign out'))
     : el('button', { class: 'btn small', type: 'button', onclick: openSignIn }, 'GM sign in'));

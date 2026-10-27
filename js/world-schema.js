@@ -45,6 +45,10 @@ export const KINDS = {
     label: 'Event', plural: 'History & Events', blurb: 'The timeline: wars, founding dates, campaign sessions.',
     fields: [['date', 'Date (in world)'], ['sort', 'Sort year (number)'], ['era', 'Era'], ['participants', 'Who was involved', 'long'], ['outcome', 'Outcome', 'long']],
   },
+  session: {
+    label: 'Session', plural: 'Session Log', blurb: 'What happened at the table, who ran it and who played.',
+    fields: [['number', 'Session number'], ['played_on', 'Played on (real date)'], ['world_date', 'In-world date'], ['gm', 'GM'], ['players', 'Players & characters', 'long'], ['xp', 'XP or milestone'], ['loot', 'Loot handed out', 'long'], ['next', 'Next time', 'long']],
+  },
   quest: {
     label: 'Quest', plural: 'Quests & Plots', blurb: 'Adventures, rumors and running plot threads.',
     fields: [['status', 'Status', 'select', ['Rumor', 'Available', 'Active', 'Completed', 'Failed', 'Abandoned']], ['patron', 'Patron'], ['gm', 'Run by (GM)'], ['reward', 'Reward'], ['stakes', 'What’s at stake', 'long'], ['outline', 'Outline', 'long']],
@@ -55,7 +59,12 @@ export const KINDS = {
   },
 };
 
-export const KIND_ORDER = ['region', 'settlement', 'location', 'faction', 'guild', 'clan', 'npc', 'character', 'deity', 'item', 'event', 'quest', 'lore'];
+export const KIND_ORDER = ['region', 'settlement', 'location', 'faction', 'guild', 'clan', 'npc', 'character', 'deity', 'item', 'event', 'session', 'quest', 'lore'];
+
+// Kinds the party can have a reputation with.
+export const STANDING_KINDS = ['faction', 'guild', 'clan', 'deity', 'settlement', 'npc'];
+export const STANDING_LEVELS = [[-5, 'Sworn enemies'], [-4, 'Hostile'], [-3, 'Hostile'], [-2, 'Unfriendly'], [-1, 'Wary'], [0, 'Neutral'], [1, 'Friendly'], [2, 'Friendly'], [3, 'Trusted'], [4, 'Allied'], [5, 'Champions']];
+export const standingLabel = (v) => (STANDING_LEVELS.find(([n]) => n === Math.max(-5, Math.min(5, Math.round(v)))) || [0, 'Neutral'])[1];
 
 export const LINK_LABELS = ['member of', 'leads', 'ally of', 'enemy of', 'rival of', 'serves', 'worships', 'located in', 'headquartered in', 'owns', 'created', 'related to', 'parent of', 'child of', 'married to', 'trades with', 'at war with', 'secretly works for', 'wants', 'guards'];
 

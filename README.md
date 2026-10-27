@@ -18,6 +18,17 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
   GM-only secrets players never see. Anything from the table tools or the Character Forge can be sent to the world
   with **Add to world**. Every change records who made it; if two GMs edit the same entry, the second save is
   stopped instead of overwriting the first.
+- **Maps**: upload a world, city or dungeon map (or link one) and drop pins for places, lairs and points of interest.
+  Pins link to entries, can be GM-only, and every entry lists the maps it's pinned on. Pan, zoom and pinch on phones.
+- **Relationship web**: a live graph of how factions, people and places connect, built from each entry's
+  connections. Filter by type, focus on one entry and its neighbors, drag things around.
+- **Session log**: each GM logs their sessions (number, date, GM, players, XP, loot, what happened). New sessions
+  number themselves, and every entry shows which sessions it appeared in.
+- **Party standing**: the party's reputation with every faction, guild, house, god, town or person, from sworn
+  enemies (−5) to champions (+5), with a dated history of what changed it and which session it happened in.
+- **GM discussions**: GMs talk on any entry ("I'm bringing her back in session 14") and resolve threads when
+  they're settled. An inbox lists every open thread. Players never see any of it.
+- **Search everything**: Ctrl+K (⌘K) or `/` opens one search box for tools, world entries, classes, species and feats.
 - **Admin**: invite GMs with personal codes, lock out or reissue codes, name the world, see recent activity, and
   download or import a full backup.
 - **Reference**: classes with features by level, species, backgrounds, feats and spell slot tables.

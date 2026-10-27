@@ -1,5 +1,5 @@
 // Rules reference: species, classes, backgrounds and feats from the 2024 rules (short paraphrases).
-import { el } from './dom.js';
+import { el, setKids } from './dom.js';
 import { SPECIES, CLASSES, BACKGROUNDS, ORIGIN_FEATS, GENERAL_FEATS, EPIC_BOONS, ABILITY_NAMES, FULL_SLOTS } from './rules2024.js';
 
 const TABS = [['classes', 'Classes'], ['species', 'Species'], ['backgrounds', 'Backgrounds'], ['feats', 'Feats'], ['slots', 'Spell slots']];
@@ -43,7 +43,7 @@ function slots() {
 export function showReference(tab = 'classes') {
   if (!TABS.some(([k]) => k === tab)) tab = 'classes';
   for (const b of root.querySelectorAll('.subtabs a')) b.setAttribute('aria-current', b.dataset.tab === tab ? 'page' : 'false');
-  body.replaceChildren(...{ classes, species, backgrounds, feats, slots }[tab]());
+  setKids(body, ...{ classes, species, backgrounds, feats, slots }[tab]());
   applyFilter();
 }
 function applyFilter() {

@@ -8,6 +8,7 @@ import { mountAdmin, showAdmin } from './admin-ui.js';
 import { initNotebook } from './notebook.js';
 import { initSignIn } from './signin.js';
 import { loadSession, onSession } from './api.js';
+import { initPalette, openPalette } from './palette.js';
 
 const mounted = new Set();
 const panels = {};
@@ -48,6 +49,9 @@ function route() {
 $('#toolnav').append(...TOOLS.map((t) => el('a', { href: `#tools/${t.id}`, 'data-tool': t.id }, t.label)));
 initNotebook();
 initSignIn();
+initPalette();
+$('#search-btn').addEventListener('click', openPalette);
+if (/Mac|iPhone|iPad/.test(navigator.platform)) $('#search-btn kbd').textContent = '⌘K';
 addEventListener('hashchange', route);
 onSession(() => { if (location.hash.startsWith('#admin')) showAdmin(); });
 route();

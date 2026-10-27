@@ -1,6 +1,6 @@
 // The character generator page: options, the rules sheet, and the backstory with per-section rerolls.
 
-import { $, el, cap, copyText, download, toast, fresh } from './dom.js';
+import { $, el, cap, copyText, download, toast, fresh, setKids } from './dom.js';
 import { randomSeed } from './rng.js';
 import { generateCharacter, characterText, STORY_SECTIONS, abilityMod, fmtMod } from './character.js';
 import { SPECIES, CLASSES, BACKGROUNDS, ABILITIES, ABILITY_NAMES, ALIGNMENTS } from './rules2024.js';
@@ -82,7 +82,7 @@ function render(isNew) {
       el('div', { class: 'story-head' }, el('h4', {}, t), el('button', { class: 'reroll', type: 'button', title: `Reroll ${t.toLowerCase()}`, 'aria-label': `Reroll ${t}`, onclick: () => bump(k) }, '↻')),
       el('ul', {}, (ch.story[k] || []).map((x) => el('li', {}, x))))));
 
-  sheet.replaceChildren(
+  setKids(sheet, 
     el('header', { class: 'sheet-head' },
       el('div', {}, el('div', { class: 'eyebrow' }, `${ch.background} · ${ch.alignment} · ${ch.pronouns}`),
         el('h3', { class: 'card-title' }, ch.name, ' ', el('button', { class: 'reroll', type: 'button', 'aria-label': 'New name', title: 'New name', onclick: () => bump('name') }, '↻')),
