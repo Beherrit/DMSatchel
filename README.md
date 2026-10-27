@@ -18,8 +18,22 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
   GM-only secrets players never see. Anything from the table tools or the Character Forge can be sent to the world
   with **Add to world**. Every change records who made it; if two GMs edit the same entry, the second save is
   stopped instead of overwriting the first.
+- **Places that work like hubs**: regions hold areas and towns, towns hold taverns, shops and dungeons. Every place
+  has tabs for its **People** (roll one NPC or populate a whole town with residents suited to it, keep the ones you
+  like, move existing NPCs in or out), its **Quest board** (a corkboard of jobs: roll or write quests and move them
+  from Rumor to Active to Completed in one click), **Places** inside it (random towns, areas, taverns and shops),
+  **Powers** (guilds, factions and families based there) and **Maps**.
+- **Atlas**: the whole world as a tree of places with people and open jobs counted on every row, and quick-add buttons.
+- **Build console** (Admin → Build, open to every GM): add quests, key NPCs, NPCs, factions, guilds, houses,
+  regions, areas, towns, locations, deities, items, events and lore from one form. "Random" fills it all in, the
+  place you pick is remembered for the next one, and places can be pinned on a map straight after saving.
+  **Key NPCs** are starred on the world's front page and listed first in their town.
+- **Map pins manager** (Admin → Map pins): every pin on every map in one table, editable in place, plus a list of
+  places not yet on any map.
 - **Maps**: upload a world, city or dungeon map (or link one) and drop pins for places, lairs and points of interest.
-  Pins link to entries, can be GM-only, and every entry lists the maps it's pinned on. Pan, zoom and pinch on phones.
+  Click a pin to open a side panel for that place with its people, quest board and sub-places, and roll NPCs or quests
+  right there. A new pin can create its town or area in the same step. Pins of places that have their own map open
+  that map, so you can drill from the world to a region to a city. Pan, zoom and pinch on phones.
 - **Relationship web**: a live graph of how factions, people and places connect, built from each entry's
   connections. Filter by type, focus on one entry and its neighbors, drag things around.
 - **Session log**: each GM logs their sessions (number, date, GM, players, XP, loot, what happened). New sessions

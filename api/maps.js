@@ -21,7 +21,7 @@ function cleanPins(pins) {
   return (Array.isArray(pins) ? pins : []).slice(0, 500).map((p) => ({
     id: clip(p.id || newId(), 40), x: Math.min(1, Math.max(0, Number(p.x) || 0)), y: Math.min(1, Math.max(0, Number(p.y) || 0)),
     label: clip(p.label, 120), entry_id: p.entry_id ? clip(p.entry_id, 40) : null, note: clip(p.note, 1000),
-    icon: ['city', 'town', 'dungeon', 'poi', 'danger', 'camp', 'port', 'temple'].includes(p.icon) ? p.icon : 'poi', secret: Boolean(p.secret),
+    icon: ['region', 'area', 'city', 'town', 'dungeon', 'poi', 'danger', 'camp', 'port', 'temple'].includes(p.icon) ? p.icon : 'poi', secret: Boolean(p.secret),
   }));
 }
 

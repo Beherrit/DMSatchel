@@ -1,7 +1,9 @@
 // The admin page: GM invite codes, world settings, activity, backups.
 import { el, toast, copyText, download, confirmButton, setKids } from './dom.js';
-import { api, isAdmin, session } from './api.js';
+import { api, isAdmin, isGm, session } from './api.js';
 import { loadWorld } from './world-ui.js';
+import { world } from './world-store.js';
+import { buildSection, pinsSection } from './admin-build.js';
 import { openSignIn } from './signin.js';
 import { KINDS } from './world-schema.js';
 
@@ -107,16 +109,31 @@ function backupSection() {
       el('label', { class: 'btn', for: 'a-import' }, 'Import backup…'), file), status);
 }
 
-export async function showAdmin() {
-  if (!isAdmin()) {
-    setKids(root, el('div', { class: 'card empty-state' }, el('h3', {}, 'Admin only'),
-      el('p', {}, session.gm ? 'Your account is a GM account. Ask the admin if you need admin access.' : 'Sign in with the admin code to manage GMs and the world.'),
-      session.gm ? null : el('button', { class: 'btn primary', type: 'button', onclick: openSignIn }, 'Sign in')));
+// Build and Pins are open to every GM; the rest is admin only.
+const ADMIN_TABS = [['build', 'Build', false], ['pins', 'Map pins', false], ['gms', 'Game Masters', true], ['world', 'World settings', true], ['activity', 'Activity', true], ['backup', 'Backup', true]];
+
+export async function showAdmin(sub) {
+  if (!isGm()) {
+    setKids(root, el('div', { class: 'card empty-state' }, el('h3', {}, 'GMs only'),
+      el('p', {}, 'Sign in with your invite code (or the admin code) to build the world and manage it.'),
+      el('button', { class: 'btn primary', type: 'button', onclick: openSignIn }, 'GM sign in')));
     return;
   }
-  setKids(root, el('div', { class: 'panel-head' }, el('h2', {}, 'Admin'), el('p', {}, 'Invite GMs, name the world, watch what changes and keep backups.')));
-  const parts = await Promise.all([gmsSection(), settingsSection(), activitySection()]);
-  root.append(el('div', { class: 'admin-grid' }, parts[0], parts[1], parts[2], backupSection()));
+  const tabs = ADMIN_TABS.filter(([, , adminOnly]) => !adminOnly || isAdmin());
+  const tab = tabs.some(([k]) => k === sub) ? sub : 'build';
+  setKids(root, el('div', { class: 'panel-head' }, el('h2', {}, isAdmin() ? 'Admin' : 'Build'),
+    el('p', {}, isAdmin() ? 'Build the world, manage map pins, invite GMs, name the world, watch what changes and keep backups.' : 'Add quests, factions, key NPCs, places and map pins.')),
+    el('nav', { class: 'subtabs', 'aria-label': 'Admin sections' }, tabs.map(([k, t]) => el('a', { href: `#admin/${k}`, 'data-tab': k, 'aria-current': k === tab ? 'page' : 'false' }, t))),
+    el('p', { class: 'muted' }, 'Loading…'));
+  if ((tab === 'build' || tab === 'pins') && !world.loaded) await loadWorld();
+  let body;
+  if (tab === 'build') body = buildSection();
+  else if (tab === 'pins') body = pinsSection();
+  else if (tab === 'gms') body = await gmsSection();
+  else if (tab === 'world') body = await settingsSection();
+  else if (tab === 'activity') body = await activitySection();
+  else body = backupSection();
+  root.lastChild.replaceWith(body);
 }
 
 export function mountAdmin(r) { root = r; }

@@ -3,17 +3,18 @@
 
 import { el, toast, confirmButton, setKids } from './dom.js';
 import { api, session, isGm, onSession } from './api.js';
-import { KINDS, KIND_ORDER, LINK_LABELS, STANDING_KINDS } from './world-schema.js';
+import { KINDS, KIND_ORDER, LINK_LABELS, STANDING_KINDS, PLACE_KINDS } from './world-schema.js';
 import { openSignIn } from './signin.js';
-import { world, worldEntries, loadWorld, byName, kindLabel, link, when, findByName, mentions, richText, notice, nameList } from './world-store.js';
+import { world, worldEntries, getEntry, loadWorld, byName, kindLabel, link, when, findByName, mentions, richText, notice, nameList } from './world-store.js';
 import { viewMaps, viewMap, pinsFor } from './world-maps.js';
 import { viewWeb } from './world-web.js';
 import { viewStandings, standingWidget } from './world-standings.js';
 import { viewTalk, talkWidget } from './world-talk.js';
+import { placeHub, viewAtlas, placeCounts } from './world-place.js';
 
 export { loadWorld, worldEntries };
 let draft = null;
-let main, side;
+let main, side, lastParts = [];
 
 // ---- sidebar -----------------------------------------------------------------------------------
 
@@ -25,6 +26,7 @@ function renderSide() {
     el('a', { href: '#world', class: 'w-home' }, world.info?.name || 'The World'),
     search,
     el('nav', { class: 'w-kinds w-tools', 'aria-label': 'World views' },
+      el('a', { href: '#world/atlas', 'data-view': 'atlas' }, el('span', {}, 'Atlas'), el('span', { class: 'count' }, worldEntries().filter((e) => PLACE_KINDS.includes(e.kind)).length)),
       el('a', { href: '#world/maps', 'data-view': 'maps' }, el('span', {}, 'Maps'), el('span', { class: 'count' }, (world.maps || []).length)),
       el('a', { href: '#world/web', 'data-view': 'web' }, el('span', {}, 'Relationship web'), el('span', { class: 'count' }, '◎')),
       el('a', { href: '#world/standings', 'data-view': 'standings' }, el('span', {}, 'Party standing'), el('span', { class: 'count' }, Object.keys(world.standings?.current || {}).length)),
@@ -40,6 +42,7 @@ function viewHome() {
   const all = worldEntries();
   const recent = [...all].sort((a, b) => String(b.updated_at).localeCompare(String(a.updated_at))).slice(0, 12);
   const info = world.info || {};
+  const keyNpcs = all.filter((e) => e.kind === 'npc' && (e.tags || []).includes('key')).sort(byName);
   return el('div', { class: 'w-view' },
     el('div', { class: 'panel-head' }, el('h2', {}, info.name || 'The World'), info.tagline ? el('p', {}, info.tagline) : null),
     info.about ? el('div', { class: 'card' }, richText(info.about)) : (isGm() ? el('p', { class: 'muted' }, 'The admin can name the world and write an introduction in the Admin page.') : null),
@@ -49,6 +52,9 @@ function viewHome() {
       const n = all.filter((e) => e.kind === k).length;
       return el('a', { class: 'kind-card', href: `#world/k/${k}` }, el('strong', {}, KINDS[k].plural), el('span', { class: 'count' }, n), el('small', {}, KINDS[k].blurb));
     })),
+    keyNpcs.length ? el('section', {}, el('h3', { class: 'section-title' }, 'Key NPCs'),
+      el('ul', { class: 'people-grid' }, keyNpcs.map((e) => el('li', { class: 'person card key' }, el('div', { class: 'person-head' }, el('span', { class: 'key-star', 'aria-hidden': 'true' }, '★'), link(e)),
+        el('span', { class: 'muted small' }, [e.fields?.role, getEntry(e.parent_id)?.name].filter(Boolean).join(' · ')), e.summary ? el('p', { class: 'small' }, e.summary) : null)))) : null,
     recent.length ? el('section', {}, el('h3', { class: 'section-title' }, 'Recently changed'),
       el('ul', { class: 'entry-list' }, recent.map((e) => el('li', {}, link(e), el('span', { class: 'kind-tag' }, kindLabel(e.kind)), el('span', { class: 'muted small' }, `${e.updated_by ? `${e.updated_by}, ` : ''}${when(e.updated_at)}`))))) : null);
 }
@@ -91,7 +97,7 @@ function viewSearch(q) {
     hits.length ? el('ul', { class: 'entry-grid' }, hits.map((e) => { const c = entryCard(e); c.prepend(el('span', { class: 'kind-tag' }, kindLabel(e.kind))); return c; })) : notice('No matches', 'Try a shorter word, or a name.'));
 }
 
-function viewEntry(id) {
+function viewEntry(id, tab) {
   const e = world.entries.get(id);
   if (!e) return notice('Entry not found', 'It may have been deleted, or the link is wrong.');
   const all = worldEntries();
@@ -106,17 +112,11 @@ function viewEntry(id) {
   const fieldRows = KINDS[e.kind].fields.filter(([k]) => e.fields?.[k]).map(([k, label, type]) => [label, e.fields[k], type]);
 
   const history = el('div', { class: 'history', hidden: true });
-  const node = el('article', { class: 'w-view entry-view' },
-    crumbs.length ? el('nav', { class: 'crumbs', 'aria-label': 'Located in' }, crumbs.flatMap((c, i) => [i ? ' › ' : '', link(c)])) : null,
-    el('div', { class: 'panel-head row' },
-      el('div', {}, el('div', { class: 'eyebrow' }, kindLabel(e.kind), e.fields?.type ? ` · ${e.fields.type}` : ''), el('h2', {}, e.name)),
-      isGm() ? el('div', { class: 'btnrow' }, el('a', { class: 'btn', href: `#world/edit/${e.id}` }, 'Edit'),
-        el('button', { class: 'btn ghost', type: 'button', onclick: async () => {
-          history.hidden = !history.hidden; if (history.hidden) return;
-          setKids(history, el('p', { class: 'muted' }, 'Loading history…'));
-          try { const r = await api('activity', { query: { id } }); setKids(history, el('h4', {}, 'History'), el('ul', { class: 'plain' }, r.activity.map((h) => el('li', {}, `${when(h.at)} · ${h.gm || 'Someone'} · ${h.action}`)))); }
-          catch (err) { setKids(history, el('p', { class: 'error' }, err.message)); }
-        } }, 'History')) : null),
+  const isPlace = PLACE_KINDS.includes(e.kind);
+  // Places show people, quests, sub-places and organizations in their own tabs, so the overview lists only the rest.
+  const shownElsewhere = isPlace ? ['npc', 'quest', 'faction', 'guild', 'clan', ...PLACE_KINDS] : [];
+  const otherChildren = children.filter((c) => !shownElsewhere.includes(c.kind));
+  const overview = () => el('div', { class: 'overview' },
     e.summary ? el('p', { class: 'lede' }, e.summary) : null,
     fieldRows.length ? el('dl', { class: 'traits' }, fieldRows.flatMap(([l, v, type]) => [el('dt', {}, l), el('dd', {}, type === 'long' ? richText(v) : el('span', {}, v))])) : null,
     e.body ? el('section', {}, richText(e.body)) : null,
@@ -128,14 +128,34 @@ function viewEntry(id) {
     STANDING_KINDS.includes(e.kind) ? standingWidget(e) : null,
     sessions.length ? el('section', {}, el('h3', { class: 'section-title' }, 'Appears in sessions'),
       el('ul', { class: 'entry-list' }, sessions.map((x) => el('li', {}, link(x), el('span', { class: 'muted small' }, [x.fields.played_on, x.fields.gm && `GM ${x.fields.gm}`].filter(Boolean).join(' · ')))))) : null,
-    pins.length ? el('section', {}, el('h3', { class: 'section-title' }, 'On the map'),
+    !isPlace && pins.length ? el('section', {}, el('h3', { class: 'section-title' }, 'On the map'),
       el('ul', { class: 'entry-list' }, pins.map(({ map, pin }) => el('li', {}, el('a', { href: `#world/map/${map.id}/${pin.id}` }, map.name), el('span', { class: 'muted small' }, pin.label || ''))))) : null,
-    children.length ? el('section', {}, el('h3', { class: 'section-title' }, `In ${e.name}`), el('ul', { class: 'entry-list' }, children.map((c) => el('li', {}, link(c), el('span', { class: 'kind-tag' }, kindLabel(c.kind)))))) : null,
+    otherChildren.length ? el('section', {}, el('h3', { class: 'section-title' }, `In ${e.name}`), el('ul', { class: 'entry-list' }, otherChildren.map((c) => el('li', {}, link(c), el('span', { class: 'kind-tag' }, kindLabel(c.kind)))))) : null,
     e.tags?.length ? el('div', { class: 'tags' }, e.tags.map((t) => el('a', { class: 'tagchip', href: `#world/q/${encodeURIComponent(`#${t}`)}` }, `#${t}`))) : null,
     el('p', { class: 'muted small' }, `Created${e.created_by ? ` by ${e.created_by}` : ''} ${when(e.created_at)}${e.updated_by ? ` · last edited by ${e.updated_by} ${when(e.updated_at)}` : ''} · `, el('a', { href: `#world/web/${e.id}` }, 'See connections in the web')),
     history,
     isGm() ? talkWidget(e) : null);
+  const node = el('article', { class: 'w-view entry-view' },
+    crumbs.length ? el('nav', { class: 'crumbs', 'aria-label': 'Located in' }, crumbs.flatMap((c, i) => [i ? ' › ' : '', link(c)])) : null,
+    el('div', { class: 'panel-head row' },
+      el('div', {}, el('div', { class: 'eyebrow' }, kindLabel(e.kind), e.fields?.type ? ` · ${e.fields.type}` : ''), el('h2', {}, e.name)),
+      isGm() ? el('div', { class: 'btnrow' }, el('a', { class: 'btn', href: `#world/edit/${e.id}` }, 'Edit'),
+        el('button', { class: 'btn ghost', type: 'button', onclick: async () => {
+          history.hidden = !history.hidden; if (history.hidden) return;
+          setKids(history, el('p', { class: 'muted' }, 'Loading history…'));
+          try { const r = await api('activity', { query: { id } }); setKids(history, el('h4', {}, 'History'), el('ul', { class: 'plain' }, r.activity.map((h) => el('li', {}, `${when(h.at)} · ${h.gm || 'Someone'} · ${h.action}`)))); }
+          catch (err) { setKids(history, el('p', { class: 'error' }, err.message)); }
+        } }, 'History')) : null),
+    isPlace ? placeSummary(e) : null,
+    isPlace ? placeHub(e, tab, overview, rerenderWorld) : overview());
   return node;
+}
+
+// A line of counts under a place's title.
+function placeSummary(e) {
+  const c = placeCounts(e);
+  const bits = [[c.people, 'people', 'people'], [c.openQuests, 'open jobs', 'quests'], [c.places, 'places', 'places'], [c.powers, 'factions & guilds', 'powers']].filter(([n]) => n);
+  return bits.length ? el('p', { class: 'place-summary muted' }, bits.flatMap(([n, t, tab], i) => [i ? ' · ' : '', el('a', { href: `#world/e/${e.id}/${tab}` }, `${n} ${t}`)])) : null;
 }
 
 // ---- editing -----------------------------------------------------------------------------------
@@ -267,7 +287,11 @@ async function viewBin() {
 
 // ---- routing -----------------------------------------------------------------------------------
 
-export async function showWorld(parts) {
+// Redraw the current world view in place (after a quick save), keeping the scroll position.
+export function rerenderWorld() { showWorld(lastParts, { keepScroll: true }); }
+
+export async function showWorld(parts, { keepScroll = false } = {}) {
+  lastParts = parts;
   if (session.configured === false || session.configured === 'offline') {
     setKids(side);
     setKids(main, notice('The shared world isn’t connected yet',
@@ -282,20 +306,22 @@ export async function showWorld(parts) {
   const [view, arg] = parts;
   let node;
   if (view === 'k') node = viewKind(arg);
-  else if (view === 'e') node = viewEntry(arg);
+  else if (view === 'e') node = viewEntry(arg, parts[2]);
   else if (view === 'new') node = viewEdit(null, arg);
   else if (view === 'edit') node = viewEdit(arg);
   else if (view === 'q') node = viewSearch(decodeURIComponent(arg || ''));
   else if (view === 'bin') node = await viewBin();
+  else if (view === 'atlas') node = viewAtlas();
   else if (view === 'maps') node = viewMaps();
   else if (view === 'map') node = await viewMap(arg, parts[2]);
   else if (view === 'web') node = viewWeb(arg);
   else if (view === 'standings') node = viewStandings();
   else if (view === 'talk') node = await viewTalk();
   else node = viewHome();
+  const y = window.scrollY;
   setKids(main, node);
   for (const a of side.querySelectorAll('.w-kinds a')) a.classList.toggle('active', Boolean((view === 'k' && a.dataset.kind === arg) || (view === 'e' && world.entries.get(arg)?.kind === a.dataset.kind) || (a.dataset.view && (a.dataset.view === view || (a.dataset.view === 'maps' && view === 'map')))));
-  window.scrollTo({ top: 0 });
+  window.scrollTo({ top: keepScroll ? y : 0 });
 }
 
 export function mountWorld(root) {
@@ -308,5 +334,6 @@ export function mountWorld(root) {
     draft = { ...d, fields: { ...(d.fields || {}) } };
     location.hash = `world/new/${d.kind}`;
   });
+  window.addEventListener('world:rerender', () => rerenderWorld());
   onSession(() => { world.loaded = false; if (location.hash.startsWith('#world')) showWorld(location.hash.slice(1).split('/').slice(1)); });
 }

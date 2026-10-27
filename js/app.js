@@ -36,7 +36,7 @@ function show(section, sub) {
   } else if (section === 'characters') panel('characters', mountCharacters).hidden = false;
   else if (section === 'world') { panel('world', mountWorld).hidden = false; showWorld(sub ? sub.split('/') : []); }
   else if (section === 'reference') { panel('reference', mountReference).hidden = false; showReference(sub); }
-  else if (section === 'admin') { panel('admin', mountAdmin).hidden = false; showAdmin(); }
+  else if (section === 'admin') { panel('admin', mountAdmin).hidden = false; showAdmin(sub); }
 }
 
 function route() {
@@ -53,6 +53,9 @@ initPalette();
 $('#search-btn').addEventListener('click', openPalette);
 if (/Mac|iPhone|iPad/.test(navigator.platform)) $('#search-btn kbd').textContent = '⌘K';
 addEventListener('hashchange', route);
-onSession(() => { if (location.hash.startsWith('#admin')) showAdmin(); });
+onSession((s) => {
+  if (location.hash.startsWith('#admin')) showAdmin(location.hash.split('/')[1]);
+  $('.mainnav [data-section="admin"]').textContent = s.gm?.role === 'admin' ? 'Admin' : 'Build';
+});
 route();
 loadSession();

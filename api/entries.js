@@ -1,7 +1,8 @@
 // The world's entries.
 // GET               every entry (GM secrets only for signed-in GMs)
 // GET ?id=          one entry
-// POST {entry}      create (GM) · POST {entries:[...], mode:'import'} bulk import (admin)
+// POST {entry}      create (GM) · POST {entries:[...], mode:'batch'} up to 25 at once (GM)
+//                   · POST {entries:[...], mode:'import'} bulk import from a backup (admin)
 // PUT ?id= {entry}  update (GM); send the version you loaded, or get 409 if someone saved first
 // DELETE ?id=       move to the bin (GM) · DELETE ?id=&restore=1 brings it back
 import { route, send, fail, sql, newId, requireGm, requireAdmin } from './_lib/core.js';
@@ -82,6 +83,21 @@ export default route({
         n++;
       }
       return send(res, 200, { imported: n });
+    }
+    if (req.body.mode === 'batch') {
+      // Several new entries at once, e.g. a town's worth of NPCs. Each one is checked and logged like a single create.
+      const list = Array.isArray(req.body.entries) ? req.body.entries.slice(0, 25) : [];
+      const made = [];
+      for (const raw of list) {
+        const e = clean(raw);
+        if (e.error) return fail(res, 400, `${raw?.name || 'An entry'}: ${e.error}`);
+        const id = newId();
+        await sql`INSERT INTO entries (id, kind, name, summary, body, fields, secret, tags, links, parent_id, created_by, updated_by)
+          VALUES (${id}, ${e.kind}, ${e.name}, ${e.summary}, ${e.body}, ${JSON.stringify(e.fields)}, ${e.secret}, ${e.tags}, ${JSON.stringify(e.links)}, ${e.parent_id}, ${req.gm.id}, ${req.gm.id})`;
+        await record(id, req.gm.id, 'create', e);
+        made.push(shape(await loadOne(id), true));
+      }
+      return send(res, 201, { entries: made });
     }
     const e = clean(req.body.entry);
     if (e.error) return fail(res, 400, e.error);

@@ -5,9 +5,13 @@ export const KINDS = {
     label: 'Region', plural: 'Regions', blurb: 'Kingdoms, provinces, wilds and seas.',
     fields: [['ruler', 'Ruled by'], ['climate', 'Climate & terrain'], ['population', 'Peoples'], ['resources', 'Known for', 'long'], ['dangers', 'Dangers', 'long']],
   },
+  area: {
+    label: 'Area', plural: 'Areas & Districts', blurb: 'Forests, valleys, coasts, city districts and wild lands inside a region.',
+    fields: [['type', 'Type', 'select', ['Forest', 'Hills', 'Mountains', 'Valley', 'Coast', 'Island', 'Swamp', 'Desert', 'Plains', 'Underdark', 'City district', 'Borderland', 'Other']], ['terrain', 'Terrain & climate'], ['controlled_by', 'Controlled by'], ['features', 'Notable features', 'long'], ['dangers', 'Dangers & encounters', 'long'], ['resources', 'Resources', 'long']],
+  },
   settlement: {
     label: 'Settlement', plural: 'Settlements', blurb: 'Cities, towns, villages and outposts.',
-    fields: [['size', 'Size', 'select', ['Hamlet', 'Village', 'Town', 'City', 'Metropolis', 'Fortress', 'Outpost']], ['population', 'Population'], ['ruler', 'Led by'], ['government', 'Government'], ['known_for', 'Known for', 'long'], ['trouble', 'Current trouble', 'long'], ['landmarks', 'Landmarks', 'long']],
+    fields: [['size', 'Size', 'select', ['Hamlet', 'Village', 'Town', 'City', 'Metropolis', 'Fortress', 'Outpost']], ['population', 'Population'], ['ruler', 'Led by'], ['government', 'Government'], ['known_for', 'Known for', 'long'], ['trouble', 'Current trouble', 'long'], ['landmarks', 'Landmarks', 'long'], ['economy', 'Trade & economy', 'long'], ['defenses', 'Defenses', 'long'], ['peoples', 'Peoples & culture', 'long']],
   },
   location: {
     label: 'Location', plural: 'Locations', blurb: 'Dungeons, ruins, taverns, shops and landmarks.',
@@ -59,12 +63,27 @@ export const KINDS = {
   },
 };
 
-export const KIND_ORDER = ['region', 'settlement', 'location', 'faction', 'guild', 'clan', 'npc', 'character', 'deity', 'item', 'event', 'session', 'quest', 'lore'];
+export const KIND_ORDER = ['region', 'area', 'settlement', 'location', 'faction', 'guild', 'clan', 'npc', 'character', 'deity', 'item', 'event', 'session', 'quest', 'lore'];
 
 // Kinds the party can have a reputation with.
-export const STANDING_KINDS = ['faction', 'guild', 'clan', 'deity', 'settlement', 'npc'];
+export const STANDING_KINDS = ['faction', 'guild', 'clan', 'deity', 'settlement', 'area', 'npc'];
 export const STANDING_LEVELS = [[-5, 'Sworn enemies'], [-4, 'Hostile'], [-3, 'Hostile'], [-2, 'Unfriendly'], [-1, 'Wary'], [0, 'Neutral'], [1, 'Friendly'], [2, 'Friendly'], [3, 'Trusted'], [4, 'Allied'], [5, 'Champions']];
 export const standingLabel = (v) => (STANDING_LEVELS.find(([n]) => n === Math.max(-5, Math.min(5, Math.round(v)))) || [0, 'Neutral'])[1];
+
+// Kinds that are places and can hold people, quests and other places.
+export const PLACE_KINDS = ['region', 'area', 'settlement', 'location'];
+// Which kinds may sit inside which place (for "Located in" pickers and quick-add buttons).
+export const CHILD_PLACES = { region: ['area', 'settlement', 'location'], area: ['settlement', 'location', 'area'], settlement: ['location', 'area'], location: ['location'] };
+// The map marker a new pin gets from its entry.
+export function pinIconFor(e) {
+  if (!e) return 'poi';
+  if (e.kind === 'region') return 'region';
+  if (e.kind === 'area') return 'area';
+  if (e.kind === 'settlement') return ['City', 'Metropolis'].includes(e.fields?.size) ? 'city' : e.fields?.size === 'Fortress' || e.fields?.size === 'Outpost' ? 'camp' : 'town';
+  if (e.kind === 'location') return { Dungeon: 'dungeon', Ruin: 'dungeon', Lair: 'danger', Temple: 'temple', Castle: 'city', Tavern: 'town', Shop: 'town' }[e.fields?.type] || 'poi';
+  if (e.kind === 'deity') return 'temple';
+  return 'poi';
+}
 
 export const LINK_LABELS = ['member of', 'leads', 'ally of', 'enemy of', 'rival of', 'serves', 'worships', 'located in', 'headquartered in', 'owns', 'created', 'related to', 'parent of', 'child of', 'married to', 'trades with', 'at war with', 'secretly works for', 'wants', 'guards'];
 

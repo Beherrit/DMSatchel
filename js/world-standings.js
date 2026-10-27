@@ -32,7 +32,7 @@ function logList(rows, withEntry) {
       el('div', {}, withEntry && e ? [link(e), ' '] : null, el('span', {}, `${standingLabel(r.value)} (${r.value > 0 ? '+' : ''}${r.value})`), r.reason ? el('span', { class: 'muted' }, ` — ${r.reason}`) : null,
         el('div', { class: 'muted small' }, [when(r.at), r.gm].filter(Boolean).join(' · '), s ? [' · ', link(s)] : null, r.secret ? el('span', { class: 'tag' }, 'GM only') : null)),
       isGm() ? confirmButton('Undo', async () => {
-        try { await api('standings', { method: 'DELETE', query: { id: r.id } }); await refresh(); toast('Change removed'); window.dispatchEvent(new HashChangeEvent('hashchange')); }
+        try { await api('standings', { method: 'DELETE', query: { id: r.id } }); await refresh(); toast('Change removed'); window.dispatchEvent(new Event('world:rerender')); }
         catch (err) { toast(err.message, 'bad'); }
       }) : null);
   }));
@@ -60,7 +60,7 @@ export function standingWidget(e) {
       ev.preventDefault();
       try {
         await api('standings', { method: 'POST', body: { entry_id: e.id, value: +slider.value, reason: reason.value, session_id: sess.value || null, secret: secret.checked } });
-        await refresh(); toast('Standing recorded'); window.dispatchEvent(new HashChangeEvent('hashchange'));
+        await refresh(); toast('Standing recorded'); window.dispatchEvent(new Event('world:rerender'));
       } catch (err) { toast(err.message, 'bad'); }
     });
     box.append(el('details', {}, el('summary', {}, 'Change standing'), form));

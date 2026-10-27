@@ -2,9 +2,12 @@
 // Routes: #world/maps · #world/map/<id> · #world/map/<id>/<pinId>
 import { el, toast, confirmButton, setKids } from './dom.js';
 import { api, isGm } from './api.js';
-import { world, getEntry, findByName, link, kindLabel, notice, nameList, whenTime } from './world-store.js';
+import { world, getEntry, findByName, link, kindLabel, notice, nameList, whenTime, createEntry, mapsOf, trail } from './world-store.js';
+import { KINDS, PLACE_KINDS, pinIconFor } from './world-schema.js';
+import { placeDrawer } from './world-place.js';
+import { randomTownName, areaDraft } from './generators.js';
 
-export const PIN_ICONS = { city: ['City', '■'], town: ['Town', '●'], port: ['Port', '◗'], dungeon: ['Dungeon', '▼'], temple: ['Temple', '✚'], camp: ['Camp', '▲'], danger: ['Danger', '✕'], poi: ['Point of interest', '◆'] };
+export const PIN_ICONS = { region: ['Region', '⬢'], area: ['Area', '◍'], city: ['City', '■'], town: ['Town', '●'], port: ['Port', '◗'], dungeon: ['Dungeon', '▼'], temple: ['Temple', '✚'], camp: ['Camp', '▲'], danger: ['Danger', '✕'], poi: ['Point of interest', '◆'] };
 const imageUrl = (m) => `/api/maps?id=${encodeURIComponent(m.id)}&image=1&v=${m.version}`;
 
 export function pinsFor(entryId) {
@@ -126,8 +129,19 @@ export async function viewMap(id, focusPin) {
     const entry = pin.entry_id && getEntry(pin.entry_id);
     const iconSel = el('select', { id: 'p-icon' }, Object.entries(PIN_ICONS).map(([k, [t, g]]) => el('option', { value: k }, `${g} ${t}`)));
     iconSel.value = pin.icon || 'poi';
+    let iconTouched = !isNew;
+    iconSel.addEventListener('change', () => { iconTouched = true; });
+    // A new pin can create its place in the same step.
+    const newKind = el('select', { id: 'p-newkind', 'aria-label': 'Type of new entry' }, ['settlement', 'area', 'location', 'region', 'npc', 'quest', 'item', 'lore'].map((k) => el('option', { value: k }, KINDS[k].label)));
+    const newName = el('input', { type: 'text', id: 'p-newname', placeholder: 'Name of the new place' });
+    const dice = el('button', { class: 'btn small', type: 'button', title: 'Random name', 'aria-label': 'Random name', onclick: () => { newName.value = newKind.value === 'area' ? areaDraft(null).name : randomTownName(); } }, 'Random');
+    newKind.addEventListener('change', () => { if (!iconTouched) iconSel.value = pinIconFor({ kind: newKind.value, fields: { size: 'Town' } }); });
+    if (isNew && !iconTouched) iconSel.value = pinIconFor({ kind: 'settlement', fields: { size: 'Town' } });
+    const createBox = isNew && isGm() ? el('fieldset', { class: 'pin-new' }, el('legend', {}, 'Or create a new entry here'),
+      el('div', { class: 'pin-new-row' }, newKind, newName, dice)) : null;
     const form = el('form', { class: 'pin-form' },
-      el('div', { class: 'field' }, el('label', { for: 'p-entry' }, 'Entry'), el('input', { type: 'text', id: 'p-entry', list: 'w-names', value: entry?.name || '', placeholder: 'Link an entry (optional)' })),
+      el('div', { class: 'field' }, el('label', { for: 'p-entry' }, isNew ? 'Link an existing entry' : 'Entry'), el('input', { type: 'text', id: 'p-entry', list: 'w-names', value: entry?.name || '', placeholder: 'Start typing a name…' })),
+      createBox,
       el('div', { class: 'field' }, el('label', { for: 'p-label' }, 'Label'), el('input', { type: 'text', id: 'p-label', value: pin.label || '', placeholder: 'Shown on the map' })),
       el('div', { class: 'field' }, el('label', { for: 'p-icon' }, 'Marker'), iconSel),
       el('div', { class: 'field' }, el('label', { for: 'p-note' }, 'Note'), el('textarea', { id: 'p-note', rows: 2 }, pin.note || '')),
@@ -135,11 +149,19 @@ export async function viewMap(id, focusPin) {
       el('div', { class: 'btnrow' }, el('button', { class: 'btn primary small', type: 'submit' }, isNew ? 'Add pin' : 'Save pin'),
         el('button', { class: 'btn ghost small', type: 'button', onclick: () => closePop() }, 'Cancel'),
         isNew ? null : confirmButton('Delete', () => { save(pins.filter((p) => p.id !== pin.id), 'Pin deleted.'); closePop(); })));
-    form.addEventListener('submit', (ev) => {
+    form.addEventListener('submit', async (ev) => {
       ev.preventDefault();
       const en = form.querySelector('#p-entry').value.trim();
-      const target = en ? findByName(en) : null;
-      if (en && !target) { toast(`There’s no entry called “${en}”.`, 'bad'); return; }
+      let target = en ? findByName(en) : null;
+      if (en && !target) { toast(`There’s no entry called “${en}”. Use “Or create a new entry here” to make it.`, 'bad'); return; }
+      if (!target && newName.value.trim()) {
+        try {
+          const parent = map.entry_id && getEntry(map.entry_id);
+          target = await createEntry({ kind: newKind.value, name: newName.value.trim(), parent_id: parent && PLACE_KINDS.includes(parent.kind) ? parent.id : null, fields: newKind.value === 'settlement' ? { size: 'Town' } : {} });
+          toast(`Created ${target.name}`);
+        } catch (err) { toast(err.message, 'bad'); return; }
+      }
+      if (target && !iconTouched) iconSel.value = pinIconFor(target);
       const next = { ...pin, entry_id: target?.id || null, label: form.querySelector('#p-label').value.trim() || target?.name || 'Pin', icon: iconSel.value, note: form.querySelector('#p-note').value, secret: form.querySelector('#p-secret').checked };
       save(isNew ? [...pins, next] : pins.map((p) => (p.id === pin.id ? next : p)), isNew ? 'Pin added.' : 'Pin saved.');
       closePop();
@@ -148,6 +170,7 @@ export async function viewMap(id, focusPin) {
   }
 
   function placePop(pin) {
+    if (pop.classList.contains('drawer')) { pop.style.left = ''; pop.style.top = ''; return; }
     const r = viewport.getBoundingClientRect(), s = stage.getBoundingClientRect();
     const x = s.left - r.left + pin.x * s.width, y = s.top - r.top + pin.y * s.height;
     pop.style.left = `${Math.min(Math.max(8, x + 14), r.width - 300)}px`;
@@ -158,15 +181,23 @@ export async function viewMap(id, focusPin) {
     const entry = pin.entry_id && getEntry(pin.entry_id);
     if (edit) setKids(pop, pinForm(pin, !pins.includes(pin)));
     else {
-      setKids(pop, 
-        el('div', { class: 'entry-head' }, el('strong', {}, pin.label || entry?.name || 'Pin'), el('button', { class: 'reroll', type: 'button', 'aria-label': 'Close', onclick: () => closePop() }, '✕')),
-        entry ? el('p', {}, link(entry), el('span', { class: 'kind-tag' }, kindLabel(entry.kind))) : null,
-        entry?.summary ? el('p', { class: 'muted small' }, entry.summary) : null,
-        pin.note ? el('p', { class: 'small' }, pin.note) : null,
-        pin.secret ? el('p', { class: 'tag' }, 'GM only') : null,
-        isGm() ? el('div', { class: 'btnrow' }, el('button', { class: 'btn small', type: 'button', onclick: () => showPin(pin, true) }, 'Edit pin'),
-          el('button', { class: 'btn small ghost', type: 'button', onclick: () => startMove(pin) }, 'Move')) : null);
+      const subMaps = entry ? mapsOf(entry.id).filter((m) => m.id !== map.id) : [];
+      setKids(pop,
+        el('div', { class: 'entry-head' }, el('div', {}, el('div', { class: 'eyebrow' }, entry ? [kindLabel(entry.kind), entry.fields?.type || entry.fields?.size].filter(Boolean).join(' · ') : 'Pin'),
+          el('strong', { class: 'drawer-title' }, entry ? link(entry, entry.name) : pin.label || 'Pin')),
+          el('button', { class: 'reroll', type: 'button', 'aria-label': 'Close', onclick: () => closePop() }, '✕')),
+        entry?.summary ? el('p', { class: 'small' }, entry.summary) : null,
+        pin.note ? el('p', { class: 'small muted' }, pin.note) : null,
+        pin.secret ? el('p', { class: 'tag' }, 'GM-only pin') : null,
+        el('div', { class: 'btnrow' },
+          entry ? el('a', { class: 'btn small primary', href: `#world/e/${entry.id}` }, 'Open page') : null,
+          subMaps.map((m) => el('a', { class: 'btn small', href: `#world/map/${m.id}` }, `Open ${m.name}`)),
+          isGm() ? el('button', { class: 'btn small ghost', type: 'button', onclick: () => showPin(pin, true) }, 'Edit pin') : null,
+          isGm() ? el('button', { class: 'btn small ghost', type: 'button', onclick: () => startMove(pin) }, 'Move') : null),
+        entry && PLACE_KINDS.includes(entry.kind) ? placeDrawer(entry, () => showPin(pin)) : null,
+        !entry && isGm() ? el('p', { class: 'muted small' }, 'This pin isn’t linked to an entry yet. Use “Edit pin” to link one or create it.') : null);
     }
+    pop.classList.toggle('drawer', !edit && Boolean(entry));
     placePop(pin);
     for (const b of layer.children) b.classList.toggle('active', b.dataset.id === pin.id);
   }
@@ -178,7 +209,7 @@ export async function viewMap(id, focusPin) {
   function renderPins() {
     const q = filter.value.trim().toLowerCase();
     setKids(layer, ...pins.map((p) => el('button', {
-      class: `pin pin-${p.icon || 'poi'}${p.secret ? ' secret' : ''}`, type: 'button', 'data-id': p.id, style: `left:${p.x * 100}%;top:${p.y * 100}%`,
+      class: `pin pin-${p.icon || 'poi'}${p.secret ? ' secret' : ''}${p.entry_id && mapsOf(p.entry_id).some((m) => m.id !== map.id) ? ' has-map' : ''}`, type: 'button', 'data-id': p.id, style: `left:${p.x * 100}%;top:${p.y * 100}%`,
       title: p.label, 'aria-label': p.label, onclick: (ev) => { ev.stopPropagation(); showPin(p); },
     }, el('span', { class: 'glyph', 'aria-hidden': 'true' }, PIN_ICONS[p.icon || 'poi'][1]), el('span', { class: 'pin-label' }, p.label))));
     const shown = pins.filter((p) => !q || `${p.label} ${getEntry(p.entry_id)?.name || ''}`.toLowerCase().includes(q)).sort((a, b) => String(a.label).localeCompare(String(b.label)));
@@ -218,7 +249,13 @@ export async function viewMap(id, focusPin) {
     if (moving) { const m = moving; moving = null; viewport.classList.remove('placing'); save(pins.map((p) => (p.id === m.id ? { ...p, x, y } : p)), 'Pin moved.'); return; }
     if (adding) {
       adding = false; viewport.classList.remove('placing'); addBtn.setAttribute('aria-pressed', 'false');
-      showPin({ id: `p${Date.now().toString(36)}${Math.floor(Math.random() * 1e4)}`, x, y, icon: 'poi', label: '', secret: false }, true);
+      const pinId = `p${Date.now().toString(36)}${Math.floor(Math.random() * 1e4)}`;
+      if (presetEntry) {
+        const e = presetEntry; presetEntry = null;
+        save([...pins, { id: pinId, x, y, entry_id: e.id, label: e.name, icon: pinIconFor(e), secret: false, note: '' }], `${e.name} pinned.`);
+        return;
+      }
+      showPin({ id: pinId, x, y, icon: 'poi', label: '', secret: false }, true);
       return;
     }
     if (openPin) closePop();
@@ -247,7 +284,10 @@ export async function viewMap(id, focusPin) {
     isGm() ? addBtn : null);
 
   const entry = map.entry_id && getEntry(map.entry_id);
+  // Maps of the places this map's place sits inside, outermost first, for drilling back up.
+  const upMaps = entry ? trail(entry).map((p) => mapsOf(p.id)[0]).filter(Boolean) : [];
   const node = el('div', { class: 'w-view map-view' },
+    upMaps.length ? el('nav', { class: 'crumbs', 'aria-label': 'Larger maps' }, upMaps.flatMap((m, i) => [i ? ' › ' : '', el('a', { href: `#world/map/${m.id}` }, m.name)]), ' › ', map.name) : null,
     el('div', { class: 'panel-head row' }, el('div', {}, el('div', { class: 'eyebrow' }, 'Map', map.secret ? ' · GM only' : ''), el('h2', {}, map.name), entry ? el('p', {}, 'Map of ', link(entry)) : null),
       isGm() ? el('div', { class: 'btnrow' }, confirmButton('Delete map', async () => {
         try { await api('maps', { method: 'DELETE', query: { id: map.id } }); world.maps = (world.maps || []).filter((m) => m.id !== map.id); toast('Map deleted'); location.hash = 'world/maps'; }
@@ -258,7 +298,17 @@ export async function viewMap(id, focusPin) {
     el('p', { class: 'muted small' }, `Last changed ${whenTime(map.updated_at)}${map.updated_by ? ` by ${map.updated_by}` : ''}. Drag to pan; scroll, pinch or use + and − to zoom.`),
     nameList());
 
-  const ready = () => { fit(); renderPins(); const p = focusPin && pins.find((x) => x.id === focusPin); if (p) { centerOn(p); showPin(p); } };
+  let presetEntry = null;
+  const ready = () => {
+    fit(); renderPins();
+    if (focusPin === 'add' && isGm()) { addBtn.click(); return; }
+    if (focusPin?.startsWith('place:') && isGm()) {
+      presetEntry = getEntry(focusPin.slice(6));
+      if (presetEntry) { adding = true; addBtn.setAttribute('aria-pressed', 'true'); viewport.classList.add('placing'); status.textContent = `Click the map where ${presetEntry.name} goes.`; status.className = 'form-status'; }
+      return;
+    }
+    const p = focusPin && pins.find((x) => x.id === focusPin); if (p) { centerOn(p); showPin(p); }
+  };
   if (img.complete && img.naturalWidth) requestAnimationFrame(ready); else img.addEventListener('load', ready, { once: true });
   img.addEventListener('error', () => { status.textContent = 'The map image didn’t load. If it’s a link, the site hosting it may block embedding.'; status.className = 'form-status error'; });
   new ResizeObserver(() => { if (img.naturalWidth) fit(); }).observe(viewport);
