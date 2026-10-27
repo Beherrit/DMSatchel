@@ -96,7 +96,7 @@ export default route({
     send(res, 200, {
       now,
       entries: rows.filter((r) => visibleTo(r, req)).map((r) => shape(r, req)),
-      world: { id: w.id, slug: w.slug, name: w.name, tagline: w.tagline, about: w.about, calendar: w.calendar, public: w.public, cal: w.cal || null, discord: Boolean(w.discord_webhook) },
+      world: { id: w.id, slug: w.slug, name: w.name, tagline: w.tagline, about: w.about, calendar: w.calendar, public: w.public, cal: w.cal || null, discord: Boolean(w.discord_webhook), next_session: w.next_session || null },
       role: req.role,
     });
   },

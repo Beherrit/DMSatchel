@@ -882,3 +882,18 @@ body.gated .mainnav, body.gated #toolnav, body.gated #panels, body.gated #notebo
 .import-preview { display: grid; gap: 10px }
 .import-table td { vertical-align: top }
 .import-table tr.muted td { opacity: .6 }
+
+/* Next session */
+.sched-poll { margin-bottom: 16px }
+.sched-table td { vertical-align: top }
+.sched-table tr.best td { background: color-mix(in srgb, var(--brass) 9%, transparent) }
+.sched-table tr.locked td { background: color-mix(in srgb, var(--good) 12%, transparent) }
+.sched-table .seg button.ans-yes[aria-pressed="true"] { background: var(--good); color: #fff }
+.sched-table .seg button.ans-maybe[aria-pressed="true"] { background: var(--brass); color: #fff }
+.sched-table .seg button.ans-no[aria-pressed="true"] { background: var(--ink); color: var(--bg) }
+.sched-dates { display: grid; gap: 6px; margin: 6px 0 }
+.sched-date-row { display: flex; gap: 6px; align-items: center }
+.sched-date-row input { max-width: 260px; min-width: 0; flex: 1 }
+.sched-locked-tag { background: var(--good); color: #fff }
+.sched-form .label { display: block; font-weight: 600; margin-bottom: 2px }
+.next-session a { font-weight: 600 }

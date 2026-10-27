@@ -3,7 +3,7 @@
 // PUT {discord_webhook}  (owner) a Discord webhook link; it never leaves the server. Empty string removes it.
 // PATCH {prep: {location_id, notes}}   (GM) session prep: where the party is, and the GMs' scratch pad.
 // POST {post: entryId}   (GM) post an entry's summary and text to the world's Discord channel.
-import { route, send, fail, sql, requireOwner, requireGm } from './_lib/core.js';
+import { route, send, fail, sql, requireOwner, requireGm, postDiscord } from './_lib/core.js';
 import { cleanCalendar } from '../js/calendar.js';
 import { KINDS } from '../js/world-schema.js';
 
@@ -49,8 +49,8 @@ export default route({
       color: 0x1C6A63, fields, footer: { text: `${req.world.name} · ${KINDS[e.kind]?.label || e.kind}` },
       ...(img ? { image: { url: img.startsWith('/') ? `${origin}${img}` : img } } : {}),
     };
-    const r = await fetch(`${hook}?wait=false`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: 'The DM’s Satchel', embeds: [embed] }) }).catch(() => null);
-    if (!r || !r.ok) return fail(res, 502, `Discord didn’t accept the post${r ? ` (${r.status})` : ''}. Check the webhook still exists.`);
+    const err = await postDiscord(hook, embed);
+    if (err) return fail(res, 502, err);
     send(res, 200, { ok: true });
   },
   async PATCH(req, res) {

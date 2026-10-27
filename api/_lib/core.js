@@ -88,6 +88,12 @@ export function ensureSchema() {
         id text PRIMARY KEY, world_id text NOT NULL, data text NOT NULL, width int NOT NULL DEFAULT 0, height int NOT NULL DEFAULT 0,
         created_by int, created_at timestamptz NOT NULL DEFAULT now())`;
       await sql`CREATE INDEX IF NOT EXISTS party_ledger_world_idx ON party_ledger (world_id, at DESC)`;
+      // Next-session scheduling: a GM proposes dates, members answer yes / maybe / no for each (votes: {gm id: [..]}).
+      await sql`CREATE TABLE IF NOT EXISTS schedule_polls (
+        id serial PRIMARY KEY, world_id text NOT NULL, created_by int, created_at timestamptz NOT NULL DEFAULT now(),
+        title text NOT NULL DEFAULT '', note text NOT NULL DEFAULT '', dates jsonb NOT NULL DEFAULT '[]', votes jsonb NOT NULL DEFAULT '{}',
+        locked int, closed boolean NOT NULL DEFAULT false, deleted boolean NOT NULL DEFAULT false)`;
+      await sql`ALTER TABLE worlds ADD COLUMN IF NOT EXISTS next_session timestamptz`;
       await sql`INSERT INTO members (world_id, gm_id, role) SELECT 'default', id, CASE WHEN role = 'admin' THEN 'owner' ELSE 'gm' END FROM gms
         WHERE NOT EXISTS (SELECT 1 FROM members m WHERE m.world_id = 'default') ON CONFLICT DO NOTHING`;
     })().catch((e) => { schemaReady = null; throw e; });
@@ -149,6 +155,13 @@ export function send(res, status, body) {
   res.end(JSON.stringify(body));
 }
 export const fail = (res, status, message, extra = {}) => send(res, status, { error: message, ...extra });
+
+// Post one embed to a world's Discord webhook. Returns null when it worked, or an error message.
+export async function postDiscord(hook, embed) {
+  if (!hook) return 'This world has no Discord channel yet. The owner can add a webhook in World settings.';
+  const r = await fetch(`${hook}?wait=false`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: 'The DM’s Satchel', embeds: [embed] }) }).catch(() => null);
+  return r && r.ok ? null : `Discord didn’t accept the post${r ? ` (${r.status})` : ''}. Check the webhook still exists.`;
+}
 
 // Which world a request is about (?world=<id or slug>), and the signed-in person's role in it.
 // Site admins act as owners everywhere. Public worlds can be read by anyone.

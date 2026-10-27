@@ -1,6 +1,6 @@
 // The shared world: browse, search, read and (for GMs) write entries.
 // Routes: #world · #world/k/<kind> · #world/e/<id> · #world/new/<kind> · #world/edit/<id> · #world/q/<search> · #world/bin
-//         #world/party · #world/suggestions (GMs) · #world/mine (your characters, journals and suggestions)
+//         #world/party · #world/schedule · #world/suggestions (GMs) · #world/mine (your characters, journals and suggestions)
 
 import { el, toast, confirmButton, setKids } from './dom.js';
 import { api, session, isGm, isMember, isPlayer, signedIn, onSession } from './api.js';
@@ -17,6 +17,7 @@ import { viewLibrary } from './world-library.js';
 import { viewImport } from './world-import.js';
 import { placeHub, viewAtlas, placeCounts } from './world-place.js';
 import { viewParty } from './world-party.js';
+import { viewSchedule, nextSessionLine } from './world-schedule.js';
 import { viewExport } from './world-export.js';
 import { viewClocks, clocksWidget } from './world-clocks.js';
 import { viewRumors } from './world-rumors.js';
@@ -52,6 +53,7 @@ function renderSide() {
       el('a', { class: 'btn ghost small', href: '#world/new/lore' }, 'Suggest an entry'), el('a', { class: 'btn ghost small', href: '#world/mine' }, 'My things'), el('a', { class: 'btn ghost small', href: '#world/export' }, 'Export')) : null,
     el('nav', { class: 'w-kinds w-tools', 'aria-label': 'World views' },
       el('a', { href: '#world/party', 'data-view': 'party' }, el('span', {}, 'The Party'), el('span', { class: 'count' }, worldEntries().filter((e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status)).length)),
+      isMember() ? el('a', { href: '#world/schedule', 'data-view': 'schedule' }, el('span', {}, 'Next session'), el('span', { class: 'count' }, world.info?.next_session && Date.parse(world.info.next_session) > Date.now() - 86400000 ? new Date(world.info.next_session).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '')) : null,
       el('a', { href: '#world/calendar', 'data-view': 'calendar', title: todayText() }, el('span', {}, 'Calendar'), el('span', { class: 'count cal-count' }, worldCalendar() ? todayText().split(', ').pop().replace(/ \d+.*$/, '') : '')),
       el('a', { href: '#world/atlas', 'data-view': 'atlas' }, el('span', {}, 'Atlas'), el('span', { class: 'count' }, worldEntries().filter((e) => PLACE_KINDS.includes(e.kind)).length)),
       el('a', { href: '#world/maps', 'data-view': 'maps' }, el('span', {}, 'Maps'), el('span', { class: 'count' }, (world.maps || []).length)),
@@ -79,7 +81,7 @@ function viewHome() {
   const keyNpcs = all.filter((e) => e.kind === 'npc' && (e.tags || []).includes('key')).sort(byName);
   return el('div', { class: 'w-view' },
     el('div', { class: 'panel-head' }, el('h2', {}, info.name || 'The World'), info.tagline ? el('p', {}, info.tagline) : null,
-      worldCalendar() ? el('p', { class: 'today-line' }, el('a', { href: '#world/calendar' }, `📅 ${todayText()}`)) : null),
+      worldCalendar() ? el('p', { class: 'today-line' }, el('a', { href: '#world/calendar' }, `📅 ${todayText()}`)) : null, isMember() ? nextSessionLine() : null),
     startCard(rerenderWorld),
     info.about ? el('div', { class: 'card' }, richText(info.about)) : (isGm() ? el('p', { class: 'muted' }, 'The admin can name the world and write an introduction in the Admin page.') : null),
     all.length ? null : notice('This world is empty', isGm() ? 'Start with a region or a city, then fill it with factions and people. Anything from the table tools can be sent here with “Add to world”.' : 'The GMs haven’t added anything yet.',
@@ -481,6 +483,7 @@ export async function showWorld(parts, { keepScroll = false } = {}) {
   else if (view === 'import') node = viewImport(rerenderWorld);
   else if (view === 'suggestions') node = viewSuggestions();
   else if (view === 'party') { markPartySeen(); node = await viewParty(rerenderWorld); }
+  else if (view === 'schedule') node = await viewSchedule(rerenderWorld);
   else if (view === 'export') node = viewExport();
   else if (view === 'clocks') node = viewClocks();
   else if (view === 'family') node = viewFamily(arg);

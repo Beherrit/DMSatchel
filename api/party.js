@@ -2,12 +2,80 @@
 // GET                                      every line, newest first, with totals
 // POST {cp, item, qty, holder, note, session_id}   add a line (any member of the world); cp and qty are signed
 // DELETE ?id=                              strike a line (GM, or whoever wrote it); it stays in the database
-import { route, send, fail, sql, requireMember } from './_lib/core.js';
+//
+// Next-session scheduling lives here too (members only):
+// GET ?schedule=1                           open polls and the last few closed ones, plus the world's members
+// POST {schedule: {title, note, dates}}     (GM) propose dates
+// PATCH {schedule_id, vote: [..]}           your answers, one per date: 'yes', 'maybe', 'no' or ''
+// PATCH {schedule_id, lock: i | null}       (GM) lock in a date (it becomes the world's next session) or unlock
+// PATCH {schedule_id, closed: bool}         (GM) close or reopen
+// PATCH {schedule_id, post: true}           (GM) post the poll, or the locked date, to the world's Discord
+// DELETE ?schedule=id                       (GM) remove a poll
+import { route, send, fail, sql, requireMember, requireGm, postDiscord } from './_lib/core.js';
+import { cleanDates, cleanVote, tally, dateText } from '../js/schedule.js';
 
 const clip = (v, n) => String(v ?? '').slice(0, n);
 
+const pollShape = (p) => ({ id: p.id, title: p.title, note: p.note, dates: p.dates, votes: p.votes, locked: p.locked, closed: p.closed, created_at: p.created_at, created_by: p.created_by });
+
+async function getSchedule(req, res) {
+  if (!requireMember(req, res)) return;
+  const polls = await sql`SELECT * FROM schedule_polls WHERE world_id = ${req.world.id} AND NOT deleted ORDER BY closed, created_at DESC LIMIT 12`;
+  const members = await sql`SELECT g.id, g.name, m.role FROM members m JOIN gms g ON g.id = m.gm_id WHERE m.world_id = ${req.world.id} ORDER BY g.name`;
+  send(res, 200, { polls: polls.map(pollShape), members, me: req.gm.id, next_session: req.world.next_session || null });
+}
+
+async function patchSchedule(req, res) {
+  if (!requireMember(req, res)) return;
+  const b = req.body, id = Number(b.schedule_id);
+  const p = (await sql`SELECT * FROM schedule_polls WHERE id = ${id} AND world_id = ${req.world.id} AND NOT deleted`)[0];
+  if (!p) return fail(res, 404, 'That poll is gone.');
+  if (b.vote !== undefined) {
+    if (p.closed) return fail(res, 409, 'This poll is closed.');
+    const vote = cleanVote(b.vote, p.dates.length);
+    // Merge just this person's answers, so two people answering at once don't overwrite each other.
+    const rows = await sql`UPDATE schedule_polls SET votes = votes || jsonb_build_object(${String(req.gm.id)}::text, ${JSON.stringify(vote)}::jsonb)
+      WHERE id = ${id} RETURNING *`;
+    return send(res, 200, { poll: pollShape(rows[0]) });
+  }
+  if (!requireGm(req, res)) return;
+  if (b.lock !== undefined) {
+    const i = b.lock === null ? null : Number(b.lock);
+    if (i !== null && !(Number.isInteger(i) && i >= 0 && i < p.dates.length)) return fail(res, 400, 'Pick one of the proposed dates.');
+    const rows = await sql`UPDATE schedule_polls SET locked = ${i} WHERE id = ${id} RETURNING *`;
+    // The locked date is the world's next session; unlocking clears it only if it was this poll's date.
+    if (i !== null) await sql`UPDATE worlds SET next_session = ${p.dates[i]} WHERE id = ${req.world.id}`;
+    else if (p.locked !== null && req.world.next_session && new Date(req.world.next_session).toISOString() === p.dates[p.locked]) await sql`UPDATE worlds SET next_session = NULL WHERE id = ${req.world.id}`;
+    return send(res, 200, { poll: pollShape(rows[0]), next_session: i !== null ? p.dates[i] : null });
+  }
+  if (b.closed !== undefined) {
+    const rows = await sql`UPDATE schedule_polls SET closed = ${Boolean(b.closed)} WHERE id = ${id} RETURNING *`;
+    return send(res, 200, { poll: pollShape(rows[0]) });
+  }
+  if (b.post) {
+    const origin = `https://${req.headers.host}`;
+    const members = await sql`SELECT g.id, g.name FROM members m JOIN gms g ON g.id = m.gm_id WHERE m.world_id = ${req.world.id}`;
+    const names = new Map(members.map((m) => [String(m.id), m.name]));
+    const t = tally(p, members.map((m) => m.id));
+    // Discord shows times in each reader's own zone with <t:…> stamps.
+    const stamp = (iso) => `<t:${Math.floor(Date.parse(iso) / 1000)}:F>`;
+    const embed = p.locked !== null
+      ? { title: `Next session: ${p.title || 'locked in'}`, description: `${stamp(p.dates[p.locked])} (<t:${Math.floor(Date.parse(p.dates[p.locked]) / 1000)}:R>)${p.note ? `\n\n${p.note}` : ''}` }
+      : { title: p.title || 'When can we play?', description: `${p.note ? `${p.note}\n\n` : ''}${t.rows.map((r) => `${r.i === t.best ? '★ ' : ''}${stamp(r.at)} — ${r.yes.length} yes, ${r.maybe.length} maybe`).join('\n')}\n\nAnswer on the site.${t.missing.length ? ` Still to answer: ${t.missing.map((m) => names.get(m)).filter(Boolean).join(', ')}.` : ''}` };
+    const err = await postDiscord(req.world.discord_webhook, { ...embed, color: 0x1C6A63, url: `${origin}/?w=${encodeURIComponent(req.world.slug)}#world/schedule`, footer: { text: req.world.name } });
+    if (err) return fail(res, req.world.discord_webhook ? 502 : 400, err);
+    return send(res, 200, { ok: true });
+  }
+  fail(res, 400, 'Nothing to change.');
+}
+
 export default route({
+  async PATCH(req, res) {
+    if (req.body.schedule_id !== undefined) return patchSchedule(req, res);
+    fail(res, 400, 'Nothing to change.');
+  },
   async GET(req, res) {
+    if (req.query?.schedule) return getSchedule(req, res);
     const lines = await sql`SELECT l.id, l.at, l.cp::float8 AS cp, l.item, l.qty, l.holder, l.note, l.session_id, l.gm_id, g.name AS by
       FROM party_ledger l LEFT JOIN gms g ON g.id = l.gm_id WHERE l.world_id = ${req.world.id} AND NOT l.deleted ORDER BY l.at DESC LIMIT 1000`;
     const cp = lines.reduce((t, l) => t + Number(l.cp || 0), 0);
@@ -24,6 +92,14 @@ export default route({
   async POST(req, res) {
     if (!requireMember(req, res)) return;
     const b = req.body || {};
+    if (b.schedule) {
+      if (!requireGm(req, res)) return;
+      const dates = cleanDates(b.schedule.dates);
+      if (!dates.length) return fail(res, 400, 'Propose at least one date and time.');
+      const rows = await sql`INSERT INTO schedule_polls (world_id, created_by, title, note, dates)
+        VALUES (${req.world.id}, ${req.gm.id}, ${clip(b.schedule.title, 120).trim()}, ${clip(b.schedule.note, 1000)}, ${JSON.stringify(dates)}::jsonb) RETURNING *`;
+      return send(res, 201, { poll: pollShape(rows[0]) });
+    }
     const cp = Math.round(Number(b.cp) || 0);
     const qty = Math.round(Number(b.qty) || 0);
     const item = clip(b.item, 200).trim();
@@ -36,6 +112,12 @@ export default route({
   },
   async DELETE(req, res) {
     if (!requireMember(req, res)) return;
+    if (req.query?.schedule) {
+      if (!requireGm(req, res)) return;
+      const rows = await sql`UPDATE schedule_polls SET deleted = true WHERE id = ${Number(req.query.schedule)} AND world_id = ${req.world.id} RETURNING locked, dates`;
+      if (!rows.length) return fail(res, 404, 'That poll is gone.');
+      return send(res, 200, { ok: true });
+    }
     const id = Number(req.query?.id);
     const rows = await sql`UPDATE party_ledger SET deleted = true WHERE id = ${id} AND world_id = ${req.world.id} AND NOT deleted
       AND (${req.isGmHere} OR gm_id = ${req.gm.id}) RETURNING id`;
