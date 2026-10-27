@@ -42,6 +42,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
   enemies (−5) to champions (+5), with a dated history of what changed it and which session it happened in.
 - **Family trees**: parents, children, spouses and siblings, drawn as a tree for every noble house and clan.
 - **Rumor mill**: gossip starts in a town and spreads to its neighbors, changing a little with each retelling.
+- **Who stands where**: a grid of every faction, guild and house against every other, with tensions called out.
 - **Faction clocks**: plans in motion (a cult's ritual, a guild's takeover) as clocks you fill between sessions; one
   click runs a faction turn.
 - **Session prep**: one page before each session with last time's notes, where the party is and who's there, quests

@@ -12,6 +12,7 @@ import { viewWeb } from './world-web.js';
 import { viewStandings, standingWidget } from './world-standings.js';
 import { viewTalk, talkWidget, tableWidget, viewTable } from './world-talk.js';
 import { viewPrep } from './world-prep.js';
+import { viewPowers } from './world-powers.js';
 import { placeHub, viewAtlas, placeCounts } from './world-place.js';
 import { viewParty } from './world-party.js';
 import { viewExport } from './world-export.js';
@@ -53,6 +54,7 @@ function renderSide() {
       el('a', { href: '#world/atlas', 'data-view': 'atlas' }, el('span', {}, 'Atlas'), el('span', { class: 'count' }, worldEntries().filter((e) => PLACE_KINDS.includes(e.kind)).length)),
       el('a', { href: '#world/maps', 'data-view': 'maps' }, el('span', {}, 'Maps'), el('span', { class: 'count' }, (world.maps || []).length)),
       el('a', { href: '#world/web', 'data-view': 'web' }, el('span', {}, 'Relationship web'), el('span', { class: 'count' }, '◎')),
+      el('a', { href: '#world/powers', 'data-view': 'powers' }, el('span', {}, 'Who stands where'), el('span', { class: 'count' }, '▦')),
       el('a', { href: '#world/clocks', 'data-view': 'clocks' }, el('span', {}, 'Faction clocks'), el('span', { class: 'count' }, (world.standings?.clocks || []).length)),
       el('a', { href: '#world/standings', 'data-view': 'standings' }, el('span', {}, 'Party standing'), el('span', { class: 'count' }, Object.keys(world.standings?.current || {}).length)),
       el('a', { href: '#world/table', 'data-view': 'table' }, el('span', {}, 'Table talk'), el('span', { class: 'count' }, '💬')),
@@ -469,6 +471,7 @@ export async function showWorld(parts, { keepScroll = false } = {}) {
   else if (view === 'talk') node = await viewTalk();
   else if (view === 'table') node = await viewTable();
   else if (view === 'prep') node = await viewPrep(rerenderWorld);
+  else if (view === 'powers') node = viewPowers(rerenderWorld);
   else if (view === 'suggestions') node = viewSuggestions();
   else if (view === 'party') { markPartySeen(); node = await viewParty(rerenderWorld); }
   else if (view === 'export') node = viewExport();

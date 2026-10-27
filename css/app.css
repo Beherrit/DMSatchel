@@ -823,3 +823,34 @@ tr.disabled td { color: var(--muted) }
 .prep-actions { align-items: center }
 .prep-card textarea { width: 100% }
 .prep-card .controls label { font-weight: 700 }
+
+/* ---- relationship grid ---- */
+.rel-wrap { overflow: auto; max-height: 72vh; border: 1px solid var(--line); border-radius: 8px; background: var(--surface) }
+.rel-grid { border-collapse: separate; border-spacing: 0 }
+.rel-grid th, .rel-grid td { border-right: 1px solid var(--line); border-bottom: 1px solid var(--line) }
+.rel-grid .corner, .rel-grid .col-head { position: sticky; top: 0; background: var(--surface); z-index: 2 }
+.rel-grid .corner, .rel-grid .row-head { position: sticky; left: 0; background: var(--surface); z-index: 1 }
+.rel-grid .corner { z-index: 3 }
+.rel-grid .col-head { height: 140px; vertical-align: bottom; padding: 6px 2px; font-weight: 500; font-size: 13px }
+.rel-grid .col-head span { writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap }
+.rel-grid .row-head { text-align: left; padding: 4px 10px; white-space: nowrap; font-weight: 500; font-size: 14px }
+.rel-grid td { width: 38px; height: 38px; padding: 0; text-align: center }
+.rel-self { background: repeating-linear-gradient(45deg, var(--sunk), var(--sunk) 4px, transparent 4px, transparent 8px) }
+.rel-cell { width: 100%; height: 100%; min-height: 38px; display: grid; place-items: center; border: 0; background: none; cursor: pointer; font-size: 16px; color: inherit; padding: 0 }
+span.rel-cell { cursor: default }
+.rel-cell:hover, .rel-cell:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px }
+.rel-ally { --rc: var(--good) } .rel-trade { --rc: var(--accent) } .rel-rival { --rc: var(--warn) } .rel-enemy { --rc: var(--danger) }
+.rel-war { --rc: var(--danger) } .rel-serves { --rc: var(--k-thing) } .rel-secret { --rc: var(--k-thing) }
+td.rel[class*="rel-"] { background: color-mix(in srgb, var(--rc) 18%, transparent); color: var(--rc); font-weight: 700 }
+td.rel-war { background: color-mix(in srgb, var(--rc) 34%, transparent) }
+td.rel-secret { outline: 2px dashed var(--rc); outline-offset: -4px }
+.rel-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; font-size: 14px }
+.rel-key .rel-mark { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 4px; background: color-mix(in srgb, var(--rc) 18%, transparent); color: var(--rc); font-weight: 700 }
+.rel-edit-card { border-left: 4px solid var(--accent) }
+.rel-btn[aria-pressed="true"] { border-color: var(--rc); background: color-mix(in srgb, var(--rc) 18%, var(--surface)) }
+.rel-btn .rel-mark { color: var(--rc); font-weight: 700 }
+.rel-summary { margin: 0; display: grid; gap: 4px }
+.powers-view { gap: 14px }
+.rel-grid { width: auto }
+.rel-grid th { text-transform: none; letter-spacing: normal; color: var(--ink) }
+.rel-wrap { width: fit-content; max-width: 100% }
