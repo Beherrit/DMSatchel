@@ -17,6 +17,7 @@ import { viewExport } from './world-export.js';
 import { viewClocks, clocksWidget } from './world-clocks.js';
 import { viewRumors } from './world-rumors.js';
 import { familySection, clanTree, viewFamily } from './world-family.js';
+import { knowsButtons, knownSection } from './world-known.js';
 import { startCard, markPartySeen } from './onboarding.js';
 import { viewCalendar, worldCalendar, todayText } from './world-calendar.js';
 import { parseDate, toDays, yearLength } from './calendar.js';
@@ -161,6 +162,7 @@ function viewEntry(id, tab) {
     e.kind === 'npc' || e.kind === 'character' ? familySection(e, rerenderWorld) : null,
     e.kind === 'character' ? ownerLine(e) : null,
     e.kind === 'character' ? sheetSection(e, rerenderWorld) : null,
+    e.kind === 'character' ? knownSection(e, rerenderWorld) : null,
     e.fields?.stock || (e.kind === 'location' && e.fields?.type === 'Shop' && isGm()) ? el('section', { class: 'card shop-card' },
       el('div', { class: 'entry-head' }, el('h3', {}, 'For sale'), isGm() ? el('button', { class: 'btn small', type: 'button', onclick: async () => {
         const town = trailTown(e);
@@ -199,6 +201,7 @@ function viewEntry(id, tab) {
           try { const r = await api('activity', { query: { id } }); setKids(history, el('h4', {}, 'History'), el('ul', { class: 'plain' }, r.activity.map((h) => el('li', {}, `${when(h.at)} · ${h.gm || 'Someone'} · ${h.action}`)))); }
           catch (err) { setKids(history, el('p', { class: 'error' }, err.message)); }
         } }, 'History')) : null),
+    knowsButtons(e, rerenderWorld),
     e.status === 'suggested' ? suggestionBanner(e) : null,
     e.visibility === 'gm' && isGm() ? el('p', { class: 'hidden-note muted small' }, 'Players can’t see this entry, or find it in search or on maps. Reveal it when they discover it.') : null,
     isPlace ? placeSummary(e) : null,

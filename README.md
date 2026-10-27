@@ -56,6 +56,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Character sheets**: characters from the Forge keep their full sheet in the world, with a play tracker the
   player and GMs share: hit points, conditions, spell slots, hit dice, rests, coins, inventory and notes. Level up
   in one click.
+- **What my character knows**: players mark the people, places and secrets their character has learned, with notes.
 - **The Party**: who's in the party, the shared treasury (coins and items, with a loot log anyone can add to and an
   even split), current quests, handouts the GM reveals at the table, and the party journal.
 - **Encounters & travel**: fights fitted to the party with the 2024 encounter budget (stat blocks open on D&D

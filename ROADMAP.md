@@ -61,7 +61,7 @@ to the log at the bottom.
 18. [x] **Rumor mill.** Rumors attached to towns that spread to linked and nearby towns over time, getting
     distorted as they go; players see the rumors in the towns they've visited.
 19. [x] **Family trees.** Parent/child/spouse links between NPCs and characters drawn as a tree for each clan.
-20. [ ] **What my character knows.** A player view per character: entries they've met or been told about.
+20. [x] **What my character knows.** A player view per character: entries they've met or been told about.
 21. [ ] **Discord recaps.** Post session summaries and handouts to a Discord channel via a webhook.
 
 ## Ideas parking lot
@@ -87,3 +87,4 @@ to the log at the bottom.
 - Faction clocks: clocks table (additive), served by the standings API; 4–12 segment clocks on factions, guilds, clans, deities, towns, NPCs and quests; GM-only or public; +1/−1; faction turn advances every ticking clock and names the finished ones; Faction clocks page and sidebar link.
 - Rumor mill: Rumor kind (truth kept in the GM-only secret), Rumors tab on towns, Rumors page with each rumor's reach, "let rumors spread" (linked towns 60%, same area 50%, same region 25% per round), retellings that exaggerate numbers, swap NPC names or add twists, and say where they came from. Players can suggest rumors. Unit tests for neighbors and spreading.
 - Family trees: parent/child/spouse/sibling connections; Family section on NPC and character pages with quick add (links someone who exists or creates them in the same town and house; a child of someone with one spouse gets both parents); clan pages draw the whole house as a generational tree; #world/family/<id> tree around anyone. Unit tests for relations, families and layout.
+- What my character knows: "☆ <character> knows this" on every entry for players' own characters; a "What <character> knows" list on the character page, grouped by kind, with a note in the character's words per entry.

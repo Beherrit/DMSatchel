@@ -796,3 +796,8 @@ tr.disabled td { color: var(--muted) }
 .tree-spouse { stroke: var(--brass); stroke-width: 3 }
 .family-card p { margin: 0 }
 .family-add input[type="text"] { flex: 1 1 220px }
+.knows { display: flex; flex-wrap: wrap; gap: 6px }
+.known-group h4 { margin: 8px 0 4px }
+.known-list li { display: grid; grid-template-columns: auto auto minmax(0, 1fr); gap: 4px 10px; align-items: center; padding: 4px 0 }
+.known-list input { width: 100%; font-size: 14px }
+@media (max-width: 560px) { .known-list li { grid-template-columns: auto auto } .known-list input { grid-column: 1 / -1 } }
