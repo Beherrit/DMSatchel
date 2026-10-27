@@ -348,16 +348,17 @@ export async function showWorld(parts, { keepScroll = false } = {}) {
   window.scrollTo({ top: keepScroll ? y : 0 });
 }
 
+// Drafts sent from the tools ("Add to world") open the new-entry form, prefilled.
+export function acceptDraft(d = {}) {
+  if (!isGm()) { toast('Sign in as a GM to add things to the shared world'); openSignIn(); return; }
+  draft = { ...d, fields: { ...(d.fields || {}) } };
+  location.hash = `world/new/${d.kind}`;
+}
+
 export function mountWorld(root) {
   side = el('aside', { class: 'w-side' });
   main = el('div', { class: 'w-main' });
   root.append(el('div', { class: 'w-layout' }, side, main));
-  window.addEventListener('world:draft', (ev) => {
-    const d = ev.detail || {};
-    if (!isGm()) { toast('Sign in as a GM to add things to the shared world'); openSignIn(); return; }
-    draft = { ...d, fields: { ...(d.fields || {}) } };
-    location.hash = `world/new/${d.kind}`;
-  });
   window.addEventListener('world:rerender', () => rerenderWorld());
   onSession(() => { world.loaded = false; if (location.hash.startsWith('#world')) showWorld(location.hash.slice(1).split('/').slice(1)); });
 }

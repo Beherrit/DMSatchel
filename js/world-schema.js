@@ -43,7 +43,7 @@ export const KINDS = {
   },
   item: {
     label: 'Item', plural: 'Items & Artifacts', blurb: 'Relics, magic items and things worth fighting over.',
-    fields: [['rarity', 'Rarity', 'select', ['Mundane', 'Common', 'Uncommon', 'Rare', 'Very rare', 'Legendary', 'Artifact']], ['type', 'Type'], ['holder', 'Current holder'], ['properties', 'Properties', 'long'], ['history', 'History', 'long']],
+    fields: [['rarity', 'Rarity', 'select', ['Mundane', 'Common', 'Uncommon', 'Rare', 'Very rare', 'Legendary', 'Artifact']], ['type', 'Type'], ['attunement', 'Attunement'], ['value', 'Value'], ['holder', 'Current holder'], ['properties', 'Properties', 'long'], ['history', 'History', 'long']],
   },
   event: {
     label: 'Event', plural: 'History & Events', blurb: 'The timeline: wars, founding dates, campaign sessions.',

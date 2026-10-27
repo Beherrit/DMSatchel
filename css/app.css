@@ -526,6 +526,13 @@ tr.disabled td { color: var(--muted) }
 .stat-roll { gap: 6px }
 .spellblock + .muted, .spellblock ~ .btn { justify-self: start }
 
+/* magic items */
+.ref-filters { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 14px }
+.cursed-tag { color: var(--danger); margin-left: 6px }
+.item-side { display: inline-flex; gap: 6px; align-items: center; flex: none }
+.loot-list .block { display: block; font-size: 13px }
+.pre { white-space: pre-wrap }
+
 @media print {
   body { background: #fff; color: #000; padding: 0 }
   .top, .mainnav, .tabs, .notebook, .foot, .controls, .btnrow, .reroll, .panel-head p, .talk, .w-side { display: none !important }

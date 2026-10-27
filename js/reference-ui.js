@@ -1,8 +1,12 @@
 // Rules reference: species, classes, backgrounds and feats from the 2024 rules (short paraphrases).
 import { el, setKids } from './dom.js';
 import { SPECIES, CLASSES, BACKGROUNDS, ORIGIN_FEATS, GENERAL_FEATS, EPIC_BOONS, ABILITY_NAMES, FULL_SLOTS } from './rules2024.js';
+import { MAGIC_ITEMS, RARITIES, RARITY_KEYS, ITEM_TYPES, baseType, itemEntry, concrete } from './magic-items.js';
+import { SPELLS, ORD } from './spells.js';
+import { isGm } from './api.js';
+import { makeRng } from './rng.js';
 
-const TABS = [['classes', 'Classes'], ['species', 'Species'], ['backgrounds', 'Backgrounds'], ['feats', 'Feats'], ['slots', 'Spell slots']];
+const TABS = [['classes', 'Classes'], ['species', 'Species'], ['backgrounds', 'Backgrounds'], ['feats', 'Feats'], ['spells', 'Spells'], ['items', 'Magic items'], ['slots', 'Spell slots']];
 let root, body, filter;
 
 const card = (title, sub, ...kids) => el('article', { class: 'card ref-card', 'data-search': `${title} ${sub}`.toLowerCase() }, el('h3', {}, title), sub ? el('p', { class: 'card-sub' }, sub) : null, ...kids);
@@ -33,6 +37,24 @@ function feats() {
     card('Epic Boons', 'Chosen at level 19', el('p', {}, EPIC_BOONS.join(', '))),
   ];
 }
+const itemFilter = { rarity: '', type: '', attune: '', cursed: false };
+function items() {
+  const rows = MAGIC_ITEMS.filter((i) => (!itemFilter.rarity || i.rarity === itemFilter.rarity) && (!itemFilter.type || baseType(i.type) === itemFilter.type)
+    && (!itemFilter.attune || (itemFilter.attune === 'yes' ? i.attunement : !i.attunement)) && (!itemFilter.cursed || i.cursed));
+  const sel = (key, label, opts) => { const s2 = el('select', { 'aria-label': label, onchange: (e) => { itemFilter[key] = e.target.value; showReference('items'); } }, opts.map(([v, t]) => el('option', { value: v }, t))); s2.value = itemFilter[key]; return s2; };
+  const rng = makeRng(Date.now());
+  return [el('div', { class: 'ref-filters card' }, sel('rarity', 'Rarity', [['', 'Any rarity'], ...Object.entries(RARITIES)]), sel('type', 'Type', [['', 'Any type'], ...ITEM_TYPES.map((t) => [t, t])]),
+      sel('attune', 'Attunement', [['', 'Attunement: any'], ['yes', 'Needs attunement'], ['no', 'No attunement']]),
+      el('label', { class: 'check' }, el('input', { type: 'checkbox', checked: itemFilter.cursed || null, onchange: (e) => { itemFilter.cursed = e.target.checked; showReference('items'); } }), ' Cursed only'),
+      el('span', { class: 'muted small' }, `${rows.length} items`)),
+    ...rows.map((i) => card(i.name, `${RARITIES[i.rarity]} · ${i.type}${i.attunement ? ` · ${i.attunement.toLowerCase()}` : ''}`,
+      el('p', {}, i.cursed ? el('span', { class: 'tag cursed-tag' }, 'cursed') : null, ' ', i.summary),
+      isGm() ? el('button', { class: 'btn small ghost world', type: 'button', onclick: () => window.dispatchEvent(new CustomEvent('world:draft', { detail: itemEntry(concrete(i, rng)) })) }, '+ Add to world') : null))];
+}
+function spells() {
+  return Object.entries(SPELLS).filter(([c]) => !['Eldritch Knight', 'Arcane Trickster'].includes(c)).map(([cls, lists]) => card(`${cls} spells`, `${lists.reduce((t, l) => t + l.length, 0)} spells`,
+    ...lists.map((names, lv) => (names.length ? el('div', { class: 'spell-row' }, el('span', { class: 'spell-lv' }, ORD[lv]), el('span', { class: 'spell-names' }, names.map((n) => el('span', { class: 'spell' }, n)))) : null))));
+}
 function slots() {
   const head = el('tr', {}, el('th', {}, 'Caster level'), ['1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th'].map((s) => el('th', {}, s)));
   const rows = FULL_SLOTS.slice(1).map((row, i) => el('tr', {}, el('td', { class: 'num' }, i + 1), Array.from({ length: 9 }, (_, j) => el('td', { class: 'num' }, row[j] || '—'))));
@@ -43,12 +65,12 @@ function slots() {
 export function showReference(tab = 'classes') {
   if (!TABS.some(([k]) => k === tab)) tab = 'classes';
   for (const b of root.querySelectorAll('.subtabs a')) b.setAttribute('aria-current', b.dataset.tab === tab ? 'page' : 'false');
-  setKids(body, ...{ classes, species, backgrounds, feats, slots }[tab]());
+  setKids(body, ...{ classes, species, backgrounds, feats, spells, items, slots }[tab]());
   applyFilter();
 }
 function applyFilter() {
   const q = filter.value.trim().toLowerCase();
-  for (const c of body.children) c.hidden = q && !c.textContent.toLowerCase().includes(q);
+  for (const c of body.children) c.hidden = q && !c.classList.contains('ref-filters') && !c.textContent.toLowerCase().includes(q);
 }
 
 export function mountReference(r) {

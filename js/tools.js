@@ -8,6 +8,7 @@ import * as D from './tables.js';
 import { saveNote } from './notebook.js';
 import { npcStats } from './npc-stats.js';
 import { renderStats, renderSpells } from './statblock-ui.js';
+import { randomItem, uniqueItem, CURSES, curseText, itemEntry, RARITIES, RARITY_KEYS, ITEM_TYPES, MINOR_PROPERTIES } from './magic-items.js';
 
 const r = makeRng(Date.now());
 const pick = r.pick, pickW = r.pickW, d = r.dice, R = r.int;
@@ -82,7 +83,13 @@ function mountNpc(root) {
 // ---- Quests ------------------------------------------------------------------------------------
 
 const Q_LABELS = { patron: 'Patron', goal: 'The job', antagonist: 'Opposition', complication: 'Complication', twist: 'Twist', reward: 'Reward' };
-function magicItem(tier) { const rr = pickW(D.RARITY_W[tier]); return { r: rr, name: pick(D.MAGIC[rr]).replace('{weapon}', pick(D.WEAPONS)).replace('{armor}', pick(D.ARMORS)) }; }
+const RARITY_CODE = { common: 'c', uncommon: 'u', rare: 'r', veryrare: 'v', legendary: 'l' };
+// A catalog item for a loot tier; now and then a cursed one sneaks in.
+function magicItem(tier) {
+  const rr = pickW(D.RARITY_W[tier]);
+  const it = (r.chance(0.06) && randomItem(r, { cursed: true })) || randomItem(r, { rarity: RARITY_CODE[rr], cursed: false });
+  return { r: RARITY_KEYS[it.rarity], name: it.name, item: it };
+}
 function mountQuest(root) {
   let q;
   const card = el('article', { class: 'card fresh' });
@@ -334,7 +341,7 @@ function mountLoot(root) {
     }
     const items = [];
     const nItems = hoard ? [Math.max(0, d(1, 4) - 2), d(1, 3), d(1, 4), d(1, 4) + 1][tier] : (r.chance(0.12) ? 1 : 0);
-    for (let i = 0; i < nItems; i++) items.push(hoard ? magicItem(tier) : { r: 'common', name: pick(D.MAGIC.common) });
+    for (let i = 0; i < nItems; i++) items.push(magicItem(hoard ? tier : 0));
     const extra = r.chance(hoard ? 0.5 : 0.35) ? pick(D.TABLES.trinket.items) : null;
     const total = coins.reduce((a, [c, q]) => a + q * D.GP[c], 0) + vals.reduce((a, v) => a + v.value, 0);
     loot = { tier, hoard, coins, vals, items, extra, where: pick(D.CONTAINERS), total };
@@ -343,7 +350,7 @@ function mountLoot(root) {
   const text = () => {
     const l = loot, lines = [`${l.hoard ? 'Hoard' : 'Pocket loot'} (${tierLabel()}), found ${l.where}`, `Coins: ${l.coins.map(([c, q]) => `${fmt(q)} ${c}`).join(', ')}`];
     for (const v of l.vals) lines.push(`${cap(v.name)} (${fmt(v.each)} gp each)`);
-    for (const it of l.items) lines.push(`${it.name} [${D.RARITY_LABEL[it.r]}]`);
+    for (const it of l.items) lines.push(`${it.name} [${D.RARITY_LABEL[it.r]}${it.item?.cursed ? ', cursed' : ''}]${it.item ? ` — ${it.item.summary}` : ''}`);
     if (l.extra) lines.push(`Trinket: ${l.extra}`);
     lines.push(`Total (coins + valuables): ${fmt(Math.round(l.total))} gp`);
     return lines.join('\n');
@@ -353,16 +360,63 @@ function mountLoot(root) {
     setKids(card, el('div', { class: 'eyebrow' }, `${l.hoard ? 'Treasure hoard' : 'Pocket loot'} · ${tierLabel()}`), el('p', { class: 'card-sub' }, `Found ${l.where}.`),
       el('div', { class: 'coins' }, l.coins.map(([c, q]) => el('span', { class: 'coin' }, `${fmt(q)} ${c}`))),
       l.vals.length ? [el('div', { class: 'eyebrow' }, l.vals[0].kind === 'gem' ? 'Gemstones' : 'Art objects'), el('ul', { class: 'loot-list' }, l.vals.map((v) => el('li', {}, el('span', {}, cap(v.name)), el('span', { class: 'v' }, `${fmt(v.each)} gp ea`))))] : null,
-      l.items.length ? [el('div', { class: 'eyebrow' }, 'Magic items'), el('ul', { class: 'loot-list' }, l.items.map((it) => el('li', {}, el('span', {}, it.name), el('span', { class: `pill r-${it.r}` }, D.RARITY_LABEL[it.r]))))] : null,
+      l.items.length ? [el('div', { class: 'eyebrow' }, 'Magic items'), el('ul', { class: 'loot-list' }, l.items.map((it) => el('li', {},
+        el('span', {}, it.name, it.item?.cursed ? el('span', { class: 'tag cursed-tag' }, 'cursed') : null, it.item ? el('small', { class: 'muted block' }, it.item.summary) : null),
+        el('span', { class: 'item-side' }, el('span', { class: `pill r-${it.r}` }, D.RARITY_LABEL[it.r] || RARITIES[it.item?.rarity]),
+          it.item ? el('button', { class: 'btn small ghost world', type: 'button', onclick: () => sendToWorld(itemEntry(it.item)) }, '+ World') : null))))] : null,
       l.extra ? [el('div', { class: 'eyebrow' }, 'Also'), el('p', { class: 'flavor' }, l.extra)] : null,
       el('div', {}, 'Total coin and valuables: ', el('span', { class: 'total' }, `${fmt(Math.round(l.total))} gp`)),
       el('div', { class: 'btnrow' },
         el('button', { class: 'btn', type: 'button', onclick: () => saveNote('Loot', `${l.hoard ? 'Hoard' : 'Pocket loot'}, ${fmt(Math.round(l.total))} gp`, text()) }, 'Save to notebook'),
         el('button', { class: 'btn', type: 'button', onclick: () => copyText(text()) }, 'Copy'),
-        l.items.length ? el('button', { class: 'btn world', type: 'button', onclick: () => sendToWorld({ kind: 'item', name: l.items[0].name, fields: { rarity: { veryrare: 'Very rare' }[l.items[0].r] || cap(l.items[0].r), type: 'Magic item' }, summary: `Found ${l.where}.` }) }, 'Add first item to world') : null));
+        null));
     if (isNew) fresh(card);
   }
   roll();
+}
+
+
+// ---- Magic items -------------------------------------------------------------------------------
+
+function mountItems(root) {
+  let it = null;
+  const card = el('article', { class: 'card fresh' });
+  const rar = select('mi-rarity', 'Rarity', [['', 'Any'], ...Object.entries(RARITIES).filter(([k]) => k !== 'a').map(([k, v]) => [k, v])]);
+  const typ = select('mi-type', 'Type', [['', 'Any'], ...ITEM_TYPES.map((t) => [t, t])]);
+  root.append(panelHead('Magic Items', 'Roll a catalog item, a one-of-a-kind treasure with its own name and history, or something cursed. Curses are kept in the GM-only secret when you add an item to the world.'),
+    el('div', { class: 'controls' }, rar, typ,
+      el('button', { class: 'btn primary', type: 'button', onclick: () => roll('catalog') }, 'Random item'),
+      el('button', { class: 'btn', type: 'button', onclick: () => roll('unique') }, 'Unique item'),
+      el('button', { class: 'btn', type: 'button', onclick: () => roll('cursed') }, 'Cursed item')), card);
+  function roll(mode) {
+    const rarity = $('#mi-rarity').value || undefined, type = $('#mi-type').value || undefined;
+    if (mode === 'catalog') it = randomItem(r, { rarity, type, cursed: false }) || randomItem(r, { rarity });
+    else if (mode === 'unique') it = uniqueItem(r, { rarity: rarity || pick(['u', 'u', 'r', 'r', 'v']) });
+    else it = r.chance(0.35) ? randomItem(r, { cursed: true }) : uniqueItem(r, { rarity: rarity || pick(['u', 'r', 'r', 'v']), cursed: true });
+    if (!it) { setKids(card, el('p', { class: 'muted' }, 'No item matches those filters. Try “Any”.')); return; }
+    render(true);
+  }
+  const text = () => [it.name, `${RARITIES[it.rarity]} ${it.type}${it.attunement ? ` (${it.attunement.toLowerCase()})` : ''}`, it.appearance, it.property || it.summary, it.minor, it.quirk && `Quirk: ${it.quirk}`, it.history,
+    it.curse ? curseText(it.curse) : it.cursed ? `CURSED: ${it.summary}` : '', it.value ? `Worth about ${fmt(it.value)} gp` : ''].filter(Boolean).join('\n');
+  function render(isNew) {
+    const cursedNote = it.curse ? curseText(it.curse) : it.cursed ? it.summary : '';
+    setKids(card,
+      el('div', { class: 'eyebrow' }, `${RARITIES[it.rarity]} · ${it.type}`, it.attunement ? ` · ${it.attunement}` : ''),
+      el('div', { class: 'entry-head' }, el('h3', { class: 'card-title' }, it.name), el('span', { class: `pill r-${RARITY_KEYS[it.rarity]}` }, RARITIES[it.rarity])),
+      it.appearance ? el('p', { class: 'card-sub' }, it.appearance) : null,
+      el('p', { class: 'flavor' }, it.property || it.summary),
+      it.minor || it.quirk || it.history ? traitList([['minor', 'Minor property', it.minor, () => { it.minor = pick(MINOR_PROPERTIES); render(); }], ['quirk', 'Quirk', it.quirk], ['history', 'History', it.history]].filter(([, , v]) => v)) : null,
+      it.value ? el('p', { class: 'muted' }, `Worth about ${fmt(it.value)} gp to the right buyer.`) : null,
+      cursedNote ? el('aside', { class: 'secret' }, el('div', { class: 'eyebrow' }, 'Curse (GM only)'), el('p', { class: 'pre' }, cursedNote)) : null,
+      el('div', { class: 'btnrow' },
+        el('button', { class: 'btn', type: 'button', onclick: () => saveNote('Magic item', it.name, text()) }, 'Save to notebook'),
+        el('button', { class: 'btn', type: 'button', onclick: () => copyText(text()) }, 'Copy'),
+        el('button', { class: 'btn world', type: 'button', onclick: () => sendToWorld(itemEntry(it)) }, 'Add to world'),
+        !it.curse && !it.cursed ? el('button', { class: 'btn ghost', type: 'button', onclick: () => { it = { ...it, curse: pick(CURSES), attunement: it.attunement || 'Requires attunement' }; render(); } }, 'Curse it')
+          : el('button', { class: 'btn ghost', type: 'button', onclick: () => { if (it.curse) { it = { ...it, curse: pick(CURSES) }; render(); } } }, it.curse ? 'Different curse' : 'SRD cursed item')));
+    if (isNew) fresh(card);
+  }
+  roll('catalog');
 }
 
 export const TOOLS = [
@@ -374,4 +428,5 @@ export const TOOLS = [
   { id: 'describe', label: 'Descriptions', mount: mountDescribe },
   { id: 'hooks', label: 'Rumors & Hooks', mount: mountHooks },
   { id: 'loot', label: 'Loot', mount: mountLoot },
+  { id: 'items', label: 'Magic Items', mount: mountItems },
 ];

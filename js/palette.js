@@ -3,6 +3,7 @@ import { el, setKids } from './dom.js';
 import { TOOLS } from './tools.js';
 import { KINDS, KIND_ORDER } from './world-schema.js';
 import { SPECIES, CLASSES, BACKGROUNDS, ORIGIN_FEATS } from './rules2024.js';
+import { MAGIC_ITEMS } from './magic-items.js';
 import { world, worldEntries, loadWorld, kindLabel } from './world-store.js';
 import { session, isGm, isAdmin } from './api.js';
 
@@ -17,11 +18,12 @@ function baseItems() {
     { label: 'Relationship web', group: 'World', href: '#world/web' },
     { label: 'Party standing', group: 'World', href: '#world/standings' },
     ...KIND_ORDER.map((k) => ({ label: KINDS[k].plural, group: 'World', href: `#world/k/${k}` })),
-    ...['classes', 'species', 'backgrounds', 'feats', 'slots'].map((t) => ({ label: `Reference: ${t === 'slots' ? 'spell slots' : t}`, group: 'Pages', href: `#reference/${t}` })),
+    ...['classes', 'species', 'backgrounds', 'feats', 'spells', 'items', 'slots'].map((t) => ({ label: `Reference: ${t === 'slots' ? 'spell slots' : t === 'items' ? 'magic items' : t}`, group: 'Pages', href: `#reference/${t}` })),
     ...Object.keys(CLASSES).map((c) => ({ label: c, group: 'Class', href: '#reference/classes', filter: c })),
     ...Object.keys(SPECIES).map((c) => ({ label: c, group: 'Species', href: '#reference/species', filter: c })),
     ...Object.keys(BACKGROUNDS).map((c) => ({ label: c, group: 'Background', href: '#reference/backgrounds', filter: c })),
     ...Object.keys(ORIGIN_FEATS).map((c) => ({ label: c, group: 'Feat', href: '#reference/feats', filter: c })),
+    ...MAGIC_ITEMS.map((i) => ({ label: i.name, group: i.cursed ? 'Cursed item' : 'Magic item', href: '#reference/items', filter: i.name, hint: i.summary })),
   ];
   if (isGm()) {
     out.push({ label: 'GM discussions', group: 'World', href: '#world/talk' });

@@ -2,7 +2,7 @@
 import { $, $$, el } from './dom.js';
 import { TOOLS } from './tools.js';
 import { mountCharacters } from './character-ui.js';
-import { mountWorld, showWorld } from './world-ui.js';
+import { mountWorld, showWorld, acceptDraft } from './world-ui.js';
 import { mountReference, showReference } from './reference-ui.js';
 import { mountAdmin, showAdmin } from './admin-ui.js';
 import { initNotebook } from './notebook.js';
@@ -53,6 +53,7 @@ initPalette();
 $('#search-btn').addEventListener('click', openPalette);
 if (/Mac|iPhone|iPad/.test(navigator.platform)) $('#search-btn kbd').textContent = '⌘K';
 addEventListener('hashchange', route);
+window.addEventListener('world:draft', (ev) => acceptDraft(ev.detail));
 onSession((s) => {
   if (location.hash.startsWith('#admin')) showAdmin(location.hash.split('/')[1]);
   $('.mainnav [data-section="admin"]').textContent = s.gm?.role === 'admin' ? 'Admin' : 'Build';

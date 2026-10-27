@@ -14,7 +14,7 @@ to the log at the bottom.
    Role sets class and level (hedge wizard: wizard 2–4, high priest: cleric 7–11…). "Roll stats" on any NPC
    page with class and level pickers. Character Forge shows its full spellbook the same way.
    Files: js/spells.js (done), js/npc-stats.js, js/statblock-ui.js; world-schema npc fields level/stats/spells.
-2. [ ] **Magic items and curses.** A full SRD magic item catalog in js/magic-items.js: name, rarity, type,
+2. [x] **Magic items and curses.** A full SRD magic item catalog in js/magic-items.js: name, rarity, type,
    attunement (and by whom), and a short original summary of what it does. Cursed items from the SRD flagged with
    their curse. A curse generator that can curse any item (bound to the user, penalties, compulsions, attracts
    things, slowly corrupts…) with a hidden reveal condition and a way to break it. A unique item maker: name,
@@ -66,3 +66,4 @@ to the log at the bottom.
 - Character Forge, table tools, world wiki, admin, maps, web, sessions, standings, discussions, search shipped.
 - Deep world builder: place hubs, quest boards, atlas, map drawers, Build console shipped.
 - NPC stat blocks, spellcasting with slot pips, SRD spell lists by class, full Forge spellbooks shipped.
+- Magic items: 267-item SRD catalog, 18 curses, unique item maker, Magic Items tool, catalog loot, Reference tabs for magic items and spells shipped. Fixed Add-to-world when World wasn't opened yet.
