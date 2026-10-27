@@ -14,7 +14,7 @@ export async function loadWorld(force) {
     try {
       const [r, s, m] = await Promise.all([api('entries'), api('standings').catch(() => null), api('maps').catch(() => null)]);
       world.entries = new Map(r.entries.map((e) => [e.id, e]));
-      world.info = r.world; world.standings = s; world.maps = m?.maps || [];
+      world.info = r.world; world.role = r.role || null; world.standings = s; world.maps = m?.maps || [];
       world.loaded = true; world.error = null;
     } catch (e) { world.error = e; }
     world.loading = null;
@@ -83,6 +83,19 @@ export async function patchEntry(entry, patch) {
   const r = await api('entries', { method: 'PUT', query: { id: entry.id }, body: { entry: next } });
   world.entries.set(r.entry.id, r.entry);
   return r.entry;
+}
+
+// GM quick changes: reveal or hide an entry, approve a suggestion.
+export async function setEntryState(entry, { visibility, status }) {
+  const r = await api('entries', { method: 'PATCH', body: { id: entry.id, visibility, status } });
+  world.entries.set(r.entry.id, r.entry);
+  return r.entry;
+}
+
+// Little markers for entries players can't see, or that wait for a GM.
+export function stateBadges(e) {
+  return [e.visibility === 'gm' ? el('span', { class: 'tag hidden-tag', title: 'Only GMs can see this entry' }, 'GMs only') : null,
+    e.status === 'suggested' ? el('span', { class: 'tag suggest-tag', title: 'Suggested by a player; a GM hasn’t approved it yet' }, 'Suggested') : null].filter(Boolean);
 }
 
 // ---- place helpers -----------------------------------------------------------------------------

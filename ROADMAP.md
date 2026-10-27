@@ -27,12 +27,12 @@ to the log at the bottom.
    A market event explains why ("the mines flooded, iron is scarce"). Haggling DC, buy-back at half price,
    restock button, special stock (rare or magic items by town size and shop type). Shops inherit their town's
    economy. Works in Table Tools, on town pages (Market tab) and on shop entries.
-4. [ ] **Hidden entries (GM prep).** Per-entry visibility: Everyone or GMs only. Hidden entries never reach
+4. [x] **Hidden entries (GM prep).** Per-entry visibility: Everyone or GMs only. Hidden entries never reach
    players (filter in API). "Reveal to players" button, with a log line. Hidden maps and pins already exist.
-5. [ ] **Multiple worlds.** worlds table; entries, maps, standings, comments, history scoped by world_id. Migrate
+5. [x] **Multiple worlds.** worlds table; entries, maps, standings, comments, history scoped by world_id. Migrate
    existing rows to a first world. World switcher in the header, world list page, create world, world settings
-   per world. URLs include the world (#w/<slug>/...).
-6. [ ] **Accounts, roles and players.** People (gms table) can belong to many worlds with a role per world:
+   per world. URLs include the world (?w=<slug>).
+6. [x] **Accounts, roles and players.** People (gms table) can belong to many worlds with a role per world:
    owner, GM, player. Per-world invite links/codes that create an account or add a membership. The site admin
    (ADMIN_CODE) can see everything. Players read revealed content, and can create and edit their own entries
    (characters, journal entries, notes), suggest edits/new entries (GM approves), and comment on quests.
@@ -68,3 +68,4 @@ to the log at the bottom.
 - NPC stat blocks, spellcasting with slot pips, SRD spell lists by class, full Forge spellbooks shipped.
 - Magic items: 267-item SRD catalog, 18 curses, unique item maker, Magic Items tool, catalog loot, Reference tabs for magic items and spells shipped. Fixed Add-to-world when World wasn't opened yet.
 - Shops & economy: SRD gear prices, 19 shop types, 6 town economies, shortages/surpluses/embargoes/festivals with reasons, haggling and buy-back helpers, magic stock by town size, Market tab on towns with restock-all, shop pages with stock tables, Shops & Markets tool.
+- Hidden entries, multiple worlds, accounts and roles: worlds table with additive migration (the old world becomes "world-1", existing GMs keep GM access), per-world owner/GM/player roles, GM and player invite links that create accounts with personal codes, world switcher and Worlds page, Members & invites admin, People (site admin), hidden entries with reveal/hide, player characters and journals, player suggestions with GM approve/reject, My things page. Verified the API and migration against a real Postgres engine (PGlite).

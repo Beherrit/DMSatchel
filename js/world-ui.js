@@ -1,9 +1,10 @@
 // The shared world: browse, search, read and (for GMs) write entries.
 // Routes: #world · #world/k/<kind> · #world/e/<id> · #world/new/<kind> · #world/edit/<id> · #world/q/<search> · #world/bin
+//         #world/suggestions (GMs) · #world/mine (your characters, journals and suggestions)
 
 import { el, toast, confirmButton, setKids } from './dom.js';
-import { api, session, isGm, onSession } from './api.js';
-import { KINDS, KIND_ORDER, LINK_LABELS, STANDING_KINDS, PLACE_KINDS } from './world-schema.js';
+import { api, session, isGm, isMember, isPlayer, signedIn, onSession } from './api.js';
+import { KINDS, KIND_ORDER, LINK_LABELS, STANDING_KINDS, PLACE_KINDS, PLAYER_KINDS } from './world-schema.js';
 import { openSignIn } from './signin.js';
 import { world, worldEntries, getEntry, loadWorld, byName, kindLabel, link, when, findByName, mentions, richText, notice, nameList } from './world-store.js';
 import { viewMaps, viewMap, pinsFor } from './world-maps.js';
@@ -15,9 +16,10 @@ import { renderStats, renderSpells } from './statblock-ui.js';
 import { renderStock } from './shop-ui.js';
 import { restockDraft } from './world-place.js';
 import { npcStats, NPC_CLASS_OPTIONS } from './npc-stats.js';
-import { patchEntry } from './world-store.js';
+import { patchEntry, setEntryState, stateBadges } from './world-store.js';
 
 export { loadWorld, worldEntries };
+const lower = (s) => (s === 'NPC' ? s : s.toLowerCase());
 let draft = null;
 let main, side, lastParts = [];
 
@@ -25,11 +27,14 @@ let main, side, lastParts = [];
 
 function renderSide() {
   const counts = {}; for (const e of world.entries.values()) counts[e.kind] = (counts[e.kind] || 0) + 1;
+  const suggested = worldEntries().filter((e) => e.status === 'suggested').length;
   const search = el('input', { type: 'search', id: 'w-search', placeholder: 'Search the world…', 'aria-label': 'Search the world' });
   search.addEventListener('keydown', (e) => { if (e.key === 'Enter' && search.value.trim()) location.hash = `world/q/${encodeURIComponent(search.value.trim())}`; });
   setKids(side, 
     el('a', { href: '#world', class: 'w-home' }, world.info?.name || 'The World'),
     search,
+    isPlayer() ? el('div', { class: 'w-gm w-player' }, el('a', { class: 'btn primary small', href: '#world/new/character' }, '+ My character'), el('a', { class: 'btn small', href: '#world/new/journal' }, '+ Journal entry'),
+      el('a', { class: 'btn ghost small', href: '#world/new/lore' }, 'Suggest an entry'), el('a', { class: 'btn ghost small', href: '#world/mine' }, 'My things')) : null,
     el('nav', { class: 'w-kinds w-tools', 'aria-label': 'World views' },
       el('a', { href: '#world/atlas', 'data-view': 'atlas' }, el('span', {}, 'Atlas'), el('span', { class: 'count' }, worldEntries().filter((e) => PLACE_KINDS.includes(e.kind)).length)),
       el('a', { href: '#world/maps', 'data-view': 'maps' }, el('span', {}, 'Maps'), el('span', { class: 'count' }, (world.maps || []).length)),
@@ -37,7 +42,9 @@ function renderSide() {
       el('a', { href: '#world/standings', 'data-view': 'standings' }, el('span', {}, 'Party standing'), el('span', { class: 'count' }, Object.keys(world.standings?.current || {}).length)),
       isGm() ? el('a', { href: '#world/talk', 'data-view': 'talk' }, el('span', {}, 'GM discussions'), el('span', { class: 'count', id: 'w-talk-count' }, '')) : null),
     el('nav', { class: 'w-kinds', 'aria-label': 'Entry types' }, KIND_ORDER.map((k) => el('a', { href: `#world/k/${k}`, 'data-kind': k }, el('span', {}, KINDS[k].plural), el('span', { class: 'count' }, counts[k] || 0)))),
-    isGm() ? el('div', { class: 'w-gm' }, el('a', { class: 'btn primary small', href: '#world/new/npc' }, '+ New entry'), el('a', { class: 'btn ghost small', href: '#world/bin' }, 'Bin')) : null,
+    isGm() ? el('div', { class: 'w-gm' }, el('a', { class: 'btn primary small', href: '#world/new/npc' }, '+ New entry'), el('a', { class: 'btn ghost small', href: '#world/bin' }, 'Bin'),
+      suggested ? el('a', { class: 'btn small suggest-btn', href: '#world/suggestions' }, `Suggestions (${suggested})`) : null) : null,
+    !isMember() && signedIn() ? el('p', { class: 'muted small w-visitor' }, 'You’re browsing as a visitor. Ask the owner for an invite to add things.') : null,
   );
 }
 
@@ -65,7 +72,7 @@ function viewHome() {
 }
 
 function entryCard(e) {
-  return el('li', { class: 'entry-card' }, link(e), e.summary ? el('p', {}, e.summary.length > 180 ? `${e.summary.slice(0, 178)}…` : e.summary) : null,
+  return el('li', { class: `entry-card${e.visibility === 'gm' ? ' is-hidden' : ''}${e.status === 'suggested' ? ' is-suggested' : ''}` }, el('div', { class: 'card-title' }, link(e), stateBadges(e)), e.summary ? el('p', {}, e.summary.length > 180 ? `${e.summary.slice(0, 178)}…` : e.summary) : null,
     e.tags?.length ? el('div', { class: 'tags' }, e.tags.map((t) => el('a', { class: 'tagchip', href: `#world/q/${encodeURIComponent(`#${t}`)}` }, `#${t}`))) : null);
 }
 
@@ -77,11 +84,12 @@ function viewKind(kind) {
   else list.sort(byName);
   return el('div', { class: 'w-view' },
     el('div', { class: 'panel-head row' }, el('div', {}, el('h2', {}, KINDS[kind].plural), el('p', {}, KINDS[kind].blurb)),
-      isGm() ? el('a', { class: 'btn primary', href: `#world/new/${kind}` }, `New ${kindLabel(kind).toLowerCase()}`) : null),
+      isGm() || (isMember() && PLAYER_KINDS.includes(kind)) ? el('a', { class: 'btn primary', href: `#world/new/${kind}` }, `New ${lower(kindLabel(kind))}`)
+        : isMember() ? el('a', { class: 'btn', href: `#world/new/${kind}` }, `Suggest a ${lower(kindLabel(kind))}`) : null),
     list.length ? (kind === 'session' ? sessionList(list) : kind === 'event'
       ? el('ol', { class: 'timeline' }, list.map((e) => el('li', {}, el('span', { class: 'date' }, e.fields.date || e.fields.sort || '—'), el('div', {}, link(e), e.summary ? el('p', {}, e.summary) : null))))
       : el('ul', { class: 'entry-grid' }, list.map(entryCard)))
-      : notice(`No ${KINDS[kind].plural.toLowerCase()} yet`, isGm() ? 'Add the first one.' : 'The GMs haven’t added any yet.'));
+      : notice(`No ${KINDS[kind].plural.replace(/^(?!NPC)\w+/, (w) => w.toLowerCase())} yet`, isGm() ? 'Add the first one.' : PLAYER_KINDS.includes(kind) && isMember() ? 'Add the first one.' : 'The GMs haven’t added any yet.'));
 }
 
 function sessionList(list) {
@@ -150,17 +158,55 @@ function viewEntry(id, tab) {
   const node = el('article', { class: 'w-view entry-view' },
     crumbs.length ? el('nav', { class: 'crumbs', 'aria-label': 'Located in' }, crumbs.flatMap((c, i) => [i ? ' › ' : '', link(c)])) : null,
     el('div', { class: 'panel-head row' },
-      el('div', {}, el('div', { class: 'eyebrow' }, kindLabel(e.kind), e.fields?.type ? ` · ${e.fields.type}` : ''), el('h2', {}, e.name)),
+      el('div', {}, el('div', { class: 'eyebrow' }, kindLabel(e.kind), e.fields?.type ? ` · ${e.fields.type}` : ''), el('h2', {}, e.name), stateBadges(e).length ? el('div', { class: 'badges' }, stateBadges(e)) : null),
+      !isGm() && e.can_edit ? el('div', { class: 'btnrow' }, el('a', { class: 'btn', href: `#world/edit/${e.id}` }, 'Edit')) : null,
       isGm() ? el('div', { class: 'btnrow' }, el('a', { class: 'btn', href: `#world/edit/${e.id}` }, 'Edit'),
+        e.status === 'suggested' ? null : el('button', { class: 'btn ghost', type: 'button', title: e.visibility === 'gm' ? 'Let players see this entry' : 'Hide this entry from players', onclick: async () => {
+          try { const n = await setEntryState(e, { visibility: e.visibility === 'gm' ? 'all' : 'gm' }); toast(n.visibility === 'gm' ? `${e.name} is hidden from players` : `Revealed ${e.name} to players`); rerenderWorld(); } catch (err) { toast(err.message, 'bad'); }
+        } }, e.visibility === 'gm' ? 'Reveal to players' : 'Hide from players'),
         el('button', { class: 'btn ghost', type: 'button', onclick: async () => {
           history.hidden = !history.hidden; if (history.hidden) return;
           setKids(history, el('p', { class: 'muted' }, 'Loading history…'));
           try { const r = await api('activity', { query: { id } }); setKids(history, el('h4', {}, 'History'), el('ul', { class: 'plain' }, r.activity.map((h) => el('li', {}, `${when(h.at)} · ${h.gm || 'Someone'} · ${h.action}`)))); }
           catch (err) { setKids(history, el('p', { class: 'error' }, err.message)); }
         } }, 'History')) : null),
+    e.status === 'suggested' ? suggestionBanner(e) : null,
+    e.visibility === 'gm' && isGm() ? el('p', { class: 'hidden-note muted small' }, 'Players can’t see this entry, or find it in search or on maps. Reveal it when they discover it.') : null,
     isPlace ? placeSummary(e) : null,
     isPlace ? placeHub(e, tab, overview, rerenderWorld) : overview());
   return node;
+}
+
+function suggestionBanner(e) {
+  if (!isGm()) return el('div', { class: 'card suggest-banner' }, el('strong', {}, 'Waiting for a GM. '), 'Only you and the GMs can see this suggestion until one of them approves it.');
+  return el('div', { class: 'card suggest-banner' },
+    el('p', {}, el('strong', {}, `${e.owner || 'A player'} suggested this. `), 'Approve it to add it to the world for everyone, edit it first, or reject it (it goes to the bin).'),
+    el('div', { class: 'btnrow' },
+      el('button', { class: 'btn primary small', type: 'button', onclick: async () => { try { await setEntryState(e, { status: 'live' }); toast(`Approved ${e.name}`); rerenderWorld(); } catch (err) { toast(err.message, 'bad'); } } }, 'Approve'),
+      el('button', { class: 'btn small', type: 'button', onclick: async () => { try { await setEntryState(e, { status: 'live', visibility: 'gm' }); toast(`Approved ${e.name}, hidden from players for now`); rerenderWorld(); } catch (err) { toast(err.message, 'bad'); } } }, 'Approve, keep hidden'),
+      confirmButton('Reject', async () => { try { await api('entries', { method: 'DELETE', query: { id: e.id } }); world.entries.delete(e.id); toast('Rejected; it’s in the bin'); location.hash = 'world/suggestions'; } catch (err) { toast(err.message, 'bad'); } }, 'btn ghost small')));
+}
+
+function viewSuggestions() {
+  if (!isGm()) return notice('GMs only', 'Suggestions from players wait here for a GM.');
+  const list = worldEntries().filter((e) => e.status === 'suggested').sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)));
+  return el('div', { class: 'w-view' }, el('div', { class: 'panel-head' }, el('h2', {}, 'Suggestions'), el('p', {}, 'Things your players have added that wait for a GM. Approve them as they are, edit them first, or reject them.')),
+    list.length ? el('ul', { class: 'entry-list suggest-list' }, list.map((e) => el('li', {}, link(e), el('span', { class: 'kind-tag' }, kindLabel(e.kind)), el('span', { class: 'muted small' }, `${e.owner || 'A player'}, ${when(e.created_at)}`),
+      el('span', { class: 'actions' },
+        el('button', { class: 'btn small primary', type: 'button', onclick: async () => { try { await setEntryState(e, { status: 'live' }); toast(`Approved ${e.name}`); rerenderWorld(); } catch (err) { toast(err.message, 'bad'); } } }, 'Approve'),
+        confirmButton('Reject', async () => { try { await api('entries', { method: 'DELETE', query: { id: e.id } }); world.entries.delete(e.id); toast('Rejected'); rerenderWorld(); } catch (err) { toast(err.message, 'bad'); } }, 'btn small ghost')))))
+      : notice('Nothing waiting', 'When a player suggests an NPC, a place or a rumor, it shows up here.'));
+}
+
+function viewMine() {
+  if (!signedIn()) return notice('Sign in first', 'Your characters, journals and suggestions show here once you’re signed in.', el('button', { class: 'btn primary', type: 'button', onclick: () => openSignIn() }, 'Sign in'));
+  const list = worldEntries().filter((e) => e.owner_id === session.gm.id).sort(byName);
+  const group = (title, items) => items.length ? el('section', {}, el('h3', { class: 'section-title' }, title), el('ul', { class: 'entry-grid' }, items.map(entryCard))) : null;
+  return el('div', { class: 'w-view' }, el('div', { class: 'panel-head' }, el('h2', {}, 'My things'), el('p', {}, 'Your characters, journal entries and the suggestions you’ve made in this world.')),
+    list.length ? [group('Characters', list.filter((e) => e.kind === 'character')), group('Journal', list.filter((e) => e.kind === 'journal')),
+      group('Suggestions', list.filter((e) => !PLAYER_KINDS.includes(e.kind)))]
+      : notice('Nothing yet', 'Add your character, keep a journal, or suggest something the GMs might add to the world.',
+        isMember() ? el('div', { class: 'btnrow' }, el('a', { class: 'btn primary', href: '#world/new/character' }, '+ My character'), el('a', { class: 'btn', href: '#world/new/journal' }, '+ Journal entry')) : null));
 }
 
 // The nearest settlement a place sits in (for market prices).
@@ -200,9 +246,12 @@ function placeSummary(e) {
 // ---- editing -----------------------------------------------------------------------------------
 
 function viewEdit(id, kindForNew) {
-  if (!isGm()) return notice('GMs only', 'Sign in with your invite code to add or change entries.', el('button', { class: 'btn primary', type: 'button', onclick: () => openSignIn() }, 'GM sign in'));
+  if (!isMember()) return notice(signedIn() ? 'Members only' : 'Sign in to add things', signedIn() ? 'You’re visiting this world. Ask its owner for an invite to add characters, journals and suggestions.' : 'Sign in with your personal code, or open the invite link your GM sent you.',
+    signedIn() ? null : el('div', { class: 'btnrow' }, el('button', { class: 'btn primary', type: 'button', onclick: () => openSignIn() }, 'Sign in'), el('a', { class: 'btn', href: '#join' }, 'I have an invite')));
   const existing = id ? world.entries.get(id) : null;
   if (id && !existing) return notice('Entry not found', 'It may have been deleted.');
+  if (existing && !existing.can_edit) return notice('Not yours to edit', 'Players can edit their own characters, journals and suggestions. Ask a GM to change this one.');
+  const gm = isGm();
   const e = existing ? structuredClone(existing) : { kind: KINDS[kindForNew] ? kindForNew : 'npc', name: '', summary: '', body: '', fields: {}, secret: '', tags: [], links: [], parent_id: null, ...(draft || {}) };
   if (!existing && !draft && e.kind === 'session') {
     const sessions = worldEntries().filter((x) => x.kind === 'session');
@@ -222,8 +271,15 @@ function viewEdit(id, kindForNew) {
   const input = (name, label, value, attrs = {}) => el('div', { class: 'field' }, el('label', { for: `f-${name}` }, label), el('input', { type: 'text', id: `f-${name}`, name, value: value || '', ...attrs }));
   const area = (name, label, value, rows = 4, hint) => el('div', { class: 'field' }, el('label', { for: `f-${name}` }, label), el('textarea', { id: `f-${name}`, name, rows }, value || ''), hint ? el('small', { class: 'muted' }, hint) : null);
 
-  const kindSel = el('select', { id: 'f-kind', name: 'kind' }, KIND_ORDER.map((k) => el('option', { value: k }, KINDS[k].label)));
-  kindSel.value = e.kind;
+  // Players can make characters and journals; anything else becomes a suggestion for the GMs.
+  const kindChoices = gm || !existing || existing.status === 'suggested' ? KIND_ORDER : PLAYER_KINDS;
+  const kindSel = el('select', { id: 'f-kind', name: 'kind' }, KIND_ORDER.filter((k) => kindChoices.includes(k)).map((k) => el('option', { value: k }, gm || PLAYER_KINDS.includes(k) ? KINDS[k].label : `${KINDS[k].label} (suggestion)`)));
+  kindSel.value = kindChoices.includes(e.kind) ? e.kind : kindChoices[0];
+  const visSel = el('select', { id: 'f-visibility', name: 'visibility' }, el('option', { value: 'all' }, 'Everyone in the world'), el('option', { value: 'gm' }, 'GMs only (hidden from players)'));
+  visSel.value = e.visibility === 'gm' ? 'gm' : 'all';
+  const suggestNote = el('p', { class: 'muted small suggest-note' });
+  const updateNote = () => { suggestNote.textContent = !gm && !PLAYER_KINDS.includes(kindSel.value) ? 'This will be a suggestion: the GMs see it and can approve it, edit it or turn it down. Until then only you and they can see it.' : ''; };
+  kindSel.addEventListener('change', updateNote); updateNote();
   function renderFields() {
     collectFields();
     setKids(fieldsBox, ...KINDS[kindSel.value].fields.map(([k, label, type, opts]) => {
@@ -247,7 +303,7 @@ function viewEdit(id, kindForNew) {
     const row = el('div', { class: 'link-row' },
       el('input', { type: 'text', class: 'l-label', list: 'w-labels', value: l.label, 'aria-label': 'Relationship' }),
       el('input', { type: 'text', class: 'l-target', list: 'w-names', value: target?.name || '', placeholder: 'Entry name', 'aria-label': 'Connected entry' }),
-      el('label', { class: 'check' }, el('input', { type: 'checkbox', class: 'l-secret', checked: l.secret || null }), ' GM only'),
+      gm ? el('label', { class: 'check' }, el('input', { type: 'checkbox', class: 'l-secret', checked: l.secret || null }), ' GM only') : null,
       el('button', { class: 'btn small ghost', type: 'button', 'aria-label': 'Remove connection', onclick: () => row.remove() }, '✕'));
     return row;
   }
@@ -257,19 +313,21 @@ function viewEdit(id, kindForNew) {
   form.append(
     el('div', { class: 'edit-grid' },
       el('div', { class: 'field' }, el('label', { for: 'f-kind' }, 'Type'), kindSel),
+      gm ? el('div', { class: 'field' }, el('label', { for: 'f-visibility' }, 'Who can see it'), visSel) : null,
       input('name', 'Name', e.name, { required: true, maxlength: 200 }),
       input('parent', 'Located in / part of', parent?.name || '', { list: 'w-names', placeholder: 'e.g. a region or city' })),
+    suggestNote,
     area('summary', 'Summary', e.summary, 2, 'One or two sentences. This shows in lists and search.'),
     fieldsBox,
     area('body', 'Description & notes', e.body, 8, 'Link to other entries by name with [[double brackets]], e.g. [[The Silver Hand]].'),
-    area('secret', 'GM-only secrets', e.secret, 4, 'Players never see this. Only signed-in GMs can read it.'),
+    gm ? area('secret', 'GM-only secrets', e.secret, 4, 'Players never see this. Only this world’s GMs can read it.') : null,
     input('tags', 'Tags', (e.tags || []).join(', '), { placeholder: 'comma separated, e.g. north, war, session-12' }),
     el('div', { class: 'field wide' }, el('label', {}, 'Connections'), linksBox,
       el('button', { class: 'btn small', type: 'button', onclick: () => linksBox.append(linkRow()) }, '+ Add connection')),
     nameList(), el('datalist', { id: 'w-labels' }, LINK_LABELS.map((l) => el('option', { value: l }))),
     status,
     el('div', { class: 'btnrow' },
-      el('button', { class: 'btn primary', type: 'submit' }, existing ? 'Save changes' : 'Create entry'),
+      el('button', { class: 'btn primary', type: 'submit' }, existing ? 'Save changes' : !gm && !PLAYER_KINDS.includes(e.kind) ? 'Send suggestion' : 'Create entry'),
       el('a', { class: 'btn ghost', href: existing ? `#world/e/${existing.id}` : '#world' }, 'Cancel'),
       existing ? confirmButton('Move to bin', async () => {
         try { await api('entries', { method: 'DELETE', query: { id: existing.id } }); world.entries.delete(existing.id); toast('Moved to the bin'); location.hash = `world/k/${existing.kind}`; }
@@ -289,11 +347,11 @@ function viewEdit(id, kindForNew) {
       const name = row.querySelector('.l-target').value.trim(); if (!name) continue;
       const t = findByName(name);
       if (!t) { unknown.push(name); continue; }
-      links.push({ id: t.id, label: row.querySelector('.l-label').value.trim() || 'related to', secret: row.querySelector('.l-secret').checked });
+      links.push({ id: t.id, label: row.querySelector('.l-label').value.trim() || 'related to', secret: Boolean(row.querySelector('.l-secret')?.checked) });
     }
     if (unknown.length) { status.textContent = `These connections don’t match any entry: ${unknown.join(', ')}.`; status.className = 'form-status error'; return; }
     const entry = {
-      kind: kindSel.value, name: String(f.get('name')).trim(), summary: String(f.get('summary') || ''), body: String(f.get('body') || ''), secret: String(f.get('secret') || ''),
+      kind: kindSel.value, name: String(f.get('name')).trim(), summary: String(f.get('summary') || ''), body: String(f.get('body') || ''), secret: gm ? String(f.get('secret') || '') : existing?.secret || '', visibility: gm ? visSel.value : existing?.visibility || 'all',
       fields: Object.fromEntries(Object.entries(e.fields).filter(([k, v]) => v && KINDS[kindSel.value].fields.some(([fk]) => fk === k))),
       tags: String(f.get('tags') || '').split(',').map((t) => t.trim()).filter(Boolean), links, parent_id: parentEntry?.id || null, version: existing?.version,
     };
@@ -301,7 +359,7 @@ function viewEdit(id, kindForNew) {
     try {
       const r = existing ? await api('entries', { method: 'PUT', query: { id: existing.id }, body: { entry } }) : await api('entries', { method: 'POST', body: { entry } });
       world.entries.set(r.entry.id, r.entry);
-      toast(existing ? 'Saved' : 'Added to the world');
+      toast(existing ? 'Saved' : r.entry.status === 'suggested' ? 'Suggested: a GM will take a look' : 'Added to the world');
       location.hash = `world/e/${r.entry.id}`;
     } catch (err) {
       status.textContent = err.message; status.className = 'form-status error';
@@ -309,7 +367,7 @@ function viewEdit(id, kindForNew) {
     }
   });
 
-  return el('div', { class: 'w-view' }, el('div', { class: 'panel-head' }, el('h2', {}, existing ? `Edit ${existing.name}` : `New ${kindLabel(e.kind).toLowerCase()}`),
+  return el('div', { class: 'w-view' }, el('div', { class: 'panel-head' }, el('h2', {}, existing ? `Edit ${existing.name}` : !gm && !PLAYER_KINDS.includes(e.kind) ? 'Suggest an entry' : `New ${lower(kindLabel(e.kind))}`),
     el('p', {}, existing ? `Last edited by ${existing.updated_by || 'someone'} ${when(existing.updated_at)}. If another GM saves first, you’ll be told before anything is overwritten.` : 'Everything except the name is optional. You can fill it in later.')), form);
 }
 
@@ -356,6 +414,8 @@ export async function showWorld(parts, { keepScroll = false } = {}) {
   else if (view === 'web') node = viewWeb(arg);
   else if (view === 'standings') node = viewStandings();
   else if (view === 'talk') node = await viewTalk();
+  else if (view === 'suggestions') node = viewSuggestions();
+  else if (view === 'mine') node = viewMine();
   else node = viewHome();
   const y = window.scrollY;
   setKids(main, node);
@@ -365,7 +425,8 @@ export async function showWorld(parts, { keepScroll = false } = {}) {
 
 // Drafts sent from the tools ("Add to world") open the new-entry form, prefilled.
 export function acceptDraft(d = {}) {
-  if (!isGm()) { toast('Sign in as a GM to add things to the shared world'); openSignIn(); return; }
+  if (!isMember()) { toast(signedIn() ? 'You need an invite to this world to add things' : 'Sign in to add things to the shared world'); if (!signedIn()) openSignIn(); return; }
+  if (!isGm()) toast('Players’ additions are sent to the GMs as suggestions');
   draft = { ...d, fields: { ...(d.fields || {}) } };
   location.hash = `world/new/${d.kind}`;
 }
@@ -375,5 +436,12 @@ export function mountWorld(root) {
   main = el('div', { class: 'w-main' });
   root.append(el('div', { class: 'w-layout' }, side, main));
   window.addEventListener('world:rerender', () => rerenderWorld());
-  onSession(() => { world.loaded = false; if (location.hash.startsWith('#world')) showWorld(location.hash.slice(1).split('/').slice(1)); });
+  // A new sign-in or a different world means different entries are visible: load again.
+  let seen = '';
+  onSession((s) => {
+    const key = `${s.gm?.id || ''}|${s.worldKey || ''}|${s.worlds.map((w) => `${w.id}:${w.role}`).join(',')}`;
+    if (key === seen) return; seen = key;
+    world.loaded = false;
+    if (location.hash.startsWith('#world')) showWorld(location.hash.slice(1).split('/').slice(1));
+  });
 }

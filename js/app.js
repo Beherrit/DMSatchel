@@ -7,8 +7,9 @@ import { mountReference, showReference } from './reference-ui.js';
 import { mountAdmin, showAdmin } from './admin-ui.js';
 import { initNotebook } from './notebook.js';
 import { initSignIn } from './signin.js';
-import { loadSession, onSession } from './api.js';
+import { loadSession, onSession, isOwner, isAdmin, isGm } from './api.js';
 import { initPalette, openPalette } from './palette.js';
+import { initWorldSwitcher, mountWorlds, showWorlds } from './worlds-ui.js';
 
 const mounted = new Set();
 const panels = {};
@@ -37,12 +38,13 @@ function show(section, sub) {
   else if (section === 'world') { panel('world', mountWorld).hidden = false; showWorld(sub ? sub.split('/') : []); }
   else if (section === 'reference') { panel('reference', mountReference).hidden = false; showReference(sub); }
   else if (section === 'admin') { panel('admin', mountAdmin).hidden = false; showAdmin(sub); }
+  else if (section === 'worlds' || section === 'join') { panel('worlds', mountWorlds).hidden = false; showWorlds(section === 'join' ? `join/${sub}` : sub); }
 }
 
 function route() {
   const h = location.hash.replace(/^#/, '');
   const [section, ...rest] = h.split('/');
-  const known = ['tools', 'characters', 'world', 'reference', 'admin'];
+  const known = ['tools', 'characters', 'world', 'reference', 'admin', 'worlds', 'join'];
   show(known.includes(section) ? section : 'tools', rest.join('/'));
 }
 
@@ -50,13 +52,15 @@ $('#toolnav').append(...TOOLS.map((t) => el('a', { href: `#tools/${t.id}`, 'data
 initNotebook();
 initSignIn();
 initPalette();
+initWorldSwitcher();
 $('#search-btn').addEventListener('click', openPalette);
 if (/Mac|iPhone|iPad/.test(navigator.platform)) $('#search-btn kbd').textContent = '⌘K';
 addEventListener('hashchange', route);
 window.addEventListener('world:draft', (ev) => acceptDraft(ev.detail));
 onSession((s) => {
   if (location.hash.startsWith('#admin')) showAdmin(location.hash.split('/')[1]);
-  $('.mainnav [data-section="admin"]').textContent = s.gm?.role === 'admin' ? 'Admin' : 'Build';
+  if (location.hash.startsWith('#worlds')) showWorlds(location.hash.split('/').slice(1).join('/'));
+  $('.mainnav [data-section="admin"]').textContent = isOwner() || isAdmin() ? 'Admin' : isGm() ? 'Build' : 'World info';
 });
 route();
 loadSession();

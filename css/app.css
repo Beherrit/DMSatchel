@@ -106,6 +106,7 @@ textarea { width: 100%; resize: vertical; line-height: 1.45 }
 .seg button:last-child { border-right: none }
 .seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg) }
 .check { display: inline-flex; align-items: center; gap: 4px; font-size: 14px; color: var(--muted); white-space: nowrap }
+.edit-form .check, .card > .check { white-space: normal; align-items: flex-start }
 
 /* cards & tool output */
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px; display: grid; gap: 12px; min-width: 0 }
@@ -243,7 +244,7 @@ textarea { width: 100%; resize: vertical; line-height: 1.45 }
 .timeline p { color: var(--muted) }
 @media (max-width: 560px) { .timeline li { grid-template-columns: minmax(0, 1fr) } }
 .empty-state { justify-items: start }
-.edit-form { gap: 14px }
+.edit-form { gap: 14px; grid-template-columns: minmax(0, 1fr) }
 .edit-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px }
 .edit-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px }
 .edit-fields .wide, .edit-form .field.wide { grid-column: 1 / -1 }
@@ -256,7 +257,7 @@ textarea { width: 100%; resize: vertical; line-height: 1.45 }
 .form-status.error { color: var(--danger) }
 
 /* admin & reference */
-.admin-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 16px; align-items: start }
+.admin-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(380px, 100%), 1fr)); gap: 16px; align-items: start }
 @media (max-width: 460px) { .admin-grid { grid-template-columns: minmax(0, 1fr) } }
 .admin-grid > :first-child { grid-column: 1 / -1 }
 .table-wrap { overflow-x: auto }
@@ -574,3 +575,41 @@ tr.disabled td { color: var(--muted) }
 }
 .pins-admin > *, .pin-map, .pin-map > * { min-width: 0; max-width: 100% }
 .board-wrap > .seg { justify-self: start }
+
+/* ---- worlds, members and player suggestions ---- */
+.world-switch { position: relative }
+.ws-btn { max-width: 240px }
+.ws-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.ws-menu { position: absolute; right: 0; top: calc(100% + 4px); z-index: 40; min-width: 240px; max-width: min(320px, calc(100vw - 32px)); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 6px; box-shadow: 0 8px 24px rgb(0 0 0 / .18); display: grid; gap: 2px }
+.ws-menu[hidden] { display: none }
+.ws-menu hr { border: 0; border-top: 1px solid var(--line); margin: 4px 0; width: 100% }
+.ws-item { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 7px 10px; border-radius: 6px; background: none; border: 0; text-align: left; color: var(--ink); text-decoration: none; cursor: pointer; font: inherit }
+.ws-item:hover, .ws-item:focus-visible { background: var(--sunk) }
+.ws-item.current { font-weight: 700 }
+.ws-empty { padding: 6px 10px; margin: 0 }
+.world-grid { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px }
+.world-card.current { border-color: var(--accent) }
+.worlds-page { display: grid; gap: 24px }
+.invite-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin: 12px 0 20px }
+.invite-card { border: 1px solid var(--line); border-radius: 8px; padding: 12px; display: grid; gap: 8px; min-width: 0 }
+.invite-card h4 { margin: 0 }
+.invite-url { overflow-wrap: anywhere; font-size: 13px }
+.code-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px }
+.danger-zone { margin-top: 24px; border-top: 1px solid var(--line); padding-top: 12px }
+.hidden-tag, .suggest-tag { border: 1px solid currentColor; border-radius: 999px; padding: 0 6px; margin-left: 0 }
+.hidden-tag { color: var(--warn) }
+.suggest-tag { color: var(--k-thing) }
+.badges { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px }
+.card-title { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px }
+.entry-card.is-hidden { border-style: dashed }
+.entry-card.is-suggested { border-style: dotted }
+.suggest-banner { border-left: 4px solid var(--k-thing); display: grid; gap: 8px }
+.suggest-banner p { margin: 0 }
+.hidden-note { margin: 0 }
+.suggest-note:empty { display: none }
+.suggest-btn { border-color: var(--k-thing) }
+.w-player { flex-wrap: wrap }
+.suggest-list .actions { display: inline-flex; gap: 6px; margin-left: auto }
+@media (max-width: 640px) { .ws-btn { max-width: 160px } .ws-menu { right: auto; left: 0 } }
+.worlds-page .admin-grid > :first-child { grid-column: auto }
+.code-row code.invite-url { font-size: 14px; letter-spacing: 0; flex: 1 1 100% }

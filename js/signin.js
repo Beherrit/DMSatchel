@@ -1,6 +1,8 @@
-// The GM sign-in dialog and the account button in the header.
+// The sign-in dialog and the account button in the header.
 import { $, el, toast, setKids } from './dom.js';
-import { session, signIn, signOut, onSession, loadSession } from './api.js';
+import { session, signIn, signOut, onSession, loadSession, worldRole, isGm, isOwner, isAdmin } from './api.js';
+
+const ROLE_LABEL = { owner: 'Owner', gm: 'GM', player: 'Player' };
 
 let dialog;
 
@@ -24,11 +26,12 @@ export async function openSignIn() {
 function renderAccount() {
   const box = $('#account');
   setKids(box, session.gm
-    ? el('span', { class: 'who' }, el('span', { class: 'who-name' }, session.gm.name), el('span', { class: 'role' }, session.gm.role === 'admin' ? 'Admin' : 'GM'),
+    ? el('span', { class: 'who' }, el('span', { class: 'who-name' }, session.gm.name), worldRole() || isAdmin() ? el('span', { class: 'role' }, isAdmin() ? 'Admin' : ROLE_LABEL[worldRole()]) : null,
       el('button', { class: 'btn small ghost', type: 'button', onclick: async () => { await signOut(); toast('Signed out'); } }, 'Sign out'))
-    : el('button', { class: 'btn small', type: 'button', onclick: openSignIn }, 'GM sign in'));
-  document.body.classList.toggle('is-gm', Boolean(session.gm));
-  document.body.classList.toggle('is-admin', session.gm?.role === 'admin');
+    : el('button', { class: 'btn small', type: 'button', onclick: openSignIn }, 'Sign in'));
+  document.body.classList.toggle('is-gm', isGm());
+  document.body.classList.toggle('is-admin', isOwner() || isAdmin());
+  document.body.classList.toggle('is-member', Boolean(worldRole()));
 }
 
 export function initSignIn() {
@@ -36,9 +39,9 @@ export function initSignIn() {
   const input = el('input', { type: 'text', id: 'signin-code', autocomplete: 'one-time-code', placeholder: 'XXXX-XXXX-XXXX', spellcheck: 'false' });
   dialog = el('dialog', { class: 'dialog', 'aria-labelledby': 'signin-title' },
     el('form', { method: 'dialog', class: 'dialog-body' },
-      el('h2', { id: 'signin-title' }, 'GM sign in'),
-      el('p', { class: 'muted' }, 'Enter the invite code your admin gave you. You’ll stay signed in on this device for 60 days.'),
-      el('div', { class: 'field' }, el('label', { for: 'signin-code' }, 'Invite code'), input),
+      el('h2', { id: 'signin-title' }, 'Sign in'),
+      el('p', { class: 'muted' }, 'Enter your personal code. You got it when you first joined; a world owner or the site admin can give you a new one. You’ll stay signed in on this device for 60 days.'), el('p', { class: 'muted small' }, 'New here? Open the invite link your GM sent you instead, or ', el('a', { href: '#join', onclick: () => dialog.close() }, 'enter an invite code'), '.'),
+      el('div', { class: 'field' }, el('label', { for: 'signin-code' }, 'Personal code'), input),
       status,
       el('div', { class: 'btnrow' }, el('button', { class: 'btn primary', type: 'submit', value: 'go' }, 'Sign in'), el('button', { class: 'btn ghost', type: 'button', onclick: () => dialog.close() }, 'Cancel'))));
   dialog.querySelector('form').addEventListener('submit', async (e) => {

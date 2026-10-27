@@ -12,14 +12,14 @@ export default route({
     const entryId = req.query?.entry_id;
     if (entryId) {
       const rows = await sql`SELECT c.id, c.entry_id, c.parent_id, c.body, c.resolved, c.created_at, c.edited_at, c.gm_id, g.name AS gm
-        FROM comments c LEFT JOIN gms g ON g.id = c.gm_id WHERE c.entry_id = ${entryId} ORDER BY c.created_at`;
+        FROM comments c LEFT JOIN gms g ON g.id = c.gm_id JOIN entries e ON e.id = c.entry_id WHERE c.entry_id = ${entryId} AND e.world_id = ${req.world.id} ORDER BY c.created_at`;
       return send(res, 200, { comments: rows });
     }
     const rows = await sql`SELECT t.id, t.entry_id, t.body, t.created_at, g.name AS gm, e.name AS entry_name, e.kind,
         (SELECT count(*)::int FROM comments r WHERE r.parent_id = t.id) AS replies,
         GREATEST(t.created_at, COALESCE((SELECT max(r.created_at) FROM comments r WHERE r.parent_id = t.id), t.created_at)) AS last_at
       FROM comments t LEFT JOIN gms g ON g.id = t.gm_id LEFT JOIN entries e ON e.id = t.entry_id
-      WHERE t.parent_id IS NULL AND NOT t.resolved AND (e.deleted IS NOT TRUE) ORDER BY last_at DESC LIMIT 100`;
+      WHERE t.parent_id IS NULL AND NOT t.resolved AND (e.deleted IS NOT TRUE) AND e.world_id = ${req.world.id} ORDER BY last_at DESC LIMIT 100`;
     send(res, 200, { threads: rows });
   },
   async POST(req, res) {
@@ -27,6 +27,7 @@ export default route({
     const body = String(req.body.body || '').trim().slice(0, 5000);
     if (!body) return fail(res, 400, 'Write something first.');
     const entryId = String(req.body.entry_id || '').slice(0, 40);
+    if (!(await sql`SELECT id FROM entries WHERE id = ${entryId} AND world_id = ${req.world.id}`).length) return fail(res, 404, 'That entry isn’t in this world.');
     const parentId = req.body.parent_id ? Number(req.body.parent_id) : null;
     if (parentId) {
       const p = await sql`SELECT id FROM comments WHERE id = ${parentId} AND entry_id = ${entryId} AND parent_id IS NULL`;
@@ -40,7 +41,7 @@ export default route({
   async PATCH(req, res) {
     if (!requireGm(req, res)) return;
     const id = Number(req.body.id);
-    const cur = (await sql`SELECT id, gm_id FROM comments WHERE id = ${id}`)[0];
+    const cur = (await sql`SELECT c.id, c.gm_id FROM comments c JOIN entries e ON e.id = c.entry_id WHERE c.id = ${id} AND e.world_id = ${req.world.id}`)[0];
     if (!cur) return fail(res, 404, 'That comment was deleted.');
     if (typeof req.body.resolved === 'boolean') await sql`UPDATE comments SET resolved = ${req.body.resolved} WHERE id = ${id}`;
     if (typeof req.body.body === 'string') {
@@ -52,10 +53,10 @@ export default route({
   async DELETE(req, res) {
     if (!requireGm(req, res)) return;
     const id = Number(req.query?.id);
-    const cur = (await sql`SELECT id, gm_id FROM comments WHERE id = ${id}`)[0];
+    const cur = (await sql`SELECT c.id, c.gm_id FROM comments c JOIN entries e ON e.id = c.entry_id WHERE c.id = ${id} AND e.world_id = ${req.world.id}`)[0];
     if (!cur) return fail(res, 404, 'That comment was already deleted.');
-    if (cur.gm_id !== req.gm.id && req.gm.role !== 'admin') return fail(res, 403, 'You can only delete your own comments.');
+    if (cur.gm_id !== req.gm.id && req.role !== 'owner') return fail(res, 403, 'You can only delete your own comments.');
     await sql`DELETE FROM comments WHERE id = ${id} OR parent_id = ${id}`;
     send(res, 200, { ok: true });
   },
-});
+}, { world: true });

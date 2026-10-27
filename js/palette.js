@@ -5,7 +5,7 @@ import { KINDS, KIND_ORDER } from './world-schema.js';
 import { SPECIES, CLASSES, BACKGROUNDS, ORIGIN_FEATS } from './rules2024.js';
 import { MAGIC_ITEMS } from './magic-items.js';
 import { world, worldEntries, loadWorld, kindLabel } from './world-store.js';
-import { session, isGm, isAdmin } from './api.js';
+import { session, isGm, isAdmin, isOwner, isPlayer } from './api.js';
 
 let dialog, input, list, items = [], active = 0;
 
@@ -27,9 +27,12 @@ function baseItems() {
   ];
   if (isGm()) {
     out.push({ label: 'GM discussions', group: 'World', href: '#world/talk' });
-    for (const k of KIND_ORDER) out.push({ label: `New ${KINDS[k].label.toLowerCase()}`, group: 'Create', href: `#world/new/${k}` });
+    for (const k of KIND_ORDER) out.push({ label: `New ${KINDS[k].label === 'NPC' ? 'NPC' : KINDS[k].label.toLowerCase()}`, group: 'Create', href: `#world/new/${k}` });
   }
-  if (isAdmin()) out.push({ label: 'Admin', group: 'Pages', href: '#admin' });
+  if (isPlayer()) out.push({ label: 'New character', group: 'Create', href: '#world/new/character' }, { label: 'New journal entry', group: 'Create', href: '#world/new/journal' }, { label: 'My things', group: 'World', href: '#world/mine' });
+  if (isGm()) out.push({ label: 'Suggestions from players', group: 'World', href: '#world/suggestions' });
+  if (isOwner() || isAdmin()) out.push({ label: 'Admin', group: 'Pages', href: '#admin' }, { label: 'Members & invites', group: 'Admin', href: '#admin/members' });
+  out.push({ label: 'Worlds', group: 'Pages', href: '#worlds', hint: 'Switch, create or join a world' });
   return out;
 }
 

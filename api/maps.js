@@ -33,14 +33,14 @@ const shape = (m, isGm) => ({
 
 export default route({
   async GET(req, res) {
-    const isGm = Boolean(req.gm);
+    const isGm = req.isGmHere;
     const { id, image } = req.query || {};
     if (!id) {
       const rows = await sql`SELECT m.id, m.name, m.width, m.height, m.entry_id, m.secret, m.version, m.pins, m.updated_at, CASE WHEN m.image LIKE 'data:%' THEN 'data:' ELSE m.image END AS image, g.name AS updated_by_name
-        FROM maps m LEFT JOIN gms g ON g.id = m.updated_by WHERE NOT m.deleted ORDER BY m.name`;
+        FROM maps m LEFT JOIN gms g ON g.id = m.updated_by WHERE NOT m.deleted AND m.world_id = ${req.world.id} ORDER BY m.name`;
       return send(res, 200, { maps: rows.filter((m) => isGm || !m.secret).map((m) => shape(m, isGm)) });
     }
-    const rows = await sql`SELECT m.*, g.name AS updated_by_name FROM maps m LEFT JOIN gms g ON g.id = m.updated_by WHERE m.id = ${id} AND NOT m.deleted`;
+    const rows = await sql`SELECT m.*, g.name AS updated_by_name FROM maps m LEFT JOIN gms g ON g.id = m.updated_by WHERE m.id = ${id} AND NOT m.deleted AND m.world_id = ${req.world.id}`;
     const m = rows[0];
     if (!m || (m.secret && !isGm)) return fail(res, 404, 'That map doesn’t exist.');
     if (image) {
@@ -62,8 +62,8 @@ export default route({
     const image = cleanImage(b.image);
     if (image.error) return fail(res, 400, image.error);
     const id = newId();
-    await sql`INSERT INTO maps (id, name, image, width, height, pins, entry_id, secret, created_by, updated_by)
-      VALUES (${id}, ${name}, ${image}, ${Math.round(Number(b.width) || 0)}, ${Math.round(Number(b.height) || 0)}, ${JSON.stringify(cleanPins(b.pins))}, ${b.entry_id || null}, ${Boolean(b.secret)}, ${req.gm.id}, ${req.gm.id})`;
+    await sql`INSERT INTO maps (id, world_id, name, image, width, height, pins, entry_id, secret, created_by, updated_by)
+      VALUES (${id}, ${req.world.id}, ${name}, ${image}, ${Math.round(Number(b.width) || 0)}, ${Math.round(Number(b.height) || 0)}, ${JSON.stringify(cleanPins(b.pins))}, ${b.entry_id || null}, ${Boolean(b.secret)}, ${req.gm.id}, ${req.gm.id})`;
     const rows = await sql`SELECT * FROM maps WHERE id = ${id}`;
     send(res, 201, { map: shape(rows[0], true) });
   },
@@ -72,22 +72,22 @@ export default route({
     if (!requireGm(req, res)) return;
     const id = req.query?.id;
     const b = req.body.map || {};
-    const cur = (await sql`SELECT m.*, g.name AS updated_by_name FROM maps m LEFT JOIN gms g ON g.id = m.updated_by WHERE m.id = ${id} AND NOT m.deleted`)[0];
+    const cur = (await sql`SELECT m.*, g.name AS updated_by_name FROM maps m LEFT JOIN gms g ON g.id = m.updated_by WHERE m.id = ${id} AND NOT m.deleted AND m.world_id = ${req.world.id}`)[0];
     if (!cur) return fail(res, 404, 'That map doesn’t exist any more.');
     let image = cur.image;
     if (b.image) { image = cleanImage(b.image); if (image.error) return fail(res, 400, image.error); }
     const name = clip(b.name ?? cur.name, 120).trim() || cur.name;
     const rows = await sql`UPDATE maps SET name = ${name}, image = ${image}, width = ${Math.round(Number(b.width ?? cur.width) || 0)}, height = ${Math.round(Number(b.height ?? cur.height) || 0)},
       pins = ${JSON.stringify(cleanPins(b.pins ?? cur.pins))}, entry_id = ${b.entry_id === undefined ? cur.entry_id : b.entry_id || null}, secret = ${b.secret === undefined ? cur.secret : Boolean(b.secret)},
-      updated_by = ${req.gm.id}, updated_at = now(), version = version + 1 WHERE id = ${id} AND version = ${Number(b.version)} RETURNING *`;
+      updated_by = ${req.gm.id}, updated_at = now(), version = version + 1 WHERE id = ${id} AND world_id = ${req.world.id} AND version = ${Number(b.version)} RETURNING *`;
     if (!rows.length) return fail(res, 409, `${cur.updated_by_name || 'Another GM'} changed this map a moment ago. Reload it to see their pins, then make your change again.`, { map: shape(cur, true) });
     send(res, 200, { map: shape(rows[0], true) });
   },
 
   async DELETE(req, res) {
     if (!requireGm(req, res)) return;
-    const rows = await sql`UPDATE maps SET deleted = true, updated_by = ${req.gm.id}, updated_at = now() WHERE id = ${req.query?.id} RETURNING id`;
+    const rows = await sql`UPDATE maps SET deleted = true, updated_by = ${req.gm.id}, updated_at = now() WHERE id = ${req.query?.id} AND world_id = ${req.world.id} RETURNING id`;
     if (!rows.length) return fail(res, 404, 'That map doesn’t exist.');
     send(res, 200, { ok: true });
   },
-});
+}, { world: true });

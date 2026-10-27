@@ -43,11 +43,18 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **GM discussions**: GMs talk on any entry ("I'm bringing her back in session 14") and resolve threads when
   they're settled. An inbox lists every open thread. Players never see any of it.
 - **Search everything**: Ctrl+K (⌘K) or `/` opens one search box for tools, world entries, classes, species and feats.
-- **Admin**: invite GMs with personal codes, lock out or reissue codes, name the world, see recent activity, and
-  download or import a full backup.
+- **Many worlds, GMs and players**: anyone signed in can create a world and becomes its owner. Each world has a GM
+  invite link and a player invite link; opening one asks for a name and hands out a personal sign-in code. Switch
+  worlds from the menu at the top. Worlds can be private (members only) or open (anyone can read).
+- **Players add to the world**: players add their own characters and journal entries, and suggest anything else
+  (an NPC, a rumor, a place). Suggestions wait for a GM to approve, edit or reject them.
+- **Hidden entries**: GMs can keep any entry hidden from players while they prep, then reveal it in one click.
+- **Admin**: world owners manage members and roles, rotate invite links, name the world, see recent activity, and
+  download or import a full backup. The site admin can see every world and every account.
 - **Reference**: classes with features by level, species, backgrounds, feats and spell slot tables.
 
-Players can open the site and read the world; only signed-in GMs can add or edit, and only GMs see secrets.
+Players read what the GMs have revealed; GMs build, edit and see secrets. Each person's role is per world, so you
+can be the GM of one campaign and a player in a friend's.
 The session notebook keeps each DM's personal saves in their own browser.
 
 ## Setup on Vercel
@@ -60,9 +67,9 @@ The site is static files plus a few serverless functions in `api/`. There is no 
    project. This sets `DATABASE_URL`. Tables are created automatically on the first request.
 3. **Set the admin code**: in *Settings* → *Environment Variables*, add `ADMIN_CODE` with a long random value
    (for example from a password manager). Redeploy.
-4. Open the site, choose **GM sign in**, and enter the admin code. Go to **Admin** to name the world and create an
-   invite code for each GM. Codes are shown once; send them privately. Changing `ADMIN_CODE` later changes the admin
-   login.
+4. Open the site, choose **Sign in**, and enter the admin code. Go to **Admin** → **Members & invites** and send the
+   GM link to your co-GMs and the player link to your players. Each person picks a name and gets a personal code
+   (shown once) to sign in on other devices. Changing `ADMIN_CODE` later changes the admin login.
 
 ## Local preview
 
