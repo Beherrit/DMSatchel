@@ -73,6 +73,10 @@ export const KINDS = {
   },
 };
 
+// Every kind can have a picture: an uploaded image (/api/images?id=…) or an https:// link.
+for (const k of Object.values(KINDS)) k.fields.push(['image', 'Picture', 'image']);
+export const isImageRef = (v) => /^\/api\/images\?id=[a-f0-9]{16}$/.test(v) || /^https:\/\/[^\s"'<>]{4,1000}$/.test(v);
+
 export const KIND_ORDER = ['region', 'area', 'settlement', 'location', 'faction', 'guild', 'clan', 'npc', 'character', 'deity', 'item', 'event', 'session', 'journal', 'handout', 'quest', 'lore'];
 
 // Kinds a player can create and edit as their own; anything else a player adds is a suggestion for the GMs.

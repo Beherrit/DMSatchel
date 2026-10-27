@@ -671,3 +671,20 @@ tr.disabled td { color: var(--muted) }
 .sheet-more[open] summary { margin-bottom: 10px }
 .owner-line { margin: 0 }
 .manual .controls { align-items: center }
+
+/* ---- pictures ---- */
+.pic-row { display: flex; gap: 12px; align-items: flex-start; flex-wrap: wrap }
+.pic-preview { display: grid; gap: 6px; justify-items: start }
+.pic-preview img { width: 120px; height: 120px; object-fit: cover; border-radius: 8px; border: 1px solid var(--line) }
+.pic-inputs { display: grid; gap: 6px; flex: 1 1 220px; min-width: 0 }
+.pic-inputs input[type="text"] { width: 100% }
+.entry-pic { float: right; margin: 0 0 12px 18px; width: min(280px, 40%) }
+.entry-pic img { width: 100%; border-radius: 10px; border: 1px solid var(--line); display: block; box-shadow: 0 2px 10px rgb(0 0 0 / .12) }
+@media (max-width: 560px) { .entry-pic { float: none; margin: 0 0 12px; width: 100% } }
+.overview-top { display: block } .overview-top > .lede { margin-top: 0 } .overview-top > .lede + .traits { margin-top: 12px }
+.overview-top::after { content: ""; display: block; clear: both }
+.overview-top:empty { display: none }
+.thumb { width: 100%; height: 140px; object-fit: cover; border-radius: 6px; margin-bottom: 6px }
+.avatar { width: 40px; height: 40px; object-fit: cover; border-radius: 50%; border: 1px solid var(--line); flex: none }
+.person-head { display: flex; align-items: center; gap: 8px }
+.handout-pic { max-width: 100%; max-height: 420px; object-fit: contain; border-radius: 4px; justify-self: start }

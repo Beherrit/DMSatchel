@@ -14,6 +14,7 @@ import { viewTalk, talkWidget } from './world-talk.js';
 import { placeHub, viewAtlas, placeCounts } from './world-place.js';
 import { viewParty } from './world-party.js';
 import { sheetSection } from './sheet-ui.js';
+import { pictureField, figure, thumb } from './image-ui.js';
 import { renderStats, renderSpells } from './statblock-ui.js';
 import { renderStock } from './shop-ui.js';
 import { restockDraft } from './world-place.js';
@@ -75,7 +76,7 @@ function viewHome() {
 }
 
 function entryCard(e) {
-  return el('li', { class: `entry-card${e.visibility === 'gm' ? ' is-hidden' : ''}${e.status === 'suggested' ? ' is-suggested' : ''}` }, el('div', { class: 'card-title' }, link(e), stateBadges(e)), e.summary ? el('p', {}, e.summary.length > 180 ? `${e.summary.slice(0, 178)}…` : e.summary) : null,
+  return el('li', { class: `entry-card${e.visibility === 'gm' ? ' is-hidden' : ''}${e.status === 'suggested' ? ' is-suggested' : ''}` }, thumb(e), el('div', { class: 'card-title' }, link(e), stateBadges(e)), e.summary ? el('p', {}, e.summary.length > 180 ? `${e.summary.slice(0, 178)}…` : e.summary) : null,
     e.tags?.length ? el('div', { class: 'tags' }, e.tags.map((t) => el('a', { class: 'tagchip', href: `#world/q/${encodeURIComponent(`#${t}`)}` }, `#${t}`))) : null);
 }
 
@@ -125,7 +126,7 @@ function viewEntry(id, tab) {
   const sessions = all.filter((x) => x.kind === 'session' && x.id !== id && (mentions(`${x.body}\n${x.summary}\n${Object.values(x.fields || {}).join('\n')}`).has(id) || (x.links || []).some((l) => l.id === id)))
     .sort((a, b) => (parseFloat(b.fields.number) || 0) - (parseFloat(a.fields.number) || 0));
   const pins = pinsFor(id);
-  const fieldRows = KINDS[e.kind].fields.filter(([k, , type]) => e.fields?.[k] && !['stats', 'spells', 'level', 'stock', 'market'].includes(k) && type !== 'hidden' && !(k === 'sheet' && e.fields.forge)).map(([k, label, type]) => [label, e.fields[k], type]);
+  const fieldRows = KINDS[e.kind].fields.filter(([k, , type]) => e.fields?.[k] && !['stats', 'spells', 'level', 'stock', 'market'].includes(k) && type !== 'hidden' && type !== 'image' && !(k === 'sheet' && e.fields.forge)).map(([k, label, type]) => [label, e.fields[k], type]);
 
   const history = el('div', { class: 'history', hidden: true });
   const isPlace = PLACE_KINDS.includes(e.kind);
@@ -133,8 +134,10 @@ function viewEntry(id, tab) {
   const shownElsewhere = isPlace ? ['npc', 'quest', 'faction', 'guild', 'clan', ...PLACE_KINDS] : [];
   const otherChildren = children.filter((c) => !shownElsewhere.includes(c.kind));
   const overview = () => el('div', { class: 'overview' },
-    e.summary ? el('p', { class: 'lede' }, e.summary) : null,
-    fieldRows.length ? el('dl', { class: 'traits' }, fieldRows.flatMap(([l, v, type]) => [el('dt', {}, l), el('dd', {}, type === 'long' ? richText(v) : el('span', {}, v))])) : null,
+    // The picture floats beside the summary and traits, so they share one plain block.
+    el('div', { class: 'overview-top' }, figure(e),
+      e.summary ? el('p', { class: 'lede' }, e.summary) : null,
+      fieldRows.length ? el('dl', { class: 'traits' }, fieldRows.flatMap(([l, v, type]) => [el('dt', {}, l), el('dd', {}, type === 'long' ? richText(v) : el('span', {}, v))])) : null),
     e.kind === 'npc' || e.fields?.stats || e.fields?.spells ? statSection(e) : null,
     e.kind === 'character' ? ownerLine(e) : null,
     e.kind === 'character' ? sheetSection(e, rerenderWorld) : null,
@@ -303,6 +306,7 @@ function viewEdit(id, kindForNew) {
     setKids(fieldsBox, ...KINDS[kindSel.value].fields.map(([k, label, type, opts]) => {
       const v = e.fields[k] || '';
       if (type === 'hidden') return null;
+      if (type === 'image') return pictureField(v);
       if (type === 'select') {
         const s = el('select', { id: `ff-${k}`, 'data-field': k }, el('option', { value: '' }, '—'), opts.map((o) => el('option', { value: o }, o)));
         if (v && !opts.includes(v)) s.append(el('option', { value: v }, v));

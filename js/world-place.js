@@ -2,6 +2,7 @@
 // placeHub(entry, tab) renders the tab bar and panels shown on a place's page and in the map drawer.
 // viewAtlas() shows the whole world as a tree of places.
 
+import { thumb } from './image-ui.js';
 import { el, toast, setKids } from './dom.js';
 import { isGm } from './api.js';
 import { KINDS, PLACE_KINDS, CHILD_PLACES } from './world-schema.js';
@@ -94,7 +95,7 @@ function peopleSection(place, rerender, compact) {
   const slot = el('div', { class: 'preview-slot' });
   const roll = (n) => slot.prepend(previewBox(n > 1 ? `${n} new people for ${place.name}` : `A new face in ${place.name}`, () => npcDraft(place), n, rerender));
   const card = (e) => el('li', { class: `person card ${e.fields?.status && e.fields.status !== 'Alive' ? 'gone' : ''}${(e.tags || []).includes('key') ? ' key' : ''}` },
-    el('div', { class: 'person-head' }, (e.tags || []).includes('key') ? el('span', { class: 'key-star', title: 'Key NPC' }, '★') : null, link(e), e.fields?.status && e.fields.status !== 'Alive' ? el('span', { class: 'tag' }, e.fields.status) : null),
+    el('div', { class: 'person-head' }, thumb(e, 'avatar'), (e.tags || []).includes('key') ? el('span', { class: 'key-star', title: 'Key NPC' }, '★') : null, link(e), e.fields?.status && e.fields.status !== 'Alive' ? el('span', { class: 'tag' }, e.fields.status) : null),
     el('span', { class: 'muted small' }, [e.fields?.role, e.fields?.ancestry].filter(Boolean).join(' · ') || 'NPC'),
     !compact && e.summary ? el('p', { class: 'small' }, e.summary) : null,
     isGm() && !compact ? el('div', { class: 'person-actions' },

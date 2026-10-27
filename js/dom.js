@@ -71,3 +71,19 @@ export function confirmButton(label, onConfirm, cls = 'btn small ghost') {
   } }, label);
   return b;
 }
+
+// Shrink an uploaded image (a File) to a JPEG data URL under `limit` characters, at most `max` pixels on its long side.
+export async function shrinkImage(file, { max = 4000, limit = 3_200_000 } = {}) {
+  const bitmap = await createImageBitmap(file);
+  let quality = 0.86, data = '', w = 0, h = 0;
+  for (let i = 0; i < 10; i++) {
+    const scale = Math.min(1, max / Math.max(bitmap.width, bitmap.height));
+    w = Math.round(bitmap.width * scale); h = Math.round(bitmap.height * scale);
+    const c = document.createElement('canvas'); c.width = w; c.height = h;
+    c.getContext('2d').drawImage(bitmap, 0, 0, w, h);
+    data = c.toDataURL('image/jpeg', quality);
+    if (data.length < limit) break;
+    if (quality > 0.65) quality -= 0.08; else max = Math.round(max * 0.8);
+  }
+  return { data, width: w, height: h };
+}

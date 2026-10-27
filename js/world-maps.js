@@ -2,6 +2,7 @@
 // Routes: #world/maps · #world/map/<id> · #world/map/<id>/<pinId>
 import { el, toast, confirmButton, setKids } from './dom.js';
 import { api, isGm } from './api.js';
+import { shrinkImage } from './dom.js';
 import { world, getEntry, findByName, link, kindLabel, notice, nameList, whenTime, createEntry, mapsOf, trail } from './world-store.js';
 import { KINDS, PLACE_KINDS, pinIconFor } from './world-schema.js';
 import { placeDrawer } from './world-place.js';
@@ -16,21 +17,7 @@ export function pinsFor(entryId) {
   return out;
 }
 
-// Shrink an uploaded image so it fits the server's size limit.
-async function shrink(file) {
-  const bitmap = await createImageBitmap(file);
-  let max = 4000, quality = 0.86, data = '', w = 0, h = 0;
-  for (let i = 0; i < 8; i++) {
-    const scale = Math.min(1, max / Math.max(bitmap.width, bitmap.height));
-    w = Math.round(bitmap.width * scale); h = Math.round(bitmap.height * scale);
-    const c = document.createElement('canvas'); c.width = w; c.height = h;
-    c.getContext('2d').drawImage(bitmap, 0, 0, w, h);
-    data = c.toDataURL('image/jpeg', quality);
-    if (data.length < 3_200_000) break;
-    if (quality > 0.65) quality -= 0.08; else max = Math.round(max * 0.8);
-  }
-  return { data, width: w, height: h };
-}
+const shrink = (file) => shrinkImage(file);
 
 function imageSize(url) {
   return new Promise((resolve, reject) => { const i = new Image(); i.onload = () => resolve({ width: i.naturalWidth, height: i.naturalHeight }); i.onerror = () => reject(new Error('That link didn’t load as an image.')); i.src = url; });

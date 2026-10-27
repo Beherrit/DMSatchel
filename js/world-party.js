@@ -4,6 +4,7 @@ import { el, toast, confirmButton, setKids } from './dom.js';
 import { api, isGm, isMember, session } from './api.js';
 import { worldEntries, byName, link, when, richText, setEntryState } from './world-store.js';
 import { parsePrice } from './economy.js';
+import { thumb } from './image-ui.js';
 
 const ACTIVE = (e) => !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
 
@@ -27,7 +28,7 @@ export function parseCoins(text) {
 function members(chars) {
   const active = chars.filter(ACTIVE), former = chars.filter((e) => !ACTIVE(e));
   const card = (e) => el('li', { class: 'person card' },
-    el('div', { class: 'person-head' }, link(e)),
+    el('div', { class: 'person-head' }, thumb(e, 'avatar'), link(e)),
     el('span', { class: 'muted small' }, [e.fields?.species, e.fields?.class, e.fields?.level && `level ${e.fields.level}`].filter(Boolean).join(' · ') || 'Adventurer'),
     e.fields?.player || e.owner ? el('span', { class: 'small' }, `Played by ${e.fields?.player || e.owner}`) : null,
     e.summary ? el('p', { class: 'small' }, e.summary) : null);
@@ -94,6 +95,7 @@ function handouts(list, rerender) {
     el('div', { class: 'entry-head' }, link(h), h.visibility === 'gm' && isGm() ? el('button', { class: 'btn small primary', type: 'button', onclick: async () => {
       try { await setEntryState(h, { visibility: 'all' }); toast(`Handed out ${h.name}`); rerender(); } catch (err) { toast(err.message, 'bad'); }
     } }, 'Hand out') : null),
+    thumb(h, 'handout-pic'),
     h.fields?.text ? el('div', { class: 'paper' }, richText(h.fields.text)) : h.summary ? el('p', {}, h.summary) : null,
     [h.fields?.from && `From ${h.fields.from}`, h.fields?.found].filter(Boolean).length ? el('p', { class: 'muted small' }, [h.fields?.from && `From ${h.fields.from}`, h.fields?.found].filter(Boolean).join(' · ')) : null);
   return el('section', {},

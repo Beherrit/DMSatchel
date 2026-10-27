@@ -1,4 +1,5 @@
 // The Build console (quick creation of any world entry) and the Pins manager, shown on the Admin page.
+import { pictureField } from './image-ui.js';
 import { el, toast, setKids, confirmButton } from './dom.js';
 import { api } from './api.js';
 import { KINDS, PLACE_KINDS } from './world-schema.js';
@@ -48,6 +49,7 @@ export function buildSection() {
     const fieldEls = KINDS[kind].fields.map(([k, l, type, opts]) => {
       const v = d.fields?.[k] || '';
       if (type === 'hidden') return null;
+      if (type === 'image') return pictureField(v, { id: 'b-image' });
       if (type === 'select') {
         const s = el('select', { id: `b-${k}`, 'data-field': k }, el('option', { value: '' }, '—'), opts.map((o) => el('option', { value: o }, o)));
         s.value = opts.includes(v) ? v : '';

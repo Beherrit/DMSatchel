@@ -42,7 +42,7 @@ to the log at the bottom.
    current HP, conditions, spell slots used, inventory, gold, notes, level-up. Players edit their own.
 9. [x] **Live updates.** Poll for changes every ~20 s while a world page is open; "Ana edited Ashford" toasts,
    refresh lists without losing form input. Edit conflicts already handled.
-10. [ ] **Images.** Portraits for NPCs and characters, pictures for places and items, handout images. Vercel Blob
+10. [x] **Images.** Portraits for NPCs and characters, pictures for places and items, handout images. Vercel Blob
    store (create via MCP, connect to project), or small data URLs in Postgres as a fallback.
 11. [ ] **In-world calendar.** Named months, current date, events and sessions placed on it, "days pass" button,
     moon phases optional. Timeline view of events by date.
@@ -72,3 +72,4 @@ to the log at the bottom.
 - Party page: active and former party members, treasury with coin total and even split, items held and by whom, loot log anyone in the world can add to (GMs or the writer can strike lines; struck lines stay in the database), current quests, handouts (new Handout kind, hidden by default, "Hand out" reveals them), party journal.
 - Character sheets: Forge characters save their recipe and rebuild the full sheet in the world; a shared play tracker (HP with damage/heal/temp HP, death saves, conditions, exhaustion, Heroic Inspiration, spell slots, hit dice, short and long rest, coins, inventory, notes), exact level-up from the recipe, manual max HP/AC for hand-made characters, claim an unowned character (GMs can unassign).
 - Live updates: entries API answers ?since= with changed entries and removed/hidden ids, using database time; the World page syncs every 20 s while visible (and on returning to the tab), toasts who changed what, and skips redrawing while someone is typing.
+- Images: every entry kind has a Picture field (upload, shrunk in the browser to ≤1200 px JPEG, or an https link); images table in Postgres served by /api/images with access checks (private worlds stay private); portraits on entry pages, thumbnails in lists, avatars in town rosters and the party, pictures on handouts.
