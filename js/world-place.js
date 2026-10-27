@@ -2,6 +2,7 @@
 // placeHub(entry, tab) renders the tab bar and panels shown on a place's page and in the map drawer.
 // viewAtlas() shows the whole world as a tree of places.
 
+import { rumorSection, rumorsAt } from './world-rumors.js';
 import { wildsSection } from './encounter-ui.js';
 import { thumb } from './image-ui.js';
 import { el, toast, setKids } from './dom.js';
@@ -19,7 +20,7 @@ import { personName, ANCESTRY_WEIGHTS } from './names.js';
 import { makeRng } from './rng.js';
 import { createEntry } from './world-store.js';
 
-export const HUB_TABS = [['overview', 'Overview'], ['people', 'People'], ['quests', 'Quest board'], ['market', 'Market'], ['places', 'Places'], ['powers', 'Powers'], ['wilds', 'Encounters'], ['maps', 'Maps']];
+export const HUB_TABS = [['overview', 'Overview'], ['people', 'People'], ['quests', 'Quest board'], ['market', 'Market'], ['places', 'Places'], ['powers', 'Powers'], ['rumors', 'Rumors'], ['wilds', 'Encounters'], ['maps', 'Maps']];
 const er = makeRng(Date.now() ^ 0xec0);
 const QUEST_STATUSES = ['Rumor', 'Available', 'Active', 'Completed', 'Failed', 'Abandoned'];
 const ORG_KINDS = ['faction', 'guild', 'clan'];
@@ -265,8 +266,8 @@ function marketSection(place, rerender) {
 
 export function placeHub(place, tab, overview, rerender) {
   const c = placeCounts(place);
-  const counts = { people: c.people, quests: c.openQuests, places: c.places, powers: c.powers, maps: mapsOf(place.id).length + pinsFor(place.id).length, market: descendantsOf(place.id, ['location']).filter(isShop).length };
-  const tabs = HUB_TABS.filter(([k]) => k !== 'market' || place.kind === 'settlement');
+  const counts = { people: c.people, quests: c.openQuests, places: c.places, powers: c.powers, maps: mapsOf(place.id).length + pinsFor(place.id).length, market: descendantsOf(place.id, ['location']).filter(isShop).length, rumors: place.kind === 'settlement' ? rumorsAt(place.id).length : 0 };
+  const tabs = HUB_TABS.filter(([k]) => (k !== 'market' && k !== 'rumors') || place.kind === 'settlement');
   const active = tabs.some(([k]) => k === tab) ? tab : 'overview';
   const panel = active === 'overview' ? overview()
     : active === 'people' ? peopleSection(place, rerender)
@@ -274,6 +275,7 @@ export function placeHub(place, tab, overview, rerender) {
         : active === 'market' ? marketSection(place, rerender)
         : active === 'places' ? placesSection(place, rerender)
           : active === 'powers' ? powersSection(place, rerender)
+            : active === 'rumors' ? rumorSection(place, rerender)
             : active === 'wilds' ? wildsSection(place, rerender)
               : mapsSection(place);
   return el('div', { class: 'hub' },

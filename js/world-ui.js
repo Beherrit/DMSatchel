@@ -15,6 +15,7 @@ import { placeHub, viewAtlas, placeCounts } from './world-place.js';
 import { viewParty } from './world-party.js';
 import { viewExport } from './world-export.js';
 import { viewClocks, clocksWidget } from './world-clocks.js';
+import { viewRumors } from './world-rumors.js';
 import { startCard, markPartySeen } from './onboarding.js';
 import { viewCalendar, worldCalendar, todayText } from './world-calendar.js';
 import { parseDate, toDays, yearLength } from './calendar.js';
@@ -442,7 +443,7 @@ export async function showWorld(parts, { keepScroll = false } = {}) {
   renderSide();
   const [view, arg] = parts;
   let node;
-  if (view === 'k') node = viewKind(arg);
+  if (view === 'k') node = arg === 'rumor' ? viewRumors(rerenderWorld) : viewKind(arg);
   else if (view === 'e') node = viewEntry(arg, parts[2]);
   else if (view === 'new') node = viewEdit(null, arg);
   else if (view === 'edit') node = viewEdit(arg);

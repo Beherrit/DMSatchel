@@ -58,7 +58,7 @@ to the log at the bottom.
 17. [x] **Faction clocks.** Progress clocks (4/6/8/12 segments) on factions and any other entry: what they're
     working toward, filled between sessions. A "faction turn" advances every clock that ticks each turn. Secret
     clocks for GMs; public ones players can see.
-18. [ ] **Rumor mill.** Rumors attached to towns that spread to linked and nearby towns over time, getting
+18. [x] **Rumor mill.** Rumors attached to towns that spread to linked and nearby towns over time, getting
     distorted as they go; players see the rumors in the towns they've visited.
 19. [ ] **Family trees.** Parent/child/spouse links between NPCs and characters drawn as a tree for each clan.
 20. [ ] **What my character knows.** A player view per character: entries they've met or been told about.
@@ -85,3 +85,4 @@ to the log at the bottom.
 - Offline & install: service worker (network first, cached copy offline; /api never cached), PNG and maskable icons, manifest with shortcuts, Install app button, offline/online notices. Verified offline reloads of the tools and the Forge.
 - Polish: getting-started checklists for GMs and players (tick themselves off, dismissible per world), keyboard shortcuts with a ? help dialog (g+letter navigation, n for new), axe-core audit of 17 pages in light, dark and phone layouts with zero WCAG A/AA violations (darker brass text, labelled progress bars, focusable preview), performance with 2,500 entries (indexed name/parent lookups, relationship web capped to the 250 most connected entries: 6.1 s → 0.2 s, search results capped at 200: 267 → 43 ms).
 - Faction clocks: clocks table (additive), served by the standings API; 4–12 segment clocks on factions, guilds, clans, deities, towns, NPCs and quests; GM-only or public; +1/−1; faction turn advances every ticking clock and names the finished ones; Faction clocks page and sidebar link.
+- Rumor mill: Rumor kind (truth kept in the GM-only secret), Rumors tab on towns, Rumors page with each rumor's reach, "let rumors spread" (linked towns 60%, same area 50%, same region 25% per round), retellings that exaggerate numbers, swap NPC names or add twists, and say where they came from. Players can suggest rumors. Unit tests for neighbors and spreading.

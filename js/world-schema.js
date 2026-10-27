@@ -63,6 +63,11 @@ export const KINDS = {
     label: 'Handout', plural: 'Handouts', blurb: 'Letters, maps, notes and clues the GMs hand to the players.',
     fields: [['from', 'From (who wrote or gave it)'], ['found', 'Where or when it was found'], ['text', 'Text of the handout', 'long']],
   },
+  rumor: {
+    label: 'Rumor', plural: 'Rumors', blurb: 'Gossip that starts in one town and spreads, changing as it goes.',
+    // The truth lives in the GM-only secret text ("Truth: False."), so players never see it.
+    fields: [['source', 'Started by'], ['spread', 'Where it has spread', 'hidden']],
+  },
   quest: {
     label: 'Quest', plural: 'Quests & Plots', blurb: 'Adventures, rumors and running plot threads.',
     fields: [['status', 'Status', 'select', ['Rumor', 'Available', 'Active', 'Completed', 'Failed', 'Abandoned']], ['patron', 'Patron'], ['gm', 'Run by (GM)'], ['reward', 'Reward'], ['stakes', 'What’s at stake', 'long'], ['outline', 'Outline', 'long']],
@@ -77,7 +82,7 @@ export const KINDS = {
 for (const k of Object.values(KINDS)) k.fields.push(['image', 'Picture', 'image']);
 export const isImageRef = (v) => /^\/api\/images\?id=[a-f0-9]{16}$/.test(v) || /^https:\/\/[^\s"'<>]{4,1000}$/.test(v);
 
-export const KIND_ORDER = ['region', 'area', 'settlement', 'location', 'faction', 'guild', 'clan', 'npc', 'character', 'deity', 'item', 'event', 'session', 'journal', 'handout', 'quest', 'lore'];
+export const KIND_ORDER = ['region', 'area', 'settlement', 'location', 'faction', 'guild', 'clan', 'npc', 'character', 'deity', 'item', 'event', 'session', 'journal', 'handout', 'quest', 'rumor', 'lore'];
 
 // Kinds a player can create and edit as their own; anything else a player adds is a suggestion for the GMs.
 export const PLAYER_KINDS = ['character', 'journal'];

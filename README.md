@@ -40,6 +40,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
   number themselves, and every entry shows which sessions it appeared in.
 - **Party standing**: the party's reputation with every faction, guild, house, god, town or person, from sworn
   enemies (−5) to champions (+5), with a dated history of what changed it and which session it happened in.
+- **Rumor mill**: gossip starts in a town and spreads to its neighbors, changing a little with each retelling.
 - **Faction clocks**: plans in motion (a cult's ritual, a guild's takeover) as clocks you fill between sessions; one
   click runs a faction turn.
 - **GM discussions**: GMs talk on any entry ("I'm bringing her back in session 14") and resolve threads when
