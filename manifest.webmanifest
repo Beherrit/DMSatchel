@@ -1,1 +1,21 @@
-{ "name": "The DM's Satchel", "short_name": "DM's Satchel", "start_url": "/", "display": "standalone", "background_color": "#E7EAE4", "theme_color": "#1D2332", "icons": [{ "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }] }
+{
+  "name": "The DM's Satchel",
+  "short_name": "Satchel",
+  "description": "Table tools, 2024-rules characters and a shared world builder for your campaigns.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#E7EAE4",
+  "theme_color": "#1D2332",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ],
+  "shortcuts": [
+    { "name": "Character Forge", "url": "/#characters" },
+    { "name": "World", "url": "/#world" },
+    { "name": "Encounters", "url": "/#tools/encounters" }
+  ]
+}

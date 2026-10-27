@@ -60,6 +60,8 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
   map; GMs can add it to the world with a page per room and a pin on each.
 - **Export & print**: the world, a region or one kind of entry as Markdown or a printable page, as a GM copy or a
   player-safe copy.
+- **Works offline**: install it like an app; the table tools, Character Forge and Reference work without a
+  connection.
 - **Calendar**: your world's own months, weekdays, moons and holidays. GMs move time forward; events, sessions and
   journals with dates appear on the month grid.
 - **Pictures**: upload a portrait, a town sketch or a handout image to any entry (or paste a link).

@@ -51,7 +51,7 @@ to the log at the bottom.
 13. [x] **Dungeon and lair generator.** Room-by-room keyed dungeon with traps, monsters and loot, saved as a
     location with child rooms.
 14. [x] **Export and print.** World or region to Markdown/PDF-friendly print page; player-safe export.
-15. [ ] **Offline and install.** Service worker caching the app shell so tools work offline; installable PWA.
+15. [x] **Offline and install.** Service worker caching the app shell so tools work offline; installable PWA.
 16. [ ] **Polish pass.** Empty states, onboarding tour for new GMs and players, keyboard shortcuts, accessibility
     audit, performance with 2,000+ entries.
 
@@ -77,3 +77,4 @@ to the log at the bottom.
 - Encounters & travel: ~230 SRD creatures with CR, type and terrain tags; 2024 XP budgets (low/moderate/high); encounter builder (packs, leader plus followers) that never exceeds the budget, with activity and warning signs and D&D Beyond stat block links; chance meetings; d12 area tables saved on regions/areas/towns/places; weather by terrain and season (from the calendar) with the 2024 environment rules; travel pace calculator; map scale and travel times between pins. Unit tests for budgets, terrain and travel.
 - Dungeons & Lairs: nine site types, 5/8/12 rooms, history, five-room-dungeon structure (guardian, puzzle, setback, master, reward/twist) with extra fights, traps, treasure, features and empty rooms for larger sites; monsters fitted to the party and themed by site; traps with DCs and damage by tier; treasure with SRD magic items; connected room graph with secret doors and a flowchart map; Add to world saves the site, a hidden page per room and a map with linked pins. Unit tests for connectivity and layout.
 - Export & print: whole world, one place and everything inside it, or one kind; GM copy or player-safe copy (no hidden entries, suggestions, secrets or GM-only links); Markdown download and a print-ready page (save as PDF); linked from the World sidebar, Admin backup and search.
+- Offline & install: service worker (network first, cached copy offline; /api never cached), PNG and maskable icons, manifest with shortcuts, Install app button, offline/online notices. Verified offline reloads of the tools and the Forge.
