@@ -1,11 +1,13 @@
 // The GM sign-in dialog and the account button in the header.
 import { $, el, toast, setKids } from './dom.js';
-import { session, signIn, signOut, onSession } from './api.js';
+import { session, signIn, signOut, onSession, loadSession } from './api.js';
 
 let dialog;
 
-export function openSignIn() {
+export async function openSignIn() {
   const status = dialog.querySelector('.form-status');
+  // The page may have loaded before the database was connected, so ask the server again.
+  if (session.configured !== true) await loadSession();
   const offline = session.configured === false || session.configured === 'offline';
   status.textContent = offline
     ? (session.configured === false
