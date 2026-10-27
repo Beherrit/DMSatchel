@@ -5,6 +5,8 @@ import { api, isGm, isMember, session } from './api.js';
 import { worldEntries, byName, link, when, richText, setEntryState } from './world-store.js';
 import { thumb } from './image-ui.js';
 import { lastShownLine } from './world-show.js';
+import { addCoins } from './sheet-ui.js';
+import { splitCoins } from './economy.js';
 
 const ACTIVE = (e) => !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
 
@@ -40,6 +42,7 @@ function treasury(state, chars, reload) {
     items.length ? el('div', {}, el('span', { class: 'eyebrow' }, 'Items held'),
       el('ul', { class: 'plain item-held' }, items.map((i) => el('li', {}, i.qty > 1 ? `${i.qty} × ` : '', el('strong', {}, i.item), i.holder ? el('span', { class: 'muted small' }, ` (${i.holder})`) : null))))
       : el('p', { class: 'muted small' }, 'No items in the shared stash.'));
+  if (isGm() && active.length && cp > 0) box.append(splitForm(cp, active, reload));
   if (isMember()) box.append(ledgerForm(chars, reload));
   box.append(el('details', { class: 'ledger', open: lines.length && lines.length <= 8 ? true : null }, el('summary', {}, `Loot log (${lines.length})`),
     lines.length ? el('ul', { class: 'plain ledger-lines' }, lines.slice(0, 200).map((l) => el('li', {},
@@ -49,6 +52,39 @@ function treasury(state, chars, reload) {
       isGm() || l.gm_id === session.gm?.id ? confirmButton('Strike', async () => { try { await api('party', { method: 'DELETE', query: { id: l.id } }); reload(); } catch (err) { toast(err.message, 'bad'); } }, 'btn small ghost') : null)))
       : el('p', { class: 'muted small' }, 'Nothing recorded yet.')));
   return box;
+}
+
+// GMs: split coin from the treasury between active characters, by shares. One ledger line takes it out; each share
+// lands on that character's sheet.
+function splitForm(cp, active, reload) {
+  const amount = el('input', { type: 'text', id: 'split-amt', value: coinText(cp), 'aria-label': 'Coin to split' });
+  const shares = active.map((c) => ({ c, input: el('input', { type: 'number', min: 0, max: 20, value: 1, class: 'qty', 'aria-label': `Shares for ${c.name}` }) }));
+  const preview = el('p', { class: 'muted small', role: 'status' });
+  const plan = () => splitCoins(Math.min(cp, parseCoins(amount.value)), shares.map(({ c, input }) => ({ id: c.id, shares: Math.max(0, Number(input.value) || 0) })));
+  const show = () => {
+    const p = plan(), names = new Map(active.map((c) => [c.id, c.name]));
+    preview.textContent = p.each.length ? `${p.each.map((x) => `${names.get(x.id)} ${coinText(x.cp)}`).join(', ')}${cp - p.given > 0 ? `; ${coinText(cp - p.given)} stays in the treasury` : ''}.` : 'Nobody has a share.';
+  };
+  for (const x of [amount, ...shares.map((s) => s.input)]) x.addEventListener('input', show);
+  show();
+  const go = el('button', { class: 'btn small primary', type: 'button', onclick: async () => {
+    const p = plan();
+    if (!p.given) { amount.focus(); return; }
+    if (parseCoins(amount.value) > cp) toast(`The treasury only has ${coinText(cp)}; splitting that.`);
+    go.disabled = true;
+    const names = new Map(active.map((c) => [c.id, c.name]));
+    try {
+      await api('party', { method: 'POST', body: { cp: -p.given, note: `Split between ${p.each.map((x) => names.get(x.id)).join(', ')}` } });
+      const failed = [];
+      for (const x of p.each) { try { await addCoins(active.find((c) => c.id === x.id), x.cp); } catch { failed.push(names.get(x.id)); } }
+      toast(failed.length ? `Split recorded, but these sheets didn’t update: ${failed.join(', ')}. Add their share by hand.` : `Split ${coinText(p.given)} between ${p.each.length} character${p.each.length === 1 ? '' : 's'}`, failed.length ? 'bad' : undefined);
+      reload();
+    } catch (err) { toast(err.message, 'bad'); go.disabled = false; }
+  } }, 'Split it');
+  return el('details', { class: 'split-loot' }, el('summary', {}, 'Split the coin'),
+    el('div', { class: 'controls' }, el('label', { for: 'split-amt' }, 'Coin to split '), amount),
+    el('ul', { class: 'plain split-shares' }, shares.map(({ c, input }) => el('li', {}, el('span', {}, c.name), input, el('span', { class: 'muted small' }, 'share(s)')))),
+    preview, el('p', { class: 'muted small' }, 'Each share goes onto that character’s sheet; set a share to 0 to leave someone out.'), el('div', { class: 'btnrow' }, go));
 }
 
 function ledgerForm(chars, reload) {

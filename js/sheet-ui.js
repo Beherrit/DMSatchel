@@ -6,7 +6,7 @@ import { generateCharacter, characterText, abilityMod, fmtMod } from './characte
 import { ABILITIES, ABILITY_NAMES } from './rules2024.js';
 import { ORD } from './spells.js';
 import { world, patchEntry } from './world-store.js';
-import { coinText, parseCoins } from './world-party.js';
+import { coinText, parseCoins } from './economy.js';
 
 export const CONDITIONS = ['Blinded', 'Charmed', 'Deafened', 'Frightened', 'Grappled', 'Incapacitated', 'Invisible', 'Paralyzed', 'Petrified', 'Poisoned', 'Prone', 'Restrained', 'Stunned', 'Unconscious'];
 
@@ -77,6 +77,18 @@ function save(id, play) {
     q.busy = false;
   };
   run();
+}
+
+// Add (or take) coins on a character's sheet, from outside the sheet (splitting the party's loot). Retries once
+// if someone saved the sheet meanwhile.
+export async function addCoins(e, cp) {
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const cur = world.entries.get(e.id) || e;
+    const play = defaults(cur, characterOf(cur));
+    play.cp += cp;
+    try { return await patchEntry(cur, { fields: { play: JSON.stringify(play) } }); }
+    catch (err) { if (err.status === 409 && err.body?.entry && attempt === 0) { world.entries.set(e.id, err.body.entry); continue; } throw err; }
+  }
 }
 
 export function sheetSection(e, rerender) {

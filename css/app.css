@@ -921,3 +921,8 @@ body.gated .mainnav, body.gated #toolnav, body.gated #panels, body.gated #notebo
 .show-img { display: block; max-width: 100%; max-height: 55vh; margin: 8px auto; border-radius: 6px }
 .show-text { max-height: 40vh; overflow: auto; background: var(--sunk); border-radius: 6px; padding: 10px 12px; margin: 8px 0 }
 .last-shown { margin-top: 6px }
+
+/* Splitting loot */
+.split-loot { margin: 8px 0 }
+.split-shares li { display: flex; gap: 8px; align-items: center; margin: 4px 0 }
+.split-shares li > span:first-child { min-width: 8em }

@@ -246,3 +246,14 @@ export function parseCoins(text) {
   if (/^[\d,.]+$/.test(t)) return Math.round(parseFloat(t.replace(/,/g, '')) * 100);
   return Math.round(parsePrice(t) * 100);
 }
+
+// Split cp between people by shares ([{ id, shares }]); whole copper only, and what doesn't divide stays behind.
+// → { each: [{ id, cp }], given, left }
+export function splitCoins(cp, people) {
+  const list = people.filter((p) => p.shares > 0);
+  const total = list.reduce((t, p) => t + p.shares, 0);
+  if (!(cp > 0) || !total) return { each: [], given: 0, left: Math.max(0, cp || 0) };
+  const each = list.map((p) => ({ id: p.id, cp: Math.floor((cp * p.shares) / total) }));
+  const given = each.reduce((t, x) => t + x.cp, 0);
+  return { each, given, left: cp - given };
+}

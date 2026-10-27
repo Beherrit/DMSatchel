@@ -85,6 +85,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
   spellcasting, so the Forge builds the whole character); your spells join class spell lists in the Forge, NPC
   spellcasting and the Spells reference.
 - **Session recaps**: one click drafts the next session-log entry from everything that changed since the last one.
+- **Split the loot**: share the party treasury's coin between characters, by shares, straight onto their sheets.
 - **Show to the table**: a GM pops a handout (or any entry) up on every player's screen.
 - **Next session**: propose a few dates, everyone answers yes / maybe / no, lock in the best one and post it to
   Discord. The date shows on the world's home page.
