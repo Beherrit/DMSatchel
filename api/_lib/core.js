@@ -166,6 +166,13 @@ export async function worldContext(req) {
   req.canRead = Boolean(w && (role || w.public));
 }
 
+// Members-only site: when the site admin turns it on, every request needs a signed-in person, except signing in
+// and joining with an invite (the session endpoint, which passes { open: true }).
+export async function siteLocked() {
+  const row = (await sql`SELECT value FROM settings WHERE key = 'site'`)[0];
+  return Boolean(row?.value?.locked);
+}
+
 // Wraps a handler: checks configuration, prepares the schema, parses JSON and catches errors.
 // With { world: true } the request also gets req.world, req.role, req.isGmHere and req.canRead.
 export function route(handlers, opts = {}) {
@@ -185,6 +192,9 @@ export function route(handlers, opts = {}) {
         if (host !== req.headers.host) return fail(res, 403, 'Cross-site requests are not allowed');
       }
       req.gm = await currentGm(req);
+      if (!opts.open && !req.gm && await siteLocked()) {
+        return fail(res, 401, 'This site is for members only. Sign in with your personal code, or open the invite link your GM sent you.', { code: 'site_locked' });
+      }
       if (opts.world) {
         await worldContext(req);
         if (!req.world) return fail(res, 404, 'That world doesn’t exist, or it was archived.', { code: 'no_world' });

@@ -96,6 +96,18 @@ async function peopleSection() {
           ]))))))));
     } catch (err) { setKids(list, el('p', { class: 'error' }, err.message)); }
   }
+  const lockBox = el('div', { class: 'lock-box' });
+  const drawLock = (locked) => setKids(lockBox,
+    el('h4', {}, locked ? '🔒 Members-only site is on' : 'Members-only site is off'),
+    el('p', { class: 'muted small' }, locked
+      ? 'Signed-out visitors see only a sign-in screen. Every page, tool and world needs a personal code or an invite link.'
+      : 'Anyone with the address can use the table tools and read open worlds. Turn this on before adding text from your books, so only your group can see anything.'),
+    confirmButton(locked ? 'Open the site to visitors' : 'Make the site members-only', async () => {
+      try { const r = await api('gms', { method: 'PATCH', body: { site: { locked: !locked } } }); drawLock(r.site.locked); toast(r.site.locked ? 'The site is members-only' : 'The site is open to visitors'); }
+      catch (err) { toast(err.message, 'bad'); }
+    }, locked ? 'btn small ghost' : 'btn small primary'));
+  box.append(lockBox);
+  api('gms').then((r) => drawLock(Boolean(r.site?.locked))).catch(() => {});
   box.append(el('p', { class: 'muted' }, 'Everyone with an account on this site. Most people join through a world’s invite link; you can also create someone here. “New code” replaces a lost code and signs them out everywhere; “Lock out” removes access without deleting their work.'), form, out, list);
   refresh();
   return box;
@@ -110,6 +122,7 @@ async function settingsSection() {
   const form = el('form', { class: 'edit-form' }, f('s-name', 'World name', w.name), f('s-tagline', 'Tagline', w.tagline), f('s-about', 'Introduction for players', w.about, 6, 'Shown on the world’s front page. [[Entry names]] become links.'),
     f('s-cal', 'Calendar & current date', w.calendar, 3),
     el('label', { class: 'check' }, el('input', { type: 'checkbox', id: 's-public', checked: w.public || null }), ' Open world: anyone with the link can read what players can see'),
+    w.public ? el('p', { class: 'warn-note small' }, 'This world is open: people who aren’t members can read everything players can see. Untick this to keep it to your group, especially if you add text from your books.') : null,
     status, el('button', { class: 'btn primary', type: 'submit' }, 'Save settings'));
   form.addEventListener('submit', async (e) => {
     e.preventDefault();

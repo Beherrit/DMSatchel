@@ -3,7 +3,8 @@
 // POST {name, world?, role?}   create a person; the response carries their personal code (shown once).
 //                              With a world, they're added to it as gm or player.
 // PATCH {id, ...}              {disabled}, {admin: true|false}, {name} or {newCode: true}
-import { route, send, fail, sql, requireAdmin, newCode, codeHash } from './_lib/core.js';
+// PATCH {site: {locked}}       members-only site on or off
+import { route, send, fail, sql, requireAdmin, newCode, codeHash, siteLocked } from './_lib/core.js';
 
 export default route({
   async GET(req, res) {
@@ -12,7 +13,7 @@ export default route({
       (SELECT count(*)::int FROM history h WHERE h.gm_id = g.id) AS edits,
       COALESCE((SELECT json_agg(json_build_object('world', w.name, 'slug', w.slug, 'role', m.role)) FROM members m JOIN worlds w ON w.id = m.world_id WHERE m.gm_id = g.id), '[]') AS worlds
       FROM gms g ORDER BY g.created_at`;
-    send(res, 200, { gms: rows });
+    send(res, 200, { gms: rows, site: { locked: await siteLocked() } });
   },
   async POST(req, res) {
     if (!requireAdmin(req, res)) return;
@@ -29,6 +30,11 @@ export default route({
   },
   async PATCH(req, res) {
     if (!requireAdmin(req, res)) return;
+    if (req.body.site) {
+      const locked = Boolean(req.body.site.locked);
+      await sql`INSERT INTO settings (key, value) VALUES ('site', ${JSON.stringify({ locked })}) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`;
+      return send(res, 200, { site: { locked } });
+    }
     const id = Number(req.body.id);
     const rows = await sql`SELECT id, role FROM gms WHERE id = ${id}`;
     if (!rows.length) return fail(res, 404, 'No one with that id.');

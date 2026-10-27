@@ -11,6 +11,7 @@ import { loadSession, onSession, isOwner, isAdmin, isGm } from './api.js';
 import { initPalette, openPalette } from './palette.js';
 import { initWorldSwitcher, mountWorlds, showWorlds } from './worlds-ui.js';
 import { initShortcuts } from './shortcuts.js';
+import { initGate } from './gate.js';
 
 const mounted = new Set();
 const panels = {};
@@ -55,6 +56,7 @@ initSignIn();
 initPalette();
 initWorldSwitcher();
 initShortcuts();
+initGate();
 $('#search-btn').addEventListener('click', openPalette);
 if (/Mac|iPhone|iPad/.test(navigator.platform)) $('#search-btn kbd').textContent = '⌘K';
 addEventListener('hashchange', route);

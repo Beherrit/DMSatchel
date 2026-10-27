@@ -1,7 +1,7 @@
 // Talks to the API, keeps track of who is signed in, their worlds and which world is open.
 // The open world lives in the URL (?w=<slug>) so links can be shared, and in this browser as a fallback.
 
-export const session = { gm: null, worlds: [], configured: null, worldKey: null, worldInfo: null, listeners: new Set() };
+export const session = { gm: null, worlds: [], configured: null, locked: false, worldKey: null, worldInfo: null, listeners: new Set() };
 const notify = () => session.listeners.forEach((fn) => fn(session));
 export const onSession = (fn) => { session.listeners.add(fn); return () => session.listeners.delete(fn); };
 
@@ -56,6 +56,7 @@ export async function api(path, { method = 'GET', body, query } = {}) {
   try { data = await res.json(); } catch { /* not JSON */ }
   if (!res.ok) {
     if (data?.code === 'not_configured') { session.configured = false; notify(); }
+    if (data?.code === 'site_locked' && !session.locked) { session.locked = true; session.gm = null; notify(); }
     throw new ApiError(data?.error || (res.status === 404 ? 'The world server isn’t running here.' : `Request failed (${res.status}).`), res.status, data);
   }
   return data;
@@ -63,6 +64,7 @@ export async function api(path, { method = 'GET', body, query } = {}) {
 
 function adopt(r) {
   session.gm = r.gm || null; session.worlds = r.worlds || []; session.configured = true;
+  if (typeof r.locked === 'boolean') session.locked = r.locked;
   // Open the world in the URL, or the last one used, or your first world.
   if (!session.worldKey || (!currentWorld() && session.gm && session.worlds.length && !new URLSearchParams(location.search).get('w'))) {
     const first = session.worlds[0];

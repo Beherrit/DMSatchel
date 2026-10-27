@@ -854,3 +854,10 @@ td.rel-secret { outline: 2px dashed var(--rc); outline-offset: -4px }
 .rel-grid { width: auto }
 .rel-grid th { text-transform: none; letter-spacing: normal; color: var(--ink) }
 .rel-wrap { width: fit-content; max-width: 100% }
+
+/* ---- members-only gate ---- */
+body.gated .mainnav, body.gated #toolnav, body.gated #panels, body.gated #notebook, body.gated #world-switch, body.gated #search-btn, body.gated #install-btn { display: none !important }
+.gate[hidden] { display: none }
+.gate-inner { max-width: 560px; margin: 32px auto; display: grid; gap: 16px }
+.gate-card { border-left: 4px solid var(--accent) }
+.lock-box { border: 1px solid var(--line); border-radius: 8px; padding: 12px; display: grid; gap: 6px; justify-items: start; margin-bottom: 12px } .warn-note { color: var(--warn); margin: 0 }

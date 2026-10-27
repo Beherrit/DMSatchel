@@ -3,7 +3,7 @@
 // POST  {invite, name?}   join a world with an invite code. Signed-in people get the membership added; new people
 //                         get an account and a personal code (returned once) and are signed in.
 // DELETE                  sign out
-import { route, send, fail, sql, codeMatchesAdmin, codeHash, createSession, clearSession, logout, hash, newCode, myWorlds } from './_lib/core.js';
+import { route, send, fail, sql, codeMatchesAdmin, codeHash, createSession, clearSession, logout, hash, newCode, myWorlds, siteLocked } from './_lib/core.js';
 
 const norm = (c) => String(c || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
 const ROLE_RANK = { player: 1, gm: 2, owner: 3 };
@@ -11,7 +11,7 @@ const ROLE_RANK = { player: 1, gm: 2, owner: 3 };
 
 export default route({
   async GET(req, res) {
-    send(res, 200, { gm: req.gm, worlds: await myWorlds(req.gm), configured: true });
+    send(res, 200, { gm: req.gm, worlds: await myWorlds(req.gm), configured: true, locked: await siteLocked() });
   },
   async POST(req, res) {
     if (req.body.invite) {
@@ -55,4 +55,4 @@ export default route({
     clearSession(res);
     send(res, 200, { gm: null, worlds: [] });
   },
-});
+}, { open: true });

@@ -77,6 +77,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
   journals with dates appear on the month grid.
 - **Pictures**: upload a portrait, a town sketch or a handout image to any entry (or paste a link).
 - **Discord**: connect your group's channel and post session recaps and handouts with one click.
+- **Members-only site**: one switch makes every page and tool need a personal code or invite link.
 - **Hidden entries**: GMs can keep any entry hidden from players while they prep, then reveal it in one click.
 - **Admin**: world owners manage members and roles, rotate invite links, name the world, see recent activity, and
   download or import a full backup. The site admin can see every world and every account.

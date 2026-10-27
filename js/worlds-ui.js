@@ -41,7 +41,7 @@ function codeCard(code, world) {
     el('a', { class: 'btn primary', href: '#world', onclick: () => setWorld(world.slug) }, `Go to ${world.name}`));
 }
 
-function joinForm(prefill) {
+export function joinForm(prefill) {
   const status = el('p', { class: 'form-status', role: 'status' });
   const invite = el('input', { type: 'text', id: 'j-invite', value: prefill || '', placeholder: 'XXXX-XXXX-XXXX', spellcheck: 'false', autocomplete: 'off' });
   const name = el('input', { type: 'text', id: 'j-name', placeholder: 'How the others will see you', maxlength: 60 });
