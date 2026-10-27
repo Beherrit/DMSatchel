@@ -155,3 +155,20 @@ export function librarySpells(entries, classNames = []) {
     return { name: e.name, level: lv, classes, text: e.fields?.features || e.summary || '', source: e.fields?.source || '', entryId: e.id };
   }).filter((s) => s.level != null && s.level >= 0 && s.level <= 9 && s.classes.length);
 }
+
+// ---- backgrounds and feats ------------------------------------------------------------------------
+// A background in the Forge's shape (see BACKGROUNDS in rules2024.js): three abilities, two skills, a tool, an
+// origin feat and gear. Blanks fall back to something usable.
+export function backgroundFrom(name, f = {}, extra = {}) {
+  const abilities = abilitiesIn(f.abilities).slice(0, 3);
+  for (const a of ['Con', 'Wis', 'Dex', 'Str', 'Int', 'Cha']) if (abilities.length < 3 && !abilities.includes(a)) abilities.push(a);
+  const skills = SKILL_NAMES.filter((s) => String(f.bgSkills || f.skills || '').toLowerCase().includes(s.toLowerCase())).slice(0, 2);
+  return { name, library: true, abilities, skills, tool: f.tool || '', feat: String(f.feat || '').trim() || 'Skilled', gear: f.gear || '50 GP', source: f.source || '', ...extra };
+}
+export const libraryBackgrounds = (entries) => ruleOptions(entries, 'Background').map((e) => backgroundFrom(e.name, e.fields || {}, { entryId: e.id, notes: e.fields?.features || e.summary || '' }));
+
+// Feats: origin, general (with an optional minimum level), fighting style or epic boon.
+export const libraryFeats = (entries) => ruleOptions(entries, 'Feat').map((e) => ({
+  name: e.name, type: ['Origin', 'General', 'Fighting Style', 'Epic Boon'].includes(e.fields?.featType) ? e.fields.featType : 'General',
+  level: num(e.fields?.level) || 0, text: e.fields?.features || e.summary || '', source: e.fields?.source || '', entryId: e.id,
+}));

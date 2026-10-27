@@ -24,7 +24,7 @@ export const featureItem = (f) => el('li', {}, el('span', { class: 'lv' }, f.lev
 // The recipe saved with a Forge character: enough to rebuild it exactly, at any level.
 // "Any from my library" is saved as the option actually picked, so the character rebuilds the same way later.
 export const forgeRecipe = (ch) => JSON.stringify({ seed: ch.seed, salts: ch.salts, opts: {
-  ...ch.opts, ...(ch.opts.species === 'library' ? { species: ch.species } : {}), ...(ch.opts.cls === 'library' ? { cls: ch.cls } : {}), ...(ch.opts.subclass === 'library' ? { subclass: ch.futureSubclass } : {}),
+  ...ch.opts, ...(ch.opts.species === 'library' ? { species: ch.species } : {}), ...(ch.opts.cls === 'library' ? { cls: ch.cls } : {}), ...(ch.opts.background === 'library' ? { background: ch.background } : {}), ...(ch.opts.subclass === 'library' ? { subclass: ch.futureSubclass } : {}),
 } });
 
 // Entry fields for a Forge character (used by "Add to world" and by level-up).

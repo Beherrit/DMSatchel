@@ -90,7 +90,10 @@ export const KINDS = {
       ...[['size', 'Size', 'select', ['Small', 'Medium', 'Small or Medium', 'Large']], ['speed', 'Speed'], ['darkvision', 'Darkvision'],
         ['like', 'Similar to', 'select', ['Aasimar', 'Dragonborn', 'Dwarf', 'Elf', 'Gnome', 'Goliath', 'Halfling', 'Human', 'Orc', 'Tiefling']]].map(([k, l, t = 'text', o = null]) => [k, l, t, o, { only: ['Species'] }]),
       // Classes only: enough for the Character Forge to build one. Features go in "What it gives", one level per line.
-      ...CLASS_FIELDS.map(([k, l, t = 'text', o = null]) => [k, l, t, o, { only: ['Class'] }])],
+      ...CLASS_FIELDS.map(([k, l, t = 'text', o = null]) => [k, l, t, o, { only: k === 'gear' ? ['Class', 'Background'] : ['Class'] }]),
+      // Backgrounds and feats: what the Forge needs to roll them.
+      ...[['abilities', 'Ability scores'], ['bgSkills', 'Skills'], ['tool', 'Tool proficiency'], ['feat', 'Origin feat']].map(([k, l]) => [k, l, 'text', null, { only: ['Background'] }]),
+      ['featType', 'Kind of feat', 'select', ['Origin', 'General', 'Fighting Style', 'Epic Boon'], { only: ['Feat'] }]],
   },
   rumor: {
     label: 'Rumor', plural: 'Rumors', blurb: 'Gossip that starts in one town and spreads, changing as it goes.',

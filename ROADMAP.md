@@ -82,6 +82,17 @@ to the log at the bottom.
 29. [x] **Library spells in spellbooks.** Spells added to the library join the right classes' spell lists in the
     Forge, NPC spellcasting and the Spells reference.
 
+30. [x] **Library backgrounds and feats in the Forge.** Backgrounds from your books (three abilities, two skills, a
+    tool, an origin feat, gear) can be picked or rolled in the Character Forge; library feats join the origin and
+    general feat pools.
+31. [ ] **Next-session scheduler.** A GM proposes a few dates; everyone in the world marks yes / maybe / no; the
+    best date is highlighted, can be locked in (it shows on the world home and calendar) and posted to Discord.
+32. [ ] **Downtime between sessions.** Players file what their character does between sessions (train, craft,
+    carouse, research, work); GMs resolve each with a short outcome that the player sees, and it lands in the
+    character's history.
+33. [ ] **Fog of war on maps.** GMs paint hidden areas over a map; players see only what's been revealed, and GMs
+    reveal more as the party explores.
+
 ## Ideas parking lot
 
 ## Log
@@ -115,3 +126,4 @@ to the log at the bottom.
 - Import notes: #world/import (GMs). Markdown files, a whole folder (Obsidian vaults: front matter, folder names as kind hints, [[links]] kept and tidied, embeds and .obsidian skipped) or a pasted document (heading per entry, or this app's export with kinds, parents, fields, GM secrets, connections and tags). Preview with per-entry kind and include; entries already in the world, repeated, or sharing a name with another kind are flagged and unticked. Created in batches of 25, hidden from players and tagged by default, then parents and connections matched by name. Unit tests for the parser, including an export round trip.
 - Library classes: the Classes tab has a structured form (hit die, main ability, saves, skill choices, armor and weapon training, armor worn, main weapon, spellcasting type, ability and borrowed spell list, starting gear, subclass level, features one level per line with optional descriptions). The Character Forge's Class menu gains a "From your library" group; library classes build fully (HP, AC, saves, skills, attack, features with their descriptions, ASIs at the usual levels unless listed, spell slots and a spellbook from the borrowed list) and take library subclasses. Rules-option entries now show only the fields for their category. SRD rolls unchanged (820 characters and 40 NPCs compared against the previous engine; the only change is a fixed height display that could read 4′12″). Unit and browser tests.
 - Library spells in spellbooks: spells in the library (with a level, "cantrip" or 0–9, and the classes they're for) join those classes' lists. Forge characters prepare them when "Spells from my library" is ticked (on for new characters, off for ones saved before, so their spells don't shift); they take over some picks on their own random stream, so the SRD picks underneath stay put, and the sheet lists which came from the library. NPC spellcasters use them too. The Spells reference marks them in each class's list and adds a library card; the Classes reference shows library classes. Unit and browser tests.
+- Library backgrounds and feats: the Backgrounds tab asks for three abilities, two skills, a tool, an origin feat and gear; the Feats tab for the kind of feat (origin, general, fighting style, epic boon) and a minimum level. The Forge's Background menu gains a "From your library" group; library backgrounds drive ability bonuses, skills, tools, gear, the origin feat (with its text when it's a library feat) and a generic backstory line. With "Spells and feats from my library" on, library feats can take the human's extra origin feat, ASI feats (respecting minimum level), fighting styles and epic boons, on their own random stream. Rules-option fields keep unique keys. SRD rolls unchanged (820 characters, 40 NPCs). Unit and browser tests.

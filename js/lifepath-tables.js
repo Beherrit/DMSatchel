@@ -148,6 +148,14 @@ export const ADOLESCENCE = [
 ];
 
 // Why the character took up their background: one sentence, subject is {name}.
+// For backgrounds from your library.
+export const BACKGROUND_WHY_ANY = [
+  'Before adventuring, {first} spent years living the {background} life, and still falls back on its habits.',
+  '{first} took up the {background} life because {their} family always had, and it never quite fit.',
+  'The {background} life taught {first} to read people, and a little about when to leave town.',
+  '{first} chose the {background} life to get away from home, and found more trouble than {they} expected.',
+];
+
 export const BACKGROUND_WHY = {
   Acolyte: [
     '{first} was left on the temple steps as a child and grew up sweeping its halls and memorizing its prayers.',

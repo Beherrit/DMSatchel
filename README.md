@@ -81,7 +81,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Discord**: connect your group's channel and post session recaps and handouts with one click.
 - **Your library**: short notes on monsters, items, classes, subclasses, species, feats and spells from the books
   your group owns. Bestiary monsters turn up in encounters and dungeons; your items in loot and shops; your classes,
-  species and subclasses in the Character Forge (a class form covers hit die, proficiencies, features by level and
+  species, subclasses, backgrounds and feats in the Character Forge (a class form covers hit die, proficiencies, features by level and
   spellcasting, so the Forge builds the whole character); your spells join class spell lists in the Forge, NPC
   spellcasting and the Spells reference.
 - **Members-only site**: one switch makes every page and tool need a personal code or invite link.

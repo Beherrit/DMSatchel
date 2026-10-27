@@ -15,19 +15,31 @@ import {
 } from './rules2024.js';
 import * as T from './lifepath-tables.js';
 import { spellbook, spellText } from './spells.js';
-import { classFrom } from './library.js';
+import { classFrom, backgroundFrom } from './library.js';
 
 // ---- your library ---------------------------------------------------------------------------------
 // Classes, species and subclasses from the open world's library (set by the world store). They're only used when
 // chosen ("Any from my library" or by name), and they draw from their own random stream, so SRD rolls and saved
 // characters come out exactly as before.
-const NO_LIBRARY = { species: [], subclasses: [], classes: [], spells: [] };
+const NO_LIBRARY = { species: [], subclasses: [], classes: [], spells: [], backgrounds: [], feats: [] };
 let libraryProvider = () => NO_LIBRARY;
 export const setCharacterLibrary = (fn) => { libraryProvider = fn; };
 let lib = NO_LIBRARY;
 
 // Class rules by name: an SRD class, a library class, or (if the library entry is gone) a plain stand-in.
 export const classData = (name) => CLASSES[name] || lib.classes.find((c) => c.name === name) || classFrom(name);
+// The same for backgrounds.
+export const backgroundData = (name) => BACKGROUNDS[name] || lib.backgrounds.find((b) => b.name === name) || backgroundFrom(name);
+const featText = (name) => ORIGIN_FEATS[name] || lib.feats.find((f) => f.name === name)?.text || '';
+
+// Library feats of a type that may take over a pick made from `pool` (on the library's own stream, xr): as likely
+// as any one SRD option, and at least one time in four. Returns the replacement, or null to keep the SRD pick.
+function libraryFeat(xr, type, pool, taken, level = 20) {
+  if (!xr) return null;
+  const mine = lib.feats.filter((f) => f.type === type && f.level <= level && !taken.includes(f.name) && !pool.includes(f.name));
+  if (!mine.length) return null;
+  return xr.chance(Math.max(0.25, mine.length / (mine.length + pool.length))) ? xr.pick(mine).name : null;
+}
 
 // Species rules by name: an SRD species, a library species built on the SRD species it's "similar to", or (if the
 // library entry is gone) a plain human-like stand-in that keeps the name.
@@ -94,7 +106,8 @@ function pickCore(opts, r, lr) {
   const libCls = opts.cls === 'library' && lib.classes.length ? lr.pick(lib.classes).name : null;
   const cls = libCls || (opts.cls && !['any', 'library'].includes(opts.cls) ? opts.cls : r.pick(Object.keys(CLASSES)));
   const cd = classData(cls);
-  const background = opts.background && opts.background !== 'any' ? opts.background : pickBackground(cls, r);
+  const libBg = opts.background === 'library' && lib.backgrounds.length ? lr.pick(lib.backgrounds).name : null;
+  const background = libBg || (opts.background && !['any', 'library'].includes(opts.background) ? opts.background : pickBackground(cls, r));
   const sp = speciesData(species);
   const lineage = sp.lineages ? r.pick(Object.keys(sp.lineages)) : null;
   let subclass = cd.subclasses.length ? r.pick(cd.subclasses) : null;
@@ -135,7 +148,7 @@ function rollAbilities(opts, core, r) {
   const scores = {}, base = {};
   order.forEach((ab, i) => { scores[ab] = raw[i]; base[ab] = raw[i]; });
 
-  const bg = BACKGROUNDS[core.background];
+  const bg = backgroundData(core.background);
   const bgOrder = [...bg.abilities].sort((a, b) => c.priority.indexOf(a) - c.priority.indexOf(b));
   const bonus = {};
   if (r.chance(0.8)) { bonus[bgOrder[0]] = 2; bonus[bgOrder[1]] = 1; } else bgOrder.forEach((a) => { bonus[a] = 1; });
@@ -143,7 +156,7 @@ function rollAbilities(opts, core, r) {
   return { scores, base, bonus, method: opts.method || 'standard' };
 }
 
-function levelUps(level, core, ab, r) {
+function levelUps(level, core, ab, r, xr) {
   const c = classData(core.cls);
   const primary = c.priority[0], second = c.priority[1];
   const asiLevels = Object.entries(c.features).filter(([lv, fs]) => +lv <= level && fs.includes('Ability Score Improvement')).map(([lv]) => +lv);
@@ -153,7 +166,8 @@ function levelUps(level, core, ab, r) {
   for (const lv of asiLevels) {
     if (s[primary] <= 18 && r.chance(0.7)) { bump(primary, 2); notes.push(`Level ${lv}: Ability Score Improvement, +2 ${primary}`); continue; }
     if (s[primary] === 19 && r.chance(0.6)) { bump(primary, 1); const t = s[second] < 20 ? second : 'Con'; bump(t, 1); notes.push(`Level ${lv}: Ability Score Improvement, +1 ${primary}, +1 ${t}`); continue; }
-    const feat = r.pick(pool.filter((f) => !feats.includes(f)));
+    const srd = r.pick(pool.filter((f) => !feats.includes(f)));
+    const feat = libraryFeat(xr, 'General', pool, feats, lv) || srd;
     feats.push(feat);
     const t = s[primary] < 20 ? primary : s[second] < 20 ? second : 'Con';
     const got = bump(t, 1);
@@ -162,14 +176,15 @@ function levelUps(level, core, ab, r) {
   let boon = null;
   if (level >= 19) {
     boon = r.pick(EPIC_BOONS);
+    boon = libraryFeat(xr, 'Epic Boon', EPIC_BOONS, []) || boon;
     s[primary] = Math.min(30, s[primary] + 1);
     notes.push(`Level 19: ${boon}, +1 ${primary}`);
   }
   return { notes, feats, boon };
 }
 
-function buildChoices(level, core, ab, r) {
-  const c = classData(core.cls), bg = BACKGROUNDS[core.background];
+function buildChoices(level, core, ab, r, xr) {
+  const c = classData(core.cls), bg = backgroundData(core.background);
   const skills = new Set(bg.skills);
   const sources = Object.fromEntries(bg.skills.map((k) => [k, core.background]));
   const add = (k, why) => { if (!skills.has(k)) { skills.add(k); sources[k] = why; return true; } return false; };
@@ -181,7 +196,11 @@ function buildChoices(level, core, ab, r) {
   if (core.species === 'Human') { const k = byAbility(Object.keys(SKILLS)).find((x) => !skills.has(x)); add(k, 'Skillful'); }
 
   const originFeats = [bg.feat];
-  if (core.species === 'Human') originFeats.push(r.pick(Object.keys(ORIGIN_FEATS).filter((f) => f !== bg.feat && !(f.startsWith('Magic Initiate') && bg.feat.startsWith('Magic Initiate')))));
+  if (core.species === 'Human') {
+    const pool = Object.keys(ORIGIN_FEATS).filter((f) => f !== bg.feat && !(f.startsWith('Magic Initiate') && bg.feat.startsWith('Magic Initiate')));
+    const srd = r.pick(pool);
+    originFeats.push(libraryFeat(xr, 'Origin', pool, originFeats) || srd);
+  }
   for (const f of originFeats) if (f === 'Skilled') {
     let n = 3; for (const k of byAbility(Object.keys(SKILLS))) { if (n <= 0) break; if (add(k, 'Skilled feat')) n--; }
   }
@@ -197,6 +216,7 @@ function buildChoices(level, core, ab, r) {
   for (const [name, options] of Object.entries(c.choices || {})) {
     if (name === 'Fighting Style' && core.cls !== 'Fighter' && level < 2) continue;
     choices[name] = core.cls === 'Fighter' && name === 'Fighting Style' ? r.pick(options.slice(0, 3)) : r.pick(options);
+    if (name === 'Fighting Style') choices[name] = libraryFeat(xr, 'Fighting Style', options, []) || choices[name];
   }
 
   const casterKey = (c.caster === 'third' && level < 3 ? null : c.caster) || (['Eldritch Knight', 'Arcane Trickster'].includes(core.subclass) && level >= 3 ? 'third' : null);
@@ -369,7 +389,7 @@ function event(ctx, r, e, age) {
 }
 
 function calling(ctx, r) {
-  const items = [fill(r.pick(T.BACKGROUND_WHY[ctx.background]), ctx, r)];
+  const items = [fill(r.pick(T.BACKGROUND_WHY[ctx.background] || T.BACKGROUND_WHY_ANY), ctx, r)];
   const mentor = ctx.newName(r);
   const local = { mentor };
   const why = r.pick(T.CLASS_WHY[ctx.cls] || T.CLASS_WHY_ANY);
@@ -461,8 +481,10 @@ export function generateCharacter(opts = {}, seed = 'seed', salts = {}) {
 
   const ab = rollAbilities(opts, core, R('abilities'));
   const br = R('build');
-  const ups = levelUps(level, core, ab, br);
-  const build = buildChoices(level, core, ab, br);
+  // Library feats (when "from my library" is on) swap in on their own stream, so the SRD rolls stay put.
+  const xr = opts.libSpells && lib.feats.length ? R('libfeats') : null;
+  const ups = levelUps(level, core, ab, br, xr);
+  const build = buildChoices(level, core, ab, br, xr);
   const stats = derive(level, core, ab, build, ups);
   if (stats.spellcasting) {
     const sa = stats.spellcasting.ability;
@@ -493,7 +515,7 @@ export function generateCharacter(opts = {}, seed = 'seed', salts = {}) {
   story.drives = drives(ctx, R('drives'));
   story.hooks = hooks(ctx, R('hooks'));
 
-  const sp = speciesData(core.species), c = classData(core.cls), bg = BACKGROUNDS[core.background];
+  const sp = speciesData(core.species), c = classData(core.cls), bg = backgroundData(core.background);
   const libSub = lib.subclasses.find((s) => s.cls === core.cls && s.name === core.subclass) || null;
   const inches = Math.round(core.heightFt * 12), ft = Math.floor(inches / 12), inch = inches % 12;
   const looks = `${core.looks.hair} hair, ${core.looks.eyes} eyes, ${fill(core.looks.mark, ctx, subRng(seed, 'looks'))}`;
@@ -504,14 +526,14 @@ export function generateCharacter(opts = {}, seed = 'seed', salts = {}) {
     name: fullName, first, gender: core.gender, pronouns: `${ctx.pro.they}/${ctx.pro.them}`, species: core.species, lineage: core.lineage, cls: core.cls,
     subclass: level >= (c.subclassLevel || 3) ? core.subclass : null, futureSubclass: core.subclass, background: core.background, alignment: core.alignment,
     age: core.age, height: `${ft}′${inch}″`, looks, town, region, summary,
-    abilities: ab, levelUps: ups.notes, feats: [...build.originFeats.map((f) => ({ name: f, text: ORIGIN_FEATS[f], kind: 'Origin' })), ...ups.feats.map((f) => ({ name: f, kind: 'General' })), ...(ups.boon ? [{ name: ups.boon, kind: 'Epic Boon' }] : [])],
+    abilities: ab, levelUps: ups.notes, feats: [...build.originFeats.map((f) => ({ name: f, text: featText(f), kind: 'Origin' })), ...ups.feats.map((f) => ({ name: f, kind: 'General', ...(featText(f) ? { text: featText(f) } : {}) })), ...(ups.boon ? [{ name: ups.boon, kind: 'Epic Boon' }] : [])],
     choices: build.choices, spells: build.spells, languages: build.languages,
     tools: [bg.tool, c.tools].filter(Boolean), armorProf: c.armorProf, weaponProf: c.weaponProf,
     equipment: { cls: c.gear, background: bg.gear },
     stats, story, people: ctx.people,
     size: sp.size,
     // Where library choices came from, so the sheet can show their notes.
-    library: { species: sp.library ? { name: core.species, source: sp.source, like: sp.like } : null, subclass: libSub, cls: c.library ? { name: core.cls, source: c.source, spellsLike: c.caster ? c.spellsLike : null, subclassLevel: c.subclassLevel } : null },
+    library: { species: sp.library ? { name: core.species, source: sp.source, like: sp.like } : null, subclass: libSub, background: bg.library ? { name: core.background, source: bg.source, notes: bg.notes || '' } : null, cls: c.library ? { name: core.cls, source: c.source, spellsLike: c.caster ? c.spellsLike : null, subclassLevel: c.subclassLevel } : null },
   };
 }
 
@@ -538,6 +560,7 @@ export function characterText(ch) {
   L.push(`Species traits: ${s.speciesTraits.map((t) => t.name).join(', ')}`);
   L.push(`Class features: ${s.features.map((f) => f.name).join(', ')}`);
   if (ch.library?.subclass) L.push(`${ch.library.subclass.name} (from your library${ch.library.subclass.source ? `, ${ch.library.subclass.source}` : ''}): ${ch.library.subclass.features.replace(/\n+/g, ' ')}`);
+  if (ch.library?.background) L.push(`${ch.background} is from your library${ch.library.background.source ? ` (${ch.library.background.source})` : ''}${ch.library.background.notes ? `: ${ch.library.background.notes.replace(/\n+/g, ' ')}` : '.'}`);
   if (ch.library?.cls) L.push(`${ch.cls} is from your library${ch.library.cls.source ? ` (${ch.library.cls.source})` : ''}${ch.library.cls.spellsLike ? `; spells come from the ${ch.library.cls.spellsLike} list` : ''}.`);
   if (ch.library?.species) L.push(`${ch.species} is from your library${ch.library.species.source ? ` (${ch.library.species.source})` : ''}; names, age and height follow the ${ch.library.species.like}.`);
   if (ch.levelUps.length) L.push(`Level-ups: ${ch.levelUps.join('; ')}`);

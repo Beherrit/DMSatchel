@@ -27,6 +27,8 @@ function statLine(e) {
   const f = e.fields || {};
   if (e.kind === 'creature') return [f.size, f.type && f.type.toLowerCase(), f.cr && `CR ${f.cr}`, f.ac && `AC ${f.ac}`, f.hp && `${f.hp} HP`, f.speed].filter(Boolean).join(' · ');
   if (e.kind === 'item') return [f.rarity, f.type, /^(yes|requires)/i.test(f.attunement || '') ? 'attunement' : ''].filter(Boolean).join(' · ');
+  if (f.category === 'Background') return ['Background', f.abilities, f.bgSkills, f.feat && `${f.feat} feat`].filter(Boolean).join(' · ');
+  if (f.category === 'Feat') return [`${f.featType || 'General'} feat`, Number(f.level) ? `level ${f.level}+` : ''].filter(Boolean).join(' · ');
   if (f.category === 'Class') return ['Class', f.die && `${f.die} hit die`, f.primary, f.caster && f.caster !== 'None' ? f.caster.toLowerCase() : ''].filter(Boolean).join(' · ');
   if (f.category === 'Species') return ['Species', f.size, f.speed && `speed ${f.speed}`, Number(f.darkvision) ? `darkvision ${f.darkvision}` : '', f.like && `like ${f.like}`].filter(Boolean).join(' · ');
   return [f.category, f.class, f.level && (f.category === 'Spell' ? (f.level === '0' ? 'cantrip' : `level ${f.level}`) : `level ${f.level}`)].filter(Boolean).join(' · ');
@@ -69,11 +71,14 @@ function addForm(tabKey, t, after) {
       Object.assign(els, { size: sel('lib-ssize', options('size'), 'Medium'), speed: txt('lib-sspeed', '30'), darkvision: txt('lib-dv', '0 if none'), like: sel('lib-like', options('like'), 'Human') });
       els.features.placeholder = 'One trait per line, like “Storm Sense: You can feel weather coming.” The Character Forge lists each as a species trait.';
     }
-    // Classes: every field the Character Forge reads, from the schema, with everyday defaults.
-    const classFields = t.category === 'Class' ? kindFields.filter((fd) => fd[4]?.only && fieldApplies(fd, { category: 'Class' })) : [];
-    const CLASS_DEFAULTS = { die: 'd8', primary: 'Str', skillCount: '2', wears: 'No armor', caster: 'None', spellAbility: 'Int', sublevel: '3' };
-    const HINTS = { saves: 'e.g. Str, Con', skills: 'e.g. Athletics, Perception, Survival (blank = any)', armorProf: 'e.g. Light and medium armor, shields', weaponProf: 'e.g. Simple and martial weapons',
-      weapon: 'e.g. Greatsword 2d6', gear: 'What they start with', spellsLike: '', sublevel: '' };
+    // Classes, backgrounds and feats: every field the Character Forge reads, from the schema, with everyday defaults.
+    const classFields = kindFields.filter((fd) => fd[4]?.only?.includes(t.category) && ['Class', 'Background', 'Feat'].includes(t.category) && !['class', 'level'].includes(fd[0]))
+      .sort((a, b) => (a[0] === 'gear') - (b[0] === 'gear'));
+    const CLASS_DEFAULTS = { die: 'd8', primary: 'Str', skillCount: '2', wears: 'No armor', caster: 'None', spellAbility: 'Int', sublevel: '3', featType: 'General' };
+    const HINTS = t.category === 'Background'
+      ? { abilities: 'Three, e.g. Dex, Wis, Con', bgSkills: 'Two, e.g. Survival, Nature', tool: 'e.g. Cartographer’s Tools', feat: 'e.g. Alert, or a feat from your library', gear: 'What they start with' }
+      : { saves: 'e.g. Str, Con', skills: 'e.g. Athletics, Perception, Survival (blank = any)', armorProf: 'e.g. Light and medium armor, shields', weaponProf: 'e.g. Simple and martial weapons',
+        weapon: 'e.g. Greatsword 2d6', gear: 'What they start with' };
     for (const [k, , type, opts] of classFields) els[k] = type === 'select' ? sel(`lib-c-${k}`, opts, CLASS_DEFAULTS[k]) : Object.assign(txt(`lib-c-${k}`, HINTS[k]), { value: CLASS_DEFAULTS[k] || '' });
     if (t.category === 'Class') {
       els.features.rows = 8;
@@ -81,7 +86,7 @@ function addForm(tabKey, t, after) {
     }
     body = [classFields.map(([k, l]) => f(`lib-c-${k}`, l, els[k])), t.category === 'Species' ? [f('lib-ssize', 'Size', els.size), f('lib-sspeed', 'Speed', els.speed), f('lib-dv', 'Darkvision', els.darkvision), f('lib-like', 'Names, age and height like', els.like)] : null,
       ['Subclass', 'Spell'].includes(t.category) ? f('lib-class', t.category === 'Spell' ? 'Classes' : 'Class', els.cls) : null,
-      ['Spell', 'Feat', 'Subclass'].includes(t.category) ? f('lib-level', t.category === 'Spell' ? 'Spell level' : 'Level', els.level) : null, f('lib-feat', t.category === 'Class' ? 'Features by level' : 'What it gives', els.features, true)];
+      ['Spell', 'Feat', 'Subclass'].includes(t.category) ? f('lib-level', { Spell: 'Spell level', Feat: 'Minimum level (blank = any)', Subclass: 'Level' }[t.category], els.level) : null, f('lib-feat', t.category === 'Class' ? 'Features by level' : 'What it gives', els.features, true)];
   }
   const hide = el('input', { type: 'checkbox', id: 'lib-hide', checked: t.kind === 'creature' ? true : null });
   const status = el('p', { class: 'form-status', role: 'status' });
@@ -99,7 +104,7 @@ function addForm(tabKey, t, after) {
     const fields = t.kind === 'creature' ? { cr: v('cr'), type: v('type'), size: v('size'), terrain: v('terrain'), ac: v('ac'), hp: v('hp'), speed: v('speed'), abilities: v('abilities') }
       : t.kind === 'item' ? { rarity: v('rarity'), type: v('type') || 'Wondrous item', attunement: v('attunement'), properties: v('properties') }
         : { category: t.category, class: v('cls'), level: v('level'), features: v('features'), ...(t.category === 'Species' ? { size: v('size'), speed: v('speed'), darkvision: v('darkvision'), like: v('like') } : {}),
-          ...(t.category === 'Class' ? Object.fromEntries(KINDS.rule.fields.filter((fd) => fd[4]?.only?.includes('Class')).map(([k]) => [k, v(k)])) : {}) };
+          ...(['Class', 'Background', 'Feat'].includes(t.category) ? Object.fromEntries(KINDS.rule.fields.filter((fd) => fd[4]?.only?.includes(t.category) && !['class', 'level'].includes(fd[0])).map(([k]) => [k, v(k)])) : {}) };
     if (t.category === 'Class' && fields.caster === 'None') { fields.spellAbility = ''; fields.spellsLike = ''; }
     fields.source = v('source') || 'My books'; fields.link = v('link');
     try {

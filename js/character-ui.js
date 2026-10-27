@@ -11,7 +11,7 @@ import { sendToWorld } from './tools.js';
 import { characterFields, featureItem } from './sheet-ui.js';
 import { session, onSession } from './api.js';
 import { world, worldEntries, loadWorld } from './world-store.js';
-import { librarySpecies, librarySubclasses, libraryClasses, librarySpells } from './library.js';
+import { librarySpecies, librarySubclasses, libraryClasses, librarySpells, libraryBackgrounds, libraryFeats } from './library.js';
 
 let state = { opts: { level: 1, species: 'any', subclass: 'any', cls: 'any', background: 'any', gender: 'any', alignment: 'any', method: 'standard', name: '', libSpells: true }, seed: randomSeed(), salts: {} };
 let ch = null;
@@ -28,7 +28,7 @@ function readOpts() {
 }
 function writeOpts() {
   const o = state.opts;
-  $('#c-level').value = o.level; $('#c-bg').value = o.background;
+  $('#c-level').value = o.level;
   fillLibraryOptions();
   $('#c-gender').value = o.gender; $('#c-align').value = o.alignment; $('#c-method').value = o.method; $('#c-name').value = o.name || ''; $('#c-libspells').checked = !!o.libSpells;
 }
@@ -36,12 +36,18 @@ function writeOpts() {
 // Class, species and subclass menus: the SRD options, then the world library's (when a world with a library is
 // open). A choice that isn't available here (say, from a shared link) stays selectable so it isn't silently lost.
 function fillLibraryOptions() {
+  const opt = (v, t) => el('option', { value: v }, t);
+  const keep = (list, v) => (v && !['any', 'library'].includes(v) && !list.includes(v) ? [opt(v, `${v} (not in this world)`)] : []);
   const entries = world.loaded ? worldEntries() : [];
   const libClasses = libraryClasses(entries).filter((c) => !CLASSES[c.name]).map((c) => c.name);
   const libSpecies = librarySpecies(entries), libSubs = librarySubclasses(entries, [...Object.keys(CLASSES), ...libClasses]);
-  $('#c-libspells-wrap').hidden = !librarySpells(entries, [...Object.keys(CLASSES), ...libClasses]).length;
-  const opt = (v, t) => el('option', { value: v }, t);
-  const keep = (list, v) => (v && !['any', 'library'].includes(v) && !list.includes(v) ? [opt(v, `${v} (not in this world)`)] : []);
+  $('#c-libspells-wrap').hidden = !librarySpells(entries, [...Object.keys(CLASSES), ...libClasses]).length && !libraryFeats(entries).length;
+  const libBgs = libraryBackgrounds(entries).filter((b) => !BACKGROUNDS[b.name]).map((b) => b.name);
+  const bgSel = $('#c-bg');
+  setKids(bgSel, opt('any', 'Any'), Object.keys(BACKGROUNDS).map((k) => opt(k, k)),
+    libBgs.length ? el('optgroup', { label: 'From your library' }, opt('library', 'Any from my library'), libBgs.map((b) => opt(b, b))) : null,
+    keep([...Object.keys(BACKGROUNDS), ...libBgs], state.opts.background));
+  bgSel.value = state.opts.background === 'library' && !libBgs.length ? 'any' : state.opts.background;
   const spSel = $('#c-species');
   const o = state.opts;
   setKids(spSel, opt('any', 'Any'), Object.keys(SPECIES).map((k) => opt(k, k)),
@@ -121,6 +127,7 @@ function render(isNew) {
       ch.subclass || !ch.futureSubclass ? null : el('p', { class: 'muted' }, `At level ${ch.library?.cls?.subclassLevel || 3} they will choose a subclass (rolled: ${ch.futureSubclass}).`),
       ch.library?.cls ? el('p', { class: 'muted small' }, `${ch.cls} comes from your library${ch.library.cls.source ? ` (${ch.library.cls.source})` : ''}${ch.library.cls.spellsLike ? `; spells come from the ${ch.library.cls.spellsLike} list` : ''}.`) : null),
     ch.library?.subclass ? block(`${ch.library.subclass.name} (your library)`, el('p', {}, ch.library.subclass.features), ch.library.subclass.source ? el('p', { class: 'muted small' }, ch.library.subclass.source) : null) : null,
+    ch.library?.background ? block(`${ch.background} (your library)`, ch.library.background.notes ? el('p', {}, ch.library.background.notes) : null, ch.library.background.source ? el('p', { class: 'muted small' }, ch.library.background.source) : null) : null,
     ch.library?.species ? el('p', { class: 'muted small' }, `${ch.species} comes from your library${ch.library.species.source ? ` (${ch.library.species.source})` : ''}: names, age and height follow the ${ch.library.species.like}.`) : null,
     ch.levelUps.length ? block('Level-ups', el('ul', { class: 'plain' }, ch.levelUps.map((x) => el('li', {}, x)))) : null);
 
@@ -156,7 +163,7 @@ export function mountCharacters(root) {
       sel('c-align', 'Alignment', [['any', 'Any'], ...Object.keys(ALIGNMENTS).map((k) => [k, k])]),
       sel('c-method', 'Ability scores', [['standard', 'Standard array'], ['pointbuy', 'Point buy'], ['roll', '4d6 drop lowest']]),
       el('div', { class: 'field' }, el('label', { for: 'c-name' }, 'Name (optional)'), el('input', { type: 'text', id: 'c-name', placeholder: 'Leave blank to roll one' })),
-      el('label', { class: 'check', id: 'c-libspells-wrap', hidden: true }, el('input', { type: 'checkbox', id: 'c-libspells', checked: true }), ' Spells from my library')),
+      el('label', { class: 'check', id: 'c-libspells-wrap', hidden: true }, el('input', { type: 'checkbox', id: 'c-libspells', checked: true }), ' Spells and feats from my library')),
     el('div', { class: 'btnrow' },
       el('button', { class: 'btn primary', type: 'button', onclick: () => { readOpts(); state.seed = randomSeed(); state.salts = {}; generate(true); } }, 'Roll character'),
       el('button', { class: 'btn', type: 'button', onclick: () => bump('origins', 'upbringing', 'calling', 'life', 'people', 'personality', 'drives', 'hooks') }, 'New backstory'),

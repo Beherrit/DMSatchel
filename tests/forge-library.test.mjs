@@ -121,3 +121,42 @@ test('library spells read their level and classes, and join spellbooks only when
   const texts = Array.from({ length: 15 }, (_, i) => npcStats({ role: 'wizard', cls: 'Wizard', level: 5 }, `npc${i}`).spells).join('\n');
   assert.ok(texts.includes('Storm Lance') || texts.includes('Spark'));
 });
+
+import { backgroundFrom, libraryFeats } from '../js/library.js';
+import { CLASSES } from '../js/rules2024.js';
+
+test('library backgrounds and feats join the Forge', () => {
+  const storm = backgroundFrom('Storm Chaser', { abilities: 'Dex, Wis, Con', skills: 'Survival, Nature', tool: 'Navigator’s Tools', feat: 'Weather Eye', gear: 'Barometer, 20 GP', source: 'Book of Storms' }, { notes: 'You chase storms.' });
+  const feats = libraryFeats([
+    { id: 'f1', kind: 'rule', name: 'Weather Eye', fields: { category: 'Feat', featType: 'Origin', features: 'You always know the weather.' } },
+    { id: 'f2', kind: 'rule', name: 'Lightning Reflexes', fields: { category: 'Feat', featType: 'General', level: '4', features: '+1 Dex; react to danger.' } },
+    { id: 'f3', kind: 'rule', name: 'Storm Style', fields: { category: 'Feat', featType: 'Fighting Style' } },
+  ]);
+  setCharacterLibrary(() => ({ backgrounds: [storm], feats }));
+  const ch = generateCharacter({ background: 'Storm Chaser', cls: 'Fighter', level: 1 }, 'bg1');
+  assert.equal(ch.background, 'Storm Chaser');
+  assert.deepEqual(ch.feats[0], { name: 'Weather Eye', text: 'You always know the weather.', kind: 'Origin' });
+  assert.ok(ch.stats.skills.find((x) => x.name === 'Survival').prof);
+  assert.ok(ch.tools.includes('Navigator’s Tools'));
+  assert.ok(characterText(ch).includes('Storm Chaser is from your library (Book of Storms): You chase storms.'));
+  const any = generateCharacter({ background: 'library', level: 1 }, 'bg2');
+  assert.equal(any.background, 'Storm Chaser');
+  // Feats only swap in with the library option on, and the SRD rolls underneath stay the same.
+  const off = generateCharacter({ cls: 'Fighter', level: 12, species: 'Human' }, 'ft');
+  assert.ok(!off.feats.some((f) => ['Lightning Reflexes', 'Storm Style'].includes(f.name)));
+  let general = false, style = false;
+  for (let i = 0; i < 15; i++) {
+    const on = generateCharacter({ cls: 'Fighter', level: 12, species: 'Human', libSpells: true }, `ft${i}`);
+    if (on.feats.some((f) => f.name === 'Lightning Reflexes' && f.text)) general = true;
+    if (on.choices['Fighting Style'] === 'Storm Style') style = true;
+  }
+  assert.ok(general && style);
+  // A general feat with a minimum level isn't taken before it.
+  for (let i = 0; i < 10; i++) {
+    const on = generateCharacter({ cls: 'Fighter', level: 12, libSpells: true }, `lv${i}`);
+    assert.ok(!on.levelUps.some((n) => /Level [1-3]: Lightning/.test(n)));
+  }
+  setCharacterLibrary(() => ({}));
+  assert.equal(generateCharacter({ background: 'Storm Chaser', cls: 'Wizard' }, 'gone').background, 'Storm Chaser');
+  assert.ok(CLASSES.Fighter);
+});
