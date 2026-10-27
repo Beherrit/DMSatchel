@@ -9,8 +9,11 @@ const svgEl = (tag, attrs = {}) => { const e = document.createElementNS(NS, tag)
 const DEFAULT_KINDS = new Set(['region', 'settlement', 'location', 'faction', 'guild', 'clan', 'npc', 'character', 'deity', 'item', 'quest']);
 let shownKinds = new Set(DEFAULT_KINDS);
 let useMentions = false, useParents = true;
+const MAX_NODES = 250;
+let truncated = 0;
 
 function buildGraph(focusId, depth) {
+  truncated = 0;
   const all = worldEntries().filter((e) => shownKinds.has(e.kind) || e.id === focusId);
   const ids = new Set(all.map((e) => e.id));
   const edges = [];
@@ -31,8 +34,12 @@ function buildGraph(focusId, depth) {
     for (let i = 0; i < depth; i++) for (const ed of edges) { if (keep.has(ed.a)) keep.add(ed.b); else if (keep.has(ed.b)) keep.add(ed.a); }
   } else {
     // Without a focus, leave out entries with no connections at all; they'd just float.
-    const linked = new Set(edges.flatMap((ed) => [ed.a, ed.b]));
-    keep = new Set([...ids].filter((id) => linked.has(id)));
+    // Big worlds show their most connected entries, so the picture stays readable and quick to lay out.
+    const deg = new Map();
+    for (const ed of edges) { deg.set(ed.a, (deg.get(ed.a) || 0) + 1); deg.set(ed.b, (deg.get(ed.b) || 0) + 1); }
+    const linked = [...ids].filter((id) => deg.has(id));
+    keep = new Set(linked.length > MAX_NODES ? linked.sort((a, b) => deg.get(b) - deg.get(a)).slice(0, MAX_NODES) : linked);
+    truncated = linked.length > MAX_NODES ? linked.length : 0;
   }
   const nodes = all.filter((e) => keep.has(e.id)).map((e) => ({ id: e.id, e, x: 0, y: 0, vx: 0, vy: 0, deg: 0 }));
   const idx = new Map(nodes.map((n, i) => [n.id, i]));
@@ -121,7 +128,7 @@ export function viewWeb(focusId) {
       nodeLayer.append(grp); n.el = grp;
     }
     svg.append(edgeLayer, nodeLayer);
-    counts.textContent = `${g.nodes.length} entries, ${g.edges.length} connections${focus ? ` around ${focus.name}` : ''}.`;
+    counts.textContent = `${g.nodes.length} entries, ${g.edges.length} connections${focus ? ` around ${focus.name}` : ''}.${truncated ? ` Showing the ${MAX_NODES} most connected of ${truncated}; open any entry’s web to see its own neighborhood.` : ''}`;
     if (!g.nodes.length) svg.append(Object.assign(svgEl('text', { x: vb.x + vb.w / 2, y: vb.y + vb.h / 2, 'text-anchor': 'middle', class: 'empty-msg' }), { textContent: 'Nothing connected yet. Add connections on entries to see the web.' }));
   }
   const move = (n) => { n.el.setAttribute('transform', `translate(${n.x},${n.y})`); for (const e of g.edges) if (e.s === n || e.t === n) { e.line.setAttribute('x1', e.s.x); e.line.setAttribute('y1', e.s.y); e.line.setAttribute('x2', e.t.x); e.line.setAttribute('y2', e.t.y); } };

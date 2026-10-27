@@ -122,7 +122,8 @@ function viewSearch(q) {
   const hits = worldEntries().filter((e) => (tag ? e.tags?.includes(tag)
     : [e.name, e.summary, e.body, ...Object.values(e.fields || {}), ...(e.tags || []), isGm() ? e.secret : ''].join('\n').toLowerCase().includes(term))).sort(byName);
   return el('div', { class: 'w-view' }, el('div', { class: 'panel-head' }, el('h2', {}, tag ? `Tagged #${tag}` : `Search: “${q}”`), el('p', {}, `${hits.length} result${hits.length === 1 ? '' : 's'}`)),
-    hits.length ? el('ul', { class: 'entry-grid' }, hits.map((e) => { const c = entryCard(e); c.prepend(el('span', { class: 'kind-tag' }, kindLabel(e.kind))); return c; })) : notice('No matches', 'Try a shorter word, or a name.'));
+    hits.length ? el('ul', { class: 'entry-grid' }, hits.slice(0, 200).map((e) => { const c = entryCard(e); c.prepend(el('span', { class: 'kind-tag' }, kindLabel(e.kind))); return c; })) : notice('No matches', 'Try a shorter word, or a name.'),
+    hits.length > 200 ? el('p', { class: 'muted' }, `Showing the first 200 of ${hits.length}. Add another word to narrow it down.`) : null);
 }
 
 function viewEntry(id, tab) {

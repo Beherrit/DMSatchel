@@ -746,3 +746,5 @@ tr.disabled td { color: var(--muted) }
 .treasure-line { color: var(--brass) }
 .dg-save-card { background: var(--sunk) }
 .export-preview { white-space: pre-wrap; background: var(--sunk); border: 1px solid var(--line); border-radius: 8px; padding: 14px; max-height: 480px; overflow: auto; font-size: 13px }
+.pic-file { width: 100%; max-width: 100%; min-width: 0 }
+.pic-row > * { min-width: 0 }

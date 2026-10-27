@@ -3,7 +3,15 @@ import { el } from './dom.js';
 import { api } from './api.js';
 import { KINDS } from './world-schema.js';
 
-export const world = { entries: new Map(), info: null, loaded: false, loading: null, error: null, standings: null, maps: null };
+// A Map that drops the lookup index whenever an entry is added, changed or removed.
+let index = null;
+class Entries extends Map {
+  set(k, v) { index = null; return super.set(k, v); }
+  delete(k) { index = null; return super.delete(k); }
+  clear() { index = null; return super.clear(); }
+}
+
+export const world = { entries: new Entries(), info: null, loaded: false, loading: null, error: null, standings: null, maps: null };
 
 export const worldEntries = () => [...world.entries.values()];
 export const getEntry = (id) => world.entries.get(id);
@@ -13,7 +21,7 @@ export async function loadWorld(force) {
   world.loading = (async () => {
     try {
       const [r, s, m] = await Promise.all([api('entries'), api('standings').catch(() => null), api('maps').catch(() => null)]);
-      world.entries = new Map(r.entries.map((e) => [e.id, e]));
+      world.entries = new Entries(r.entries.map((e) => [e.id, e]));
       world.info = r.world; world.role = r.role || null; world.syncedAt = r.now || null; world.standings = s; world.maps = m?.maps || [];
       world.loaded = true; world.error = null;
     } catch (e) { world.error = e; }
@@ -28,9 +36,21 @@ export const link = (e, text) => el('a', { href: `#world/e/${e.id}`, class: `eli
 export const when = (iso) => (iso ? new Date(iso).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : '');
 export const whenTime = (iso) => (iso ? new Date(iso).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) : '');
 
+// Lookups by name and by parent, rebuilt only after the entries change.
+function idx() {
+  if (!index || index.map !== world.entries) {
+    const byNameMap = new Map(), kids = new Map();
+    for (const e of world.entries.values()) {
+      const k = e.name.toLowerCase(); if (!byNameMap.has(k)) byNameMap.set(k, e);
+      if (e.parent_id) { if (!kids.has(e.parent_id)) kids.set(e.parent_id, []); kids.get(e.parent_id).push(e); }
+    }
+    index = { byNameMap, kids, map: world.entries };
+  }
+  return index;
+}
+
 export function findByName(name) {
-  const n = String(name).trim().toLowerCase();
-  return worldEntries().find((e) => e.name.toLowerCase() === n);
+  return idx().byNameMap.get(String(name).trim().toLowerCase());
 }
 
 // Ids of entries mentioned in text with [[Name]] or [[Name|label]].
@@ -131,15 +151,16 @@ export function stateBadges(e) {
 
 // ---- place helpers -----------------------------------------------------------------------------
 
-export const childrenOf = (id, kinds) => worldEntries().filter((e) => e.parent_id === id && (!kinds || kinds.includes(e.kind))).sort(byName);
+export const childrenOf = (id, kinds) => (idx().kids.get(id) || []).filter((e) => !kinds || kinds.includes(e.kind)).sort(byName);
 
 // Every entry inside a place, at any depth.
 export function descendantsOf(id, kinds) {
   const out = [], seen = new Set([id]);
   let frontier = [id];
+  const { kids } = idx();
   while (frontier.length) {
     const next = [];
-    for (const e of worldEntries()) if (frontier.includes(e.parent_id) && !seen.has(e.id)) { seen.add(e.id); next.push(e.id); if (!kinds || kinds.includes(e.kind)) out.push(e); }
+    for (const p of frontier) for (const e of kids.get(p) || []) if (!seen.has(e.id)) { seen.add(e.id); next.push(e.id); if (!kinds || kinds.includes(e.kind)) out.push(e); }
     frontier = next;
   }
   return out.sort(byName);
