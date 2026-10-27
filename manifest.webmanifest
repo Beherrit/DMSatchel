@@ -1,0 +1,1 @@
+{ "name": "The DM's Satchel", "short_name": "DM's Satchel", "start_url": "/", "display": "standalone", "background_color": "#E7EAE4", "theme_color": "#1D2332", "icons": [{ "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }] }

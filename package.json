@@ -1,0 +1,15 @@
+{
+  "name": "dmsatchel",
+  "version": "1.0.0",
+  "description": "A DM's toolkit and shared world builder for fifth-edition campaigns.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test \"tests/*.test.mjs\"",
+    "dev": "node tools/serve.mjs"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "1.1.0"
+  },
+  "engines": { "node": ">=20" }
+}

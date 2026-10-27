@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The DM's Satchel</title>
+<meta name="description" content="A Dungeon Master's toolkit and shared world builder for fifth-edition campaigns: NPCs, quests, factions, loot, 2024-rules characters with backstories, and a world wiki for many GMs.">
+<meta name="theme-color" content="#1D2332">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=IM+Fell+English:ital@0;1&family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="#tools"><span class="brand-name">The DM’s Satchel</span><span class="brand-sub">Characters, quests and a world to put them in</span></a>
+    <div id="account" class="account"></div>
+  </header>
+  <nav class="mainnav" aria-label="Sections">
+    <a href="#tools" data-section="tools">Table Tools</a>
+    <a href="#characters" data-section="characters">Character Forge</a>
+    <a href="#world" data-section="world">World</a>
+    <a href="#reference" data-section="reference">Reference</a>
+    <a href="#admin" data-section="admin" class="admin-only">Admin</a>
+  </nav>
+  <nav class="tabs" id="toolnav" aria-label="Table tools"></nav>
+  <div class="layout">
+    <main id="panels"></main>
+    <aside class="notebook" id="notebook" aria-label="Session notebook">
+      <div class="nb-head"><h2>Session Notebook</h2><span class="nb-status" id="nb-status"></span></div>
+      <div class="notes" id="notes"></div>
+      <div class="btnrow nb-tools">
+        <button class="btn small ghost" type="button" id="nb-export">Export</button>
+        <label class="btn small ghost" for="nb-import">Import</label>
+        <input type="file" id="nb-import" accept="application/json,.json" hidden>
+      </div>
+    </aside>
+  </div>
+  <footer class="foot">
+    <p>Unofficial fan tool, not affiliated with Wizards of the Coast. Rules data summarizes fifth-edition (2024) game mechanics in original words.
+      This work includes material from the System Reference Document 5.2 (“SRD 5.2”) by Wizards of the Coast LLC, available at
+      <a href="https://www.dndbeyond.com/srd" rel="noopener">dndbeyond.com/srd</a>, licensed under the
+      <a href="https://creativecommons.org/licenses/by/4.0/legalcode" rel="noopener">Creative Commons Attribution 4.0 International License</a>.</p>
+  </footer>
+</div>
+<div class="toast" id="toast" hidden></div>
+<noscript><p style="padding:16px">The DM’s Satchel needs JavaScript turned on.</p></noscript>
+<script type="module" src="/js/app.js"></script>
+</body>
+</html>
