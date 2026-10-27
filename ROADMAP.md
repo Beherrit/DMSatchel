@@ -103,6 +103,15 @@ to the log at the bottom.
 37. [x] **How each character stands with NPCs.** A per-character attitude (friendly, wary, hostile…) toward key
     NPCs and factions, set by GMs, shown on both pages and in session prep.
 
+38. [ ] **Private notes on any entry.** Each person can keep their own notes on an NPC, place or quest that only
+    they see ("I think she's lying"), listed together on their My things page.
+39. [ ] **Quest objectives.** A checklist of steps on each quest (some hidden until revealed); ticking them shows
+    progress on the quest board and the party page.
+40. [ ] **What's new since you were last here.** On opening a world, a short list of what changed since your last
+    visit (new and revealed entries, resolved downtime, session logs, handouts), for players and GMs.
+41. [ ] **Printable session sheet.** One page for the table from session prep: where the party is, local NPCs with
+    roles and attitudes, jobs, rumors, today's weather and a rolled encounter, ready to print.
+
 ## Ideas parking lot
 
 ## Log
