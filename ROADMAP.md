@@ -36,7 +36,7 @@ to the log at the bottom.
    owner, GM, player. Per-world invite links/codes that create an account or add a membership. The site admin
    (ADMIN_CODE) can see everything. Players read revealed content, and can create and edit their own entries
    (characters, journal entries, notes), suggest edits/new entries (GM approves), and comment on quests.
-7. [ ] **Party page.** Party members and their characters, shared treasure and loot log (gold in/out, items),
+7. [x] **Party page.** Party members and their characters, shared treasure and loot log (gold in/out, items),
    party journal (players and GMs post), handouts the GM reveals (text and images), current quests.
 8. [ ] **Player character sheets.** Characters from the Forge saved to the world and owned by a player:
    current HP, conditions, spell slots used, inventory, gold, notes, level-up. Players edit their own.
@@ -69,3 +69,4 @@ to the log at the bottom.
 - Magic items: 267-item SRD catalog, 18 curses, unique item maker, Magic Items tool, catalog loot, Reference tabs for magic items and spells shipped. Fixed Add-to-world when World wasn't opened yet.
 - Shops & economy: SRD gear prices, 19 shop types, 6 town economies, shortages/surpluses/embargoes/festivals with reasons, haggling and buy-back helpers, magic stock by town size, Market tab on towns with restock-all, shop pages with stock tables, Shops & Markets tool.
 - Hidden entries, multiple worlds, accounts and roles: worlds table with additive migration (the old world becomes "world-1", existing GMs keep GM access), per-world owner/GM/player roles, GM and player invite links that create accounts with personal codes, world switcher and Worlds page, Members & invites admin, People (site admin), hidden entries with reveal/hide, player characters and journals, player suggestions with GM approve/reject, My things page. Verified the API and migration against a real Postgres engine (PGlite).
+- Party page: active and former party members, treasury with coin total and even split, items held and by whom, loot log anyone in the world can add to (GMs or the writer can strike lines; struck lines stay in the database), current quests, handouts (new Handout kind, hidden by default, "Hand out" reveals them), party journal.

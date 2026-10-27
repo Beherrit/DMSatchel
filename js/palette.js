@@ -14,6 +14,7 @@ function baseItems() {
     ...TOOLS.map((t) => ({ label: t.label, group: 'Table tools', href: `#tools/${t.id}` })),
     { label: 'Character Forge', group: 'Pages', href: '#characters', hint: 'Roll a 2024-rules character' },
     { label: 'World', group: 'Pages', href: '#world' },
+    { label: 'The Party', group: 'World', href: '#world/party', hint: 'Party members, treasury, loot log, handouts' },
     { label: 'Maps', group: 'World', href: '#world/maps' },
     { label: 'Relationship web', group: 'World', href: '#world/web' },
     { label: 'Party standing', group: 'World', href: '#world/standings' },

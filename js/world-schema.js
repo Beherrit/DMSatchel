@@ -57,6 +57,10 @@ export const KINDS = {
     label: 'Journal', plural: 'Journals & Notes', blurb: 'Diaries, session notes, letters and theories, by players and GMs.',
     fields: [['kind', 'Kind', 'select', ['Diary', 'Session notes', 'Letter', 'Theory', 'Rumor heard', 'Party notes', 'Other']], ['character', 'Written by (character)'], ['date', 'Date (in world)']],
   },
+  handout: {
+    label: 'Handout', plural: 'Handouts', blurb: 'Letters, maps, notes and clues the GMs hand to the players.',
+    fields: [['from', 'From (who wrote or gave it)'], ['found', 'Where or when it was found'], ['text', 'Text of the handout', 'long']],
+  },
   quest: {
     label: 'Quest', plural: 'Quests & Plots', blurb: 'Adventures, rumors and running plot threads.',
     fields: [['status', 'Status', 'select', ['Rumor', 'Available', 'Active', 'Completed', 'Failed', 'Abandoned']], ['patron', 'Patron'], ['gm', 'Run by (GM)'], ['reward', 'Reward'], ['stakes', 'What’s at stake', 'long'], ['outline', 'Outline', 'long']],
@@ -67,7 +71,7 @@ export const KINDS = {
   },
 };
 
-export const KIND_ORDER = ['region', 'area', 'settlement', 'location', 'faction', 'guild', 'clan', 'npc', 'character', 'deity', 'item', 'event', 'session', 'journal', 'quest', 'lore'];
+export const KIND_ORDER = ['region', 'area', 'settlement', 'location', 'faction', 'guild', 'clan', 'npc', 'character', 'deity', 'item', 'event', 'session', 'journal', 'handout', 'quest', 'lore'];
 
 // Kinds a player can create and edit as their own; anything else a player adds is a suggestion for the GMs.
 export const PLAYER_KINDS = ['character', 'journal'];

@@ -89,7 +89,7 @@ body:not([data-section="tools"]):not([data-section="characters"]) .layout { grid
 .field { display: grid; gap: 3px; min-width: 0 }
 .field.grow { flex: 1 1 220px }
 .field label, .field > .lbl { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 700 }
-select, input[type="text"], input[type="search"], textarea { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 7px 10px; min-width: 0; max-width: 100% }
+select, input[type="text"], input[type="search"], input[type="number"], textarea { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 7px 10px; min-width: 0; max-width: 100% }
 textarea { width: 100%; resize: vertical; line-height: 1.45 }
 .btn { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); background: var(--surface); padding: 7px 14px; border-radius: 6px; cursor: pointer; font-weight: 500; text-decoration: none; color: var(--ink); line-height: 1.3 }
 .btn:hover { border-color: var(--muted) }
@@ -306,7 +306,7 @@ tr.disabled td { color: var(--muted) }
 .k-faction, .k-guild, .k-clan { --kc: var(--k-power) }
 .k-npc, .k-character { --kc: var(--k-people) }
 .k-deity, .k-quest { --kc: var(--k-faith) }
-.k-item, .k-lore { --kc: var(--k-thing) }
+.k-item, .k-lore, .k-handout { --kc: var(--k-thing) }
 .k-event, .k-session { --kc: var(--k-time) }
 .w-tools { padding-bottom: 8px; border-bottom: 1px solid var(--line) }
 .linkish { background: none; border: none; padding: 0; color: var(--accent); cursor: pointer; text-align: left }
@@ -613,3 +613,27 @@ tr.disabled td { color: var(--muted) }
 @media (max-width: 640px) { .ws-btn { max-width: 160px } .ws-menu { right: auto; left: 0 } }
 .worlds-page .admin-grid > :first-child { grid-column: auto }
 .code-row code.invite-url { font-size: 14px; letter-spacing: 0; flex: 1 1 100% }
+
+/* ---- the party page ---- */
+.party-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 360px); gap: 24px; align-items: start }
+.party-main { display: grid; gap: 24px; min-width: 0 }
+.party-side { position: sticky; top: 12px; min-width: 0 }
+@media (max-width: 900px) { .party-grid { grid-template-columns: minmax(0, 1fr) } .party-side { position: static; order: -1 } }
+.coin-total { display: grid; gap: 2px }
+.coin-total strong { font-size: 26px; font-family: var(--f-display, inherit); color: var(--brass) }
+.item-held li { padding: 2px 0 }
+.ledger-form { display: grid; gap: 8px; border-top: 1px solid var(--line); padding-top: 12px }
+.ledger-form .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 6px }
+.ledger-form .controls > * { min-width: 0; width: 100% }
+.ledger-form input.qty { max-width: none }
+.ledger-form > input { width: 100% }
+.ledger-lines li { padding: 6px 0; border-bottom: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 0 4px; align-items: baseline }
+.ledger-lines .btn { margin-left: auto }
+.amt { font-weight: 700; font-variant-numeric: tabular-nums }
+.amt.in { color: var(--good) } .amt.out { color: var(--danger) }
+.handout-list { list-style: none; padding: 0; display: grid; gap: 12px }
+.handout { display: grid; gap: 8px }
+.handout.held { opacity: .85 }
+.handout .paper { background: var(--paper); color: var(--paper-ink); padding: 14px 18px; border-radius: 4px; box-shadow: 0 1px 3px rgb(0 0 0 / .15); font-family: var(--f-flavor); font-size: 17px; transform: rotate(-.3deg) }
+.handout.held .paper { outline: 2px dashed var(--warn); outline-offset: 3px }
+.former summary { cursor: pointer; color: var(--muted) }

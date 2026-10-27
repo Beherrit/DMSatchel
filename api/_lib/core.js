@@ -63,6 +63,12 @@ export function ensureSchema() {
       await sql`UPDATE entries SET world_id = 'default' WHERE world_id IS NULL`;
       await sql`UPDATE maps SET world_id = 'default' WHERE world_id IS NULL`;
       await sql`UPDATE standing_log s SET world_id = COALESCE((SELECT e.world_id FROM entries e WHERE e.id = s.entry_id), 'default') WHERE s.world_id IS NULL`;
+      // The party's treasury: coins and items in and out.
+      await sql`CREATE TABLE IF NOT EXISTS party_ledger (
+        id serial PRIMARY KEY, world_id text NOT NULL, at timestamptz NOT NULL DEFAULT now(), gm_id int, cp bigint NOT NULL DEFAULT 0,
+        item text NOT NULL DEFAULT '', qty int NOT NULL DEFAULT 0, holder text NOT NULL DEFAULT '', note text NOT NULL DEFAULT '',
+        session_id text, deleted boolean NOT NULL DEFAULT false)`;
+      await sql`CREATE INDEX IF NOT EXISTS party_ledger_world_idx ON party_ledger (world_id, at DESC)`;
       await sql`INSERT INTO members (world_id, gm_id, role) SELECT 'default', id, CASE WHEN role = 'admin' THEN 'owner' ELSE 'gm' END FROM gms
         WHERE NOT EXISTS (SELECT 1 FROM members m WHERE m.world_id = 'default') ON CONFLICT DO NOTHING`;
     })().catch((e) => { schemaReady = null; throw e; });

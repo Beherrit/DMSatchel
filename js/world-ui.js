@@ -1,6 +1,6 @@
 // The shared world: browse, search, read and (for GMs) write entries.
 // Routes: #world · #world/k/<kind> · #world/e/<id> · #world/new/<kind> · #world/edit/<id> · #world/q/<search> · #world/bin
-//         #world/suggestions (GMs) · #world/mine (your characters, journals and suggestions)
+//         #world/party · #world/suggestions (GMs) · #world/mine (your characters, journals and suggestions)
 
 import { el, toast, confirmButton, setKids } from './dom.js';
 import { api, session, isGm, isMember, isPlayer, signedIn, onSession } from './api.js';
@@ -12,6 +12,7 @@ import { viewWeb } from './world-web.js';
 import { viewStandings, standingWidget } from './world-standings.js';
 import { viewTalk, talkWidget } from './world-talk.js';
 import { placeHub, viewAtlas, placeCounts } from './world-place.js';
+import { viewParty } from './world-party.js';
 import { renderStats, renderSpells } from './statblock-ui.js';
 import { renderStock } from './shop-ui.js';
 import { restockDraft } from './world-place.js';
@@ -36,6 +37,7 @@ function renderSide() {
     isPlayer() ? el('div', { class: 'w-gm w-player' }, el('a', { class: 'btn primary small', href: '#world/new/character' }, '+ My character'), el('a', { class: 'btn small', href: '#world/new/journal' }, '+ Journal entry'),
       el('a', { class: 'btn ghost small', href: '#world/new/lore' }, 'Suggest an entry'), el('a', { class: 'btn ghost small', href: '#world/mine' }, 'My things')) : null,
     el('nav', { class: 'w-kinds w-tools', 'aria-label': 'World views' },
+      el('a', { href: '#world/party', 'data-view': 'party' }, el('span', {}, 'The Party'), el('span', { class: 'count' }, worldEntries().filter((e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status)).length)),
       el('a', { href: '#world/atlas', 'data-view': 'atlas' }, el('span', {}, 'Atlas'), el('span', { class: 'count' }, worldEntries().filter((e) => PLACE_KINDS.includes(e.kind)).length)),
       el('a', { href: '#world/maps', 'data-view': 'maps' }, el('span', {}, 'Maps'), el('span', { class: 'count' }, (world.maps || []).length)),
       el('a', { href: '#world/web', 'data-view': 'web' }, el('span', {}, 'Relationship web'), el('span', { class: 'count' }, '◎')),
@@ -260,6 +262,8 @@ function viewEdit(id, kindForNew) {
     e.fields = { number: String(next), played_on: new Date().toISOString().slice(0, 10), gm: session.gm?.name || '' };
     e.body = 'What happened:\n\nWho the party met (use [[Names]] so the entries link back to this session):\n';
   }
+  // Handouts start hidden: write them ahead, hand them out at the table.
+  if (!existing && !draft && e.kind === 'handout' && !e.visibility) e.visibility = 'gm';
   if (!existing) draft = null;
   e.fields = e.fields || {}; e.links = e.links || [];
 
@@ -415,6 +419,7 @@ export async function showWorld(parts, { keepScroll = false } = {}) {
   else if (view === 'standings') node = viewStandings();
   else if (view === 'talk') node = await viewTalk();
   else if (view === 'suggestions') node = viewSuggestions();
+  else if (view === 'party') node = await viewParty(rerenderWorld);
   else if (view === 'mine') node = viewMine();
   else node = viewHome();
   const y = window.scrollY;

@@ -5,7 +5,7 @@ export const session = { gm: null, worlds: [], configured: null, worldKey: null,
 const notify = () => session.listeners.forEach((fn) => fn(session));
 export const onSession = (fn) => { session.listeners.add(fn); return () => session.listeners.delete(fn); };
 
-const WORLD_SCOPED = new Set(['entries', 'maps', 'standings', 'comments', 'activity', 'settings']);
+const WORLD_SCOPED = new Set(['entries', 'maps', 'standings', 'comments', 'activity', 'settings', 'party']);
 const LS_WORLD = 'dm-satchel-world';
 
 function initialWorldKey() {

@@ -48,6 +48,8 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
   worlds from the menu at the top. Worlds can be private (members only) or open (anyone can read).
 - **Players add to the world**: players add their own characters and journal entries, and suggest anything else
   (an NPC, a rumor, a place). Suggestions wait for a GM to approve, edit or reject them.
+- **The Party**: who's in the party, the shared treasury (coins and items, with a loot log anyone can add to and an
+  even split), current quests, handouts the GM reveals at the table, and the party journal.
 - **Hidden entries**: GMs can keep any entry hidden from players while they prep, then reveal it in one click.
 - **Admin**: world owners manage members and roles, rotate invite links, name the world, see recent activity, and
   download or import a full backup. The site admin can see every world and every account.
