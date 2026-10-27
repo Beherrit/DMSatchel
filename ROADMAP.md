@@ -93,6 +93,16 @@ to the log at the bottom.
 33. [x] **Fog of war on maps.** GMs paint hidden areas over a map; players see only what's been revealed, and GMs
     reveal more as the party explores.
 
+34. [ ] **Session recap drafts.** One click drafts the next session-log entry from what changed since the last one
+    (entries revealed or edited, quests moved, downtime resolved, party ledger lines, clocks advanced); the GM edits
+    it, saves it as a session and can post it to Discord.
+35. [ ] **Show a handout to the table.** A GM pushes a handout (or any entry's picture) to everyone who has the world
+    open; it pops up on their screen and stays in their party page.
+36. [ ] **Split the loot.** From the party treasury, split coin evenly (or by shares) between active characters;
+    each share lands in that character's sheet coin and in the ledger.
+37. [ ] **How each character stands with NPCs.** A per-character attitude (friendly, wary, hostile…) toward key
+    NPCs and factions, set by GMs, shown on both pages and in session prep.
+
 ## Ideas parking lot
 
 ## Log
