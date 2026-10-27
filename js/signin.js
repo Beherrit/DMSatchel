@@ -5,10 +5,18 @@ import { session, signIn, signOut, onSession } from './api.js';
 let dialog;
 
 export function openSignIn() {
-  if (session.configured === false) { toast('The shared world isn’t connected yet. See the README to finish setup.'); return; }
-  dialog.querySelector('.form-status').textContent = '';
+  const status = dialog.querySelector('.form-status');
+  const offline = session.configured === false || session.configured === 'offline';
+  status.textContent = offline
+    ? (session.configured === false
+      ? 'Sign-in isn’t available yet: the shared world’s database isn’t connected. The site owner needs to connect Neon Postgres to this Vercel project and redeploy.'
+      : 'Sign-in isn’t available in this copy of the app: it’s running without its server.')
+    : '';
+  status.className = offline ? 'form-status error' : 'form-status';
+  dialog.querySelector('input').disabled = offline;
+  dialog.querySelector('button[type="submit"]').disabled = offline;
   dialog.showModal();
-  dialog.querySelector('input').focus();
+  if (!offline) dialog.querySelector('input').focus();
 }
 
 function renderAccount() {
