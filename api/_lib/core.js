@@ -49,6 +49,7 @@ const MAX_AGE = 60 * 60 * 24 * 60;
 
 export async function createSession(res, gmId) {
   const token = randomBytes(32).toString('base64url');
+  await sql`DELETE FROM sessions WHERE expires_at < now()`;
   await sql`INSERT INTO sessions (token_hash, gm_id, expires_at) VALUES (${hash(token)}, ${gmId}, now() + interval '60 days')`;
   res.setHeader('Set-Cookie', `${COOKIE}=${token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${MAX_AGE}`);
 }
@@ -70,7 +71,7 @@ export async function currentGm(req) {
   const rows = await sql`SELECT g.id, g.name, g.role FROM sessions s JOIN gms g ON g.id = s.gm_id
     WHERE s.token_hash = ${hash(token)} AND s.expires_at > now() AND NOT g.disabled`;
   if (!rows.length) return null;
-  sql`UPDATE gms SET last_seen = now() WHERE id = ${rows[0].id}`.catch(() => {});
+  try { await sql`UPDATE gms SET last_seen = now() WHERE id = ${rows[0].id} AND (last_seen IS NULL OR last_seen < now() - interval '5 minutes')`; } catch { /* not important */ }
   return rows[0];
 }
 
@@ -100,7 +101,9 @@ export function route(handlers) {
       if (req.method !== 'GET') {
         // Same-origin check for writes: browsers send Origin on POST/PUT/PATCH/DELETE.
         const origin = req.headers.origin;
-        if (origin && new URL(origin).host !== req.headers.host) return fail(res, 403, 'Cross-site requests are not allowed');
+        let host = null;
+        try { host = origin ? new URL(origin).host : req.headers.host; } catch { /* malformed Origin */ }
+        if (host !== req.headers.host) return fail(res, 403, 'Cross-site requests are not allowed');
       }
       req.gm = await currentGm(req);
       return await h(req, res);
