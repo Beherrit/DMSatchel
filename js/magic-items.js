@@ -304,8 +304,16 @@ export function concrete(item, rng) {
   return { ...item, name, value };
 }
 
+// Items from the open world's library (set by the world store), mixed into every roll.
+let libraryItems = () => [];
+export const setLibraryItems = (fn) => { libraryItems = fn; };
+
 export function randomItem(rng, { rarity, type, cursed } = {}) {
-  const pool = MAGIC_ITEMS.filter((i) => (!rarity || i.rarity === rarity) && (!type || baseType(i.type) === type) && (cursed == null || i.cursed === cursed));
+  const fits = (i) => (!rarity || i.rarity === rarity) && (!type || baseType(i.type) === type) && (cursed == null || i.cursed === cursed);
+  // A handful of your own items would be lost among the catalog, so they get about a third of the rolls they fit.
+  const mine = libraryItems().filter(fits);
+  if (mine.length && rng.chance(0.35)) return concrete(rng.pick(mine), rng);
+  const pool = [...MAGIC_ITEMS, ...mine].filter(fits);
   return pool.length ? concrete(rng.pick(pool), rng) : null;
 }
 

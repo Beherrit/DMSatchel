@@ -121,11 +121,12 @@ const NON_COMBAT = ['A merchant caravan, nervous about the road ahead', 'Pilgrim
 const pick = (rng, list) => list[Math.floor(rng() * list.length)];
 
 // One combat encounter for the party, fitted to the XP budget. Returns {groups:[{name, cr, count}], xp, budget, activity, sign}.
-export function rollEncounter({ terrain = ['forest'], level = 3, size = 4, difficulty = 'Moderate', seed, types } = {}) {
+// `extra` adds creatures (from your bestiary); `only` uses just those.
+export function rollEncounter({ terrain = ['forest'], level = 3, size = 4, difficulty = 'Moderate', seed, types, extra = [], only = false } = {}) {
   const rng = makeRng(seed ?? Math.random().toString(36).slice(2)).next;
   const want = budget(level, size, difficulty);
   const terrains = Array.isArray(terrain) ? terrain : [terrain];
-  const all = CREATURES.filter((c) => c.terrains.some((t) => terrains.includes(t)) && xpFor(c.cr) <= want);
+  const all = [...(only ? [] : CREATURES), ...extra].filter((c) => c.terrains.some((t) => terrains.includes(t)) && xpFor(c.cr) <= want);
   // Prefer the given creature types (undead in a crypt, people in a hideout) when enough of them fit.
   const typed = types?.length ? all.filter((c) => types.includes(c.type)) : [];
   const pool = typed.length >= 2 ? typed : all;
@@ -156,20 +157,20 @@ export function rollEncounter({ terrain = ['forest'], level = 3, size = 4, diffi
   // Prefer encounters that use most of the budget without going over.
   tries.sort((a, b) => Math.abs(0.85 - a.fit) - Math.abs(0.85 - b.fit));
   const best = tries[Math.floor(rng() * Math.min(3, tries.length))];
-  return { groups: best.groups.map(({ name, cr, type, count }) => ({ name, cr, type, count })), xp: best.xp, budget: want, difficulty, activity: pick(rng, ACTIVITY), sign: pick(rng, SIGNS) };
+  return { groups: best.groups.map(({ name, cr, type, count, entryId, link }) => ({ name, cr, type, count, ...(entryId ? { entryId, link } : {}) })), xp: best.xp, budget: want, difficulty, activity: pick(rng, ACTIVITY), sign: pick(rng, SIGNS) };
 }
 
 export const encounterLine = (enc) => `${enc.groups.map((g) => `${g.count > 1 ? `${g.count} × ` : ''}${g.name} (CR ${crText(g.cr)})`).join(' and ')}, ${enc.activity}`;
 
 // A d8 or d12 table for an area: mostly fights fitted to the party, with a few meetings and sights mixed in.
-export function encounterTable({ terrain, level = 3, size = 4, dice = 12, seed = 'table' } = {}) {
+export function encounterTable({ terrain, level = 3, size = 4, dice = 12, seed = 'table', extra = [], only = false } = {}) {
   const rng = makeRng(seed).next;
   const rows = [];
   for (let i = 0; i < dice; i++) {
     const kind = i % 4 === 3 ? 'meeting' : 'combat';
     if (kind === 'meeting') { rows.push(pick(rng, NON_COMBAT)); continue; }
     const difficulty = i < dice / 3 ? 'Low' : i < (dice * 2) / 3 ? 'Moderate' : 'High';
-    const enc = rollEncounter({ terrain, level, size, difficulty, seed: `${seed}:${i}` });
+    const enc = rollEncounter({ terrain, level, size, difficulty, seed: `${seed}:${i}`, extra, only });
     rows.push(enc ? `${encounterLine(enc)} (${difficulty.toLowerCase()})` : pick(rng, NON_COMBAT));
   }
   return rows;

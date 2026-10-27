@@ -2,9 +2,10 @@
 import { el, toast, copyText, setKids, fresh } from './dom.js';
 import { TERRAINS, TERRAIN_LABEL, DIFFICULTIES, SEASONS, rollEncounter, encounterTable, tableText, meeting, rollWeather, seasonOf, terrainsFor, xpFor, crText, travelText } from './encounters.js';
 import { saveNote } from './notebook.js';
-import { worldEntries, patchEntry } from './world-store.js';
+import { world, worldEntries, patchEntry, loadWorld } from './world-store.js';
 import { worldCalendar } from './world-calendar.js';
-import { isGm } from './api.js';
+import { isGm, session } from './api.js';
+import { libraryCreatures } from './library.js';
 
 // The party's size and average level, from active player characters (or 4 at level 3).
 export function partyDefaults() {
@@ -12,6 +13,14 @@ export function partyDefaults() {
   const levels = pcs.map((e) => parseInt(e.fields?.level, 10)).filter((n) => n > 0);
   return { size: pcs.length || 4, level: levels.length ? Math.round(levels.reduce((a, b) => a + b, 0) / levels.length) : 3 };
 }
+
+// Where monsters come from: the SRD list, your bestiary, or both (remembered while the page is open).
+let source = 'all';
+export const bestiary = () => libraryCreatures(worldEntries());
+export const monsterSource = () => {
+  const extra = source === 'srd' ? [] : bestiary();
+  return { extra, only: source === 'mine' && extra.length > 0 };
+};
 
 const ddb = (name) => `https://www.dndbeyond.com/monsters?filter-search=${encodeURIComponent(name)}`;
 
@@ -23,7 +32,9 @@ export function encounterCard(enc, { title = 'Encounter' } = {}) {
     el('ul', { class: 'enc-list' }, enc.groups.map((g) => el('li', {},
       el('strong', {}, g.count > 1 ? `${g.count} × ${g.name}` : g.name),
       el('span', { class: 'muted small' }, ` CR ${crText(g.cr)} ${g.type}, ${(xpFor(g.cr) * g.count).toLocaleString('en-US')} XP`),
-      el('a', { class: 'small ext', href: ddb(g.name), target: '_blank', rel: 'noopener' }, 'stat block ↗')))),
+      g.entryId ? el('a', { class: 'small ext', href: `#world/e/${g.entryId}` }, 'your notes')
+        : el('a', { class: 'small ext', href: ddb(g.name), target: '_blank', rel: 'noopener' }, 'stat block ↗'),
+      g.entryId && /^https:\/\/\S+$/.test(g.link || '') ? el('a', { class: 'small', href: g.link, target: '_blank', rel: 'noopener' }, 'D&D Beyond ↗') : null))),
     el('p', {}, `They’re ${enc.activity}.`),
     el('p', { class: 'muted small' }, `Before the party sees them: ${enc.sign}.`),
     el('div', { class: 'xp-bar', title: `${pct}% of the budget` }, el('span', { style: `width:${Math.min(100, pct)}%` })),
@@ -54,15 +65,21 @@ function controls(terrain, defaults) {
   diff.value = 'Moderate';
   const season = el('select', { id: 'en-season', 'aria-label': 'Season' }, SEASONS.map((s) => el('option', { value: s }, s)));
   season.value = currentSeason() || 'Summer';
+  const mine = bestiary().length;
+  const src = el('select', { id: 'en-source', 'aria-label': 'Monsters from' }, [['all', `SRD and your bestiary (${mine})`], ['mine', 'Only your bestiary'], ['srd', 'Only the SRD']].map(([v, t]) => el('option', { value: v }, t)));
+  src.value = source;
+  src.addEventListener('change', () => { source = src.value; });
   const lab = (l, x) => el('div', { class: 'field' }, el('label', { for: x.id }, l), x);
-  return { terr, level, size, diff, season, row: el('div', { class: 'controls' }, lab('Terrain', terr), lab('Party level', level), lab('Party size', size), lab('Difficulty', diff), lab('Season', season)),
+  return { terr, level, size, diff, season, row: el('div', { class: 'controls' }, lab('Terrain', terr), lab('Party level', level), lab('Party size', size), lab('Difficulty', diff), lab('Season', season), mine ? lab('Monsters from', src) : null),
     read: () => ({ terrain: [terr.value], level: +level.value, size: +size.value, difficulty: diff.value, season: season.value }) };
 }
 
 // ---- the Table Tool -------------------------------------------------------------------------------
 
 export function mountEncounters(root) {
-  const c = controls(['forest']);
+  let c = controls(['forest']);
+  // The world (and its bestiary and party) may still be loading: redraw the controls once it's here.
+  if (!world.loaded && session.configured !== false) loadWorld().then(() => { if (world.loaded) { const fresh = controls([c.terr.value]); c.row.replaceWith(fresh.row); c = fresh; } }).catch(() => {});
   const out = el('div', { class: 'enc-out' });
   const milesIn = el('input', { type: 'number', id: 'tr-miles', min: 1, value: 60, class: 'hp-amt' });
   const diffT = el('input', { type: 'checkbox', id: 'tr-diff' });
@@ -71,7 +88,7 @@ export function mountEncounters(root) {
   milesIn.addEventListener('input', showTravel); diffT.addEventListener('change', showTravel);
   const show = (node) => { setKids(out, node); fresh(node); };
   const encounter = () => {
-    const o = c.read(); const enc = rollEncounter(o);
+    const o = c.read(); const enc = rollEncounter({ ...o, ...monsterSource() });
     show(el('div', { class: 'stack' }, encounterCard(enc), enc ? el('div', { class: 'btnrow' },
       el('button', { class: 'btn', type: 'button', onclick: () => saveNote('Encounter', `${enc.groups.map((g) => g.name).join(' & ')}`, encText(enc)) }, 'Save to notebook'),
       el('button', { class: 'btn', type: 'button', onclick: () => copyText(encText(enc)) }, 'Copy')) : null));
@@ -84,7 +101,7 @@ export function mountEncounters(root) {
       el('button', { class: 'btn primary', type: 'button', onclick: encounter }, 'Roll encounter'),
       el('button', { class: 'btn', type: 'button', onclick: () => show(el('article', { class: 'card' }, el('div', { class: 'eyebrow' }, 'On the road'), el('p', { class: 'lede' }, meeting()))) }, 'Chance meeting'),
       el('button', { class: 'btn', type: 'button', onclick: () => {
-        const o = c.read(); const rows = encounterTable({ ...o, seed: Math.random().toString(36).slice(2) });
+        const o = c.read(); const rows = encounterTable({ ...o, ...monsterSource(), seed: Math.random().toString(36).slice(2) });
         show(el('article', { class: 'card' }, el('div', { class: 'eyebrow' }, `d${rows.length} ${TERRAIN_LABEL[o.terrain[0]].toLowerCase()} encounters · level ${o.level}`),
           el('ol', { class: 'enc-table' }, rows.map((r) => el('li', {}, r))),
           el('div', { class: 'btnrow' }, el('button', { class: 'btn', type: 'button', onclick: () => saveNote('Encounter table', `${TERRAIN_LABEL[o.terrain[0]]} encounters`, tableText(rows)) }, 'Save to notebook'),
@@ -111,9 +128,9 @@ export function wildsSection(place, rerender) {
   const c = controls(terrains);
   const out = el('div', { class: 'enc-out' });
   const table = place.fields?.encounters;
-  const roll = () => { const enc = rollEncounter({ ...c.read(), terrain: [c.terr.value] }); setKids(out, encounterCard(enc, { title: `Encounter near ${place.name}` })); };
+  const roll = () => { const enc = rollEncounter({ ...c.read(), terrain: [c.terr.value], ...monsterSource() }); setKids(out, encounterCard(enc, { title: `Encounter near ${place.name}` })); };
   const saveTable = async () => {
-    const rows = encounterTable({ ...c.read(), terrain: [c.terr.value], seed: Math.random().toString(36).slice(2) });
+    const rows = encounterTable({ ...c.read(), terrain: [c.terr.value], ...monsterSource(), seed: Math.random().toString(36).slice(2) });
     try { await patchEntry(place, { fields: { encounters: tableText(rows) } }); toast(`Saved a d${rows.length} table to ${place.name}`); rerender(); } catch (err) { toast(err.message, 'bad'); }
   };
   const rollFromTable = () => {

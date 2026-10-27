@@ -9,7 +9,7 @@ import { worldCalendar, todayText, datedEntries } from './world-calendar.js';
 import { toDays, fromDays, today, holidaysOn, formatDate } from './calendar.js';
 import { clockFace } from './world-clocks.js';
 import { rumorsAt, letRumorsSpread } from './world-rumors.js';
-import { encounterCard, partyDefaults, placeTerrains } from './encounter-ui.js';
+import { encounterCard, partyDefaults, placeTerrains, monsterSource } from './encounter-ui.js';
 import { rollEncounter, rollWeather, seasonOf } from './encounters.js';
 import { vitals } from './sheet-ui.js';
 
@@ -76,7 +76,7 @@ function whereSection(prep, rerender) {
         shops.length ? el('p', { class: 'small' }, `${shops.length} shop${shops.length === 1 ? '' : 's'}: `, shops.slice(0, 6).flatMap((s, i) => [i ? ', ' : '', link(s)])) : null),
       el('div', {}, el('h4', {}, 'Weather'), el('p', {}, weather.line), weather.rules.length ? el('p', { class: 'muted small' }, weather.rules[0]) : null,
         el('h4', {}, 'If trouble comes'),
-        el('div', { class: 'btnrow' }, el('button', { class: 'btn small', type: 'button', onclick: () => setKids(encBox, encounterCard(rollEncounter({ terrain, level: party.level, size: party.size, difficulty: 'Moderate' }), { title: `Near ${here.name}` })) }, 'Roll an encounter'),
+        el('div', { class: 'btnrow' }, el('button', { class: 'btn small', type: 'button', onclick: () => setKids(encBox, encounterCard(rollEncounter({ terrain, level: party.level, size: party.size, difficulty: 'Moderate', ...monsterSource() }), { title: `Near ${here.name}` })) }, 'Roll an encounter'),
           el('a', { class: 'btn small ghost', href: `#world/e/${here.id}/wilds` }, 'Encounter table')),
         encBox)));
 }

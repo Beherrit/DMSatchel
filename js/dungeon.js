@@ -86,12 +86,12 @@ function treasure(rng, tier, big) {
   return { gp, items, line: `${gp.toLocaleString('en-US')} gp in mixed coin ${rng.pick(CONTAINERS)}${items.length ? `; also ${items.map((i) => `${i.name}${i.cursed ? ' (cursed)' : ''}`).join(', ')}` : ''}.` };
 }
 
-export function generateDungeon({ theme = 'crypt', rooms = 8, level = 3, size = 4, seed = String(Math.random()) } = {}) {
+export function generateDungeon({ theme = 'crypt', rooms = 8, level = 3, size = 4, seed = String(Math.random()), extra = [], only = false } = {}) {
   const rng = makeRng(seed);
   const th = THEMES[theme] || THEMES.crypt;
   const tier = tierOf(level);
   const name = `The ${rng.pick(NAME_A)} ${rng.pick(NAME_B[theme] || NAME_B.crypt)}`;
-  const enc = (difficulty, i) => rollEncounter({ terrain: th.terrain, types: th.types, level, size, difficulty, seed: `${seed}:enc:${i}` });
+  const enc = (difficulty, i) => rollEncounter({ terrain: th.terrain, types: th.types, level, size, difficulty, seed: `${seed}:enc:${i}`, extra, only });
   const bossEnc = enc('High', 'boss');
   const foe = bossEnc ? bossEnc.groups.map((g) => (g.count > 1 ? `${g.name.toLowerCase()}s` : `a ${g.name.toLowerCase()}`)).join(' and ') : 'scavengers';
   const history = `Built by ${rng.pick(th.builders)} ${th.purpose}. Then ${rng.pick(AFTER)}; ${rng.pick(NOW).replace('{foe}', foe)}.`;

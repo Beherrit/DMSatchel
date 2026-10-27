@@ -2,6 +2,8 @@
 import { el } from './dom.js';
 import { api } from './api.js';
 import { KINDS } from './world-schema.js';
+import { setLibraryItems } from './magic-items.js';
+import { libraryItems } from './library.js';
 
 // A Map that drops the lookup index whenever an entry is added, changed or removed.
 let index = null;
@@ -14,6 +16,8 @@ class Entries extends Map {
 export const world = { entries: new Entries(), info: null, loaded: false, loading: null, error: null, standings: null, maps: null };
 
 export const worldEntries = () => [...world.entries.values()];
+// Loot, shops and the magic item tool also roll items from the world's library.
+setLibraryItems(() => (world.loaded ? libraryItems(worldEntries()) : []));
 export const getEntry = (id) => world.entries.get(id);
 
 export async function loadWorld(force) {

@@ -369,7 +369,7 @@ function mountLoot(root) {
       l.items.length ? [el('div', { class: 'eyebrow' }, 'Magic items'), el('ul', { class: 'loot-list' }, l.items.map((it) => el('li', {},
         el('span', {}, it.name, it.item?.cursed ? el('span', { class: 'tag cursed-tag' }, 'cursed') : null, it.item ? el('small', { class: 'muted block' }, it.item.summary) : null),
         el('span', { class: 'item-side' }, el('span', { class: `pill r-${it.r}` }, D.RARITY_LABEL[it.r] || RARITIES[it.item?.rarity]),
-          it.item ? el('button', { class: 'btn small ghost world', type: 'button', onclick: () => sendToWorld(itemEntry(it.item)) }, '+ World') : null))))] : null,
+          it.item?.entryId ? el('a', { class: 'btn small ghost', href: `#world/e/${it.item.entryId}` }, 'From your library') : it.item ? el('button', { class: 'btn small ghost world', type: 'button', onclick: () => sendToWorld(itemEntry(it.item)) }, '+ World') : null))))] : null,
       l.extra ? [el('div', { class: 'eyebrow' }, 'Also'), el('p', { class: 'flavor' }, l.extra)] : null,
       el('div', {}, 'Total coin and valuables: ', el('span', { class: 'total' }, `${fmt(Math.round(l.total))} gp`)),
       el('div', { class: 'btnrow' },
@@ -481,7 +481,7 @@ function mountItems(root) {
       el('div', { class: 'btnrow' },
         el('button', { class: 'btn', type: 'button', onclick: () => saveNote('Magic item', it.name, text()) }, 'Save to notebook'),
         el('button', { class: 'btn', type: 'button', onclick: () => copyText(text()) }, 'Copy'),
-        el('button', { class: 'btn world', type: 'button', onclick: () => sendToWorld(itemEntry(it)) }, 'Add to world'),
+        it.entryId ? el('a', { class: 'btn', href: `#world/e/${it.entryId}` }, `From your library${it.source ? ` (${it.source})` : ''}`) : el('button', { class: 'btn world', type: 'button', onclick: () => sendToWorld(itemEntry(it)) }, 'Add to world'),
         !it.curse && !it.cursed ? el('button', { class: 'btn ghost', type: 'button', onclick: () => { it = { ...it, curse: pick(CURSES), attunement: it.attunement || 'Requires attunement' }; render(); } }, 'Curse it')
           : el('button', { class: 'btn ghost', type: 'button', onclick: () => { if (it.curse) { it = { ...it, curse: pick(CURSES) }; render(); } } }, it.curse ? 'Different curse' : 'SRD cursed item')));
     if (isNew) fresh(card);

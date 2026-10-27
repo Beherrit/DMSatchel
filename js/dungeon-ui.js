@@ -6,7 +6,7 @@ import { saveNote } from './notebook.js';
 import { isGm, onSession, api } from './api.js';
 import { world, worldEntries, loadWorld, createEntry, createEntries, byName, kindLabel } from './world-store.js';
 import { PLACE_KINDS } from './world-schema.js';
-import { partyDefaults } from './encounter-ui.js';
+import { partyDefaults, monsterSource } from './encounter-ui.js';
 
 // Draw the SVG map onto a canvas so it can be stored like any uploaded map image.
 function svgToPng(svg, width, height) {
@@ -60,7 +60,7 @@ export function mountDungeons(root) {
   const lab = (l, x) => el('div', { class: 'field' }, el('label', { for: x.id }, l), x);
 
   function roll() {
-    d = generateDungeon({ theme: theme.value, rooms: +rooms.value, level: +level.value, size: +size.value });
+    d = generateDungeon({ theme: theme.value, rooms: +rooms.value, level: +level.value, size: +size.value, ...monsterSource() });
     render(); fresh(card);
   }
 

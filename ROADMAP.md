@@ -70,6 +70,10 @@ to the log at the bottom.
     the party's current town, upcoming calendar events, NPCs nearby, and a scratch pad.
 24. [x] **Faction relationship matrix.** Every faction against every other: ally, rival, war, trade, at a glance,
     editable in place (writes the same connections the web uses).
+26. [x] **Your library.** Short summaries from the group's own books: Creature kind (bestiary) and Rules option kind
+    (class, subclass, species, background, feat, spell), plus source and D&D Beyond link on items.
+27. [ ] **Library in the Character Forge.** Pick subclasses and species from the library; their features show on
+    the sheet.
 25. [ ] **Import.** Bring in Markdown notes (one file per entry, or an Obsidian-style folder) and the exported
     Markdown from this app.
 
@@ -101,3 +105,4 @@ to the log at the bottom.
 - Session prep: GM-only #world/prep (sidebar, search, g then s). Last session with its “next time” notes; where the party is (saved per world, GM-only) with its people, jobs, rumors, shops, the day's weather and a quick encounter; quests in play; clocks closest to finishing; the next two weeks on the calendar; party HP and conditions; loose threads (GM discussions, suggestions, table talk since last session); a shared GM scratch pad; one-click “Start session N” prefilled with players, dates and where things left off. Prep is stored in a new worlds.prep column and never sent to players.
 - Who stands where: #world/powers grid of factions, guilds and houses (deities and towns optional): allied, trading, rivals, enemies, at war, serves (directional), secretly works for (GM only). GMs click a square to set it; one relationship per pair, written as the same connections the web and entry pages use, other connections untouched. At-a-glance tallies and tensions (allied with two powers at war). Unit tests for reading, setting, tallies and tensions.
 - Members-only site: the site admin can lock the whole site (People tab). Locked, every API call needs a signed-in person except signing in and joining with an invite; signed-out visitors see only a sign-in / join screen (a newcomer's one-time personal code still shows). Open worlds now carry a warning in World settings.
+- Your library: #world/library with tabs (bestiary, items, classes, subclasses, species, backgrounds, feats, spells, other), quick-add forms for short summaries, search, D&D Beyond links. Bestiary creatures join encounters (with a "Monsters from" choice: SRD and bestiary / only bestiary / only SRD), area tables, session prep and dungeons; sourced items join every magic item roll (loot, shops, dungeon treasure, Magic Items tool) at about a third of the rolls they fit. Creatures start hidden from players. Unit tests for CR parsing and conversions.

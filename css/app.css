@@ -304,9 +304,9 @@ tr.disabled td { color: var(--muted) }
 /* kind colors (graph, pins) */
 .k-region, .k-settlement, .k-location { --kc: var(--k-place) }
 .k-faction, .k-guild, .k-clan { --kc: var(--k-power) }
-.k-npc, .k-character { --kc: var(--k-people) }
+.k-npc, .k-character, .k-creature { --kc: var(--k-people) }
 .k-deity, .k-quest { --kc: var(--k-faith) }
-.k-item, .k-lore, .k-handout { --kc: var(--k-thing) }
+.k-item, .k-lore, .k-handout, .k-rule { --kc: var(--k-thing) }
 .k-event, .k-session { --kc: var(--k-time) }
 .w-tools { padding-bottom: 8px; border-bottom: 1px solid var(--line) }
 .linkish { background: none; border: none; padding: 0; color: var(--accent); cursor: pointer; text-align: left }
@@ -861,3 +861,15 @@ body.gated .mainnav, body.gated #toolnav, body.gated #panels, body.gated #notebo
 .gate-inner { max-width: 560px; margin: 32px auto; display: grid; gap: 16px }
 .gate-card { border-left: 4px solid var(--accent) }
 .lock-box { border: 1px solid var(--line); border-radius: 8px; padding: 12px; display: grid; gap: 6px; justify-items: start; margin-bottom: 12px } .warn-note { color: var(--warn); margin: 0 }
+
+/* ---- library ---- */
+.lib-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 380px); gap: 16px; align-items: start }
+@media (max-width: 960px) { .lib-layout { grid-template-columns: minmax(0, 1fr) } .lib-form { order: -1 } }
+.lib-list { display: grid; gap: 10px; min-width: 0 }
+.lib-grid { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)) }
+.lib-card { gap: 6px }
+.lib-card p { margin: 0 }
+.lib-card.is-hidden { border-style: dashed }
+.lib-source { margin: 0 }
+.lib-form .edit-fields { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) }
+.lib-form textarea { width: 100% }

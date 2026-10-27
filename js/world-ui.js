@@ -13,6 +13,7 @@ import { viewStandings, standingWidget } from './world-standings.js';
 import { viewTalk, talkWidget, tableWidget, viewTable } from './world-talk.js';
 import { viewPrep } from './world-prep.js';
 import { viewPowers } from './world-powers.js';
+import { viewLibrary } from './world-library.js';
 import { placeHub, viewAtlas, placeCounts } from './world-place.js';
 import { viewParty } from './world-party.js';
 import { viewExport } from './world-export.js';
@@ -54,6 +55,7 @@ function renderSide() {
       el('a', { href: '#world/atlas', 'data-view': 'atlas' }, el('span', {}, 'Atlas'), el('span', { class: 'count' }, worldEntries().filter((e) => PLACE_KINDS.includes(e.kind)).length)),
       el('a', { href: '#world/maps', 'data-view': 'maps' }, el('span', {}, 'Maps'), el('span', { class: 'count' }, (world.maps || []).length)),
       el('a', { href: '#world/web', 'data-view': 'web' }, el('span', {}, 'Relationship web'), el('span', { class: 'count' }, '◎')),
+      el('a', { href: '#world/library', 'data-view': 'library' }, el('span', {}, 'Your library'), el('span', { class: 'count' }, worldEntries().filter((e) => e.kind === 'creature' || e.kind === 'rule' || (e.kind === 'item' && e.fields?.source)).length)),
       el('a', { href: '#world/powers', 'data-view': 'powers' }, el('span', {}, 'Who stands where'), el('span', { class: 'count' }, '▦')),
       el('a', { href: '#world/clocks', 'data-view': 'clocks' }, el('span', {}, 'Faction clocks'), el('span', { class: 'count' }, (world.standings?.clocks || []).length)),
       el('a', { href: '#world/standings', 'data-view': 'standings' }, el('span', {}, 'Party standing'), el('span', { class: 'count' }, Object.keys(world.standings?.current || {}).length)),
@@ -160,7 +162,7 @@ function viewEntry(id, tab) {
     // The picture floats beside the summary and traits, so they share one plain block.
     el('div', { class: 'overview-top' }, figure(e),
       e.summary ? el('p', { class: 'lede' }, e.summary) : null,
-      fieldRows.length ? el('dl', { class: 'traits' }, fieldRows.flatMap(([l, v, type]) => [el('dt', {}, l), el('dd', {}, type === 'long' ? richText(v) : el('span', {}, v))])) : null),
+      fieldRows.length ? el('dl', { class: 'traits' }, fieldRows.flatMap(([l, v, type]) => [el('dt', {}, l), el('dd', {}, type === 'long' ? richText(v) : /^https:\/\/\S+$/.test(v) ? el('a', { href: v, target: '_blank', rel: 'noopener' }, /dndbeyond\.com/.test(v) ? 'Open on D&D Beyond ↗' : 'Open link ↗') : el('span', {}, v))])) : null),
     e.kind === 'npc' || e.fields?.stats || e.fields?.spells ? statSection(e) : null,
     e.kind === 'clan' ? clanTree(e, rerenderWorld) : null,
     e.kind === 'npc' || e.kind === 'character' ? familySection(e, rerenderWorld) : null,
@@ -472,6 +474,7 @@ export async function showWorld(parts, { keepScroll = false } = {}) {
   else if (view === 'table') node = await viewTable();
   else if (view === 'prep') node = await viewPrep(rerenderWorld);
   else if (view === 'powers') node = viewPowers(rerenderWorld);
+  else if (view === 'library') node = viewLibrary(arg, rerenderWorld);
   else if (view === 'suggestions') node = viewSuggestions();
   else if (view === 'party') { markPartySeen(); node = await viewParty(rerenderWorld); }
   else if (view === 'export') node = viewExport();

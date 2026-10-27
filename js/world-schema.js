@@ -45,7 +45,7 @@ export const KINDS = {
   },
   item: {
     label: 'Item', plural: 'Items & Artifacts', blurb: 'Relics, magic items and things worth fighting over.',
-    fields: [['rarity', 'Rarity', 'select', ['Mundane', 'Common', 'Uncommon', 'Rare', 'Very rare', 'Legendary', 'Artifact']], ['type', 'Type'], ['attunement', 'Attunement'], ['value', 'Value'], ['holder', 'Current holder'], ['properties', 'Properties', 'long'], ['history', 'History', 'long']],
+    fields: [['rarity', 'Rarity', 'select', ['Mundane', 'Common', 'Uncommon', 'Rare', 'Very rare', 'Legendary', 'Artifact']], ['type', 'Type'], ['attunement', 'Attunement'], ['value', 'Value'], ['holder', 'Current holder'], ['properties', 'Properties', 'long'], ['history', 'History', 'long'], ['source', 'Source book'], ['link', 'D&D Beyond link']],
   },
   event: {
     label: 'Event', plural: 'History & Events', blurb: 'The timeline: wars, founding dates, campaign sessions.',
@@ -62,6 +62,17 @@ export const KINDS = {
   handout: {
     label: 'Handout', plural: 'Handouts', blurb: 'Letters, maps, notes and clues the GMs hand to the players.',
     fields: [['from', 'From (who wrote or gave it)'], ['found', 'Where or when it was found'], ['text', 'Text of the handout', 'long']],
+  },
+  creature: {
+    label: 'Creature', plural: 'Bestiary', blurb: 'Monsters from your books, in short: what they are and what they do.',
+    fields: [['cr', 'Challenge rating'], ['type', 'Type', 'select', ['Aberration', 'Beast', 'Celestial', 'Construct', 'Dragon', 'Elemental', 'Fey', 'Fiend', 'Giant', 'Humanoid', 'Monstrosity', 'Ooze', 'Plant', 'Undead']],
+      ['size', 'Size', 'select', ['Tiny', 'Small', 'Medium', 'Large', 'Huge', 'Gargantuan']], ['terrain', 'Where it’s found'], ['ac', 'Armor class'], ['hp', 'Hit points'], ['speed', 'Speed'],
+      ['abilities', 'What it does', 'long'], ['tactics', 'How it fights', 'long'], ['source', 'Source book'], ['link', 'D&D Beyond link']],
+  },
+  rule: {
+    label: 'Rules option', plural: 'Classes, Species & Feats', blurb: 'Classes, subclasses, species, backgrounds, feats and spells from your books, in short.',
+    fields: [['category', 'Category', 'select', ['Class', 'Subclass', 'Species', 'Background', 'Feat', 'Spell', 'Other']], ['class', 'Class (for subclasses and spells)'], ['level', 'Level'],
+      ['features', 'What it gives', 'long'], ['source', 'Source book'], ['link', 'D&D Beyond link']],
   },
   rumor: {
     label: 'Rumor', plural: 'Rumors', blurb: 'Gossip that starts in one town and spreads, changing as it goes.',
@@ -82,7 +93,7 @@ export const KINDS = {
 for (const k of Object.values(KINDS)) k.fields.push(['image', 'Picture', 'image']);
 export const isImageRef = (v) => /^\/api\/images\?id=[a-f0-9]{16}$/.test(v) || /^https:\/\/[^\s"'<>]{4,1000}$/.test(v);
 
-export const KIND_ORDER = ['region', 'area', 'settlement', 'location', 'faction', 'guild', 'clan', 'npc', 'character', 'deity', 'item', 'event', 'session', 'journal', 'handout', 'quest', 'rumor', 'lore'];
+export const KIND_ORDER = ['region', 'area', 'settlement', 'location', 'faction', 'guild', 'clan', 'npc', 'character', 'deity', 'item', 'event', 'session', 'journal', 'handout', 'quest', 'rumor', 'lore', 'creature', 'rule'];
 
 // Kinds a player can create and edit as their own; anything else a player adds is a suggestion for the GMs.
 export const PLAYER_KINDS = ['character', 'journal'];
