@@ -3,7 +3,7 @@ import { el } from './dom.js';
 import { isGm, isMember } from './api.js';
 
 const GO = { t: ['#tools', 'Table tools'], c: ['#characters', 'Character Forge'], w: ['#world', 'World'], p: ['#world/party', 'The Party'], m: ['#world/maps', 'Maps'],
-  a: ['#world/atlas', 'Atlas'], d: ['#world/calendar', 'Calendar'], r: ['#reference', 'Reference'], e: ['#tools/encounters', 'Encounters & Travel'], x: ['#admin', 'Admin / Build'] };
+  a: ['#world/atlas', 'Atlas'], d: ['#world/calendar', 'Calendar'], r: ['#reference', 'Reference'], e: ['#tools/encounters', 'Encounters & Travel'], x: ['#admin', 'Admin / Build'], s: ['#world/prep', 'Session prep'] };
 
 let dialog;
 function help() {

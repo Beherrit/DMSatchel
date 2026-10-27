@@ -226,3 +226,10 @@ function fullSheet(ch) {
       sec(`${ch.species} traits`, el('ul', { class: 'feature-list' }, s.speciesTraits.map((t) => el('li', {}, el('strong', {}, t.name), el('p', {}, t.text))))),
       sec(`${ch.cls} features`, el('ol', { class: 'level-list' }, s.features.map((f) => el('li', {}, el('span', { class: 'lv' }, f.level), f.name))))));
 }
+
+// Hit points and conditions at a glance (for the party and session prep pages).
+export function vitals(e) {
+  const ch = characterOf(e);
+  const p = defaults(e, ch);
+  return { hp: p.hp, max: Number(p.maxhp) || ch?.stats.hp || 0, temp: p.temp, conditions: p.conditions, exhaustion: p.exhaustion, inspiration: p.inspiration, ac: p.ac || ch?.stats.ac || null };
+}

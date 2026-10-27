@@ -70,6 +70,8 @@ export function ensureSchema() {
       await sql`ALTER TABLE worlds ADD COLUMN IF NOT EXISTS cal jsonb`;
       // A Discord webhook for posting recaps; stays on the server.
       await sql`ALTER TABLE worlds ADD COLUMN IF NOT EXISTS discord_webhook text`;
+      // GM session prep: where the party is and a shared scratch pad. Never sent to players.
+      await sql`ALTER TABLE worlds ADD COLUMN IF NOT EXISTS prep jsonb`;
       // Progress clocks on factions and other entries (filled between sessions).
       await sql`CREATE TABLE IF NOT EXISTS clocks (
         id serial PRIMARY KEY, world_id text NOT NULL, entry_id text NOT NULL, name text NOT NULL, size int NOT NULL DEFAULT 6, filled int NOT NULL DEFAULT 0,

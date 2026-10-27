@@ -66,7 +66,7 @@ to the log at the bottom.
 
 22. [x] **Player comments.** Players can comment on quests, handouts, rumors and their own entries (separate from
     the GM-only discussions), with GMs able to reply and hide comments.
-23. [ ] **Session prep page.** One GM page for next session: active quests, clocks close to finishing, rumors in
+23. [x] **Session prep page.** One GM page for next session: active quests, clocks close to finishing, rumors in
     the party's current town, upcoming calendar events, NPCs nearby, and a scratch pad.
 24. [ ] **Faction relationship matrix.** Every faction against every other: ally, rival, war, trade, at a glance,
     editable in place (writes the same connections the web uses).
@@ -98,3 +98,4 @@ to the log at the bottom.
 - What my character knows: "☆ <character> knows this" on every entry for players' own characters; a "What <character> knows" list on the character page, grouped by kind, with a note in the character's words per entry.
 - Discord recaps: owner connects a webhook in World settings (validated, stored only on the server, never sent to browsers); GMs get "Post to Discord" on visible entries, which sends an embed with the summary, text, fields, picture and a link back (secrets left out).
 - Player comments: comments get an audience (additive column; existing rows stay GM-only) and a hidden flag. Table talk on every entry players can see: members post and reply, edit their own; GMs reply, hide (author still sees it, marked) or delete; visitors to open worlds can read. A Table talk feed across the world, refreshing every 30 s without losing half-written replies. GM discussions unchanged and still private. Also darkened the light-theme warning, success and rarity colors to pass WCAG AA on shaded backgrounds.
+- Session prep: GM-only #world/prep (sidebar, search, g then s). Last session with its “next time” notes; where the party is (saved per world, GM-only) with its people, jobs, rumors, shops, the day's weather and a quick encounter; quests in play; clocks closest to finishing; the next two weeks on the calendar; party HP and conditions; loose threads (GM discussions, suggestions, table talk since last session); a shared GM scratch pad; one-click “Start session N” prefilled with players, dates and where things left off. Prep is stored in a new worlds.prep column and never sent to players.

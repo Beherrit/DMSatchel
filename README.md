@@ -44,6 +44,8 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Rumor mill**: gossip starts in a town and spreads to its neighbors, changing a little with each retelling.
 - **Faction clocks**: plans in motion (a cult's ritual, a guild's takeover) as clocks you fill between sessions; one
   click runs a faction turn.
+- **Session prep**: one page before each session with last time's notes, where the party is and who's there, quests
+  in play, clocks about to finish, upcoming dates, the party's HP, loose threads and a shared GM scratch pad.
 - **Table talk**: players and GMs comment on quests, handouts, rumors and anything else players can see; GMs can
   hide or remove comments. A feed shows the latest across the world.
 - **GM discussions**: GMs talk on any entry ("I'm bringing her back in session 14") and resolve threads when

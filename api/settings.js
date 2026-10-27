@@ -1,6 +1,7 @@
 // GET the current world's name and description · PUT to change them (world owner).
 // PATCH {cal}  set the in-world calendar and today's date (any GM: days pass during play).
 // PUT {discord_webhook}  (owner) a Discord webhook link; it never leaves the server. Empty string removes it.
+// PATCH {prep: {location_id, notes}}   (GM) session prep: where the party is, and the GMs' scratch pad.
 // POST {post: entryId}   (GM) post an entry's summary and text to the world's Discord channel.
 import { route, send, fail, sql, requireOwner, requireGm } from './_lib/core.js';
 import { cleanCalendar } from '../js/calendar.js';
@@ -15,7 +16,7 @@ const clip = (v, n) => String(v ?? '').slice(0, n);
 export default route({
   async GET(req, res) {
     const w = req.world;
-    send(res, 200, { world: { id: w.id, slug: w.slug, name: w.name, tagline: w.tagline, about: w.about, calendar: w.calendar, public: w.public, cal: w.cal || null, discord: Boolean(w.discord_webhook) }, role: req.role });
+    send(res, 200, { world: { id: w.id, slug: w.slug, name: w.name, tagline: w.tagline, about: w.about, calendar: w.calendar, public: w.public, cal: w.cal || null, discord: Boolean(w.discord_webhook), ...(req.isGmHere ? { prep: w.prep || {} } : {}) }, role: req.role });
   },
   async PUT(req, res) {
     if (!requireOwner(req, res)) return;
@@ -54,6 +55,17 @@ export default route({
   },
   async PATCH(req, res) {
     if (!requireGm(req, res)) return;
+    if (req.body.prep !== undefined) {
+      const p = req.body.prep || {};
+      const cur = req.world.prep || {};
+      const next = {
+        location_id: p.location_id === undefined ? cur.location_id || null : p.location_id ? String(p.location_id).slice(0, 40) : null,
+        notes: p.notes === undefined ? cur.notes || '' : String(p.notes).slice(0, 20000),
+        updated_by: req.gm.name, updated_at: new Date().toISOString(),
+      };
+      await sql`UPDATE worlds SET prep = ${JSON.stringify(next)} WHERE id = ${req.world.id}`;
+      return send(res, 200, { prep: next });
+    }
     const cal = req.body.cal === null ? null : cleanCalendar(req.body.cal);
     if (req.body.cal !== null && !cal) return fail(res, 400, 'That calendar needs at least one month.');
     await sql`UPDATE worlds SET cal = ${cal ? JSON.stringify(cal) : null} WHERE id = ${req.world.id}`;

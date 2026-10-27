@@ -804,3 +804,22 @@ tr.disabled td { color: var(--muted) }
 .discord-box { margin-top: 20px; border-top: 1px solid var(--line); padding-top: 12px; display: grid; gap: 6px } .discord-box input { flex: 1 1 280px }
 .hidden-comment { opacity: .6 }
 .talk.talk-table { border-style: solid; border-left: 4px solid var(--accent) }
+
+/* ---- session prep ---- */
+.prep-columns { display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, 340px); gap: 16px; align-items: start }
+.prep-main, .prep-side { display: grid; gap: 16px; min-width: 0 }
+@media (max-width: 960px) { .prep-columns { grid-template-columns: minmax(0, 1fr) } }
+.prep-card { gap: 8px }
+.prep-card h4 { margin: 10px 0 4px; font-size: 15px }
+.prep-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 12px 20px }
+.prep-list { margin: 0; display: grid; gap: 4px }
+.prep-list q { font-family: var(--f-flavor) }
+.prep-next { background: var(--sunk); border-radius: 6px; padding: 8px 12px }
+.prep-next .rich p { margin: 0 }
+.prep-party { margin: 0; display: grid; gap: 10px }
+.prep-pc { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: baseline }
+.prep-hp { margin-left: auto; font-variant-numeric: tabular-nums }
+.small-bar { height: 6px }
+.prep-actions { align-items: center }
+.prep-card textarea { width: 100% }
+.prep-card .controls label { font-weight: 700 }

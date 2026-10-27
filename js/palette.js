@@ -35,7 +35,7 @@ function baseItems() {
     for (const k of KIND_ORDER) out.push({ label: `New ${KINDS[k].label === 'NPC' ? 'NPC' : KINDS[k].label.toLowerCase()}`, group: 'Create', href: `#world/new/${k}` });
   }
   if (isPlayer()) out.push({ label: 'New character', group: 'Create', href: '#world/new/character' }, { label: 'New journal entry', group: 'Create', href: '#world/new/journal' }, { label: 'My things', group: 'World', href: '#world/mine' });
-  if (isGm()) out.push({ label: 'Suggestions from players', group: 'World', href: '#world/suggestions' });
+  if (isGm()) out.push({ label: 'Suggestions from players', group: 'World', href: '#world/suggestions' }, { label: 'Session prep', group: 'World', href: '#world/prep', hint: 'Everything for next session on one page' });
   if (isOwner() || isAdmin()) out.push({ label: 'Admin', group: 'Pages', href: '#admin' }, { label: 'Members & invites', group: 'Admin', href: '#admin/members' });
   out.push({ label: 'Worlds', group: 'Pages', href: '#worlds', hint: 'Switch, create or join a world' });
   return out;
