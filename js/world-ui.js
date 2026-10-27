@@ -21,6 +21,7 @@ import { viewSchedule, nextSessionLine } from './world-schedule.js';
 import { viewDowntime, downtimeSection } from './world-downtime.js';
 import { recapButton } from './world-recap.js';
 import { showButton, checkShown } from './world-show.js';
+import { attitudesOfCharacter, attitudesToward } from './world-attitudes.js';
 import { viewExport } from './world-export.js';
 import { viewClocks, clocksWidget } from './world-clocks.js';
 import { viewRumors } from './world-rumors.js';
@@ -177,7 +178,9 @@ function viewEntry(id, tab) {
     e.kind === 'character' ? ownerLine(e) : null,
     e.kind === 'character' ? sheetSection(e, rerenderWorld) : null,
     e.kind === 'character' ? knownSection(e, rerenderWorld) : null,
+    e.kind === 'character' ? attitudesOfCharacter(e, rerenderWorld) : null,
     e.kind === 'character' ? downtimeSection(e) : null,
+    attitudesToward(e, rerenderWorld),
     e.fields?.stock || (e.kind === 'location' && e.fields?.type === 'Shop' && isGm()) ? el('section', { class: 'card shop-card' },
       el('div', { class: 'entry-head' }, el('h3', {}, 'For sale'), isGm() ? el('button', { class: 'btn small', type: 'button', onclick: async () => {
         const town = trailTown(e);

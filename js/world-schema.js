@@ -52,7 +52,9 @@ export const KINDS = {
     label: 'Player Character', plural: 'Player Characters', blurb: 'The heroes, past and present.',
     fields: [['player', 'Player'], ['species', 'Species'], ['class', 'Class'], ['level', 'Level'], ['background', 'Background'], ['status', 'Status', 'select', ['Active', 'Retired', 'Dead', 'Missing']], ['sheet', 'Sheet & backstory', 'long'],
       // Kept out of forms: the Character Forge recipe (rebuilds the full sheet) and the live play state.
-      ['forge', 'Forge recipe', 'hidden'], ['play', 'Play state', 'hidden'], ['known', 'What they know', 'hidden']],
+      ['forge', 'Forge recipe', 'hidden'], ['play', 'Play state', 'hidden'], ['known', 'What they know', 'hidden'],
+      // How NPCs and powers feel about this character (see attitudes.js); only GMs set it.
+      ['attitudes', 'Attitudes', 'hidden', null, { gmOnly: true }]],
   },
   deity: {
     label: 'Deity', plural: 'Deities & Powers', blurb: 'Gods, patrons, demon lords and old powers.',

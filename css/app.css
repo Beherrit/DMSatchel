@@ -926,3 +926,12 @@ body.gated .mainnav, body.gated #toolnav, body.gated #panels, body.gated #notebo
 .split-loot { margin: 8px 0 }
 .split-shares li { display: flex; gap: 8px; align-items: center; margin: 4px 0 }
 .split-shares li > span:first-child { min-width: 8em }
+
+/* Attitudes */
+.att-list li { margin: 6px 0; display: flex; flex-wrap: wrap; gap: 6px; align-items: center }
+.att-chip { display: inline-block; font-size: 12px; padding: 1px 8px; border-radius: 999px; border: 1px solid currentColor }
+.att-good { color: var(--good) }
+.att-neutral { color: var(--muted) }
+.att-bad { color: var(--warn) }
+.att-add { margin-top: 8px }
+.att-line { display: inline-block; margin-top: 2px }

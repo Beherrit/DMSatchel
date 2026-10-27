@@ -3,6 +3,7 @@
 // scratch pad the GMs share. Route: #world/prep
 import { el, toast, setKids } from './dom.js';
 import { recapButton } from './world-recap.js';
+import { attitudeLine } from './world-attitudes.js';
 import { api, isGm, session } from './api.js';
 import { world, worldEntries, getEntry, link, kindLabel, byName, descendantsOf, trail, whenTime, notice, richText } from './world-store.js';
 import { PLACE_KINDS } from './world-schema.js';
@@ -67,7 +68,7 @@ function whereSection(prep, rerender) {
   return card(`Where the party is: ${here.name}`, pick,
     el('div', { class: 'prep-grid' },
       el('div', {}, el('h4', {}, `People (${people.length})`),
-        people.length ? list([...key, ...people.filter((p) => !key.includes(p))].slice(0, 12), (p) => [link(p), el('span', { class: 'muted small' }, ` ${p.fields?.role || ''}`), key.includes(p) ? el('span', { class: 'tag' }, 'key') : null])
+        people.length ? list([...key, ...people.filter((p) => !key.includes(p))].slice(0, 12), (p) => [link(p), el('span', { class: 'muted small' }, ` ${p.fields?.role || ''}`), key.includes(p) ? el('span', { class: 'tag' }, 'key') : null, attitudeLine(p) ? el('div', {}, attitudeLine(p)) : null])
           : empty('Nobody recorded here.'),
         people.length > 12 ? el('a', { class: 'small', href: `#world/e/${here.id}/people` }, `All ${people.length}`) : null),
       el('div', {}, el('h4', {}, `Jobs on the board (${jobs.length})`),
