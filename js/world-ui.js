@@ -13,6 +13,8 @@ import { viewStandings, standingWidget } from './world-standings.js';
 import { viewTalk, talkWidget } from './world-talk.js';
 import { placeHub, viewAtlas, placeCounts } from './world-place.js';
 import { viewParty } from './world-party.js';
+import { viewCalendar, worldCalendar, todayText } from './world-calendar.js';
+import { parseDate, toDays, yearLength } from './calendar.js';
 import { sheetSection } from './sheet-ui.js';
 import { pictureField, figure, thumb } from './image-ui.js';
 import { renderStats, renderSpells } from './statblock-ui.js';
@@ -40,6 +42,7 @@ function renderSide() {
       el('a', { class: 'btn ghost small', href: '#world/new/lore' }, 'Suggest an entry'), el('a', { class: 'btn ghost small', href: '#world/mine' }, 'My things')) : null,
     el('nav', { class: 'w-kinds w-tools', 'aria-label': 'World views' },
       el('a', { href: '#world/party', 'data-view': 'party' }, el('span', {}, 'The Party'), el('span', { class: 'count' }, worldEntries().filter((e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status)).length)),
+      el('a', { href: '#world/calendar', 'data-view': 'calendar', title: todayText() }, el('span', {}, 'Calendar'), el('span', { class: 'count cal-count' }, worldCalendar() ? todayText().split(', ').pop().replace(/ \d+.*$/, '') : '')),
       el('a', { href: '#world/atlas', 'data-view': 'atlas' }, el('span', {}, 'Atlas'), el('span', { class: 'count' }, worldEntries().filter((e) => PLACE_KINDS.includes(e.kind)).length)),
       el('a', { href: '#world/maps', 'data-view': 'maps' }, el('span', {}, 'Maps'), el('span', { class: 'count' }, (world.maps || []).length)),
       el('a', { href: '#world/web', 'data-view': 'web' }, el('span', {}, 'Relationship web'), el('span', { class: 'count' }, '◎')),
@@ -60,7 +63,8 @@ function viewHome() {
   const info = world.info || {};
   const keyNpcs = all.filter((e) => e.kind === 'npc' && (e.tags || []).includes('key')).sort(byName);
   return el('div', { class: 'w-view' },
-    el('div', { class: 'panel-head' }, el('h2', {}, info.name || 'The World'), info.tagline ? el('p', {}, info.tagline) : null),
+    el('div', { class: 'panel-head' }, el('h2', {}, info.name || 'The World'), info.tagline ? el('p', {}, info.tagline) : null,
+      worldCalendar() ? el('p', { class: 'today-line' }, el('a', { href: '#world/calendar' }, `📅 ${todayText()}`)) : null),
     info.about ? el('div', { class: 'card' }, richText(info.about)) : (isGm() ? el('p', { class: 'muted' }, 'The admin can name the world and write an introduction in the Admin page.') : null),
     all.length ? null : notice('This world is empty', isGm() ? 'Start with a region or a city, then fill it with factions and people. Anything from the table tools can be sent here with “Add to world”.' : 'The GMs haven’t added anything yet.',
       isGm() ? el('div', { class: 'btnrow' }, el('a', { class: 'btn primary', href: '#world/new/region' }, 'New region'), el('a', { class: 'btn', href: '#world/new/settlement' }, 'New settlement'), el('a', { class: 'btn', href: '#world/new/faction' }, 'New faction')) : null),
@@ -83,7 +87,12 @@ function entryCard(e) {
 function viewKind(kind) {
   if (!KINDS[kind]) return notice('Nothing here', 'That kind of entry doesn’t exist.');
   let list = worldEntries().filter((e) => e.kind === kind);
-  if (kind === 'event') list.sort((a, b) => (parseFloat(a.fields.sort) || 0) - (parseFloat(b.fields.sort) || 0) || byName(a, b));
+  if (kind === 'event') {
+    // Timeline order: the date as the world calendar reads it, else the sort year.
+    const cal = worldCalendar();
+    const key = (e) => { const d = cal && parseDate(cal, e.fields.date); return d ? toDays(cal, d) / yearLength(cal) : parseFloat(e.fields.sort) || 0; };
+    list.sort((a, b) => key(a) - key(b) || byName(a, b));
+  }
   else if (kind === 'session') list.sort((a, b) => (parseFloat(b.fields.number) || 0) - (parseFloat(a.fields.number) || 0) || String(b.fields.played_on || b.created_at).localeCompare(String(a.fields.played_on || a.created_at)));
   else list.sort(byName);
   return el('div', { class: 'w-view' },
@@ -439,6 +448,7 @@ export async function showWorld(parts, { keepScroll = false } = {}) {
   else if (view === 'talk') node = await viewTalk();
   else if (view === 'suggestions') node = viewSuggestions();
   else if (view === 'party') node = await viewParty(rerenderWorld);
+  else if (view === 'calendar') node = viewCalendar(arg, parts[2], rerenderWorld);
   else if (view === 'mine') node = viewMine();
   else node = viewHome();
   const y = window.scrollY;
@@ -469,7 +479,7 @@ export function mountWorld(root) {
       if (changes.length) {
         const people = [...new Set(changes.map((c) => c.by).filter(Boolean))];
         const one = changes.length === 1 && changes[0];
-        toast(one ? (one.change === 'removed' ? `${one.entry.name} was removed or hidden` : `${one.by || 'Someone'} ${one.change === 'new' ? 'added' : 'edited'} ${one.entry.name}`)
+        toast(one ? (one.calendar ? 'The calendar changed' : one.change === 'removed' ? `${one.entry.name} was removed or hidden` : `${one.by || 'Someone'} ${one.change === 'new' ? 'added' : 'edited'} ${one.entry.name}`)
           : `${changes.length} changes${people.length ? ` from ${people.join(', ')}` : ''}`);
         // Don't redraw under someone who is typing; their form keeps its input and the new data shows next time.
         const typing = /^#world\/(new|edit)\//.test(location.hash) || main.contains(document.activeElement) && ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName);

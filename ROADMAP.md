@@ -44,7 +44,7 @@ to the log at the bottom.
    refresh lists without losing form input. Edit conflicts already handled.
 10. [x] **Images.** Portraits for NPCs and characters, pictures for places and items, handout images. Vercel Blob
    store (create via MCP, connect to project), or small data URLs in Postgres as a fallback.
-11. [ ] **In-world calendar.** Named months, current date, events and sessions placed on it, "days pass" button,
+11. [x] **In-world calendar.** Named months, current date, events and sessions placed on it, "days pass" button,
     moon phases optional. Timeline view of events by date.
 12. [ ] **Encounters and travel helpers per area.** Random encounter table per area (built from its danger
     fields and SRD monsters), weather by season, travel time between pinned places on a map (scale setting).
@@ -73,3 +73,4 @@ to the log at the bottom.
 - Character sheets: Forge characters save their recipe and rebuild the full sheet in the world; a shared play tracker (HP with damage/heal/temp HP, death saves, conditions, exhaustion, Heroic Inspiration, spell slots, hit dice, short and long rest, coins, inventory, notes), exact level-up from the recipe, manual max HP/AC for hand-made characters, claim an unowned character (GMs can unassign).
 - Live updates: entries API answers ?since= with changed entries and removed/hidden ids, using database time; the World page syncs every 20 s while visible (and on returning to the tab), toasts who changed what, and skips redrawing while someone is typing.
 - Images: every entry kind has a Picture field (upload, shrunk in the browser to ≤1200 px JPEG, or an https link); images table in Postgres served by /api/images with access checks (private worlds stay private); portraits on entry pages, thumbnails in lists, avatars in town rosters and the party, pictures on handouts.
+- Calendar: three original presets, editable months/weekdays/moons/holidays/era, today's date on the world front page and sidebar, month grid with exact new and full moons, holidays and dated events/sessions/journals/handouts, day detail with "make this today" and "+ event on this day", time passes (+day, week, month, custom), coming up in the next 60 days, timeline sorted by calendar date, live sync of date changes. Unit tests for date math and parsing.

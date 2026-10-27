@@ -80,7 +80,7 @@ export default route({
       const now = (await sql`SELECT now() AS now`)[0].now;
       return send(res, 200, {
         changed: rows.filter((r) => !r.deleted && visibleTo(r, req)).map((r) => shape(r, req)),
-        removed: rows.filter((r) => r.deleted || !visibleTo(r, req)).map((r) => r.id), now,
+        removed: rows.filter((r) => r.deleted || !visibleTo(r, req)).map((r) => r.id), now, cal: req.world.cal || null,
       });
     }
     if (id) {
@@ -96,7 +96,7 @@ export default route({
     send(res, 200, {
       now,
       entries: rows.filter((r) => visibleTo(r, req)).map((r) => shape(r, req)),
-      world: { id: w.id, slug: w.slug, name: w.name, tagline: w.tagline, about: w.about, calendar: w.calendar, public: w.public },
+      world: { id: w.id, slug: w.slug, name: w.name, tagline: w.tagline, about: w.about, calendar: w.calendar, public: w.public, cal: w.cal || null },
       role: req.role,
     });
   },

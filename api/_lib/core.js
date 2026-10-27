@@ -63,6 +63,8 @@ export function ensureSchema() {
       await sql`UPDATE entries SET world_id = 'default' WHERE world_id IS NULL`;
       await sql`UPDATE maps SET world_id = 'default' WHERE world_id IS NULL`;
       await sql`UPDATE standing_log s SET world_id = COALESCE((SELECT e.world_id FROM entries e WHERE e.id = s.entry_id), 'default') WHERE s.world_id IS NULL`;
+      // A structured in-world calendar and today's date (see js/calendar.js).
+      await sql`ALTER TABLE worlds ADD COLUMN IF NOT EXISTS cal jsonb`;
       // The party's treasury: coins and items in and out.
       await sql`CREATE TABLE IF NOT EXISTS party_ledger (
         id serial PRIMARY KEY, world_id text NOT NULL, at timestamptz NOT NULL DEFAULT now(), gm_id int, cp bigint NOT NULL DEFAULT 0,

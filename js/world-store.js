@@ -85,6 +85,9 @@ export async function patchEntry(entry, patch) {
   return r.entry;
 }
 
+// JSON with sorted keys, so the same value compares equal however the database ordered it.
+const stable = (v) => JSON.stringify(v, (k, x) => (x && typeof x === 'object' && !Array.isArray(x) ? Object.fromEntries(Object.entries(x).sort(([a], [b]) => a.localeCompare(b))) : x));
+
 // Live updates: fetch what changed since the last load or sync. Returns [{entry, change, by}] for changes made
 // by other people (new, edit or removed), newest last. Our own saves already sit in world.entries.
 export async function syncWorld(me) {
@@ -94,6 +97,10 @@ export async function syncWorld(me) {
   const r = await api('entries', { query: { since } });
   world.syncedAt = r.now;
   const out = [];
+  if (r.cal !== undefined && stable(r.cal) !== stable(world.info?.cal ?? null)) {
+    world.info = { ...world.info, cal: r.cal };
+    out.push({ entry: { name: 'the calendar' }, change: 'edit', by: null, calendar: true });
+  }
   for (const e of r.changed) {
     const old = world.entries.get(e.id);
     if (old && old.version >= e.version) continue;
