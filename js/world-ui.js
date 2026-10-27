@@ -16,6 +16,7 @@ import { viewParty } from './world-party.js';
 import { viewExport } from './world-export.js';
 import { viewClocks, clocksWidget } from './world-clocks.js';
 import { viewRumors } from './world-rumors.js';
+import { familySection, clanTree, viewFamily } from './world-family.js';
 import { startCard, markPartySeen } from './onboarding.js';
 import { viewCalendar, worldCalendar, todayText } from './world-calendar.js';
 import { parseDate, toDays, yearLength } from './calendar.js';
@@ -156,6 +157,8 @@ function viewEntry(id, tab) {
       e.summary ? el('p', { class: 'lede' }, e.summary) : null,
       fieldRows.length ? el('dl', { class: 'traits' }, fieldRows.flatMap(([l, v, type]) => [el('dt', {}, l), el('dd', {}, type === 'long' ? richText(v) : el('span', {}, v))])) : null),
     e.kind === 'npc' || e.fields?.stats || e.fields?.spells ? statSection(e) : null,
+    e.kind === 'clan' ? clanTree(e, rerenderWorld) : null,
+    e.kind === 'npc' || e.kind === 'character' ? familySection(e, rerenderWorld) : null,
     e.kind === 'character' ? ownerLine(e) : null,
     e.kind === 'character' ? sheetSection(e, rerenderWorld) : null,
     e.fields?.stock || (e.kind === 'location' && e.fields?.type === 'Shop' && isGm()) ? el('section', { class: 'card shop-card' },
@@ -459,6 +462,7 @@ export async function showWorld(parts, { keepScroll = false } = {}) {
   else if (view === 'party') { markPartySeen(); node = await viewParty(rerenderWorld); }
   else if (view === 'export') node = viewExport();
   else if (view === 'clocks') node = viewClocks();
+  else if (view === 'family') node = viewFamily(arg);
   else if (view === 'calendar') node = viewCalendar(arg, parts[2], rerenderWorld);
   else if (view === 'mine') node = viewMine();
   else node = viewHome();

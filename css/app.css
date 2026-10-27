@@ -783,3 +783,16 @@ tr.disabled td { color: var(--muted) }
 .rumor-add input[type="text"] { flex: 1 1 260px }
 .rumors { display: grid; gap: 12px }
 .k-rumor { --kc: var(--k-time) }
+
+/* ---- family trees ---- */
+.tree-wrap { overflow: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); padding: 6px; max-height: 640px }
+.tree-svg { display: block; margin: 0 auto }
+.tree-node rect { fill: var(--sunk); stroke: var(--kc, var(--line)); stroke-width: 2 }
+.tree-node.focus rect { stroke: var(--accent); stroke-width: 3 }
+.tree-node:hover rect, .tree-node:focus rect { fill: var(--bg) }
+.tree-name { fill: var(--ink); font-weight: 700; font-size: 14px }
+.tree-sub { fill: var(--muted); font-size: 12px }
+.tree-line { fill: none; stroke: var(--muted); stroke-width: 2 }
+.tree-spouse { stroke: var(--brass); stroke-width: 3 }
+.family-card p { margin: 0 }
+.family-add input[type="text"] { flex: 1 1 220px }
