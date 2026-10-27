@@ -11,6 +11,9 @@ import { viewWeb } from './world-web.js';
 import { viewStandings, standingWidget } from './world-standings.js';
 import { viewTalk, talkWidget } from './world-talk.js';
 import { placeHub, viewAtlas, placeCounts } from './world-place.js';
+import { renderStats, renderSpells } from './statblock-ui.js';
+import { npcStats, NPC_CLASS_OPTIONS } from './npc-stats.js';
+import { patchEntry } from './world-store.js';
 
 export { loadWorld, worldEntries };
 let draft = null;
@@ -109,7 +112,7 @@ function viewEntry(id, tab) {
   const sessions = all.filter((x) => x.kind === 'session' && x.id !== id && (mentions(`${x.body}\n${x.summary}\n${Object.values(x.fields || {}).join('\n')}`).has(id) || (x.links || []).some((l) => l.id === id)))
     .sort((a, b) => (parseFloat(b.fields.number) || 0) - (parseFloat(a.fields.number) || 0));
   const pins = pinsFor(id);
-  const fieldRows = KINDS[e.kind].fields.filter(([k]) => e.fields?.[k]).map(([k, label, type]) => [label, e.fields[k], type]);
+  const fieldRows = KINDS[e.kind].fields.filter(([k]) => e.fields?.[k] && !['stats', 'spells', 'level'].includes(k)).map(([k, label, type]) => [label, e.fields[k], type]);
 
   const history = el('div', { class: 'history', hidden: true });
   const isPlace = PLACE_KINDS.includes(e.kind);
@@ -119,6 +122,7 @@ function viewEntry(id, tab) {
   const overview = () => el('div', { class: 'overview' },
     e.summary ? el('p', { class: 'lede' }, e.summary) : null,
     fieldRows.length ? el('dl', { class: 'traits' }, fieldRows.flatMap(([l, v, type]) => [el('dt', {}, l), el('dd', {}, type === 'long' ? richText(v) : el('span', {}, v))])) : null,
+    e.kind === 'npc' || e.fields?.stats || e.fields?.spells ? statSection(e) : null,
     e.body ? el('section', {}, richText(e.body)) : null,
     isGm() && e.secret ? el('aside', { class: 'secret' }, el('div', { class: 'eyebrow' }, 'GM only'), richText(e.secret)) : null,
     out.length || incoming.length ? el('section', {}, el('h3', { class: 'section-title' }, 'Connections'),
@@ -149,6 +153,26 @@ function viewEntry(id, tab) {
     isPlace ? placeSummary(e) : null,
     isPlace ? placeHub(e, tab, overview, rerenderWorld) : overview());
   return node;
+}
+
+// The NPC's stat block and spells, with a GM control to roll new ones.
+function statSection(e) {
+  const has = e.fields?.stats || e.fields?.spells;
+  if (!has && !isGm()) return null;
+  const clsSel = el('select', { 'aria-label': 'Class' }, NPC_CLASS_OPTIONS.map((c) => el('option', { value: c }, c === 'auto' ? 'From their role' : c === 'commoner' ? 'Commoner (no class)' : c)));
+  const lvlSel = el('select', { 'aria-label': 'Level' }, el('option', { value: '' }, 'Any level'), Array.from({ length: 20 }, (_, i) => el('option', { value: i + 1 }, `Level ${i + 1}`)));
+  const roll = async () => {
+    const st = npcStats({ role: e.fields?.role, ancestry: e.fields?.ancestry, cls: clsSel.value, level: +lvlSel.value || undefined });
+    try { await patchEntry(e, { fields: { level: st.level, stats: st.stats, spells: st.spells } }); toast(`New stats for ${e.name}: ${st.level}`); rerenderWorld(); }
+    catch (err) { toast(err.message, 'bad'); }
+  };
+  return el('section', { class: 'card stat-card' },
+    el('div', { class: 'entry-head' }, el('div', {}, el('h3', {}, 'Stat block'), e.fields?.level ? el('div', { class: 'eyebrow' }, e.fields.level) : null)),
+    has ? null : el('p', { class: 'muted' }, 'No stats yet. Roll a stat block: a class and level are picked from their role, or choose your own.'),
+    renderStats(e.fields?.stats),
+    e.fields?.spells ? el('h4', { class: 'sb-spell-title' }, 'Spellcasting') : null,
+    renderSpells(e.fields?.spells, e.id),
+    isGm() ? el('div', { class: 'controls stat-roll' }, clsSel, lvlSel, el('button', { class: 'btn small', type: 'button', onclick: roll }, has ? 'Reroll stats' : 'Roll stats')) : null);
 }
 
 // A line of counts under a place's title.

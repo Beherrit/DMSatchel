@@ -497,6 +497,35 @@ tr.disabled td { color: var(--muted) }
 .pin-map summary { cursor: pointer }
 .pins-admin td input[type="text"] { width: 100%; min-width: 120px }
 
+/* stat blocks and spellcasting */
+.stat-card { gap: 10px; border-left: 4px solid var(--danger) }
+.statblock { display: grid; gap: 6px }
+.sb-top { display: flex; flex-wrap: wrap; gap: 6px }
+.sb-chip { background: var(--sunk); border-radius: 8px; padding: 4px 10px; display: grid; min-width: 70px }
+.sb-chip-l { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 700 }
+.sb-chip-v { font-family: var(--f-mono); font-size: 15px; font-variant-numeric: tabular-nums }
+.sb-abilities { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 4px; border-block: 1px solid var(--line); padding-block: 6px }
+@media (max-width: 480px) { .sb-abilities { grid-template-columns: repeat(3, minmax(0, 1fr)) } }
+.sb-ab { display: grid; justify-items: center; line-height: 1.2 }
+.sb-ab-n { font-size: 11px; letter-spacing: .1em; font-weight: 700; color: var(--muted) }
+.sb-ab-v { font-family: var(--f-mono); font-size: 16px } .sb-ab-m { font-size: 13px; color: var(--muted) }
+.sb-line { font-size: 15px } .sb-line strong { color: var(--danger) }
+.sb-spell-title { margin-top: 4px }
+.spellblock { display: grid; gap: 6px }
+.sb-head { font-weight: 700 }
+.slots { display: flex; flex-wrap: wrap; gap: 6px 16px }
+.slot-row { display: inline-flex; align-items: center; gap: 6px }
+.slot-l { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 700; min-width: 2.5em }
+.pips { display: inline-flex; gap: 4px }
+.pip { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--accent); background: var(--accent); cursor: pointer; padding: 0 }
+.pip.used { background: transparent; border-color: var(--muted) }
+.spell-row { display: grid; grid-template-columns: 5.5em minmax(0, 1fr); gap: 8px; align-items: baseline }
+.spell-lv { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 700 }
+.spell-names { display: flex; flex-wrap: wrap; gap: 4px }
+.spell { font-size: 14px; background: var(--sunk); border-radius: 999px; padding: 1px 9px; font-style: italic }
+.stat-roll { gap: 6px }
+.spellblock + .muted, .spellblock ~ .btn { justify-self: start }
+
 @media print {
   body { background: #fff; color: #000; padding: 0 }
   .top, .mainnav, .tabs, .notebook, .foot, .controls, .btnrow, .reroll, .panel-head p, .talk, .w-side { display: none !important }

@@ -14,8 +14,9 @@ import {
   EPIC_BOONS, STANDARD_LANGUAGES, FULL_SLOTS, pactSlots, ALIGNMENTS,
 } from './rules2024.js';
 import * as T from './lifepath-tables.js';
+import { spellbook, spellText } from './spells.js';
 
-export const PARTS = ['name', 'core', 'abilities', 'build', 'origins', 'upbringing', 'calling', 'life', 'people', 'personality', 'drives', 'hooks'];
+export const PARTS = ['name', 'core', 'abilities', 'build', 'spells', 'origins', 'upbringing', 'calling', 'life', 'people', 'personality', 'drives', 'hooks'];
 export const STORY_SECTIONS = {
   origins: 'Origins & Family', upbringing: 'Upbringing & Youth', calling: 'Background & Calling',
   life: 'Adult Life', people: 'People in Their Life', personality: 'Personality', drives: 'Goals, Secrets & Regrets', hooks: 'Hooks for the DM',
@@ -424,6 +425,10 @@ export function generateCharacter(opts = {}, seed = 'seed', salts = {}) {
   const ups = levelUps(level, core, ab, br);
   const build = buildChoices(level, core, ab, br);
   const stats = derive(level, core, ab, build, ups);
+  if (stats.spellcasting) {
+    const sa = stats.spellcasting.ability;
+    stats.spellbook = spellbook(build.casterKey === 'third' ? core.subclass : core.cls, level, R('spells'), { ability: sa, mod: mod(ab.scores[sa]), pb: stats.pb });
+  }
 
   const ctx = {
     name: fullName, first, surname: fullName.split(' ').slice(1).join(' ').replace(/^(the|of)\b.*$/i, ''), town, region,
@@ -476,7 +481,7 @@ export function characterText(ch) {
   L.push(`Skills: ${s.skills.filter((k) => k.prof).map((k) => `${k.name} ${sign(k.mod)}${k.expert ? ' (expertise)' : ''}`).join(', ')}`);
   L.push(`Attack: ${s.weapon.name} ${sign(s.weapon.toHit)} to hit, ${s.weapon.damage}${s.weapon.attacks > 1 ? `, ${s.weapon.attacks} attacks` : ''}`);
   if (s.spellcasting) L.push(`Spellcasting (${s.spellcasting.ability}): save DC ${s.spellcasting.dc}, attack ${sign(s.spellcasting.attack)}; slots ${s.spellcasting.slots}`);
-  if (ch.spells) L.push(`Suggested spells: ${[...ch.spells.cantrips, ...ch.spells.first].join(', ')}`);
+  if (s.spellbook) L.push(...spellText(s.spellbook).split('\n').slice(2).map((x) => `  ${x}`));
   if (s.resources.length) L.push(`Resources: ${s.resources.join('; ')}`);
   L.push(`Feats: ${ch.feats.map((f) => f.name).join(', ')}`);
   for (const [k, v] of Object.entries(ch.choices)) L.push(`${k}: ${v}`);

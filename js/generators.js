@@ -5,6 +5,7 @@ import { makeRng } from './rng.js';
 import { cap, fmt } from './dom.js';
 import { personName, lastName, townName, tavernName, shopName, ANCESTRY_WEIGHTS } from './names.js';
 import * as D from './tables.js';
+import { npcStats } from './npc-stats.js';
 
 const r = makeRng(Date.now() ^ 0x5eed);
 const aOrAn = (s) => (/^[aeiou]/i.test(s) && !/^(uni|one)/i.test(s) ? 'an ' : 'a ') + s;
@@ -32,10 +33,11 @@ export function npcDraft(place, ancestry) {
   const job = extras.length && r.chance(0.35) ? r.pick(extras) : r.pick(D.ROLES[r.pickW(weights)]);
   const anc = ancestry || r.pickW(ANCESTRY_WEIGHTS);
   const n = Object.fromEntries(['look', 'personality', 'mannerism', 'voice', 'want', 'secret', 'attitude'].map((k) => [k, r.pick(D.NPC[k])]));
+  const st = npcStats({ role: job, ancestry: anc }, `${Date.now()}-${r.int(1e9)}`);
   return {
     kind: 'npc', name: personName(r, anc), parent_id: place?.id || null,
     summary: `${cap(job)}${place ? ` in ${place.name}` : ''}. ${cap(n.personality)}.`,
-    fields: { ancestry: anc, role: cap(job), status: 'Alive', appearance: cap(n.look), personality: `${cap(n.personality)}. ${cap(n.mannerism)}.`, voice: cap(n.voice), wants: cap(n.want) },
+    fields: { ancestry: anc, role: cap(job), status: 'Alive', appearance: cap(n.look), personality: `${cap(n.personality)}. ${cap(n.mannerism)}.`, voice: cap(n.voice), wants: cap(n.want), level: st.level, stats: st.stats, spells: st.spells },
     secret: `${cap(n.secret)}.`, body: `Attitude toward the party: ${n.attitude}.`,
   };
 }

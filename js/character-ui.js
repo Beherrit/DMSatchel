@@ -5,6 +5,8 @@ import { randomSeed } from './rng.js';
 import { generateCharacter, characterText, STORY_SECTIONS, abilityMod, fmtMod } from './character.js';
 import { SPECIES, CLASSES, BACKGROUNDS, ABILITIES, ABILITY_NAMES, ALIGNMENTS } from './rules2024.js';
 import { saveNote } from './notebook.js';
+import { renderSpells } from './statblock-ui.js';
+import { spellText } from './spells.js';
 import { sendToWorld } from './tools.js';
 
 let state = { opts: { level: 1, species: 'any', cls: 'any', background: 'any', gender: 'any', alignment: 'any', method: 'standard', name: '' }, seed: randomSeed(), salts: {} };
@@ -63,8 +65,10 @@ function render(isNew) {
     block('Skills', el('ul', { class: 'skill-list' }, s.skills.map((x) => el('li', { class: x.expert ? 'prof expert' : x.prof ? 'prof' : '', title: x.source ? `From ${x.source}` : '' },
       el('span', {}, x.name, el('small', {}, ` ${x.ability}`)), el('span', { class: 'v' }, fmtMod(x.mod)))))),
     block('Attack', el('p', {}, `${s.weapon.name}: ${fmtMod(s.weapon.toHit)} to hit, ${s.weapon.damage} damage${s.weapon.attacks > 1 ? `, ${s.weapon.attacks} attacks per Attack action` : ''}.`)),
-    s.spellcasting ? block('Spellcasting', el('p', {}, `${ABILITY_NAMES[s.spellcasting.ability]} · save DC ${s.spellcasting.dc} · spell attack ${fmtMod(s.spellcasting.attack)}`), el('p', { class: 'muted' }, `Slots: ${s.spellcasting.slots}`),
-      ch.spells ? el('p', { class: 'muted' }, `Suggested: ${[...ch.spells.cantrips, ...ch.spells.first].join(', ')}`) : null) : null,
+    s.spellcasting ? block('Spellcasting', s.spellbook ? renderSpells(spellText(s.spellbook), `forge-${ch.seed}`)
+      : el('p', {}, `${ABILITY_NAMES[s.spellcasting.ability]} · save DC ${s.spellcasting.dc} · spell attack ${fmtMod(s.spellcasting.attack)}`),
+      s.spellbook ? el('p', { class: 'muted small' }, `${s.spellbook.prepared} spells prepared${s.spellbook.cantrips.length ? `, ${s.spellbook.cantrips.length} cantrips` : ''}. Reroll the list with ↻ on “Spells”.`) : null,
+      s.spellbook ? el('button', { class: 'btn small ghost', type: 'button', onclick: () => bump('spells') }, '↻ Spells') : null) : null,
     s.resources.length ? block('Class resources', el('ul', { class: 'plain' }, s.resources.map((x) => el('li', {}, x)))) : null,
     block('Proficiencies', el('p', {}, `Armor: ${ch.armorProf}.`), el('p', {}, `Weapons: ${ch.weaponProf}.`), el('p', {}, `Tools: ${ch.tools.join(', ')}.`), el('p', {}, `Languages: ${ch.languages.join(', ')}.`)),
     block('Equipment', el('p', {}, `From class: ${ch.equipment.cls}.`), el('p', {}, `From background: ${ch.equipment.background}.`), el('p', { class: 'muted' }, 'Either can be swapped for gold: 50 GP for the background, or the class’s gold option.')));

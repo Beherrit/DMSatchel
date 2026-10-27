@@ -6,6 +6,8 @@ import { $, el, cap, fmt, copyText, fresh, traitList, setKids } from './dom.js';
 import { personName, ANCESTRY_WEIGHTS, ANCESTRIES, townName, tavernName, shopName, shipName, groupName, lastName } from './names.js';
 import * as D from './tables.js';
 import { saveNote } from './notebook.js';
+import { npcStats } from './npc-stats.js';
+import { renderStats, renderSpells } from './statblock-ui.js';
 
 const r = makeRng(Date.now());
 const pick = r.pick, pickW = r.pickW, d = r.dice, R = r.int;
@@ -50,10 +52,11 @@ function mountNpc(root) {
       el('button', { class: 'btn primary', type: 'button', onclick: () => roll() }, 'New NPC')), card);
   const rollField = (f) => {
     if (f === 'name') npc.name = pname(npc.anc);
-    else if (f === 'job') npc.job = pick(D.ROLES[npc.roleGroup]);
+    else if (f === 'job') { npc.job = pick(D.ROLES[npc.roleGroup]); npc.st = npcStats({ role: npc.job, ancestry: npc.anc }); }
+    else if (f === 'stats') npc.st = npcStats({ role: npc.job, ancestry: npc.anc });
     else npc[f] = pick(D.NPC[f]);
   };
-  const text = () => `${npc.name} (${npc.anc} ${npc.job})\n${Object.entries(NPC_LABELS).map(([k, l]) => `${l}: ${cap(npc[k])}`).join('\n')}`;
+  const text = () => `${npc.name} (${npc.anc} ${npc.job})\n${Object.entries(NPC_LABELS).map(([k, l]) => `${l}: ${cap(npc[k])}`).join('\n')}\n\n${npc.st.level}\n${npc.st.stats}${npc.st.spells ? `\n\n${npc.st.spells}` : ''}`;
   function roll() {
     const a = $('#npc-anc').value, g = $('#npc-role').value;
     npc = { anc: a === 'any' ? randomAncestry() : a, roleGroup: g === 'any' ? pick(Object.keys(D.ROLES)) : g };
@@ -65,8 +68,11 @@ function mountNpc(root) {
       el('div', { class: 'eyebrow' }, `${npc.anc} · ${cap(npc.job)}`),
       el('div', { class: 'entry-head' }, el('h3', { class: 'card-title' }, npc.name), el('button', { class: 'reroll', type: 'button', 'aria-label': 'Reroll name', onclick: () => { rollField('name'); render(); } }, '↻')),
       traitList(Object.entries(NPC_LABELS).map(([k, l]) => [k, l, cap(npc[k]), () => { rollField(k); render(); }])),
+      el('div', { class: 'entry-head' }, el('div', { class: 'eyebrow' }, `Stat block · ${npc.st.level}`), el('button', { class: 'reroll', type: 'button', 'aria-label': 'Reroll stats', title: 'New stats', onclick: () => { rollField('stats'); render(); } }, '↻')),
+      renderStats(npc.st.stats),
+      npc.st.spells ? renderSpells(npc.st.spells, `tool-${npc.name}`) : null,
       actions({ kind: 'NPC', title: () => npc.name, text, world: () => ({ kind: 'npc', name: npc.name, summary: `${cap(npc.job)}. ${cap(npc.personality)}.`,
-        fields: { ancestry: npc.anc, role: cap(npc.job), status: 'Alive', appearance: cap(npc.look), personality: `${cap(npc.personality)}. ${cap(npc.mannerism)}.`, voice: cap(npc.voice), wants: cap(npc.want) },
+        fields: { ancestry: npc.anc, role: cap(npc.job), status: 'Alive', appearance: cap(npc.look), personality: `${cap(npc.personality)}. ${cap(npc.mannerism)}.`, voice: cap(npc.voice), wants: cap(npc.want), level: npc.st.level, stats: npc.st.stats, spells: npc.st.spells },
         secret: cap(npc.secret) + '.', body: `Attitude toward the party: ${npc.attitude}.` }) }));
     if (isNew) fresh(card);
   }
