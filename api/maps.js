@@ -3,9 +3,11 @@
 // GET ?id=            one map with its pins (GM-only pins and maps hidden from players)
 // GET ?id=&image=1    the image itself, cached hard (the client adds &v=<version>)
 // POST {map}          create (GM): {name, image, width, height, entry_id, secret}
-// PUT ?id= {map}      update (GM): pins, name, entry_id, secret, miles (scale), optional new image; send version
+// PUT ?id= {map}      update (GM): pins, name, entry_id, secret, miles (scale), fog, optional new image; send version
+// With fog on, players get the fog and only the pins outside it (the image itself is still the whole map).
 // DELETE ?id=         delete (GM)
 import { route, send, fail, sql, newId, requireGm } from './_lib/core.js';
+import { cleanFog, decodeFog, fogHides } from '../js/fog.js';
 
 const MAX_IMAGE = 3_500_000; // characters of data URL; the browser shrinks uploads well under this
 const clip = (v, n) => String(v ?? '').slice(0, n);
@@ -26,10 +28,15 @@ function cleanPins(pins) {
   }));
 }
 
+function visiblePins(m) {
+  const fog = m.fog?.on ? m.fog : null, cells = fog && decodeFog(fog.bits, fog.cols * fog.rows);
+  return (m.pins || []).filter((p) => !p.secret && !(fog && fogHides(fog, cells, p.x, p.y)));
+}
+
 const shape = (m, isGm) => ({
   id: m.id, name: m.name, width: m.width, height: m.height, entry_id: m.entry_id, secret: m.secret, version: m.version,
-  pins: isGm ? m.pins : (m.pins || []).filter((p) => !p.secret), updated_at: m.updated_at, updated_by: m.updated_by_name || null,
-  external: !String(m.image || '').startsWith('data:'), miles: m.miles || null,
+  pins: isGm ? m.pins : visiblePins(m), updated_at: m.updated_at, updated_by: m.updated_by_name || null,
+  external: !String(m.image || '').startsWith('data:'), miles: m.miles || null, fog: isGm || m.fog?.on ? m.fog || null : null,
 });
 
 export default route({
@@ -37,7 +44,7 @@ export default route({
     const isGm = req.isGmHere;
     const { id, image } = req.query || {};
     if (!id) {
-      const rows = await sql`SELECT m.id, m.name, m.width, m.height, m.entry_id, m.secret, m.version, m.pins, m.updated_at, CASE WHEN m.image LIKE 'data:%' THEN 'data:' ELSE m.image END AS image, g.name AS updated_by_name
+      const rows = await sql`SELECT m.id, m.name, m.width, m.height, m.entry_id, m.secret, m.version, m.pins, m.fog, m.updated_at, CASE WHEN m.image LIKE 'data:%' THEN 'data:' ELSE m.image END AS image, g.name AS updated_by_name
         FROM maps m LEFT JOIN gms g ON g.id = m.updated_by WHERE NOT m.deleted AND m.world_id = ${req.world.id} ORDER BY m.name`;
       return send(res, 200, { maps: rows.filter((m) => isGm || !m.secret).map((m) => shape(m, isGm)) });
     }
@@ -78,8 +85,10 @@ export default route({
     let image = cur.image;
     if (b.image) { image = cleanImage(b.image); if (image.error) return fail(res, 400, image.error); }
     const name = clip(b.name ?? cur.name, 120).trim() || cur.name;
+    let fog = cur.fog || null;
+    if (b.fog !== undefined) { fog = b.fog === null ? null : cleanFog(b.fog); if (b.fog !== null && !fog) return fail(res, 400, 'That fog doesn’t fit this map. Reload and try again.'); }
     const rows = await sql`UPDATE maps SET name = ${name}, image = ${image}, width = ${Math.round(Number(b.width ?? cur.width) || 0)}, height = ${Math.round(Number(b.height ?? cur.height) || 0)},
-      pins = ${JSON.stringify(cleanPins(b.pins ?? cur.pins))}, miles = ${b.miles === undefined ? cur.miles : cleanMiles(b.miles)}, entry_id = ${b.entry_id === undefined ? cur.entry_id : b.entry_id || null}, secret = ${b.secret === undefined ? cur.secret : Boolean(b.secret)},
+      pins = ${JSON.stringify(cleanPins(b.pins ?? cur.pins))}, miles = ${b.miles === undefined ? cur.miles : cleanMiles(b.miles)}, fog = ${fog ? JSON.stringify(fog) : null}::jsonb, entry_id = ${b.entry_id === undefined ? cur.entry_id : b.entry_id || null}, secret = ${b.secret === undefined ? cur.secret : Boolean(b.secret)},
       updated_by = ${req.gm.id}, updated_at = now(), version = version + 1 WHERE id = ${id} AND world_id = ${req.world.id} AND version = ${Number(b.version)} RETURNING *`;
     if (!rows.length) return fail(res, 409, `${cur.updated_by_name || 'Another GM'} changed this map a moment ago. Reload it to see their pins, then make your change again.`, { map: shape(cur, true) });
     send(res, 200, { map: shape(rows[0], true) });

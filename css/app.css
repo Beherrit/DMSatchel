@@ -907,3 +907,10 @@ body.gated .mainnav, body.gated #toolnav, body.gated #panels, body.gated #notebo
 .downtime-resolve textarea { width: 100%; margin: 6px 0 }
 .waiting-tag { background: var(--brass); color: #fff }
 .downtime-section { margin-top: 18px }
+
+/* Fog of war */
+.fog-layer { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; image-rendering: auto }
+.fog-layer.gm { opacity: .55 }
+.map-viewport.painting { cursor: crosshair }
+.fog-bar { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin: 8px 0 }
+.fog-bar p { flex-basis: 100%; margin: 0 }

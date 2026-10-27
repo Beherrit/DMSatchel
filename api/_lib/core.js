@@ -94,6 +94,8 @@ export function ensureSchema() {
         title text NOT NULL DEFAULT '', note text NOT NULL DEFAULT '', dates jsonb NOT NULL DEFAULT '[]', votes jsonb NOT NULL DEFAULT '{}',
         locked int, closed boolean NOT NULL DEFAULT false, deleted boolean NOT NULL DEFAULT false)`;
       await sql`ALTER TABLE worlds ADD COLUMN IF NOT EXISTS next_session timestamptz`;
+      // Fog of war over a map: { on, cols, rows, bits } (see js/fog.js).
+      await sql`ALTER TABLE maps ADD COLUMN IF NOT EXISTS fog jsonb`;
       await sql`INSERT INTO members (world_id, gm_id, role) SELECT 'default', id, CASE WHEN role = 'admin' THEN 'owner' ELSE 'gm' END FROM gms
         WHERE NOT EXISTS (SELECT 1 FROM members m WHERE m.world_id = 'default') ON CONFLICT DO NOTHING`;
     })().catch((e) => { schemaReady = null; throw e; });

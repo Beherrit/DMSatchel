@@ -8,6 +8,7 @@ import { world, getEntry, findByName, link, kindLabel, notice, nameList, whenTim
 import { KINDS, PLACE_KINDS, pinIconFor } from './world-schema.js';
 import { placeDrawer } from './world-place.js';
 import { randomTownName, areaDraft } from './generators.js';
+import { fogGrid, newFog, encodeFog, decodeFog, paintFog, hiddenShare } from './fog.js';
 
 export const PIN_ICONS = { region: ['Region', '⬢'], area: ['Area', '◍'], city: ['City', '■'], town: ['Town', '●'], port: ['Port', '◗'], dungeon: ['Dungeon', '▼'], temple: ['Temple', '✚'], camp: ['Camp', '▲'], danger: ['Danger', '✕'], poi: ['Point of interest', '◆'] };
 const imageUrl = (m) => `/api/maps?id=${encodeURIComponent(m.id)}&image=1&v=${m.version}`;
@@ -81,7 +82,25 @@ export async function viewMap(id, focusPin) {
   const img = el('img', { src: imageUrl(map), alt: map.name, draggable: 'false' });
   const layer = el('div', { class: 'pin-layer' });
   const pop = el('div', { class: 'pin-pop', hidden: true });
-  stage.append(img, layer); viewport.append(stage, pop);
+  // Fog of war: one canvas pixel per cell, stretched over the map (the browser's smoothing softens the edges).
+  const fogCanvas = el('canvas', { class: `fog-layer${isGm() ? ' gm' : ''}`, 'aria-hidden': 'true' });
+  stage.append(img, fogCanvas, layer); viewport.append(stage, pop);
+  const dims = map.fog ? { cols: map.fog.cols, rows: map.fog.rows } : fogGrid(map.width, map.height);
+  let cells = map.fog ? decodeFog(map.fog.bits, dims.cols * dims.rows) : newFog(dims.cols, dims.rows, true);
+  let fogOn = Boolean(map.fog?.on), fogMode = false, brush = 0, radius = 3, painting = false;
+  function drawFog() {
+    fogCanvas.hidden = !fogOn && !fogMode;
+    fogCanvas.width = dims.cols; fogCanvas.height = dims.rows;
+    const g = fogCanvas.getContext('2d'), data = g.createImageData(dims.cols, dims.rows);
+    cells.forEach((v, i) => { if (v) data.data.set([34, 29, 24, 255], i * 4); });
+    g.putImageData(data, 0, 0);
+    if (fogInfo) fogInfo.textContent = `${Math.round(hiddenShare(cells) * 100)}% hidden${fogOn ? '' : ' · players can’t see the fog yet'}`;
+  }
+  function paintAt(ev) {
+    const s = stage.getBoundingClientRect();
+    if (paintFog(cells, dims.cols, dims.rows, (ev.clientX - s.left) / s.width, (ev.clientY - s.top) / s.height, radius, brush)) drawFog();
+  }
+  const saveFog = (msg) => save(pins, msg || 'Fog saved.', { fog: { on: fogOn, cols: dims.cols, rows: dims.rows, bits: encodeFog(cells) } });
   const list = el('ul', { class: 'pin-list' });
   const status = el('p', { class: 'form-status', role: 'status' });
   const filter = el('input', { type: 'search', placeholder: 'Find a pin…', 'aria-label': 'Find a pin' });
@@ -223,10 +242,12 @@ export async function viewMap(id, focusPin) {
   const pointers = new Map(); let last = null, pinchDist = 0, dragged = false;
   viewport.addEventListener('pointerdown', (ev) => {
     if (ev.target.closest('.pin, .pin-pop')) return;
+    if (fogMode && ev.isPrimary) { viewport.setPointerCapture(ev.pointerId); painting = true; paintAt(ev); return; }
     viewport.setPointerCapture(ev.pointerId); pointers.set(ev.pointerId, ev); last = { x: ev.clientX, y: ev.clientY }; dragged = false;
     if (pointers.size === 2) { const [a, b] = [...pointers.values()]; pinchDist = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY); }
   });
   viewport.addEventListener('pointermove', (ev) => {
+    if (painting) { paintAt(ev); return; }
     if (!pointers.has(ev.pointerId)) return;
     pointers.set(ev.pointerId, ev);
     if (pointers.size === 2) {
@@ -241,6 +262,7 @@ export async function viewMap(id, focusPin) {
     if (openPin) placePop(openPin);
   });
   const up = (ev) => {
+    if (painting) { painting = false; saveFog(); return; }
     const wasDrag = dragged; pointers.delete(ev.pointerId); if (pointers.size < 2) pinchDist = 0;
     if (wasDrag || ev.type === 'pointercancel' || ev.target.closest('.pin, .pin-pop')) return;
     const s = stage.getBoundingClientRect();
@@ -276,6 +298,29 @@ export async function viewMap(id, focusPin) {
     status.textContent = adding ? 'Click the map where the pin goes.' : ''; status.className = 'form-status';
   } }, '+ Add pin');
   const c = () => [viewport.clientWidth / 2, viewport.clientHeight / 2];
+
+  // The GM's fog tools: paint to reveal or hide, show or hide the fog to players, cover or clear everything.
+  let fogInfo = null;
+  function fogBar() {
+    fogInfo = el('span', { class: 'muted small' });
+    const seg = el('div', { class: 'seg', role: 'group', 'aria-label': 'Brush' }, [[0, 'Reveal'], [1, 'Hide']].map(([v, t]) =>
+      el('button', { type: 'button', 'aria-pressed': String(brush === v), onclick: (ev) => { brush = v; for (const b of seg.children) b.setAttribute('aria-pressed', String(b === ev.target)); } }, t)));
+    const size = el('select', { 'aria-label': 'Brush size' }, [[1.5, 'Small brush'], [3, 'Medium brush'], [6, 'Large brush']].map(([v, t]) => el('option', { value: v }, t)));
+    size.value = String(radius); size.addEventListener('change', () => { radius = Number(size.value); });
+    const on = el('input', { type: 'checkbox', checked: fogOn || null });
+    on.addEventListener('change', () => { fogOn = on.checked; drawFog(); saveFog(fogOn ? 'Players now see the fog.' : 'Fog turned off for players.'); });
+    const fill = (v) => () => { cells.fill(v); drawFog(); saveFog(v ? 'The whole map is hidden.' : 'The whole map is revealed.'); };
+    const bar = el('div', { class: 'fog-bar card', hidden: true },
+      el('label', { class: 'check' }, on, ' Players see the fog'), seg, size,
+      el('button', { class: 'btn small ghost', type: 'button', onclick: fill(1) }, 'Hide all'), el('button', { class: 'btn small ghost', type: 'button', onclick: fill(0) }, 'Reveal all'),
+      fogInfo, el('p', { class: 'muted small' }, 'Drag on the map to paint. Players see a dark cover over hidden parts, and pins under it are left out for them. The map picture itself is still sent whole, so it hides things from the table, not from someone digging through the page.'));
+    return bar;
+  }
+  const fogTools = isGm() ? fogBar() : null;
+  const fogBtn = el('button', { class: 'btn small', type: 'button', 'aria-pressed': 'false', onclick: () => {
+    fogMode = !fogMode; fogBtn.setAttribute('aria-pressed', String(fogMode)); fogTools.hidden = !fogMode; viewport.classList.toggle('painting', fogMode);
+    adding = false; moving = null; addBtn.setAttribute('aria-pressed', 'false'); viewport.classList.remove('placing'); drawFog();
+  } }, 'Fog');
   function scaleControl() {
     const label = el('span', { class: 'muted small map-scale' }, map.miles ? `${Math.round(map.miles).toLocaleString('en-US')} miles across` : isGm() ? '' : '');
     if (!isGm()) return map.miles ? label : null;
@@ -291,6 +336,7 @@ export async function viewMap(id, focusPin) {
     el('button', { class: 'btn small', type: 'button', onclick: fit }, 'Fit'),
     el('button', { class: 'btn small', type: 'button', onclick: () => layer.classList.toggle('no-labels') }, 'Labels'),
     isGm() ? addBtn : null,
+    isGm() ? fogBtn : null,
     scaleControl());
 
   const entry = map.entry_id && getEntry(map.entry_id);
@@ -303,14 +349,14 @@ export async function viewMap(id, focusPin) {
         try { await api('maps', { method: 'DELETE', query: { id: map.id } }); world.maps = (world.maps || []).filter((m) => m.id !== map.id); toast('Map deleted'); location.hash = 'world/maps'; }
         catch (err) { toast(err.message, 'bad'); }
       }, 'btn ghost small')) : null),
-    toolbar, viewport, status,
+    toolbar, fogTools, viewport, status,
     el('div', { class: 'map-side' }, el('h3', { class: 'section-title' }, 'Pins'), filter, list),
     el('p', { class: 'muted small' }, `Last changed ${whenTime(map.updated_at)}${map.updated_by ? ` by ${map.updated_by}` : ''}. Drag to pan; scroll, pinch or use + and − to zoom.`),
     nameList());
 
   let presetEntry = null;
   const ready = () => {
-    fit(); renderPins();
+    fit(); renderPins(); drawFog();
     if (focusPin === 'add' && isGm()) { addBtn.click(); return; }
     if (focusPin?.startsWith('place:') && isGm()) {
       presetEntry = getEntry(focusPin.slice(6));
