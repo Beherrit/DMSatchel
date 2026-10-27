@@ -65,6 +65,10 @@ export function ensureSchema() {
       await sql`UPDATE standing_log s SET world_id = COALESCE((SELECT e.world_id FROM entries e WHERE e.id = s.entry_id), 'default') WHERE s.world_id IS NULL`;
       // A structured in-world calendar and today's date (see js/calendar.js).
       await sql`ALTER TABLE worlds ADD COLUMN IF NOT EXISTS cal jsonb`;
+      // Progress clocks on factions and other entries (filled between sessions).
+      await sql`CREATE TABLE IF NOT EXISTS clocks (
+        id serial PRIMARY KEY, world_id text NOT NULL, entry_id text NOT NULL, name text NOT NULL, size int NOT NULL DEFAULT 6, filled int NOT NULL DEFAULT 0,
+        per_turn int NOT NULL DEFAULT 0, secret boolean NOT NULL DEFAULT false, note text NOT NULL DEFAULT '', created_by int, updated_at timestamptz NOT NULL DEFAULT now(), deleted boolean NOT NULL DEFAULT false)`;
       // A map's scale: how many miles its full width covers (for travel times between pins).
       await sql`ALTER TABLE maps ADD COLUMN IF NOT EXISTS miles real`;
       // The party's treasury: coins and items in and out.

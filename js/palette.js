@@ -17,6 +17,7 @@ function baseItems() {
     { label: 'The Party', group: 'World', href: '#world/party', hint: 'Party members, treasury, loot log, handouts' },
     { label: 'Calendar', group: 'World', href: '#world/calendar', hint: 'Today’s date, moons, holidays, days pass' },
     { label: 'Export & print', group: 'World', href: '#world/export', hint: 'Markdown or a print page, GM or player copy' },
+    { label: 'Faction clocks', group: 'World', href: '#world/clocks', hint: 'Plans in motion; run a faction turn' },
     { label: 'Maps', group: 'World', href: '#world/maps' },
     { label: 'Relationship web', group: 'World', href: '#world/web' },
     { label: 'Party standing', group: 'World', href: '#world/standings' },

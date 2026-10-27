@@ -14,6 +14,7 @@ import { viewTalk, talkWidget } from './world-talk.js';
 import { placeHub, viewAtlas, placeCounts } from './world-place.js';
 import { viewParty } from './world-party.js';
 import { viewExport } from './world-export.js';
+import { viewClocks, clocksWidget } from './world-clocks.js';
 import { startCard, markPartySeen } from './onboarding.js';
 import { viewCalendar, worldCalendar, todayText } from './world-calendar.js';
 import { parseDate, toDays, yearLength } from './calendar.js';
@@ -48,6 +49,7 @@ function renderSide() {
       el('a', { href: '#world/atlas', 'data-view': 'atlas' }, el('span', {}, 'Atlas'), el('span', { class: 'count' }, worldEntries().filter((e) => PLACE_KINDS.includes(e.kind)).length)),
       el('a', { href: '#world/maps', 'data-view': 'maps' }, el('span', {}, 'Maps'), el('span', { class: 'count' }, (world.maps || []).length)),
       el('a', { href: '#world/web', 'data-view': 'web' }, el('span', {}, 'Relationship web'), el('span', { class: 'count' }, '◎')),
+      el('a', { href: '#world/clocks', 'data-view': 'clocks' }, el('span', {}, 'Faction clocks'), el('span', { class: 'count' }, (world.standings?.clocks || []).length)),
       el('a', { href: '#world/standings', 'data-view': 'standings' }, el('span', {}, 'Party standing'), el('span', { class: 'count' }, Object.keys(world.standings?.current || {}).length)),
       isGm() ? el('a', { href: '#world/talk', 'data-view': 'talk' }, el('span', {}, 'GM discussions'), el('span', { class: 'count', id: 'w-talk-count' }, '')) : null),
     el('nav', { class: 'w-kinds', 'aria-label': 'Entry types' }, KIND_ORDER.map((k) => el('a', { href: `#world/k/${k}`, 'data-kind': k }, el('span', {}, KINDS[k].plural), el('span', { class: 'count' }, counts[k] || 0)))),
@@ -168,6 +170,7 @@ function viewEntry(id, tab) {
         out.map((l) => el('li', { class: l.secret ? 'secret-link' : '' }, el('span', { class: 'rel' }, l.label), ' ', link(l.target), el('span', { class: 'kind-tag' }, kindLabel(l.target.kind)), l.secret ? el('span', { class: 'tag' }, 'GM only') : null)),
         incoming.map((l) => el('li', { class: l.secret ? 'secret-link' : '' }, link(l.from), ' ', el('span', { class: 'rel' }, `is ${l.label}`), ' this', el('span', { class: 'kind-tag' }, kindLabel(l.from.kind)))))) : null,
     STANDING_KINDS.includes(e.kind) ? standingWidget(e) : null,
+    STANDING_KINDS.includes(e.kind) || e.kind === 'quest' ? clocksWidget(e) : null,
     sessions.length ? el('section', {}, el('h3', { class: 'section-title' }, 'Appears in sessions'),
       el('ul', { class: 'entry-list' }, sessions.map((x) => el('li', {}, link(x), el('span', { class: 'muted small' }, [x.fields.played_on, x.fields.gm && `GM ${x.fields.gm}`].filter(Boolean).join(' · ')))))) : null,
     !isPlace && pins.length ? el('section', {}, el('h3', { class: 'section-title' }, 'On the map'),
@@ -454,6 +457,7 @@ export async function showWorld(parts, { keepScroll = false } = {}) {
   else if (view === 'suggestions') node = viewSuggestions();
   else if (view === 'party') { markPartySeen(); node = await viewParty(rerenderWorld); }
   else if (view === 'export') node = viewExport();
+  else if (view === 'clocks') node = viewClocks();
   else if (view === 'calendar') node = viewCalendar(arg, parts[2], rerenderWorld);
   else if (view === 'mine') node = viewMine();
   else node = viewHome();
