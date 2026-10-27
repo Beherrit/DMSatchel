@@ -12,6 +12,8 @@ import { viewStandings, standingWidget } from './world-standings.js';
 import { viewTalk, talkWidget } from './world-talk.js';
 import { placeHub, viewAtlas, placeCounts } from './world-place.js';
 import { renderStats, renderSpells } from './statblock-ui.js';
+import { renderStock } from './shop-ui.js';
+import { restockDraft } from './world-place.js';
 import { npcStats, NPC_CLASS_OPTIONS } from './npc-stats.js';
 import { patchEntry } from './world-store.js';
 
@@ -112,7 +114,7 @@ function viewEntry(id, tab) {
   const sessions = all.filter((x) => x.kind === 'session' && x.id !== id && (mentions(`${x.body}\n${x.summary}\n${Object.values(x.fields || {}).join('\n')}`).has(id) || (x.links || []).some((l) => l.id === id)))
     .sort((a, b) => (parseFloat(b.fields.number) || 0) - (parseFloat(a.fields.number) || 0));
   const pins = pinsFor(id);
-  const fieldRows = KINDS[e.kind].fields.filter(([k]) => e.fields?.[k] && !['stats', 'spells', 'level'].includes(k)).map(([k, label, type]) => [label, e.fields[k], type]);
+  const fieldRows = KINDS[e.kind].fields.filter(([k]) => e.fields?.[k] && !['stats', 'spells', 'level', 'stock', 'market'].includes(k)).map(([k, label, type]) => [label, e.fields[k], type]);
 
   const history = el('div', { class: 'history', hidden: true });
   const isPlace = PLACE_KINDS.includes(e.kind);
@@ -123,6 +125,12 @@ function viewEntry(id, tab) {
     e.summary ? el('p', { class: 'lede' }, e.summary) : null,
     fieldRows.length ? el('dl', { class: 'traits' }, fieldRows.flatMap(([l, v, type]) => [el('dt', {}, l), el('dd', {}, type === 'long' ? richText(v) : el('span', {}, v))])) : null,
     e.kind === 'npc' || e.fields?.stats || e.fields?.spells ? statSection(e) : null,
+    e.fields?.stock || (e.kind === 'location' && e.fields?.type === 'Shop' && isGm()) ? el('section', { class: 'card shop-card' },
+      el('div', { class: 'entry-head' }, el('h3', {}, 'For sale'), isGm() ? el('button', { class: 'btn small', type: 'button', onclick: async () => {
+        const town = trailTown(e);
+        try { await patchEntry(e, { fields: restockDraft(e, town) }); toast(town ? `Restocked at ${town.name}’s prices` : 'Restocked'); rerenderWorld(); } catch (err) { toast(err.message, 'bad'); }
+      } }, e.fields?.stock ? 'Restock' : 'Stock this shop') : null),
+      renderStock(e.fields?.stock) || el('p', { class: 'muted' }, 'No stock listed yet.')) : null,
     e.body ? el('section', {}, richText(e.body)) : null,
     isGm() && e.secret ? el('aside', { class: 'secret' }, el('div', { class: 'eyebrow' }, 'GM only'), richText(e.secret)) : null,
     out.length || incoming.length ? el('section', {}, el('h3', { class: 'section-title' }, 'Connections'),
@@ -153,6 +161,13 @@ function viewEntry(id, tab) {
     isPlace ? placeSummary(e) : null,
     isPlace ? placeHub(e, tab, overview, rerenderWorld) : overview());
   return node;
+}
+
+// The nearest settlement a place sits in (for market prices).
+function trailTown(e) {
+  let p = e.parent_id && world.entries.get(e.parent_id), guard = 0;
+  while (p && guard++ < 12) { if (p.kind === 'settlement') return p; p = p.parent_id && world.entries.get(p.parent_id); }
+  return null;
 }
 
 // The NPC's stat block and spells, with a GM control to roll new ones.

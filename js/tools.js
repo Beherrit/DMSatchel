@@ -2,12 +2,16 @@
 // Each tool mounts into its own panel and can save to the notebook or send a draft to the world.
 
 import { makeRng } from './rng.js';
-import { $, el, cap, fmt, copyText, fresh, traitList, setKids } from './dom.js';
+import { $, el, cap, fmt, copyText, fresh, traitList, setKids, toast } from './dom.js';
 import { personName, ANCESTRY_WEIGHTS, ANCESTRIES, townName, tavernName, shopName, shipName, groupName, lastName } from './names.js';
 import * as D from './tables.js';
 import { saveNote } from './notebook.js';
 import { npcStats } from './npc-stats.js';
 import { renderStats, renderSpells } from './statblock-ui.js';
+import { generateShop, rollMarket, marketText, parseMarket, stockText, SHOP_TYPES, ECONOMIES } from './economy.js';
+import { renderMarket, renderStock } from './shop-ui.js';
+import { world, worldEntries, loadWorld, patchEntry } from './world-store.js';
+import { isGm, session, onSession } from './api.js';
 import { randomItem, uniqueItem, CURSES, curseText, itemEntry, RARITIES, RARITY_KEYS, ITEM_TYPES, MINOR_PROPERTIES } from './magic-items.js';
 
 const r = makeRng(Date.now());
@@ -376,6 +380,70 @@ function mountLoot(root) {
 }
 
 
+// ---- Shops & markets ---------------------------------------------------------------------------
+
+function mountShops(root) {
+  let market = null, shop = null;
+  const out = el('div', { class: 'shop-out' });
+  const typeSel = select('sh-type', 'Shop', [['', 'Any shop'], ...Object.keys(SHOP_TYPES).map((t) => [t, t])]);
+  const sizeSel = select('sh-size', 'Town size', ['Hamlet', 'Village', 'Town', 'City', 'Metropolis', 'Fortress', 'Outpost'].map((x) => [x, x]), 'Town');
+  const ecoSel = select('sh-eco', 'Economy', [['', 'Random'], ...Object.keys(ECONOMIES).map((x) => [x, x])]);
+  const townSel = el('select', { id: 'sh-town' }, el('option', { value: '' }, 'None (make one up)'));
+  const townWrap = el('div', { class: 'field' }, el('label', { for: 'sh-town' }, 'A town in your world'), townSel);
+  root.append(panelHead('Shops & Markets', 'Real gear at SRD prices, shaped by the town’s economy: inflation, shortages, surpluses, banned goods and festivals. Haggle, sell loot, restock, and add the shop to a town in your world.'),
+    el('div', { class: 'controls' }, typeSel, sizeSel, ecoSel, townWrap,
+      el('button', { class: 'btn primary', type: 'button', onclick: () => { newMarket(); newShop(); } }, 'New shop & market'),
+      el('button', { class: 'btn', type: 'button', onclick: () => newShop() }, 'Another shop, same market'),
+      el('button', { class: 'btn ghost', type: 'button', onclick: () => { newMarket(); newShop(); } }, 'New market')), out);
+  const town = () => townSel.value && worldEntries().find((e) => e.id === townSel.value);
+  async function fillTowns() {
+    if (session.configured !== true) { townWrap.hidden = true; return; }
+    if (!world.loaded) await loadWorld();
+    const towns = worldEntries().filter((e) => e.kind === 'settlement').sort((a, b) => a.name.localeCompare(b.name));
+    townWrap.hidden = !towns.length;
+    setKids(townSel, el('option', { value: '' }, 'None (make one up)'), towns.map((t) => el('option', { value: t.id }, `${t.name}${t.fields?.market ? ' (has a market)' : ''}`)));
+  }
+  townSel.addEventListener('change', () => {
+    const t = town();
+    if (t?.fields?.size) $('#sh-size').value = ['Hamlet', 'Village', 'Town', 'City', 'Metropolis', 'Fortress', 'Outpost'].includes(t.fields.size) ? t.fields.size : 'Town';
+    newMarket(); newShop();
+  });
+  function newMarket() {
+    const t = town(), size = $('#sh-size').value;
+    market = t?.fields?.market ? parseMarket(t.fields.market, size) : rollMarket(r, { economy: $('#sh-eco').value || undefined, size });
+  }
+  function newShop() {
+    if (!market) newMarket();
+    const owner = pname();
+    shop = generateShop(r, { type: $('#sh-type').value || undefined, market, ownerName: owner, size: $('#sh-size').value });
+    shop.ownerFull = owner;
+    render();
+  }
+  const text = () => `${shop.name} (${shop.type}), run by ${shop.ownerFull}\n${marketText(market)}\n\n${stockText(shop)}`;
+  function render() {
+    const t = town();
+    setKids(out,
+      el('section', { class: 'card' }, el('div', { class: 'entry-head' }, el('h3', {}, t ? `Market of ${t.name}` : 'The market'),
+        t && isGm() && !t.fields?.market ? el('button', { class: 'btn small', type: 'button', onclick: async () => { try { await patchEntry(t, { fields: { market: marketText(market) } }); toast(`Saved the market to ${t.name}`); fillTowns(); } catch (err) { toast(err.message, 'bad'); } } }, `Save this market to ${t.name}`) : null),
+        renderMarket(market)),
+      el('article', { class: 'card fresh shop-card' },
+        el('div', { class: 'eyebrow' }, shop.type),
+        el('div', { class: 'entry-head' }, el('h3', { class: 'card-title' }, shop.name), el('button', { class: 'reroll', type: 'button', 'aria-label': 'Restock', title: 'Restock', onclick: () => newShop() }, '↻')),
+        el('p', { class: 'card-sub' }, `Run by ${shop.ownerFull}.`),
+        renderStock(stockText(shop)),
+        shop.special.length ? el('div', { class: 'special' }, el('h5', {}, 'Special stock'), el('ul', { class: 'loot-list' }, shop.special.map((sp) => el('li', {}, el('span', {}, sp.name, el('small', { class: 'muted block' }, sp.item.summary)),
+          el('span', { class: 'item-side' }, el('span', { class: `pill r-${RARITY_KEYS[sp.item.rarity]}` }, RARITIES[sp.item.rarity]), el('span', { class: 'v' }, fmt(Math.round(sp.price)) + ' gp')))))) : null,
+        el('div', { class: 'btnrow' },
+          el('button', { class: 'btn', type: 'button', onclick: () => saveNote('Shop', shop.name, text()) }, 'Save to notebook'),
+          el('button', { class: 'btn', type: 'button', onclick: () => copyText(text()) }, 'Copy'),
+          el('button', { class: 'btn world', type: 'button', onclick: () => sendToWorld({ kind: 'location', name: shop.name, parent_id: t?.id || null, summary: `${shop.type} run by ${shop.ownerFull}. ${shop.attitude} with prices.`,
+            fields: { type: 'Shop', shop_type: shop.type, owner: shop.ownerFull, stock: stockText(shop) } }) }, t ? `Add to ${t.name}` : 'Add to world'))));
+    fresh(out.lastChild);
+  }
+  fillTowns(); onSession(() => fillTowns());
+  newMarket(); newShop();
+}
+
 // ---- Magic items -------------------------------------------------------------------------------
 
 function mountItems(root) {
@@ -429,4 +497,5 @@ export const TOOLS = [
   { id: 'hooks', label: 'Rumors & Hooks', mount: mountHooks },
   { id: 'loot', label: 'Loot', mount: mountLoot },
   { id: 'items', label: 'Magic Items', mount: mountItems },
+  { id: 'shops', label: 'Shops & Markets', mount: mountShops },
 ];

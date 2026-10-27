@@ -6,6 +6,7 @@ import { cap, fmt } from './dom.js';
 import { personName, lastName, townName, tavernName, shopName, ANCESTRY_WEIGHTS } from './names.js';
 import * as D from './tables.js';
 import { npcStats } from './npc-stats.js';
+import { generateShop, parseMarket, rollMarket, stockText } from './economy.js';
 
 const r = makeRng(Date.now() ^ 0x5eed);
 const aOrAn = (s) => (/^[aeiou]/i.test(s) && !/^(uni|one)/i.test(s) ? 'an ' : 'a ') + s;
@@ -67,12 +68,11 @@ export function tavernDraft(place) {
 }
 
 export function shopDraft(place) {
-  const a = r.pickW(ANCESTRY_WEIGHTS), owner = personName(r, a), kind = r.pick(Object.keys(D.SHOP.type));
-  return {
-    kind: 'location', name: shopName(r, owner), parent_id: place?.id || null,
-    summary: `${kind}. The owner ${r.pick(D.SHOP.quirk)}.`,
-    fields: { type: 'Shop', owner: `${owner}, ${a.toLowerCase()}`, features: r.sample(D.SHOP.type[kind], 5).map(([n, c]) => `${n} (${c})`).join('; ') },
-  };
+  const size = ['Hamlet', 'Village', 'Town', 'City', 'Metropolis', 'Fortress', 'Outpost'].includes(place?.fields?.size) ? place.fields.size : 'Town';
+  const market = place?.fields?.market ? parseMarket(place.fields.market, size) : rollMarket(r, { size, economy: 'Stable' });
+  const owner = personName(r, r.pickW(ANCESTRY_WEIGHTS));
+  const sh = generateShop(r, { market, ownerName: owner, size });
+  return { kind: 'location', name: sh.name, parent_id: place?.id || null, summary: `${sh.type} run by ${owner}. ${sh.attitude} with prices.`, fields: { type: 'Shop', shop_type: sh.type, owner, stock: stockText(sh) } };
 }
 
 export function settlementDraft(place) {

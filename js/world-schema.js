@@ -11,11 +11,11 @@ export const KINDS = {
   },
   settlement: {
     label: 'Settlement', plural: 'Settlements', blurb: 'Cities, towns, villages and outposts.',
-    fields: [['size', 'Size', 'select', ['Hamlet', 'Village', 'Town', 'City', 'Metropolis', 'Fortress', 'Outpost']], ['population', 'Population'], ['ruler', 'Led by'], ['government', 'Government'], ['known_for', 'Known for', 'long'], ['trouble', 'Current trouble', 'long'], ['landmarks', 'Landmarks', 'long'], ['economy', 'Trade & economy', 'long'], ['defenses', 'Defenses', 'long'], ['peoples', 'Peoples & culture', 'long']],
+    fields: [['size', 'Size', 'select', ['Hamlet', 'Village', 'Town', 'City', 'Metropolis', 'Fortress', 'Outpost']], ['population', 'Population'], ['ruler', 'Led by'], ['government', 'Government'], ['known_for', 'Known for', 'long'], ['trouble', 'Current trouble', 'long'], ['landmarks', 'Landmarks', 'long'], ['economy', 'Trade & economy', 'long'], ['defenses', 'Defenses', 'long'], ['peoples', 'Peoples & culture', 'long'], ['market', 'Market conditions', 'long']],
   },
   location: {
     label: 'Location', plural: 'Locations', blurb: 'Dungeons, ruins, taverns, shops and landmarks.',
-    fields: [['type', 'Type', 'select', ['Dungeon', 'Ruin', 'Tavern', 'Shop', 'Temple', 'Landmark', 'Lair', 'Castle', 'Wilderness', 'Other']], ['owner', 'Owner or occupant'], ['features', 'Notable features', 'long'], ['dangers', 'Dangers', 'long'], ['treasure', 'Treasure', 'long']],
+    fields: [['type', 'Type', 'select', ['Dungeon', 'Ruin', 'Tavern', 'Shop', 'Temple', 'Landmark', 'Lair', 'Castle', 'Wilderness', 'Other']], ['owner', 'Owner or occupant'], ['shop_type', 'Shop type'], ['features', 'Notable features', 'long'], ['dangers', 'Dangers', 'long'], ['treasure', 'Treasure', 'long'], ['stock', 'Stock & prices', 'long']],
   },
   faction: {
     label: 'Faction', plural: 'Factions', blurb: 'Political powers, cults, armies and secret societies.',

@@ -21,7 +21,7 @@ to the log at the bottom.
    appearance, property, minor quirk, history and optional curse. Reference tab with filters (rarity, type,
    attunement, cursed). Loot, quest rewards, shops and the world's Item entries all draw on it; a cursed item's
    curse goes in the GM-only secret.
-3. [ ] **Shops and economy.** Shop inventories from real 5e gear at SRD prices, with quantity in stock.
+3. [x] **Shops and economy.** Shop inventories from real 5e gear at SRD prices, with quantity in stock.
    Settlements get an economy (Booming, Stable, Struggling, Besieged…), inflation %, and market conditions per
    goods category: shortage (price ×1.5–3, few or none in stock), surplus (discount, plenty), embargo, festival.
    A market event explains why ("the mines flooded, iron is scarce"). Haggling DC, buy-back at half price,
@@ -67,3 +67,4 @@ to the log at the bottom.
 - Deep world builder: place hubs, quest boards, atlas, map drawers, Build console shipped.
 - NPC stat blocks, spellcasting with slot pips, SRD spell lists by class, full Forge spellbooks shipped.
 - Magic items: 267-item SRD catalog, 18 curses, unique item maker, Magic Items tool, catalog loot, Reference tabs for magic items and spells shipped. Fixed Add-to-world when World wasn't opened yet.
+- Shops & economy: SRD gear prices, 19 shop types, 6 town economies, shortages/surpluses/embargoes/festivals with reasons, haggling and buy-back helpers, magic stock by town size, Market tab on towns with restock-all, shop pages with stock tables, Shops & Markets tool.

@@ -11,8 +11,14 @@ import {
 } from './world-store.js';
 import { npcDraft, questDraft, tavernDraft, shopDraft, settlementDraft, areaDraft, orgDraft } from './generators.js';
 import { pinsFor } from './world-maps.js';
+import { generateShop, rollMarket, marketText, parseMarket, stockText, SHOP_TYPES, ECONOMIES } from './economy.js';
+import { renderMarket, renderStock } from './shop-ui.js';
+import { personName, ANCESTRY_WEIGHTS } from './names.js';
+import { makeRng } from './rng.js';
+import { createEntry } from './world-store.js';
 
-export const HUB_TABS = [['overview', 'Overview'], ['people', 'People'], ['quests', 'Quest board'], ['places', 'Places'], ['powers', 'Powers'], ['maps', 'Maps']];
+export const HUB_TABS = [['overview', 'Overview'], ['people', 'People'], ['quests', 'Quest board'], ['market', 'Market'], ['places', 'Places'], ['powers', 'Powers'], ['maps', 'Maps']];
+const er = makeRng(Date.now() ^ 0xec0);
 const QUEST_STATUSES = ['Rumor', 'Available', 'Active', 'Completed', 'Failed', 'Abandoned'];
 const ORG_KINDS = ['faction', 'guild', 'clan'];
 const sendDraft = (d) => window.dispatchEvent(new CustomEvent('world:draft', { detail: d }));
@@ -197,20 +203,78 @@ function mapsSection(place) {
     !own.length && !pins.length && !inside.length && !isGm() ? el('p', { class: 'muted' }, 'Not on any map yet.') : null);
 }
 
+// ---- market (settlements) ------------------------------------------------------------------------
+
+const isShop = (e) => e.kind === 'location' && (e.fields?.type === 'Shop' || e.fields?.type === 'Tavern' || e.fields?.shop_type);
+const townSize = (place) => (['Hamlet', 'Village', 'Town', 'City', 'Metropolis', 'Fortress', 'Outpost'].includes(place.fields?.size) ? place.fields.size : 'Town');
+export const marketOf = (place) => (place?.fields?.market ? parseMarket(place.fields.market, townSize(place)) : null);
+
+// New stock for a shop entry under its town's market.
+export function restockDraft(shopEntry, town) {
+  const market = marketOf(town) || rollMarket(er, { size: town ? townSize(town) : 'Town', economy: 'Stable' });
+  const type = shopEntry.fields?.shop_type || (shopEntry.fields?.type === 'Tavern' ? 'Tavern & inn' : 'General store');
+  const sh = generateShop(er, { type, market, ownerName: shopEntry.fields?.owner?.split(',')[0], size: market.size });
+  return { shop_type: type, stock: stockText(sh) };
+}
+
+function marketSection(place, rerender) {
+  const market = marketOf(place);
+  const shops = descendantsOf(place.id, ['location']).filter(isShop);
+  const slot = el('div', { class: 'preview-slot' });
+  const ecoSel = el('select', { 'aria-label': 'Economy' }, el('option', { value: '' }, 'Random economy'), Object.keys(ECONOMIES).map((k) => el('option', { value: k }, k)));
+  const typeSel = el('select', { 'aria-label': 'Shop type' }, el('option', { value: '' }, 'Any shop'), Object.keys(SHOP_TYPES).map((k) => el('option', { value: k }, k)));
+  const rollMkt = async () => {
+    const m = rollMarket(er, { economy: ecoSel.value || undefined, size: townSize(place) });
+    try { await patchEntry(place, { fields: { market: marketText(m) } }); toast(`${place.name}: ${m.economy}`); rerender(); } catch (err) { toast(err.message, 'bad'); }
+  };
+  const openShop = () => {
+    const m = market || rollMarket(er, { size: townSize(place) });
+    let sh;
+    const box = el('div', { class: 'preview card' });
+    const draw = () => {
+      const owner = personName(er, er.pickW(ANCESTRY_WEIGHTS));
+      sh = generateShop(er, { type: typeSel.value || undefined, market: m, ownerName: owner, size: townSize(place) }); sh.ownerFull = owner;
+      setKids(box, el('div', { class: 'entry-head' }, el('h4', {}, `${sh.name} · ${sh.type}`), el('button', { class: 'reroll', type: 'button', 'aria-label': 'Close', onclick: () => box.remove() }, '✕')),
+        el('p', { class: 'muted small' }, `Run by ${owner}. ${sh.items.length + sh.special.length} items.`), renderStock(stockText(sh)),
+        el('div', { class: 'btnrow' }, el('button', { class: 'btn primary small', type: 'button', onclick: async () => {
+          try { await createEntry({ kind: 'location', name: sh.name, parent_id: place.id, summary: `${sh.type} run by ${owner}.`, fields: { type: 'Shop', shop_type: sh.type, owner, stock: stockText(sh) } }); toast(`Opened ${sh.name}`); box.remove(); rerender(); }
+          catch (err) { toast(err.message, 'bad'); }
+        } }, 'Open this shop'), el('button', { class: 'btn small', type: 'button', onclick: draw }, 'Different shop'), el('button', { class: 'btn small ghost', type: 'button', onclick: () => box.remove() }, 'Discard')));
+    };
+    draw(); slot.prepend(box);
+  };
+  const restockAll = async () => {
+    let n = 0;
+    for (const sh of shops) { try { await patchEntry(sh, { fields: restockDraft(sh, place) }); n++; } catch (err) { toast(`${sh.name}: ${err.message}`, 'bad'); } }
+    toast(`Restocked ${n} shop${n === 1 ? '' : 's'} at ${place.name}’s prices`); rerender();
+  };
+  return el('section', { class: 'hub-sec' },
+    market ? renderMarket(market) : el('p', { class: 'muted' }, isGm() ? `${place.name} has no market yet. Roll one: its economy, inflation, shortages and surpluses set prices in every shop here.` : 'Nobody has written up the market here yet.'),
+    isGm() ? el('div', { class: 'hub-tools' }, ecoSel, el('button', { class: market ? 'btn small' : 'btn primary small', type: 'button', onclick: rollMkt }, market ? 'New market conditions' : 'Roll the market'),
+      typeSel, el('button', { class: 'btn primary small', type: 'button', onclick: openShop }, 'Open a shop'),
+      shops.length ? el('button', { class: 'btn small ghost', type: 'button', onclick: restockAll }, `Restock all ${shops.length} at today’s prices`) : null) : null,
+    slot,
+    shops.length ? el('div', {}, el('h4', {}, 'Shops'), el('ul', { class: 'entry-list' }, shops.map((e) => el('li', {}, link(e), el('span', { class: 'kind-tag' }, e.fields?.shop_type || e.fields?.type),
+      e.fields?.owner ? el('span', { class: 'muted small' }, e.fields.owner) : null,
+      e.parent_id !== place.id && getEntry(e.parent_id) ? el('span', { class: 'muted small' }, 'in ', link(getEntry(e.parent_id))) : null)))) : el('p', { class: 'muted small' }, 'No shops yet.'));
+}
+
 // ---- hub -----------------------------------------------------------------------------------------
 
 export function placeHub(place, tab, overview, rerender) {
   const c = placeCounts(place);
-  const counts = { people: c.people, quests: c.openQuests, places: c.places, powers: c.powers, maps: mapsOf(place.id).length + pinsFor(place.id).length };
-  const active = HUB_TABS.some(([k]) => k === tab) ? tab : 'overview';
+  const counts = { people: c.people, quests: c.openQuests, places: c.places, powers: c.powers, maps: mapsOf(place.id).length + pinsFor(place.id).length, market: descendantsOf(place.id, ['location']).filter(isShop).length };
+  const tabs = HUB_TABS.filter(([k]) => k !== 'market' || place.kind === 'settlement');
+  const active = tabs.some(([k]) => k === tab) ? tab : 'overview';
   const panel = active === 'overview' ? overview()
     : active === 'people' ? peopleSection(place, rerender)
       : active === 'quests' ? questSection(place, rerender)
+        : active === 'market' ? marketSection(place, rerender)
         : active === 'places' ? placesSection(place, rerender)
           : active === 'powers' ? powersSection(place, rerender)
             : mapsSection(place);
   return el('div', { class: 'hub' },
-    el('nav', { class: 'hub-tabs', 'aria-label': `${place.name} sections` }, HUB_TABS.map(([k, t]) => el('a', { href: `#world/e/${place.id}${k === 'overview' ? '' : `/${k}`}`, 'aria-current': k === active ? 'page' : 'false' },
+    el('nav', { class: 'hub-tabs', 'aria-label': `${place.name} sections` }, tabs.map(([k, t]) => el('a', { href: `#world/e/${place.id}${k === 'overview' ? '' : `/${k}`}`, 'aria-current': k === active ? 'page' : 'false' },
       t, k !== 'overview' && counts[k] ? el('span', { class: 'count' }, counts[k]) : null))),
     el('div', { class: 'hub-panel' }, panel));
 }
