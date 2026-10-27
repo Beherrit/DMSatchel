@@ -1,5 +1,6 @@
 // The entries of one world (?world=<id or slug>).
 // GET               every entry the requester may see
+// GET ?since=<iso>  entries changed since then (for live updates): {changed, removed, now}
 // GET ?id=          one entry
 // POST {entry}      create. GMs create anything; players create their own characters and journals, and anything
 //                   else they make is a suggestion that waits for a GM.
@@ -69,7 +70,19 @@ async function insert(e, req, { owner = null, status = 'live', id = newId() } = 
 
 export default route({
   async GET(req, res) {
-    const { id, bin } = req.query || {};
+    const { id, bin, since } = req.query || {};
+    if (since) {
+      const t = new Date(since);
+      if (Number.isNaN(t.getTime())) return fail(res, 400, 'Bad time.');
+      const rows = await sql`SELECT e.*, c.name AS created_by_name, u.name AS updated_by_name, o.name AS owner_name FROM entries e
+        LEFT JOIN gms c ON c.id = e.created_by LEFT JOIN gms u ON u.id = e.updated_by LEFT JOIN gms o ON o.id = e.owner_id
+        WHERE e.world_id = ${req.world.id} AND e.updated_at >= ${t.toISOString()} ORDER BY e.updated_at LIMIT 500`;
+      const now = (await sql`SELECT now() AS now`)[0].now;
+      return send(res, 200, {
+        changed: rows.filter((r) => !r.deleted && visibleTo(r, req)).map((r) => shape(r, req)),
+        removed: rows.filter((r) => r.deleted || !visibleTo(r, req)).map((r) => r.id), now,
+      });
+    }
     if (id) {
       const row = await loadOne(id, req.world.id);
       if (!row || (row.deleted && !req.isGmHere) || !visibleTo(row, req)) return fail(res, 404, 'That entry doesn’t exist, or it was deleted.');
@@ -79,7 +92,9 @@ export default route({
       ? await sql`SELECT e.*, c.name AS created_by_name, u.name AS updated_by_name, o.name AS owner_name FROM entries e LEFT JOIN gms c ON c.id = e.created_by LEFT JOIN gms u ON u.id = e.updated_by LEFT JOIN gms o ON o.id = e.owner_id WHERE e.world_id = ${req.world.id} AND e.deleted ORDER BY e.updated_at DESC`
       : await sql`SELECT e.*, c.name AS created_by_name, u.name AS updated_by_name, o.name AS owner_name FROM entries e LEFT JOIN gms c ON c.id = e.created_by LEFT JOIN gms u ON u.id = e.updated_by LEFT JOIN gms o ON o.id = e.owner_id WHERE e.world_id = ${req.world.id} AND NOT e.deleted ORDER BY e.name`;
     const w = req.world;
+    const now = (await sql`SELECT now() AS now`)[0].now;
     send(res, 200, {
+      now,
       entries: rows.filter((r) => visibleTo(r, req)).map((r) => shape(r, req)),
       world: { id: w.id, slug: w.slug, name: w.name, tagline: w.tagline, about: w.about, calendar: w.calendar, public: w.public },
       role: req.role,

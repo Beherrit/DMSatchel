@@ -18,7 +18,7 @@ import { renderStats, renderSpells } from './statblock-ui.js';
 import { renderStock } from './shop-ui.js';
 import { restockDraft } from './world-place.js';
 import { npcStats, NPC_CLASS_OPTIONS } from './npc-stats.js';
-import { patchEntry, setEntryState, stateBadges } from './world-store.js';
+import { patchEntry, setEntryState, stateBadges, syncWorld } from './world-store.js';
 
 export { loadWorld, worldEntries };
 const lower = (s) => (s === 'NPC' ? s : s.toLowerCase());
@@ -456,6 +456,27 @@ export function mountWorld(root) {
   main = el('div', { class: 'w-main' });
   root.append(el('div', { class: 'w-layout' }, side, main));
   window.addEventListener('world:rerender', () => rerenderWorld());
+  // Live updates: every 20 seconds while a world page is open and visible, pick up what others changed.
+  const tick = async () => {
+    if (document.hidden || !location.hash.startsWith('#world') || !world.loaded || syncing) return;
+    syncing = true;
+    try {
+      const changes = await syncWorld(session.gm?.name);
+      if (changes.length) {
+        const people = [...new Set(changes.map((c) => c.by).filter(Boolean))];
+        const one = changes.length === 1 && changes[0];
+        toast(one ? (one.change === 'removed' ? `${one.entry.name} was removed or hidden` : `${one.by || 'Someone'} ${one.change === 'new' ? 'added' : 'edited'} ${one.entry.name}`)
+          : `${changes.length} changes${people.length ? ` from ${people.join(', ')}` : ''}`);
+        // Don't redraw under someone who is typing; their form keeps its input and the new data shows next time.
+        const typing = /^#world\/(new|edit)\//.test(location.hash) || main.contains(document.activeElement) && ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName);
+        if (!typing) rerenderWorld();
+      }
+    } catch { /* offline for a moment: try again next time */ }
+    syncing = false;
+  };
+  let syncing = false;
+  setInterval(tick, 20000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) tick(); });
   // A new sign-in or a different world means different entries are visible: load again.
   let seen = '';
   onSession((s) => {

@@ -14,7 +14,7 @@ export async function loadWorld(force) {
     try {
       const [r, s, m] = await Promise.all([api('entries'), api('standings').catch(() => null), api('maps').catch(() => null)]);
       world.entries = new Map(r.entries.map((e) => [e.id, e]));
-      world.info = r.world; world.role = r.role || null; world.standings = s; world.maps = m?.maps || [];
+      world.info = r.world; world.role = r.role || null; world.syncedAt = r.now || null; world.standings = s; world.maps = m?.maps || [];
       world.loaded = true; world.error = null;
     } catch (e) { world.error = e; }
     world.loading = null;
@@ -83,6 +83,30 @@ export async function patchEntry(entry, patch) {
   const r = await api('entries', { method: 'PUT', query: { id: entry.id }, body: { entry: next } });
   world.entries.set(r.entry.id, r.entry);
   return r.entry;
+}
+
+// Live updates: fetch what changed since the last load or sync. Returns [{entry, change, by}] for changes made
+// by other people (new, edit or removed), newest last. Our own saves already sit in world.entries.
+export async function syncWorld(me) {
+  if (!world.loaded || !world.syncedAt) return [];
+  // A second of overlap catches saves that landed while the last sync ran; versions keep us from counting them twice.
+  const since = new Date(new Date(world.syncedAt).getTime() - 1000).toISOString();
+  const r = await api('entries', { query: { since } });
+  world.syncedAt = r.now;
+  const out = [];
+  for (const e of r.changed) {
+    const old = world.entries.get(e.id);
+    if (old && old.version >= e.version) continue;
+    world.entries.set(e.id, e);
+    if (e.updated_by !== me) out.push({ entry: e, change: old ? 'edit' : 'new', by: e.updated_by });
+  }
+  for (const id of r.removed) {
+    const old = world.entries.get(id);
+    if (!old) continue;
+    world.entries.delete(id);
+    out.push({ entry: old, change: 'removed', by: null });
+  }
+  return out;
 }
 
 // GM quick changes: reveal or hide an entry, approve a suggestion.
