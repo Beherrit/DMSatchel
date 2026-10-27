@@ -48,6 +48,9 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
   worlds from the menu at the top. Worlds can be private (members only) or open (anyone can read).
 - **Players add to the world**: players add their own characters and journal entries, and suggest anything else
   (an NPC, a rumor, a place). Suggestions wait for a GM to approve, edit or reject them.
+- **Character sheets**: characters from the Forge keep their full sheet in the world, with a play tracker the
+  player and GMs share: hit points, conditions, spell slots, hit dice, rests, coins, inventory and notes. Level up
+  in one click.
 - **The Party**: who's in the party, the shared treasury (coins and items, with a loot log anyone can add to and an
   even split), current quests, handouts the GM reveals at the table, and the party journal.
 - **Hidden entries**: GMs can keep any entry hidden from players while they prep, then reveal it in one click.

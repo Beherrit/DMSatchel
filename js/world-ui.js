@@ -13,6 +13,7 @@ import { viewStandings, standingWidget } from './world-standings.js';
 import { viewTalk, talkWidget } from './world-talk.js';
 import { placeHub, viewAtlas, placeCounts } from './world-place.js';
 import { viewParty } from './world-party.js';
+import { sheetSection } from './sheet-ui.js';
 import { renderStats, renderSpells } from './statblock-ui.js';
 import { renderStock } from './shop-ui.js';
 import { restockDraft } from './world-place.js';
@@ -124,7 +125,7 @@ function viewEntry(id, tab) {
   const sessions = all.filter((x) => x.kind === 'session' && x.id !== id && (mentions(`${x.body}\n${x.summary}\n${Object.values(x.fields || {}).join('\n')}`).has(id) || (x.links || []).some((l) => l.id === id)))
     .sort((a, b) => (parseFloat(b.fields.number) || 0) - (parseFloat(a.fields.number) || 0));
   const pins = pinsFor(id);
-  const fieldRows = KINDS[e.kind].fields.filter(([k]) => e.fields?.[k] && !['stats', 'spells', 'level', 'stock', 'market'].includes(k)).map(([k, label, type]) => [label, e.fields[k], type]);
+  const fieldRows = KINDS[e.kind].fields.filter(([k, , type]) => e.fields?.[k] && !['stats', 'spells', 'level', 'stock', 'market'].includes(k) && type !== 'hidden' && !(k === 'sheet' && e.fields.forge)).map(([k, label, type]) => [label, e.fields[k], type]);
 
   const history = el('div', { class: 'history', hidden: true });
   const isPlace = PLACE_KINDS.includes(e.kind);
@@ -135,6 +136,8 @@ function viewEntry(id, tab) {
     e.summary ? el('p', { class: 'lede' }, e.summary) : null,
     fieldRows.length ? el('dl', { class: 'traits' }, fieldRows.flatMap(([l, v, type]) => [el('dt', {}, l), el('dd', {}, type === 'long' ? richText(v) : el('span', {}, v))])) : null,
     e.kind === 'npc' || e.fields?.stats || e.fields?.spells ? statSection(e) : null,
+    e.kind === 'character' ? ownerLine(e) : null,
+    e.kind === 'character' ? sheetSection(e, rerenderWorld) : null,
     e.fields?.stock || (e.kind === 'location' && e.fields?.type === 'Shop' && isGm()) ? el('section', { class: 'card shop-card' },
       el('div', { class: 'entry-head' }, el('h3', {}, 'For sale'), isGm() ? el('button', { class: 'btn small', type: 'button', onclick: async () => {
         const town = trailTown(e);
@@ -209,6 +212,17 @@ function viewMine() {
       group('Suggestions', list.filter((e) => !PLAYER_KINDS.includes(e.kind)))]
       : notice('Nothing yet', 'Add your character, keep a journal, or suggest something the GMs might add to the world.',
         isMember() ? el('div', { class: 'btnrow' }, el('a', { class: 'btn primary', href: '#world/new/character' }, '+ My character'), el('a', { class: 'btn', href: '#world/new/journal' }, '+ Journal entry')) : null));
+}
+
+// Who plays a character, and a way to claim an unowned one (or for a GM, to let it go).
+function ownerLine(e) {
+  const claim = async (body, msg) => { try { const r = await api('entries', { method: 'PATCH', body: { id: e.id, ...body } }); world.entries.set(r.entry.id, r.entry); toast(msg); rerenderWorld(); } catch (err) { toast(err.message, 'bad'); } };
+  if (e.owner_id) {
+    return el('p', { class: 'muted small owner-line' }, `Played by ${e.owner}${e.owner_id === session.gm?.id ? ' (you)' : ''}. `,
+      isGm() ? confirmButton('Unassign', () => claim({ owner: null }, 'Nobody plays this character now'), 'linkish') : null);
+  }
+  return isMember() ? el('p', { class: 'muted small owner-line' }, 'No player has claimed this character. ',
+    el('button', { class: 'linkish', type: 'button', onclick: () => claim({ claim: true }, `${e.name} is yours now`) }, 'It’s mine')) : null;
 }
 
 // The nearest settlement a place sits in (for market prices).
@@ -288,6 +302,7 @@ function viewEdit(id, kindForNew) {
     collectFields();
     setKids(fieldsBox, ...KINDS[kindSel.value].fields.map(([k, label, type, opts]) => {
       const v = e.fields[k] || '';
+      if (type === 'hidden') return null;
       if (type === 'select') {
         const s = el('select', { id: `ff-${k}`, 'data-field': k }, el('option', { value: '' }, '—'), opts.map((o) => el('option', { value: o }, o)));
         if (v && !opts.includes(v)) s.append(el('option', { value: v }, v));
@@ -431,7 +446,7 @@ export async function showWorld(parts, { keepScroll = false } = {}) {
 // Drafts sent from the tools ("Add to world") open the new-entry form, prefilled.
 export function acceptDraft(d = {}) {
   if (!isMember()) { toast(signedIn() ? 'You need an invite to this world to add things' : 'Sign in to add things to the shared world'); if (!signedIn()) openSignIn(); return; }
-  if (!isGm()) toast('Players’ additions are sent to the GMs as suggestions');
+  if (!isGm() && !PLAYER_KINDS.includes(d.kind)) toast('Players’ additions are sent to the GMs as suggestions');
   draft = { ...d, fields: { ...(d.fields || {}) } };
   location.hash = `world/new/${d.kind}`;
 }

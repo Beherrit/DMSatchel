@@ -47,6 +47,7 @@ export function buildSection() {
       el('button', { type: 'button', class: 'chip-btn', 'aria-pressed': String(id === current), onclick: () => { current = id; render(); } }, t)));
     const fieldEls = KINDS[kind].fields.map(([k, l, type, opts]) => {
       const v = d.fields?.[k] || '';
+      if (type === 'hidden') return null;
       if (type === 'select') {
         const s = el('select', { id: `b-${k}`, 'data-field': k }, el('option', { value: '' }, '—'), opts.map((o) => el('option', { value: o }, o)));
         s.value = opts.includes(v) ? v : '';

@@ -8,6 +8,7 @@ import { saveNote } from './notebook.js';
 import { renderSpells } from './statblock-ui.js';
 import { spellText } from './spells.js';
 import { sendToWorld } from './tools.js';
+import { characterFields } from './sheet-ui.js';
 
 let state = { opts: { level: 1, species: 'any', cls: 'any', background: 'any', gender: 'any', alignment: 'any', method: 'standard', name: '' }, seed: randomSeed(), salts: {} };
 let ch = null;
@@ -119,7 +120,7 @@ export function mountCharacters(root) {
       el('button', { class: 'btn', type: 'button', onclick: () => bump('abilities', 'build') }, 'New stats'),
       el('button', { class: 'btn', type: 'button', onclick: () => saveNote('Character', ch.name, characterText(ch)) }, 'Save to notebook'),
       el('button', { class: 'btn world', type: 'button', onclick: () => sendToWorld({ kind: 'character', name: ch.name, summary: ch.summary,
-        fields: { species: ch.lineage ? `${ch.species} (${ch.lineage})` : ch.species, class: ch.subclass ? `${ch.cls} (${ch.subclass})` : ch.cls, level: String(ch.stats.level), background: ch.background, status: 'Active', sheet: characterText(ch) },
+        fields: { ...characterFields(ch), status: 'Active' },
         secret: ch.story.drives.find((x) => x.startsWith('Secret')) || '' }) }, 'Add to world'),
       el('button', { class: 'btn', type: 'button', onclick: () => copyText(characterText(ch)) }, 'Copy'),
       el('button', { class: 'btn', type: 'button', onclick: () => download(`${ch.name.replace(/[^\w]+/g, '-')}.txt`, characterText(ch)) }, 'Download'),

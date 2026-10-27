@@ -130,7 +130,7 @@ async function activitySection() {
   const box = el('section', { class: 'card' }, el('h3', {}, 'Recent activity'));
   try {
     const r = await api('activity');
-    box.append(r.activity.length ? el('ul', { class: 'plain activity' }, r.activity.map((h) => el('li', {}, el('span', { class: 'muted small' }, when(h.at)), ' ', el('strong', {}, h.gm || 'Someone'), ` ${{ create: 'created', edit: 'edited', delete: 'deleted', restore: 'restored', import: 'imported', suggest: 'suggested', approve: 'approved', unapprove: 'un-approved', reject: 'rejected', reveal: 'revealed', hide: 'hid' }[h.action] || h.action} `,
+    box.append(r.activity.length ? el('ul', { class: 'plain activity' }, r.activity.map((h) => el('li', {}, el('span', { class: 'muted small' }, when(h.at)), ' ', el('strong', {}, h.gm || 'Someone'), ` ${{ create: 'created', edit: 'edited', delete: 'deleted', restore: 'restored', import: 'imported', suggest: 'suggested', approve: 'approved', unapprove: 'un-approved', reject: 'rejected', reveal: 'revealed', hide: 'hid', claim: 'claimed', unassign: 'unassigned' }[h.action] || h.action} `,
       h.entry_name ? el('a', { href: `#world/e/${h.entry_id}` }, h.entry_name) : 'an entry', h.kind ? el('span', { class: 'kind-tag' }, KINDS[h.kind]?.label || h.kind) : null))) : el('p', { class: 'muted' }, 'No changes yet.'));
   } catch (err) { box.append(el('p', { class: 'error' }, err.message)); }
   return box;

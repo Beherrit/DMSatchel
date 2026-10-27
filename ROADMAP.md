@@ -38,7 +38,7 @@ to the log at the bottom.
    (characters, journal entries, notes), suggest edits/new entries (GM approves), and comment on quests.
 7. [x] **Party page.** Party members and their characters, shared treasure and loot log (gold in/out, items),
    party journal (players and GMs post), handouts the GM reveals (text and images), current quests.
-8. [ ] **Player character sheets.** Characters from the Forge saved to the world and owned by a player:
+8. [x] **Player character sheets.** Characters from the Forge saved to the world and owned by a player:
    current HP, conditions, spell slots used, inventory, gold, notes, level-up. Players edit their own.
 9. [ ] **Live updates.** Poll for changes every ~20 s while a world page is open; "Ana edited Ashford" toasts,
    refresh lists without losing form input. Edit conflicts already handled.
@@ -70,3 +70,4 @@ to the log at the bottom.
 - Shops & economy: SRD gear prices, 19 shop types, 6 town economies, shortages/surpluses/embargoes/festivals with reasons, haggling and buy-back helpers, magic stock by town size, Market tab on towns with restock-all, shop pages with stock tables, Shops & Markets tool.
 - Hidden entries, multiple worlds, accounts and roles: worlds table with additive migration (the old world becomes "world-1", existing GMs keep GM access), per-world owner/GM/player roles, GM and player invite links that create accounts with personal codes, world switcher and Worlds page, Members & invites admin, People (site admin), hidden entries with reveal/hide, player characters and journals, player suggestions with GM approve/reject, My things page. Verified the API and migration against a real Postgres engine (PGlite).
 - Party page: active and former party members, treasury with coin total and even split, items held and by whom, loot log anyone in the world can add to (GMs or the writer can strike lines; struck lines stay in the database), current quests, handouts (new Handout kind, hidden by default, "Hand out" reveals them), party journal.
+- Character sheets: Forge characters save their recipe and rebuild the full sheet in the world; a shared play tracker (HP with damage/heal/temp HP, death saves, conditions, exhaustion, Heroic Inspiration, spell slots, hit dice, short and long rest, coins, inventory, notes), exact level-up from the recipe, manual max HP/AC for hand-made characters, claim an unowned character (GMs can unassign).

@@ -637,3 +637,37 @@ tr.disabled td { color: var(--muted) }
 .handout .paper { background: var(--paper); color: var(--paper-ink); padding: 14px 18px; border-radius: 4px; box-shadow: 0 1px 3px rgb(0 0 0 / .15); font-family: var(--f-flavor); font-size: 17px; transform: rotate(-.3deg) }
 .handout.held .paper { outline: 2px dashed var(--warn); outline-offset: 3px }
 .former summary { cursor: pointer; color: var(--muted) }
+
+/* ---- player character sheets ---- */
+.pc-sheet { gap: 16px }
+.tracker { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 16px; align-items: start }
+@media (max-width: 720px) { .tracker { grid-template-columns: minmax(0, 1fr) } }
+.hp-block { display: grid; gap: 8px }
+.hp-top { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap }
+.hp-now { font-size: 30px; font-variant-numeric: tabular-nums }
+.hp-now.down { color: var(--danger) }
+.hp-bar { height: 10px; border-radius: 999px; background: var(--sunk); border: 1px solid var(--line); overflow: hidden }
+.hp-bar span { display: block; height: 100%; background: var(--good); transition: width .2s }
+.hp-controls { display: flex; gap: 6px; flex-wrap: wrap; align-items: center }
+.hp-amt { width: 80px }
+.coin-amt { width: 120px }
+.tag.temp { color: var(--accent); margin: 0 }
+.death-saves { display: grid; gap: 4px }
+.death-row { display: flex; gap: 10px; align-items: center }
+.death-row span:first-child { width: 90px; font-size: 14px }
+.pip.fail:not(.used) { background: var(--danger); border-color: var(--danger) }
+.pip.ok:not(.used) { background: var(--good); border-color: var(--good) }
+.pip:disabled { cursor: default }
+.conds, .slots, .rests, .purse { display: grid; gap: 6px }
+.cond-extra { display: flex; flex-wrap: wrap; gap: 8px; align-items: center }
+.chip-btn.small { font-size: 13px; padding: 3px 9px }
+.rests { grid-template-columns: minmax(0, 1fr); }
+.rests > span { display: flex; flex-wrap: wrap; gap: 8px; align-items: center }
+.pc-cols { display: grid; grid-template-columns: minmax(0, 220px) minmax(0, 1fr); gap: 16px; align-items: start }
+@media (max-width: 640px) { .pc-cols { grid-template-columns: minmax(0, 1fr) } }
+.purse strong { font-size: 20px; color: var(--brass) }
+.pc-sheet textarea { width: 100% }
+.sheet-more summary { cursor: pointer; color: var(--accent); font-weight: 500 }
+.sheet-more[open] summary { margin-bottom: 10px }
+.owner-line { margin: 0 }
+.manual .controls { align-items: center }

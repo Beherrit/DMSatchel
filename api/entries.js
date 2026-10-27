@@ -6,6 +6,7 @@
 // POST {entries:[...], mode:'batch'}   up to 25 at once (GM) · mode:'import' restores a backup (owner)
 // PUT ?id= {entry}  update; send the version you loaded or get 409. Players may edit only their own entries.
 // PATCH {id, visibility?, status?}     GM quick changes: reveal or hide, approve a suggestion
+// PATCH {id, claim: true} · {id, owner: null}   claim an unowned character (member) · unassign it (GM)
 // DELETE ?id=       move to the bin (GM, or a player's own entry) · DELETE ?id=&restore=1 brings it back (GM)
 //
 // Players never receive: GM-only entries, other people's pending suggestions, secrets, or GM-only links.
@@ -21,7 +22,7 @@ function clean(input) {
   if (!name) return { error: 'Give the entry a name.' };
   const allowed = new Set(KINDS[e.kind].fields.map(([k]) => k));
   const fields = {};
-  for (const [k, v] of Object.entries(e.fields || {})) if (allowed.has(k) && v != null && String(v).trim()) fields[k] = clip(v, k === 'stock' || k === 'sheet' ? LIMITS.body : LIMITS.field);
+  for (const [k, v] of Object.entries(e.fields || {})) if (allowed.has(k) && v != null && String(v).trim()) fields[k] = clip(v, ['stock', 'sheet', 'play'].includes(k) ? LIMITS.body : LIMITS.field);
   const tags = [...new Set((Array.isArray(e.tags) ? e.tags : []).map((t) => clip(t, LIMITS.tag).trim().toLowerCase()).filter(Boolean))].slice(0, LIMITS.tags);
   const links = (Array.isArray(e.links) ? e.links : []).filter((l) => l && typeof l.id === 'string').slice(0, LIMITS.links)
     .map((l) => ({ id: clip(l.id, 40), label: clip(l.label || 'related to', 60), secret: Boolean(l.secret) }));
@@ -157,10 +158,21 @@ export default route({
   },
 
   async PATCH(req, res) {
-    if (!requireGm(req, res)) return;
+    if (!requireMember(req, res)) return;
     const { id, visibility, status } = req.body || {};
     const current = id && await loadOne(id, req.world.id);
-    if (!current) return fail(res, 404, 'That entry doesn’t exist.');
+    if (!current || current.deleted) return fail(res, 404, 'That entry doesn’t exist.');
+    // Claim an unowned player character (any member), or let one go (GM).
+    if (req.body.claim || req.body.owner === null) {
+      if (current.kind !== 'character') return fail(res, 400, 'Only player characters can be claimed.');
+      if (req.body.claim && current.owner_id && current.owner_id !== req.gm.id) return fail(res, 409, 'Someone else already plays this character.');
+      if (req.body.owner === null && !req.isGmHere) return fail(res, 403, 'Only a GM can unassign a character.');
+      const owner = req.body.claim ? req.gm.id : null;
+      await sql`UPDATE entries SET owner_id = ${owner}, updated_by = ${req.gm.id}, updated_at = now(), version = version + 1 WHERE id = ${id} AND world_id = ${req.world.id}`;
+      await record(id, req.gm.id, owner ? 'claim' : 'unassign', null);
+      return send(res, 200, { entry: shape(await loadOne(id, req.world.id), req) });
+    }
+    if (!requireGm(req, res)) return;
     const vis = visibility === 'gm' || visibility === 'all' ? visibility : current.visibility;
     const st = status === 'live' || status === 'suggested' ? status : current.status;
     await sql`UPDATE entries SET visibility = ${vis}, status = ${st}, updated_by = ${req.gm.id}, updated_at = now(), version = version + 1 WHERE id = ${id} AND world_id = ${req.world.id}`;
