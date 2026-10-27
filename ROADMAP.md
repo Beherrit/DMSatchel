@@ -74,7 +74,7 @@ to the log at the bottom.
     (class, subclass, species, background, feat, spell), plus source and D&D Beyond link on items.
 27. [x] **Library in the Character Forge.** Pick subclasses and species from the library; their features show on
     the sheet.
-25. [ ] **Import.** Bring in Markdown notes (one file per entry, or an Obsidian-style folder) and the exported
+25. [x] **Import.** Bring in Markdown notes (one file per entry, or an Obsidian-style folder) and the exported
     Markdown from this app.
 
 ## Ideas parking lot
@@ -107,3 +107,4 @@ to the log at the bottom.
 - Members-only site: the site admin can lock the whole site (People tab). Locked, every API call needs a signed-in person except signing in and joining with an invite; signed-out visitors see only a sign-in / join screen (a newcomer's one-time personal code still shows). Open worlds now carry a warning in World settings.
 - Your library: #world/library with tabs (bestiary, items, classes, subclasses, species, backgrounds, feats, spells, other), quick-add forms for short summaries, search, D&D Beyond links. Bestiary creatures join encounters (with a "Monsters from" choice: SRD and bestiary / only bestiary / only SRD), area tables, session prep and dungeons; sourced items join every magic item roll (loot, shops, dungeon treasure, Magic Items tool) at about a third of the rolls they fit. Creatures start hidden from players. Unit tests for CR parsing and conversions.
 - Library in the Character Forge: Species and Subclass menus gain a "From your library" group (a specific option, or any from the library). Library species use their size, speed and darkvision, list each “Name: text” line as a trait, and borrow names, age and height from a chosen SRD species; library subclasses show their notes on the Forge sheet, the world sheet and the text export. Library picks use their own random stream, so SRD rolls and saved characters are unchanged (600-character comparison against the previous engine), and “any from my library” is saved as the option picked so level-ups rebuild the same character.
+- Import notes: #world/import (GMs). Markdown files, a whole folder (Obsidian vaults: front matter, folder names as kind hints, [[links]] kept and tidied, embeds and .obsidian skipped) or a pasted document (heading per entry, or this app's export with kinds, parents, fields, GM secrets, connections and tags). Preview with per-entry kind and include; entries already in the world, repeated, or sharing a name with another kind are flagged and unticked. Created in batches of 25, hidden from players and tagged by default, then parents and connections matched by name. Unit tests for the parser, including an export round trip.

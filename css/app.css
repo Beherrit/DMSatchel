@@ -873,3 +873,11 @@ body.gated .mainnav, body.gated #toolnav, body.gated #panels, body.gated #notebo
 .lib-source { margin: 0 }
 .lib-form .edit-fields { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) }
 .lib-form textarea { width: 100% }
+
+/* ---- import ---- */
+.import-sources { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 12px }
+.import-sources textarea { width: 100% }
+.import-sources input[type="file"] { max-width: 100% }
+.import-preview { display: grid; gap: 10px }
+.import-table td { vertical-align: top }
+.import-table tr.muted td { opacity: .6 }

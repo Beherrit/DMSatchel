@@ -14,6 +14,7 @@ import { viewTalk, talkWidget, tableWidget, viewTable } from './world-talk.js';
 import { viewPrep } from './world-prep.js';
 import { viewPowers } from './world-powers.js';
 import { viewLibrary } from './world-library.js';
+import { viewImport } from './world-import.js';
 import { placeHub, viewAtlas, placeCounts } from './world-place.js';
 import { viewParty } from './world-party.js';
 import { viewExport } from './world-export.js';
@@ -63,7 +64,7 @@ function renderSide() {
       isGm() ? el('a', { href: '#world/talk', 'data-view': 'talk' }, el('span', {}, 'GM discussions'), el('span', { class: 'count', id: 'w-talk-count' }, '')) : null),
     el('nav', { class: 'w-kinds', 'aria-label': 'Entry types' }, KIND_ORDER.map((k) => el('a', { href: `#world/k/${k}`, 'data-kind': k }, el('span', {}, KINDS[k].plural), el('span', { class: 'count' }, counts[k] || 0)))),
     isGm() ? el('div', { class: 'w-gm' }, el('a', { class: 'btn primary small', href: '#world/prep' }, 'Session prep'), el('a', { class: 'btn small', href: '#world/new/npc' }, '+ New entry'), el('a', { class: 'btn ghost small', href: '#world/bin' }, 'Bin'),
-      el('a', { class: 'btn ghost small', href: '#world/export' }, 'Export & print'),
+      el('a', { class: 'btn ghost small', href: '#world/export' }, 'Export & print'), el('a', { class: 'btn ghost small', href: '#world/import' }, 'Import notes'),
       suggested ? el('a', { class: 'btn small suggest-btn', href: '#world/suggestions' }, `Suggestions (${suggested})`) : null) : null,
     !isMember() && signedIn() ? el('p', { class: 'muted small w-visitor' }, 'You’re browsing as a visitor. Ask the owner for an invite to add things.') : null,
   );
@@ -475,6 +476,7 @@ export async function showWorld(parts, { keepScroll = false } = {}) {
   else if (view === 'prep') node = await viewPrep(rerenderWorld);
   else if (view === 'powers') node = viewPowers(rerenderWorld);
   else if (view === 'library') node = viewLibrary(arg, rerenderWorld);
+  else if (view === 'import') node = viewImport(rerenderWorld);
   else if (view === 'suggestions') node = viewSuggestions();
   else if (view === 'party') { markPartySeen(); node = await viewParty(rerenderWorld); }
   else if (view === 'export') node = viewExport();

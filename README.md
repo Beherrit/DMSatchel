@@ -69,6 +69,8 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
   pins once a map has a scale.
 - **Dungeons & lairs**: a keyed site in one roll, with monsters fitted to the party, traps, puzzles, treasure and a
   map; GMs can add it to the world with a page per room and a pin on each.
+- **Import notes**: bring in Markdown files, an Obsidian folder, or pasted notes, with a preview before anything
+  is saved.
 - **Export & print**: the world, a region or one kind of entry as Markdown or a printable page, as a GM copy or a
   player-safe copy.
 - **Works offline**: install it like an app; the table tools, Character Forge and Reference work without a
