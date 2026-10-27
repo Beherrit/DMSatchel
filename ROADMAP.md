@@ -64,8 +64,16 @@ to the log at the bottom.
 20. [x] **What my character knows.** A player view per character: entries they've met or been told about.
 21. [x] **Discord recaps.** Post session summaries and handouts to a Discord channel via a webhook.
 
+22. [ ] **Player comments.** Players can comment on quests, handouts, rumors and their own entries (separate from
+    the GM-only discussions), with GMs able to reply and hide comments.
+23. [ ] **Session prep page.** One GM page for next session: active quests, clocks close to finishing, rumors in
+    the party's current town, upcoming calendar events, NPCs nearby, and a scratch pad.
+24. [ ] **Faction relationship matrix.** Every faction against every other: ally, rival, war, trade, at a glance,
+    editable in place (writes the same connections the web uses).
+25. [ ] **Import.** Bring in Markdown notes (one file per entry, or an Obsidian-style folder) and the exported
+    Markdown from this app.
+
 ## Ideas parking lot
-- Faction relationship matrix.
 
 ## Log
 - Character Forge, table tools, world wiki, admin, maps, web, sessions, standings, discussions, search shipped.
