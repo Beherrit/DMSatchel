@@ -64,7 +64,7 @@ to the log at the bottom.
 20. [x] **What my character knows.** A player view per character: entries they've met or been told about.
 21. [x] **Discord recaps.** Post session summaries and handouts to a Discord channel via a webhook.
 
-22. [ ] **Player comments.** Players can comment on quests, handouts, rumors and their own entries (separate from
+22. [x] **Player comments.** Players can comment on quests, handouts, rumors and their own entries (separate from
     the GM-only discussions), with GMs able to reply and hide comments.
 23. [ ] **Session prep page.** One GM page for next session: active quests, clocks close to finishing, rumors in
     the party's current town, upcoming calendar events, NPCs nearby, and a scratch pad.
@@ -97,3 +97,4 @@ to the log at the bottom.
 - Family trees: parent/child/spouse/sibling connections; Family section on NPC and character pages with quick add (links someone who exists or creates them in the same town and house; a child of someone with one spouse gets both parents); clan pages draw the whole house as a generational tree; #world/family/<id> tree around anyone. Unit tests for relations, families and layout.
 - What my character knows: "☆ <character> knows this" on every entry for players' own characters; a "What <character> knows" list on the character page, grouped by kind, with a note in the character's words per entry.
 - Discord recaps: owner connects a webhook in World settings (validated, stored only on the server, never sent to browsers); GMs get "Post to Discord" on visible entries, which sends an embed with the summary, text, fields, picture and a link back (secrets left out).
+- Player comments: comments get an audience (additive column; existing rows stay GM-only) and a hidden flag. Table talk on every entry players can see: members post and reply, edit their own; GMs reply, hide (author still sees it, marked) or delete; visitors to open worlds can read. A Table talk feed across the world, refreshing every 30 s without losing half-written replies. GM discussions unchanged and still private. Also darkened the light-theme warning, success and rarity colors to pass WCAG AA on shaded backgrounds.

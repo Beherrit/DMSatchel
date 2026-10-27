@@ -40,6 +40,9 @@ export function ensureSchema() {
         id serial PRIMARY KEY, entry_id text NOT NULL, parent_id int, gm_id int, body text NOT NULL, resolved boolean NOT NULL DEFAULT false,
         created_at timestamptz NOT NULL DEFAULT now(), edited_at timestamptz)`;
       await sql`CREATE INDEX IF NOT EXISTS comments_entry_idx ON comments (entry_id, created_at)`;
+      // Comments are GM-only discussion unless audience = 'table' (players and GMs). Old rows stay GM-only.
+      await sql`ALTER TABLE comments ADD COLUMN IF NOT EXISTS audience text NOT NULL DEFAULT 'gm'`;
+      await sql`ALTER TABLE comments ADD COLUMN IF NOT EXISTS hidden boolean NOT NULL DEFAULT false`;
       // Multiple worlds and per-world roles (added later; every step is additive and safe to repeat).
       await sql`CREATE TABLE IF NOT EXISTS worlds (
         id text PRIMARY KEY, slug text UNIQUE NOT NULL, name text NOT NULL, tagline text NOT NULL DEFAULT '', about text NOT NULL DEFAULT '',

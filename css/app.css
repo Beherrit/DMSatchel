@@ -12,10 +12,10 @@
   --brass: #7A5209;
   --danger: #9E3328;
   --secret-bg: #F3E7E4;
-  --r-common: #6B7280; --r-uncommon: #2F7A3A; --r-rare: #2459A6; --r-veryrare: #7A3FA0; --r-legendary: #A8630A;
+  --r-common: #565C68; --r-uncommon: #256A30; --r-rare: #2459A6; --r-veryrare: #7A3FA0; --r-legendary: #8A4F05;
   --k-place: #2F6E8E; --k-power: #A3352B; --k-people: #2F7A3A; --k-faith: #8E6210; --k-thing: #7A3FA0; --k-time: #586070;
   --cork: #D9C7A3; --paper: #FBF6E9; --paper-ink: #2A2418;
-  --good: #2F7A3A; --warn: #A8630A;
+  --good: #256A30; --warn: #8A4F05;
   --f-display: "IM Fell English SC", "Iowan Old Style", Georgia, serif;
   --f-flavor: "IM Fell English", "Iowan Old Style", Georgia, serif;
   --f-body: "Alegreya Sans", "Gill Sans", "Segoe UI", system-ui, sans-serif;
@@ -802,3 +802,5 @@ tr.disabled td { color: var(--muted) }
 .known-list input { width: 100%; font-size: 14px }
 @media (max-width: 560px) { .known-list li { grid-template-columns: auto auto } .known-list input { grid-column: 1 / -1 } }
 .discord-box { margin-top: 20px; border-top: 1px solid var(--line); padding-top: 12px; display: grid; gap: 6px } .discord-box input { flex: 1 1 280px }
+.hidden-comment { opacity: .6 }
+.talk.talk-table { border-style: solid; border-left: 4px solid var(--accent) }
