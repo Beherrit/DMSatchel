@@ -124,7 +124,17 @@ async function settingsSection() {
       try { await api('worlds', { method: 'DELETE', query: { id: w.id } }); setWorld(null, { silent: true }); await refreshWorlds(); toast('Archived'); location.hash = 'worlds'; }
       catch (err) { toast(err.message, 'bad'); }
     }, 'btn ghost'));
-  box.append(form, leave);
+  const hook = el('input', { type: 'password', id: 's-discord', autocomplete: 'off', placeholder: w.discord ? 'Connected. Paste a new link to change it.' : 'https://discord.com/api/webhooks/…' });
+  const hookStatus = el('p', { class: 'form-status', role: 'status' });
+  const saveHook = async (value) => {
+    try { const r = await api('settings', { method: 'PUT', body: { discord_webhook: value } }); hook.value = ''; hook.placeholder = r.discord ? 'Connected. Paste a new link to change it.' : 'https://discord.com/api/webhooks/…'; hookStatus.textContent = r.discord ? 'Connected. GMs now see “Post to Discord” on sessions, handouts and other pages.' : 'Disconnected.'; hookStatus.className = 'form-status'; loadWorld(true); }
+    catch (err) { hookStatus.textContent = err.message; hookStatus.className = 'form-status error'; }
+  };
+  const discord = el('div', { class: 'discord-box' }, el('h4', {}, 'Discord channel'),
+    el('p', { class: 'muted small' }, 'Post session recaps and handouts to your group’s Discord. In Discord, open the channel’s settings → Integrations → Webhooks → New Webhook → Copy Webhook URL, and paste it here. The link stays on the server.'),
+    el('div', { class: 'controls' }, hook, el('button', { class: 'btn small primary', type: 'button', onclick: () => { if (hook.value.trim()) saveHook(hook.value.trim()); else hook.focus(); } }, 'Connect'),
+      w.discord ? confirmButton('Disconnect', () => saveHook(''), 'btn small ghost') : null), hookStatus);
+  box.append(form, discord, leave);
   return box;
 }
 

@@ -801,3 +801,4 @@ tr.disabled td { color: var(--muted) }
 .known-list li { display: grid; grid-template-columns: auto auto minmax(0, 1fr); gap: 4px 10px; align-items: center; padding: 4px 0 }
 .known-list input { width: 100%; font-size: 14px }
 @media (max-width: 560px) { .known-list li { grid-template-columns: auto auto } .known-list input { grid-column: 1 / -1 } }
+.discord-box { margin-top: 20px; border-top: 1px solid var(--line); padding-top: 12px; display: grid; gap: 6px } .discord-box input { flex: 1 1 280px }
