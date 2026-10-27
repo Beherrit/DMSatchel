@@ -36,3 +36,35 @@ export function libraryItems(entries) {
 
 export const LIBRARY_CATEGORIES = ['Class', 'Subclass', 'Species', 'Background', 'Feat', 'Spell', 'Other'];
 export const ruleOptions = (entries, category) => entries.filter((e) => e.kind === 'rule' && (!category || e.fields?.category === category));
+
+// "Name: text" or "Name. text" lines become separate traits; anything else is one trait named after the option.
+export function traitsFrom(name, text) {
+  const lines = String(text || '').split(/\n+/).map((l) => l.replace(/^[-•*]\s*/, '').trim()).filter(Boolean);
+  const out = [];
+  for (const l of lines) {
+    const m = l.match(/^([A-Z][\w’' -]{1,40}?)[:.]\s+(.+)$/);
+    if (m) out.push([m[1].trim(), m[2].trim()]);
+    else if (out.length) out[out.length - 1][1] += ` ${l}`;
+    else out.push([name, l]);
+  }
+  return out;
+}
+
+const num = (v) => { const m = String(v ?? '').match(/\d+/); return m ? Number(m[0]) : null; };
+
+// Species from the library, in the shape the Character Forge uses.
+export function librarySpecies(entries) {
+  return ruleOptions(entries, 'Species').map((e) => ({
+    name: e.name, size: e.fields?.size || '', speed: num(e.fields?.speed), darkvision: num(e.fields?.darkvision),
+    like: e.fields?.like || 'Human', traits: traitsFrom(e.name, e.fields?.features || e.summary), source: e.fields?.source || '', entryId: e.id,
+  }));
+}
+
+// Subclasses from the library, with the class they belong to (matched loosely: "fighter", "Fighter (2024)").
+export function librarySubclasses(entries, classes = []) {
+  return ruleOptions(entries, 'Subclass').map((e) => {
+    const raw = String(e.fields?.class || '').toLowerCase();
+    const cls = classes.find((c) => raw.includes(c.toLowerCase())) || (e.fields?.class || '').trim();
+    return { name: e.name, cls, features: e.fields?.features || e.summary || '', source: e.fields?.source || '', entryId: e.id };
+  }).filter((x) => x.cls);
+}

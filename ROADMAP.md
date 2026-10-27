@@ -72,7 +72,7 @@ to the log at the bottom.
     editable in place (writes the same connections the web uses).
 26. [x] **Your library.** Short summaries from the group's own books: Creature kind (bestiary) and Rules option kind
     (class, subclass, species, background, feat, spell), plus source and D&D Beyond link on items.
-27. [ ] **Library in the Character Forge.** Pick subclasses and species from the library; their features show on
+27. [x] **Library in the Character Forge.** Pick subclasses and species from the library; their features show on
     the sheet.
 25. [ ] **Import.** Bring in Markdown notes (one file per entry, or an Obsidian-style folder) and the exported
     Markdown from this app.
@@ -106,3 +106,4 @@ to the log at the bottom.
 - Who stands where: #world/powers grid of factions, guilds and houses (deities and towns optional): allied, trading, rivals, enemies, at war, serves (directional), secretly works for (GM only). GMs click a square to set it; one relationship per pair, written as the same connections the web and entry pages use, other connections untouched. At-a-glance tallies and tensions (allied with two powers at war). Unit tests for reading, setting, tallies and tensions.
 - Members-only site: the site admin can lock the whole site (People tab). Locked, every API call needs a signed-in person except signing in and joining with an invite; signed-out visitors see only a sign-in / join screen (a newcomer's one-time personal code still shows). Open worlds now carry a warning in World settings.
 - Your library: #world/library with tabs (bestiary, items, classes, subclasses, species, backgrounds, feats, spells, other), quick-add forms for short summaries, search, D&D Beyond links. Bestiary creatures join encounters (with a "Monsters from" choice: SRD and bestiary / only bestiary / only SRD), area tables, session prep and dungeons; sourced items join every magic item roll (loot, shops, dungeon treasure, Magic Items tool) at about a third of the rolls they fit. Creatures start hidden from players. Unit tests for CR parsing and conversions.
+- Library in the Character Forge: Species and Subclass menus gain a "From your library" group (a specific option, or any from the library). Library species use their size, speed and darkvision, list each “Name: text” line as a trait, and borrow names, age and height from a chosen SRD species; library subclasses show their notes on the Forge sheet, the world sheet and the text export. Library picks use their own random stream, so SRD rolls and saved characters are unchanged (600-character comparison against the previous engine), and “any from my library” is saved as the option picked so level-ups rebuild the same character.

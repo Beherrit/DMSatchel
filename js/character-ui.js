@@ -9,8 +9,11 @@ import { renderSpells } from './statblock-ui.js';
 import { spellText } from './spells.js';
 import { sendToWorld } from './tools.js';
 import { characterFields } from './sheet-ui.js';
+import { session, onSession } from './api.js';
+import { world, worldEntries, loadWorld } from './world-store.js';
+import { librarySpecies, librarySubclasses } from './library.js';
 
-let state = { opts: { level: 1, species: 'any', cls: 'any', background: 'any', gender: 'any', alignment: 'any', method: 'standard', name: '' }, seed: randomSeed(), salts: {} };
+let state = { opts: { level: 1, species: 'any', subclass: 'any', cls: 'any', background: 'any', gender: 'any', alignment: 'any', method: 'standard', name: '' }, seed: randomSeed(), salts: {} };
 let ch = null;
 let sheet;
 
@@ -19,13 +22,38 @@ const sel = (id, label, options, value) => el('div', { class: 'field' }, el('lab
 
 function readOpts() {
   const o = state.opts;
-  o.level = +$('#c-level').value; o.species = $('#c-species').value; o.cls = $('#c-class').value; o.background = $('#c-bg').value;
+  o.level = +$('#c-level').value; o.species = $('#c-species').value; o.cls = $('#c-class').value; o.subclass = $('#c-subclass').value; o.background = $('#c-bg').value;
   o.gender = $('#c-gender').value; o.alignment = $('#c-align').value; o.method = $('#c-method').value; o.name = $('#c-name').value.trim();
 }
 function writeOpts() {
   const o = state.opts;
-  $('#c-level').value = o.level; $('#c-species').value = o.species; $('#c-class').value = o.cls; $('#c-bg').value = o.background;
+  $('#c-level').value = o.level; $('#c-class').value = o.cls; $('#c-bg').value = o.background;
+  fillLibraryOptions();
   $('#c-gender').value = o.gender; $('#c-align').value = o.alignment; $('#c-method').value = o.method; $('#c-name').value = o.name || '';
+}
+
+// Species and subclass menus: the SRD options, then the world library's (when a world with a library is open).
+// A choice that isn't available here (say, from a shared link) stays selectable so it isn't silently lost.
+function fillLibraryOptions() {
+  const entries = world.loaded ? worldEntries() : [];
+  const libSpecies = librarySpecies(entries), libSubs = librarySubclasses(entries, Object.keys(CLASSES));
+  const opt = (v, t) => el('option', { value: v }, t);
+  const keep = (list, v) => (v && !['any', 'library'].includes(v) && !list.includes(v) ? [opt(v, `${v} (not in this world)`)] : []);
+  const spSel = $('#c-species');
+  const o = state.opts;
+  setKids(spSel, opt('any', 'Any'), Object.keys(SPECIES).map((k) => opt(k, k)),
+    libSpecies.length ? el('optgroup', { label: 'From your library' }, opt('library', 'Any from my library'), libSpecies.map((s) => opt(s.name, s.name))) : null,
+    keep([...Object.keys(SPECIES), ...libSpecies.map((s) => s.name)], o.species));
+  spSel.value = o.species === 'library' && !libSpecies.length ? 'any' : o.species;
+  const cls = state.opts.cls;
+  const subSel = $('#c-subclass');
+  if (cls === 'any') { setKids(subSel, opt('any', 'Pick a class first')); subSel.disabled = true; subSel.value = 'any'; return; }
+  subSel.disabled = false;
+  const mine = libSubs.filter((s) => s.cls === cls);
+  setKids(subSel, opt('any', 'Any'), CLASSES[cls].subclasses.map((s) => opt(s, s)),
+    mine.length ? el('optgroup', { label: 'From your library' }, opt('library', 'Any from my library'), mine.map((s) => opt(s.name, s.name))) : null,
+    keep([...CLASSES[cls].subclasses, ...mine.map((s) => s.name)], o.subclass));
+  subSel.value = o.subclass === 'library' && !mine.length ? 'any' : o.subclass || 'any';
 }
 
 const bump = (...parts) => { for (const p of parts) state.salts[p] = (state.salts[p] || 0) + 1; generate(); };
@@ -80,6 +108,8 @@ function render(isNew) {
     block(`${ch.species} traits`, el('ul', { class: 'feature-list' }, s.speciesTraits.map((t) => el('li', {}, el('strong', {}, t.name), el('p', {}, t.text))))),
     block(`${ch.cls} features`, el('ol', { class: 'level-list' }, s.features.map((f) => el('li', {}, el('span', { class: 'lv' }, f.level), f.name))),
       ch.subclass ? null : el('p', { class: 'muted' }, `At level 3 they will choose a subclass (rolled: ${ch.futureSubclass}).`)),
+    ch.library?.subclass ? block(`${ch.library.subclass.name} (your library)`, el('p', {}, ch.library.subclass.features), ch.library.subclass.source ? el('p', { class: 'muted small' }, ch.library.subclass.source) : null) : null,
+    ch.library?.species ? el('p', { class: 'muted small' }, `${ch.species} comes from your library${ch.library.species.source ? ` (${ch.library.species.source})` : ''}: names, age and height follow the ${ch.library.species.like}.`) : null,
     ch.levelUps.length ? block('Level-ups', el('ul', { class: 'plain' }, ch.levelUps.map((x) => el('li', {}, x)))) : null);
 
   const story = el('div', { class: 'story' }, el('p', { class: 'summary' }, ch.summary),
@@ -109,7 +139,7 @@ export function mountCharacters(root) {
       el('p', {}, 'A complete 2024-rules character in one roll: species, class, background, ability scores, features and spells, plus a life story with family, upbringing, the people they know and hooks for the DM. Reroll any part with ↻.')),
     el('div', { class: 'controls' },
       sel('c-level', 'Level', levelOpts), sel('c-species', 'Species', [['any', 'Any'], ...Object.keys(SPECIES).map((k) => [k, k])]),
-      sel('c-class', 'Class', [['any', 'Any'], ...Object.keys(CLASSES).map((k) => [k, k])]), sel('c-bg', 'Background', [['any', 'Any'], ...Object.keys(BACKGROUNDS).map((k) => [k, k])]),
+      sel('c-class', 'Class', [['any', 'Any'], ...Object.keys(CLASSES).map((k) => [k, k])]), sel('c-subclass', 'Subclass', [['any', 'Any']]), sel('c-bg', 'Background', [['any', 'Any'], ...Object.keys(BACKGROUNDS).map((k) => [k, k])]),
       sel('c-gender', 'Character', [['any', 'Any'], ['f', 'She/her'], ['m', 'He/him'], ['x', 'They/them']]),
       sel('c-align', 'Alignment', [['any', 'Any'], ...Object.keys(ALIGNMENTS).map((k) => [k, k])]),
       sel('c-method', 'Ability scores', [['standard', 'Standard array'], ['pointbuy', 'Point buy'], ['roll', '4d6 drop lowest']]),
@@ -128,7 +158,13 @@ export function mountCharacters(root) {
       el('button', { class: 'btn', type: 'button', onclick: () => { copyText(shareLink()); toast('Link copied: anyone who opens it sees this exact character'); } }, 'Share link')),
     sheet);
   // Changing an option rerolls with the same seed, so the character changes only where it must.
-  for (const id of ['c-level', 'c-species', 'c-class', 'c-bg', 'c-gender', 'c-align', 'c-method']) $(`#${id}`, root).addEventListener('change', () => { readOpts(); generate(); });
+  for (const id of ['c-level', 'c-species', 'c-subclass', 'c-bg', 'c-gender', 'c-align', 'c-method']) $(`#${id}`, root).addEventListener('change', () => { readOpts(); generate(); });
+  // A new class has its own subclasses: refill that menu before rolling.
+  $('#c-class', root).addEventListener('change', () => { state.opts.cls = $('#c-class').value; state.opts.subclass = 'any'; fillLibraryOptions(); readOpts(); generate(); });
+  // The library lives in the open world: load it (and reload when someone signs in or switches worlds).
+  const refreshLibrary = () => { if (session.configured === false) return; loadWorld(true).then(() => { writeOpts(); if (state.opts.species === 'library' || state.opts.subclass === 'library' || !SPECIES[state.opts.species]) generate(); }).catch(() => {}); };
+  let seen = '';
+  onSession((s) => { const k = `${s.gm?.id || ''}|${s.worldKey || ''}`; if (k !== seen) { seen = k; refreshLibrary(); } });
   $('#c-name', root).addEventListener('change', () => { readOpts(); generate(); });
   writeOpts();
   generate();

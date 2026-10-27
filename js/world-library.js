@@ -27,6 +27,7 @@ function statLine(e) {
   const f = e.fields || {};
   if (e.kind === 'creature') return [f.size, f.type && f.type.toLowerCase(), f.cr && `CR ${f.cr}`, f.ac && `AC ${f.ac}`, f.hp && `${f.hp} HP`, f.speed].filter(Boolean).join(' · ');
   if (e.kind === 'item') return [f.rarity, f.type, /^(yes|requires)/i.test(f.attunement || '') ? 'attunement' : ''].filter(Boolean).join(' · ');
+  if (f.category === 'Species') return ['Species', f.size, f.speed && `speed ${f.speed}`, Number(f.darkvision) ? `darkvision ${f.darkvision}` : '', f.like && `like ${f.like}`].filter(Boolean).join(' · ');
   return [f.category, f.class, f.level && (f.category === 'Spell' ? (f.level === '0' ? 'cantrip' : `level ${f.level}`) : `level ${f.level}`)].filter(Boolean).join(' · ');
 }
 
@@ -63,14 +64,19 @@ function addForm(tabKey, t, after) {
     body = [f('lib-rarity', 'Rarity', els.rarity), f('lib-itype', 'Type', els.type), f('lib-att', 'Attunement', els.attunement), f('lib-props', 'What it does', els.properties, true)];
   } else {
     Object.assign(els, { cls: txt('lib-class', t.category === 'Spell' ? 'e.g. Wizard, Sorcerer' : 'e.g. Fighter'), level: txt('lib-level', t.category === 'Spell' ? '0 for a cantrip' : ''), features: area('lib-feat', 'What it gives, in short: the key features and when you get them.') });
-    body = [['Subclass', 'Spell'].includes(t.category) ? f('lib-class', t.category === 'Spell' ? 'Classes' : 'Class', els.cls) : null,
+    if (t.category === 'Species') {
+      Object.assign(els, { size: sel('lib-ssize', options('size'), 'Medium'), speed: txt('lib-sspeed', '30'), darkvision: txt('lib-dv', '0 if none'), like: sel('lib-like', options('like'), 'Human') });
+      els.features.placeholder = 'One trait per line, like “Storm Sense: You can feel weather coming.” The Character Forge lists each as a species trait.';
+    }
+    body = [t.category === 'Species' ? [f('lib-ssize', 'Size', els.size), f('lib-sspeed', 'Speed', els.speed), f('lib-dv', 'Darkvision', els.darkvision), f('lib-like', 'Names, age and height like', els.like)] : null,
+      ['Subclass', 'Spell'].includes(t.category) ? f('lib-class', t.category === 'Spell' ? 'Classes' : 'Class', els.cls) : null,
       ['Spell', 'Feat', 'Subclass'].includes(t.category) ? f('lib-level', t.category === 'Spell' ? 'Spell level' : 'Level', els.level) : null, f('lib-feat', 'What it gives', els.features, true)];
   }
   const hide = el('input', { type: 'checkbox', id: 'lib-hide', checked: t.kind === 'creature' ? true : null });
   const status = el('p', { class: 'form-status', role: 'status' });
   const form = el('form', { class: 'card edit-form lib-form' },
     el('h3', {}, `Add to ${TABS.find(([k]) => k === tabKey)[1].toLowerCase()}`),
-    el('div', { class: 'edit-fields' }, f('lib-name', 'Name', els.name), ...body.filter(Boolean), f('lib-source', 'Source book', els.source), f('lib-link', 'D&D Beyond link (optional)', els.link)),
+    el('div', { class: 'edit-fields' }, f('lib-name', 'Name', els.name), ...body.flat().filter(Boolean), f('lib-source', 'Source book', els.source), f('lib-link', 'D&D Beyond link (optional)', els.link)),
     gm ? el('label', { class: 'check' }, hide, ' Hide from players (GM prep)') : el('p', { class: 'muted small' }, 'GMs will see this as a suggestion and can approve it.'),
     status, el('div', { class: 'btnrow' }, el('button', { class: 'btn primary', type: 'submit' }, 'Add')));
   form.addEventListener('submit', async (ev) => {
@@ -81,7 +87,7 @@ function addForm(tabKey, t, after) {
     if (v('link') && !/^https:\/\//.test(v('link'))) { status.textContent = 'Links start with https://'; status.className = 'form-status error'; return; }
     const fields = t.kind === 'creature' ? { cr: v('cr'), type: v('type'), size: v('size'), terrain: v('terrain'), ac: v('ac'), hp: v('hp'), speed: v('speed'), abilities: v('abilities') }
       : t.kind === 'item' ? { rarity: v('rarity'), type: v('type') || 'Wondrous item', attunement: v('attunement'), properties: v('properties') }
-        : { category: t.category, class: v('cls'), level: v('level'), features: v('features') };
+        : { category: t.category, class: v('cls'), level: v('level'), features: v('features'), ...(t.category === 'Species' ? { size: v('size'), speed: v('speed'), darkvision: v('darkvision'), like: v('like') } : {}) };
     fields.source = v('source') || 'My books'; fields.link = v('link');
     try {
       await createEntry({ kind: t.kind, name, fields, visibility: gm && hide.checked ? 'gm' : 'all', summary: snippet(fields.abilities || fields.properties || fields.features, 300) });

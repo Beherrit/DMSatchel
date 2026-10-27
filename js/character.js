@@ -16,6 +16,29 @@ import {
 import * as T from './lifepath-tables.js';
 import { spellbook, spellText } from './spells.js';
 
+// ---- your library ---------------------------------------------------------------------------------
+// Species and subclasses from the open world's library (set by the world store). They're only used when chosen
+// ("Any from my library" or by name), and they draw from their own random stream, so SRD rolls and saved
+// characters come out exactly as before.
+let libraryProvider = () => ({ species: [], subclasses: [] });
+export const setCharacterLibrary = (fn) => { libraryProvider = fn; };
+let lib = { species: [], subclasses: [] };
+
+// Species rules by name: an SRD species, a library species built on the SRD species it's "similar to", or (if the
+// library entry is gone) a plain human-like stand-in that keeps the name.
+export function speciesData(name) {
+  if (SPECIES[name]) return SPECIES[name];
+  const x = lib.species.find((s) => s.name === name);
+  const base = SPECIES[x?.like] || SPECIES.Human;
+  return {
+    ...base, lineages: null, library: true, like: x?.like || 'Human', source: x?.source || '',
+    size: x?.size || base.size, speed: x?.speed || base.speed, darkvision: x?.darkvision ?? base.darkvision,
+    traits: x?.traits?.length ? x.traits : [[name, 'Species traits from your library.']],
+  };
+}
+// Which SRD species's names a species uses.
+const nameStock = (species) => (SPECIES[species] ? species : speciesData(species).like);
+
 export const PARTS = ['name', 'core', 'abilities', 'build', 'spells', 'origins', 'upbringing', 'calling', 'life', 'people', 'personality', 'drives', 'hooks'];
 export const STORY_SECTIONS = {
   origins: 'Origins & Family', upbringing: 'Upbringing & Youth', calling: 'Background & Calling',
@@ -59,13 +82,19 @@ function fill(text, ctx, r, local = {}) {
 
 // ---- rules build -------------------------------------------------------------------------------
 
-function pickCore(opts, r) {
-  const species = opts.species && opts.species !== 'any' ? opts.species : r.pickW(SPECIES_WEIGHTS);
+function pickCore(opts, r, lr) {
+  // "library" means any species from your library, chosen with its own random stream (lr).
+  const fromLib = opts.species === 'library' && lib.species.length ? lr.pick(lib.species).name : null;
+  const species = fromLib || (opts.species && !['any', 'library'].includes(opts.species) ? opts.species : r.pickW(SPECIES_WEIGHTS));
   const cls = opts.cls && opts.cls !== 'any' ? opts.cls : r.pick(Object.keys(CLASSES));
   const background = opts.background && opts.background !== 'any' ? opts.background : pickBackground(cls, r);
-  const sp = SPECIES[species];
+  const sp = speciesData(species);
   const lineage = sp.lineages ? r.pick(Object.keys(sp.lineages)) : null;
-  const subclass = r.pick(CLASSES[cls].subclasses);
+  let subclass = r.pick(CLASSES[cls].subclasses);
+  // A chosen subclass (SRD or library) replaces the roll; the roll above still happens so later picks don't shift.
+  const libSubs = lib.subclasses.filter((s) => s.cls === cls);
+  if (opts.subclass === 'library' && libSubs.length) subclass = lr.pick(libSubs).name;
+  else if (opts.subclass && !['any', 'library'].includes(opts.subclass)) subclass = opts.subclass;
   const alignment = opts.alignment && opts.alignment !== 'any' ? opts.alignment : r.pickW(ALIGNMENTS);
   const gender = opts.gender && opts.gender !== 'any' ? opts.gender : r.pickW({ f: 45, m: 45, x: 10 });
   const [aLo, aHi] = sp.age;
@@ -193,7 +222,7 @@ function acFor(armor, s, choices) {
 }
 
 function derive(level, core, ab, build, ups) {
-  const c = CLASSES[core.cls], sp = SPECIES[core.species], s = ab.scores, pb = profBonus(level);
+  const c = CLASSES[core.cls], sp = speciesData(core.species), s = ab.scores, pb = profBonus(level);
   const conMod = mod(s.Con);
   let hp = c.die + conMod + (level - 1) * Math.max(1, c.die / 2 + 1 + conMod);
   if (core.species === 'Dwarf') hp += level;
@@ -343,9 +372,9 @@ function calling(ctx, r) {
 }
 
 function life(ctx, r) {
-  const adultYears = Math.max(0, ctx.ageYears - (SPECIES[ctx.species].age[0]));
+  const adultYears = Math.max(0, ctx.ageYears - (speciesData(ctx.species).age[0]));
   const n = Math.min(4, 1 + Math.floor(adultYears / 12) + (ctx.level >= 5 ? 1 : 0));
-  const startAge = SPECIES[ctx.species].age[0];
+  const startAge = speciesData(ctx.species).age[0];
   const evs = r.sample(T.ADULT_EVENTS, n);
   const ages = evs.map(() => r.range(startAge, Math.max(startAge, ctx.ageYears - 1))).sort((a, b) => a - b);
   const items = evs.map((e, i) => event(ctx, r, e, ages[i]));
@@ -413,11 +442,13 @@ const withArticle = (w) => `${/^[aeiou]/i.test(w) ? 'an' : 'a'} ${w}`;
 
 export function generateCharacter(opts = {}, seed = 'seed', salts = {}) {
   const R = (part) => subRng(seed, `${part}:${salts[part] || 0}`);
+  lib = libraryProvider() || { species: [], subclasses: [] };
   const level = Math.max(1, Math.min(20, +opts.level || 1));
-  const core = pickCore({ ...opts, level }, R('core'));
+  const core = pickCore({ ...opts, level }, R('core'), R('library'));
+  const stock = nameStock(core.species);
   const nr = R('name');
-  const first = opts.name ? opts.name.split(' ')[0] : firstName(nr, core.species, core.gender);
-  const fullName = opts.name || (() => { const l = (personName(nr, core.species, core.gender).split(' ').slice(1).join(' ')); return l ? `${first} ${l}` : first; })();
+  const first = opts.name ? opts.name.split(' ')[0] : firstName(nr, stock, core.gender);
+  const fullName = opts.name || (() => { const l = (personName(nr, stock, core.gender).split(' ').slice(1).join(' ')); return l ? `${first} ${l}` : first; })();
   const town = townName(nr), region = regionName(nr);
 
   const ab = rollAbilities(opts, core, R('abilities'));
@@ -434,7 +465,7 @@ export function generateCharacter(opts = {}, seed = 'seed', salts = {}) {
     name: fullName, first, surname: fullName.split(' ').slice(1).join(' ').replace(/^(the|of)\b.*$/i, ''), town, region,
     species: core.species, cls: core.cls, subclass: core.subclass, background: core.background, alignment: core.alignment, level,
     ageYears: core.age, pro: pronouns(core.gender), vars: {}, people: [], leanings: [], keepsakes: [], drives: [], hooks: [], secrets: [], losses: [],
-    newName: (rr) => personName(rr, rr.chance(0.7) ? core.species : rr.pickW(SPECIES_WEIGHTS) === 'Human' ? 'Human' : core.species, rr.pick(['f', 'm'])),
+    newName: (rr) => personName(rr, rr.chance(0.7) ? stock : rr.pickW(SPECIES_WEIGHTS) === 'Human' ? 'Human' : stock, rr.pick(['f', 'm'])),
   };
   const story = {};
   story.origins = origins(ctx, R('origins'));
@@ -446,7 +477,8 @@ export function generateCharacter(opts = {}, seed = 'seed', salts = {}) {
   story.drives = drives(ctx, R('drives'));
   story.hooks = hooks(ctx, R('hooks'));
 
-  const sp = SPECIES[core.species], c = CLASSES[core.cls], bg = BACKGROUNDS[core.background];
+  const sp = speciesData(core.species), c = CLASSES[core.cls], bg = BACKGROUNDS[core.background];
+  const libSub = lib.subclasses.find((s) => s.cls === core.cls && s.name === core.subclass) || null;
   const ft = Math.floor(core.heightFt), inch = Math.round((core.heightFt - ft) * 12);
   const looks = `${core.looks.hair} hair, ${core.looks.eyes} eyes, ${fill(core.looks.mark, ctx, subRng(seed, 'looks'))}`;
   const summary = `${fullName} is ${withArticle(String(core.age))}-year-old ${['Elf', 'Gnome'].includes(core.species) && core.lineage ? core.lineage : core.species}${core.species === 'Dragonborn' ? ` of ${core.lineage.toLowerCase()} ancestry` : ''} ${core.cls.toLowerCase()} from ${town}, once ${withArticle(core.background.toLowerCase())}. ${cap(ctx.pro.they)} ${ctx.pro.plural ? 'want' : 'wants'} to ${ctx.drives[0] || story.drives[0].replace(/^Goal: To /, '').replace(/\.$/, '')}.`;
@@ -462,6 +494,8 @@ export function generateCharacter(opts = {}, seed = 'seed', salts = {}) {
     equipment: { cls: c.gear, background: bg.gear },
     stats, story, people: ctx.people,
     size: sp.size,
+    // Where library choices came from, so the sheet can show their notes.
+    library: { species: sp.library ? { name: core.species, source: sp.source, like: sp.like } : null, subclass: libSub },
   };
 }
 
@@ -487,6 +521,8 @@ export function characterText(ch) {
   for (const [k, v] of Object.entries(ch.choices)) L.push(`${k}: ${v}`);
   L.push(`Species traits: ${s.speciesTraits.map((t) => t.name).join(', ')}`);
   L.push(`Class features: ${s.features.map((f) => f.name).join(', ')}`);
+  if (ch.library?.subclass) L.push(`${ch.library.subclass.name} (from your library${ch.library.subclass.source ? `, ${ch.library.subclass.source}` : ''}): ${ch.library.subclass.features.replace(/\n+/g, ' ')}`);
+  if (ch.library?.species) L.push(`${ch.species} is from your library${ch.library.species.source ? ` (${ch.library.species.source})` : ''}; names, age and height follow the ${ch.library.species.like}.`);
   if (ch.levelUps.length) L.push(`Level-ups: ${ch.levelUps.join('; ')}`);
   L.push(`Proficiencies: ${ch.armorProf}; ${ch.weaponProf}; tools: ${ch.tools.join(', ')}`);
   L.push(`Languages: ${ch.languages.join(', ')}`);

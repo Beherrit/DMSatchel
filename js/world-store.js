@@ -3,7 +3,9 @@ import { el } from './dom.js';
 import { api } from './api.js';
 import { KINDS } from './world-schema.js';
 import { setLibraryItems } from './magic-items.js';
-import { libraryItems } from './library.js';
+import { libraryItems, librarySpecies, librarySubclasses } from './library.js';
+import { setCharacterLibrary } from './character.js';
+import { CLASSES } from './rules2024.js';
 
 // A Map that drops the lookup index whenever an entry is added, changed or removed.
 let index = null;
@@ -18,6 +20,8 @@ export const world = { entries: new Entries(), info: null, loaded: false, loadin
 export const worldEntries = () => [...world.entries.values()];
 // Loot, shops and the magic item tool also roll items from the world's library.
 setLibraryItems(() => (world.loaded ? libraryItems(worldEntries()) : []));
+// The Character Forge can build characters with the world's library species and subclasses.
+setCharacterLibrary(() => (world.loaded ? { species: librarySpecies(worldEntries()), subclasses: librarySubclasses(worldEntries(), Object.keys(CLASSES)) } : { species: [], subclasses: [] }));
 export const getEntry = (id) => world.entries.get(id);
 
 export async function loadWorld(force) {

@@ -72,7 +72,10 @@ export const KINDS = {
   rule: {
     label: 'Rules option', plural: 'Classes, Species & Feats', blurb: 'Classes, subclasses, species, backgrounds, feats and spells from your books, in short.',
     fields: [['category', 'Category', 'select', ['Class', 'Subclass', 'Species', 'Background', 'Feat', 'Spell', 'Other']], ['class', 'Class (for subclasses and spells)'], ['level', 'Level'],
-      ['features', 'What it gives', 'long'], ['source', 'Source book'], ['link', 'D&D Beyond link']],
+      ['features', 'What it gives', 'long'], ['source', 'Source book'], ['link', 'D&D Beyond link'],
+      // Species only: the numbers the Character Forge needs, and an SRD species to borrow names, age and height from.
+      ['size', 'Size (species)', 'select', ['Small', 'Medium', 'Small or Medium', 'Large']], ['speed', 'Speed (species)'], ['darkvision', 'Darkvision (species)'],
+      ['like', 'Similar to (species)', 'select', ['Aasimar', 'Dragonborn', 'Dwarf', 'Elf', 'Gnome', 'Goliath', 'Halfling', 'Human', 'Orc', 'Tiefling']]],
   },
   rumor: {
     label: 'Rumor', plural: 'Rumors', blurb: 'Gossip that starts in one town and spreads, changing as it goes.',
