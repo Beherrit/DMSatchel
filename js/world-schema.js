@@ -3,19 +3,19 @@
 export const KINDS = {
   region: {
     label: 'Region', plural: 'Regions', blurb: 'Kingdoms, provinces, wilds and seas.',
-    fields: [['ruler', 'Ruled by'], ['climate', 'Climate & terrain'], ['population', 'Peoples'], ['resources', 'Known for', 'long'], ['dangers', 'Dangers', 'long']],
+    fields: [['ruler', 'Ruled by'], ['climate', 'Climate & terrain'], ['population', 'Peoples'], ['resources', 'Known for', 'long'], ['dangers', 'Dangers', 'long'], ['encounters', 'Encounter table', 'long']],
   },
   area: {
     label: 'Area', plural: 'Areas & Districts', blurb: 'Forests, valleys, coasts, city districts and wild lands inside a region.',
-    fields: [['type', 'Type', 'select', ['Forest', 'Hills', 'Mountains', 'Valley', 'Coast', 'Island', 'Swamp', 'Desert', 'Plains', 'Underdark', 'City district', 'Borderland', 'Other']], ['terrain', 'Terrain & climate'], ['controlled_by', 'Controlled by'], ['features', 'Notable features', 'long'], ['dangers', 'Dangers & encounters', 'long'], ['resources', 'Resources', 'long']],
+    fields: [['type', 'Type', 'select', ['Forest', 'Hills', 'Mountains', 'Valley', 'Coast', 'Island', 'Swamp', 'Desert', 'Plains', 'Underdark', 'City district', 'Borderland', 'Other']], ['terrain', 'Terrain & climate'], ['controlled_by', 'Controlled by'], ['features', 'Notable features', 'long'], ['dangers', 'Dangers & encounters', 'long'], ['resources', 'Resources', 'long'], ['encounters', 'Encounter table', 'long']],
   },
   settlement: {
     label: 'Settlement', plural: 'Settlements', blurb: 'Cities, towns, villages and outposts.',
-    fields: [['size', 'Size', 'select', ['Hamlet', 'Village', 'Town', 'City', 'Metropolis', 'Fortress', 'Outpost']], ['population', 'Population'], ['ruler', 'Led by'], ['government', 'Government'], ['known_for', 'Known for', 'long'], ['trouble', 'Current trouble', 'long'], ['landmarks', 'Landmarks', 'long'], ['economy', 'Trade & economy', 'long'], ['defenses', 'Defenses', 'long'], ['peoples', 'Peoples & culture', 'long'], ['market', 'Market conditions', 'long']],
+    fields: [['size', 'Size', 'select', ['Hamlet', 'Village', 'Town', 'City', 'Metropolis', 'Fortress', 'Outpost']], ['population', 'Population'], ['ruler', 'Led by'], ['government', 'Government'], ['known_for', 'Known for', 'long'], ['trouble', 'Current trouble', 'long'], ['landmarks', 'Landmarks', 'long'], ['economy', 'Trade & economy', 'long'], ['defenses', 'Defenses', 'long'], ['peoples', 'Peoples & culture', 'long'], ['market', 'Market conditions', 'long'], ['encounters', 'Encounter table', 'long']],
   },
   location: {
     label: 'Location', plural: 'Locations', blurb: 'Dungeons, ruins, taverns, shops and landmarks.',
-    fields: [['type', 'Type', 'select', ['Dungeon', 'Ruin', 'Tavern', 'Shop', 'Temple', 'Landmark', 'Lair', 'Castle', 'Wilderness', 'Other']], ['owner', 'Owner or occupant'], ['shop_type', 'Shop type'], ['features', 'Notable features', 'long'], ['dangers', 'Dangers', 'long'], ['treasure', 'Treasure', 'long'], ['stock', 'Stock & prices', 'long']],
+    fields: [['type', 'Type', 'select', ['Dungeon', 'Ruin', 'Tavern', 'Shop', 'Temple', 'Landmark', 'Lair', 'Castle', 'Wilderness', 'Other']], ['owner', 'Owner or occupant'], ['shop_type', 'Shop type'], ['features', 'Notable features', 'long'], ['dangers', 'Dangers', 'long'], ['treasure', 'Treasure', 'long'], ['stock', 'Stock & prices', 'long'], ['encounters', 'Encounter table', 'long']],
   },
   faction: {
     label: 'Faction', plural: 'Factions', blurb: 'Political powers, cults, armies and secret societies.',

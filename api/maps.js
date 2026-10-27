@@ -3,12 +3,13 @@
 // GET ?id=            one map with its pins (GM-only pins and maps hidden from players)
 // GET ?id=&image=1    the image itself, cached hard (the client adds &v=<version>)
 // POST {map}          create (GM): {name, image, width, height, entry_id, secret}
-// PUT ?id= {map}      update (GM): pins, name, entry_id, secret, optional new image; send version
+// PUT ?id= {map}      update (GM): pins, name, entry_id, secret, miles (scale), optional new image; send version
 // DELETE ?id=         delete (GM)
 import { route, send, fail, sql, newId, requireGm } from './_lib/core.js';
 
 const MAX_IMAGE = 3_500_000; // characters of data URL; the browser shrinks uploads well under this
 const clip = (v, n) => String(v ?? '').slice(0, n);
+const cleanMiles = (v) => (v == null || v === '' ? null : Math.max(0, Math.min(1e6, Number(v) || 0)) || null);
 
 function cleanImage(img) {
   const s = String(img || '');
@@ -28,7 +29,7 @@ function cleanPins(pins) {
 const shape = (m, isGm) => ({
   id: m.id, name: m.name, width: m.width, height: m.height, entry_id: m.entry_id, secret: m.secret, version: m.version,
   pins: isGm ? m.pins : (m.pins || []).filter((p) => !p.secret), updated_at: m.updated_at, updated_by: m.updated_by_name || null,
-  external: !String(m.image || '').startsWith('data:'),
+  external: !String(m.image || '').startsWith('data:'), miles: m.miles || null,
 });
 
 export default route({
@@ -78,7 +79,7 @@ export default route({
     if (b.image) { image = cleanImage(b.image); if (image.error) return fail(res, 400, image.error); }
     const name = clip(b.name ?? cur.name, 120).trim() || cur.name;
     const rows = await sql`UPDATE maps SET name = ${name}, image = ${image}, width = ${Math.round(Number(b.width ?? cur.width) || 0)}, height = ${Math.round(Number(b.height ?? cur.height) || 0)},
-      pins = ${JSON.stringify(cleanPins(b.pins ?? cur.pins))}, entry_id = ${b.entry_id === undefined ? cur.entry_id : b.entry_id || null}, secret = ${b.secret === undefined ? cur.secret : Boolean(b.secret)},
+      pins = ${JSON.stringify(cleanPins(b.pins ?? cur.pins))}, miles = ${b.miles === undefined ? cur.miles : cleanMiles(b.miles)}, entry_id = ${b.entry_id === undefined ? cur.entry_id : b.entry_id || null}, secret = ${b.secret === undefined ? cur.secret : Boolean(b.secret)},
       updated_by = ${req.gm.id}, updated_at = now(), version = version + 1 WHERE id = ${id} AND world_id = ${req.world.id} AND version = ${Number(b.version)} RETURNING *`;
     if (!rows.length) return fail(res, 409, `${cur.updated_by_name || 'Another GM'} changed this map a moment ago. Reload it to see their pins, then make your change again.`, { map: shape(cur, true) });
     send(res, 200, { map: shape(rows[0], true) });

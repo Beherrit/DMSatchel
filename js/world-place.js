@@ -2,6 +2,7 @@
 // placeHub(entry, tab) renders the tab bar and panels shown on a place's page and in the map drawer.
 // viewAtlas() shows the whole world as a tree of places.
 
+import { wildsSection } from './encounter-ui.js';
 import { thumb } from './image-ui.js';
 import { el, toast, setKids } from './dom.js';
 import { isGm } from './api.js';
@@ -18,7 +19,7 @@ import { personName, ANCESTRY_WEIGHTS } from './names.js';
 import { makeRng } from './rng.js';
 import { createEntry } from './world-store.js';
 
-export const HUB_TABS = [['overview', 'Overview'], ['people', 'People'], ['quests', 'Quest board'], ['market', 'Market'], ['places', 'Places'], ['powers', 'Powers'], ['maps', 'Maps']];
+export const HUB_TABS = [['overview', 'Overview'], ['people', 'People'], ['quests', 'Quest board'], ['market', 'Market'], ['places', 'Places'], ['powers', 'Powers'], ['wilds', 'Encounters'], ['maps', 'Maps']];
 const er = makeRng(Date.now() ^ 0xec0);
 const QUEST_STATUSES = ['Rumor', 'Available', 'Active', 'Completed', 'Failed', 'Abandoned'];
 const ORG_KINDS = ['faction', 'guild', 'clan'];
@@ -273,7 +274,8 @@ export function placeHub(place, tab, overview, rerender) {
         : active === 'market' ? marketSection(place, rerender)
         : active === 'places' ? placesSection(place, rerender)
           : active === 'powers' ? powersSection(place, rerender)
-            : mapsSection(place);
+            : active === 'wilds' ? wildsSection(place, rerender)
+              : mapsSection(place);
   return el('div', { class: 'hub' },
     el('nav', { class: 'hub-tabs', 'aria-label': `${place.name} sections` }, tabs.map(([k, t]) => el('a', { href: `#world/e/${place.id}${k === 'overview' ? '' : `/${k}`}`, 'aria-current': k === active ? 'page' : 'false' },
       t, k !== 'overview' && counts[k] ? el('span', { class: 'count' }, counts[k]) : null))),

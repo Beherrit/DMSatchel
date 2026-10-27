@@ -1,6 +1,7 @@
 // The table tools: NPCs, quests, names, places, organizations, descriptions, rumors and loot.
 // Each tool mounts into its own panel and can save to the notebook or send a draft to the world.
 
+import { mountEncounters } from './encounter-ui.js';
 import { makeRng } from './rng.js';
 import { $, el, cap, fmt, copyText, fresh, traitList, setKids, toast } from './dom.js';
 import { personName, ANCESTRY_WEIGHTS, ANCESTRIES, townName, tavernName, shopName, shipName, groupName, lastName } from './names.js';
@@ -498,4 +499,5 @@ export const TOOLS = [
   { id: 'loot', label: 'Loot', mount: mountLoot },
   { id: 'items', label: 'Magic Items', mount: mountItems },
   { id: 'shops', label: 'Shops & Markets', mount: mountShops },
+  { id: 'encounters', label: 'Encounters & Travel', mount: mountEncounters },
 ];

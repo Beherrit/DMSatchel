@@ -3,6 +3,7 @@
 import { el, toast, confirmButton, setKids } from './dom.js';
 import { api, isGm } from './api.js';
 import { shrinkImage } from './dom.js';
+import { travelText } from './encounters.js';
 import { world, getEntry, findByName, link, kindLabel, notice, nameList, whenTime, createEntry, mapsOf, trail } from './world-store.js';
 import { KINDS, PLACE_KINDS, pinIconFor } from './world-schema.js';
 import { placeDrawer } from './world-place.js';
@@ -102,10 +103,10 @@ export async function viewMap(id, focusPin) {
     tx = viewport.clientWidth / 2 - pin.x * w * scale; ty = viewport.clientHeight / 2 - pin.y * h * scale; apply();
   }
 
-  async function save(nextPins, msg) {
+  async function save(nextPins, msg, extra = {}) {
     status.textContent = 'Saving…'; status.className = 'form-status';
     try {
-      const r = await api('maps', { method: 'PUT', query: { id: map.id }, body: { map: { pins: nextPins, version: map.version } } });
+      const r = await api('maps', { method: 'PUT', query: { id: map.id }, body: { map: { pins: nextPins, version: map.version, ...extra } } });
       map = r.map; pins = map.pins; status.textContent = msg || 'Saved.';
       const i = (world.maps || []).findIndex((m) => m.id === map.id); if (i >= 0) world.maps[i] = { ...map }; else world.maps = [...(world.maps || []), map];
       renderPins(); return true;
@@ -181,12 +182,24 @@ export async function viewMap(id, focusPin) {
           subMaps.map((m) => el('a', { class: 'btn small', href: `#world/map/${m.id}` }, `Open ${m.name}`)),
           isGm() ? el('button', { class: 'btn small ghost', type: 'button', onclick: () => showPin(pin, true) }, 'Edit pin') : null,
           isGm() ? el('button', { class: 'btn small ghost', type: 'button', onclick: () => startMove(pin) }, 'Move') : null),
+        map.miles && pins.length > 1 ? travelPicker(pin) : null,
         entry && PLACE_KINDS.includes(entry.kind) ? placeDrawer(entry, () => showPin(pin)) : null,
         !entry && isGm() ? el('p', { class: 'muted small' }, 'This pin isn’t linked to an entry yet. Use “Edit pin” to link one or create it.') : null);
     }
     pop.classList.toggle('drawer', !edit && Boolean(entry));
     placePop(pin);
     for (const b of layer.children) b.classList.toggle('active', b.dataset.id === pin.id);
+  }
+  // Distance on this map in miles (the scale is miles across the full width).
+  const milesBetween = (a, b) => Math.hypot((a.x - b.x) * map.miles, (a.y - b.y) * map.miles * ((map.height || 1) / (map.width || 1)));
+  function travelPicker(pin) {
+    const out = el('p', { class: 'small travel-out' });
+    const diff = el('input', { type: 'checkbox' });
+    const sel = el('select', { 'aria-label': `Travel from ${pin.label} to` }, el('option', { value: '' }, 'Travel to…'),
+      pins.filter((p) => p.id !== pin.id).sort((a, b) => String(a.label).localeCompare(String(b.label))).map((p) => el('option', { value: p.id }, p.label)));
+    const show = () => { const to = pins.find((p) => p.id === sel.value); out.textContent = to ? `To ${to.label}: ${travelText(milesBetween(pin, to), { difficult: diff.checked })}.` : ''; };
+    sel.addEventListener('change', show); diff.addEventListener('change', show);
+    return el('div', { class: 'travel-pick' }, el('div', { class: 'controls' }, sel, el('label', { class: 'check' }, diff, ' Rough going')), out);
   }
   function closePop() { openPin = null; pop.hidden = true; for (const b of layer.children) b.classList.remove('active'); renderPins(); }
 
@@ -263,12 +276,22 @@ export async function viewMap(id, focusPin) {
     status.textContent = adding ? 'Click the map where the pin goes.' : ''; status.className = 'form-status';
   } }, '+ Add pin');
   const c = () => [viewport.clientWidth / 2, viewport.clientHeight / 2];
+  function scaleControl() {
+    const label = el('span', { class: 'muted small map-scale' }, map.miles ? `${Math.round(map.miles).toLocaleString('en-US')} miles across` : isGm() ? '' : '');
+    if (!isGm()) return map.miles ? label : null;
+    const input = el('input', { type: 'number', min: 0, class: 'hp-amt', 'aria-label': 'Miles across the whole map', value: map.miles || '', placeholder: 'miles' });
+    const box = el('span', { class: 'scale-edit', hidden: true }, input, el('button', { class: 'btn small', type: 'button', onclick: async () => {
+      if (await save(pins, 'Scale saved: open a pin to see travel times.', { miles: Number(input.value) || null })) { label.textContent = map.miles ? `${Math.round(map.miles).toLocaleString('en-US')} miles across` : ''; box.hidden = true; }
+    } }, 'Save'));
+    return el('span', { class: 'scale-ctl' }, label, el('button', { class: 'btn small ghost', type: 'button', onclick: () => { box.hidden = !box.hidden; if (!box.hidden) input.focus(); } }, map.miles ? 'Scale' : 'Set scale'), box);
+  }
   const toolbar = el('div', { class: 'map-tools' },
     el('button', { class: 'btn small', type: 'button', 'aria-label': 'Zoom in', onclick: () => zoomAt(1.3, ...c()) }, '+'),
     el('button', { class: 'btn small', type: 'button', 'aria-label': 'Zoom out', onclick: () => zoomAt(1 / 1.3, ...c()) }, '−'),
     el('button', { class: 'btn small', type: 'button', onclick: fit }, 'Fit'),
     el('button', { class: 'btn small', type: 'button', onclick: () => layer.classList.toggle('no-labels') }, 'Labels'),
-    isGm() ? addBtn : null);
+    isGm() ? addBtn : null,
+    scaleControl());
 
   const entry = map.entry_id && getEntry(map.entry_id);
   // Maps of the places this map's place sits inside, outermost first, for drilling back up.

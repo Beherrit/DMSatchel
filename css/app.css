@@ -713,3 +713,20 @@ tr.disabled td { color: var(--muted) }
 .cal-editor summary { cursor: pointer; font-weight: 500; color: var(--accent) }
 .today-line { margin-top: 4px }
 .today-line a { text-decoration: none }
+
+/* ---- encounters ---- */
+.enc-out { display: grid; gap: 10px }
+.enc-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 4px }
+.enc-list li { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: baseline }
+.enc-list .ext { margin-left: auto }
+.xp-bar { height: 6px; border-radius: 999px; background: var(--sunk); overflow: hidden }
+.xp-bar span { display: block; height: 100%; background: var(--brass) }
+.enc-table { margin: 0; padding-left: 28px; display: grid; gap: 4px }
+.enc-table li::marker { color: var(--muted); font-variant-numeric: tabular-nums }
+.travel-out { font-weight: 500 }
+.wilds { display: grid; gap: 12px }
+.stack { display: grid; gap: 10px }
+.scale-ctl, .scale-edit { display: inline-flex; gap: 6px; align-items: center; flex-wrap: wrap }
+.scale-edit[hidden] { display: none }
+.travel-pick { display: grid; gap: 4px; border-top: 1px solid var(--line); padding-top: 8px }
+.travel-pick select { max-width: 100% }

@@ -46,7 +46,7 @@ to the log at the bottom.
    store (create via MCP, connect to project), or small data URLs in Postgres as a fallback.
 11. [x] **In-world calendar.** Named months, current date, events and sessions placed on it, "days pass" button,
     moon phases optional. Timeline view of events by date.
-12. [ ] **Encounters and travel helpers per area.** Random encounter table per area (built from its danger
+12. [x] **Encounters and travel helpers per area.** Random encounter table per area (built from its danger
     fields and SRD monsters), weather by season, travel time between pinned places on a map (scale setting).
 13. [ ] **Dungeon and lair generator.** Room-by-room keyed dungeon with traps, monsters and loot, saved as a
     location with child rooms.
@@ -74,3 +74,4 @@ to the log at the bottom.
 - Live updates: entries API answers ?since= with changed entries and removed/hidden ids, using database time; the World page syncs every 20 s while visible (and on returning to the tab), toasts who changed what, and skips redrawing while someone is typing.
 - Images: every entry kind has a Picture field (upload, shrunk in the browser to ≤1200 px JPEG, or an https link); images table in Postgres served by /api/images with access checks (private worlds stay private); portraits on entry pages, thumbnails in lists, avatars in town rosters and the party, pictures on handouts.
 - Calendar: three original presets, editable months/weekdays/moons/holidays/era, today's date on the world front page and sidebar, month grid with exact new and full moons, holidays and dated events/sessions/journals/handouts, day detail with "make this today" and "+ event on this day", time passes (+day, week, month, custom), coming up in the next 60 days, timeline sorted by calendar date, live sync of date changes. Unit tests for date math and parsing.
+- Encounters & travel: ~230 SRD creatures with CR, type and terrain tags; 2024 XP budgets (low/moderate/high); encounter builder (packs, leader plus followers) that never exceeds the budget, with activity and warning signs and D&D Beyond stat block links; chance meetings; d12 area tables saved on regions/areas/towns/places; weather by terrain and season (from the calendar) with the 2024 environment rules; travel pace calculator; map scale and travel times between pins. Unit tests for budgets, terrain and travel.

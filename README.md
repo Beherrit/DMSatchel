@@ -53,6 +53,9 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
   in one click.
 - **The Party**: who's in the party, the shared treasury (coins and items, with a loot log anyone can add to and an
   even split), current quests, handouts the GM reveals at the table, and the party journal.
+- **Encounters & travel**: fights fitted to the party with the 2024 encounter budget (stat blocks open on D&D
+  Beyond), chance meetings, weather with its rules, a saved encounter table per area, and travel times between map
+  pins once a map has a scale.
 - **Calendar**: your world's own months, weekdays, moons and holidays. GMs move time forward; events, sessions and
   journals with dates appear on the month grid.
 - **Pictures**: upload a portrait, a town sketch or a handout image to any entry (or paste a link).
@@ -94,6 +97,6 @@ npm test
 Unofficial fan content, not affiliated with or endorsed by Wizards of the Coast. Rules data summarizes game mechanics
 in original wording; all names, tables, stories and descriptions are original except SRD terms.
 
-This work includes material from the System Reference Document 5.2 ("SRD 5.2") by Wizards of the Coast LLC,
-available at https://www.dndbeyond.com/srd. The SRD 5.2 is licensed under the Creative Commons Attribution 4.0
+This work includes material from the System Reference Documents 5.1 and 5.2 ("SRD 5.1", "SRD 5.2") by Wizards of
+the Coast LLC, available at https://www.dndbeyond.com/srd. Both are licensed under the Creative Commons Attribution 4.0
 International License, available at https://creativecommons.org/licenses/by/4.0/legalcode.
