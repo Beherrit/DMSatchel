@@ -43,6 +43,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **GM discussions**: GMs talk on any entry ("I'm bringing her back in session 14") and resolve threads when
   they're settled. An inbox lists every open thread. Players never see any of it.
 - **Search everything**: Ctrl+K (⌘K) or `/` opens one search box for tools, world entries, classes, species and feats.
+  Press `?` for keyboard shortcuts (`g` then a letter jumps between pages).
 - **Many worlds, GMs and players**: anyone signed in can create a world and becomes its owner. Each world has a GM
   invite link and a player invite link; opening one asks for a name and hands out a personal sign-in code. Switch
   worlds from the menu at the top. Worlds can be private (members only) or open (anyone can read).

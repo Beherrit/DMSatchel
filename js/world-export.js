@@ -103,7 +103,7 @@ export function viewExport() {
     places.length ? el('optgroup', { label: 'A place and everything in it' }, places.map((p) => el('option', { value: `place:${p.id}` }, p.name))) : null,
     el('optgroup', { label: 'One kind of entry' }, KIND_ORDER.map((k) => el('option', { value: `kind:${k}` }, KINDS[k].plural))));
   const safe = el('select', { id: 'x-safe' }, gm ? el('option', { value: 'gm' }, 'GM copy (secrets and hidden entries)') : null, el('option', { value: 'player' }, 'Player copy (only what players can see)'));
-  const preview = el('pre', { class: 'export-preview' });
+  const preview = el('pre', { class: 'export-preview', tabindex: '0', 'aria-label': 'Export preview' });
   const opts = () => ({ scope: scope.value, playerSafe: safe.value === 'player' });
   const refresh = () => { const { text } = toMarkdown(opts()); preview.textContent = text.length > 6000 ? `${text.slice(0, 6000)}\n\n… (${Math.round(text.length / 1000)}k characters in full)` : text; };
   scope.addEventListener('change', refresh); safe.addEventListener('change', refresh);

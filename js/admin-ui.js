@@ -6,6 +6,7 @@ import { world } from './world-store.js';
 import { buildSection, pinsSection } from './admin-build.js';
 import { openSignIn } from './signin.js';
 import { KINDS } from './world-schema.js';
+import { markInvitesSeen } from './onboarding.js';
 
 let root;
 const when = (iso) => (iso ? new Date(iso).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) : 'never');
@@ -25,6 +26,7 @@ async function membersSection() {
   const box = el('section', { class: 'card' }, el('h3', {}, 'Members & invites'));
   const body = el('div', {}, el('p', { class: 'muted' }, 'Loading…'));
   const wid = currentWorld()?.id || world.info?.id;
+  markInvitesSeen();
   async function act(fn, label) {
     try { const r = await fn(); if (label) toast(label); render(r.world); } catch (err) { toast(err.message, 'bad'); }
   }

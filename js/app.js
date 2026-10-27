@@ -10,6 +10,7 @@ import { initSignIn } from './signin.js';
 import { loadSession, onSession, isOwner, isAdmin, isGm } from './api.js';
 import { initPalette, openPalette } from './palette.js';
 import { initWorldSwitcher, mountWorlds, showWorlds } from './worlds-ui.js';
+import { initShortcuts } from './shortcuts.js';
 
 const mounted = new Set();
 const panels = {};
@@ -53,6 +54,7 @@ initNotebook();
 initSignIn();
 initPalette();
 initWorldSwitcher();
+initShortcuts();
 $('#search-btn').addEventListener('click', openPalette);
 if (/Mac|iPhone|iPad/.test(navigator.platform)) $('#search-btn kbd').textContent = '⌘K';
 addEventListener('hashchange', route);

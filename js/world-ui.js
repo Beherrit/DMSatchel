@@ -14,6 +14,7 @@ import { viewTalk, talkWidget } from './world-talk.js';
 import { placeHub, viewAtlas, placeCounts } from './world-place.js';
 import { viewParty } from './world-party.js';
 import { viewExport } from './world-export.js';
+import { startCard, markPartySeen } from './onboarding.js';
 import { viewCalendar, worldCalendar, todayText } from './world-calendar.js';
 import { parseDate, toDays, yearLength } from './calendar.js';
 import { sheetSection } from './sheet-ui.js';
@@ -67,6 +68,7 @@ function viewHome() {
   return el('div', { class: 'w-view' },
     el('div', { class: 'panel-head' }, el('h2', {}, info.name || 'The World'), info.tagline ? el('p', {}, info.tagline) : null,
       worldCalendar() ? el('p', { class: 'today-line' }, el('a', { href: '#world/calendar' }, `📅 ${todayText()}`)) : null),
+    startCard(rerenderWorld),
     info.about ? el('div', { class: 'card' }, richText(info.about)) : (isGm() ? el('p', { class: 'muted' }, 'The admin can name the world and write an introduction in the Admin page.') : null),
     all.length ? null : notice('This world is empty', isGm() ? 'Start with a region or a city, then fill it with factions and people. Anything from the table tools can be sent here with “Add to world”.' : 'The GMs haven’t added anything yet.',
       isGm() ? el('div', { class: 'btnrow' }, el('a', { class: 'btn primary', href: '#world/new/region' }, 'New region'), el('a', { class: 'btn', href: '#world/new/settlement' }, 'New settlement'), el('a', { class: 'btn', href: '#world/new/faction' }, 'New faction')) : null),
@@ -450,7 +452,7 @@ export async function showWorld(parts, { keepScroll = false } = {}) {
   else if (view === 'standings') node = viewStandings();
   else if (view === 'talk') node = await viewTalk();
   else if (view === 'suggestions') node = viewSuggestions();
-  else if (view === 'party') node = await viewParty(rerenderWorld);
+  else if (view === 'party') { markPartySeen(); node = await viewParty(rerenderWorld); }
   else if (view === 'export') node = viewExport();
   else if (view === 'calendar') node = viewCalendar(arg, parts[2], rerenderWorld);
   else if (view === 'mine') node = viewMine();

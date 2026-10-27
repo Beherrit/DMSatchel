@@ -52,7 +52,7 @@ to the log at the bottom.
     location with child rooms.
 14. [x] **Export and print.** World or region to Markdown/PDF-friendly print page; player-safe export.
 15. [x] **Offline and install.** Service worker caching the app shell so tools work offline; installable PWA.
-16. [ ] **Polish pass.** Empty states, onboarding tour for new GMs and players, keyboard shortcuts, accessibility
+16. [x] **Polish pass.** Empty states, onboarding tour for new GMs and players, keyboard shortcuts, accessibility
     audit, performance with 2,000+ entries.
 
 ## Ideas parking lot
@@ -78,3 +78,4 @@ to the log at the bottom.
 - Dungeons & Lairs: nine site types, 5/8/12 rooms, history, five-room-dungeon structure (guardian, puzzle, setback, master, reward/twist) with extra fights, traps, treasure, features and empty rooms for larger sites; monsters fitted to the party and themed by site; traps with DCs and damage by tier; treasure with SRD magic items; connected room graph with secret doors and a flowchart map; Add to world saves the site, a hidden page per room and a map with linked pins. Unit tests for connectivity and layout.
 - Export & print: whole world, one place and everything inside it, or one kind; GM copy or player-safe copy (no hidden entries, suggestions, secrets or GM-only links); Markdown download and a print-ready page (save as PDF); linked from the World sidebar, Admin backup and search.
 - Offline & install: service worker (network first, cached copy offline; /api never cached), PNG and maskable icons, manifest with shortcuts, Install app button, offline/online notices. Verified offline reloads of the tools and the Forge.
+- Polish: getting-started checklists for GMs and players (tick themselves off, dismissible per world), keyboard shortcuts with a ? help dialog (g+letter navigation, n for new), axe-core audit of 17 pages in light, dark and phone layouts with zero WCAG A/AA violations (darker brass text, labelled progress bars, focusable preview), performance with 2,500 entries (indexed name/parent lookups, relationship web capped to the 250 most connected entries: 6.1 s → 0.2 s, search results capped at 200: 267 → 43 ms).

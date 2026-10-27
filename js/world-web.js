@@ -81,7 +81,7 @@ export function viewWeb(focusId) {
   const focus = focusId && getEntry(focusId);
   let depth = 2;
   const info = el('aside', { class: 'web-info card' }, el('p', { class: 'muted' }, 'Click a name to see how it connects. Drag to move things around; scroll or pinch to zoom.'));
-  const svg = svgEl('svg', { class: 'web-svg', role: 'img', 'aria-label': 'Relationship web' });
+  const svg = svgEl('svg', { class: 'web-svg', role: 'group', 'aria-label': 'Relationship web' });
   const wrap = el('div', { class: 'web-wrap' }, svg, info);
   const legend = el('div', { class: 'web-legend' });
   const counts = el('p', { class: 'muted small' });
