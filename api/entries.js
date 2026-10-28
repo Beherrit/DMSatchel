@@ -16,6 +16,7 @@ import { route, send, fail, sql, newId, requireGm, requireMember, requireOwner }
 import { KINDS, isKind, LIMITS, PLAYER_KINDS, PLACE_KINDS, isImageRef, gmOnlyFields } from '../js/world-schema.js';
 import { forPlayers } from '../js/objectives.js';
 import { cleanTag, chainUp } from '../js/bulk.js';
+import { cleanPrimer, primerEmpty } from '../js/zero.js';
 import { readCustom, customForPlayers, customKeys, secretCustomKeys, isCustomKey } from '../js/custom-fields.js';
 
 const clip = (v, n) => String(v ?? '').slice(0, n);
@@ -117,6 +118,9 @@ export default route({
         WHERE world_id = ${w.id} AND gm_id = ${req.gm.id} RETURNING prev_visit`)[0];
       prevVisit = m ? m.prev_visit || null : undefined;
     }
+    // Has this member read the session zero page yet? (Only asked when there is one.)
+    let zeroRead;
+    if (req.gm && req.role && w.primer && !primerEmpty(w.primer)) zeroRead = Boolean((await sql`SELECT read_at FROM zero_answers WHERE world_id = ${w.id} AND gm_id = ${req.gm.id}`)[0]?.read_at);
     send(res, 200, {
       now,
       entries: rows.filter((r) => visibleTo(r, req)).map((r) => shape(r, req)),
@@ -124,6 +128,8 @@ export default route({
         // null: first visit; missing: not a member row (the client remembers visits itself).
         ...(prevVisit !== undefined ? { prev_visit: prevVisit } : {}),
         custom_fields: req.isGmHere ? customOf(req) : customForPlayers(w.custom_fields),
+        primer: w.primer && !primerEmpty(w.primer) ? { tone: cleanPrimer(w.primer).tone, updated_at: w.primer.updated_at || null } : null,
+        ...(zeroRead !== undefined ? { zero_read: zeroRead } : {}),
         ...(req.isGmHere ? { templates: Array.isArray(w.templates) ? w.templates : [] } : {}) },
       role: req.role,
     });

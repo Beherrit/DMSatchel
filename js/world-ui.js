@@ -1,6 +1,6 @@
 // The shared world: browse, search, read and (for GMs) write entries.
 // Routes: #world · #world/k/<kind> · #world/e/<id> · #world/new/<kind> · #world/edit/<id> · #world/q/<search> · #world/bin
-//         #world/party · #world/schedule · #world/downtime[/<character>] · #world/suggestions (GMs) · #world/mine (your characters, journals and suggestions)
+//         #world/party · #world/zero (session zero) · #world/schedule · #world/downtime[/<character>] · #world/suggestions (GMs) · #world/mine (your characters, journals and suggestions)
 
 import { el, toast, confirmButton, setKids } from './dom.js';
 import { api, session, isGm, isMember, isPlayer, signedIn, onSession } from './api.js';
@@ -57,6 +57,7 @@ const viewLibrary = lazyView(() => import('./world-library.js'), 'viewLibrary');
 const viewImport = lazyView(() => import('./world-import.js'), 'viewImport');
 const viewSessionSheet = lazyView(() => import('./world-sheet.js'), 'viewSessionSheet');
 const viewTodo = lazyView(() => import('./world-todo.js'), 'viewTodo');
+const viewZero = lazyView(() => import('./world-zero.js'), 'viewZero');
 const viewExport = lazyView(() => import('./world-export.js'), 'viewExport');
 
 export { loadWorld, worldEntries };
@@ -78,6 +79,7 @@ function renderSide() {
       el('a', { class: 'btn ghost small', href: '#world/new/lore' }, 'Suggest an entry'), el('a', { class: 'btn ghost small', href: '#world/mine' }, 'My things'), el('a', { class: 'btn ghost small', href: '#world/export' }, 'Export')) : null,
     el('nav', { class: 'w-kinds w-tools', 'aria-label': 'World views' },
       el('a', { href: '#world/party', 'data-view': 'party' }, el('span', {}, 'The Party'), el('span', { class: 'count' }, worldEntries().filter((e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status)).length)),
+      isMember() && (world.info?.primer || isGm()) ? el('a', { href: '#world/zero', 'data-view': 'zero' }, el('span', {}, 'Session zero'), el('span', { class: 'count' }, world.info?.zero_read === false ? 'new' : '')) : null,
       isMember() ? el('a', { href: '#world/schedule', 'data-view': 'schedule' }, el('span', {}, 'Next session'), el('span', { class: 'count' }, world.info?.next_session && Date.parse(world.info.next_session) > Date.now() - 86400000 ? new Date(world.info.next_session).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '')) : null,
       isMember() ? el('a', { href: '#world/downtime', 'data-view': 'downtime' }, el('span', {}, 'Downtime'), el('span', { class: 'count' }, isGm() ? (worldEntries().filter((d) => d.kind === 'downtime' && !d.fields?.resolved).length || '') : '')) : null,
       el('a', { href: '#world/calendar', 'data-view': 'calendar', title: todayText() }, el('span', {}, 'Calendar'), el('span', { class: 'count cal-count' }, worldCalendar() ? todayText().split(', ').pop().replace(/ \d+.*$/, '') : '')),
@@ -100,6 +102,14 @@ function renderSide() {
 
 // ---- views -------------------------------------------------------------------------------------
 
+// A nudge on the front page until a member has read the session zero page.
+function zeroNudge() {
+  if (!world.info?.primer || world.info.zero_read !== false) return null;
+  return el('section', { class: 'card zero-nudge' }, el('h3', {}, 'Before your first session'),
+    el('p', {}, 'Read the session zero page: what kind of game this is', world.info.primer.tone ? ` (${world.info.primer.tone})` : '', ', the house rules and the safety tools. You can tell the GMs privately what you’d like kept out of the game.'),
+    el('a', { class: 'btn primary', href: '#world/zero' }, 'Read session zero'));
+}
+
 function viewHome() {
   const all = worldEntries();
   const recent = [...all].sort((a, b) => String(b.updated_at).localeCompare(String(a.updated_at))).slice(0, 12);
@@ -108,6 +118,7 @@ function viewHome() {
   return el('div', { class: 'w-view' },
     el('div', { class: 'panel-head' }, el('h2', {}, info.name || 'The World'), info.tagline ? el('p', {}, info.tagline) : null,
       worldCalendar() ? el('p', { class: 'today-line' }, el('a', { href: '#world/calendar' }, `📅 ${todayText()}`)) : null, isMember() ? nextSessionLine() : null),
+    zeroNudge(),
     whatsNewCard(),
     startCard(rerenderWorld),
     info.about ? el('div', { class: 'card' }, richText(info.about)) : (isGm() ? el('p', { class: 'muted' }, 'The admin can name the world and write an introduction in the Admin page.') : null),
@@ -552,6 +563,7 @@ export async function showWorld(parts, { keepScroll = false } = {}) {
   else if (view === 'prep') node = await viewPrep(rerenderWorld);
   else if (view === 'sheet') node = await viewSessionSheet();
   else if (view === 'todo') node = await viewTodo();
+  else if (view === 'zero') node = await viewZero();
   else if (view === 'cards') node = await viewCards(arg);
   else if (view === 'powers') node = await viewPowers(rerenderWorld);
   else if (view === 'library') node = await viewLibrary(arg, rerenderWorld);

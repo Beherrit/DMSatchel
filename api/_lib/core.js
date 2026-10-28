@@ -105,6 +105,11 @@ export function ensureSchema() {
       await sql`ALTER TABLE worlds ADD COLUMN IF NOT EXISTS templates jsonb`;
       // The world's own fields per kind of entry: { npc: [{ key, label, type, options, gmOnly }] }.
       await sql`ALTER TABLE worlds ADD COLUMN IF NOT EXISTS custom_fields jsonb`;
+      // Session zero: the world's primer, and each person's private answers for the GMs (and when they read it).
+      await sql`ALTER TABLE worlds ADD COLUMN IF NOT EXISTS primer jsonb`;
+      await sql`CREATE TABLE IF NOT EXISTS zero_answers (
+        world_id text NOT NULL, gm_id int NOT NULL, answer jsonb, read_at timestamptz, updated_at timestamptz NOT NULL DEFAULT now(),
+        PRIMARY KEY (world_id, gm_id))`;
       // Private map markers: each person's own notes on a map ("we camped here"), seen only by them.
       await sql`CREATE TABLE IF NOT EXISTS map_marks (
         id serial PRIMARY KEY, map_id text NOT NULL, gm_id int NOT NULL, x real NOT NULL, y real NOT NULL,

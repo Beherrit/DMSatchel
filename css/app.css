@@ -1091,3 +1091,23 @@ li.picking:has(.bulk-pick:checked) { outline: 2px solid var(--accent, #2c6e63); 
 .cf-row input, .cf-row select { font: inherit; font-size: .95rem; padding: 6px 8px; min-width: 0 }
 .own-fields { margin: 0 }
 @media (max-width: 560px) { .cf-row { grid-template-columns: 1fr 1fr } .cf-row .cf-label, .cf-move { grid-column: 1 / -1 } }
+
+/* Session zero */
+.zero-view .card { margin-bottom: 16px }
+.zero-tone { font-family: var(--f-flavor); font-size: 19px; margin: 0 0 8px }
+.zero-part { margin: 12px 0 }
+.zero-part h3 { font-size: 1.15rem; margin-bottom: 4px }
+.zero-lv { display: grid; grid-template-columns: 1fr 1fr; gap: 16px }
+.zero-table-wrap { overflow-x: auto }
+.zero-table { width: 100%; border-collapse: collapse; margin: 8px 0 12px }
+.zero-table th, .zero-table td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: top }
+.zero-table tbody th { font-weight: 500; text-transform: none; letter-spacing: normal; font-size: inherit; color: var(--ink) }
+.zero-rate { display: flex; flex-wrap: wrap; gap: 4px 12px }
+.zr { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; cursor: pointer; padding: 4px 0 }
+.zr input { accent-color: var(--accent) }
+.zr-tag { display: inline-block; font-size: .78rem; font-weight: 600; padding: 1px 8px; border-radius: 999px; background: var(--sunk) }
+.zr-tag.zr-line { background: #f3d6d2; color: #7a1f14 }
+.zr-tag.zr-veil { background: #efe3c4; color: #5e4710 }
+.zero-suggest li, .zero-free li { padding: 4px 0 }
+.zero-nudge { border-left: 4px solid var(--accent) }
+@media (max-width: 640px) { .zero-lv { grid-template-columns: 1fr } }

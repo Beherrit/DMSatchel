@@ -11,8 +11,16 @@
 // PATCH {schedule_id, closed: bool}         (GM) close or reopen
 // PATCH {schedule_id, post: true}           (GM) post the poll, or the locked date, to the world's Discord
 // DELETE ?schedule=id                       (GM) remove a poll
+//
+// Session zero (members only):
+// GET ?zero=1                               the primer, your own answers; GMs also get everyone's (anonymous ones without
+//                                           a name) and who has read the page
+// PATCH {primer: {...}}                     (GM) the primer: pitch, tone, house rules, safety tools, lines, veils
+// PUT {zero: {ratings, lines, veils, note, anon}}   your private answers for the GMs (marks the page read)
+// POST {zero_read: true}                    you've read the page
 import { route, send, fail, sql, requireMember, requireGm, postDiscord } from './_lib/core.js';
 import { cleanDates, cleanVote, tally, dateText } from '../js/schedule.js';
+import { cleanPrimer, cleanAnswer, answerEmpty } from '../js/zero.js';
 
 const clip = (v, n) => String(v ?? '').slice(0, n);
 
@@ -69,13 +77,51 @@ async function patchSchedule(req, res) {
   fail(res, 400, 'Nothing to change.');
 }
 
+async function getZero(req, res) {
+  if (!requireMember(req, res)) return;
+  const rows = await sql`SELECT z.gm_id, z.answer, z.read_at, z.updated_at, g.name FROM zero_answers z JOIN gms g ON g.id = z.gm_id
+    JOIN members m ON m.world_id = z.world_id AND m.gm_id = z.gm_id WHERE z.world_id = ${req.world.id}`;
+  const mine = rows.find((r) => r.gm_id === req.gm.id);
+  const p = req.world.primer;
+  const out = { primer: p ? { ...cleanPrimer(p), updated_at: p.updated_at || null, updated_by: p.updated_by || null } : null, mine: { answer: mine?.answer || null, read_at: mine?.read_at || null } };
+  if (req.isGmHere) {
+    const members = await sql`SELECT g.id, g.name, m.role FROM members m JOIN gms g ON g.id = m.gm_id WHERE m.world_id = ${req.world.id} ORDER BY g.name`;
+    const read = new Map(rows.filter((r) => r.read_at).map((r) => [r.gm_id, r.read_at]));
+    out.members = members.map((m) => ({ name: m.name, role: m.role, read_at: read.get(m.id) || null }));
+    // Anonymous answers come without a name, and in no particular order.
+    out.answers = rows.filter((r) => r.answer && !answerEmpty(r.answer)).map((r) => ({ name: r.answer.anon ? null : r.name, answer: r.answer, updated_at: r.answer.anon ? null : r.updated_at }))
+      .sort((a, b) => (a.name ? 0 : 1) - (b.name ? 0 : 1) || String(a.name || JSON.stringify(a.answer)).localeCompare(String(b.name || JSON.stringify(b.answer))));
+  }
+  send(res, 200, out);
+}
+
+async function putZero(req, res) {
+  if (!requireMember(req, res)) return;
+  const a = cleanAnswer(req.body.zero);
+  const answer = answerEmpty(a) ? null : a;
+  await sql`INSERT INTO zero_answers (world_id, gm_id, answer, read_at, updated_at) VALUES (${req.world.id}, ${req.gm.id}, ${answer ? JSON.stringify(answer) : null}::jsonb, now(), now())
+    ON CONFLICT (world_id, gm_id) DO UPDATE SET answer = EXCLUDED.answer, read_at = COALESCE(zero_answers.read_at, now()), updated_at = now()`;
+  send(res, 200, { answer });
+}
+
 export default route({
+  async PUT(req, res) {
+    if (req.body.zero !== undefined) return putZero(req, res);
+    fail(res, 400, 'Nothing to change.');
+  },
   async PATCH(req, res) {
     if (req.body.schedule_id !== undefined) return patchSchedule(req, res);
+    if (req.body.primer !== undefined) {
+      if (!requireGm(req, res)) return;
+      const p = { ...cleanPrimer(req.body.primer), updated_at: new Date().toISOString(), updated_by: req.gm.name };
+      await sql`UPDATE worlds SET primer = ${JSON.stringify(p)}::jsonb WHERE id = ${req.world.id}`;
+      return send(res, 200, { primer: p });
+    }
     fail(res, 400, 'Nothing to change.');
   },
   async GET(req, res) {
     if (req.query?.schedule) return getSchedule(req, res);
+    if (req.query?.zero) return getZero(req, res);
     const lines = await sql`SELECT l.id, l.at, l.cp::float8 AS cp, l.item, l.qty, l.holder, l.note, l.session_id, l.gm_id, g.name AS by
       FROM party_ledger l LEFT JOIN gms g ON g.id = l.gm_id WHERE l.world_id = ${req.world.id} AND NOT l.deleted ORDER BY l.at DESC LIMIT 1000`;
     const cp = lines.reduce((t, l) => t + Number(l.cp || 0), 0);
@@ -92,6 +138,11 @@ export default route({
   async POST(req, res) {
     if (!requireMember(req, res)) return;
     const b = req.body || {};
+    if (b.zero_read) {
+      await sql`INSERT INTO zero_answers (world_id, gm_id, read_at) VALUES (${req.world.id}, ${req.gm.id}, now())
+        ON CONFLICT (world_id, gm_id) DO UPDATE SET read_at = COALESCE(zero_answers.read_at, now())`;
+      return send(res, 200, { ok: true });
+    }
     if (b.schedule) {
       if (!requireGm(req, res)) return;
       const dates = cleanDates(b.schedule.dates);

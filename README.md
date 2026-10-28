@@ -108,6 +108,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Fog of war**: paint over the parts of a map the party hasn't explored; players see only what's revealed.
 - **Members-only site**: one switch makes every page and tool need a personal code or invite link.
 - **Hidden entries**: GMs can keep any entry hidden from players while they prep, then reveal it in one click.
+- **Session zero**: a primer every member reads (pitch, tone, house rules, safety tools, lines and veils); players tell the GMs privately what to keep out, optionally without their name.
 - **Your own fields**: GMs add extra fields to any kind of entry (shared or GM-only), shown on the form and the page.
 - **Many at once**: GMs tick entries on any list or search and reveal, hide, tag, untag or move them into a place together.
 - **Link suggestions**: typing [[ in any text box suggests entry names; pick one to finish the link.
