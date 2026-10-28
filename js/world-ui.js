@@ -35,6 +35,7 @@ import { withPronouns } from './world-profiles.js';
 import { noticesCard, drawNoticeBanner } from './world-notices.js';
 import { gallerySection } from './world-gallery.js';
 import { talkResults } from './world-talk-search.js';
+import { shareButton } from './world-share.js';
 import { tableSection } from './world-tables.js';
 import { parseSearch, searchHash, searchEntries } from './search.js';
 import { saveTemplateButton, templatePicker } from './world-templates.js';
@@ -307,6 +308,7 @@ function viewEntry(id, tab) {
         world.info?.discord && e.visibility !== 'gm' && e.status !== 'suggested' ? confirmButton('Post to Discord', async () => {
           try { await api('settings', { method: 'POST', body: { post: e.id } }); toast(`Posted ${e.name} to Discord`); } catch (err) { toast(err.message, 'bad'); }
         }, 'btn ghost') : null,
+        shareButton(e, rerenderWorld),
         e.status === 'suggested' ? null : el('button', { class: 'btn ghost', type: 'button', title: e.visibility === 'gm' ? 'Let players see this entry' : 'Hide this entry from players', onclick: async () => {
           try { const n = await setEntryState(e, { visibility: e.visibility === 'gm' ? 'all' : 'gm' }); toast(n.visibility === 'gm' ? `${e.name} is hidden from players` : `Revealed ${e.name} to players`); rerenderWorld(); } catch (err) { toast(err.message, 'bad'); }
         } }, e.visibility === 'gm' ? 'Reveal to players' : 'Hide from players'),

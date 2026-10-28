@@ -117,8 +117,9 @@ function ledgerForm(chars, reload) {
 }
 
 function handouts(list, rerender) {
-  const shown = list.filter((h) => h.visibility !== 'gm'), held = list.filter((h) => h.visibility === 'gm');
-  const paper = (h) => el('li', { class: `handout${h.visibility === 'gm' ? ' held' : ''}` },
+  // Players also see handouts the GMs gave just to them.
+  const shown = list.filter((h) => h.visibility !== 'gm' || h.shared), held = list.filter((h) => h.visibility === 'gm' && !h.shared);
+  const paper = (h) => el('li', { class: `handout${h.visibility === 'gm' && !h.shared ? ' held' : ''}` },
     el('div', { class: 'entry-head' }, link(h), h.visibility === 'gm' && isGm() ? el('button', { class: 'btn small primary', type: 'button', onclick: async () => {
       try { await setEntryState(h, { visibility: 'all' }); toast(`Handed out ${h.name}`); rerender(); } catch (err) { toast(err.message, 'bad'); }
     } }, 'Hand out') : null),

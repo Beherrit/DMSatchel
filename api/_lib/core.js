@@ -113,6 +113,8 @@ export function ensureSchema() {
       await sql`ALTER TABLE members ADD COLUMN IF NOT EXISTS profile jsonb`;
       // Notices from the GMs on the world's front page: [{ id, text, by, at, until }], newest first.
       await sql`ALTER TABLE worlds ADD COLUMN IF NOT EXISTS notices jsonb`;
+      // Hidden entries given to chosen members (ids): they can see it, nobody else but the GMs can.
+      await sql`ALTER TABLE entries ADD COLUMN IF NOT EXISTS shared_with jsonb`;
       await sql`CREATE TABLE IF NOT EXISTS zero_answers (
         world_id text NOT NULL, gm_id int NOT NULL, answer jsonb, read_at timestamptz, updated_at timestamptz NOT NULL DEFAULT now(),
         PRIMARY KEY (world_id, gm_id))`;

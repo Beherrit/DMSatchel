@@ -8,6 +8,7 @@
 // PUT ?id= {entry}  update; send the version you loaded or get 409. Players may edit only their own entries.
 // PATCH {id, visibility?, status?}     GM quick changes: reveal or hide, approve a suggestion
 // PATCH {ids, visibility | add_tag | remove_tag | move_to}   the same for many entries at once (GM)
+// PATCH {id, share: [member ids]}     (GM) give a hidden entry to chosen members only ([] takes it back)
 // PATCH {id, claim: true} · {id, owner: null}   claim an unowned character (member) · unassign it (GM)
 // DELETE ?id=       move to the bin (GM, or a player's own entry) · DELETE ?id=&restore=1 brings it back (GM)
 //
@@ -17,6 +18,7 @@ import { KINDS, isKind, LIMITS, PLAYER_KINDS, PLACE_KINDS, isImageRef, gmOnlyFie
 import { forPlayers } from '../js/objectives.js';
 import { goalsForOthers } from '../js/goals.js';
 import { cleanGallery } from '../js/gallery.js';
+import { cleanShare, sharedWith } from '../js/sharing.js';
 import { cleanTag, chainUp } from '../js/bulk.js';
 import { cleanPrimer, primerEmpty } from '../js/zero.js';
 import { activeNotices } from '../js/notices.js';
@@ -56,7 +58,8 @@ function shape(row, req) {
     created_by: row.created_by_name || null, updated_by: row.updated_by_name || null, owner_id: row.owner_id || null, owner: row.owner_name || null,
     can_edit: Boolean(gmView || (mine && req.role)),
   };
-  if (gmView) { out.secret = row.secret; out.deleted = row.deleted; }
+  if (gmView) { out.secret = row.secret; out.deleted = row.deleted; out.shared_with = cleanShare(row.shared_with); }
+  else if (row.visibility === 'gm' && sharedWith(row, req.gm?.id)) out.shared = true;
   else {
     if (row.fields?.objectives) out.fields = { ...row.fields, objectives: forPlayers(row.fields.objectives) };
     // A character's secret goals: only its player (and the GMs) see them.
@@ -74,7 +77,8 @@ const partyAt = (w, rows, req) => {
   return row && !row.deleted && visibleTo(row, req) ? id : null;
 };
 
-const visibleTo = (row, req) => req.isGmHere || (row.owner_id && req.gm && row.owner_id === req.gm.id) || (row.visibility === 'all' && row.status === 'live');
+const visibleTo = (row, req) => req.isGmHere || (row.owner_id && req.gm && row.owner_id === req.gm.id) || (row.visibility === 'all' && row.status === 'live')
+  || (row.status === 'live' && sharedWith(row, req.gm?.id));
 
 async function loadOne(id, worldId) {
   const rows = await sql`SELECT e.*, c.name AS created_by_name, u.name AS updated_by_name, o.name AS owner_name FROM entries e
@@ -292,6 +296,14 @@ export default route({
       return send(res, 200, { entry: shape(await loadOne(id, req.world.id), req) });
     }
     if (!requireGm(req, res)) return;
+    if (Array.isArray(req.body.share)) {
+      const want = cleanShare(req.body.share);
+      const members = new Set((await sql`SELECT gm_id FROM members WHERE world_id = ${req.world.id}`).map((m) => m.gm_id));
+      const ids = want.filter((x) => members.has(x));
+      await sql`UPDATE entries SET shared_with = ${ids.length ? JSON.stringify(ids) : null}::jsonb, updated_by = ${req.gm.id}, updated_at = now(), version = version + 1 WHERE id = ${id} AND world_id = ${req.world.id}`;
+      await record(id, req.gm.id, ids.length ? 'share' : 'unshare', null);
+      return send(res, 200, { entry: shape(await loadOne(id, req.world.id), req) });
+    }
     const vis = visibility === 'gm' || visibility === 'all' ? visibility : current.visibility;
     const st = status === 'live' || status === 'suggested' ? status : current.status;
     await sql`UPDATE entries SET visibility = ${vis}, status = ${st}, updated_by = ${req.gm.id}, updated_at = now(), version = version + 1 WHERE id = ${id} AND world_id = ${req.world.id}`;

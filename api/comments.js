@@ -16,13 +16,15 @@
 // GET ?search=words                 comments containing the words (members): table talk you can see, GM discussions
 //                                   (GMs), and your own private notes; newest first, at most 40
 import { route, send, fail, sql, requireGm, requireMember } from './_lib/core.js';
+import { sharedWith } from '../js/sharing.js';
 
 const room = (v) => (v === 'table' ? 'table' : 'gm');
 // Can this request see the entry? Same rule as the entries API.
-const sees = (e, req) => e && !e.deleted && (req.isGmHere || (req.gm && e.owner_id === req.gm.id) || (e.visibility === 'all' && e.status === 'live'));
+const sees = (e, req) => e && !e.deleted && (req.isGmHere || (req.gm && e.owner_id === req.gm.id) || (e.visibility === 'all' && e.status === 'live')
+  || (e.status === 'live' && sharedWith(e, req.gm?.id)));
 
 async function entryFor(id, req) {
-  return (await sql`SELECT id, owner_id, visibility, status, deleted FROM entries WHERE id = ${String(id || '').slice(0, 40)} AND world_id = ${req.world.id}`)[0];
+  return (await sql`SELECT id, owner_id, visibility, status, deleted, shared_with FROM entries WHERE id = ${String(id || '').slice(0, 40)} AND world_id = ${req.world.id}`)[0];
 }
 
 export default route({
@@ -33,30 +35,30 @@ export default route({
       const q = String(search).trim().slice(0, 100);
       if (q.length < 2) return send(res, 200, { comments: [] });
       const pattern = `%${q.replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
-      const rows = await sql`SELECT c.id, c.entry_id, c.parent_id, c.body, c.audience, c.hidden, c.created_at, c.gm_id, g.name AS gm, e.name AS entry_name, e.kind, e.owner_id, e.visibility, e.status, e.deleted
+      const rows = await sql`SELECT c.id, c.entry_id, c.parent_id, c.body, c.audience, c.hidden, c.created_at, c.gm_id, g.name AS gm, e.name AS entry_name, e.kind, e.owner_id, e.visibility, e.status, e.deleted, e.shared_with
         FROM comments c LEFT JOIN gms g ON g.id = c.gm_id JOIN entries e ON e.id = c.entry_id
         WHERE e.world_id = ${req.world.id} AND NOT e.deleted AND c.body ILIKE ${pattern}
           AND (c.audience = 'table' OR (c.audience = 'gm' AND ${req.isGmHere}) OR (c.audience = 'note' AND c.gm_id = ${req.gm.id}))
         ORDER BY c.created_at DESC LIMIT 200`;
       const out = rows.filter((r) => sees(r, req) && (r.audience !== 'table' || !r.hidden || req.isGmHere || r.gm_id === req.gm.id)).slice(0, 40)
-        .map(({ owner_id, visibility, status, deleted, ...r }) => r);
+        .map(({ owner_id, visibility, status, deleted, shared_with, ...r }) => r);
       return send(res, 200, { comments: out });
     }
     if (notes === 'mine' || (entryId && audience === 'note')) {
       if (!requireMember(req, res)) return;
-      const rows = await sql`SELECT c.id, c.entry_id, c.body, c.created_at, c.edited_at, e.name AS entry_name, e.kind, e.owner_id, e.visibility, e.status, e.deleted
+      const rows = await sql`SELECT c.id, c.entry_id, c.body, c.created_at, c.edited_at, e.name AS entry_name, e.kind, e.owner_id, e.visibility, e.status, e.deleted, e.shared_with
         FROM comments c JOIN entries e ON e.id = c.entry_id
         WHERE c.audience = 'note' AND c.gm_id = ${req.gm.id} AND e.world_id = ${req.world.id}
         ORDER BY COALESCE(c.edited_at, c.created_at) DESC LIMIT 500`;
       const only = notes === 'mine' ? null : String(entryId);
-      return send(res, 200, { notes: rows.filter((r) => sees(r, req) && (!only || r.entry_id === only)).map(({ owner_id, visibility, status, deleted, ...r }) => r) });
+      return send(res, 200, { notes: rows.filter((r) => sees(r, req) && (!only || r.entry_id === only)).map(({ owner_id, visibility, status, deleted, shared_with, ...r }) => r) });
     }
     if (recent === 'table') {
-      const rows = await sql`SELECT c.id, c.entry_id, c.parent_id, c.body, c.created_at, c.hidden, c.gm_id, g.name AS gm, e.name AS entry_name, e.kind, e.owner_id, e.visibility, e.status, e.deleted
+      const rows = await sql`SELECT c.id, c.entry_id, c.parent_id, c.body, c.created_at, c.hidden, c.gm_id, g.name AS gm, e.name AS entry_name, e.kind, e.owner_id, e.visibility, e.status, e.deleted, e.shared_with
         FROM comments c LEFT JOIN gms g ON g.id = c.gm_id JOIN entries e ON e.id = c.entry_id
         WHERE c.audience = 'table' AND e.world_id = ${req.world.id} AND NOT e.deleted ORDER BY c.created_at DESC LIMIT 200`;
       const out = rows.filter((r) => sees(r, req) && (!r.hidden || req.isGmHere)).slice(0, 60)
-        .map(({ owner_id, visibility, status, deleted, ...r }) => r);
+        .map(({ owner_id, visibility, status, deleted, shared_with, ...r }) => r);
       return send(res, 200, { comments: out });
     }
     if (entryId) {
