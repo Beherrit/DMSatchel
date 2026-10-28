@@ -2,6 +2,7 @@
 // change or take back their vote), everyone sees the tally and who chose what; whoever asked, or a GM, closes it.
 import { el, toast, setKids, confirmButton } from './dom.js';
 import { api, isGm, isMember } from './api.js';
+import { world } from './world-store.js';
 import { tallyPoll } from './polls.js';
 
 export function pollsCard() {
@@ -33,11 +34,20 @@ export function pollsCard() {
   function askForm() {
     const q = el('input', { type: 'text', id: 'poll-q', maxlength: 200, placeholder: 'e.g. Where do we go next?' });
     const opts = el('textarea', { id: 'poll-opts', rows: 3, placeholder: 'One choice per line\nThe crypt\nThe tower' });
+    const toDiscord = world.info?.discord ? el('input', { type: 'checkbox', id: 'poll-discord' }) : null;
     const form = el('form', { class: 'poll-form' },
       el('div', { class: 'field wide' }, el('label', { for: 'poll-q' }, 'Question'), q),
       el('div', { class: 'field wide' }, el('label', { for: 'poll-opts' }, 'Choices (one per line, up to 8)'), opts),
+      toDiscord ? el('label', { class: 'check', for: 'poll-discord' }, toDiscord, ' Also post it to Discord') : null,
       el('div', { class: 'btnrow' }, el('button', { class: 'btn small primary', type: 'submit' }, 'Ask the table'), el('button', { class: 'btn small ghost', type: 'button', onclick: () => { asking = false; load(); } }, 'Cancel')));
-    form.addEventListener('submit', (ev) => { ev.preventDefault(); act(async () => { await api('party', { method: 'POST', body: { poll: { question: q.value, options: opts.value } } }); asking = false; }, 'Poll posted'); });
+    form.addEventListener('submit', (ev) => {
+      ev.preventDefault();
+      act(async () => {
+        const r = await api('party', { method: 'POST', body: { poll: { question: q.value, options: opts.value }, discord: Boolean(toDiscord?.checked) } });
+        if (r.discord_error) toast(`Posted here, but not to Discord: ${r.discord_error}`, 'bad');
+        asking = false;
+      }, toDiscord?.checked ? 'Poll posted here and to Discord' : 'Poll posted');
+    });
     setTimeout(() => q.focus(), 0);
     return form;
   }

@@ -23,9 +23,10 @@ export function drawNoticeBanner() {
   document.querySelector('.w-main')?.prepend(b);
 }
 
-async function send(op, msg, rerender) {
+async function send(op, msg, rerender, discord = false) {
   try {
-    const r = await api('settings', { method: 'PATCH', body: { notice: op } });
+    const r = await api('settings', { method: 'PATCH', body: { notice: op, discord } });
+    if (r.discord_error) toast(`Posted here, but not to Discord: ${r.discord_error}`, 'bad');
     const today = new Date().toISOString().slice(0, 10);
     world.info = { ...world.info, notices: r.notices.filter((n) => !n.until || n.until >= today) };
     toast(msg); rerender(); return true;
@@ -41,11 +42,13 @@ export function noticesCard(rerender) {
   if (isGm()) {
     const text = el('textarea', { id: 'nt-text', rows: 2, maxlength: 500, placeholder: 'e.g. No game this Friday. Back on the 14th!' });
     const until = el('input', { type: 'date', id: 'nt-until', min: new Date().toISOString().slice(0, 10) });
+    const toDiscord = world.info?.discord ? el('input', { type: 'checkbox', id: 'nt-discord', checked: true }) : null;
     form = el('form', { class: 'nt-form' },
       el('div', { class: 'field wide' }, el('label', { for: 'nt-text' }, 'Post a notice to everyone'), text),
       el('div', { class: 'nt-row' }, el('div', { class: 'field' }, el('label', { for: 'nt-until' }, 'Show until (optional)'), until),
+        toDiscord ? el('label', { class: 'check', for: 'nt-discord' }, toDiscord, ' Also post to Discord') : null,
         el('button', { class: 'btn small primary', type: 'submit' }, 'Post notice')));
-    form.addEventListener('submit', async (ev) => { ev.preventDefault(); if (!text.value.trim()) { text.focus(); return; } await send({ add: { text: text.value, until: until.value || null } }, 'Notice posted', rerender); });
+    form.addEventListener('submit', async (ev) => { ev.preventDefault(); if (!text.value.trim()) { text.focus(); return; } await send({ add: { text: text.value, until: until.value || null } }, toDiscord?.checked ? 'Notice posted here and to Discord' : 'Notice posted', rerender, Boolean(toDiscord?.checked)); });
   }
   return el('section', { class: 'card notices-card', 'aria-labelledby': 'nt-h' },
     el('h3', { id: 'nt-h' }, '📣 Notices'),

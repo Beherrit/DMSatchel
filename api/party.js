@@ -22,7 +22,7 @@
 // PUT {favorite: entryId, on: bool}         star or unstar an entry for yourself (members); returns your favorites
 // GET ?members=1                            the world's members with their profiles (members)
 //
-// Quick polls (members): GET ?polls=1 open ones and the last few closed · POST {poll: {question, options}} ask one
+// Quick polls (members): GET ?polls=1 open ones and the last few closed · POST {poll: {question, options}, discord?} ask one
 // PATCH {poll_id, vote: i | null} vote or take it back · PATCH {poll_id, closed} (asker or GM) · DELETE ?poll=id
 // PUT {profile: {pronouns, note}}           your own profile in this world
 import { route, send, fail, sql, requireMember, requireGm, postDiscord } from './_lib/core.js';
@@ -204,7 +204,13 @@ export default route({
       const open = (await sql`SELECT count(*)::int AS n FROM table_polls WHERE world_id = ${req.world.id} AND NOT closed AND NOT deleted`)[0].n;
       if (open >= 10) return fail(res, 400, 'There are 10 open polls already. Close one first.');
       const row = (await sql`INSERT INTO table_polls (world_id, gm_id, question, options) VALUES (${req.world.id}, ${req.gm.id}, ${c.question}, ${JSON.stringify(c.options)}::jsonb) RETURNING id`)[0];
-      return send(res, 201, { id: row.id });
+      // Also to the world's Discord channel, if asked: the question and the choices, with a link to vote.
+      let discord = null;
+      if (b.discord && req.world.discord_webhook) {
+        discord = await postDiscord(req.world.discord_webhook, { title: `🗳 ${c.question}`.slice(0, 250), description: `${c.options.map((o, i) => `${i + 1}. ${o}`).join('\n')}\n\nVote on the world's front page.`, color: 0x1C6A63,
+          url: `https://${req.headers.host}/?w=${encodeURIComponent(req.world.slug)}#world`, footer: { text: `${req.world.name} · asked by ${req.gm.name}` } });
+      }
+      return send(res, 201, { id: row.id, ...(discord ? { discord_error: discord } : {}) });
     }
     if (b.schedule) {
       if (!requireGm(req, res)) return;

@@ -4,7 +4,7 @@
 // PATCH {prep: {location_id, notes}}   (GM) session prep: where the party is, and the GMs' scratch pad.
 // PATCH {start_here: {id, on} | {order}}   (GM) the entries newcomers should read first
 // PATCH {clock: {advance} | {set} | {add_light} | {remove_light}}   (GM) time of day and lights during play
-// PATCH {notice: {add: {text, until}} | {remove: id}}   (GM) notices on the world's front page
+// PATCH {notice: {add: {text, until}} | {remove: id}, discord?}   (GM) notices on the front page (and Discord)
 // PATCH {secret: {add} | {id, found, session} | {id, text} | {remove}}   (GM) secrets and clues in session prep
 // POST {post: entryId}   (GM) post an entry's summary and text to the world's Discord channel.
 // PATCH {template: {name, kind, summary, body, fields, tags, secret}}  (GM) save an entry template; {template_remove: id} delete one
@@ -149,7 +149,14 @@ export default route({
       const r = applyNotice(req.world.notices, req.body.notice, req.gm.name);
       if (r.error) return fail(res, 400, r.error);
       await sql`UPDATE worlds SET notices = ${JSON.stringify(r.list)}::jsonb WHERE id = ${req.world.id}`;
-      return send(res, 200, { notices: r.list });
+      // Also to the world's Discord channel, if asked (the notice is saved either way).
+      let discord = null;
+      if (req.body.notice.add && req.body.discord && req.world.discord_webhook) {
+        const n = r.list[0];
+        discord = await postDiscord(req.world.discord_webhook, { title: '📣 Notice from the GMs', description: n.text.slice(0, 3500), color: 0x1C6A63,
+          url: `https://${req.headers.host}/?w=${encodeURIComponent(req.world.slug)}#world`, footer: { text: `${req.world.name} · ${n.by}${n.until ? ` · until ${n.until}` : ''}` } });
+      }
+      return send(res, 200, { notices: r.list, ...(discord ? { discord_error: discord } : {}) });
     }
     if (req.body.secret) {
       const r = applySecret(req.world.prep?.secrets, req.body.secret, req.gm.name);
