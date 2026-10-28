@@ -121,6 +121,14 @@ to the log at the bottom.
 45. [x] **Quick journal note from anywhere.** Players can jot a journal note from any page (linked to the page they're
     on) without leaving it.
 
+46. [ ] **Your own roll tables.** GMs (and players) write custom tables ("Tavern patrons", "Weird weather", "What's in
+    the barrel") with optional weights, roll them anywhere, and send a result to the world.
+47. [ ] **Search filters.** Narrow world search by kind, tag, place it's in, and (for GMs) hidden or suggested only.
+48. [ ] **Entry templates.** GMs save an entry as a template ("Roadside inn", "Cult cell") and start new entries from
+    it, fields and text filled in.
+49. [ ] **Your own map markers.** Players drop private markers with notes on any map ("we camped here"), seen only by
+    them, alongside the GM's pins.
+
 ## Ideas parking lot
 
 ## Log
