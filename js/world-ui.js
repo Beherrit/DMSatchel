@@ -33,6 +33,7 @@ import { tableSection } from './world-tables.js';
 import { parseSearch, searchHash, searchEntries } from './search.js';
 import { saveTemplateButton, templatePicker } from './world-templates.js';
 import { fillHistory } from './world-history.js';
+import { viewCards, cardsButton } from './world-cards.js';
 import { viewExport } from './world-export.js';
 import { viewClocks, clocksWidget } from './world-clocks.js';
 import { viewRumors } from './world-rumors.js';
@@ -252,6 +253,7 @@ function viewEntry(id, tab) {
         showButton(e),
         revealButton(e, rerenderWorld),
         saveTemplateButton(e),
+        cardsButton(e),
         world.info?.discord && e.visibility !== 'gm' && e.status !== 'suggested' ? confirmButton('Post to Discord', async () => {
           try { await api('settings', { method: 'POST', body: { post: e.id } }); toast(`Posted ${e.name} to Discord`); } catch (err) { toast(err.message, 'bad'); }
         }, 'btn ghost') : null,
@@ -528,6 +530,7 @@ export async function showWorld(parts, { keepScroll = false } = {}) {
   else if (view === 'table') node = await viewTable();
   else if (view === 'prep') node = await viewPrep(rerenderWorld);
   else if (view === 'sheet') node = await viewSessionSheet();
+  else if (view === 'cards') node = await viewCards(arg);
   else if (view === 'powers') node = viewPowers(rerenderWorld);
   else if (view === 'library') node = viewLibrary(arg, rerenderWorld);
   else if (view === 'import') node = viewImport(rerenderWorld);

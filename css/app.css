@@ -1024,3 +1024,18 @@ body.gated .mainnav, body.gated #toolnav, body.gated #panels, body.gated #notebo
 .history-list > li { padding: 6px 0; border-bottom: 1px solid var(--line); display: grid; gap: 4px; justify-items: start }
 .diff-list del { color: var(--warn) }
 .diff-list ins { color: var(--good); text-decoration: none }
+
+/* NPC table cards */
+.card-grid { display: grid; align-items: start; grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr)); gap: 12px }
+.npc-card { border: 1px solid var(--ink); border-radius: 8px; padding: 10px 12px; background: var(--surface); break-inside: avoid; font-size: 14px }
+.npc-card header { display: flex; justify-content: space-between; align-items: start; gap: 6px }
+.npc-card h3 { margin: 0; font-size: 18px }
+.npc-card p { margin: 3px 0 }
+.npc-card-sub { color: var(--muted); font-size: 13px }
+.npc-card-stats { font-family: var(--f-mono); font-size: 12px; border-top: 1px dashed var(--line); padding-top: 4px }
+.npc-card-secret { border-top: 1px dashed var(--line); padding-top: 4px; font-style: italic }
+@media print {
+  .card-tools .btnrow, .card-x, .w-side { display: none !important }
+  .card-grid { grid-template-columns: 1fr 1fr; gap: 8px }
+  .npc-card { border-color: #000; font-size: 11px }
+}
