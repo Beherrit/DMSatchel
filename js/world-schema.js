@@ -85,6 +85,11 @@ export const KINDS = {
     fields: [['character', 'Character', 'hidden'], ['activity', 'Activity', 'select', DOWNTIME_ACTIVITIES], ['days', 'Days spent'], ['cost', 'Cost'],
       ['outcome', 'Outcome (from the GM)', 'long', null, { gmOnly: true }], ['resolved', 'Resolved on', 'hidden', null, { gmOnly: true }]],
   },
+  table: {
+    label: 'Roll table', plural: 'Roll Tables', blurb: 'Your own random tables: tavern patrons, strange weather, what’s in the barrel.',
+    // One result per line; "3x …" or "1-4: …" for weights, {2d6} for dice, {a|b} for a choice, [[Another table]] to roll it.
+    fields: [['rows', 'Results, one per line', 'long'], ['category', 'Category']],
+  },
   handout: {
     label: 'Handout', plural: 'Handouts', blurb: 'Letters, maps, notes and clues the GMs hand to the players.',
     fields: [['from', 'From (who wrote or gave it)'], ['found', 'Where or when it was found'], ['text', 'Text of the handout', 'long']],
@@ -130,10 +135,10 @@ export const KINDS = {
 for (const k of Object.values(KINDS)) k.fields.push(['image', 'Picture', 'image']);
 export const isImageRef = (v) => /^\/api\/images\?id=[a-f0-9]{16}$/.test(v) || /^https:\/\/[^\s"'<>]{4,1000}$/.test(v);
 
-export const KIND_ORDER = ['region', 'area', 'settlement', 'location', 'faction', 'guild', 'clan', 'npc', 'character', 'deity', 'item', 'event', 'session', 'journal', 'downtime', 'handout', 'quest', 'rumor', 'lore', 'creature', 'rule'];
+export const KIND_ORDER = ['region', 'area', 'settlement', 'location', 'faction', 'guild', 'clan', 'npc', 'character', 'deity', 'item', 'event', 'session', 'journal', 'downtime', 'handout', 'quest', 'rumor', 'lore', 'creature', 'rule', 'table'];
 
 // Kinds a player can create and edit as their own; anything else a player adds is a suggestion for the GMs.
-export const PLAYER_KINDS = ['character', 'journal', 'downtime'];
+export const PLAYER_KINDS = ['character', 'journal', 'downtime', 'table'];
 // Fields only a GM can set (a downtime outcome); the server keeps their old values when a player saves.
 export const gmOnlyFields = (kind) => (KINDS[kind]?.fields || []).filter((f) => f[4]?.gmOnly).map(([k]) => k);
 

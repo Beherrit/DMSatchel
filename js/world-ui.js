@@ -29,6 +29,7 @@ import { viewSessionSheet } from './world-sheet.js';
 import { attendanceSection } from './world-attendance.js';
 import { revealButton } from './world-reveal.js';
 import { quickNoteButton } from './world-quicknote.js';
+import { tableSection } from './world-tables.js';
 import { viewExport } from './world-export.js';
 import { viewClocks, clocksWidget } from './world-clocks.js';
 import { viewRumors } from './world-rumors.js';
@@ -190,6 +191,7 @@ function viewEntry(id, tab) {
     e.kind === 'character' ? downtimeSection(e) : null,
     attitudesToward(e, rerenderWorld),
     objectivesSection(e, rerenderWorld),
+    tableSection(e),
     attendanceSection(e, rerenderWorld),
     e.fields?.stock || (e.kind === 'location' && e.fields?.type === 'Shop' && isGm()) ? el('section', { class: 'card shop-card' },
       el('div', { class: 'entry-head' }, el('h3', {}, 'For sale'), isGm() ? el('button', { class: 'btn small', type: 'button', onclick: async () => {

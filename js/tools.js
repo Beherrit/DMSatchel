@@ -2,6 +2,7 @@
 // Each tool mounts into its own panel and can save to the notebook or send a draft to the world.
 
 import { mountDungeons } from './dungeon-ui.js';
+import { mountTables } from './world-tables.js';
 import { mountEncounters } from './encounter-ui.js';
 import { makeRng } from './rng.js';
 import { $, el, cap, fmt, copyText, fresh, traitList, setKids, toast } from './dom.js';
@@ -504,4 +505,5 @@ export const TOOLS = [
   { id: 'shops', label: 'Shops & Markets', mount: mountShops },
   { id: 'encounters', label: 'Encounters & Travel', mount: mountEncounters },
   { id: 'dungeons', label: 'Dungeons & Lairs', mount: mountDungeons },
+  { id: 'tables', label: 'Your tables', mount: mountTables },
 ];

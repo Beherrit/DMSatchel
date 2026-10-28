@@ -121,7 +121,7 @@ to the log at the bottom.
 45. [x] **Quick journal note from anywhere.** Players can jot a journal note from any page (linked to the page they're
     on) without leaving it.
 
-46. [ ] **Your own roll tables.** GMs (and players) write custom tables ("Tavern patrons", "Weird weather", "What's in
+46. [x] **Your own roll tables.** GMs (and players) write custom tables ("Tavern patrons", "Weird weather", "What's in
     the barrel") with optional weights, roll them anywhere, and send a result to the world.
 47. [ ] **Search filters.** Narrow world search by kind, tag, place it's in, and (for GMs) hidden or suggested only.
 48. [ ] **Entry templates.** GMs save an entry as a template ("Roadside inn", "Cult cell") and start new entries from
@@ -178,3 +178,4 @@ to the log at the bottom.
 - Reveal with contents: place pages get a "Reveal with contents (N)" button (GMs) when the place or anything inside it is hidden. It opens a preview listing the hidden sub-places, people, items, quests and the place's hidden maps, grouped and all ticked, with All / none; Reveal makes the ticked ones visible in one batch request (entries PATCH {ids, visibility}, additive, GMs only, each reveal recorded in history) and un-hides the ticked maps. Suggestions are left alone. API (PGlite) and browser tests.
 - Items in inventories: under a character's inventory on the world sheet, "Items on this sheet" lists every world item, library item or SRD magic item named in it (whole words, longer names first, each once, apostrophes either way; names under five letters ignored), with rarity, attunement and what it does; world items link to their pages. It updates as you type. Unit and browser tests.
 - Quick note: a floating "✎ Note" button on world pages (members) and the j key open a small box. The note is saved as a journal entry titled from its first words, with its kind (Session notes by default) and which of your characters wrote it; on an entry page it's linked to that entry (a connection plus an "About [[Name]]" line). You stay on the page. Hidden when printing and off world pages. Unit and browser tests.
+- Roll tables: a new kind, Roll table, that players can make too (theirs go live like journals). One result per line, with "3x …" weights or "1-4: …" die ranges, # comments, {2d6+1} dice, {a|b} choices and [[Other table]] references rolled up to three deep. Each table's page has Roll / Roll 3, the last dozen results (Copy, Notebook, Add to world) and every line with its chance; the Table Tools get a "Your tables" tool to roll any table in the open world. Import recognises "Roll tables" folders. Unit and browser tests.
