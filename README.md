@@ -99,6 +99,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Spreadsheet import**: bring in a CSV of NPCs, items or places, say which column is which, and check a preview first.
 - **Entry templates**: save any entry as a template and start new ones from it.
 - **Quick notes**: jot a journal note from any page (button or the j key), linked to what you're looking at.
+- **Keep going offline**: character sheet changes and private notes made without a connection are kept and sent when it comes back.
 - **Private notes**: everyone can keep their own notes on any page, seen by nobody else.
 - **Attitudes**: how each NPC and power feels about each character, on both pages and in session prep.
 - **Quest rewards**: completing a quest offers to put its reward (coin and items read from the text) into the party treasury.

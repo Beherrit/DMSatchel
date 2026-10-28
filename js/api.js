@@ -53,7 +53,7 @@ export async function api(path, { method = 'GET', body, query } = {}) {
   const q = { ...(query || {}) };
   if (WORLD_SCOPED.has(path) && session.worldKey && !q.world) q.world = session.worldKey;
   if (WORLD_SCOPED.has(path) && previewing()) {
-    if (method !== 'GET') throw new ApiError('You’re seeing the world as a player. Go back to the GM view to change anything.', 0);
+    if (method !== 'GET') throw new ApiError('You’re seeing the world as a player. Go back to the GM view to change anything.', 0, { code: 'preview' });
     q.as = 'player';
   }
   const qs = Object.keys(q).length ? `?${new URLSearchParams(Object.entries(q).filter(([, v]) => v != null && v !== ''))}` : '';

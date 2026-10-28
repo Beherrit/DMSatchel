@@ -11,6 +11,7 @@ import { matchItems } from './inventory-items.js';
 import { coinText, parseCoins } from './economy.js';
 import { api } from './api.js';
 import { inventoryLines } from './handover.js';
+import { queuePlay, isOffline } from './outbox.js';
 
 export const CONDITIONS = ['Blinded', 'Charmed', 'Deafened', 'Frightened', 'Grappled', 'Incapacitated', 'Invisible', 'Paralyzed', 'Petrified', 'Poisoned', 'Prone', 'Restrained', 'Stunned', 'Unconscious'];
 
@@ -74,6 +75,8 @@ function save(id, play) {
         try { await patchEntry(world.entries.get(id), { fields: { play: JSON.stringify(p) } }); break; }
         catch (err) {
           if (err.status === 409 && err.body?.entry && attempt === 0) { world.entries.set(id, err.body.entry); continue; }
+          // No connection: keep it on this device and send it when the connection is back.
+          if (isOffline(err)) { queuePlay(id, p); break; }
           toast(`Couldn’t save the sheet: ${err.message}`, 'bad'); break;
         }
       }

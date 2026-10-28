@@ -3,6 +3,7 @@
 import { el, toast, setKids } from './dom.js';
 import { api, isMember } from './api.js';
 import { getEntry, link, when, richText, kindLabel } from './world-store.js';
+import { queueNote, isOffline } from './outbox.js';
 
 export function noteBox(e) {
   if (!isMember()) return null;
@@ -14,7 +15,10 @@ export function noteBox(e) {
     if (v === saved) return;
     status.textContent = 'Saving…';
     try { await api('comments', { method: 'PUT', body: { entry_id: e.id, body: v } }); saved = v; status.textContent = v ? `Saved ${new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}` : 'Removed'; }
-    catch (err) { status.textContent = ''; toast(err.message, 'bad'); }
+    catch (err) {
+      if (isOffline(err)) { queueNote(e.id, v); saved = v; status.textContent = 'Kept on this device: it’s sent when you’re back online'; return; }
+      status.textContent = ''; toast(err.message, 'bad');
+    }
   };
   text.addEventListener('blur', save);
   text.addEventListener('keydown', (ev) => { if (ev.key === 'Enter' && (ev.ctrlKey || ev.metaKey)) { ev.preventDefault(); save(); } });

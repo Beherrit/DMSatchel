@@ -9,6 +9,7 @@ import { initWorldSwitcher, mountWorlds, showWorlds } from './worlds-ui.js';
 import { initShortcuts } from './shortcuts.js';
 import { initGate } from './gate.js';
 import { initTheme } from './theme.js';
+import { initOutbox } from './outbox.js';
 
 const mounted = new Set();
 const panels = {};
@@ -67,6 +68,7 @@ initWorldSwitcher();
 initShortcuts();
 initGate();
 initTheme();
+initOutbox();
 $('#search-btn').addEventListener('click', openPalette);
 if (/Mac|iPhone|iPad/.test(navigator.platform)) $('#search-btn kbd').textContent = '⌘K';
 addEventListener('hashchange', route);
