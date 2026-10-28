@@ -203,6 +203,14 @@ to the log at the bottom.
     time at each pace.
 85. [x] **Keep going offline.** Changes to your character sheet and notes made without a connection are kept and sent
     when it comes back, with a clear "waiting to send" marker.
+86. [ ] **Time of day and light.** During play the GM moves the clock on (10 minutes, an hour, a short rest) and
+    tracks torches, lanterns and spells with durations; everyone sees the hour and what's about to go out.
+87. [ ] **Start here.** GMs pick a handful of entries new players should read first (the home town, the patron, the
+    big threat); they show on the front page and the session zero page for newcomers.
+88. [ ] **Notices and polls to Discord.** When the world has a Discord channel, posting a notice or a poll can go to
+    the channel too, with a link back.
+89. [ ] **Tag pages.** Every tag gets a page listing what's tagged, with a short description GMs can write, and a list
+    of all tags with counts.
 
 ## Ideas parking lot
 
