@@ -167,7 +167,7 @@ export function pinIconFor(e) {
   return 'poi';
 }
 
-export const LINK_LABELS = ['member of', 'leads', 'ally of', 'enemy of', 'rival of', 'serves', 'worships', 'located in', 'headquartered in', 'owns', 'created', 'related to', 'parent of', 'child of', 'married to', 'sibling of', 'trades with', 'at war with', 'secretly works for', 'wants', 'guards'];
+export const LINK_LABELS = ['member of', 'leads', 'ally of', 'enemy of', 'rival of', 'serves', 'worships', 'located in', 'headquartered in', 'owns', 'created', 'related to', 'parent of', 'child of', 'married to', 'sibling of', 'trades with', 'at war with', 'secretly works for', 'wants', 'guards', 'childhood friend of', 'owes a debt to', 'saved the life of', 'sworn to protect', 'in love with', 'mentor of', 'keeps a secret from', 'distrusts', 'old comrade of'];
 
 export const LIMITS = { name: 200, summary: 4000, body: 40000, secret: 20000, field: 4000, tags: 30, tag: 40, links: 100 };
 

@@ -35,6 +35,7 @@ import { saveTemplateButton, templatePicker } from './world-templates.js';
 import { fillHistory } from './world-history.js';
 import { viewCards, cardsButton } from './world-cards.js';
 import { encounterCard } from './encounter-ui.js';
+import { bondsSection } from './world-bonds.js';
 import { viewExport } from './world-export.js';
 import { viewClocks, clocksWidget } from './world-clocks.js';
 import { viewRumors } from './world-rumors.js';
@@ -215,6 +216,7 @@ function viewEntry(id, tab) {
     e.kind === 'character' ? sheetSection(e, rerenderWorld) : null,
     e.kind === 'character' ? knownSection(e, rerenderWorld) : null,
     e.kind === 'character' ? attitudesOfCharacter(e, rerenderWorld) : null,
+    bondsSection(e, rerenderWorld),
     e.kind === 'character' ? downtimeSection(e) : null,
     attitudesToward(e, rerenderWorld),
     objectivesSection(e, rerenderWorld),

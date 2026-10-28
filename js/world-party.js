@@ -8,6 +8,7 @@ import { lastShownLine } from './world-show.js';
 import { addCoins } from './sheet-ui.js';
 import { progressBadge } from './world-objectives.js';
 import { advancementSection } from './world-attendance.js';
+import { partyBondsSection } from './world-bonds.js';
 import { splitCoins } from './economy.js';
 
 const ACTIVE = (e) => !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
@@ -147,7 +148,7 @@ export async function viewParty(rerender) {
   return el('div', { class: 'w-view party-view' },
     el('div', { class: 'panel-head' }, el('h2', {}, 'The Party'), el('p', {}, 'Who’s adventuring, what they carry, what they’re chasing and what they’ve found.'), lastShownLine()),
     el('div', { class: 'party-grid' },
-      el('div', { class: 'party-main' }, members(chars), advancementSection(),
+      el('div', { class: 'party-main' }, members(chars), partyBondsSection(), advancementSection(),
         el('section', {}, el('h3', { class: 'section-title' }, 'Current quests'),
           quests.length ? el('ul', { class: 'entry-list' }, quests.map((q) => el('li', {}, link(q), progressBadge(q), q.fields?.reward ? el('span', { class: 'muted small' }, `Reward: ${q.fields.reward}`) : null)))
             : el('p', { class: 'muted' }, 'No active quests.'),

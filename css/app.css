@@ -1039,3 +1039,4 @@ body.gated .mainnav, body.gated #toolnav, body.gated #panels, body.gated #notebo
   .card-grid { grid-template-columns: 1fr 1fr; gap: 8px }
   .npc-card { border-color: #000; font-size: 11px }
 }
+.bond-list li { margin: 4px 0 } .bond-add span { font-weight: 600 }
