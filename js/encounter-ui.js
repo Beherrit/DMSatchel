@@ -24,7 +24,16 @@ export const monsterSource = () => {
 
 const ddb = (name) => `https://www.dndbeyond.com/monsters?filter-search=${encodeURIComponent(name)}`;
 
-export function encounterCard(enc, { title = 'Encounter' } = {}) {
+// A GM can keep any rolled encounter as an entry (hidden from players), placed where the party will meet it.
+export function saveEncounterButton(enc, place) {
+  if (!enc || !isGm() || session.configured === false) return null;
+  return el('div', { class: 'btnrow' }, el('button', { class: 'btn small ghost', type: 'button', onclick: () => window.dispatchEvent(new CustomEvent('world:draft', { detail: {
+    kind: 'encounter', name: enc.groups.map((g) => (g.count > 1 ? `${g.count} ${g.name}` : g.name)).join(' and '), parent_id: place?.id || null, visibility: 'gm',
+    summary: `They’re ${enc.activity}.`, body: encText(enc), fields: { difficulty: enc.difficulty, enc: JSON.stringify(enc) },
+  } })) }, 'Save encounter'));
+}
+
+export function encounterCard(enc, { title = 'Encounter', place = null, save = true } = {}) {
   if (!enc) return el('div', { class: 'card' }, el('p', { class: 'muted' }, 'Nothing in that terrain fits a party this size. Try another difficulty or terrain.'));
   const pct = Math.round((enc.xp / enc.budget) * 100);
   return el('article', { class: 'card enc-card' },
@@ -38,7 +47,8 @@ export function encounterCard(enc, { title = 'Encounter' } = {}) {
     el('p', {}, `They’re ${enc.activity}.`),
     el('p', { class: 'muted small' }, `Before the party sees them: ${enc.sign}.`),
     el('div', { class: 'xp-bar', title: `${pct}% of the budget` }, el('span', { style: `width:${Math.min(100, pct)}%` })),
-    el('p', { class: 'muted small' }, `${enc.xp.toLocaleString('en-US')} XP of a ${enc.budget.toLocaleString('en-US')} XP budget.`));
+    el('p', { class: 'muted small' }, `${enc.xp.toLocaleString('en-US')} XP of a ${enc.budget.toLocaleString('en-US')} XP budget.`),
+    save ? saveEncounterButton(enc, place) : null);
 }
 
 const encText = (enc) => [`${enc.difficulty} encounter (${enc.xp} XP of ${enc.budget})`, ...enc.groups.map((g) => `${g.count > 1 ? `${g.count} × ` : ''}${g.name} (CR ${crText(g.cr)})`), `They’re ${enc.activity}.`, `Signs: ${enc.sign}.`].join('\n');
@@ -128,7 +138,7 @@ export function wildsSection(place, rerender) {
   const c = controls(terrains);
   const out = el('div', { class: 'enc-out' });
   const table = place.fields?.encounters;
-  const roll = () => { const enc = rollEncounter({ ...c.read(), terrain: [c.terr.value], ...monsterSource() }); setKids(out, encounterCard(enc, { title: `Encounter near ${place.name}` })); };
+  const roll = () => { const enc = rollEncounter({ ...c.read(), terrain: [c.terr.value], ...monsterSource() }); setKids(out, encounterCard(enc, { title: `Encounter near ${place.name}`, place })); };
   const saveTable = async () => {
     const rows = encounterTable({ ...c.read(), terrain: [c.terr.value], ...monsterSource(), seed: Math.random().toString(36).slice(2) });
     try { await patchEntry(place, { fields: { encounters: tableText(rows) } }); toast(`Saved a d${rows.length} table to ${place.name}`); rerender(); } catch (err) { toast(err.message, 'bad'); }

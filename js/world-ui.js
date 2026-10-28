@@ -34,6 +34,7 @@ import { parseSearch, searchHash, searchEntries } from './search.js';
 import { saveTemplateButton, templatePicker } from './world-templates.js';
 import { fillHistory } from './world-history.js';
 import { viewCards, cardsButton } from './world-cards.js';
+import { encounterCard } from './encounter-ui.js';
 import { viewExport } from './world-export.js';
 import { viewClocks, clocksWidget } from './world-clocks.js';
 import { viewRumors } from './world-rumors.js';
@@ -218,6 +219,7 @@ function viewEntry(id, tab) {
     attitudesToward(e, rerenderWorld),
     objectivesSection(e, rerenderWorld),
     tableSection(e),
+    e.kind === 'encounter' && e.fields?.enc ? (() => { try { return encounterCard(JSON.parse(e.fields.enc), { title: 'Saved encounter', save: false }); } catch { return null; } })() : null,
     attendanceSection(e, rerenderWorld),
     e.fields?.stock || (e.kind === 'location' && e.fields?.type === 'Shop' && isGm()) ? el('section', { class: 'card shop-card' },
       el('div', { class: 'entry-head' }, el('h3', {}, 'For sale'), isGm() ? el('button', { class: 'btn small', type: 'button', onclick: async () => {

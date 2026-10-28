@@ -85,6 +85,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
   spellcasting, so the Forge builds the whole character); your spells join class spell lists in the Forge, NPC
   spellcasting and the Spells reference.
 - **NPC table cards**: print a card per NPC (voice, manner, wants, stats, attitudes, secret) for the people nearby.
+- **Saved encounters**: keep a rolled encounter where the party will meet it; session prep reminds you.
 - **Printable session sheet**: everything for the table on one page, from session prep.
 - **Attendance and XP**: record who came and XP or milestones per session; the party page shows who's due a level.
 - **Session recaps**: one click drafts the next session-log entry from everything that changed since the last one.

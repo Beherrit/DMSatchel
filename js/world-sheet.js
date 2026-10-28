@@ -41,7 +41,7 @@ export async function viewSessionSheet() {
   const weather = here ? rollWeather({ terrain, season: cal ? seasonOf(cal.month, cal.months.length) : 'Summer', seed: `${here.id}:${cal ? todayText(cal) : new Date().toDateString()}` }) : null;
   const party = partyDefaults();
   const encBox = el('div', { class: 'ss-enc' });
-  const roll = () => setKids(encBox, encounterCard(rollEncounter({ terrain, level: party.level, size: party.size, difficulty: 'Moderate', ...monsterSource() }), { title: here ? `Near ${here.name}` : 'On the road' }));
+  const roll = () => setKids(encBox, encounterCard(rollEncounter({ terrain, level: party.level, size: party.size, difficulty: 'Moderate', ...monsterSource() }), { title: here ? `Near ${here.name}` : 'On the road', place: here }));
   roll();
 
   return el('div', { class: 'w-view session-sheet' },

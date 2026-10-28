@@ -78,7 +78,8 @@ function whereSection(prep, rerender) {
         shops.length ? el('p', { class: 'small' }, `${shops.length} shop${shops.length === 1 ? '' : 's'}: `, shops.slice(0, 6).flatMap((s, i) => [i ? ', ' : '', link(s)])) : null),
       el('div', {}, el('h4', {}, 'Weather'), el('p', {}, weather.line), weather.rules.length ? el('p', { class: 'muted small' }, weather.rules[0]) : null,
         el('h4', {}, 'If trouble comes'),
-        el('div', { class: 'btnrow' }, el('button', { class: 'btn small', type: 'button', onclick: () => setKids(encBox, encounterCard(rollEncounter({ terrain, level: party.level, size: party.size, difficulty: 'Moderate', ...monsterSource() }), { title: `Near ${here.name}` })) }, 'Roll an encounter'),
+        (() => { const saved = [here, ...inside].filter((e) => e.kind === 'encounter'); return saved.length ? el('ul', { class: 'plain prep-list' }, saved.map((x) => el('li', {}, '⚔ ', link(x), x.fields?.difficulty ? el('span', { class: 'muted small' }, ` ${x.fields.difficulty}`) : null, x.fields?.when ? el('div', { class: 'muted small' }, x.fields.when) : null))) : null; })(),
+        el('div', { class: 'btnrow' }, el('button', { class: 'btn small', type: 'button', onclick: () => setKids(encBox, encounterCard(rollEncounter({ terrain, level: party.level, size: party.size, difficulty: 'Moderate', ...monsterSource() }), { title: `Near ${here.name}`, place: here })) }, 'Roll an encounter'),
           el('a', { class: 'btn small ghost', href: `#world/e/${here.id}/wilds` }, 'Encounter table')),
         encBox)));
 }

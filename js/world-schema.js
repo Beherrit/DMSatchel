@@ -90,6 +90,11 @@ export const KINDS = {
     // One result per line; "3x …" or "1-4: …" for weights, {2d6} for dice, {a|b} for a choice, [[Another table]] to roll it.
     fields: [['rows', 'Results, one per line', 'long'], ['category', 'Category']],
   },
+  encounter: {
+    label: 'Encounter', plural: 'Encounters', blurb: 'Fights and meetings saved for later, waiting where the party will find them.',
+    // The rolled encounter itself is kept as JSON (enc); the rest is for the GM to describe when and how it happens.
+    fields: [['difficulty', 'Difficulty', 'select', ['Low', 'Moderate', 'High']], ['when', 'When it happens', 'long'], ['tactics', 'Tactics', 'long'], ['enc', 'Encounter', 'hidden']],
+  },
   handout: {
     label: 'Handout', plural: 'Handouts', blurb: 'Letters, maps, notes and clues the GMs hand to the players.',
     fields: [['from', 'From (who wrote or gave it)'], ['found', 'Where or when it was found'], ['text', 'Text of the handout', 'long']],
@@ -135,7 +140,7 @@ export const KINDS = {
 for (const k of Object.values(KINDS)) k.fields.push(['image', 'Picture', 'image']);
 export const isImageRef = (v) => /^\/api\/images\?id=[a-f0-9]{16}$/.test(v) || /^https:\/\/[^\s"'<>]{4,1000}$/.test(v);
 
-export const KIND_ORDER = ['region', 'area', 'settlement', 'location', 'faction', 'guild', 'clan', 'npc', 'character', 'deity', 'item', 'event', 'session', 'journal', 'downtime', 'handout', 'quest', 'rumor', 'lore', 'creature', 'rule', 'table'];
+export const KIND_ORDER = ['region', 'area', 'settlement', 'location', 'faction', 'guild', 'clan', 'npc', 'character', 'deity', 'item', 'event', 'session', 'journal', 'downtime', 'handout', 'quest', 'rumor', 'lore', 'creature', 'rule', 'table', 'encounter'];
 
 // Kinds a player can create and edit as their own; anything else a player adds is a suggestion for the GMs.
 export const PLAYER_KINDS = ['character', 'journal', 'downtime', 'table'];
