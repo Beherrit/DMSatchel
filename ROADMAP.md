@@ -163,6 +163,14 @@ to the log at the bottom.
     the character page, in session prep and on the spotlight tracker, and can mark them advanced or done.
 65. [x] **Link the mentions.** On any entry, GMs see plain-text mentions of other entries' names that aren't linked yet
     and can turn them into [[links]] one by one or all at once.
+66. [ ] **Make a copy.** GMs duplicate any entry (another tavern like this one, a second bandit captain) and land in
+    the edit form with the copy, named "… (copy)".
+67. [ ] **Your favorites.** Everyone stars the entries they keep going back to; starred entries sit at the top of the
+    world sidebar, for that person only.
+68. [ ] **The party on the map.** Where the party is (from session prep) shows as a marker on every map that has that
+    place pinned, for players too; GMs can set it from the map.
+69. [ ] **See it as a player.** A GM switch that shows the world the way players see it (no hidden entries, secrets,
+    suggestions or GM-only fields) to check what's been revealed, with a banner and one click back.
 
 ## Ideas parking lot
 
