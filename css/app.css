@@ -962,3 +962,25 @@ body.gated .mainnav, body.gated #toolnav, body.gated #panels, body.gated #notebo
 .wn-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr)); gap: 4px 20px }
 .wn-group h4 { margin: 8px 0 4px }
 .wn-group li { margin: 2px 0 }
+
+/* Printable session sheet */
+.session-sheet .ss-head h2 { margin: 0 }
+.session-sheet .ss-head p { margin: 2px 0 12px }
+.ss-grid { display: grid; align-items: start; grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr)); gap: 12px 24px }
+.ss-block { break-inside: avoid; border-top: 2px solid var(--ink); padding-top: 4px }
+.ss-block h3 { margin: 0 0 6px; font-size: 17px }
+.ss-list { margin: 0; padding-left: 18px }
+.ss-list > li { margin: 3px 0 }
+.ss-steps { list-style: none; padding-left: 8px; margin: 2px 0 }
+.ss-table { width: 100%; border-collapse: collapse; font-size: 14px }
+.ss-table th, .ss-table td { border-bottom: 1px solid var(--line); padding: 3px 6px; text-align: left }
+.ss-notes { white-space: pre-wrap; font-size: 14px }
+.ss-tools { margin-bottom: 10px }
+@media print {
+  .ss-tools, .w-side { display: none !important }
+  .w-layout { display: block }
+  .session-sheet { font-size: 12px }
+  .ss-grid { grid-template-columns: 1fr 1fr; gap: 8px 16px }
+  .ss-block { border-top-color: #000 }
+  .ss-enc .card, .ss-enc .btnrow { border: 0; padding: 0 }
+}

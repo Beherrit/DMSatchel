@@ -176,7 +176,7 @@ export async function viewPrep(rerender) {
   const next = Math.max(0, ...sessions().map((x) => parseInt(x.fields?.number, 10) || 0)) + 1;
   return el('div', { class: 'w-view prep-view' },
     el('div', { class: 'panel-head row' }, el('div', {}, el('h2', {}, `Prep for session ${next}`), el('p', {}, 'Everything you need before the table: where things stand, what’s about to happen, and your notes.')),
-      el('div', { class: 'btnrow' }, recapButton('btn'), el('button', { class: 'btn primary', type: 'button', onclick: startSession(prep) }, `Start session ${next}`))),
+      el('div', { class: 'btnrow' }, recapButton('btn'), el('a', { class: 'btn', href: '#world/sheet' }, 'Printable sheet'), el('button', { class: 'btn primary', type: 'button', onclick: startSession(prep) }, `Start session ${next}`))),
     el('div', { class: 'btnrow prep-actions' }, el('span', { class: 'muted small' }, 'Between sessions:'),
       el('a', { class: 'btn small', href: '#world/clocks' }, 'Faction turn'),
       el('button', { class: 'btn small', type: 'button', onclick: async () => { await letRumorsSpread(); rerender(); } }, 'Let rumors spread'),

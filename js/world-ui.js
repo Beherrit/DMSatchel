@@ -25,6 +25,7 @@ import { attitudesOfCharacter, attitudesToward } from './world-attitudes.js';
 import { noteBox, myNotesSection } from './world-notes.js';
 import { objectivesSection } from './world-objectives.js';
 import { whatsNewCard } from './world-whatsnew.js';
+import { viewSessionSheet } from './world-sheet.js';
 import { viewExport } from './world-export.js';
 import { viewClocks, clocksWidget } from './world-clocks.js';
 import { viewRumors } from './world-rumors.js';
@@ -495,6 +496,7 @@ export async function showWorld(parts, { keepScroll = false } = {}) {
   else if (view === 'talk') node = await viewTalk();
   else if (view === 'table') node = await viewTable();
   else if (view === 'prep') node = await viewPrep(rerenderWorld);
+  else if (view === 'sheet') node = await viewSessionSheet();
   else if (view === 'powers') node = viewPowers(rerenderWorld);
   else if (view === 'library') node = viewLibrary(arg, rerenderWorld);
   else if (view === 'import') node = viewImport(rerenderWorld);
