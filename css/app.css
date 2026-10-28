@@ -1312,3 +1312,5 @@ div.poll-row { cursor: default }
 .tag-cloud { list-style: none; padding: 0; margin: 8px 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); gap: 8px 16px }
 .tag-note-short { color: var(--muted) }
 .tag-note { margin-bottom: 12px }
+.toast.with-action { display: inline-flex; align-items: center; gap: 6px }
+.toast-undo { background: none; border: 0; color: inherit; font: inherit; font-weight: 700; text-decoration: underline; cursor: pointer; padding: 2px 4px }

@@ -2,7 +2,7 @@
 // Routes: #world · #world/k/<kind> · #world/e/<id> · #world/new/<kind> · #world/edit/<id> · #world/q/<search> · #world/bin
 //         #world/party · #world/zero (session zero) · #world/schedule · #world/downtime[/<character>] · #world/suggestions (GMs) · #world/mine (your characters, journals and suggestions)
 
-import { el, toast, confirmButton, setKids } from './dom.js';
+import { el, toast, toastUndo, confirmButton, setKids } from './dom.js';
 import { api, session, isGm, isMember, isPlayer, signedIn, onSession, setPreview } from './api.js';
 import { KINDS, KIND_ORDER, LINK_LABELS, STANDING_KINDS, PLACE_KINDS, PLAYER_KINDS, fieldApplies } from './world-schema.js';
 import { openSignIn } from './signin.js';
@@ -345,7 +345,7 @@ function suggestionBanner(e) {
     el('div', { class: 'btnrow' },
       el('button', { class: 'btn primary small', type: 'button', onclick: async () => { try { await setEntryState(e, { status: 'live' }); toast(`Approved ${e.name}`); rerenderWorld(); } catch (err) { toast(err.message, 'bad'); } } }, 'Approve'),
       el('button', { class: 'btn small', type: 'button', onclick: async () => { try { await setEntryState(e, { status: 'live', visibility: 'gm' }); toast(`Approved ${e.name}, hidden from players for now`); rerenderWorld(); } catch (err) { toast(err.message, 'bad'); } } }, 'Approve, keep hidden'),
-      confirmButton('Reject', async () => { try { await api('entries', { method: 'DELETE', query: { id: e.id } }); world.entries.delete(e.id); toast('Rejected; it’s in the bin'); location.hash = 'world/suggestions'; } catch (err) { toast(err.message, 'bad'); } }, 'btn ghost small')));
+      confirmButton('Reject', async () => { try { await api('entries', { method: 'DELETE', query: { id: e.id } }); world.entries.delete(e.id); toastUndo('Rejected; it’s in the bin', () => undoDelete(e.id, e.name, false)); location.hash = 'world/suggestions'; } catch (err) { toast(err.message, 'bad'); } }, 'btn ghost small')));
 }
 
 function viewSuggestions() {
@@ -355,7 +355,7 @@ function viewSuggestions() {
     list.length ? el('ul', { class: 'entry-list suggest-list' }, list.map((e) => el('li', {}, link(e), el('span', { class: 'kind-tag' }, kindLabel(e.kind)), el('span', { class: 'muted small' }, `${e.owner || 'A player'}, ${when(e.created_at)}`),
       el('span', { class: 'actions' },
         el('button', { class: 'btn small primary', type: 'button', onclick: async () => { try { await setEntryState(e, { status: 'live' }); toast(`Approved ${e.name}`); rerenderWorld(); } catch (err) { toast(err.message, 'bad'); } } }, 'Approve'),
-        confirmButton('Reject', async () => { try { await api('entries', { method: 'DELETE', query: { id: e.id } }); world.entries.delete(e.id); toast('Rejected'); rerenderWorld(); } catch (err) { toast(err.message, 'bad'); } }, 'btn small ghost')))))
+        confirmButton('Reject', async () => { try { await api('entries', { method: 'DELETE', query: { id: e.id } }); world.entries.delete(e.id); toastUndo(`Rejected ${e.name}`, () => undoDelete(e.id, e.name, false)); rerenderWorld(); } catch (err) { toast(err.message, 'bad'); } }, 'btn small ghost')))))
       : (world.info?.edits_open ? null : notice('Nothing waiting', 'When a player suggests an NPC, a place, a rumor or an edit to an entry, it shows up here.')),
     editsSection(rerenderWorld));
 }
@@ -511,7 +511,7 @@ function viewEdit(id, kindForNew) {
       el('button', { class: 'btn primary', type: 'submit' }, existing ? 'Save changes' : !gm && !PLAYER_KINDS.includes(e.kind) ? 'Send suggestion' : 'Create entry'),
       el('a', { class: 'btn ghost', href: existing ? `#world/e/${existing.id}` : '#world' }, 'Cancel'),
       existing ? confirmButton('Move to bin', async () => {
-        try { await api('entries', { method: 'DELETE', query: { id: existing.id } }); world.entries.delete(existing.id); toast('Moved to the bin'); location.hash = `world/k/${existing.kind}`; }
+        try { await api('entries', { method: 'DELETE', query: { id: existing.id } }); world.entries.delete(existing.id); toastUndo(`${existing.name} moved to the bin`, () => undoDelete(existing.id, existing.name)); location.hash = `world/k/${existing.kind}`; }
         catch (err) { status.textContent = err.message; status.className = 'form-status error'; }
       }, 'btn ghost') : null));
   renderFields();
@@ -644,6 +644,17 @@ function lastSeenLine(e) {
   if (!seen) return null;
   return el('p', { class: 'muted small last-seen' }, '👁 Last seen in ', link(seen.last), seen.ago ? ` (${seen.ago} session${seen.ago === 1 ? '' : 's'} ago)` : ' (the latest session)',
     seen.count > 1 ? ` · in ${seen.count} sessions` : '');
+}
+
+// Undo a move to the bin: bring the entry back, then open it (or just redraw where we are).
+async function undoDelete(id, name, open = true) {
+  try {
+    await api('entries', { method: 'DELETE', query: { id, restore: 1 } });
+    const r = await api('entries', { query: { id } });
+    world.entries.set(r.entry.id, r.entry);
+    toast(`${name} is back`);
+    if (open) location.hash = `world/e/${id}`; else rerenderWorld();
+  } catch (err) { toast(err.message, 'bad'); }
 }
 
 export function acceptDraft(d = {}) {

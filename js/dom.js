@@ -33,6 +33,15 @@ export function toast(msg, kind = '') {
   toast.timer = setTimeout(() => { t.hidden = true; }, 2200);
 }
 
+// A toast with an Undo button that stays a few seconds longer, for things that can be taken back.
+export function toastUndo(msg, onUndo, ms = 7000) {
+  const t = $('#toast');
+  const undo = el('button', { class: 'toast-undo', type: 'button', onclick: async () => { clearTimeout(toast.timer); t.hidden = true; await onUndo(); } }, 'Undo');
+  t.replaceChildren(msg, ' · ', undo); t.className = 'toast with-action'; t.hidden = false;
+  clearTimeout(toast.timer);
+  toast.timer = setTimeout(() => { t.hidden = true; }, ms);
+}
+
 export async function copyText(text) {
   try { await navigator.clipboard.writeText(text); toast('Copied'); }
   catch {

@@ -16,7 +16,7 @@
 //                                   inventory as the page shows them, used only where the sheet never saved its own.
 // PATCH {id, share: [member ids]}     (GM) give a hidden entry to chosen members only ([] takes it back)
 // PATCH {id, claim: true} · {id, owner: null}   claim an unowned character (member) · unassign it (GM)
-// DELETE ?id=       move to the bin (GM, or a player's own entry) · DELETE ?id=&restore=1 brings it back (GM)
+// DELETE ?id=       move to the bin (GM, or a player's own entry) · DELETE ?id=&restore=1 brings it back (the same people)
 //
 // Players never receive: GM-only entries, other people's pending suggestions, secrets, or GM-only links.
 import { route, send, fail, sql, newId, requireGm, requireMember, requireOwner } from './_lib/core.js';
@@ -395,7 +395,8 @@ export default route({
     const { id, restore } = req.query || {};
     const current = id && await loadOne(id, req.world.id);
     if (!current) return fail(res, 404, 'That entry doesn’t exist.');
-    if (!req.isGmHere && (current.owner_id !== req.gm.id || restore)) return fail(res, 403, 'You can only delete your own entries.');
+    // Players delete (and undo deleting) only their own entries.
+    if (!req.isGmHere && current.owner_id !== req.gm.id) return fail(res, 403, 'You can only delete your own entries.');
     await sql`UPDATE entries SET deleted = ${!restore}, updated_by = ${req.gm.id}, updated_at = now(), version = version + 1 WHERE id = ${id} AND world_id = ${req.world.id}`;
     await record(id, req.gm.id, restore ? 'restore' : current.status === 'suggested' && req.isGmHere && current.owner_id !== req.gm.id ? 'reject' : 'delete', null);
     send(res, 200, { ok: true });
