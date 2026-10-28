@@ -69,6 +69,7 @@ const viewImport = lazyView(() => import('./world-import.js'), 'viewImport');
 const viewSessionSheet = lazyView(() => import('./world-sheet.js'), 'viewSessionSheet');
 const viewTodo = lazyView(() => import('./world-todo.js'), 'viewTodo');
 const viewZero = lazyView(() => import('./world-zero.js'), 'viewZero');
+const viewPrintCharacter = lazyView(() => import('./world-print.js'), 'viewPrintCharacter');
 const viewExport = lazyView(() => import('./world-export.js'), 'viewExport');
 
 export { loadWorld, worldEntries };
@@ -587,6 +588,7 @@ export async function showWorld(parts, { keepScroll = false } = {}) {
   else if (view === 'sheet') node = await viewSessionSheet();
   else if (view === 'todo') node = await viewTodo();
   else if (view === 'zero') node = await viewZero();
+  else if (view === 'print') node = await viewPrintCharacter(arg);
   else if (view === 'cards') node = await viewCards(arg);
   else if (view === 'powers') node = await viewPowers(rerenderWorld);
   else if (view === 'library') node = await viewLibrary(arg, rerenderWorld);

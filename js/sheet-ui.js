@@ -267,7 +267,7 @@ export function sheetSection(e, rerender) {
   function draw() {
     const s = ch?.stats;
     setKids(box,
-      el('div', { class: 'entry-head' }, el('h3', {}, 'Character sheet'), levelUp()),
+      el('div', { class: 'entry-head' }, el('h3', {}, 'Character sheet'), el('div', { class: 'btnrow' }, levelUp(), el('a', { class: 'btn small ghost', href: `#world/print/${e.id}` }, 'Print'))),
       ch ? el('p', { class: 'muted small' }, `Level ${s.level} ${ch.species} ${ch.cls}${ch.subclass ? ` (${ch.subclass})` : ''} · ${ch.background} · ${ch.alignment}`) : null,
       el('div', { class: 'tracker' }, hpBlock(), el('div', { class: 'stats' },
         el('div', { class: 'stat' }, el('span', { class: 'stat-l' }, 'Armor class'), el('span', { class: 'stat-v' }, play.ac || s?.ac || '—'), s && !play.ac ? el('span', { class: 'stat-n' }, s.acNote) : null),
@@ -284,7 +284,7 @@ export function sheetSection(e, rerender) {
   return box;
 }
 
-function fullSheet(ch) {
+export function fullSheet(ch) {
   const s = ch.stats;
   const sec = (t, ...k) => el('section', { class: 'sheet-block' }, el('h4', {}, t), ...k);
   return el('div', { class: 'sheet-cols' },
@@ -307,6 +307,9 @@ function fullSheet(ch) {
 }
 
 // Hit points and conditions at a glance (for the party and session prep pages).
+// A character's play state (coin, inventory, notes, hit dice…) with the defaults the sheet shows.
+export const playOf = (e) => defaults(e, characterOf(e));
+
 export function vitals(e) {
   const ch = characterOf(e);
   const p = defaults(e, ch);

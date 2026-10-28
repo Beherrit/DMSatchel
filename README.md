@@ -102,6 +102,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Private notes**: everyone can keep their own notes on any page, seen by nobody else.
 - **Attitudes**: how each NPC and power feels about each character, on both pages and in session prep.
 - **Quest rewards**: completing a quest offers to put its reward (coin and items read from the text) into the party treasury.
+- **Print a character**: a clean printable page for any world character, from their sheet and play state.
 - **Hand it over**: give an item or coin from your character to another party member; both sheets update at once.
 - **Split the loot**: share the party treasury's coin between characters, by shares, straight onto their sheets.
 - **Notices**: GMs post short notices ("No game this Friday") on the front page, shown as a banner until dismissed or expired.

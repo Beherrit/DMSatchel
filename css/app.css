@@ -1226,3 +1226,28 @@ li.picking:has(.bulk-pick:checked) { outline: 2px solid var(--accent, #2c6e63); 
 .edit-list .diff-list { margin: 6px 0 }
 .se-dialog { width: min(760px, calc(100vw - 24px)) }
 .edit-accepted { background: var(--accent); color: var(--accent-ink) }
+
+/* Printable character */
+.print-char { max-width: 900px }
+.pr-head { display: flex; gap: 16px; align-items: center; margin-bottom: 12px }
+.pr-head h2 { margin: 0 }
+.pr-head p { margin: 2px 0 }
+.pr-pic { width: 96px; height: 96px; object-fit: cover; border-radius: 8px; border: 1px solid var(--line) }
+.pr-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; margin: 8px 0 }
+.pr-stat, .pr-ab { border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; display: grid; text-align: center }
+.pr-stat span, .pr-ab span { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em }
+.pr-stat strong, .pr-ab strong { font-size: 20px }
+.pr-abilities { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; margin: 8px 0 }
+.pr-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px }
+.pr-box h3 { font-size: 1.05rem; margin: 12px 0 4px }
+.pr-list { margin: 0; padding-left: 18px }
+.pr-story { white-space: pre-line }
+.pr-pre { white-space: pre-wrap; font: inherit }
+.pr-sheet .sheet-more, .pr-sheet details { display: block }
+@media (max-width: 640px) { .pr-abilities { grid-template-columns: repeat(3, minmax(0, 1fr)) } .pr-cols { grid-template-columns: 1fr } }
+@media print {
+  .print-char .pr-tools, #notice-banner, .preview-banner { display: none !important }
+  .print-char { max-width: none; font-size: 12px }
+  .pr-stat, .pr-ab { border-color: #000 }
+  .pr-box, .sheet-block { break-inside: avoid }
+}
