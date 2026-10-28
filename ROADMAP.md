@@ -155,6 +155,14 @@ to the log at the bottom.
     locations); they show on the form and the page like built-in ones.
 61. [x] **Session zero page.** A world primer every member sees when they join: tone, house rules, and safety tools
     (lines and veils), with players able to add their own lines and veils privately for the GMs.
+62. [ ] **Secrets and clues.** In session prep GMs keep a list of secrets the party could discover, each tied to
+    entries; tick one off when it's found out, and the unrevealed ones carry over to the next session.
+63. [ ] **Spotlight tracker.** Session prep shows which player characters have had the least attention lately (from
+    attendance and mentions in recent session logs), with their goals, so every player gets a turn.
+64. [ ] **Character goals.** Players write their character's goals (short, long, secret-from-the-party); GMs see them on
+    the character page, in session prep and on the spotlight tracker, and can mark them advanced or done.
+65. [ ] **Link the mentions.** On any entry, GMs see plain-text mentions of other entries' names that aren't linked yet
+    and can turn them into [[links]] one by one or all at once.
 
 ## Ideas parking lot
 
