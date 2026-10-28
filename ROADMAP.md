@@ -147,6 +147,15 @@ to the log at the bottom.
 57. [x] **Faster first load.** Load the rarely used pages and tools only when they're opened, so the site starts
     faster on phones.
 
+58. [ ] **Link suggestions while writing.** Typing [[ in any text box suggests entry names as you type; picking one
+    finishes the link.
+59. [ ] **Bulk actions.** On entry lists and search results GMs can tick several entries and reveal, hide, tag or move
+    them into a place at once.
+60. [ ] **Your own fields.** GMs add extra fields to a kind for this world (say "Deity" on NPCs or "Danger level" on
+    locations); they show on the form and the page like built-in ones.
+61. [ ] **Session zero page.** A world primer every member sees when they join: tone, house rules, and safety tools
+    (lines and veils), with players able to add their own lines and veils privately for the GMs.
+
 ## Ideas parking lot
 
 ## Log
