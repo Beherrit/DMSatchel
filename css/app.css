@@ -1169,3 +1169,13 @@ li.picking:has(.bulk-pick:checked) { outline: 2px solid var(--accent, #2c6e63); 
 
 /* Theme switch */
 .theme-btn { flex: none; min-width: 40px; min-height: 40px; font-size: 18px; line-height: 1; padding: 6px 10px; display: inline-grid; place-items: center }
+
+/* At the table */
+.table-card { margin-top: 18px }
+.table-people { list-style: none; padding: 0; margin: 0 }
+.table-people li { padding: 6px 0; border-bottom: 1px dashed var(--line) }
+.table-people li:last-child { border-bottom: 0 }
+.table-people .tag { margin-left: 6px }
+.table-people p { margin: 2px 0 0 }
+.pf-edit summary { cursor: pointer; font-size: .92rem }
+.pf-form { display: grid; gap: 8px; margin-top: 8px }

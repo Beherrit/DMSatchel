@@ -143,6 +143,8 @@ export default route({
         ...(favorites ? { favorites } : {}),
         // Where the party is (from session prep), when this person can see that place.
         party_at: partyAt(w, rows, req),
+        // Members' pronouns by person, to show beside their names.
+        ...(req.role ? { pronouns: Object.fromEntries((await sql`SELECT gm_id, profile->>'pronouns' AS p FROM members WHERE world_id = ${w.id} AND profile->>'pronouns' <> ''`).map((r) => [r.gm_id, r.p])) } : {}),
         ...(req.isGmHere ? { templates: Array.isArray(w.templates) ? w.templates : [] } : {}) },
       role: req.role,
     });

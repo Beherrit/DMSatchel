@@ -20,11 +20,14 @@
 // POST {zero_read: true}                    you've read the page
 //
 // PUT {favorite: entryId, on: bool}         star or unstar an entry for yourself (members); returns your favorites
+// GET ?members=1                            the world's members with their profiles (members)
+// PUT {profile: {pronouns, note}}           your own profile in this world
 import { route, send, fail, sql, requireMember, requireGm, postDiscord } from './_lib/core.js';
 import { cleanDates, cleanVote, tally, dateText } from '../js/schedule.js';
 import { cleanPrimer, cleanAnswer, answerEmpty } from '../js/zero.js';
 
 const clip = (v, n) => String(v ?? '').slice(0, n);
+const cleanProfile = (p) => ({ pronouns: clip(p?.pronouns, 40).trim(), note: clip(p?.note, 600).trim() });
 
 const pollShape = (p) => ({ id: p.id, title: p.title, note: p.note, dates: p.dates, votes: p.votes, locked: p.locked, closed: p.closed, created_at: p.created_at, created_by: p.created_by });
 
@@ -109,6 +112,12 @@ async function putZero(req, res) {
 export default route({
   async PUT(req, res) {
     if (req.body.zero !== undefined) return putZero(req, res);
+    if (req.body.profile !== undefined) {
+      if (!requireMember(req, res)) return;
+      const p = cleanProfile(req.body.profile);
+      await sql`UPDATE members SET profile = ${JSON.stringify(p)}::jsonb WHERE world_id = ${req.world.id} AND gm_id = ${req.gm.id}`;
+      return send(res, 200, { profile: p });
+    }
     if (req.body.favorite !== undefined) {
       if (!requireMember(req, res)) return;
       const id = clip(req.body.favorite, 40);
@@ -132,6 +141,11 @@ export default route({
   async GET(req, res) {
     if (req.query?.schedule) return getSchedule(req, res);
     if (req.query?.zero) return getZero(req, res);
+    if (req.query?.members) {
+      if (!requireMember(req, res)) return;
+      const rows = await sql`SELECT g.id, g.name, m.role, m.profile FROM members m JOIN gms g ON g.id = m.gm_id WHERE m.world_id = ${req.world.id} ORDER BY g.name`;
+      return send(res, 200, { members: rows.map((r) => ({ id: r.id, name: r.name, role: r.role, ...cleanProfile(r.profile) })), me: req.gm.id });
+    }
     const lines = await sql`SELECT l.id, l.at, l.cp::float8 AS cp, l.item, l.qty, l.holder, l.note, l.session_id, l.gm_id, g.name AS by
       FROM party_ledger l LEFT JOIN gms g ON g.id = l.gm_id WHERE l.world_id = ${req.world.id} AND NOT l.deleted ORDER BY l.at DESC LIMIT 1000`;
     const cp = lines.reduce((t, l) => t + Number(l.cp || 0), 0);

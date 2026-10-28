@@ -177,7 +177,7 @@ to the log at the bottom.
     prep lists recurring NPCs tied to where the party is who haven't appeared for a while.
 72. [x] **Light, dark or automatic.** A theme switch in the header (the styles already support both), remembered on
     this device.
-73. [ ] **Member profiles.** Each member sets their pronouns and a short note for the table (availability, what
+73. [x] **Member profiles.** Each member sets their pronouns and a short note for the table (availability, what
     they enjoy); shown on the party page, member lists and session zero answers.
 
 ## Ideas parking lot
@@ -256,3 +256,4 @@ to the log at the bottom.
 - Quest rewards to the treasury: a Completed quest with a reward shows GMs "Quest complete: pay the reward?" on its page. "Add to the party treasury" opens a check-first dialog with the coin and items read from the reward text ("200 gp, a +1 longsword and 3 potions of healing"; coin words like "50 gold pieces", "two horses", [[links]] and "each" handled), each item with a tick box and quantity, plus room for more; it adds treasury lines noted "Reward: <quest>" against the latest session and records the date on the quest (hidden reward_paid field), after which the page just says when. "Already handled" records it without adding anything. js/reward.js unit tested.
 - Who shows up where: NPC pages say "Last seen in Session N (k sessions ago) · in m sessions" under the heading (the existing "Appears in sessions" list stays at the foot). Session prep has "Who might turn up in <town>": people in the party's town (or wherever it is) met before but not in the last two sessions, longest absent first, then key people not met yet, each with their role and when they were last seen. Appearances come from session logs' [[links]] in any text or field, and the sessions' connections. js/appearances.js unit tested.
 - Light, dark or automatic: a ◐ / ☀ / ☾ button in the header cycles automatic (follows the device), light and dark; the choice is kept in this browser and applied by a tiny script in the page head before anything draws, so it never flashes the other theme. The browser bar colour follows. Checked with axe in dark mode and at phone width.
+- Member profiles: the party page has an "At the table" list of the world's members with their role, pronouns and a short note (when they can play, what they enjoy); each person edits their own row (pronouns with common choices suggested). Pronouns travel with the world load, so character pages read "Played by Pip (she/her)". Additive members.profile jsonb; GET ?members and PUT {profile} on the party API, tested against PGlite.

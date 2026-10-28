@@ -16,6 +16,7 @@ const ACTIVE = (e) => !['Retired', 'Dead', 'Missing'].includes(e.fields?.status)
 // Coin text and parsing live in economy.js (pure, so recaps and tests can use them too).
 export { coinText, parseCoins } from './economy.js';
 import { coinText, parseCoins } from './economy.js';
+import { tableCard } from './world-profiles.js';
 
 function members(chars) {
   const active = chars.filter(ACTIVE), former = chars.filter((e) => !ACTIVE(e));
@@ -158,6 +159,6 @@ export async function viewParty(rerender) {
           journal.length ? el('ul', { class: 'entry-list' }, journal.slice(0, 8).map((j) => el('li', {}, link(j), el('span', { class: 'muted small' }, [j.fields?.character || j.owner || j.created_by, j.fields?.date || when(j.created_at)].filter(Boolean).join(' · ')))))
             : el('p', { class: 'muted' }, 'Nobody has written anything yet.'),
           journal.length > 8 ? el('a', { href: '#world/k/journal' }, `All ${journal.length} entries`) : null)),
-      el('aside', { class: 'party-side' }, treasuryBox)));
+      el('aside', { class: 'party-side' }, treasuryBox, tableCard())));
 }
 

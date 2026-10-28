@@ -31,6 +31,7 @@ import { mentionsCard } from './world-mentions.js';
 import { starButton, favoritesNav } from './world-favorites.js';
 import { rewardCard } from './world-reward.js';
 import { appearances } from './appearances.js';
+import { withPronouns } from './world-profiles.js';
 import { tableSection } from './world-tables.js';
 import { parseSearch, searchHash, searchEntries } from './search.js';
 import { saveTemplateButton, templatePicker } from './world-templates.js';
@@ -352,7 +353,7 @@ function viewMine() {
 function ownerLine(e) {
   const claim = async (body, msg) => { try { const r = await api('entries', { method: 'PATCH', body: { id: e.id, ...body } }); world.entries.set(r.entry.id, r.entry); toast(msg); rerenderWorld(); } catch (err) { toast(err.message, 'bad'); } };
   if (e.owner_id) {
-    return el('p', { class: 'muted small owner-line' }, `Played by ${e.owner}${e.owner_id === session.gm?.id ? ' (you)' : ''}. `,
+    return el('p', { class: 'muted small owner-line' }, `Played by ${withPronouns(e.owner_id, e.owner)}${e.owner_id === session.gm?.id ? ', that’s you' : ''}. `,
       isGm() ? confirmButton('Unassign', () => claim({ owner: null }, 'Nobody plays this character now'), 'linkish') : null);
   }
   return isMember() ? el('p', { class: 'muted small owner-line' }, 'No player has claimed this character. ',
