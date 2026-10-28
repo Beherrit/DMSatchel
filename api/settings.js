@@ -2,6 +2,7 @@
 // PATCH {cal}  set the in-world calendar and today's date (any GM: days pass during play).
 // PUT {discord_webhook}  (owner) a Discord webhook link; it never leaves the server. Empty string removes it.
 // PATCH {prep: {location_id, notes}}   (GM) session prep: where the party is, and the GMs' scratch pad.
+// PATCH {tag_note: {tag, text}}   (GM) a tag's description on its page
 // PATCH {start_here: {id, on} | {order}}   (GM) the entries newcomers should read first
 // PATCH {clock: {advance} | {set} | {add_light} | {remove_light}}   (GM) time of day and lights during play
 // PATCH {notice: {add: {text, until}} | {remove: id}, discord?}   (GM) notices on the front page (and Discord)
@@ -116,6 +117,17 @@ export default route({
       return send(res, 200, { shown, revealed: e.visibility === 'gm' });
     }
     // Secrets and clues in session prep, one change at a time: {secret: {add} | {id, found, session} | {id, text} | {remove}}.
+    // Tag descriptions (GMs): {tag_note: {tag, text}}; an empty text removes it.
+    if (req.body.tag_note) {
+      const tag = String(req.body.tag_note.tag || '').trim().replace(/^#+/, '').toLowerCase().slice(0, 40);
+      if (!tag) return fail(res, 400, 'Which tag?');
+      const text = String(req.body.tag_note.text || '').trim().slice(0, 2000);
+      const notes = { ...(req.world.tag_notes && typeof req.world.tag_notes === 'object' ? req.world.tag_notes : {}) };
+      if (text) notes[tag] = text; else delete notes[tag];
+      if (Object.keys(notes).length > 300) return fail(res, 400, 'That’s a lot of tag descriptions already.');
+      await sql`UPDATE worlds SET tag_notes = ${JSON.stringify(notes)}::jsonb WHERE id = ${req.world.id}`;
+      return send(res, 200, { tag_notes: notes });
+    }
     // Start here (GMs): {start_here: {id, on}} adds or removes an entry; {start_here: {order: [ids]}} reorders.
     if (req.body.start_here) {
       const b = req.body.start_here;

@@ -168,7 +168,7 @@ export default route({
         ...(zeroRead !== undefined ? { zero_read: zeroRead } : {}),
         ...(favorites ? { favorites } : {}),
         // Where the party is (from session prep), when this person can see that place.
-        party_at: partyAt(w, rows, req), clock: readClock(w.clock),
+        party_at: partyAt(w, rows, req), clock: readClock(w.clock), tag_notes: w.tag_notes || {},
         // Start here: only what this person can see.
         start_here: (Array.isArray(w.start_here) ? w.start_here : []).filter((id) => { const r = rows.find((x) => x.id === id); return r && !r.deleted && visibleTo(r, req); }),
         ...(req.role ? { notices: activeNotices(w.notices) } : {}),

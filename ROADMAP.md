@@ -209,7 +209,7 @@ to the log at the bottom.
     big threat); they show on the front page and the session zero page for newcomers.
 88. [x] **Notices and polls to Discord.** When the world has a Discord channel, posting a notice or a poll can go to
     the channel too, with a link back.
-89. [ ] **Tag pages.** Every tag gets a page listing what's tagged, with a short description GMs can write, and a list
+89. [x] **Tag pages.** Every tag gets a page listing what's tagged, with a short description GMs can write, and a list
     of all tags with counts.
 
 ## Ideas parking lot
@@ -304,3 +304,4 @@ to the log at the bottom.
 - Time and light: a "Time and light" card on the world front page and in session prep shows the in-world hour ("23:30 · night") and the lights burning (torch, lantern, candle, Light, continual flame or anything named), each with a bar and the time left, turning red near the end. GMs move time on (+10 min, +1 hour, short rest, long rest), set the hour, light and put out lights; lights burn down as time passes and the toast says what went out; passing midnight moves the world calendar on a day. Players see it update live (it travels with the 20-second sync). The front page now puts notices, quick polls and time side by side on wide screens. Additive worlds.clock jsonb; settings PATCH {clock}. js/clock.js unit tested; tested against PGlite.
 - Start here: GMs add up to twelve entries to "Start here" with a button on their pages, and reorder them on the front page. The list (name, kind, summary) leads the world front page, open for newcomers (no earlier visit, or session zero not read yet) and folded for everyone else, and also shows on the session zero page. Players only see the entries they're allowed to see. Additive worlds.start_here jsonb; settings PATCH {start_here: {id, on} | {order}}; tested against PGlite.
 - Notices and polls to Discord: when the world has a Discord channel, the notice form has "Also post to Discord" (ticked by default) and the quick-poll form has "Also post it to Discord" (unticked). The post carries the notice (with who and until when) or the question with numbered choices and a link back to vote. The notice or poll is saved either way; if Discord refuses, the page says so. Tested against PGlite with Discord stubbed (what's posted, and what happens when it fails).
+- Tag pages: "Tags" in the world sidebar (with how many there are) opens #world/tags, every tag with how many entries carry it, most used first, and the first line of its description. A tag's own page (the tagged search) shows its description, which GMs write or edit in place ([[links]] work; everyone who can see the tag reads it), plus a link back to all tags. Additive worlds.tag_notes jsonb; settings PATCH {tag_note: {tag, text}}.

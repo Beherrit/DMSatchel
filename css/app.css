@@ -1307,3 +1307,8 @@ div.poll-row { cursor: default }
 .start-list li::after { content: ""; display: table; clear: both }
 .start-list li .btnrow { float: right; display: inline-flex; gap: 2px; margin: 0 0 0 8px }
 .start-list p { margin: 2px 0 0 }
+
+/* Tag pages */
+.tag-cloud { list-style: none; padding: 0; margin: 8px 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); gap: 8px 16px }
+.tag-note-short { color: var(--muted) }
+.tag-note { margin-bottom: 12px }

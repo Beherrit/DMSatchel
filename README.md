@@ -135,6 +135,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Is that name taken?**: the entry form warns when the world already has an entry with that name, or a close one.
 - **Make a copy**: GMs duplicate any entry and edit the copy.
 - **Many at once**: GMs tick entries on any list or search and reveal, hide, tag, untag or move them into a place together.
+- **Tag pages**: a list of every tag with counts, and a description on each tag's page.
 - **Search the talk**: world search also finds words in table talk, GM discussions (GMs) and your own notes, and jumps to the comment.
 - **Link the mentions**: entry pages show GMs names written as plain text that could be links, and link them in one click.
 - **Link suggestions**: typing [[ in any text box suggests entry names; pick one to finish the link.

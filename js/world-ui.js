@@ -41,6 +41,7 @@ import { nameCheck } from './world-namecheck.js';
 import { pollsCard } from './world-polls.js';
 import { clockCard } from './world-clock.js';
 import { startHereButton, startHereCard } from './world-start.js';
+import { viewTags, tagNote } from './world-tags.js';
 import { tableSection } from './world-tables.js';
 import { parseSearch, searchHash, searchEntries } from './search.js';
 import { saveTemplateButton, templatePicker } from './world-templates.js';
@@ -107,6 +108,7 @@ function renderSide() {
       el('a', { href: '#world/powers', 'data-view': 'powers' }, el('span', {}, 'Who stands where'), el('span', { class: 'count' }, '▦')),
       el('a', { href: '#world/clocks', 'data-view': 'clocks' }, el('span', {}, 'Faction clocks'), el('span', { class: 'count' }, (world.standings?.clocks || []).length)),
       el('a', { href: '#world/standings', 'data-view': 'standings' }, el('span', {}, 'Party standing'), el('span', { class: 'count' }, Object.keys(world.standings?.current || {}).length)),
+      el('a', { href: '#world/tags', 'data-view': 'tags' }, el('span', {}, 'Tags'), el('span', { class: 'count' }, new Set(worldEntries().flatMap((e) => e.tags || [])).size || '')),
       el('a', { href: '#world/table', 'data-view': 'table' }, el('span', {}, 'Table talk'), el('span', { class: 'count' }, '💬')),
       isGm() ? el('a', { href: '#world/talk', 'data-view': 'talk' }, el('span', {}, 'GM discussions'), el('span', { class: 'count', id: 'w-talk-count' }, '')) : null),
     el('nav', { class: 'w-kinds', 'aria-label': 'Entry types' }, KIND_ORDER.map((k) => el('a', { href: `#world/k/${k}`, 'data-kind': k }, el('span', {}, KINDS[k].plural), el('span', { class: 'count' }, counts[k] || 0)))),
@@ -222,6 +224,8 @@ function viewSearch(raw) {
   const grid = hits.length && (f.q || filtered) ? el('ul', { class: 'entry-grid' }, hits.slice(0, 200).map((e) => { const c = entryCard(e); c.prepend(el('span', { class: 'kind-tag' }, kindLabel(e.kind))); return c; })) : null;
   const bulk = grid ? bulkControls(hits.slice(0, 200), grid) : {};
   return el('div', { class: 'w-view' }, el('div', { class: 'panel-head row' }, el('div', {}, el('h2', {}, title), el('p', {}, `${hits.length} result${hits.length === 1 ? '' : 's'}${place ? ` in ${place.name}` : ''}`)), bulk.button),
+    tagOnly ? tagNote(tagOnly, rerenderWorld) : null,
+    tagOnly ? el('p', { class: 'small' }, el('a', { href: '#world/tags' }, 'All tags')) : null,
     el('div', { class: 'controls search-filters' }, q, el('button', { class: 'btn small', type: 'button', onclick: () => go({ q: q.value.trim() }) }, 'Search'),
       sel('sf-kind', 'Kind', f.kind, [['', 'Any kind'], ...kinds.map((k) => [k, KINDS[k].plural])], 'kind'),
       tags.length ? sel('sf-tag', 'Tag', f.tag, [['', 'Any tag'], ...tags.map((t) => [t, `#${t}`])], 'tag') : null,
@@ -586,6 +590,7 @@ export async function showWorld(parts, { keepScroll = false } = {}) {
   else if (view === 'new') node = viewEdit(null, arg);
   else if (view === 'edit') node = viewEdit(arg);
   else if (view === 'q') node = viewSearch(arg || '');
+  else if (view === 'tags') node = viewTags();
   else if (view === 'bin') node = await viewBin();
   else if (view === 'atlas') node = viewAtlas();
   else if (view === 'maps') node = viewMaps();
