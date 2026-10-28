@@ -16,15 +16,19 @@ import { route, send, fail, sql, newId, requireGm, requireMember, requireOwner }
 import { KINDS, isKind, LIMITS, PLAYER_KINDS, PLACE_KINDS, isImageRef, gmOnlyFields } from '../js/world-schema.js';
 import { forPlayers } from '../js/objectives.js';
 import { cleanTag, chainUp } from '../js/bulk.js';
+import { readCustom, customForPlayers, customKeys, secretCustomKeys, isCustomKey } from '../js/custom-fields.js';
 
 const clip = (v, n) => String(v ?? '').slice(0, n);
 
-function clean(input) {
+// The world's own fields, read once per request.
+const customOf = (req) => (req.custom ??= readCustom(req.world?.custom_fields));
+
+function clean(input, custom = {}) {
   const e = input || {};
   if (!isKind(e.kind)) return { error: 'Pick what kind of entry this is.' };
   const name = clip(e.name, LIMITS.name).trim();
   if (!name) return { error: 'Give the entry a name.' };
-  const allowed = new Set(KINDS[e.kind].fields.map(([k]) => k));
+  const allowed = new Set([...KINDS[e.kind].fields.map(([k]) => k), ...customKeys(e.kind, custom)]);
   const fields = {};
   for (const [k, v] of Object.entries(e.fields || {})) if (allowed.has(k) && v != null && String(v).trim() && (k !== 'image' || isImageRef(String(v)))) fields[k] = clip(v, ['stock', 'sheet', 'play', 'spread', 'known', 'attitudes', 'objectives', 'attendance', 'enc'].includes(k) ? LIMITS.body : LIMITS.field);
   const tags = [...new Set((Array.isArray(e.tags) ? e.tags : []).map((t) => clip(t, LIMITS.tag).trim().toLowerCase()).filter(Boolean))].slice(0, LIMITS.tags);
@@ -47,7 +51,12 @@ function shape(row, req) {
     can_edit: Boolean(gmView || (mine && req.role)),
   };
   if (gmView) { out.secret = row.secret; out.deleted = row.deleted; }
-  else if (row.fields?.objectives) out.fields = { ...row.fields, objectives: forPlayers(row.fields.objectives) };
+  else {
+    if (row.fields?.objectives) out.fields = { ...row.fields, objectives: forPlayers(row.fields.objectives) };
+    // The world's own GM-only fields stay with the GMs, even on a player's own entries.
+    const hide = secretCustomKeys(row.kind, customOf(req)).filter((k) => out.fields?.[k]);
+    if (hide.length) { out.fields = { ...out.fields }; for (const k of hide) delete out.fields[k]; }
+  }
   return out;
 }
 
@@ -114,6 +123,7 @@ export default route({
       world: { id: w.id, slug: w.slug, name: w.name, tagline: w.tagline, about: w.about, calendar: w.calendar, public: w.public, cal: w.cal || null, discord: Boolean(w.discord_webhook), next_session: w.next_session || null, shown: w.shown || null,
         // null: first visit; missing: not a member row (the client remembers visits itself).
         ...(prevVisit !== undefined ? { prev_visit: prevVisit } : {}),
+        custom_fields: req.isGmHere ? customOf(req) : customForPlayers(w.custom_fields),
         ...(req.isGmHere ? { templates: Array.isArray(w.templates) ? w.templates : [] } : {}) },
       role: req.role,
     });
@@ -126,7 +136,7 @@ export default route({
       const list = Array.isArray(req.body.entries) ? req.body.entries.slice(0, 5000) : [];
       let n = 0;
       for (const raw of list) {
-        const e = clean(raw);
+        const e = clean(raw, customOf(req));
         if (e.error) continue;
         const id = typeof raw.id === 'string' && /^[\w-]{4,40}$/.test(raw.id) ? raw.id : newId();
         const taken = (await sql`SELECT world_id FROM entries WHERE id = ${id}`)[0];
@@ -146,13 +156,13 @@ export default route({
       const list = Array.isArray(req.body.entries) ? req.body.entries.slice(0, 25) : [];
       const made = [];
       for (const raw of list) {
-        const e = clean(raw);
+        const e = clean(raw, customOf(req));
         if (e.error) return fail(res, 400, `${raw?.name || 'An entry'}: ${e.error}`);
         made.push(shape(await loadOne(await insert(e, req), req.world.id), req));
       }
       return send(res, 201, { entries: made });
     }
-    const e = clean(req.body.entry);
+    const e = clean(req.body.entry, customOf(req));
     if (e.error) return fail(res, 400, e.error);
     let id;
     if (req.isGmHere) id = await insert(e, req, { owner: req.body.entry?.owner_id ? Number(req.body.entry.owner_id) || null : null });
@@ -160,7 +170,7 @@ export default route({
       // Players: their own characters and journals go live; anything else waits for a GM's approval.
       // Downtime can be kept between the player and the GMs; GM-only fields (its outcome) start empty.
       e.secret = ''; e.visibility = e.kind === 'downtime' && e.visibility === 'gm' ? 'gm' : 'all'; e.links = e.links.map((l) => ({ ...l, secret: false }));
-      for (const k of gmOnlyFields(e.kind)) delete e.fields[k];
+      for (const k of [...gmOnlyFields(e.kind), ...secretCustomKeys(e.kind, customOf(req))]) delete e.fields[k];
       id = await insert(e, req, { owner: req.gm.id, status: PLAYER_KINDS.includes(e.kind) ? 'live' : 'suggested' });
     }
     send(res, 201, { entry: shape(await loadOne(id, req.world.id), req) });
@@ -173,15 +183,18 @@ export default route({
     if (!current || current.deleted) return fail(res, 404, 'That entry doesn’t exist any more.');
     const mine = current.owner_id === req.gm.id;
     if (!req.isGmHere && !mine) return fail(res, 403, 'You can only edit your own characters, journals and suggestions.');
-    const e = clean(req.body.entry);
+    const e = clean(req.body.entry, customOf(req));
     if (e.error) return fail(res, 400, e.error);
     if (e.parent_id === id) return fail(res, 400, 'An entry can’t be inside itself.');
     if (!req.isGmHere) {
       if (current.status === 'live' && !PLAYER_KINDS.includes(e.kind)) return fail(res, 403, 'Players can’t change an entry into that kind.');
       e.secret = current.secret; e.links = e.links.map((l) => ({ ...l, secret: false }));
       e.visibility = e.kind === 'downtime' && current.kind === 'downtime' ? e.visibility : current.visibility;
-      for (const k of gmOnlyFields(e.kind)) { if (current.fields?.[k]) e.fields[k] = current.fields[k]; else delete e.fields[k]; }
+      for (const k of [...gmOnlyFields(e.kind), ...secretCustomKeys(e.kind, customOf(req))]) { if (current.fields?.[k]) e.fields[k] = current.fields[k]; else delete e.fields[k]; }
     }
+    // Values of the world's own fields that were taken off this kind stay put, in case the field comes back.
+    const live = customKeys(e.kind, customOf(req));
+    for (const [k, v] of Object.entries(current.fields || {})) if (isCustomKey(k) && !live.has(k) && e.kind === current.kind) e.fields[k] = v;
     const version = Number(req.body.entry?.version);
     const rows = await sql`UPDATE entries SET kind = ${e.kind}, name = ${e.name}, summary = ${e.summary}, body = ${e.body}, fields = ${JSON.stringify(e.fields)},
       secret = ${e.secret}, tags = ${e.tags}, links = ${JSON.stringify(e.links)}, parent_id = ${e.parent_id}, visibility = ${e.visibility},

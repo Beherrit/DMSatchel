@@ -5,7 +5,8 @@ import { KINDS } from './world-schema.js';
 // Live state that keeps changing at the table; a restore never rolls it back.
 export const LIVE_FIELDS = ['play', 'known', 'spread', 'attendance', 'attitudes'];
 
-const label = (kind, k) => KINDS[kind]?.fields.find(([key]) => key === k)?.[1] || k;
+// A world's own fields (x_…) aren't in the schema; their key reads well enough without the prefix.
+const label = (kind, k) => KINDS[kind]?.fields.find(([key]) => key === k)?.[1] || (k.startsWith('x_') ? k.slice(2).replace(/_/g, ' ').replace(/^./, (c) => c.toUpperCase()) : k);
 const same = (a, b) => JSON.stringify(a ?? '') === JSON.stringify(b ?? '');
 
 // [{ key, label, before, after }] for the parts that differ (before = older snapshot).

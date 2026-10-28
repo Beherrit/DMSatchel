@@ -6,7 +6,7 @@ import { el, toast, confirmButton, setKids } from './dom.js';
 import { api, session, isGm, isMember, isPlayer, signedIn, onSession } from './api.js';
 import { KINDS, KIND_ORDER, LINK_LABELS, STANDING_KINDS, PLACE_KINDS, PLAYER_KINDS, fieldApplies } from './world-schema.js';
 import { openSignIn } from './signin.js';
-import { world, worldEntries, getEntry, loadWorld, byName, kindLabel, link, when, findByName, mentions, richText, notice, nameList } from './world-store.js';
+import { world, worldEntries, getEntry, loadWorld, byName, kindLabel, kindFields, link, when, findByName, mentions, richText, notice, nameList } from './world-store.js';
 import { viewMaps, viewMap, pinsFor } from './world-maps.js';
 import { viewStandings, standingWidget } from './world-standings.js';
 import { viewTalk, talkWidget, tableWidget, viewTable } from './world-talk.js';
@@ -25,6 +25,7 @@ import { revealButton } from './world-reveal.js';
 import { quickNoteButton } from './world-quicknote.js';
 import { initLinkSuggest } from './link-suggest.js';
 import { bulkControls } from './world-bulk.js';
+import { customFieldsButton } from './world-fields.js';
 import { tableSection } from './world-tables.js';
 import { parseSearch, searchHash, searchEntries } from './search.js';
 import { saveTemplateButton, templatePicker } from './world-templates.js';
@@ -150,7 +151,7 @@ function viewKind(kind) {
   const bulk = listNode ? bulkControls(list, listNode) : {};
   return el('div', { class: 'w-view' },
     el('div', { class: 'panel-head row' }, el('div', {}, el('h2', {}, KINDS[kind].plural), el('p', {}, KINDS[kind].blurb)),
-      el('div', { class: 'btnrow' }, bulk.button,
+      el('div', { class: 'btnrow' }, bulk.button, customFieldsButton(kind, rerenderWorld, 'btn ghost'),
         kind === 'session' && isGm() ? [recapButton('btn'), el('a', { class: 'btn primary', href: '#world/new/session' }, 'New session')]
           : isGm() || (isMember() && PLAYER_KINDS.includes(kind)) ? el('a', { class: 'btn primary', href: `#world/new/${kind}` }, `New ${lower(kindLabel(kind))}`)
           : isMember() ? el('a', { class: 'btn', href: `#world/new/${kind}` }, `Suggest a ${lower(kindLabel(kind))}`) : null)),
@@ -213,7 +214,7 @@ function viewEntry(id, tab) {
   const sessions = all.filter((x) => x.kind === 'session' && x.id !== id && (mentions(`${x.body}\n${x.summary}\n${Object.values(x.fields || {}).join('\n')}`).has(id) || (x.links || []).some((l) => l.id === id)))
     .sort((a, b) => (parseFloat(b.fields.number) || 0) - (parseFloat(a.fields.number) || 0));
   const pins = pinsFor(id);
-  const fieldRows = KINDS[e.kind].fields.filter((fd) => fieldApplies(fd, e.fields)).filter(([k, , type]) => e.fields?.[k] && !['stats', 'spells', 'level', 'stock', 'market', 'encounters'].includes(k) && type !== 'hidden' && type !== 'image' && !(k === 'sheet' && e.fields.forge)).map(([k, label, type]) => [label, e.fields[k], type]);
+  const fieldRows = kindFields(e.kind).filter((fd) => fieldApplies(fd, e.fields)).filter(([k, , type]) => e.fields?.[k] && !['stats', 'spells', 'level', 'stock', 'market', 'encounters'].includes(k) && type !== 'hidden' && type !== 'image' && !(k === 'sheet' && e.fields.forge)).map(([k, label, type, , o]) => [o?.gmSecret ? `${label} (GMs only)` : label, e.fields[k], type]);
 
   const history = el('div', { class: 'history', hidden: true });
   const isPlace = PLACE_KINDS.includes(e.kind);
@@ -411,9 +412,9 @@ function viewEdit(id, kindForNew) {
   kindSel.addEventListener('change', updateNote); updateNote();
   function renderFields() {
     collectFields();
-    setKids(fieldsBox, ...KINDS[kindSel.value].fields.map((fd) => {
+    setKids(fieldsBox, ...kindFields(kindSel.value).map((fd) => {
       const [k, label, type, opts] = fd, v = e.fields[k] || '';
-      if (type === 'hidden' || !fieldApplies(fd, e.fields) || (fd[4]?.gmOnly && !gm)) return null;
+      if (type === 'hidden' || !fieldApplies(fd, e.fields) || ((fd[4]?.gmOnly || fd[4]?.gmSecret) && !gm)) return null;
       if (type === 'image') return pictureField(v);
       if (type === 'select') {
         const s = el('select', { id: `ff-${k}`, 'data-field': k }, el('option', { value: '' }, '—'), opts.map((o) => el('option', { value: o }, o)));
@@ -424,7 +425,7 @@ function viewEdit(id, kindForNew) {
       return type === 'long'
         ? el('div', { class: 'field wide' }, el('label', { for: `ff-${k}` }, label), el('textarea', { id: `ff-${k}`, 'data-field': k, rows: 3 }, v))
         : el('div', { class: 'field' }, el('label', { for: `ff-${k}` }, label), el('input', { type: 'text', id: `ff-${k}`, 'data-field': k, value: v }));
-    }));
+    }), gm ? el('p', { class: 'field wide own-fields' }, customFieldsButton(kindSel.value, renderFields)) : null);
   }
   function collectFields() { for (const f of fieldsBox.querySelectorAll('[data-field]')) e.fields[f.dataset.field] = f.value; }
   kindSel.addEventListener('change', renderFields);
@@ -485,7 +486,7 @@ function viewEdit(id, kindForNew) {
     if (unknown.length) { status.textContent = `These connections don’t match any entry: ${unknown.join(', ')}.`; status.className = 'form-status error'; return; }
     const entry = {
       kind: kindSel.value, name: String(f.get('name')).trim(), summary: String(f.get('summary') || ''), body: String(f.get('body') || ''), secret: gm ? String(f.get('secret') || '') : existing?.secret || '', visibility: gm ? visSel.value : existing?.visibility || 'all',
-      fields: Object.fromEntries(Object.entries(e.fields).filter(([k, v]) => v && KINDS[kindSel.value].fields.some(([fk]) => fk === k))),
+      fields: Object.fromEntries(Object.entries(e.fields).filter(([k, v]) => v && kindFields(kindSel.value).some(([fk]) => fk === k))),
       tags: String(f.get('tags') || '').split(',').map((t) => t.trim()).filter(Boolean), links, parent_id: parentEntry?.id || null, version: existing?.version,
     };
     status.textContent = 'Saving…'; status.className = 'form-status';

@@ -5,6 +5,7 @@ import { KINDS } from './world-schema.js';
 import { libraryItems, librarySpecies, librarySubclasses, libraryClasses, librarySpells, libraryBackgrounds, libraryFeats } from './library.js';
 import { hooks } from './hooks.js';
 import { visitSince } from './whatsnew.js';
+import { fieldsWith } from './custom-fields.js';
 import { CLASSES, BACKGROUNDS } from './rules2024.js';
 
 // A Map that drops the lookup index whenever an entry is added, changed or removed.
@@ -45,6 +46,8 @@ export async function loadWorld(force) {
 
 export const byName = (a, b) => a.name.localeCompare(b.name);
 export const kindLabel = (k) => KINDS[k]?.label || k;
+// A kind's fields, with this world's own fields after the built-in ones.
+export const kindFields = (k) => fieldsWith(k, world.info?.custom_fields);
 export const link = (e, text) => el('a', { href: `#world/e/${e.id}`, class: `elink k-${e.kind}` }, text || e.name);
 export const when = (iso) => (iso ? new Date(iso).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : '');
 export const whenTime = (iso) => (iso ? new Date(iso).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) : '');

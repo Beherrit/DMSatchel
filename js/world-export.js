@@ -3,7 +3,7 @@
 // Route: #world/export
 import { el, toast, download } from './dom.js';
 import { isGm } from './api.js';
-import { world, worldEntries, byName, kindLabel, notice, descendantsOf, getEntry } from './world-store.js';
+import { world, worldEntries, byName, kindLabel, kindFields, notice, descendantsOf, getEntry } from './world-store.js';
 import { KINDS, KIND_ORDER, PLACE_KINDS } from './world-schema.js';
 import { todayText } from './world-calendar.js';
 
@@ -25,9 +25,9 @@ const anchor = (name) => name.toLowerCase().replace(/[^\w\s-]/g, '').trim().repl
 
 function fieldsOf(e, playerSafe) {
   const rows = [];
-  for (const [k, label] of KINDS[e.kind]?.fields || []) {
+  for (const [k, label, , , o] of kindFields(e.kind)) {
     const v = e.fields?.[k];
-    if (!v || SKIP_FIELDS.has(k) || (k === 'sheet' && e.fields.forge)) continue;
+    if (!v || SKIP_FIELDS.has(k) || (k === 'sheet' && e.fields.forge) || (playerSafe && o?.gmSecret)) continue;
     rows.push([label, v]);
   }
   if (e.fields?.stats && !playerSafe) rows.push(['Stat block', e.fields.stats]);

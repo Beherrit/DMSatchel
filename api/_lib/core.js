@@ -103,6 +103,8 @@ export function ensureSchema() {
       await sql`ALTER TABLE members ADD COLUMN IF NOT EXISTS prev_visit timestamptz`;
       // Entry templates the GMs saved: [{ id, name, kind, summary, body, fields, tags, secret }].
       await sql`ALTER TABLE worlds ADD COLUMN IF NOT EXISTS templates jsonb`;
+      // The world's own fields per kind of entry: { npc: [{ key, label, type, options, gmOnly }] }.
+      await sql`ALTER TABLE worlds ADD COLUMN IF NOT EXISTS custom_fields jsonb`;
       // Private map markers: each person's own notes on a map ("we camped here"), seen only by them.
       await sql`CREATE TABLE IF NOT EXISTS map_marks (
         id serial PRIMARY KEY, map_id text NOT NULL, gm_id int NOT NULL, x real NOT NULL, y real NOT NULL,

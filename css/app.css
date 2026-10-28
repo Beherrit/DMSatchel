@@ -1081,3 +1081,13 @@ li.picking:has(.bulk-pick:checked) { outline: 2px solid var(--accent, #2c6e63); 
   .bulk-group { border-left: 0; padding-left: 0 }
   .bulk-bar { bottom: 64px } /* clear of the quick-note button */
 }
+
+/* The world's own fields */
+.cf-dialog { width: min(680px, calc(100vw - 32px)) }
+.cf-rows { display: grid; gap: 10px; margin: 12px 0 }
+.cf-row { display: grid; grid-template-columns: 1fr auto auto auto; gap: 6px; align-items: center; padding: 8px; border: 1px solid var(--line); border-radius: 8px }
+.cf-row .cf-options { grid-column: 1 / -1 }
+.cf-move { display: inline-flex; gap: 2px }
+.cf-row input, .cf-row select { font: inherit; font-size: .95rem; padding: 6px 8px; min-width: 0 }
+.own-fields { margin: 0 }
+@media (max-width: 560px) { .cf-row { grid-template-columns: 1fr 1fr } .cf-row .cf-label, .cf-move { grid-column: 1 / -1 } }
