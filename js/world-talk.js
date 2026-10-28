@@ -22,7 +22,7 @@ function commentNode(c, reload, { isReply, audience }) {
     ta.focus();
   };
   const canDelete = mine || isOwner() || (audience === 'table' && isGm());
-  return el('div', { class: `comment${isReply ? ' reply' : ''}${c.resolved ? ' resolved' : ''}${c.hidden ? ' hidden-comment' : ''}` },
+  return el('div', { id: `comment-${c.id}`, class: `comment${isReply ? ' reply' : ''}${c.resolved ? ' resolved' : ''}${c.hidden ? ' hidden-comment' : ''}` },
     el('div', { class: 'comment-head' }, el('strong', {}, c.gm || 'Someone'), el('span', { class: 'muted small' }, whenTime(c.created_at), c.edited_at ? ' (edited)' : ''),
       c.hidden ? el('span', { class: 'tag hidden-tag' }, isGm() ? 'Hidden from players' : 'Hidden by a GM') : null,
       el('span', { class: 'comment-actions' },
@@ -48,6 +48,18 @@ function composer(entryId, parentId, reload, placeholder, audience) {
   return form;
 }
 
+// A comment to scroll to once its entry's talk has loaded (from a search result).
+let focusId = null;
+export const focusComment = (id) => { focusId = Number(id) || null; };
+function showFocused(list, comments, setResolved) {
+  if (!focusId || !comments.some((c) => c.id === focusId)) return;
+  const node = list.querySelector(`#comment-${focusId}`);
+  if (!node) { setResolved(); return; } // inside a resolved thread: show those, and the next draw finds it
+  focusId = null;
+  node.classList.add('flash');
+  node.scrollIntoView({ block: 'center' });
+}
+
 function widget(e, audience) {
   const R = ROOMS[audience];
   const box = el('section', { class: `talk card talk-${audience}` }, el('div', { class: 'entry-head' }, el('h3', {}, R.title), el('span', { class: 'muted small' }, R.note)));
@@ -65,6 +77,7 @@ function widget(e, audience) {
         comments.filter((r) => r.parent_id === t.id).map((r) => commentNode(r, reload, { isReply: true, audience })),
         t.resolved || !isMember() ? null : composer(e.id, t.id, reload, 'Reply…', audience)))
         : [el('p', { class: 'muted small' }, isMember() ? R.empty : 'No comments yet.')]));
+      showFocused(list, comments, () => { if (!showResolved) { showResolved = true; reload(); } });
     } catch (err) { setKids(list, el('p', { class: 'error' }, err.message)); }
   }
   box.append(list, toggle, isMember() ? composer(e.id, null, reload, audience === 'gm' ? `Start a thread about ${e.name}…` : `Say something about ${e.name}…`, audience) : null);

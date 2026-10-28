@@ -34,6 +34,7 @@ import { appearances } from './appearances.js';
 import { withPronouns } from './world-profiles.js';
 import { noticesCard, drawNoticeBanner } from './world-notices.js';
 import { gallerySection } from './world-gallery.js';
+import { talkResults } from './world-talk-search.js';
 import { tableSection } from './world-tables.js';
 import { parseSearch, searchHash, searchEntries } from './search.js';
 import { saveTemplateButton, templatePicker } from './world-templates.js';
@@ -220,7 +221,8 @@ function viewSearch(raw) {
     !f.q && !filtered ? el('p', { class: 'muted' }, 'Type some words, or pick a kind, tag or place to list what’s there.')
       : grid ? [grid, bulk.bar]
         : notice('No matches', 'Try fewer words, or clear a filter.'),
-    hits.length > 200 ? el('p', { class: 'muted' }, `Showing the first 200 of ${hits.length}. Add another word or a filter to narrow it down.`) : null);
+    hits.length > 200 ? el('p', { class: 'muted' }, `Showing the first 200 of ${hits.length}. Add another word or a filter to narrow it down.`) : null,
+    talkResults(f.q));
 }
 
 function viewEntry(id, tab) {

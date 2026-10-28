@@ -12,6 +12,9 @@
 // GET ?notes=mine                   your notes across the world, with the entries' names
 // GET ?entry_id=&audience=note      your note on one entry (or none)
 // PUT {entry_id, body}              write your note on an entry; an empty body removes it
+//
+// GET ?search=words                 comments containing the words (members): table talk you can see, GM discussions
+//                                   (GMs), and your own private notes; newest first, at most 40
 import { route, send, fail, sql, requireGm, requireMember } from './_lib/core.js';
 
 const room = (v) => (v === 'table' ? 'table' : 'gm');
@@ -24,7 +27,21 @@ async function entryFor(id, req) {
 
 export default route({
   async GET(req, res) {
-    const { entry_id: entryId, audience, recent, notes } = req.query || {};
+    const { entry_id: entryId, audience, recent, notes, search } = req.query || {};
+    if (search !== undefined) {
+      if (!requireMember(req, res)) return;
+      const q = String(search).trim().slice(0, 100);
+      if (q.length < 2) return send(res, 200, { comments: [] });
+      const pattern = `%${q.replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
+      const rows = await sql`SELECT c.id, c.entry_id, c.parent_id, c.body, c.audience, c.hidden, c.created_at, c.gm_id, g.name AS gm, e.name AS entry_name, e.kind, e.owner_id, e.visibility, e.status, e.deleted
+        FROM comments c LEFT JOIN gms g ON g.id = c.gm_id JOIN entries e ON e.id = c.entry_id
+        WHERE e.world_id = ${req.world.id} AND NOT e.deleted AND c.body ILIKE ${pattern}
+          AND (c.audience = 'table' OR (c.audience = 'gm' AND ${req.isGmHere}) OR (c.audience = 'note' AND c.gm_id = ${req.gm.id}))
+        ORDER BY c.created_at DESC LIMIT 200`;
+      const out = rows.filter((r) => sees(r, req) && (r.audience !== 'table' || !r.hidden || req.isGmHere || r.gm_id === req.gm.id)).slice(0, 40)
+        .map(({ owner_id, visibility, status, deleted, ...r }) => r);
+      return send(res, 200, { comments: out });
+    }
     if (notes === 'mine' || (entryId && audience === 'note')) {
       if (!requireMember(req, res)) return;
       const rows = await sql`SELECT c.id, c.entry_id, c.body, c.created_at, c.edited_at, e.name AS entry_name, e.kind, e.owner_id, e.visibility, e.status, e.deleted

@@ -125,6 +125,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Favorites**: star entries you keep going back to; they sit at the top of your world sidebar.
 - **Make a copy**: GMs duplicate any entry and edit the copy.
 - **Many at once**: GMs tick entries on any list or search and reveal, hide, tag, untag or move them into a place together.
+- **Search the talk**: world search also finds words in table talk, GM discussions (GMs) and your own notes, and jumps to the comment.
 - **Link the mentions**: entry pages show GMs names written as plain text that could be links, and link them in one click.
 - **Link suggestions**: typing [[ in any text box suggests entry names; pick one to finish the link.
 - **Admin**: world owners manage members and roles, rotate invite links, name the world, see recent activity, and
