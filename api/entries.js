@@ -11,6 +11,9 @@
 // POST {suggest_edit: {entry_id, summary, body, fields, note}}   (member) suggest changes to an entry you can see
 // GET ?edits=1                          suggested edits: every open one (GMs) or your own (players)
 // PATCH {edit_id, decision: 'accept' | 'decline'}   (GM) apply a suggested edit, or turn it down
+// PATCH {give: {from, to, item, qty, cp, from_base, to_base}}   hand an item and/or coin from one character's
+//                                   sheet to another's (the giver's player or a GM). *_base: the sheet's coin and
+//                                   inventory as the page shows them, used only where the sheet never saved its own.
 // PATCH {id, share: [member ids]}     (GM) give a hidden entry to chosen members only ([] takes it back)
 // PATCH {id, claim: true} · {id, owner: null}   claim an unowned character (member) · unassign it (GM)
 // DELETE ?id=       move to the bin (GM, or a player's own entry) · DELETE ?id=&restore=1 brings it back (GM)
@@ -23,6 +26,7 @@ import { goalsForOthers } from '../js/goals.js';
 import { cleanGallery } from '../js/gallery.js';
 import { cleanShare, sharedWith } from '../js/sharing.js';
 import { cleanProposal, applyProposal } from '../js/edit-suggest.js';
+import { takeItem, giveItem } from '../js/handover.js';
 import { fieldsWith } from '../js/custom-fields.js';
 import { cleanTag, chainUp } from '../js/bulk.js';
 import { cleanPrimer, primerEmpty } from '../js/zero.js';
@@ -265,6 +269,35 @@ export default route({
 
   async PATCH(req, res) {
     if (!requireMember(req, res)) return;
+    if (req.body.give) {
+      const g = req.body.give;
+      const from = await loadOne(String(g.from || '').slice(0, 40), req.world.id), to = await loadOne(String(g.to || '').slice(0, 40), req.world.id);
+      if (!from || from.deleted || from.kind !== 'character' || !to || to.deleted || to.kind !== 'character' || to.status !== 'live' || from.id === to.id) return fail(res, 404, 'Pick two characters in this world.');
+      if (!req.isGmHere && from.owner_id !== req.gm.id) return fail(res, 403, 'You can only give from your own character.');
+      const playOf = (row, base) => {
+        let p = {}; try { p = JSON.parse(row.fields?.play || '{}') || {}; } catch { p = {}; }
+        if (!Number.isFinite(p.cp)) p.cp = Math.max(0, Math.round(Number(base?.cp) || 0));
+        if (p.inventory === undefined) p.inventory = clip(base?.inventory, 15000);
+        return p;
+      };
+      const fp = playOf(from, g.from_base), tp = playOf(to, g.to_base);
+      const cp = Math.max(0, Math.round(Number(g.cp) || 0));
+      if (!cp && !String(g.item || '').trim()) return fail(res, 400, 'Choose an item or some coin to give.');
+      if (cp > fp.cp) return fail(res, 400, `${from.name} doesn’t have that much coin.`);
+      let moved = null;
+      if (String(g.item || '').trim()) {
+        const t = takeItem(fp.inventory, clip(g.item, 200), Number(g.qty) || 1);
+        if (t.error) return fail(res, 400, t.error);
+        fp.inventory = t.text; tp.inventory = clip(giveItem(tp.inventory, t.name, t.qty, from.name), 15000); moved = t;
+      }
+      fp.cp -= cp; tp.cp += cp;
+      for (const [row, p] of [[from, fp], [to, tp]]) {
+        await sql`UPDATE entries SET fields = fields || jsonb_build_object('play', ${JSON.stringify(p)}::text), updated_by = ${req.gm.id}, updated_at = now(), version = version + 1
+          WHERE id = ${row.id} AND world_id = ${req.world.id}`;
+        await record(row.id, req.gm.id, 'give', null);
+      }
+      return send(res, 200, { entries: [shape(await loadOne(from.id, req.world.id), req), shape(await loadOne(to.id, req.world.id), req)], moved, cp });
+    }
     if (req.body.edit_id !== undefined) {
       if (!requireGm(req, res)) return;
       const s = (await sql`SELECT * FROM edit_suggestions WHERE id = ${Number(req.body.edit_id)} AND world_id = ${req.world.id}`)[0];

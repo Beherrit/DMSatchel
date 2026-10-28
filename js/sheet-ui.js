@@ -9,6 +9,8 @@ import { world, patchEntry, worldEntries, link } from './world-store.js';
 import { MAGIC_ITEMS, RARITIES } from './magic-items.js';
 import { matchItems } from './inventory-items.js';
 import { coinText, parseCoins } from './economy.js';
+import { api } from './api.js';
+import { inventoryLines } from './handover.js';
 
 export const CONDITIONS = ['Blinded', 'Charmed', 'Deafened', 'Frightened', 'Grappled', 'Incapacitated', 'Invisible', 'Paralyzed', 'Petrified', 'Poisoned', 'Prone', 'Restrained', 'Stunned', 'Unconscious'];
 
@@ -170,6 +172,42 @@ export function sheetSection(e, rerender) {
         }, 'btn small')) : null);
   }
 
+  // Hand an item and/or coin to another party member, both sheets updated at once by the server.
+  function giveDialog() {
+    const others = worldEntries().filter((c) => c.kind === 'character' && c.id !== e.id && c.status !== 'suggested' && !['Dead', 'Missing', 'Retired'].includes(c.fields?.status)).sort((a, b) => a.name.localeCompare(b.name));
+    if (!others.length) { toast('There’s nobody else in the party to give things to yet'); return; }
+    const items = inventoryLines(play.inventory);
+    const to = el('select', { id: 'gv-to' }, others.map((c) => el('option', { value: c.id }, c.name)));
+    const item = el('select', { id: 'gv-item' }, el('option', { value: '' }, 'No item, just coin'), items.map((x) => el('option', { value: x.name, 'data-qty': x.qty }, x.qty > 1 ? `${x.name} (${x.qty})` : x.name)));
+    const qty = el('input', { type: 'number', id: 'gv-qty', min: 1, value: 1 });
+    const coin = el('input', { type: 'text', id: 'gv-coin', placeholder: `e.g. 10 gp (you have ${coinText(play.cp)})` });
+    const syncQty = () => { const n = Number(item.selectedOptions[0]?.dataset.qty) || 1; qty.max = n; qty.value = Math.min(Number(qty.value) || 1, n); qty.closest('.field').hidden = !item.value || n < 2; };
+    item.addEventListener('change', syncQty);
+    const status = el('p', { class: 'form-status', role: 'status' });
+    const field = (id, label, input) => el('div', { class: 'field' }, el('label', { for: id }, label), input);
+    const d = el('dialog', { class: 'dialog', 'aria-labelledby': 'gv-title' }, el('form', { class: 'dialog-body', method: 'dialog' },
+      el('h2', { id: 'gv-title' }, `Give from ${e.name}`),
+      field('gv-to', 'To', to), field('gv-item', 'Item', item), field('gv-qty', 'How many', qty), field('gv-coin', 'Coin', coin),
+      el('p', { class: 'muted small' }, 'Both sheets change at once; the other sheet notes who it came from.'), status,
+      el('div', { class: 'btnrow' }, el('button', { class: 'btn primary', type: 'submit' }, 'Give'), el('button', { class: 'btn', type: 'button', onclick: () => d.close() }, 'Cancel'))));
+    syncQty();
+    d.querySelector('form').addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      const cp = coin.value.trim() ? parseCoins(coin.value) : 0;
+      if (coin.value.trim() && !cp) { status.textContent = 'Write coins like “15 gp” or “2 sp”.'; status.className = 'form-status error'; return; }
+      const target = world.entries.get(to.value);
+      const base = (x) => { const p = defaults(x, characterOf(x)); return { cp: p.cp, inventory: p.inventory }; };
+      try {
+        const r = await api('entries', { method: 'PATCH', body: { give: { from: e.id, to: target.id, item: item.value, qty: Number(qty.value) || 1, cp, from_base: base(world.entries.get(e.id) || e), to_base: base(target) } } });
+        for (const x of r.entries) world.entries.set(x.id, x);
+        toast(`Gave ${[r.moved ? `${r.moved.qty > 1 ? `${r.moved.qty} ` : ''}${r.moved.name}` : '', r.cp ? coinText(r.cp) : ''].filter(Boolean).join(' and ')} to ${target.name}`);
+        d.close(); rerender();
+      } catch (err) { status.textContent = err.message; status.className = 'form-status error'; }
+    });
+    d.addEventListener('close', () => d.remove());
+    document.body.append(d); d.showModal();
+  }
+
   function purse() {
     const amt = el('input', { type: 'text', class: 'coin-amt', placeholder: 'e.g. 15 gp', 'aria-label': 'Coins' });
     const move = (sign) => { const cp = parseCoins(amt.value); if (!cp) { toast('Write coins like “15 gp” or “2 sp”'); return; } play.cp += sign * cp; commit(); };
@@ -239,6 +277,7 @@ export function sheetSection(e, rerender) {
         el('span', { class: 'ab-name' }, k), el('span', { class: 'ab-mod' }, fmtMod(abilityMod(ch.abilities.scores[k]))), el('span', { class: 'ab-score' }, ch.abilities.scores[k])))) : null,
       ch ? el('details', { class: 'sheet-more' }, el('summary', {}, 'Saves, skills, attacks, spells and features'), fullSheet(ch)) : null,
       el('div', { class: 'pc-cols' }, purse(), textBox('inventory', 'Inventory', 6)), inventoryItems(),
+      can && !e.status?.startsWith?.('suggest') ? el('div', { class: 'btnrow' }, el('button', { class: 'btn small', type: 'button', onclick: giveDialog }, 'Give to a party member…')) : null,
       textBox('notes', 'Notes', 4));
   }
   draw();
