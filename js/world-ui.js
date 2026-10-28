@@ -289,6 +289,7 @@ function viewEntry(id, tab) {
         showButton(e),
         revealButton(e, rerenderWorld),
         saveTemplateButton(e),
+        copyButton(e),
         cardsButton(e),
         world.info?.discord && e.visibility !== 'gm' && e.status !== 'suggested' ? confirmButton('Post to Discord', async () => {
           try { await api('settings', { method: 'POST', body: { post: e.id } }); toast(`Posted ${e.name} to Discord`); } catch (err) { toast(err.message, 'bad'); }
@@ -589,6 +590,18 @@ export async function showWorld(parts, { keepScroll = false } = {}) {
 }
 
 // Drafts sent from the tools ("Add to world") open the new-entry form, prefilled.
+// Make a copy (GMs): the entry's text, fields, tags, connections and place, as a new draft named "… (copy)". What
+// belongs to one character or one session (play state, goals, attitudes, attendance…) stays behind.
+const NOT_COPIED = ['play', 'known', 'attitudes', 'attendance', 'goals', 'spread', 'objectives'];
+function copyButton(e) {
+  if (e.status === 'suggested') return null;
+  return el('button', { class: 'btn small', type: 'button', title: 'Start a new entry from this one', onclick: () => acceptDraft({
+    kind: e.kind, name: `${e.name} (copy)`, summary: e.summary || '', body: e.body || '', secret: e.secret || '', tags: [...(e.tags || [])],
+    links: (e.links || []).map((l) => ({ ...l })), parent_id: e.parent_id || null, visibility: e.visibility || 'all',
+    fields: Object.fromEntries(Object.entries(e.fields || {}).filter(([k]) => !NOT_COPIED.includes(k))),
+  }) }, 'Make a copy');
+}
+
 export function acceptDraft(d = {}) {
   if (!isMember()) { toast(signedIn() ? 'You need an invite to this world to add things' : 'Sign in to add things to the shared world'); if (!signedIn()) openSignIn(); return; }
   if (!isGm() && !PLAYER_KINDS.includes(d.kind)) toast('Players’ additions are sent to the GMs as suggestions');
