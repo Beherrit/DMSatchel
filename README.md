@@ -135,7 +135,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Recently viewed**: the entries you opened last, in the sidebar and at the top of Ctrl+K.
 - **Favorites**: star entries you keep going back to; they sit at the top of your world sidebar.
 - **Is that name taken?**: the entry form warns when the world already has an entry with that name, or a close one.
-- **Make a copy**: GMs duplicate any entry and edit the copy.
+- **Make a copy**: GMs duplicate any entry and edit the copy; a place can bring its people, shops and sub-places along.
 - **Many at once**: GMs tick entries on any list or search and reveal, hide, tag, untag or move them into a place together.
 - **Tag pages**: a list of every tag with counts, and a description on each tag's page.
 - **Search the talk**: world search also finds words in table talk, GM discussions (GMs) and your own notes, and jumps to the comment.

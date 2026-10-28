@@ -44,6 +44,7 @@ import { clockCard } from './world-clock.js';
 import { startHereButton, startHereCard } from './world-start.js';
 import { viewTags, tagNote } from './world-tags.js';
 import { pushRecent, readRecent } from './recent.js';
+import { copyPlaceDialog } from './world-copyplace.js';
 import { tableSection } from './world-tables.js';
 import { parseSearch, searchHash, searchEntries } from './search.js';
 import { saveTemplateButton, templatePicker } from './world-templates.js';
@@ -646,11 +647,13 @@ export async function showWorld(parts, { keepScroll = false } = {}) {
 const NOT_COPIED = ['play', 'known', 'attitudes', 'attendance', 'goals', 'spread', 'objectives'];
 function copyButton(e) {
   if (e.status === 'suggested') return null;
-  return el('button', { class: 'btn small', type: 'button', title: 'Start a new entry from this one', onclick: () => acceptDraft({
-    kind: e.kind, name: `${e.name} (copy)`, summary: e.summary || '', body: e.body || '', secret: e.secret || '', tags: [...(e.tags || [])],
+  const draft = (name) => acceptDraft({
+    kind: e.kind, name: name || `${e.name} (copy)`, summary: e.summary || '', body: e.body || '', secret: e.secret || '', tags: [...(e.tags || [])],
     links: (e.links || []).map((l) => ({ ...l })), parent_id: e.parent_id || null, visibility: e.visibility || 'all',
     fields: Object.fromEntries(Object.entries(e.fields || {}).filter(([k]) => !NOT_COPIED.includes(k))),
-  }) }, 'Make a copy');
+  });
+  // A place can bring what's inside it along.
+  return el('button', { class: 'btn small', type: 'button', title: 'Start a new entry from this one', onclick: () => (PLACE_KINDS.includes(e.kind) ? copyPlaceDialog(e, draft) : draft()) }, 'Make a copy');
 }
 
 // On an NPC's page: when the party last met them, from the session logs.
