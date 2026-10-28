@@ -127,9 +127,12 @@ function viewKind(kind) {
   if (!KINDS[kind]) return notice('Nothing here', 'That kind of entry doesn’t exist.');
   let list = worldEntries().filter((e) => e.kind === kind);
   if (kind === 'event') {
-    // Timeline order: the date as the world calendar reads it, else the sort year.
+    // Timeline order: the date as the world calendar reads it, else the sort year. Sessions with an in-world date
+    // join the timeline, so the world's history and the table's line up.
     const cal = worldCalendar();
-    const key = (e) => { const d = cal && parseDate(cal, e.fields.date); return d ? toDays(cal, d) / yearLength(cal) : parseFloat(e.fields.sort) || 0; };
+    const when = (e) => (e.kind === 'session' ? e.fields.world_date : e.fields.date);
+    const key = (e) => { const d = cal && parseDate(cal, when(e)); return d ? toDays(cal, d) / yearLength(cal) : parseFloat(e.fields.sort) || 0; };
+    if (cal) list = [...list, ...worldEntries().filter((e) => e.kind === 'session' && parseDate(cal, e.fields?.world_date))];
     list.sort((a, b) => key(a) - key(b) || byName(a, b));
   }
   else if (kind === 'session') list.sort((a, b) => (parseFloat(b.fields.number) || 0) - (parseFloat(a.fields.number) || 0) || String(b.fields.played_on || b.created_at).localeCompare(String(a.fields.played_on || a.created_at)));
@@ -140,7 +143,9 @@ function viewKind(kind) {
         : isGm() || (isMember() && PLAYER_KINDS.includes(kind)) ? el('a', { class: 'btn primary', href: `#world/new/${kind}` }, `New ${lower(kindLabel(kind))}`)
         : isMember() ? el('a', { class: 'btn', href: `#world/new/${kind}` }, `Suggest a ${lower(kindLabel(kind))}`) : null),
     list.length ? (kind === 'session' ? sessionList(list) : kind === 'event'
-      ? el('ol', { class: 'timeline' }, list.map((e) => el('li', {}, el('span', { class: 'date' }, e.fields.date || e.fields.sort || '—'), el('div', {}, link(e), e.summary ? el('p', {}, e.summary) : null))))
+      ? el('ol', { class: 'timeline' }, list.map((e) => (e.kind === 'session'
+        ? el('li', { class: 'tl-session' }, el('span', { class: 'date' }, e.fields.world_date), el('div', {}, el('span', { class: 'tag' }, 'Played'), ' ', link(e), e.fields.played_on ? el('span', { class: 'muted small' }, ` at the table ${e.fields.played_on}`) : null, e.summary ? el('p', {}, e.summary) : null))
+        : el('li', {}, el('span', { class: 'date' }, e.fields.date || e.fields.sort || '—'), el('div', {}, link(e), e.summary ? el('p', {}, e.summary) : null)))))
       : el('ul', { class: 'entry-grid' }, list.map(entryCard)))
       : notice(`No ${KINDS[kind].plural.replace(/^(?!NPC)\w+/, (w) => w.toLowerCase())} yet`, isGm() ? 'Add the first one.' : PLAYER_KINDS.includes(kind) && isMember() ? 'Add the first one.' : 'The GMs haven’t added any yet.'));
 }

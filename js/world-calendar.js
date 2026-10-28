@@ -125,7 +125,7 @@ export function viewCalendar(arg, sub, rerender) {
     } },
       el('span', { class: 'cal-day' }, day, full.length ? el('span', { class: 'cal-moon' }, full.join('')) : null),
       hol.map((h) => el('span', { class: 'cal-hol' }, h.name)),
-      items.slice(0, 3).map((x) => el('span', { class: `cal-item k-${x.entry.kind}` }, x.entry.name)),
+      items.slice(0, 3).map((x) => el('span', { class: `cal-item k-${x.entry.kind}`, title: x.entry.kind === 'session' ? `Played: ${x.entry.name}` : x.entry.name }, x.entry.kind === 'session' ? `▶ ${x.entry.name}` : x.entry.name)),
       items.length > 3 ? el('span', { class: 'cal-more' }, `+${items.length - 3} more`) : null));
   }
 

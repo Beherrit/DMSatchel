@@ -1057,3 +1057,7 @@ body.gated .mainnav, body.gated #toolnav, body.gated #panels, body.gated #notebo
 .todo-group { margin-bottom: 12px }
 .todo-list li { display: flex; flex-wrap: wrap; gap: 6px; align-items: baseline; margin: 3px 0 }
 .todo-list .btn { margin-left: auto }
+
+/* Sessions on the in-world calendar and timeline */
+.cal-item.k-session { background: color-mix(in srgb, var(--accent) 16%, transparent); font-weight: 600 }
+.timeline li.tl-session::before { background: var(--accent); border-radius: 2px }
