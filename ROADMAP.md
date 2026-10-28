@@ -211,6 +211,13 @@ to the log at the bottom.
     the channel too, with a link back.
 89. [x] **Tag pages.** Every tag gets a page listing what's tagged, with a short description GMs can write, and a list
     of all tags with counts.
+90. [ ] **Phone and accessibility pass.** Check every page and dialog added since the last pass (58 onwards) at phone
+    width as a GM and as a player, with the accessibility checker, in light and dark; fix what turns up.
+91. [ ] **Undo after deleting.** Deleting an entry shows "Moved to the bin · Undo" for a few seconds.
+92. [ ] **Share a marker with the party.** Your own map markers can be shared with the party (still private by
+    default), so "we camped here" shows for everyone.
+93. [ ] **Follow an entry.** Anyone can follow an entry; when someone else changes it, it shows at the top of "since
+    your last visit" and as a quiet note in the sidebar.
 
 ## Ideas parking lot
 
