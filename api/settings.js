@@ -2,6 +2,7 @@
 // PATCH {cal}  set the in-world calendar and today's date (any GM: days pass during play).
 // PUT {discord_webhook}  (owner) a Discord webhook link; it never leaves the server. Empty string removes it.
 // PATCH {prep: {location_id, notes}}   (GM) session prep: where the party is, and the GMs' scratch pad.
+// PATCH {secret: {add} | {id, found, session} | {id, text} | {remove}}   (GM) secrets and clues in session prep
 // POST {post: entryId}   (GM) post an entry's summary and text to the world's Discord channel.
 // PATCH {template: {name, kind, summary, body, fields, tags, secret}}  (GM) save an entry template; {template_remove: id} delete one
 // PATCH {show: entryId | null}  (GM) show an entry to everyone with the world open (revealing it if hidden), or stop.
@@ -10,6 +11,7 @@ import { route, send, fail, sql, requireOwner, requireGm, postDiscord } from './
 import { cleanCalendar } from '../js/calendar.js';
 import { KINDS } from '../js/world-schema.js';
 import { readCustom, cleanCustomList, customKeys } from '../js/custom-fields.js';
+import { applySecret } from '../js/secrets.js';
 
 const WEBHOOK = /^https:\/\/(?:ptb\.|canary\.)?(?:discord|discordapp)\.com\/api\/webhooks\/\d+\/[\w-]+$/;
 const plain = (t) => String(t || '').replace(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g, (_, n, l) => l || n);
@@ -108,6 +110,13 @@ export default route({
       await sql`UPDATE worlds SET shown = ${JSON.stringify(shown)} WHERE id = ${req.world.id}`;
       return send(res, 200, { shown, revealed: e.visibility === 'gm' });
     }
+    // Secrets and clues in session prep, one change at a time: {secret: {add} | {id, found, session} | {id, text} | {remove}}.
+    if (req.body.secret) {
+      const r = applySecret(req.world.prep?.secrets, req.body.secret, req.gm.name);
+      if (r.error) return fail(res, 400, r.error);
+      await sql`UPDATE worlds SET prep = jsonb_set(COALESCE(prep, '{}'::jsonb), '{secrets}', ${JSON.stringify(r.list)}::jsonb) WHERE id = ${req.world.id}`;
+      return send(res, 200, { secrets: r.list });
+    }
     if (req.body.prep !== undefined) {
       const p = req.body.prep || {};
       const cur = req.world.prep || {};
@@ -116,8 +125,9 @@ export default route({
         notes: p.notes === undefined ? cur.notes || '' : String(p.notes).slice(0, 20000),
         updated_by: req.gm.name, updated_at: new Date().toISOString(),
       };
-      await sql`UPDATE worlds SET prep = ${JSON.stringify(next)} WHERE id = ${req.world.id}`;
-      return send(res, 200, { prep: next });
+      // Merged into what's stored, so the secrets list (changed on its own) is never dropped.
+      await sql`UPDATE worlds SET prep = COALESCE(prep, '{}'::jsonb) || ${JSON.stringify(next)}::jsonb WHERE id = ${req.world.id}`;
+      return send(res, 200, { prep: { ...cur, ...next } });
     }
     const cal = req.body.cal === null ? null : cleanCalendar(req.body.cal);
     if (req.body.cal !== null && !cal) return fail(res, 400, 'That calendar needs at least one month.');

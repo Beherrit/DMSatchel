@@ -1,5 +1,5 @@
 // Session prep (GMs): everything for the next session on one page. Last time, where the party is and what's there,
-// quests in play, clocks about to finish, what's coming on the calendar, the party's state, loose threads, and a
+// secrets and clues, quests in play, clocks about to finish, what's coming on the calendar, the party's state, loose threads, and a
 // scratch pad the GMs share. Route: #world/prep
 import { el, toast, setKids } from './dom.js';
 import { recapButton } from './world-recap.js';
@@ -14,6 +14,7 @@ import { rumorsAt, letRumorsSpread } from './world-rumors.js';
 import { encounterCard, partyDefaults, placeTerrains, monsterSource } from './encounter-ui.js';
 import { rollEncounter, rollWeather, seasonOf } from './encounters.js';
 import { vitals } from './sheet-ui.js';
+import { secretsCard } from './world-secrets.js';
 
 const ACTIVE_PC = (e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
 const card = (title, ...kids) => el('section', { class: 'card prep-card' }, el('h3', {}, title), ...kids);
@@ -183,6 +184,6 @@ export async function viewPrep(rerender) {
       el('button', { class: 'btn small', type: 'button', onclick: async () => { await letRumorsSpread(); rerender(); } }, 'Let rumors spread'),
       el('a', { class: 'btn small', href: '#world/calendar' }, 'Move time on')),
     el('div', { class: 'prep-columns' },
-      el('div', { class: 'prep-main' }, lastTime(), whereSection(prep, rerender), questsSection(), scratchPad(prep)),
+      el('div', { class: 'prep-main' }, lastTime(), whereSection(prep, rerender), secretsCard(prep, next), questsSection(), scratchPad(prep)),
       el('div', { class: 'prep-side' }, partySection(), clocksSection(), calendarSection(), threadsSection(gmThreads, table))));
 }

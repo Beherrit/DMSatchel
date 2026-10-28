@@ -11,6 +11,7 @@ import { rollEncounter, rollWeather, seasonOf } from './encounters.js';
 import { vitals } from './sheet-ui.js';
 import { towards } from './attitudes.js';
 import { readObjectives, progress } from './objectives.js';
+import { sortSecrets } from './secrets.js';
 
 const ACTIVE_PC = (e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
 const townOf = (place) => (place?.kind === 'settlement' ? place : [...trail(place)].reverse().find((p) => p.kind === 'settlement') || null);
@@ -73,6 +74,7 @@ export async function viewSessionSheet() {
         return el('li', {}, el('strong', {}, q.name), p.total ? ` (${p.done}/${p.total})` : '', q.fields?.stakes ? `: ${cut(q.fields.stakes, 120)}` : '',
           open.length ? el('ul', { class: 'ss-steps' }, open.slice(0, 5).map((o) => el('li', {}, `☐ ${plain(o.text)}${o.secret ? ' (secret)' : ''}`))) : null);
       }))) : null,
+      sortSecrets(prep.secrets).open.length ? block('Secrets and clues', el('ul', { class: 'ss-steps' }, sortSecrets(prep.secrets).open.slice(0, 12).map((s) => el('li', {}, `☐ ${plain(s.text)}`)))) : null,
       clocks.length ? block('Clocks', el('ul', { class: 'ss-list' }, clocks.map((c) => el('li', {}, el('strong', {}, c.name), ` ${c.filled}/${c.size}`, getEntry(c.entry_id) ? ` · ${getEntry(c.entry_id).name}` : '')))) : null,
       block('If trouble comes', encBox),
       prep.notes ? block('GM notes', el('div', { class: 'ss-notes' }, plain(prep.notes))) : null));
