@@ -218,6 +218,14 @@ to the log at the bottom.
     default), so "we camped here" shows for everyone.
 93. [x] **Follow an entry.** Anyone can follow an entry; when someone else changes it, it shows at the top of "since
     your last visit" and as a quiet note in the sidebar.
+94. [ ] **Formatting in descriptions.** **Bold**, *italic*, lists, small headings and "> read-aloud" boxes in any
+    long text, shown formatted on pages, cards, the session sheet and exports.
+95. [ ] **Recently viewed.** The last entries you opened, in the sidebar and at the top of Ctrl+K search, for this
+    browser.
+96. [ ] **Copy a place with what's in it.** "Make a copy" on a place can bring its people, shops and sub-places
+    along, for a second village built like the first.
+97. [ ] **Merge two entries.** When the world has two entries for the same thing, GMs merge one into the other:
+    connections, places inside it and mentions move over, texts are joined, and the spare goes to the bin.
 
 ## Ideas parking lot
 
