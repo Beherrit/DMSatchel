@@ -986,8 +986,11 @@ body.gated .mainnav, body.gated #toolnav, body.gated #panels, body.gated #notebo
 }
 
 /* Attendance and advancement */
-.attend-list li { display: flex; gap: 10px; align-items: center; margin: 4px 0 }
-.attend-list label { min-width: 10em }
+.attend-list li { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; margin: 4px 0 }
+.attend-list label { flex: 1 1 8em; min-width: 0 }
+.attendance { min-width: 0 }
+.attendance .controls { flex-wrap: wrap }
+.attendance .controls input { max-width: 9em }
 .adv-table { border-collapse: collapse; width: 100% }
 .adv-table th, .adv-table td { padding: 4px 8px; border-bottom: 1px solid var(--line); text-align: left }
 .due-tag { background: var(--good); color: #fff; text-decoration: none }
@@ -1040,3 +1043,12 @@ body.gated .mainnav, body.gated #toolnav, body.gated #panels, body.gated #notebo
   .npc-card { border-color: #000; font-size: 11px }
 }
 .bond-list li { margin: 4px 0 } .bond-add span { font-weight: 600 }
+
+/* Touch screens: small controls get a bigger tap area without changing how they look. */
+@media (pointer: coarse) {
+  .pip, .reroll { position: relative }
+  .pip::after, .reroll::after { content: ''; position: absolute; inset: -10px }
+  .linkish { padding: 6px 2px }
+  input[type=range] { min-height: 32px }
+}
+.w-main { padding-bottom: 64px } /* room for the floating Note button */
