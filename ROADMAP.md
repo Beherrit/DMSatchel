@@ -118,7 +118,7 @@ to the log at the bottom.
     quests inside it (with a preview and a choice of what to include).
 44. [x] **Items in inventories.** Lines in a character's inventory that name a world or library item link to it, and
     magic items show what they do right on the sheet.
-45. [ ] **Quick journal note from anywhere.** Players can jot a journal note from any page (linked to the page they're
+45. [x] **Quick journal note from anywhere.** Players can jot a journal note from any page (linked to the page they're
     on) without leaving it.
 
 ## Ideas parking lot
@@ -169,3 +169,4 @@ to the log at the bottom.
 - Attendance and XP: each session page has an Attendance and XP panel (GMs): tick who came (prefilled from the session's players line), XP each or a total split evenly, and a milestone switch. The party page adds it up in an Advancement table (sessions, XP toward the next level on the 2024 table, level) with a "Level N due" badge linking to the character. A milestone stays owed until the character's level passes the level they had at that session, so levelling up clears it. Stored as a GM-only hidden field on the session; players see who came and the XP. Unit and browser tests.
 - Reveal with contents: place pages get a "Reveal with contents (N)" button (GMs) when the place or anything inside it is hidden. It opens a preview listing the hidden sub-places, people, items, quests and the place's hidden maps, grouped and all ticked, with All / none; Reveal makes the ticked ones visible in one batch request (entries PATCH {ids, visibility}, additive, GMs only, each reveal recorded in history) and un-hides the ticked maps. Suggestions are left alone. API (PGlite) and browser tests.
 - Items in inventories: under a character's inventory on the world sheet, "Items on this sheet" lists every world item, library item or SRD magic item named in it (whole words, longer names first, each once, apostrophes either way; names under five letters ignored), with rarity, attunement and what it does; world items link to their pages. It updates as you type. Unit and browser tests.
+- Quick note: a floating "✎ Note" button on world pages (members) and the j key open a small box. The note is saved as a journal entry titled from its first words, with its kind (Session notes by default) and which of your characters wrote it; on an entry page it's linked to that entry (a connection plus an "About [[Name]]" line). You stay on the page. Hidden when printing and off world pages. Unit and browser tests.

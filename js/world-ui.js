@@ -28,6 +28,7 @@ import { whatsNewCard } from './world-whatsnew.js';
 import { viewSessionSheet } from './world-sheet.js';
 import { attendanceSection } from './world-attendance.js';
 import { revealButton } from './world-reveal.js';
+import { quickNoteButton } from './world-quicknote.js';
 import { viewExport } from './world-export.js';
 import { viewClocks, clocksWidget } from './world-clocks.js';
 import { viewRumors } from './world-rumors.js';
@@ -532,6 +533,7 @@ export function mountWorld(root) {
   side = el('aside', { class: 'w-side' });
   main = el('div', { class: 'w-main' });
   root.append(el('div', { class: 'w-layout' }, side, main));
+  document.body.append(quickNoteButton());
   window.addEventListener('world:rerender', () => rerenderWorld());
   // Live updates: every 20 seconds while a world page is open and visible, pick up what others changed.
   const tick = async () => {

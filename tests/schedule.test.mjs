@@ -45,3 +45,11 @@ test('loot splits by shares in whole copper, and the rest stays in the treasury'
   assert.equal(splitCoins(500, []).left, 500);
   assert.equal(coinText(3333), '33 gp 3 sp 3 cp');
 });
+
+import { titleFrom } from '../js/note-title.js';
+test('quick notes get a title from their first words', () => {
+  assert.equal(titleFrom('Mabel lied about the bell.\nMore later.'), 'Mabel lied about the bell.');
+  assert.equal(titleFrom('[[Mabel|the innkeeper]] knows'), 'Mabel knows');
+  assert.ok(titleFrom('x'.repeat(30) + ' ' + 'y'.repeat(40)).endsWith('…'));
+  assert.equal(titleFrom('   '), 'Note');
+});

@@ -1000,3 +1000,8 @@ body.gated .mainnav, body.gated #toolnav, body.gated #panels, body.gated #notebo
 /* Items named in an inventory */
 .inv-items { margin-top: 6px }
 .inv-list li { margin: 4px 0; padding-left: 8px; border-left: 2px solid var(--line) }
+
+/* Quick note */
+.quicknote-btn { position: fixed; right: 16px; bottom: 16px; z-index: 30; box-shadow: 0 4px 14px rgb(0 0 0 / .2); background: var(--surface) }
+.quicknote textarea { width: 100% }
+@media print { .quicknote-btn { display: none !important } }
