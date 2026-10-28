@@ -7,7 +7,8 @@ import { SPECIES, CLASSES, BACKGROUNDS, ABILITIES, ABILITY_NAMES, ALIGNMENTS } f
 import { saveNote } from './notebook.js';
 import { renderSpells } from './statblock-ui.js';
 import { spellText } from './spells.js';
-import { sendToWorld } from './tools.js';
+// Opens the world's new-entry form with this character filled in (the same event the table tools send).
+const sendToWorld = (entry) => window.dispatchEvent(new CustomEvent('world:draft', { detail: entry }));
 import { characterFields, featureItem } from './sheet-ui.js';
 import { session, onSession } from './api.js';
 import { world, worldEntries, loadWorld } from './world-store.js';

@@ -1,6 +1,7 @@
 // Magic items: the 5e SRD catalog (names, rarity, type, attunement) with short original summaries,
 // cursed items, a curse generator and a unique item maker.
 // Row format: name | type | rarity (c u r v l a) | attunement ('' no, '1' yes, or who) | summary. "CURSED." starts a cursed item's summary.
+import { hooks } from './hooks.js';
 
 export const RARITIES = { c: 'Common', u: 'Uncommon', r: 'Rare', v: 'Very rare', l: 'Legendary', a: 'Artifact' };
 export const RARITY_KEYS = { c: 'common', u: 'uncommon', r: 'rare', v: 'veryrare', l: 'legendary', a: 'artifact' };
@@ -305,8 +306,9 @@ export function concrete(item, rng) {
 }
 
 // Items from the open world's library (set by the world store), mixed into every roll.
-let libraryItems = () => [];
-export const setLibraryItems = (fn) => { libraryItems = fn; };
+// Items from the open world's library (filled in by the world store; tests can set their own).
+export const setLibraryItems = (fn) => { hooks.libraryItems = fn; };
+const libraryItems = () => hooks.libraryItems() || [];
 
 export function randomItem(rng, { rarity, type, cursed } = {}) {
   const fits = (i) => (!rarity || i.rarity === rarity) && (!type || baseType(i.type) === type) && (cursed == null || i.cursed === cursed);

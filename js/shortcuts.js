@@ -1,6 +1,5 @@
 // Keyboard shortcuts: "?" lists them; "g" then a letter jumps to a page; "n" starts a new world entry (GMs).
 import { el } from './dom.js';
-import { openQuickNote } from './world-quicknote.js';
 import { isGm, isMember } from './api.js';
 
 const GO = { t: ['#tools', 'Table tools'], c: ['#characters', 'Character Forge'], w: ['#world', 'World'], p: ['#world/party', 'The Party'], m: ['#world/maps', 'Maps'],
@@ -34,7 +33,7 @@ export function initShortcuts() {
     pendingG = 0;
     if (ev.key === 'g') { pendingG = Date.now(); return; }
     if (ev.key === '?') { ev.preventDefault(); help(); return; }
-    if (ev.key === 'j' && isMember() && location.hash.startsWith('#world')) { ev.preventDefault(); openQuickNote(); return; }
+    if (ev.key === 'j' && isMember() && location.hash.startsWith('#world')) { ev.preventDefault(); import('./world-quicknote.js').then((m) => m.openQuickNote()); return; }
     if (ev.key === 'n' && isMember()) { ev.preventDefault(); location.hash = isGm() ? 'world/new/npc' : 'world/new/journal'; }
   });
 }

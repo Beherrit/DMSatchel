@@ -16,14 +16,15 @@ import {
 import * as T from './lifepath-tables.js';
 import { spellbook, spellText } from './spells.js';
 import { classFrom, backgroundFrom } from './library.js';
+import { hooks as late } from './hooks.js';
 
 // ---- your library ---------------------------------------------------------------------------------
 // Classes, species and subclasses from the open world's library (set by the world store). They're only used when
 // chosen ("Any from my library" or by name), and they draw from their own random stream, so SRD rolls and saved
 // characters come out exactly as before.
 const NO_LIBRARY = { species: [], subclasses: [], classes: [], spells: [], backgrounds: [], feats: [] };
-let libraryProvider = () => NO_LIBRARY;
-export const setCharacterLibrary = (fn) => { libraryProvider = fn; };
+// The world store fills hooks.characterLibrary in; tests can set their own.
+export const setCharacterLibrary = (fn) => { late.characterLibrary = fn; };
 let lib = NO_LIBRARY;
 
 // Class rules by name: an SRD class, a library class, or (if the library entry is gone) a plain stand-in.
@@ -470,7 +471,7 @@ const withArticle = (w) => `${/^[aeiou]/i.test(w) ? 'an' : 'a'} ${w}`;
 
 export function generateCharacter(opts = {}, seed = 'seed', salts = {}) {
   const R = (part) => subRng(seed, `${part}:${salts[part] || 0}`);
-  lib = { ...NO_LIBRARY, ...(libraryProvider() || {}) };
+  lib = { ...NO_LIBRARY, ...(late.characterLibrary() || {}) };
   const level = Math.max(1, Math.min(20, +opts.level || 1));
   const core = pickCore({ ...opts, level }, R('core'), R('library'));
   const stock = nameStock(core.species);

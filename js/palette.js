@@ -1,17 +1,24 @@
 // Search everything: Ctrl+K (⌘K on a Mac) or "/" opens one box for pages, actions, world entries and rules.
 import { el, setKids } from './dom.js';
-import { TOOLS } from './tools.js';
+import { TOOL_LIST } from './tool-list.js';
 import { KINDS, KIND_ORDER } from './world-schema.js';
-import { SPECIES, CLASSES, BACKGROUNDS, ORIGIN_FEATS } from './rules2024.js';
-import { MAGIC_ITEMS } from './magic-items.js';
-import { world, worldEntries, loadWorld, kindLabel } from './world-store.js';
 import { session, isGm, isAdmin, isOwner, isPlayer } from './api.js';
+
+// The rules, magic items and the world load the first time the palette opens, not with every page.
+let M = null;
+async function loadData() {
+  if (!M) {
+    const [rules, items, store] = await Promise.all([import('./rules2024.js'), import('./magic-items.js'), import('./world-store.js')]);
+    M = { ...rules, MAGIC_ITEMS: items.MAGIC_ITEMS, store };
+  }
+  return M;
+}
 
 let dialog, input, list, items = [], active = 0;
 
 function baseItems() {
   const out = [
-    ...TOOLS.map((t) => ({ label: t.label, group: 'Table tools', href: `#tools/${t.id}` })),
+    ...TOOL_LIST.map((t) => ({ label: t.label, group: 'Table tools', href: `#tools/${t.id}` })),
     { label: 'Character Forge', group: 'Pages', href: '#characters', hint: 'Roll a 2024-rules character' },
     { label: 'World', group: 'Pages', href: '#world' },
     { label: 'The Party', group: 'World', href: '#world/party', hint: 'Party members, treasury, loot log, handouts' },
@@ -26,11 +33,11 @@ function baseItems() {
     { label: 'Party standing', group: 'World', href: '#world/standings' },
     ...KIND_ORDER.map((k) => ({ label: KINDS[k].plural, group: 'World', href: `#world/k/${k}` })),
     ...['classes', 'species', 'backgrounds', 'feats', 'spells', 'items', 'slots'].map((t) => ({ label: `Reference: ${t === 'slots' ? 'spell slots' : t === 'items' ? 'magic items' : t}`, group: 'Pages', href: `#reference/${t}` })),
-    ...Object.keys(CLASSES).map((c) => ({ label: c, group: 'Class', href: '#reference/classes', filter: c })),
-    ...Object.keys(SPECIES).map((c) => ({ label: c, group: 'Species', href: '#reference/species', filter: c })),
-    ...Object.keys(BACKGROUNDS).map((c) => ({ label: c, group: 'Background', href: '#reference/backgrounds', filter: c })),
-    ...Object.keys(ORIGIN_FEATS).map((c) => ({ label: c, group: 'Feat', href: '#reference/feats', filter: c })),
-    ...MAGIC_ITEMS.map((i) => ({ label: i.name, group: i.cursed ? 'Cursed item' : 'Magic item', href: '#reference/items', filter: i.name, hint: i.summary })),
+    ...Object.keys(M.CLASSES).map((c) => ({ label: c, group: 'Class', href: '#reference/classes', filter: c })),
+    ...Object.keys(M.SPECIES).map((c) => ({ label: c, group: 'Species', href: '#reference/species', filter: c })),
+    ...Object.keys(M.BACKGROUNDS).map((c) => ({ label: c, group: 'Background', href: '#reference/backgrounds', filter: c })),
+    ...Object.keys(M.ORIGIN_FEATS).map((c) => ({ label: c, group: 'Feat', href: '#reference/feats', filter: c })),
+    ...M.MAGIC_ITEMS.map((i) => ({ label: i.name, group: i.cursed ? 'Cursed item' : 'Magic item', href: '#reference/items', filter: i.name, hint: i.summary })),
   ];
   if (isGm()) {
     out.push({ label: 'GM discussions', group: 'World', href: '#world/talk' });
@@ -44,7 +51,7 @@ function baseItems() {
 }
 
 function entryItems() {
-  return worldEntries().map((e) => ({ label: e.name, group: kindLabel(e.kind), href: `#world/e/${e.id}`, hint: e.summary, haystack: `${e.name} ${(e.tags || []).join(' ')} ${Object.values(e.fields || {}).join(' ')}` }));
+  return M.store.worldEntries().map((e) => ({ label: e.name, group: M.store.kindLabel(e.kind), href: `#world/e/${e.id}`, hint: e.summary, haystack: `${e.name} ${(e.tags || []).join(' ')} ${Object.values(e.fields || {}).join(' ')}` }));
 }
 
 function score(item, q) {
@@ -61,13 +68,14 @@ function score(item, q) {
 }
 
 function render() {
+  if (!M) return;
   const q = input.value.trim().toLowerCase();
   const all = [...baseItems(), ...entryItems()];
   items = all.map((it) => [score(it, q), it]).filter(([s]) => s > 0).sort((a, b) => b[0] - a[0] || a[1].label.localeCompare(b[1].label)).slice(0, 40).map(([, it]) => it);
   active = Math.min(active, Math.max(0, items.length - 1));
   setKids(list, ...(items.length ? items.map((it, i) => el('li', { role: 'option', id: `pal-${i}`, 'aria-selected': String(i === active), class: i === active ? 'active' : '', onmousedown: (ev) => { ev.preventDefault(); go(it); }, onmousemove: () => { if (active !== i) { active = i; mark(); } } },
     el('span', { class: 'pal-label' }, it.label), it.hint ? el('span', { class: 'pal-hint' }, it.hint.length > 70 ? `${it.hint.slice(0, 68)}…` : it.hint) : null, el('span', { class: 'pal-group' }, it.group)))
-    : [el('li', { class: 'pal-empty' }, world.loaded || session.configured !== true ? 'Nothing matches.' : 'Nothing matches yet. The world is still loading…')]));
+    : [el('li', { class: 'pal-empty' }, M.store.world.loaded || session.configured !== true ? 'Nothing matches.' : 'Nothing matches yet. The world is still loading…')]));
   input.setAttribute('aria-activedescendant', items.length ? `pal-${active}` : '');
 }
 function mark() { [...list.children].forEach((li, i) => { li.classList.toggle('active', i === active); li.setAttribute('aria-selected', String(i === active)); }); input.setAttribute('aria-activedescendant', `pal-${active}`); list.children[active]?.scrollIntoView({ block: 'nearest' }); }
@@ -78,9 +86,12 @@ function go(it) {
   if (it.filter) setTimeout(() => { const f = document.getElementById('ref-filter'); if (f) { f.value = it.filter; f.dispatchEvent(new Event('input')); } }, 50);
 }
 
-export function openPalette() {
-  input.value = ''; active = 0; render(); dialog.showModal(); input.focus();
-  if (session.configured === true && !world.loaded) loadWorld().then(() => { if (dialog.open) render(); });
+export async function openPalette() {
+  input.value = ''; active = 0; dialog.showModal(); input.focus();
+  setKids(list, el('li', { class: 'pal-empty' }, 'Loading…'));
+  await loadData();
+  render();
+  if (session.configured === true && !M.store.world.loaded) M.store.loadWorld().then(() => { if (dialog.open) render(); });
 }
 
 export function initPalette() {

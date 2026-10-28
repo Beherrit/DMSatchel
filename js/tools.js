@@ -3,6 +3,7 @@
 
 import { mountDungeons } from './dungeon-ui.js';
 import { mountTables } from './world-tables.js';
+import { TOOL_LIST } from './tool-list.js';
 import { mountEncounters } from './encounter-ui.js';
 import { makeRng } from './rng.js';
 import { $, el, cap, fmt, copyText, fresh, traitList, setKids, toast } from './dom.js';
@@ -492,18 +493,5 @@ function mountItems(root) {
   roll('catalog');
 }
 
-export const TOOLS = [
-  { id: 'npc', label: 'NPCs', mount: mountNpc },
-  { id: 'quest', label: 'Quests', mount: mountQuest },
-  { id: 'orgs', label: 'Factions', mount: mountOrgs },
-  { id: 'names', label: 'Names', mount: mountNames },
-  { id: 'places', label: 'Places', mount: mountPlaces },
-  { id: 'describe', label: 'Descriptions', mount: mountDescribe },
-  { id: 'hooks', label: 'Rumors & Hooks', mount: mountHooks },
-  { id: 'loot', label: 'Loot', mount: mountLoot },
-  { id: 'items', label: 'Magic Items', mount: mountItems },
-  { id: 'shops', label: 'Shops & Markets', mount: mountShops },
-  { id: 'encounters', label: 'Encounters & Travel', mount: mountEncounters },
-  { id: 'dungeons', label: 'Dungeons & Lairs', mount: mountDungeons },
-  { id: 'tables', label: 'Your tables', mount: mountTables },
-];
+const MOUNTS = { npc: mountNpc, quest: mountQuest, orgs: mountOrgs, names: mountNames, places: mountPlaces, describe: mountDescribe, hooks: mountHooks, loot: mountLoot, items: mountItems, shops: mountShops, encounters: mountEncounters, dungeons: mountDungeons, tables: mountTables };
+export const TOOLS = TOOL_LIST.map((t) => ({ ...t, mount: MOUNTS[t.id] }));
