@@ -22,6 +22,7 @@ import { viewDowntime, downtimeSection } from './world-downtime.js';
 import { recapButton } from './world-recap.js';
 import { showButton, checkShown } from './world-show.js';
 import { attitudesOfCharacter, attitudesToward } from './world-attitudes.js';
+import { noteBox, myNotesSection } from './world-notes.js';
 import { viewExport } from './world-export.js';
 import { viewClocks, clocksWidget } from './world-clocks.js';
 import { viewRumors } from './world-rumors.js';
@@ -203,6 +204,7 @@ function viewEntry(id, tab) {
     e.tags?.length ? el('div', { class: 'tags' }, e.tags.map((t) => el('a', { class: 'tagchip', href: `#world/q/${encodeURIComponent(`#${t}`)}` }, `#${t}`))) : null,
     el('p', { class: 'muted small' }, `Created${e.created_by ? ` by ${e.created_by}` : ''} ${when(e.created_at)}${e.updated_by ? ` · last edited by ${e.updated_by} ${when(e.updated_at)}` : ''} · `, el('a', { href: `#world/web/${e.id}` }, 'See connections in the web')),
     history,
+    noteBox(e),
     tableWidget(e),
     isGm() ? talkWidget(e) : null);
   const node = el('article', { class: 'w-view entry-view' },
@@ -257,11 +259,12 @@ function viewMine() {
   if (!signedIn()) return notice('Sign in first', 'Your characters, journals and suggestions show here once you’re signed in.', el('button', { class: 'btn primary', type: 'button', onclick: () => openSignIn() }, 'Sign in'));
   const list = worldEntries().filter((e) => e.owner_id === session.gm.id).sort(byName);
   const group = (title, items) => items.length ? el('section', {}, el('h3', { class: 'section-title' }, title), el('ul', { class: 'entry-grid' }, items.map(entryCard))) : null;
-  return el('div', { class: 'w-view' }, el('div', { class: 'panel-head' }, el('h2', {}, 'My things'), el('p', {}, 'Your characters, journal entries and the suggestions you’ve made in this world.')),
+  return el('div', { class: 'w-view' }, el('div', { class: 'panel-head' }, el('h2', {}, 'My things'), el('p', {}, 'Your characters, journal entries, the suggestions you’ve made and your private notes in this world.')),
     list.length ? [group('Characters', list.filter((e) => e.kind === 'character')), group('Journal', list.filter((e) => e.kind === 'journal')),
       group('Suggestions', list.filter((e) => !PLAYER_KINDS.includes(e.kind)))]
       : notice('Nothing yet', 'Add your character, keep a journal, or suggest something the GMs might add to the world.',
-        isMember() ? el('div', { class: 'btnrow' }, el('a', { class: 'btn primary', href: '#world/new/character' }, '+ My character'), el('a', { class: 'btn', href: '#world/new/journal' }, '+ Journal entry')) : null));
+        isMember() ? el('div', { class: 'btnrow' }, el('a', { class: 'btn primary', href: '#world/new/character' }, '+ My character'), el('a', { class: 'btn', href: '#world/new/journal' }, '+ Journal entry')) : null),
+    isMember() ? myNotesSection() : null);
 }
 
 // Who plays a character, and a way to claim an unowned one (or for a GM, to let it go).

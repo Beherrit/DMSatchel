@@ -935,3 +935,8 @@ body.gated .mainnav, body.gated #toolnav, body.gated #panels, body.gated #notebo
 .att-bad { color: var(--warn) }
 .att-add { margin-top: 8px }
 .att-line { display: inline-block; margin-top: 2px }
+
+/* Private notes */
+.my-notes textarea { width: 100%; margin: 6px 0 }
+.my-notes summary { cursor: pointer; font-weight: 600 }
+.my-notes-list li { margin-bottom: 8px }

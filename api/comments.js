@@ -7,6 +7,11 @@
 // POST {entry_id, body, parent_id, audience}   start a thread or reply (table: any member; gm: GMs)
 // PATCH {id, resolved}   resolve or reopen a GM thread · {id, hidden} hide table talk (GM) · {id, body} edit your own
 // DELETE ?id=            delete your own comment (GMs may delete any table comment; the owner any comment)
+//
+// Private notes (audience 'note'): one per person per entry, seen only by whoever wrote it, never by GMs or the owner.
+// GET ?notes=mine                   your notes across the world, with the entries' names
+// GET ?entry_id=&audience=note      your note on one entry (or none)
+// PUT {entry_id, body}              write your note on an entry; an empty body removes it
 import { route, send, fail, sql, requireGm, requireMember } from './_lib/core.js';
 
 const room = (v) => (v === 'table' ? 'table' : 'gm');
@@ -19,7 +24,16 @@ async function entryFor(id, req) {
 
 export default route({
   async GET(req, res) {
-    const { entry_id: entryId, audience, recent } = req.query || {};
+    const { entry_id: entryId, audience, recent, notes } = req.query || {};
+    if (notes === 'mine' || (entryId && audience === 'note')) {
+      if (!requireMember(req, res)) return;
+      const rows = await sql`SELECT c.id, c.entry_id, c.body, c.created_at, c.edited_at, e.name AS entry_name, e.kind, e.owner_id, e.visibility, e.status, e.deleted
+        FROM comments c JOIN entries e ON e.id = c.entry_id
+        WHERE c.audience = 'note' AND c.gm_id = ${req.gm.id} AND e.world_id = ${req.world.id}
+        ORDER BY COALESCE(c.edited_at, c.created_at) DESC LIMIT 500`;
+      const only = notes === 'mine' ? null : String(entryId);
+      return send(res, 200, { notes: rows.filter((r) => sees(r, req) && (!only || r.entry_id === only)).map(({ owner_id, visibility, status, deleted, ...r }) => r) });
+    }
     if (recent === 'table') {
       const rows = await sql`SELECT c.id, c.entry_id, c.parent_id, c.body, c.created_at, c.hidden, c.gm_id, g.name AS gm, e.name AS entry_name, e.kind, e.owner_id, e.visibility, e.status, e.deleted
         FROM comments c LEFT JOIN gms g ON g.id = c.gm_id JOIN entries e ON e.id = c.entry_id
@@ -63,11 +77,23 @@ export default route({
       RETURNING id, entry_id, parent_id, body, resolved, hidden, created_at, edited_at, gm_id`;
     send(res, 201, { comment: { ...rows[0], gm: req.gm.name } });
   },
+  async PUT(req, res) {
+    if (!requireMember(req, res)) return;
+    const entryId = String(req.body.entry_id || '').slice(0, 40);
+    if (!sees(await entryFor(entryId, req), req)) return fail(res, 404, 'That entry isn’t in this world.');
+    const body = String(req.body.body || '').trim().slice(0, 5000);
+    const cur = (await sql`SELECT id FROM comments WHERE entry_id = ${entryId} AND gm_id = ${req.gm.id} AND audience = 'note' ORDER BY id LIMIT 1`)[0];
+    if (!body) { if (cur) await sql`DELETE FROM comments WHERE id = ${cur.id}`; return send(res, 200, { note: null }); }
+    const rows = cur
+      ? await sql`UPDATE comments SET body = ${body}, edited_at = now() WHERE id = ${cur.id} RETURNING id, entry_id, body, created_at, edited_at`
+      : await sql`INSERT INTO comments (entry_id, gm_id, body, audience) VALUES (${entryId}, ${req.gm.id}, ${body}, 'note') RETURNING id, entry_id, body, created_at, edited_at`;
+    send(res, 200, { note: rows[0] });
+  },
   async PATCH(req, res) {
     if (!requireMember(req, res)) return;
     const id = Number(req.body.id);
     const cur = (await sql`SELECT c.id, c.gm_id, c.audience FROM comments c JOIN entries e ON e.id = c.entry_id WHERE c.id = ${id} AND e.world_id = ${req.world.id}`)[0];
-    if (!cur || (cur.audience === 'gm' && !req.isGmHere)) return fail(res, 404, 'That comment was deleted.');
+    if (!cur || (cur.audience === 'gm' && !req.isGmHere) || (cur.audience === 'note' && cur.gm_id !== req.gm.id)) return fail(res, 404, 'That comment was deleted.');
     if (typeof req.body.resolved === 'boolean') {
       if (!req.isGmHere) return fail(res, 403, 'Only GMs can resolve threads.');
       await sql`UPDATE comments SET resolved = ${req.body.resolved} WHERE id = ${id}`;
@@ -88,7 +114,7 @@ export default route({
     if (!requireMember(req, res)) return;
     const id = Number(req.query?.id);
     const cur = (await sql`SELECT c.id, c.gm_id, c.audience FROM comments c JOIN entries e ON e.id = c.entry_id WHERE c.id = ${id} AND e.world_id = ${req.world.id}`)[0];
-    if (!cur || (cur.audience === 'gm' && !req.isGmHere)) return fail(res, 404, 'That comment was already deleted.');
+    if (!cur || (cur.audience === 'gm' && !req.isGmHere) || (cur.audience === 'note' && cur.gm_id !== req.gm.id)) return fail(res, 404, 'That comment was already deleted.');
     const mod = req.role === 'owner' || (cur.audience === 'table' && req.isGmHere);
     if (cur.gm_id !== req.gm.id && !mod) return fail(res, 403, 'You can only delete your own comments.');
     await sql`DELETE FROM comments WHERE id = ${id} OR parent_id = ${id}`;
