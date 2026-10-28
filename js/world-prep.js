@@ -15,6 +15,7 @@ import { encounterCard, partyDefaults, placeTerrains, monsterSource } from './en
 import { rollEncounter, rollWeather, seasonOf } from './encounters.js';
 import { vitals } from './sheet-ui.js';
 import { secretsCard } from './world-secrets.js';
+import { readGoals, activeGoals } from './goals.js';
 
 const ACTIVE_PC = (e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
 const card = (title, ...kids) => el('section', { class: 'card prep-card' }, el('h3', {}, title), ...kids);
@@ -129,7 +130,8 @@ function partySection() {
       return el('li', {}, el('div', { class: 'prep-pc' }, link(c), el('span', { class: 'muted small' }, [c.fields?.class, c.fields?.level && `L${c.fields.level}`, c.owner || c.fields?.player].filter(Boolean).join(' · ')),
         v.max ? el('span', { class: 'small prep-hp' }, `${v.hp}/${v.max} HP${v.temp ? ` +${v.temp}` : ''}`) : null),
         v.max ? el('div', { class: 'hp-bar small-bar' }, el('span', { style: `width:${pct}%` })) : null,
-        v.conditions.length || v.exhaustion ? el('div', { class: 'small danger-line' }, [...v.conditions, v.exhaustion ? `Exhaustion ${v.exhaustion}` : ''].filter(Boolean).join(', ')) : null);
+        v.conditions.length || v.exhaustion ? el('div', { class: 'small danger-line' }, [...v.conditions, v.exhaustion ? `Exhaustion ${v.exhaustion}` : ''].filter(Boolean).join(', ')) : null,
+        activeGoals(readGoals(c)).length ? el('div', { class: 'small prep-goals' }, el('strong', {}, 'Wants: '), activeGoals(readGoals(c)).slice(0, 3).map((g) => g.text.replace(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g, (_, a, b) => b || a)).join(' · ')) : null);
     })) : empty('No active characters yet.'),
     el('a', { class: 'small', href: '#world/party' }, 'Party page and treasury'));
 }

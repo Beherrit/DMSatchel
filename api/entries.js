@@ -15,6 +15,7 @@
 import { route, send, fail, sql, newId, requireGm, requireMember, requireOwner } from './_lib/core.js';
 import { KINDS, isKind, LIMITS, PLAYER_KINDS, PLACE_KINDS, isImageRef, gmOnlyFields } from '../js/world-schema.js';
 import { forPlayers } from '../js/objectives.js';
+import { goalsForOthers } from '../js/goals.js';
 import { cleanTag, chainUp } from '../js/bulk.js';
 import { cleanPrimer, primerEmpty } from '../js/zero.js';
 import { readCustom, customForPlayers, customKeys, secretCustomKeys, isCustomKey } from '../js/custom-fields.js';
@@ -31,7 +32,7 @@ function clean(input, custom = {}) {
   if (!name) return { error: 'Give the entry a name.' };
   const allowed = new Set([...KINDS[e.kind].fields.map(([k]) => k), ...customKeys(e.kind, custom)]);
   const fields = {};
-  for (const [k, v] of Object.entries(e.fields || {})) if (allowed.has(k) && v != null && String(v).trim() && (k !== 'image' || isImageRef(String(v)))) fields[k] = clip(v, ['stock', 'sheet', 'play', 'spread', 'known', 'attitudes', 'objectives', 'attendance', 'enc'].includes(k) ? LIMITS.body : LIMITS.field);
+  for (const [k, v] of Object.entries(e.fields || {})) if (allowed.has(k) && v != null && String(v).trim() && (k !== 'image' || isImageRef(String(v)))) fields[k] = clip(v, ['stock', 'sheet', 'play', 'spread', 'known', 'attitudes', 'objectives', 'attendance', 'enc', 'goals'].includes(k) ? LIMITS.body : LIMITS.field);
   const tags = [...new Set((Array.isArray(e.tags) ? e.tags : []).map((t) => clip(t, LIMITS.tag).trim().toLowerCase()).filter(Boolean))].slice(0, LIMITS.tags);
   const links = (Array.isArray(e.links) ? e.links : []).filter((l) => l && typeof l.id === 'string').slice(0, LIMITS.links)
     .map((l) => ({ id: clip(l.id, 40), label: clip(l.label || 'related to', 60), secret: Boolean(l.secret) }));
@@ -54,6 +55,8 @@ function shape(row, req) {
   if (gmView) { out.secret = row.secret; out.deleted = row.deleted; }
   else {
     if (row.fields?.objectives) out.fields = { ...row.fields, objectives: forPlayers(row.fields.objectives) };
+    // A character's secret goals: only its player (and the GMs) see them.
+    if (row.fields?.goals && !mine) out.fields = { ...out.fields, goals: goalsForOthers(row.fields.goals) };
     // The world's own GM-only fields stay with the GMs, even on a player's own entries.
     const hide = secretCustomKeys(row.kind, customOf(req)).filter((k) => out.fields?.[k]);
     if (hide.length) { out.fields = { ...out.fields }; for (const k of hide) delete out.fields[k]; }

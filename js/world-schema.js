@@ -54,7 +54,9 @@ export const KINDS = {
       // Kept out of forms: the Character Forge recipe (rebuilds the full sheet) and the live play state.
       ['forge', 'Forge recipe', 'hidden'], ['play', 'Play state', 'hidden'], ['known', 'What they know', 'hidden'],
       // How NPCs and powers feel about this character (see attitudes.js); only GMs set it.
-      ['attitudes', 'Attitudes', 'hidden', null, { gmOnly: true }]],
+      ['attitudes', 'Attitudes', 'hidden', null, { gmOnly: true }],
+      // The player's goals for the character (see goals.js); secret ones only the player and the GMs see.
+      ['goals', 'Goals', 'hidden']],
   },
   deity: {
     label: 'Deity', plural: 'Deities & Powers', blurb: 'Gods, patrons, demon lords and old powers.',

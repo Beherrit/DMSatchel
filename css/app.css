@@ -1124,3 +1124,14 @@ li.picking:has(.bulk-pick:checked) { outline: 2px solid var(--accent, #2c6e63); 
 .sc-item .secret-edit { grid-column: 1 / 3; min-width: 0 }
 .secret-add { display: flex; gap: 6px; margin-top: 8px }
 .secret-add input { flex: 1; min-width: 0 }
+
+/* Character goals */
+.goal-list { margin: 6px 0 10px }
+.goal { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; align-items: start; padding: 6px 0; border-bottom: 1px dashed var(--line) }
+.goal:last-child { border-bottom: 0 }
+.goal-text .rich p { margin: 0 }
+.goal-tags { display: inline-flex; flex-wrap: wrap; gap: 4px; margin-top: 2px }
+.goal-done .goal-text .rich { text-decoration: line-through; color: var(--muted) }
+.goal-state { width: auto }
+.goal-add { display: flex; flex-wrap: wrap; gap: 6px; align-items: center }
+.goal-add input[type=text] { flex: 1 1 14rem; min-width: 0 }

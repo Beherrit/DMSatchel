@@ -25,9 +25,9 @@ const anchor = (name) => name.toLowerCase().replace(/[^\w\s-]/g, '').trim().repl
 
 function fieldsOf(e, playerSafe) {
   const rows = [];
-  for (const [k, label, , , o] of kindFields(e.kind)) {
+  for (const [k, label, type, , o] of kindFields(e.kind)) {
     const v = e.fields?.[k];
-    if (!v || SKIP_FIELDS.has(k) || (k === 'sheet' && e.fields.forge) || (playerSafe && o?.gmSecret)) continue;
+    if (!v || SKIP_FIELDS.has(k) || type === 'hidden' || (k === 'sheet' && e.fields.forge) || (playerSafe && o?.gmSecret)) continue;
     rows.push([label, v]);
   }
   if (e.fields?.stats && !playerSafe) rows.push(['Stat block', e.fields.stats]);

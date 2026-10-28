@@ -26,6 +26,7 @@ import { quickNoteButton } from './world-quicknote.js';
 import { initLinkSuggest } from './link-suggest.js';
 import { bulkControls } from './world-bulk.js';
 import { customFieldsButton } from './world-fields.js';
+import { goalsSection } from './world-goals.js';
 import { tableSection } from './world-tables.js';
 import { parseSearch, searchHash, searchEntries } from './search.js';
 import { saveTemplateButton, templatePicker } from './world-templates.js';
@@ -241,6 +242,7 @@ function viewEntry(id, tab) {
     e.kind === 'clan' ? clanTree(e, rerenderWorld) : null,
     e.kind === 'npc' || e.kind === 'character' ? familySection(e, rerenderWorld) : null,
     e.kind === 'character' ? ownerLine(e) : null,
+    goalsSection(e, rerenderWorld),
     e.kind === 'character' ? sheetSection(e, rerenderWorld) : null,
     e.kind === 'character' ? knownSection(e, rerenderWorld) : null,
     e.kind === 'character' ? attitudesOfCharacter(e, rerenderWorld) : null,
