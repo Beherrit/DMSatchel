@@ -103,6 +103,11 @@ export function ensureSchema() {
       await sql`ALTER TABLE members ADD COLUMN IF NOT EXISTS prev_visit timestamptz`;
       // Entry templates the GMs saved: [{ id, name, kind, summary, body, fields, tags, secret }].
       await sql`ALTER TABLE worlds ADD COLUMN IF NOT EXISTS templates jsonb`;
+      // Private map markers: each person's own notes on a map ("we camped here"), seen only by them.
+      await sql`CREATE TABLE IF NOT EXISTS map_marks (
+        id serial PRIMARY KEY, map_id text NOT NULL, gm_id int NOT NULL, x real NOT NULL, y real NOT NULL,
+        label text NOT NULL DEFAULT '', note text NOT NULL DEFAULT '', created_at timestamptz NOT NULL DEFAULT now())`;
+      await sql`CREATE INDEX IF NOT EXISTS map_marks_idx ON map_marks (map_id, gm_id)`;
       await sql`INSERT INTO members (world_id, gm_id, role) SELECT 'default', id, CASE WHEN role = 'admin' THEN 'owner' ELSE 'gm' END FROM gms
         WHERE NOT EXISTS (SELECT 1 FROM members m WHERE m.world_id = 'default') ON CONFLICT DO NOTHING`;
     })().catch((e) => { schemaReady = null; throw e; });

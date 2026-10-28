@@ -1,7 +1,7 @@
 // World maps: upload a map, pan and zoom it, and pin entries to it.
 // Routes: #world/maps · #world/map/<id> · #world/map/<id>/<pinId>
 import { el, toast, confirmButton, setKids } from './dom.js';
-import { api, isGm } from './api.js';
+import { api, isGm, isMember } from './api.js';
 import { shrinkImage } from './dom.js';
 import { travelText } from './encounters.js';
 import { world, getEntry, findByName, link, kindLabel, notice, nameList, whenTime, createEntry, mapsOf, trail } from './world-store.js';
@@ -73,7 +73,10 @@ export function viewMaps() {
 
 export async function viewMap(id, focusPin) {
   let map;
-  try { map = (await api('maps', { query: { id } })).map; } catch (err) { return notice('Couldn’t open the map', err.message); }
+  let marks = [];
+  try { const r = await api('maps', { query: { id } }); map = r.map; marks = r.mine || []; } catch (err) { return notice('Couldn’t open the map', err.message); }
+  let marking = false;
+  const myBox = el('div', { class: 'my-marks' });
   let pins = map.pins || [];
   let scale = 1, tx = 0, ty = 0, adding = false, openPin = null;
 
@@ -225,9 +228,32 @@ export async function viewMap(id, focusPin) {
   let moving = null;
   function startMove(pin) { moving = pin; adding = false; closePop(); viewport.classList.add('placing'); status.textContent = `Click the map to move “${pin.label}”.`; status.className = 'form-status'; }
 
+  // Your own markers: only you see them.
+  function markDialog(mk) {
+    const label = el('input', { type: 'text', id: 'mk-label', value: mk.label || '', maxlength: 80, placeholder: 'e.g. We camped here' });
+    const note = el('textarea', { id: 'mk-note', rows: 3, placeholder: 'Anything to remember about this spot' }, mk.note || '');
+    const d = el('dialog', { class: 'dialog', 'aria-labelledby': 'mk-title' }, el('div', { class: 'dialog-body' },
+      el('h2', { id: 'mk-title' }, mk.id ? 'Your marker' : 'New marker'), el('p', { class: 'muted small' }, 'Only you can see your markers.'),
+      el('label', { for: 'mk-label' }, 'Label'), label, el('label', { for: 'mk-note' }, 'Note'), note,
+      el('div', { class: 'btnrow' },
+        el('button', { class: 'btn primary', type: 'button', onclick: async () => {
+          try {
+            const r = await api('maps', { method: 'POST', body: { mark: { ...mk, map_id: map.id, label: label.value, note: note.value } } });
+            marks = [...marks.filter((x) => x.id !== r.mark.id), r.mark]; d.close(); renderPins();
+          } catch (err) { toast(err.message, 'bad'); }
+        } }, 'Save'),
+        mk.id ? el('button', { class: 'btn', type: 'button', onclick: () => { d.close(); moving = { mark: mk }; viewport.classList.add('placing'); status.textContent = `Click the map to move “${mk.label}”.`; status.className = 'form-status'; } }, 'Move') : null,
+        mk.id ? confirmButton('Delete', async () => { try { await api('maps', { method: 'DELETE', query: { mark: mk.id } }); marks = marks.filter((x) => x.id !== mk.id); d.close(); renderPins(); } catch (err) { toast(err.message, 'bad'); } }, 'btn') : null,
+        el('button', { class: 'btn ghost', type: 'button', onclick: () => d.close() }, 'Cancel'))));
+    d.addEventListener('close', () => d.remove());
+    document.body.append(d); d.showModal(); label.focus();
+  }
+
   function renderPins() {
     const q = filter.value.trim().toLowerCase();
-    setKids(layer, ...pins.map((p) => el('button', {
+    setKids(layer, ...marks.map((m) => el('button', { class: 'pin mark', type: 'button', style: `left:${m.x * 100}%;top:${m.y * 100}%`, title: m.label, 'aria-label': `Your marker: ${m.label}`,
+      onclick: (ev) => { ev.stopPropagation(); markDialog(m); } }, el('span', { class: 'glyph', 'aria-hidden': 'true' }, '✎'), el('span', { class: 'pin-label' }, m.label))),
+    ...pins.map((p) => el('button', {
       class: `pin pin-${p.icon || 'poi'}${p.secret ? ' secret' : ''}${p.entry_id && mapsOf(p.entry_id).some((m) => m.id !== map.id) ? ' has-map' : ''}`, type: 'button', 'data-id': p.id, style: `left:${p.x * 100}%;top:${p.y * 100}%`,
       title: p.label, 'aria-label': p.label, onclick: (ev) => { ev.stopPropagation(); showPin(p); },
     }, el('span', { class: 'glyph', 'aria-hidden': 'true' }, PIN_ICONS[p.icon || 'poi'][1]), el('span', { class: 'pin-label' }, p.label))));
@@ -235,8 +261,12 @@ export async function viewMap(id, focusPin) {
     setKids(list, ...(shown.length ? shown.map((p) => el('li', {}, el('button', { class: 'linkish', type: 'button', onclick: () => { centerOn(p); showPin(p); } },
       el('span', { class: `glyph pin-${p.icon || 'poi'}` }, PIN_ICONS[p.icon || 'poi'][1]), ' ', p.label), p.secret ? el('span', { class: 'tag' }, 'GM') : null))
       : [el('li', { class: 'muted small' }, pins.length ? 'No pins match.' : 'No pins yet.')]));
+    drawMine();
   }
   filter.addEventListener('input', renderPins);
+  // The side list of your markers (redrawn with the pins).
+  const drawMine = () => setKids(myBox, ...(marks.length ? [el('h3', { class: 'section-title' }, `Your markers (${marks.length})`), el('ul', { class: 'pin-list' }, [...marks].sort((a, b) => a.label.localeCompare(b.label)).map((m) => el('li', {},
+    el('button', { class: 'linkish', type: 'button', onclick: () => { centerOn(m); markDialog(m); } }, el('span', { class: 'glyph mark-glyph', 'aria-hidden': 'true' }, '✎'), ' ', m.label), m.note ? el('span', { class: 'muted small' }, ` ${m.note.slice(0, 60)}`) : null)))] : []));
 
   // Pan, zoom and place pins.
   const pointers = new Map(); let last = null, pinchDist = 0, dragged = false;
@@ -268,6 +298,8 @@ export async function viewMap(id, focusPin) {
     const s = stage.getBoundingClientRect();
     const x = (ev.clientX - s.left) / s.width, y = (ev.clientY - s.top) / s.height;
     if (x < 0 || x > 1 || y < 0 || y > 1) return;
+    if (moving?.mark) { const mk = moving.mark; moving = null; viewport.classList.remove('placing'); api('maps', { method: 'POST', body: { mark: { ...mk, map_id: map.id, x, y } } }).then((r) => { marks = marks.map((m) => (m.id === mk.id ? r.mark : m)); status.textContent = 'Marker moved.'; renderPins(); }).catch((err) => toast(err.message, 'bad')); return; }
+    if (marking) { marking = false; viewport.classList.remove('placing'); markBtn.setAttribute('aria-pressed', 'false'); status.textContent = ''; markDialog({ x, y, label: '', note: '' }); return; }
     if (moving) { const m = moving; moving = null; viewport.classList.remove('placing'); save(pins.map((p) => (p.id === m.id ? { ...p, x, y } : p)), 'Pin moved.'); return; }
     if (adding) {
       adding = false; viewport.classList.remove('placing'); addBtn.setAttribute('aria-pressed', 'false');
@@ -298,6 +330,10 @@ export async function viewMap(id, focusPin) {
     status.textContent = adding ? 'Click the map where the pin goes.' : ''; status.className = 'form-status';
   } }, '+ Add pin');
   const c = () => [viewport.clientWidth / 2, viewport.clientHeight / 2];
+  const markBtn = el('button', { class: 'btn small', type: 'button', 'aria-pressed': 'false', title: 'A private marker only you can see', onclick: () => {
+    marking = !marking; adding = false; moving = null; markBtn.setAttribute('aria-pressed', String(marking)); viewport.classList.toggle('placing', marking);
+    status.textContent = marking ? 'Click the map where your marker goes.' : ''; status.className = 'form-status';
+  } }, '+ My marker');
 
   // The GM's fog tools: paint to reveal or hide, show or hide the fog to players, cover or clear everything.
   let fogInfo = null;
@@ -337,6 +373,7 @@ export async function viewMap(id, focusPin) {
     el('button', { class: 'btn small', type: 'button', onclick: () => layer.classList.toggle('no-labels') }, 'Labels'),
     isGm() ? addBtn : null,
     isGm() ? fogBtn : null,
+    isMember() ? markBtn : null,
     scaleControl());
 
   const entry = map.entry_id && getEntry(map.entry_id);
@@ -350,7 +387,7 @@ export async function viewMap(id, focusPin) {
         catch (err) { toast(err.message, 'bad'); }
       }, 'btn ghost small')) : null),
     toolbar, fogTools, viewport, status,
-    el('div', { class: 'map-side' }, el('h3', { class: 'section-title' }, 'Pins'), filter, list),
+    el('div', { class: 'map-side' }, el('h3', { class: 'section-title' }, 'Pins'), filter, list, myBox),
     el('p', { class: 'muted small' }, `Last changed ${whenTime(map.updated_at)}${map.updated_by ? ` by ${map.updated_by}` : ''}. Drag to pan; scroll, pinch or use + and − to zoom.`),
     nameList());
 

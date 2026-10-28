@@ -6,7 +6,11 @@
 // PUT ?id= {map}      update (GM): pins, name, entry_id, secret, miles (scale), fog, optional new image; send version
 // With fog on, players get the fog and only the pins outside it (the image itself is still the whole map).
 // DELETE ?id=         delete (GM)
-import { route, send, fail, sql, newId, requireGm } from './_lib/core.js';
+// Private markers (any member, on maps they can see; only the one who made a marker ever gets it back):
+// GET ?id= also returns `mine`: your markers on that map
+// POST {mark: {map_id, x, y, label, note, id?}}   add a marker, or move / relabel one of yours
+// DELETE ?mark=id                                  remove one of yours
+import { route, send, fail, sql, newId, requireGm, requireMember } from './_lib/core.js';
 import { cleanFog, decodeFog, fogHides } from '../js/fog.js';
 
 const MAX_IMAGE = 3_500_000; // characters of data URL; the browser shrinks uploads well under this
@@ -59,10 +63,28 @@ export default route({
       res.setHeader('Cache-Control', m.secret ? 'private, max-age=86400' : 'public, max-age=31536000, immutable');
       return res.end(Buffer.from(b64, 'base64'));
     }
-    send(res, 200, { map: shape(m, isGm) });
+    const mine = req.gm && req.role ? await sql`SELECT id, x, y, label, note, created_at FROM map_marks WHERE map_id = ${m.id} AND gm_id = ${req.gm.id} ORDER BY id` : [];
+    send(res, 200, { map: shape(m, isGm), mine });
   },
 
   async POST(req, res) {
+    if (req.body.mark) {
+      if (!requireMember(req, res)) return;
+      const k = req.body.mark;
+      const m = (await sql`SELECT id, secret FROM maps WHERE id = ${String(k.map_id || '')} AND world_id = ${req.world.id} AND NOT deleted`)[0];
+      if (!m || (m.secret && !req.isGmHere)) return fail(res, 404, 'That map doesn’t exist.');
+      const x = Math.min(1, Math.max(0, Number(k.x) || 0)), y = Math.min(1, Math.max(0, Number(k.y) || 0));
+      const label = clip(k.label, 80).trim() || 'Marker', note = clip(k.note, 1000);
+      if (k.id) {
+        const rows = await sql`UPDATE map_marks SET x = ${x}, y = ${y}, label = ${label}, note = ${note} WHERE id = ${Number(k.id)} AND gm_id = ${req.gm.id} AND map_id = ${m.id} RETURNING id, x, y, label, note, created_at`;
+        if (!rows.length) return fail(res, 404, 'That marker is gone.');
+        return send(res, 200, { mark: rows[0] });
+      }
+      const n = (await sql`SELECT count(*)::int AS n FROM map_marks WHERE map_id = ${m.id} AND gm_id = ${req.gm.id}`)[0].n;
+      if (n >= 200) return fail(res, 400, 'That’s 200 markers on this map already.');
+      const rows = await sql`INSERT INTO map_marks (map_id, gm_id, x, y, label, note) VALUES (${m.id}, ${req.gm.id}, ${x}, ${y}, ${label}, ${note}) RETURNING id, x, y, label, note, created_at`;
+      return send(res, 201, { mark: rows[0] });
+    }
     if (!requireGm(req, res)) return;
     const b = req.body.map || {};
     const name = clip(b.name, 120).trim();
@@ -95,6 +117,12 @@ export default route({
   },
 
   async DELETE(req, res) {
+    if (req.query?.mark) {
+      if (!requireMember(req, res)) return;
+      const rows = await sql`DELETE FROM map_marks WHERE id = ${Number(req.query.mark)} AND gm_id = ${req.gm.id} RETURNING id`;
+      if (!rows.length) return fail(res, 404, 'That marker is gone.');
+      return send(res, 200, { ok: true });
+    }
     if (!requireGm(req, res)) return;
     const rows = await sql`UPDATE maps SET deleted = true, updated_by = ${req.gm.id}, updated_at = now() WHERE id = ${req.query?.id} AND world_id = ${req.world.id} RETURNING id`;
     if (!rows.length) return fail(res, 404, 'That map doesn’t exist.');

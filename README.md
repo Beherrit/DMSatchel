@@ -100,6 +100,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
   Discord. The date shows on the world's home page.
 - **Downtime**: players file what their characters do between sessions; GMs write how it went, and it stays on
   the character's page.
+- **Your own map markers**: drop private markers with notes on any map; only you see them.
 - **Fog of war**: paint over the parts of a map the party hasn't explored; players see only what's revealed.
 - **Members-only site**: one switch makes every page and tool need a personal code or invite link.
 - **Hidden entries**: GMs can keep any entry hidden from players while they prep, then reveal it in one click.

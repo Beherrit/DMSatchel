@@ -1014,3 +1014,8 @@ body.gated .mainnav, body.gated #toolnav, body.gated #panels, body.gated #notebo
 .odds td { padding: 2px 8px; border-bottom: 1px solid var(--line) }
 .search-filters input[type=search] { flex: 1; min-width: 12em }
 .template-picker { margin-bottom: 12px }
+
+/* Private map markers */
+.pin.mark .glyph { background: var(--surface); color: var(--accent); border: 2px dotted var(--accent) }
+.pin.mark .pin-label { font-style: italic }
+.mark-glyph { color: var(--accent) }

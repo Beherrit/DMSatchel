@@ -126,7 +126,7 @@ to the log at the bottom.
 47. [x] **Search filters.** Narrow world search by kind, tag, place it's in, and (for GMs) hidden or suggested only.
 48. [x] **Entry templates.** GMs save an entry as a template ("Roadside inn", "Cult cell") and start new entries from
     it, fields and text filled in.
-49. [ ] **Your own map markers.** Players drop private markers with notes on any map ("we camped here"), seen only by
+49. [x] **Your own map markers.** Players drop private markers with notes on any map ("we camped here"), seen only by
     them, alongside the GM's pins.
 
 ## Ideas parking lot
@@ -181,3 +181,4 @@ to the log at the bottom.
 - Roll tables: a new kind, Roll table, that players can make too (theirs go live like journals). One result per line, with "3x …" weights or "1-4: …" die ranges, # comments, {2d6+1} dice, {a|b} choices and [[Other table]] references rolled up to three deep. Each table's page has Roll / Roll 3, the last dozen results (Copy, Notebook, Add to world) and every line with its chance; the Table Tools get a "Your tables" tool to roll any table in the open world. Import recognises "Roll tables" folders. Unit and browser tests.
 - Search filters: the world search page has a filter bar: words (every word must match; exact names, then names starting with them, then names, then summaries rank first), kind, tag, inside a place (the place and everything under it) and, for GMs, hidden-from-players or suggestions only, with Clear filters. Filters live in the link (#world/q/<words>?kind=…&tag=…&in=…&state=…), so a filtered search can be bookmarked; tag chips still open "Tagged #…". Unit and browser tests.
 - Entry templates: GMs press "Save as template" on any entry and name it; the new-entry form then offers "Start from a template…" (this kind's first), which fills in the summary, text, fields, tags and GM notes, plus a Manage list to delete old ones. Play state, Forge recipes, what a character knows, attitudes, attendance and rumor spread are never copied. Stored per world in a new worlds.templates column (additive), sent only to GMs. Choosing a draft for the form you're already on now redraws it. API (PGlite) and browser tests.
+- Private map markers: on any map they can see, members press "+ My marker", click the spot, and give it a label and note. Markers show dotted on the map and in a "Your markers" list, and can be edited, moved or deleted. Only the person who made a marker ever gets it back (not other players, not GMs); they're never pins. New map_marks table (additive), handled by the maps endpoint (up to 200 per person per map). API tests on real Postgres (PGlite) and browser tests.
