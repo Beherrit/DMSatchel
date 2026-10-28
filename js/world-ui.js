@@ -30,6 +30,7 @@ import { attendanceSection } from './world-attendance.js';
 import { revealButton } from './world-reveal.js';
 import { quickNoteButton } from './world-quicknote.js';
 import { tableSection } from './world-tables.js';
+import { parseSearch, searchHash, searchEntries } from './search.js';
 import { viewExport } from './world-export.js';
 import { viewClocks, clocksWidget } from './world-clocks.js';
 import { viewRumors } from './world-rumors.js';
@@ -44,7 +45,7 @@ import { renderStats, renderSpells } from './statblock-ui.js';
 import { renderStock } from './shop-ui.js';
 import { restockDraft } from './world-place.js';
 import { npcStats, NPC_CLASS_OPTIONS } from './npc-stats.js';
-import { patchEntry, setEntryState, stateBadges, syncWorld } from './world-store.js';
+import { patchEntry, setEntryState, stateBadges, syncWorld, descendantsOf } from './world-store.js';
 
 export { loadWorld, worldEntries };
 const lower = (s) => (s === 'NPC' ? s : s.toLowerCase());
@@ -147,14 +148,36 @@ function sessionList(list) {
     e.fields.xp ? el('p', { class: 'muted small' }, `XP: ${e.fields.xp}`) : null)));
 }
 
-function viewSearch(q) {
-  const term = q.trim().toLowerCase();
-  const tag = term.startsWith('#') ? term.slice(1) : null;
-  const hits = worldEntries().filter((e) => (tag ? e.tags?.includes(tag)
-    : [e.name, e.summary, e.body, ...Object.values(e.fields || {}), ...(e.tags || []), isGm() ? e.secret : ''].join('\n').toLowerCase().includes(term))).sort(byName);
-  return el('div', { class: 'w-view' }, el('div', { class: 'panel-head' }, el('h2', {}, tag ? `Tagged #${tag}` : `Search: “${q}”`), el('p', {}, `${hits.length} result${hits.length === 1 ? '' : 's'}`)),
-    hits.length ? el('ul', { class: 'entry-grid' }, hits.slice(0, 200).map((e) => { const c = entryCard(e); c.prepend(el('span', { class: 'kind-tag' }, kindLabel(e.kind))); return c; })) : notice('No matches', 'Try a shorter word, or a name.'),
-    hits.length > 200 ? el('p', { class: 'muted' }, `Showing the first 200 of ${hits.length}. Add another word to narrow it down.`) : null);
+function viewSearch(raw) {
+  const f = parseSearch(raw), gm = isGm();
+  const place = f.inside && getEntry(f.inside);
+  const within = place ? new Set([place.id, ...descendantsOf(place.id).map((e) => e.id)]) : null;
+  const hits = searchEntries(worldEntries(), f, { gm, within });
+  const all = worldEntries();
+  const go = (patch) => { location.hash = searchHash({ ...f, ...patch }); };
+  const sel = (id, label, value, opts, key) => {
+    const s2 = el('select', { id, 'aria-label': label }, opts.map(([v, t]) => el('option', { value: v }, t)));
+    s2.value = value; s2.addEventListener('change', () => go({ [key]: s2.value })); return s2;
+  };
+  const q = el('input', { type: 'search', id: 'sq', value: f.q, placeholder: 'Words to find…', 'aria-label': 'Search words' });
+  q.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') go({ q: q.value.trim() }); });
+  const kinds = KIND_ORDER.filter((k) => all.some((e) => e.kind === k));
+  const tags = [...new Set(all.flatMap((e) => e.tags || []))].sort();
+  const places = all.filter((e) => PLACE_KINDS.includes(e.kind)).sort(byName);
+  const filtered = f.kind || f.tag || f.inside || f.state;
+  const tagOnly = /^#\S+$/.test(f.q.trim()) ? f.q.trim().slice(1) : !f.q && f.tag && !f.kind && !f.inside && !f.state ? f.tag : null;
+  const title = tagOnly ? `Tagged #${tagOnly}` : f.q ? `Search: “${f.q}”` : 'Search the world';
+  return el('div', { class: 'w-view' }, el('div', { class: 'panel-head' }, el('h2', {}, title), el('p', {}, `${hits.length} result${hits.length === 1 ? '' : 's'}${place ? ` in ${place.name}` : ''}`)),
+    el('div', { class: 'controls search-filters' }, q, el('button', { class: 'btn small', type: 'button', onclick: () => go({ q: q.value.trim() }) }, 'Search'),
+      sel('sf-kind', 'Kind', f.kind, [['', 'Any kind'], ...kinds.map((k) => [k, KINDS[k].plural])], 'kind'),
+      tags.length ? sel('sf-tag', 'Tag', f.tag, [['', 'Any tag'], ...tags.map((t) => [t, `#${t}`])], 'tag') : null,
+      places.length ? sel('sf-in', 'Inside', f.inside, [['', 'Anywhere'], ...places.map((p) => [p.id, p.name])], 'inside') : null,
+      gm ? sel('sf-state', 'Show', f.state, [['', 'Everything'], ['hidden', 'Hidden from players'], ['suggested', 'Suggestions']], 'state') : null,
+      filtered ? el('button', { class: 'btn small ghost', type: 'button', onclick: () => go({ kind: '', tag: '', inside: '', state: '' }) }, 'Clear filters') : null),
+    !f.q && !filtered ? el('p', { class: 'muted' }, 'Type some words, or pick a kind, tag or place to list what’s there.')
+      : hits.length ? el('ul', { class: 'entry-grid' }, hits.slice(0, 200).map((e) => { const c = entryCard(e); c.prepend(el('span', { class: 'kind-tag' }, kindLabel(e.kind))); return c; }))
+        : notice('No matches', 'Try fewer words, or clear a filter.'),
+    hits.length > 200 ? el('p', { class: 'muted' }, `Showing the first 200 of ${hits.length}. Add another word or a filter to narrow it down.`) : null);
 }
 
 function viewEntry(id, tab) {
@@ -493,7 +516,7 @@ export async function showWorld(parts, { keepScroll = false } = {}) {
   else if (view === 'e') node = viewEntry(arg, parts[2]);
   else if (view === 'new') node = viewEdit(null, arg);
   else if (view === 'edit') node = viewEdit(arg);
-  else if (view === 'q') node = viewSearch(decodeURIComponent(arg || ''));
+  else if (view === 'q') node = viewSearch(arg || '');
   else if (view === 'bin') node = await viewBin();
   else if (view === 'atlas') node = viewAtlas();
   else if (view === 'maps') node = viewMaps();
