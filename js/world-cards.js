@@ -4,8 +4,9 @@ import { el, setKids } from './dom.js';
 import { api, isGm } from './api.js';
 import { worldEntries, getEntry, descendantsOf, byName, notice, link } from './world-store.js';
 import { towards } from './attitudes.js';
+import { stripMarks } from './rich.js';
 
-const plain = (t) => String(t || '').replace(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g, (_, a, b) => b || a).replace(/\s+/g, ' ').trim();
+const plain = (t) => stripMarks(t).replace(/\s+/g, ' ').trim();
 const cut = (t, n) => { const s = plain(t); return s.length > n ? `${s.slice(0, n - 1)}…` : s; };
 const ALIVE = (e) => e.kind === 'npc' && !['Dead'].includes(e.fields?.status);
 

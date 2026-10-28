@@ -139,6 +139,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Tag pages**: a list of every tag with counts, and a description on each tag's page.
 - **Search the talk**: world search also finds words in table talk, GM discussions (GMs) and your own notes, and jumps to the comment.
 - **Link the mentions**: entry pages show GMs names written as plain text that could be links, and link them in one click.
+- **Formatting**: **bold**, *italic*, lists, small headings and "> read-aloud" boxes in any long text.
 - **Link suggestions**: typing [[ in any text box suggests entry names; pick one to finish the link.
 - **Admin**: world owners manage members and roles, rotate invite links, name the world, see recent activity, and
   download or import a full backup. The site admin can see every world and every account.

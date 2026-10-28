@@ -19,6 +19,7 @@ import { readGoals, activeGoals } from './goals.js';
 import { spotlight } from './spotlight.js';
 import { clockCard } from './world-clock.js';
 import { appearances, dueBack } from './appearances.js';
+import { stripMarks } from './rich.js';
 
 const ACTIVE_PC = (e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
 const card = (title, ...kids) => el('section', { class: 'card prep-card' }, el('h3', {}, title), ...kids);
@@ -159,7 +160,7 @@ const RECENT = 4;
 function spotlightSection() {
   const rows = spotlight(worldEntries(), RECENT);
   if (!rows.length || !sessions().length) return null;
-  const plain = (t) => t.replace(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g, (_, a, b) => b || a);
+  const plain = (t) => stripMarks(t);
   return card('Spotlight',
     el('p', { class: 'muted small' }, `Who the last ${Math.min(RECENT, sessions().length)} session logs name least, out of the sessions each character was at. Sessions they missed don’t count.`),
     el('ul', { class: 'plain prep-list spotlight-list' }, rows.map((r) => {

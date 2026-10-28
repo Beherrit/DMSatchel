@@ -6,6 +6,7 @@ import { libraryItems, librarySpecies, librarySubclasses, libraryClasses, librar
 import { hooks } from './hooks.js';
 import { visitSince } from './whatsnew.js';
 import { fieldsWith } from './custom-fields.js';
+import { blocks, inline } from './rich.js';
 import { CLASSES, BACKGROUNDS } from './rules2024.js';
 
 // A Map that drops the lookup index whenever an entry is added, changed or removed.
@@ -77,19 +78,32 @@ export function mentions(text) {
 }
 
 // Body text with [[Entry Name]] links.
+// One line with **bold**, *italic* and [[links]] (a summary).
+export const richInline = (text) => inlineParts(inline(text));
+function inlineParts(list) {
+  return list.map((x) => {
+    if (x.t === 'text') return x.v;
+    if (x.t === 'b') return el('strong', {}, inlineParts(x.c));
+    if (x.t === 'i') return el('em', {}, inlineParts(x.c));
+    const target = findByName(x.name);
+    return target ? link(target, x.label) : el('span', { class: 'missing', title: 'No entry with this name yet' }, x.label);
+  });
+}
+
 export function richText(text) {
-  const out = el('div', { class: 'rich' });
-  for (const para of String(text || '').split(/\n{2,}/)) {
-    const p = el('p');
-    String(para).split(/(\[\[[^\]]+\]\])/).forEach((part) => {
-      const m = part.match(/^\[\[([^\]|]+)(?:\|([^\]]+))?\]\]$/);
-      if (!m) { p.append(part); return; }
-      const target = findByName(m[1]);
-      p.append(target ? link(target, m[2] || m[1]) : el('span', { class: 'missing', title: 'No entry with this name yet' }, m[2] || m[1]));
-    });
-    out.append(p);
-  }
-  return out;
+  const parts = (list) => list.map((x) => {
+    if (x.t === 'text') return x.v;
+    if (x.t === 'b') return el('strong', {}, parts(x.c));
+    if (x.t === 'i') return el('em', {}, parts(x.c));
+    const target = findByName(x.name);
+    return target ? link(target, x.label) : el('span', { class: 'missing', title: 'No entry with this name yet' }, x.label);
+  });
+  const lines = (ls) => ls.flatMap((l, i) => (i ? [el('br'), ...parts(l)] : parts(l)));
+  return el('div', { class: 'rich' }, blocks(text).map((b) => (
+    b.t === 'h' ? el('h4', { class: 'rich-h' }, parts(b.v))
+      : b.t === 'quote' ? el('aside', { class: 'readaloud' }, lines(b.lines))
+        : b.t === 'ul' || b.t === 'ol' ? el(b.t, {}, b.items.map((it) => el('li', {}, parts(it))))
+          : el('p', {}, lines(b.lines)))));
 }
 
 export function notice(title, text, ...extra) { return el('div', { class: 'card empty-state' }, el('h3', {}, title), el('p', {}, text), ...extra); }

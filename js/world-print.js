@@ -9,8 +9,9 @@ import { coinText } from './economy.js';
 import { readGoals } from './goals.js';
 import { pictureOf } from './image-ui.js';
 import { withPronouns } from './world-profiles.js';
+import { stripMarks } from './rich.js';
 
-const plain = (t) => String(t || '').replace(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g, (_, a, b) => b || a);
+const plain = (t) => stripMarks(t);
 const box = (title, ...kids) => el('section', { class: 'pr-box' }, el('h3', {}, title), ...kids);
 const lines = (t) => plain(t).split('\n').filter((x) => x.trim()).map((x) => el('li', {}, x));
 

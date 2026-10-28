@@ -3,8 +3,9 @@
 import { el, toast, setKids } from './dom.js';
 import { api, isGm } from './api.js';
 import { world, worldEntries, richText, notice } from './world-store.js';
+import { stripMarks } from './rich.js';
 
-const plain = (t) => String(t).replace(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g, (_, a, b) => b || a);
+const plain = (t) => stripMarks(t);
 const tagHref = (t) => `#world/q/${encodeURIComponent(`#${t}`)}`;
 
 export function viewTags() {

@@ -12,10 +12,11 @@ import { vitals } from './sheet-ui.js';
 import { towards } from './attitudes.js';
 import { readObjectives, progress } from './objectives.js';
 import { sortSecrets } from './secrets.js';
+import { stripMarks } from './rich.js';
 
 const ACTIVE_PC = (e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
 const townOf = (place) => (place?.kind === 'settlement' ? place : [...trail(place)].reverse().find((p) => p.kind === 'settlement') || null);
-const plain = (t) => String(t || '').replace(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g, (_, a, b) => b || a);
+const plain = (t) => stripMarks(t);
 const cut = (t, n) => { const s = plain(t).replace(/\s+/g, ' ').trim(); return s.length > n ? `${s.slice(0, n - 1)}…` : s; };
 const block = (title, ...kids) => el('section', { class: 'ss-block' }, el('h3', {}, title), ...kids);
 

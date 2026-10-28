@@ -6,7 +6,8 @@ import { el, toast, toastUndo, confirmButton, setKids } from './dom.js';
 import { api, session, isGm, isMember, isPlayer, signedIn, onSession, setPreview } from './api.js';
 import { KINDS, KIND_ORDER, LINK_LABELS, STANDING_KINDS, PLACE_KINDS, PLAYER_KINDS, fieldApplies } from './world-schema.js';
 import { openSignIn } from './signin.js';
-import { world, worldEntries, getEntry, loadWorld, byName, kindLabel, kindFields, link, when, findByName, mentions, richText, notice, nameList } from './world-store.js';
+import { stripMarks } from './rich.js';
+import { world, worldEntries, getEntry, loadWorld, byName, kindLabel, kindFields, richInline, link, when, findByName, mentions, richText, notice, nameList } from './world-store.js';
 import { viewMaps, viewMap, pinsFor } from './world-maps.js';
 import { viewStandings, standingWidget } from './world-standings.js';
 import { viewTalk, talkWidget, tableWidget, viewTable } from './world-talk.js';
@@ -160,7 +161,7 @@ function viewHome() {
 }
 
 function entryCard(e) {
-  return el('li', { 'data-id': e.id, class: `entry-card${e.visibility === 'gm' ? ' is-hidden' : ''}${e.status === 'suggested' ? ' is-suggested' : ''}` }, thumb(e), el('div', { class: 'card-title' }, link(e), stateBadges(e)), e.summary ? el('p', {}, e.summary.length > 180 ? `${e.summary.slice(0, 178)}…` : e.summary) : null,
+  return el('li', { 'data-id': e.id, class: `entry-card${e.visibility === 'gm' ? ' is-hidden' : ''}${e.status === 'suggested' ? ' is-suggested' : ''}` }, thumb(e), el('div', { class: 'card-title' }, link(e), stateBadges(e)), e.summary ? el('p', {}, ((s) => (s.length > 180 ? `${s.slice(0, 178)}…` : s))(stripMarks(e.summary))) : null,
     e.tags?.length ? el('div', { class: 'tags' }, e.tags.map((t) => el('a', { class: 'tagchip', href: `#world/q/${encodeURIComponent(`#${t}`)}` }, `#${t}`))) : null);
 }
 
@@ -262,7 +263,7 @@ function viewEntry(id, tab) {
   const overview = () => el('div', { class: 'overview' },
     // The picture floats beside the summary and traits, so they share one plain block.
     el('div', { class: 'overview-top' }, figure(e),
-      e.summary ? el('p', { class: 'lede' }, e.summary) : null,
+      e.summary ? el('p', { class: 'lede' }, richInline(e.summary)) : null,
       fieldRows.length ? el('dl', { class: 'traits' }, fieldRows.flatMap(([l, v, type]) => [el('dt', {}, l), el('dd', {}, type === 'long' ? richText(v) : /^https:\/\/\S+$/.test(v) ? el('a', { href: v, target: '_blank', rel: 'noopener' }, /dndbeyond\.com/.test(v) ? 'Open on D&D Beyond ↗' : 'Open link ↗') : el('span', {}, v))])) : null),
     e.kind === 'npc' || e.fields?.stats || e.fields?.spells ? statSection(e) : null,
     e.kind === 'clan' ? clanTree(e, rerenderWorld) : null,
@@ -501,7 +502,7 @@ function viewEdit(id, kindForNew) {
     suggestNote,
     area('summary', 'Summary', e.summary, 2, 'One or two sentences. This shows in lists and search.'),
     fieldsBox,
-    area('body', 'Description & notes', e.body, 8, 'Link to other entries by name with [[double brackets]], e.g. [[The Silver Hand]].'),
+    area('body', 'Description & notes', e.body, 8, 'Link to other entries with [[double brackets]], e.g. [[The Silver Hand]]. **Bold**, *italic*, “- ” for a list, “## ” for a small heading, “> ” for text to read aloud.'),
     gm ? area('secret', 'GM-only secrets', e.secret, 4, 'Players never see this. Only this world’s GMs can read it.') : null,
     input('tags', 'Tags', (e.tags || []).join(', '), { placeholder: 'comma separated, e.g. north, war, session-12' }),
     el('div', { class: 'field wide' }, el('label', {}, 'Connections'), linksBox,
