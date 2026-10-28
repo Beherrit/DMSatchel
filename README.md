@@ -77,6 +77,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
   connection.
 - **Calendar**: your world's own months, weekdays, moons and holidays. GMs move time forward; events, sessions and
   journals with dates appear on the month grid.
+- **More pictures**: a gallery of up to 12 captioned pictures on any entry, with a full-size viewer.
 - **Pictures**: upload a portrait, a town sketch or a handout image to any entry (or paste a link).
 - **Discord**: connect your group's channel and post session recaps and handouts with one click.
 - **Your library**: short notes on monsters, items, classes, subclasses, species, feats and spells from the books

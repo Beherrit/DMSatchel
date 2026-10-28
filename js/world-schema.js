@@ -142,6 +142,8 @@ export const KINDS = {
 
 // Every kind can have a picture: an uploaded image (/api/images?id=…) or an https:// link.
 for (const k of Object.values(KINDS)) k.fields.push(['image', 'Picture', 'image']);
+// …and a small gallery of more pictures (see gallery.js), added and arranged on the entry's page.
+for (const k of Object.values(KINDS)) k.fields.push(['gallery', 'More pictures', 'hidden']);
 export const isImageRef = (v) => /^\/api\/images\?id=[a-f0-9]{16}$/.test(v) || /^https:\/\/[^\s"'<>]{4,1000}$/.test(v);
 
 export const KIND_ORDER = ['region', 'area', 'settlement', 'location', 'faction', 'guild', 'clan', 'npc', 'character', 'deity', 'item', 'event', 'session', 'journal', 'downtime', 'handout', 'quest', 'rumor', 'lore', 'creature', 'rule', 'table', 'encounter'];

@@ -33,6 +33,7 @@ import { rewardCard } from './world-reward.js';
 import { appearances } from './appearances.js';
 import { withPronouns } from './world-profiles.js';
 import { noticesCard, drawNoticeBanner } from './world-notices.js';
+import { gallerySection } from './world-gallery.js';
 import { tableSection } from './world-tables.js';
 import { parseSearch, searchHash, searchEntries } from './search.js';
 import { saveTemplateButton, templatePicker } from './world-templates.js';
@@ -278,6 +279,7 @@ function viewEntry(id, tab) {
         incoming.map((l) => el('li', { class: l.secret ? 'secret-link' : '' }, link(l.from), ' ', el('span', { class: 'rel' }, `is ${l.label}`), ' this', el('span', { class: 'kind-tag' }, kindLabel(l.from.kind)))))) : null,
     STANDING_KINDS.includes(e.kind) ? standingWidget(e) : null,
     STANDING_KINDS.includes(e.kind) || e.kind === 'quest' ? clocksWidget(e) : null,
+    gallerySection(e, rerenderWorld),
     sessions.length ? el('section', {}, el('h3', { class: 'section-title' }, 'Appears in sessions'),
       el('ul', { class: 'entry-list' }, sessions.map((x) => el('li', {}, link(x), el('span', { class: 'muted small' }, [x.fields.played_on, x.fields.gm && `GM ${x.fields.gm}`].filter(Boolean).join(' · ')))))) : null,
     !isPlace && pins.length ? el('section', {}, el('h3', { class: 'section-title' }, 'On the map'),

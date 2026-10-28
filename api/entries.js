@@ -16,6 +16,7 @@ import { route, send, fail, sql, newId, requireGm, requireMember, requireOwner }
 import { KINDS, isKind, LIMITS, PLAYER_KINDS, PLACE_KINDS, isImageRef, gmOnlyFields } from '../js/world-schema.js';
 import { forPlayers } from '../js/objectives.js';
 import { goalsForOthers } from '../js/goals.js';
+import { cleanGallery } from '../js/gallery.js';
 import { cleanTag, chainUp } from '../js/bulk.js';
 import { cleanPrimer, primerEmpty } from '../js/zero.js';
 import { activeNotices } from '../js/notices.js';
@@ -33,7 +34,9 @@ function clean(input, custom = {}) {
   if (!name) return { error: 'Give the entry a name.' };
   const allowed = new Set([...KINDS[e.kind].fields.map(([k]) => k), ...customKeys(e.kind, custom)]);
   const fields = {};
-  for (const [k, v] of Object.entries(e.fields || {})) if (allowed.has(k) && v != null && String(v).trim() && (k !== 'image' || isImageRef(String(v)))) fields[k] = clip(v, ['stock', 'sheet', 'play', 'spread', 'known', 'attitudes', 'objectives', 'attendance', 'enc', 'goals'].includes(k) ? LIMITS.body : LIMITS.field);
+  for (const [k, v] of Object.entries(e.fields || {})) if (allowed.has(k) && v != null && String(v).trim() && (k !== 'image' || isImageRef(String(v)))) fields[k] = clip(v, ['stock', 'sheet', 'play', 'spread', 'known', 'attitudes', 'objectives', 'attendance', 'enc', 'goals', 'gallery'].includes(k) ? LIMITS.body : LIMITS.field);
+  // Pictures in the gallery must be real image addresses.
+  if (fields.gallery) { fields.gallery = cleanGallery(fields.gallery); if (!fields.gallery) delete fields.gallery; }
   const tags = [...new Set((Array.isArray(e.tags) ? e.tags : []).map((t) => clip(t, LIMITS.tag).trim().toLowerCase()).filter(Boolean))].slice(0, LIMITS.tags);
   const links = (Array.isArray(e.links) ? e.links : []).filter((l) => l && typeof l.id === 'string').slice(0, LIMITS.links)
     .map((l) => ({ id: clip(l.id, 40), label: clip(l.label || 'related to', 60), secret: Boolean(l.secret) }));
