@@ -30,6 +30,7 @@ import { goalsSection } from './world-goals.js';
 import { mentionsCard } from './world-mentions.js';
 import { starButton, favoritesNav } from './world-favorites.js';
 import { rewardCard } from './world-reward.js';
+import { appearances } from './appearances.js';
 import { tableSection } from './world-tables.js';
 import { parseSearch, searchHash, searchEntries } from './search.js';
 import { saveTemplateButton, templatePicker } from './world-templates.js';
@@ -267,6 +268,7 @@ function viewEntry(id, tab) {
     e.body ? el('section', {}, richText(e.body)) : null,
     isGm() && e.secret ? el('aside', { class: 'secret' }, el('div', { class: 'eyebrow' }, 'GM only'), richText(e.secret)) : null,
     mentionsCard(e, rerenderWorld),
+    e.kind === 'npc' ? lastSeenLine(e) : null,
     out.length || incoming.length ? el('section', {}, el('h3', { class: 'section-title' }, 'Connections'),
       el('ul', { class: 'links' },
         out.map((l) => el('li', { class: l.secret ? 'secret-link' : '' }, el('span', { class: 'rel' }, l.label), ' ', link(l.target), el('span', { class: 'kind-tag' }, kindLabel(l.target.kind)), l.secret ? el('span', { class: 'tag' }, 'GM only') : null)),
@@ -604,6 +606,14 @@ function copyButton(e) {
     links: (e.links || []).map((l) => ({ ...l })), parent_id: e.parent_id || null, visibility: e.visibility || 'all',
     fields: Object.fromEntries(Object.entries(e.fields || {}).filter(([k]) => !NOT_COPIED.includes(k))),
   }) }, 'Make a copy');
+}
+
+// On an NPC's page: when the party last met them, from the session logs.
+function lastSeenLine(e) {
+  const seen = appearances(worldEntries(), mentions).get(e.id);
+  if (!seen) return null;
+  return el('p', { class: 'muted small last-seen' }, '👁 Last seen in ', link(seen.last), seen.ago ? ` (${seen.ago} session${seen.ago === 1 ? '' : 's'} ago)` : ' (the latest session)',
+    seen.count > 1 ? ` · in ${seen.count} sessions` : '');
 }
 
 export function acceptDraft(d = {}) {

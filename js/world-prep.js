@@ -5,7 +5,7 @@ import { el, toast, setKids } from './dom.js';
 import { recapButton } from './world-recap.js';
 import { attitudeLine } from './world-attitudes.js';
 import { api, isGm, session } from './api.js';
-import { world, worldEntries, getEntry, link, kindLabel, byName, descendantsOf, trail, whenTime, notice, richText } from './world-store.js';
+import { world, worldEntries, getEntry, link, kindLabel, byName, descendantsOf, trail, whenTime, notice, richText, mentions } from './world-store.js';
 import { PLACE_KINDS } from './world-schema.js';
 import { worldCalendar, todayText, datedEntries } from './world-calendar.js';
 import { toDays, fromDays, today, holidaysOn, formatDate } from './calendar.js';
@@ -17,6 +17,7 @@ import { vitals } from './sheet-ui.js';
 import { secretsCard } from './world-secrets.js';
 import { readGoals, activeGoals } from './goals.js';
 import { spotlight } from './spotlight.js';
+import { appearances, dueBack } from './appearances.js';
 
 const ACTIVE_PC = (e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
 const card = (title, ...kids) => el('section', { class: 'card prep-card' }, el('h3', {}, title), ...kids);
@@ -85,6 +86,21 @@ function whereSection(prep, rerender) {
         el('div', { class: 'btnrow' }, el('button', { class: 'btn small', type: 'button', onclick: () => setKids(encBox, encounterCard(rollEncounter({ terrain, level: party.level, size: party.size, difficulty: 'Moderate', ...monsterSource() }), { title: `Near ${here.name}`, place: here })) }, 'Roll an encounter'),
           el('a', { class: 'btn small ghost', href: `#world/e/${here.id}/wilds` }, 'Encounter table')),
         encBox)));
+}
+
+// People where the party is who were met before but not lately (or key people not met yet): who might turn up.
+function turnUpSection(prep) {
+  const here = prep.location_id && getEntry(prep.location_id);
+  if (!here) return null;
+  const town = townOf(here) || here;
+  const people = descendantsOf(town.id).filter((e) => e.kind === 'npc' && e.fields?.status !== 'Dead');
+  const seen = appearances(worldEntries(), mentions);
+  const due = dueBack(people, seen).slice(0, 8);
+  if (!due.length) return null;
+  return card(`Who might turn up in ${town.name}`,
+    el('p', { class: 'muted small' }, 'People here the party has met before but not in the last two sessions, then key people they haven’t met yet.'),
+    list(due, (p) => { const s = seen.get(p.id); return [link(p), p.fields?.role ? el('span', { class: 'muted small' }, ` ${p.fields.role}`) : null,
+      el('div', { class: 'muted small' }, s ? `Last seen in ${s.last.name}, ${s.ago} sessions ago${s.count > 1 ? ` · met ${s.count} times` : ''}` : 'Key person, not met yet')]; }));
 }
 
 function questsSection() {
@@ -206,6 +222,6 @@ export async function viewPrep(rerender) {
       el('button', { class: 'btn small', type: 'button', onclick: async () => { await letRumorsSpread(); rerender(); } }, 'Let rumors spread'),
       el('a', { class: 'btn small', href: '#world/calendar' }, 'Move time on')),
     el('div', { class: 'prep-columns' },
-      el('div', { class: 'prep-main' }, lastTime(), whereSection(prep, rerender), secretsCard(prep, next), questsSection(), scratchPad(prep)),
+      el('div', { class: 'prep-main' }, lastTime(), whereSection(prep, rerender), secretsCard(prep, next), turnUpSection(prep), questsSection(), scratchPad(prep)),
       el('div', { class: 'prep-side' }, partySection(), spotlightSection(), clocksSection(), calendarSection(), threadsSection(gmThreads, table))));
 }
