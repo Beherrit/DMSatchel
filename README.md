@@ -85,6 +85,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
   spellcasting, so the Forge builds the whole character); your spells join class spell lists in the Forge, NPC
   spellcasting and the Spells reference.
 - **Session recaps**: one click drafts the next session-log entry from everything that changed since the last one.
+- **Quest objectives**: a checklist of steps per quest, some secret until revealed, with progress on the boards.
 - **Private notes**: everyone can keep their own notes on any page, seen by nobody else.
 - **Attitudes**: how each NPC and power feels about each character, on both pages and in session prep.
 - **Split the loot**: share the party treasury's coin between characters, by shares, straight onto their sheets.

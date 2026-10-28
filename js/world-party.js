@@ -6,6 +6,7 @@ import { worldEntries, byName, link, when, richText, setEntryState } from './wor
 import { thumb } from './image-ui.js';
 import { lastShownLine } from './world-show.js';
 import { addCoins } from './sheet-ui.js';
+import { progressBadge } from './world-objectives.js';
 import { splitCoins } from './economy.js';
 
 const ACTIVE = (e) => !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
@@ -147,7 +148,7 @@ export async function viewParty(rerender) {
     el('div', { class: 'party-grid' },
       el('div', { class: 'party-main' }, members(chars),
         el('section', {}, el('h3', { class: 'section-title' }, 'Current quests'),
-          quests.length ? el('ul', { class: 'entry-list' }, quests.map((q) => el('li', {}, link(q), q.fields?.reward ? el('span', { class: 'muted small' }, `Reward: ${q.fields.reward}`) : null)))
+          quests.length ? el('ul', { class: 'entry-list' }, quests.map((q) => el('li', {}, link(q), progressBadge(q), q.fields?.reward ? el('span', { class: 'muted small' }, `Reward: ${q.fields.reward}`) : null)))
             : el('p', { class: 'muted' }, 'No active quests.'),
           offered ? el('p', { class: 'small' }, el('a', { href: '#world/k/quest' }, `${offered} more on offer or rumored`)) : null),
         handouts(all.filter((e) => e.kind === 'handout').sort((a, b) => String(b.updated_at).localeCompare(String(a.updated_at))), rerender),

@@ -3,6 +3,7 @@
 // viewAtlas() shows the whole world as a tree of places.
 
 import { rumorSection, rumorsAt } from './world-rumors.js';
+import { progressBadge } from './world-objectives.js';
 import { wildsSection } from './encounter-ui.js';
 import { thumb } from './image-ui.js';
 import { el, toast, setKids } from './dom.js';
@@ -134,7 +135,7 @@ function questSection(place, rerender, compact) {
         return el('li', { class: `notice ${statusClass(s)}` },
           el('span', { class: 'pinhead', 'aria-hidden': 'true' }),
           el('div', { class: 'notice-top' }, el('span', { class: `status-pill ${statusClass(s)}` }, s), q.fields?.reward ? el('span', { class: 'reward' }, q.fields.reward) : null),
-          el('h5', {}, link(q)),
+          el('h5', {}, link(q)), progressBadge(q),
           q.summary ? el('p', {}, q.summary) : null,
           q.fields?.patron ? el('p', { class: 'muted small' }, `Ask for: ${q.fields.patron}`) : null,
           q.parent_id !== place.id && getEntry(q.parent_id) ? el('p', { class: 'muted small' }, 'Posted in ', link(getEntry(q.parent_id))) : null,

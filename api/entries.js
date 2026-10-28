@@ -13,6 +13,7 @@
 // Players never receive: GM-only entries, other people's pending suggestions, secrets, or GM-only links.
 import { route, send, fail, sql, newId, requireGm, requireMember, requireOwner } from './_lib/core.js';
 import { KINDS, isKind, LIMITS, PLAYER_KINDS, isImageRef, gmOnlyFields } from '../js/world-schema.js';
+import { forPlayers } from '../js/objectives.js';
 
 const clip = (v, n) => String(v ?? '').slice(0, n);
 
@@ -23,7 +24,7 @@ function clean(input) {
   if (!name) return { error: 'Give the entry a name.' };
   const allowed = new Set(KINDS[e.kind].fields.map(([k]) => k));
   const fields = {};
-  for (const [k, v] of Object.entries(e.fields || {})) if (allowed.has(k) && v != null && String(v).trim() && (k !== 'image' || isImageRef(String(v)))) fields[k] = clip(v, ['stock', 'sheet', 'play', 'spread', 'known', 'attitudes'].includes(k) ? LIMITS.body : LIMITS.field);
+  for (const [k, v] of Object.entries(e.fields || {})) if (allowed.has(k) && v != null && String(v).trim() && (k !== 'image' || isImageRef(String(v)))) fields[k] = clip(v, ['stock', 'sheet', 'play', 'spread', 'known', 'attitudes', 'objectives'].includes(k) ? LIMITS.body : LIMITS.field);
   const tags = [...new Set((Array.isArray(e.tags) ? e.tags : []).map((t) => clip(t, LIMITS.tag).trim().toLowerCase()).filter(Boolean))].slice(0, LIMITS.tags);
   const links = (Array.isArray(e.links) ? e.links : []).filter((l) => l && typeof l.id === 'string').slice(0, LIMITS.links)
     .map((l) => ({ id: clip(l.id, 40), label: clip(l.label || 'related to', 60), secret: Boolean(l.secret) }));
@@ -44,6 +45,7 @@ function shape(row, req) {
     can_edit: Boolean(gmView || (mine && req.role)),
   };
   if (gmView) { out.secret = row.secret; out.deleted = row.deleted; }
+  else if (row.fields?.objectives) out.fields = { ...row.fields, objectives: forPlayers(row.fields.objectives) };
   return out;
 }
 

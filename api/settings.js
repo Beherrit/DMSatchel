@@ -40,7 +40,7 @@ export default route({
     const e = (await sql`SELECT * FROM entries WHERE id = ${String(req.body.post || '')} AND world_id = ${req.world.id} AND NOT deleted`)[0];
     if (!e) return fail(res, 404, 'That entry doesn’t exist.');
     const origin = `https://${req.headers.host}`;
-    const skip = new Set(['forge', 'play', 'known', 'attitudes', 'spread', 'image', 'stats', 'spells', 'stock', 'market', 'encounters', 'sheet']);
+    const skip = new Set(['forge', 'play', 'known', 'attitudes', 'objectives', 'spread', 'image', 'stats', 'spells', 'stock', 'market', 'encounters', 'sheet']);
     const fields = (KINDS[e.kind]?.fields || []).filter(([k]) => e.fields?.[k] && !skip.has(k)).slice(0, 8)
       .map(([k, label]) => ({ name: label, value: cut(plain(e.fields[k]), 1000), inline: !String(e.fields[k]).includes('\n') && String(e.fields[k]).length < 40 }));
     const img = e.fields?.image;

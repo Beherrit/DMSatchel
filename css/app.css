@@ -940,3 +940,19 @@ body.gated .mainnav, body.gated #toolnav, body.gated #panels, body.gated #notebo
 .my-notes textarea { width: 100%; margin: 6px 0 }
 .my-notes summary { cursor: pointer; font-weight: 600 }
 .my-notes-list li { margin-bottom: 8px }
+
+/* Quest objectives */
+.obj-bar { display: inline-block; width: 60px; height: 6px; background: var(--sunk); border-radius: 3px; overflow: hidden; vertical-align: middle }
+.obj-bar > span { display: block; height: 100%; background: var(--good) }
+.obj-bar.big { display: block; width: 100%; height: 8px; margin: 6px 0 10px }
+.obj-badge { font-size: 12px; color: var(--muted); white-space: nowrap; margin-left: 6px }
+.obj-badge.complete { color: var(--good) }
+.obj-list { padding-left: 0; list-style: none; display: grid; gap: 6px }
+.obj-list li { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap }
+.obj-list li.done .obj-text { text-decoration: line-through; color: var(--muted) }
+.obj-list li.is-secret { opacity: .8 }
+.obj-text > p { margin: 0; display: inline }
+.obj-tools { margin-left: auto; display: inline-flex; gap: 4px }
+.obj-tick { color: var(--good); width: 1em }
+.obj-add { margin-top: 8px }
+.obj-add input[type=text] { flex: 1; min-width: 12em }

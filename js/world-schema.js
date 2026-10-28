@@ -114,7 +114,9 @@ export const KINDS = {
   },
   quest: {
     label: 'Quest', plural: 'Quests & Plots', blurb: 'Adventures, rumors and running plot threads.',
-    fields: [['status', 'Status', 'select', ['Rumor', 'Available', 'Active', 'Completed', 'Failed', 'Abandoned']], ['patron', 'Patron'], ['gm', 'Run by (GM)'], ['reward', 'Reward'], ['stakes', 'What’s at stake', 'long'], ['outline', 'Outline', 'long']],
+    fields: [['status', 'Status', 'select', ['Rumor', 'Available', 'Active', 'Completed', 'Failed', 'Abandoned']], ['patron', 'Patron'], ['gm', 'Run by (GM)'], ['reward', 'Reward'], ['stakes', 'What’s at stake', 'long'], ['outline', 'Outline', 'long'],
+      // The checklist of steps (see objectives.js); GMs keep it, and secret steps never reach players.
+      ['objectives', 'Objectives', 'hidden', null, { gmOnly: true }]],
   },
   lore: {
     label: 'Lore', plural: 'Lore & Rules', blurb: 'Myths, cultures, languages, calendars and house rules.',
