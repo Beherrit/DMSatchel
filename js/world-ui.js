@@ -43,6 +43,7 @@ import { pollsCard } from './world-polls.js';
 import { clockCard } from './world-clock.js';
 import { startHereButton, startHereCard } from './world-start.js';
 import { viewTags, tagNote } from './world-tags.js';
+import { pushRecent, readRecent } from './recent.js';
 import { tableSection } from './world-tables.js';
 import { parseSearch, searchHash, searchEntries } from './search.js';
 import { saveTemplateButton, templatePicker } from './world-templates.js';
@@ -85,6 +86,16 @@ let main, side, lastParts = [];
 
 // ---- sidebar -----------------------------------------------------------------------------------
 
+// The entries you opened last in this browser (folded away; the open one is left out).
+function recentNav() {
+  let ids = [];
+  try { ids = readRecent(localStorage, session.worldKey); } catch { /* storage blocked */ }
+  const here = location.hash.match(/^#world\/e\/([^/]+)/)?.[1];
+  const list = ids.filter((id) => id !== here).map((id) => world.entries.get(id)).filter(Boolean).slice(0, 8);
+  if (!list.length) return null;
+  return el('details', { class: 'w-favs w-recent' }, el('summary', { class: 'w-favs-h' }, '🕘 Recently viewed'), el('ul', {}, list.map((e) => el('li', {}, link(e)))));
+}
+
 function renderSide() {
   const counts = {}; for (const e of world.entries.values()) counts[e.kind] = (counts[e.kind] || 0) + 1;
   const suggested = worldEntries().filter((e) => e.status === 'suggested').length;
@@ -95,6 +106,7 @@ function renderSide() {
     search,
     favoritesNav(),
     followingNav(session.gm?.name),
+    recentNav(),
     isPlayer() ? el('div', { class: 'w-gm w-player' }, el('a', { class: 'btn primary small', href: '#world/new/character' }, '+ My character'), el('a', { class: 'btn small', href: '#world/new/journal' }, '+ Journal entry'),
       el('a', { class: 'btn ghost small', href: '#world/new/lore' }, 'Suggest an entry'), el('a', { class: 'btn ghost small', href: '#world/mine' }, 'My things'), el('a', { class: 'btn ghost small', href: '#world/export' }, 'Export')) : null,
     el('nav', { class: 'w-kinds w-tools', 'aria-label': 'World views' },
@@ -244,6 +256,7 @@ function viewSearch(raw) {
 function viewEntry(id, tab) {
   const e = world.entries.get(id);
   if (!e) return notice('Entry not found', 'It may have been deleted, or the link is wrong.');
+  try { pushRecent(localStorage, session.worldKey, e.id); } catch { /* storage blocked */ }
   const all = worldEntries();
   const crumbs = []; let p = e.parent_id && world.entries.get(e.parent_id), guard = 0;
   while (p && guard++ < 10) { crumbs.unshift(p); p = p.parent_id && world.entries.get(p.parent_id); }

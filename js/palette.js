@@ -3,6 +3,7 @@ import { el, setKids } from './dom.js';
 import { TOOL_LIST } from './tool-list.js';
 import { KINDS, KIND_ORDER } from './world-schema.js';
 import { session, isGm, isAdmin, isOwner, isPlayer } from './api.js';
+import { readRecent } from './recent.js';
 
 // The rules, magic items and the world load the first time the palette opens, not with every page.
 let M = null;
@@ -72,6 +73,12 @@ function render() {
   const q = input.value.trim().toLowerCase();
   const all = [...baseItems(), ...entryItems()];
   items = all.map((it) => [score(it, q), it]).filter(([s]) => s > 0).sort((a, b) => b[0] - a[0] || a[1].label.localeCompare(b[1].label)).slice(0, 40).map(([, it]) => it);
+  // Nothing typed yet: the entries you opened last come first.
+  if (!q) {
+    let recent = [];
+    try { recent = readRecent(localStorage, session.worldKey).map((id) => M.store.world.entries.get(id)).filter(Boolean).slice(0, 6); } catch { /* storage blocked */ }
+    items = [...recent.map((e) => ({ label: e.name, group: 'Recently viewed', href: `#world/e/${e.id}`, hint: e.summary })), ...items].slice(0, 40);
+  }
   active = Math.min(active, Math.max(0, items.length - 1));
   setKids(list, ...(items.length ? items.map((it, i) => el('li', { role: 'option', id: `pal-${i}`, 'aria-selected': String(i === active), class: i === active ? 'active' : '', onmousedown: (ev) => { ev.preventDefault(); go(it); }, onmousemove: () => { if (active !== i) { active = i; mark(); } } },
     el('span', { class: 'pal-label' }, it.label), it.hint ? el('span', { class: 'pal-hint' }, it.hint.length > 70 ? `${it.hint.slice(0, 68)}…` : it.hint) : null, el('span', { class: 'pal-group' }, it.group)))

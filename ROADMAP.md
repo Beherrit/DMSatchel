@@ -220,7 +220,7 @@ to the log at the bottom.
     your last visit" and as a quiet note in the sidebar.
 94. [x] **Formatting in descriptions.** **Bold**, *italic*, lists, small headings and "> read-aloud" boxes in any
     long text, shown formatted on pages, cards, the session sheet and exports.
-95. [ ] **Recently viewed.** The last entries you opened, in the sidebar and at the top of Ctrl+K search, for this
+95. [x] **Recently viewed.** The last entries you opened, in the sidebar and at the top of Ctrl+K search, for this
     browser.
 96. [ ] **Copy a place with what's in it.** "Make a copy" on a place can bring its people, shops and sub-places
     along, for a second village built like the first.
@@ -325,3 +325,4 @@ to the log at the bottom.
 - Share a marker with the party: the marker dialog has "Show to the party". Shared markers show for everyone in the world in gold with the maker's name ("We camped here · Pip"), open to a read-only note, and are listed under "Shared by the party" beside the map; only their maker can move, change or delete them, and they stay private by default. Additive map_marks.shared column; maps GET returns `party` markers; tested against PGlite.
 - Follow an entry: "🔔 Follow" beside the favorite star on every entry page. Changes other people make to followed entries come first in "since your last visit" (as "You follow", not repeated below), arrive live as their own toast ("Ring the Bell (you follow it) changed by Bo"), and the sidebar's "🔔 Following" list (opened when something changed) puts a dot on each one changed since your last visit. Kept per member and world (additive members.following, returned with the world load); party API PUT {follow, on}. whatsNew unit tested; storage tested against PGlite.
 - Formatting in descriptions: long text everywhere (descriptions, notes, handouts, comments, goals, secrets, tag descriptions…) now understands **bold**, *italic* or _italic_, "- " and "1. " lists, "## " small headings and "> " read-aloud boxes, alongside [[links]]; summaries take bold, italic and links on the entry page. Arithmetic like "2 * 3" and names like snake_case are left alone. Pages are built from a parsed tree, never HTML strings. Cards, the session sheet, NPC cards, the printable character and other one-line places drop the marks; exports keep them (they're Markdown already). The description field says how. js/rich.js unit tested.
+- Recently viewed: opening an entry remembers it (in this browser, per world, the last ten). The world sidebar has a folded "🕘 Recently viewed" list (leaving out the page you're on), and Ctrl+K with nothing typed shows the last six first; typing searches as before. js/recent.js unit tested (including blocked or broken storage).
