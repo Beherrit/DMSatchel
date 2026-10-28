@@ -1013,3 +1013,4 @@ body.gated .mainnav, body.gated #toolnav, body.gated #panels, body.gated #notebo
 .roll-acts { margin-left: auto; display: inline-flex; gap: 2px }
 .odds td { padding: 2px 8px; border-bottom: 1px solid var(--line) }
 .search-filters input[type=search] { flex: 1; min-width: 12em }
+.template-picker { margin-bottom: 12px }

@@ -3,6 +3,7 @@
 // PUT {discord_webhook}  (owner) a Discord webhook link; it never leaves the server. Empty string removes it.
 // PATCH {prep: {location_id, notes}}   (GM) session prep: where the party is, and the GMs' scratch pad.
 // POST {post: entryId}   (GM) post an entry's summary and text to the world's Discord channel.
+// PATCH {template: {name, kind, summary, body, fields, tags, secret}}  (GM) save an entry template; {template_remove: id} delete one
 // PATCH {show: entryId | null}  (GM) show an entry to everyone with the world open (revealing it if hidden), or stop.
 import { route, send, fail, sql, requireOwner, requireGm, postDiscord } from './_lib/core.js';
 import { cleanCalendar } from '../js/calendar.js';
@@ -11,6 +12,19 @@ import { KINDS } from '../js/world-schema.js';
 const WEBHOOK = /^https:\/\/(?:ptb\.|canary\.)?(?:discord|discordapp)\.com\/api\/webhooks\/\d+\/[\w-]+$/;
 const plain = (t) => String(t || '').replace(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g, (_, n, l) => l || n);
 const cut = (t, n) => (t.length > n ? `${t.slice(0, n - 1)}…` : t);
+
+// A template keeps an entry's text and fields, but nothing tied to one character or session.
+const PERSONAL = new Set(['play', 'forge', 'known', 'attitudes', 'attendance', 'spread']);
+function cleanTemplate(t = {}) {
+  if (!KINDS[t.kind]) return { error: 'Unknown kind of entry.' };
+  const name = String(t.name || '').trim().slice(0, 80);
+  if (!name) return { error: 'Give the template a name.' };
+  const allowed = new Set(KINDS[t.kind].fields.map(([k]) => k));
+  const fields = Object.fromEntries(Object.entries(t.fields || {}).filter(([k, v]) => allowed.has(k) && !PERSONAL.has(k) && v != null && String(v).trim()).map(([k, v]) => [k, String(v).slice(0, 8000)]));
+  const out = { id: Math.random().toString(36).slice(2, 10), name, kind: t.kind, summary: String(t.summary || '').slice(0, 4000), body: String(t.body || '').slice(0, 20000),
+    secret: String(t.secret || '').slice(0, 8000), tags: (Array.isArray(t.tags) ? t.tags : []).map((x) => String(x).slice(0, 40)).slice(0, 30), fields };
+  return JSON.stringify(out).length > 60000 ? { error: 'That template is too long.' } : out;
+}
 
 const clip = (v, n) => String(v ?? '').slice(0, n);
 
@@ -56,6 +70,18 @@ export default route({
   },
   async PATCH(req, res) {
     if (!requireGm(req, res)) return;
+    if (req.body.template || req.body.template_remove) {
+      let list = Array.isArray(req.world.templates) ? req.world.templates : [];
+      if (req.body.template_remove) list = list.filter((t) => t.id !== String(req.body.template_remove));
+      else {
+        const t = cleanTemplate(req.body.template);
+        if (t.error) return fail(res, 400, t.error);
+        if (list.length >= 60) return fail(res, 400, 'That’s 60 templates already. Delete one you don’t use first.');
+        list = [...list.filter((x) => !(x.name.toLowerCase() === t.name.toLowerCase() && x.kind === t.kind)), t];
+      }
+      await sql`UPDATE worlds SET templates = ${JSON.stringify(list)}::jsonb WHERE id = ${req.world.id}`;
+      return send(res, 200, { templates: list });
+    }
     if (req.body.show !== undefined) {
       if (req.body.show === null) { await sql`UPDATE worlds SET shown = NULL WHERE id = ${req.world.id}`; return send(res, 200, { shown: null }); }
       const e = (await sql`SELECT id, visibility, status FROM entries WHERE id = ${String(req.body.show)} AND world_id = ${req.world.id} AND NOT deleted`)[0];

@@ -90,6 +90,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Since your last visit**: opening a world shows what others changed while you were away.
 - **Quest objectives**: a checklist of steps per quest, some secret until revealed, with progress on the boards.
 - **Your own roll tables**: write random tables (weights, dice, choices, tables inside tables) and roll them in play.
+- **Entry templates**: save any entry as a template and start new ones from it.
 - **Quick notes**: jot a journal note from any page (button or the j key), linked to what you're looking at.
 - **Private notes**: everyone can keep their own notes on any page, seen by nobody else.
 - **Attitudes**: how each NPC and power feels about each character, on both pages and in session prep.

@@ -101,6 +101,8 @@ export function ensureSchema() {
       // "What's new since you were last here": when each member last used the world, and when their previous sitting ended.
       await sql`ALTER TABLE members ADD COLUMN IF NOT EXISTS seen_at timestamptz`;
       await sql`ALTER TABLE members ADD COLUMN IF NOT EXISTS prev_visit timestamptz`;
+      // Entry templates the GMs saved: [{ id, name, kind, summary, body, fields, tags, secret }].
+      await sql`ALTER TABLE worlds ADD COLUMN IF NOT EXISTS templates jsonb`;
       await sql`INSERT INTO members (world_id, gm_id, role) SELECT 'default', id, CASE WHEN role = 'admin' THEN 'owner' ELSE 'gm' END FROM gms
         WHERE NOT EXISTS (SELECT 1 FROM members m WHERE m.world_id = 'default') ON CONFLICT DO NOTHING`;
     })().catch((e) => { schemaReady = null; throw e; });

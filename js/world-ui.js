@@ -31,6 +31,7 @@ import { revealButton } from './world-reveal.js';
 import { quickNoteButton } from './world-quicknote.js';
 import { tableSection } from './world-tables.js';
 import { parseSearch, searchHash, searchEntries } from './search.js';
+import { saveTemplateButton, templatePicker } from './world-templates.js';
 import { viewExport } from './world-export.js';
 import { viewClocks, clocksWidget } from './world-clocks.js';
 import { viewRumors } from './world-rumors.js';
@@ -249,6 +250,7 @@ function viewEntry(id, tab) {
       isGm() ? el('div', { class: 'btnrow' }, el('a', { class: 'btn', href: `#world/edit/${e.id}` }, 'Edit'),
         showButton(e),
         revealButton(e, rerenderWorld),
+        saveTemplateButton(e),
         world.info?.discord && e.visibility !== 'gm' && e.status !== 'suggested' ? confirmButton('Post to Discord', async () => {
           try { await api('settings', { method: 'POST', body: { post: e.id } }); toast(`Posted ${e.name} to Discord`); } catch (err) { toast(err.message, 'bad'); }
         }, 'btn ghost') : null,
@@ -478,7 +480,7 @@ function viewEdit(id, kindForNew) {
   });
 
   return el('div', { class: 'w-view' }, el('div', { class: 'panel-head' }, el('h2', {}, existing ? `Edit ${existing.name}` : !gm && !PLAYER_KINDS.includes(e.kind) ? 'Suggest an entry' : `New ${lower(kindLabel(e.kind))}`),
-    el('p', {}, existing ? `Last edited by ${existing.updated_by || 'someone'} ${when(existing.updated_at)}. If another GM saves first, you’ll be told before anything is overwritten.` : 'Everything except the name is optional. You can fill it in later.')), form);
+    el('p', {}, existing ? `Last edited by ${existing.updated_by || 'someone'} ${when(existing.updated_at)}. If another GM saves first, you’ll be told before anything is overwritten.` : 'Everything except the name is optional. You can fill it in later.')), existing ? null : templatePicker(e.kind), form);
 }
 
 async function viewBin() {
@@ -551,7 +553,8 @@ export function acceptDraft(d = {}) {
   if (!isMember()) { toast(signedIn() ? 'You need an invite to this world to add things' : 'Sign in to add things to the shared world'); if (!signedIn()) openSignIn(); return; }
   if (!isGm() && !PLAYER_KINDS.includes(d.kind)) toast('Players’ additions are sent to the GMs as suggestions');
   draft = { ...d, fields: { ...(d.fields || {}) } };
-  location.hash = `world/new/${d.kind}`;
+  // Already on that form (say, picking a template): redraw it with the draft.
+  if (location.hash === `#world/new/${d.kind}`) rerenderWorld(); else location.hash = `world/new/${d.kind}`;
 }
 
 export function mountWorld(root) {

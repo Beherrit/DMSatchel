@@ -108,7 +108,8 @@ export default route({
       entries: rows.filter((r) => visibleTo(r, req)).map((r) => shape(r, req)),
       world: { id: w.id, slug: w.slug, name: w.name, tagline: w.tagline, about: w.about, calendar: w.calendar, public: w.public, cal: w.cal || null, discord: Boolean(w.discord_webhook), next_session: w.next_session || null, shown: w.shown || null,
         // null: first visit; missing: not a member row (the client remembers visits itself).
-        ...(prevVisit !== undefined ? { prev_visit: prevVisit } : {}) },
+        ...(prevVisit !== undefined ? { prev_visit: prevVisit } : {}),
+        ...(req.isGmHere ? { templates: Array.isArray(w.templates) ? w.templates : [] } : {}) },
       role: req.role,
     });
   },
