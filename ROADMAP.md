@@ -195,6 +195,14 @@ to the log at the bottom.
     noted on both sheets.
 81. [x] **Print a character.** A clean printable page for a world character, built from their saved sheet and play
     state, for players who like paper at the table.
+82. [ ] **Is that name taken?** While writing a new entry's name, the form says if the world already has one with that
+    name (or a close one), with a link, so nobody makes a second Brindle.
+83. [ ] **Quick polls.** Anyone at the table asks a quick question ("Where do we go next?") with a few choices; members
+    vote, everyone sees the tally, and the asker closes it.
+84. [ ] **Measure on the map.** A ruler on any map with a scale: click points to measure a route in miles, with travel
+    time at each pace.
+85. [ ] **Keep going offline.** Changes to your character sheet and notes made without a connection are kept and sent
+    when it comes back, with a clear "waiting to send" marker.
 
 ## Ideas parking lot
 
