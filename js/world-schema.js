@@ -130,7 +130,9 @@ export const KINDS = {
     label: 'Quest', plural: 'Quests & Plots', blurb: 'Adventures, rumors and running plot threads.',
     fields: [['status', 'Status', 'select', ['Rumor', 'Available', 'Active', 'Completed', 'Failed', 'Abandoned']], ['patron', 'Patron'], ['gm', 'Run by (GM)'], ['reward', 'Reward'], ['stakes', 'What’s at stake', 'long'], ['outline', 'Outline', 'long'],
       // The checklist of steps (see objectives.js); GMs keep it, and secret steps never reach players.
-      ['objectives', 'Objectives', 'hidden', null, { gmOnly: true }]],
+      ['objectives', 'Objectives', 'hidden', null, { gmOnly: true }],
+      // When its reward went into the party treasury (see world-reward.js).
+      ['reward_paid', 'Reward paid', 'hidden', null, { gmOnly: true }]],
   },
   lore: {
     label: 'Lore', plural: 'Lore & Rules', blurb: 'Myths, cultures, languages, calendars and house rules.',

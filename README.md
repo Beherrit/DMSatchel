@@ -98,6 +98,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Quick notes**: jot a journal note from any page (button or the j key), linked to what you're looking at.
 - **Private notes**: everyone can keep their own notes on any page, seen by nobody else.
 - **Attitudes**: how each NPC and power feels about each character, on both pages and in session prep.
+- **Quest rewards**: completing a quest offers to put its reward (coin and items read from the text) into the party treasury.
 - **Split the loot**: share the party treasury's coin between characters, by shares, straight onto their sheets.
 - **Show to the table**: a GM pops a handout (or any entry) up on every player's screen.
 - **Next session**: propose a few dates, everyone answers yes / maybe / no, lock in the best one and post it to

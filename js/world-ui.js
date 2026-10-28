@@ -29,6 +29,7 @@ import { customFieldsButton } from './world-fields.js';
 import { goalsSection } from './world-goals.js';
 import { mentionsCard } from './world-mentions.js';
 import { starButton, favoritesNav } from './world-favorites.js';
+import { rewardCard } from './world-reward.js';
 import { tableSection } from './world-tables.js';
 import { parseSearch, searchHash, searchEntries } from './search.js';
 import { saveTemplateButton, templatePicker } from './world-templates.js';
@@ -252,6 +253,7 @@ function viewEntry(id, tab) {
     bondsSection(e, rerenderWorld),
     e.kind === 'character' ? downtimeSection(e) : null,
     attitudesToward(e, rerenderWorld),
+    rewardCard(e, rerenderWorld),
     objectivesSection(e, rerenderWorld),
     tableSection(e),
     e.kind === 'encounter' && e.fields?.enc ? (() => { try { return encounterCard(JSON.parse(e.fields.enc), { title: 'Saved encounter', save: false }); } catch { return null; } })() : null,

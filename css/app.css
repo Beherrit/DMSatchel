@@ -1159,3 +1159,10 @@ li.picking:has(.bulk-pick:checked) { outline: 2px solid var(--accent, #2c6e63); 
 /* See it as a player */
 .preview-banner { position: sticky; top: 0; z-index: 70; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; justify-content: center; padding: 8px 16px; background: var(--accent); color: var(--accent-ink); font-size: .95rem }
 .preview-banner .btn { background: var(--accent-ink); color: var(--accent); border-color: var(--accent-ink) }
+
+/* Quest rewards */
+.reward-card { border-left: 4px solid var(--accent) }
+.rw-items { display: grid; gap: 6px; margin: 6px 0 }
+.rw-row { display: grid; grid-template-columns: auto 5rem 1fr; gap: 6px; align-items: center }
+.rw-row input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--accent) }
+.rw-h { font-size: 1rem; margin-top: 10px }
