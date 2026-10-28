@@ -1149,7 +1149,7 @@ li.picking:has(.bulk-pick:checked) { outline: 2px solid var(--accent, #2c6e63); 
 .w-favs-h { font-size: .8rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 0 0 4px; font-family: var(--f-body) }
 .w-favs ul { list-style: none; padding: 0; margin: 0 }
 .w-favs li { padding: 3px 0 }
-.btn.star.on { color: #9a6a00 }
+.btn.star.on { font-weight: 700 }
 
 /* The party on the map */
 .pin.party-token { z-index: 4; transform: translate(-50%, -50%) scale(var(--inv)) translateY(-26px) }
@@ -1166,3 +1166,6 @@ li.picking:has(.bulk-pick:checked) { outline: 2px solid var(--accent, #2c6e63); 
 .rw-row { display: grid; grid-template-columns: auto 5rem 1fr; gap: 6px; align-items: center }
 .rw-row input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--accent) }
 .rw-h { font-size: 1rem; margin-top: 10px }
+
+/* Theme switch */
+.theme-btn { flex: none; min-width: 40px; min-height: 40px; font-size: 18px; line-height: 1; padding: 6px 10px; display: inline-grid; place-items: center }

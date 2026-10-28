@@ -108,6 +108,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **The party on the map**: a ⚑ token shows where the party is on every map with that place (or a place around it) pinned.
 - **Your own map markers**: drop private markers with notes on any map; only you see them.
 - **Fog of war**: paint over the parts of a map the party hasn't explored; players see only what's revealed.
+- **Light or dark**: a header switch for light, dark or automatic (follows your device), remembered per browser.
 - **Members-only site**: one switch makes every page and tool need a personal code or invite link.
 - **See it as a player**: GMs preview the world exactly as players see it, then go back with one click.
 - **Hidden entries**: GMs can keep any entry hidden from players while they prep, then reveal it in one click.
