@@ -127,6 +127,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Session zero**: a primer every member reads (pitch, tone, house rules, safety tools, lines and veils); players tell the GMs privately what to keep out, optionally without their name.
 - **Your own fields**: GMs add extra fields to any kind of entry (shared or GM-only), shown on the form and the page.
 - **Favorites**: star entries you keep going back to; they sit at the top of your world sidebar.
+- **Is that name taken?**: the entry form warns when the world already has an entry with that name, or a close one.
 - **Make a copy**: GMs duplicate any entry and edit the copy.
 - **Many at once**: GMs tick entries on any list or search and reveal, hide, tag, untag or move them into a place together.
 - **Search the talk**: world search also finds words in table talk, GM discussions (GMs) and your own notes, and jumps to the comment.

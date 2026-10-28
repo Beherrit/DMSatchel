@@ -1251,3 +1251,10 @@ li.picking:has(.bulk-pick:checked) { outline: 2px solid var(--accent, #2c6e63); 
   .pr-stat, .pr-ab { border-color: #000 }
   .pr-box, .sheet-block { break-inside: avoid }
 }
+
+/* Is that name taken? */
+.name-check { margin: 4px 0 0; min-height: 0 }
+.name-check:empty { display: none }
+.name-check.warn { color: var(--danger); font-weight: 600 }
+.name-check a { text-decoration: underline }
+.name-check.warn a { font-weight: 600 }

@@ -37,6 +37,7 @@ import { gallerySection } from './world-gallery.js';
 import { talkResults } from './world-talk-search.js';
 import { shareButton } from './world-share.js';
 import { suggestEditButton, editsSection, myEditsSection } from './world-edits.js';
+import { nameCheck } from './world-namecheck.js';
 import { tableSection } from './world-tables.js';
 import { parseSearch, searchHash, searchEntries } from './search.js';
 import { saveTemplateButton, templatePicker } from './world-templates.js';
@@ -504,6 +505,8 @@ function viewEdit(id, kindForNew) {
       }, 'btn ghost') : null));
   renderFields();
 
+  // Same or similar names already in the world, under the name field (new entries, or a renamed one).
+  if (form.querySelector('#f-name')) nameCheck(form.querySelector('#f-name'), existing?.id);
   form.addEventListener('submit', async (ev) => {
     ev.preventDefault();
     collectFields();
