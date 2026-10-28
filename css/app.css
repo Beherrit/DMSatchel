@@ -1019,3 +1019,8 @@ body.gated .mainnav, body.gated #toolnav, body.gated #panels, body.gated #notebo
 .pin.mark .glyph { background: var(--surface); color: var(--accent); border: 2px dotted var(--accent) }
 .pin.mark .pin-label { font-style: italic }
 .mark-glyph { color: var(--accent) }
+
+/* Entry history */
+.history-list > li { padding: 6px 0; border-bottom: 1px solid var(--line); display: grid; gap: 4px; justify-items: start }
+.diff-list del { color: var(--warn) }
+.diff-list ins { color: var(--good); text-decoration: none }

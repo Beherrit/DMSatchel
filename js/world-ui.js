@@ -32,6 +32,7 @@ import { quickNoteButton } from './world-quicknote.js';
 import { tableSection } from './world-tables.js';
 import { parseSearch, searchHash, searchEntries } from './search.js';
 import { saveTemplateButton, templatePicker } from './world-templates.js';
+import { fillHistory } from './world-history.js';
 import { viewExport } from './world-export.js';
 import { viewClocks, clocksWidget } from './world-clocks.js';
 import { viewRumors } from './world-rumors.js';
@@ -259,9 +260,7 @@ function viewEntry(id, tab) {
         } }, e.visibility === 'gm' ? 'Reveal to players' : 'Hide from players'),
         el('button', { class: 'btn ghost', type: 'button', onclick: async () => {
           history.hidden = !history.hidden; if (history.hidden) return;
-          setKids(history, el('p', { class: 'muted' }, 'Loading history…'));
-          try { const r = await api('activity', { query: { id } }); setKids(history, el('h4', {}, 'History'), el('ul', { class: 'plain' }, r.activity.map((h) => el('li', {}, `${when(h.at)} · ${h.gm || 'Someone'} · ${h.action}`)))); }
-          catch (err) { setKids(history, el('p', { class: 'error' }, err.message)); }
+          fillHistory(history, id, rerenderWorld);
         } }, 'History')) : null),
     knowsButtons(e, rerenderWorld),
     e.status === 'suggested' ? suggestionBanner(e) : null,
