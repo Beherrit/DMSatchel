@@ -113,6 +113,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Secrets and clues**: a running list in session prep of things the party could find out; tick them off as they come out.
 - **Session zero**: a primer every member reads (pitch, tone, house rules, safety tools, lines and veils); players tell the GMs privately what to keep out, optionally without their name.
 - **Your own fields**: GMs add extra fields to any kind of entry (shared or GM-only), shown on the form and the page.
+- **Favorites**: star entries you keep going back to; they sit at the top of your world sidebar.
 - **Make a copy**: GMs duplicate any entry and edit the copy.
 - **Many at once**: GMs tick entries on any list or search and reveal, hide, tag, untag or move them into a place together.
 - **Link the mentions**: entry pages show GMs names written as plain text that could be links, and link them in one click.

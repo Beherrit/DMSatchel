@@ -28,6 +28,7 @@ import { bulkControls } from './world-bulk.js';
 import { customFieldsButton } from './world-fields.js';
 import { goalsSection } from './world-goals.js';
 import { mentionsCard } from './world-mentions.js';
+import { starButton, favoritesNav } from './world-favorites.js';
 import { tableSection } from './world-tables.js';
 import { parseSearch, searchHash, searchEntries } from './search.js';
 import { saveTemplateButton, templatePicker } from './world-templates.js';
@@ -77,6 +78,7 @@ function renderSide() {
   setKids(side, 
     el('a', { href: '#world', class: 'w-home' }, world.info?.name || 'The World'),
     search,
+    favoritesNav(),
     isPlayer() ? el('div', { class: 'w-gm w-player' }, el('a', { class: 'btn primary small', href: '#world/new/character' }, '+ My character'), el('a', { class: 'btn small', href: '#world/new/journal' }, '+ Journal entry'),
       el('a', { class: 'btn ghost small', href: '#world/new/lore' }, 'Suggest an entry'), el('a', { class: 'btn ghost small', href: '#world/mine' }, 'My things'), el('a', { class: 'btn ghost small', href: '#world/export' }, 'Export')) : null,
     el('nav', { class: 'w-kinds w-tools', 'aria-label': 'World views' },
@@ -284,8 +286,8 @@ function viewEntry(id, tab) {
     crumbs.length ? el('nav', { class: 'crumbs', 'aria-label': 'Located in' }, crumbs.flatMap((c, i) => [i ? ' › ' : '', link(c)])) : null,
     el('div', { class: 'panel-head row' },
       el('div', {}, el('div', { class: 'eyebrow' }, kindLabel(e.kind), e.fields?.type ? ` · ${e.fields.type}` : ''), el('h2', {}, e.name), stateBadges(e).length ? el('div', { class: 'badges' }, stateBadges(e)) : null),
-      !isGm() && e.can_edit ? el('div', { class: 'btnrow' }, el('a', { class: 'btn', href: `#world/edit/${e.id}` }, 'Edit')) : null,
-      isGm() ? el('div', { class: 'btnrow' }, el('a', { class: 'btn', href: `#world/edit/${e.id}` }, 'Edit'),
+      !isGm() ? el('div', { class: 'btnrow' }, starButton(e), e.can_edit ? el('a', { class: 'btn', href: `#world/edit/${e.id}` }, 'Edit') : null) : null,
+      isGm() ? el('div', { class: 'btnrow' }, starButton(e), el('a', { class: 'btn', href: `#world/edit/${e.id}` }, 'Edit'),
         showButton(e),
         revealButton(e, rerenderWorld),
         saveTemplateButton(e),

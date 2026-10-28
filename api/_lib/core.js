@@ -107,6 +107,8 @@ export function ensureSchema() {
       await sql`ALTER TABLE worlds ADD COLUMN IF NOT EXISTS custom_fields jsonb`;
       // Session zero: the world's primer, and each person's private answers for the GMs (and when they read it).
       await sql`ALTER TABLE worlds ADD COLUMN IF NOT EXISTS primer jsonb`;
+      // Each member's starred entries in a world (ids, most recent first).
+      await sql`ALTER TABLE members ADD COLUMN IF NOT EXISTS favorites jsonb`;
       await sql`CREATE TABLE IF NOT EXISTS zero_answers (
         world_id text NOT NULL, gm_id int NOT NULL, answer jsonb, read_at timestamptz, updated_at timestamptz NOT NULL DEFAULT now(),
         PRIMARY KEY (world_id, gm_id))`;

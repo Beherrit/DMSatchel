@@ -165,7 +165,7 @@ to the log at the bottom.
     and can turn them into [[links]] one by one or all at once.
 66. [x] **Make a copy.** GMs duplicate any entry (another tavern like this one, a second bandit captain) and land in
     the edit form with the copy, named "… (copy)".
-67. [ ] **Your favorites.** Everyone stars the entries they keep going back to; starred entries sit at the top of the
+67. [x] **Your favorites.** Everyone stars the entries they keep going back to; starred entries sit at the top of the
     world sidebar, for that person only.
 68. [ ] **The party on the map.** Where the party is (from session prep) shows as a marker on every map that has that
     place pinned, for players too; GMs can set it from the map.
@@ -242,3 +242,4 @@ to the log at the bottom.
 - Spotlight tracker: a Spotlight card on session prep ranks active player characters by how often the last four session logs name them ([[Name]], the full name, or a distinctive first name, whole words only), out of the sessions each was at (from attendance; sessions they missed don't count against them). Characters named in under half their sessions get "due a turn"; each row says when they were last named and lists up to two open goals as hooks. js/spotlight.js unit tested.
 - Link the mentions: on an entry's page GMs get a folded "N names here could be links" card listing other entries whose names appear as plain text in its summary, description, long fields or GM secret (whole words, matching case, names of four letters or more, nothing inside existing links, a longer name like "Red Hand" always beating "Hand" inside it, even once linked). "Link" turns the first plain mention of that name into a [[link]]; "Link all" does every listed name. The card stays open while you work through it. js/mentions.js unit tested.
 - Make a copy: a "Make a copy" button on every entry page (GMs) opens the new-entry form filled from it: name "… (copy)", summary, description, GM secret, tags, connections, place, visibility and fields, leaving behind what belongs to one character or session (play state, what they know, attitudes, goals, attendance, rumor spread, quest objectives).
+- Your favorites: a ☆ Favorite button on every entry page for members; starred entries (newest first, up to 12 shown) sit under "★ Favorites" at the top of the world sidebar, for that person only. Kept on the membership (additive members.favorites jsonb, returned with the world load), so they follow the person to any device. PUT {favorite, on} on the party API; tested against PGlite.

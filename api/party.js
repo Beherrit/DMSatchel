@@ -18,6 +18,8 @@
 // PATCH {primer: {...}}                     (GM) the primer: pitch, tone, house rules, safety tools, lines, veils
 // PUT {zero: {ratings, lines, veils, note, anon}}   your private answers for the GMs (marks the page read)
 // POST {zero_read: true}                    you've read the page
+//
+// PUT {favorite: entryId, on: bool}         star or unstar an entry for yourself (members); returns your favorites
 import { route, send, fail, sql, requireMember, requireGm, postDiscord } from './_lib/core.js';
 import { cleanDates, cleanVote, tally, dateText } from '../js/schedule.js';
 import { cleanPrimer, cleanAnswer, answerEmpty } from '../js/zero.js';
@@ -107,6 +109,14 @@ async function putZero(req, res) {
 export default route({
   async PUT(req, res) {
     if (req.body.zero !== undefined) return putZero(req, res);
+    if (req.body.favorite !== undefined) {
+      if (!requireMember(req, res)) return;
+      const id = clip(req.body.favorite, 40);
+      const cur = (await sql`SELECT favorites FROM members WHERE world_id = ${req.world.id} AND gm_id = ${req.gm.id}`)[0];
+      const next = [...(req.body.on ? [id] : []), ...(Array.isArray(cur?.favorites) ? cur.favorites : []).filter((x) => x !== id)].slice(0, 60);
+      await sql`UPDATE members SET favorites = ${JSON.stringify(next)}::jsonb WHERE world_id = ${req.world.id} AND gm_id = ${req.gm.id}`;
+      return send(res, 200, { favorites: next });
+    }
     fail(res, 400, 'Nothing to change.');
   },
   async PATCH(req, res) {
