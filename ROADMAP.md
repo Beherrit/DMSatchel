@@ -129,6 +129,15 @@ to the log at the bottom.
 49. [x] **Your own map markers.** Players drop private markers with notes on any map ("we camped here"), seen only by
     them, alongside the GM's pins.
 
+50. [ ] **Restore an earlier version.** An entry's history shows what changed in each edit, and GMs can put an entry
+    back the way it was at any point (saved as a new edit, so nothing is lost).
+51. [ ] **NPC table cards.** A compact card per NPC (voice, manner, wants, what they know, a stat line) to print as a
+    set for the people the party is likely to meet, from session prep or a place.
+52. [ ] **Saved encounters.** Keep an encounter you rolled or built, attach it to a place or quest, and find it again
+    in session prep when the party gets there.
+53. [ ] **Party bonds.** How the player characters are tied to each other (siblings, rivals, owes a debt…), set by
+    players for their own characters, shown on the party page and character pages.
+
 ## Ideas parking lot
 
 ## Log
