@@ -235,6 +235,10 @@ export function route(handlers, opts = {}) {
         await worldContext(req);
         if (!req.world) return fail(res, 404, 'That world doesn’t exist, or it was archived.', { code: 'no_world' });
         if (!req.canRead) return fail(res, req.gm ? 403 : 401, req.gm ? 'You’re not a member of this world. Ask its owner for an invite link.' : 'This world is private. Sign in, or open an invite link from its owner.', { code: 'no_access' });
+        // "See it as a player" (GMs, reading only): answer as for a player with no characters of their own.
+        if (req.method === 'GET' && req.query?.as === 'player' && req.isGmHere) {
+          req.preview = true; req.isGmHere = false; req.role = 'player'; req.gm = { ...req.gm, id: -1, role: 'user' };
+        }
       }
       return await h(req, res);
     } catch (e) {

@@ -212,6 +212,8 @@ function notGm() {
 }
 
 export async function showAdmin(sub) {
+  // A session change can arrive before the section has been mounted; the mount shows it then.
+  if (!root) return;
   const tabs = TABS.filter(([, , need]) => allowed(need));
   if (!tabs.length) { setKids(root, notGm()); return; }
   const tab = tabs.some(([k]) => k === sub) ? sub : tabs[0][0];

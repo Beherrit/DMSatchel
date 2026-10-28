@@ -16,8 +16,19 @@ function initialWorldKey() {
 session.worldKey = initialWorldKey();
 
 export const currentWorld = () => session.worlds.find((w) => w.slug === session.worldKey || w.id === session.worldKey) || null;
-// Your role in the open world: owner, gm, player, or null (a visitor to a public world).
-export const worldRole = () => currentWorld()?.role || (session.gm?.role === 'admin' ? 'owner' : null);
+// Your real role in the open world: owner, gm, player, or null (a visitor to a public world).
+export const realRole = () => currentWorld()?.role || (session.gm?.role === 'admin' ? 'owner' : null);
+
+// "See it as a player": a GM previews the world the way players see it, for this browser tab. The server answers
+// every read as it would for a player; changes are refused until the GM leaves the preview.
+const previewKey = () => `satchel-as-player-${session.worldKey || 'default'}`;
+export const previewing = () => { try { return sessionStorage.getItem(previewKey()) === '1' && ['owner', 'gm'].includes(realRole()); } catch { return false; } };
+export function setPreview(on) {
+  try { if (on) sessionStorage.setItem(previewKey(), '1'); else sessionStorage.removeItem(previewKey()); } catch { /* private window */ }
+  location.reload();
+}
+
+export const worldRole = () => (previewing() ? 'player' : realRole());
 export const isGm = () => ['owner', 'gm'].includes(worldRole());
 export const isOwner = () => worldRole() === 'owner';
 export const isPlayer = () => worldRole() === 'player';
@@ -41,6 +52,10 @@ export class ApiError extends Error {
 export async function api(path, { method = 'GET', body, query } = {}) {
   const q = { ...(query || {}) };
   if (WORLD_SCOPED.has(path) && session.worldKey && !q.world) q.world = session.worldKey;
+  if (WORLD_SCOPED.has(path) && previewing()) {
+    if (method !== 'GET') throw new ApiError('You’re seeing the world as a player. Go back to the GM view to change anything.', 0);
+    q.as = 'player';
+  }
   const qs = Object.keys(q).length ? `?${new URLSearchParams(Object.entries(q).filter(([, v]) => v != null && v !== ''))}` : '';
   let res;
   try {

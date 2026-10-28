@@ -3,7 +3,7 @@
 //         #world/party · #world/zero (session zero) · #world/schedule · #world/downtime[/<character>] · #world/suggestions (GMs) · #world/mine (your characters, journals and suggestions)
 
 import { el, toast, confirmButton, setKids } from './dom.js';
-import { api, session, isGm, isMember, isPlayer, signedIn, onSession } from './api.js';
+import { api, session, isGm, isMember, isPlayer, signedIn, onSession, setPreview } from './api.js';
 import { KINDS, KIND_ORDER, LINK_LABELS, STANDING_KINDS, PLACE_KINDS, PLAYER_KINDS, fieldApplies } from './world-schema.js';
 import { openSignIn } from './signin.js';
 import { world, worldEntries, getEntry, loadWorld, byName, kindLabel, kindFields, link, when, findByName, mentions, richText, notice, nameList } from './world-store.js';
@@ -98,7 +98,7 @@ function renderSide() {
       isGm() ? el('a', { href: '#world/talk', 'data-view': 'talk' }, el('span', {}, 'GM discussions'), el('span', { class: 'count', id: 'w-talk-count' }, '')) : null),
     el('nav', { class: 'w-kinds', 'aria-label': 'Entry types' }, KIND_ORDER.map((k) => el('a', { href: `#world/k/${k}`, 'data-kind': k }, el('span', {}, KINDS[k].plural), el('span', { class: 'count' }, counts[k] || 0)))),
     isGm() ? el('div', { class: 'w-gm' }, el('a', { class: 'btn primary small', href: '#world/prep' }, 'Session prep'), el('a', { class: 'btn small', href: '#world/new/npc' }, '+ New entry'), el('a', { class: 'btn ghost small', href: '#world/bin' }, 'Bin'),
-      el('a', { class: 'btn ghost small', href: '#world/export' }, 'Export & print'), el('a', { class: 'btn ghost small', href: '#world/import' }, 'Import notes'), el('a', { class: 'btn ghost small', href: '#world/todo' }, 'What needs writing'),
+      el('a', { class: 'btn ghost small', href: '#world/export' }, 'Export & print'), el('a', { class: 'btn ghost small', href: '#world/import' }, 'Import notes'), el('a', { class: 'btn ghost small', href: '#world/todo' }, 'What needs writing'), el('button', { class: 'btn ghost small', type: 'button', title: 'Check what players can see (this tab only)', onclick: () => setPreview(true) }, '👁 See it as a player'),
       suggested ? el('a', { class: 'btn small suggest-btn', href: '#world/suggestions' }, `Suggestions (${suggested})`) : null) : null,
     !isMember() && signedIn() ? el('p', { class: 'muted small w-visitor' }, 'You’re browsing as a visitor. Ask the owner for an invite to add things.') : null,
   );

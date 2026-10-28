@@ -1,6 +1,6 @@
 // The sign-in dialog and the account button in the header.
 import { $, el, toast, setKids } from './dom.js';
-import { session, signIn, signOut, onSession, loadSession, worldRole, isGm, isOwner, isAdmin } from './api.js';
+import { session, signIn, signOut, onSession, loadSession, worldRole, isGm, isOwner, isAdmin, previewing, setPreview } from './api.js';
 
 const ROLE_LABEL = { owner: 'Owner', gm: 'GM', player: 'Player' };
 
@@ -23,10 +23,22 @@ export async function openSignIn() {
   if (!offline) dialog.querySelector('input').focus();
 }
 
+// While a GM is seeing the world as a player: a banner on every page with the way back.
+function previewBanner() {
+  let b = document.getElementById('preview-banner');
+  if (!previewing()) { b?.remove(); return; }
+  if (b) return;
+  b = el('div', { id: 'preview-banner', class: 'preview-banner', role: 'status' },
+    el('span', {}, '👁 You’re seeing this world the way players see it: no hidden entries, secrets or suggestions. Nothing can be changed here.'),
+    el('button', { class: 'btn small', type: 'button', onclick: () => setPreview(false) }, 'Back to the GM view'));
+  document.body.prepend(b);
+}
+
 function renderAccount() {
   const box = $('#account');
+  previewBanner();
   setKids(box, session.gm
-    ? el('span', { class: 'who' }, el('span', { class: 'who-name' }, session.gm.name), worldRole() || isAdmin() ? el('span', { class: 'role' }, isAdmin() ? 'Admin' : ROLE_LABEL[worldRole()]) : null,
+    ? el('span', { class: 'who' }, el('span', { class: 'who-name' }, session.gm.name), worldRole() || isAdmin() ? el('span', { class: 'role' }, previewing() ? 'Player view' : isAdmin() ? 'Admin' : ROLE_LABEL[worldRole()]) : null,
       el('button', { class: 'btn small ghost', type: 'button', onclick: async () => { await signOut(); toast('Signed out'); } }, 'Sign out'))
     : el('button', { class: 'btn small', type: 'button', onclick: openSignIn }, 'Sign in'));
   document.body.classList.toggle('is-gm', isGm());

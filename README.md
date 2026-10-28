@@ -108,6 +108,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Your own map markers**: drop private markers with notes on any map; only you see them.
 - **Fog of war**: paint over the parts of a map the party hasn't explored; players see only what's revealed.
 - **Members-only site**: one switch makes every page and tool need a personal code or invite link.
+- **See it as a player**: GMs preview the world exactly as players see it, then go back with one click.
 - **Hidden entries**: GMs can keep any entry hidden from players while they prep, then reveal it in one click.
 - **Spotlight**: session prep shows which characters the recent session logs name least, with their goals as hooks.
 - **Character goals**: players write short and long-term goals (some kept from the party); GMs see them in session prep.
