@@ -2,6 +2,7 @@
 // PATCH {cal}  set the in-world calendar and today's date (any GM: days pass during play).
 // PUT {discord_webhook}  (owner) a Discord webhook link; it never leaves the server. Empty string removes it.
 // PATCH {prep: {location_id, notes}}   (GM) session prep: where the party is, and the GMs' scratch pad.
+// PATCH {start_here: {id, on} | {order}}   (GM) the entries newcomers should read first
 // PATCH {clock: {advance} | {set} | {add_light} | {remove_light}}   (GM) time of day and lights during play
 // PATCH {notice: {add: {text, until}} | {remove: id}}   (GM) notices on the world's front page
 // PATCH {secret: {add} | {id, found, session} | {id, text} | {remove}}   (GM) secrets and clues in session prep
@@ -115,6 +116,21 @@ export default route({
       return send(res, 200, { shown, revealed: e.visibility === 'gm' });
     }
     // Secrets and clues in session prep, one change at a time: {secret: {add} | {id, found, session} | {id, text} | {remove}}.
+    // Start here (GMs): {start_here: {id, on}} adds or removes an entry; {start_here: {order: [ids]}} reorders.
+    if (req.body.start_here) {
+      const b = req.body.start_here;
+      let list = (Array.isArray(req.world.start_here) ? req.world.start_here : []).map(String);
+      if (Array.isArray(b.order)) list = b.order.map(String).filter((id) => list.includes(id));
+      else {
+        const id = String(b.id || '').slice(0, 40);
+        const e = (await sql`SELECT id FROM entries WHERE id = ${id} AND world_id = ${req.world.id} AND NOT deleted`)[0];
+        if (!e) return fail(res, 404, 'That entry doesn’t exist.');
+        list = list.filter((x) => x !== id);
+        if (b.on) { if (list.length >= 12) return fail(res, 400, 'Twelve is plenty for newcomers. Take one off first.'); list.push(id); }
+      }
+      await sql`UPDATE worlds SET start_here = ${JSON.stringify(list)}::jsonb WHERE id = ${req.world.id}`;
+      return send(res, 200, { start_here: list });
+    }
     // The time of day and the lights (any GM, during play): {clock: {advance: minutes} | {set: minutes} |
     // {add_light: {name, minutes}} | {remove_light: id}}. Passing midnight moves the calendar on.
     if (req.body.clock) {

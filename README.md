@@ -128,6 +128,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Spotlight**: session prep shows which characters the recent session logs name least, with their goals as hooks.
 - **Character goals**: players write short and long-term goals (some kept from the party); GMs see them in session prep.
 - **Secrets and clues**: a running list in session prep of things the party could find out; tick them off as they come out.
+- **Start here**: GMs pick the entries newcomers should read first; they lead the front page and the session zero page.
 - **Session zero**: a primer every member reads (pitch, tone, house rules, safety tools, lines and veils); players tell the GMs privately what to keep out, optionally without their name.
 - **Your own fields**: GMs add extra fields to any kind of entry (shared or GM-only), shown on the form and the page.
 - **Favorites**: star entries you keep going back to; they sit at the top of your world sidebar.

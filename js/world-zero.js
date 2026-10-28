@@ -6,6 +6,7 @@ import { el, toast, setKids } from './dom.js';
 import { api, isGm, isMember } from './api.js';
 import { world, richText, notice, when } from './world-store.js';
 import { TOPICS, RATINGS, summarize, primerEmpty } from './zero.js';
+import { startHereCard } from './world-start.js';
 
 const TOOLS_HINT = 'e.g. We use the X-card: tap it, or type X in chat, to skip anything, no questions asked. Anyone can call a break at any time.';
 
@@ -21,6 +22,7 @@ export async function viewZero() {
     el('div', { class: 'panel-head' }, el('h2', {}, 'Session zero'),
       el('p', {}, 'What kind of game this is and how we look after each other at the table. Read it before your first session.')),
     primerCard(data, draw),
+    startHereCard({ fresh: true }),
     answerCard(data, draw),
     isGm() ? tableCard(data, draw) : null);
   draw();

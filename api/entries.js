@@ -169,6 +169,8 @@ export default route({
         ...(favorites ? { favorites } : {}),
         // Where the party is (from session prep), when this person can see that place.
         party_at: partyAt(w, rows, req), clock: readClock(w.clock),
+        // Start here: only what this person can see.
+        start_here: (Array.isArray(w.start_here) ? w.start_here : []).filter((id) => { const r = rows.find((x) => x.id === id); return r && !r.deleted && visibleTo(r, req); }),
         ...(req.role ? { notices: activeNotices(w.notices) } : {}),
         ...(req.isGmHere ? { edits_open: (await sql`SELECT count(*)::int AS n FROM edit_suggestions WHERE world_id = ${w.id} AND status = 'open'`)[0].n } : {}),
         // Members' pronouns by person, to show beside their names.

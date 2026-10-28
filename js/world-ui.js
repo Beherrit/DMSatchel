@@ -40,6 +40,7 @@ import { suggestEditButton, editsSection, myEditsSection } from './world-edits.j
 import { nameCheck } from './world-namecheck.js';
 import { pollsCard } from './world-polls.js';
 import { clockCard } from './world-clock.js';
+import { startHereButton, startHereCard } from './world-start.js';
 import { tableSection } from './world-tables.js';
 import { parseSearch, searchHash, searchEntries } from './search.js';
 import { saveTemplateButton, templatePicker } from './world-templates.js';
@@ -135,6 +136,8 @@ function viewHome() {
     el('div', { class: 'panel-head' }, el('h2', {}, info.name || 'The World'), info.tagline ? el('p', {}, info.tagline) : null,
       worldCalendar() ? el('p', { class: 'today-line' }, el('a', { href: '#world/calendar' }, `📅 ${todayText()}`)) : null, isMember() ? nextSessionLine() : null),
     zeroNudge(),
+    // Open for newcomers (no earlier visit, or session zero not read yet), folded for everyone else.
+    startHereCard({ fresh: !world.info?.prev_visit || world.info?.zero_read === false }),
     // The table's things side by side: notices, quick polls, time and light.
     el('div', { class: 'home-table' }, noticesCard(rerenderWorld), pollsCard(), clockCard()),
     whatsNewCard(),
@@ -310,6 +313,7 @@ function viewEntry(id, tab) {
         revealButton(e, rerenderWorld),
         saveTemplateButton(e),
         copyButton(e),
+        startHereButton(e),
         cardsButton(e),
         world.info?.discord && e.visibility !== 'gm' && e.status !== 'suggested' ? confirmButton('Post to Discord', async () => {
           try { await api('settings', { method: 'POST', body: { post: e.id } }); toast(`Posted ${e.name} to Discord`); } catch (err) { toast(err.message, 'bad'); }
