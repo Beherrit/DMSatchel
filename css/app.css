@@ -1314,3 +1314,7 @@ div.poll-row { cursor: default }
 .tag-note { margin-bottom: 12px }
 .toast.with-action { display: inline-flex; align-items: center; gap: 6px }
 .toast-undo { background: none; border: 0; color: inherit; font: inherit; font-weight: 700; text-decoration: underline; cursor: pointer; padding: 2px 4px }
+/* Markers shared with the party */
+.pin.mark.shared .glyph { border-style: solid }
+.pin.party-mark .glyph { color: var(--brass); border: 2px solid var(--brass) }
+.mark-glyph.party { color: var(--brass) }

@@ -87,8 +87,8 @@ export function viewMaps() {
 
 export async function viewMap(id, focusPin) {
   let map;
-  let marks = [];
-  try { const r = await api('maps', { query: { id } }); map = r.map; marks = r.mine || []; } catch (err) { return notice('Couldn’t open the map', err.message); }
+  let marks = [], partyMarks = [];
+  try { const r = await api('maps', { query: { id } }); map = r.map; marks = r.mine || []; partyMarks = r.party || []; } catch (err) { return notice('Couldn’t open the map', err.message); }
   let marking = false;
   let measuring = false, route = [];
   const myBox = el('div', { class: 'my-marks' });
@@ -253,13 +253,15 @@ export async function viewMap(id, focusPin) {
   function markDialog(mk) {
     const label = el('input', { type: 'text', id: 'mk-label', value: mk.label || '', maxlength: 80, placeholder: 'e.g. We camped here' });
     const note = el('textarea', { id: 'mk-note', rows: 3, placeholder: 'Anything to remember about this spot' }, mk.note || '');
+    const shared = el('input', { type: 'checkbox', id: 'mk-shared', checked: Boolean(mk.shared) });
     const d = el('dialog', { class: 'dialog', 'aria-labelledby': 'mk-title' }, el('div', { class: 'dialog-body' },
-      el('h2', { id: 'mk-title' }, mk.id ? 'Your marker' : 'New marker'), el('p', { class: 'muted small' }, 'Only you can see your markers.'),
+      el('h2', { id: 'mk-title' }, mk.id ? 'Your marker' : 'New marker'), el('p', { class: 'muted small' }, 'Only you can see your markers, unless you show one to the party.'),
       el('label', { for: 'mk-label' }, 'Label'), label, el('label', { for: 'mk-note' }, 'Note'), note,
+      el('label', { class: 'check', for: 'mk-shared' }, shared, ' Show to the party (everyone in the world sees it, with your name)'),
       el('div', { class: 'btnrow' },
         el('button', { class: 'btn primary', type: 'button', onclick: async () => {
           try {
-            const r = await api('maps', { method: 'POST', body: { mark: { ...mk, map_id: map.id, label: label.value, note: note.value } } });
+            const r = await api('maps', { method: 'POST', body: { mark: { ...mk, map_id: map.id, label: label.value, note: note.value, shared: shared.checked } } });
             marks = [...marks.filter((x) => x.id !== r.mark.id), r.mark]; d.close(); renderPins();
           } catch (err) { toast(err.message, 'bad'); }
         } }, 'Save'),
@@ -272,7 +274,9 @@ export async function viewMap(id, focusPin) {
 
   function renderPins() {
     const q = filter.value.trim().toLowerCase();
-    setKids(layer, ...marks.map((m) => el('button', { class: 'pin mark', type: 'button', style: `left:${m.x * 100}%;top:${m.y * 100}%`, title: m.label, 'aria-label': `Your marker: ${m.label}`,
+    setKids(layer, ...partyMarks.map((m) => el('button', { class: 'pin mark party-mark', type: 'button', style: `left:${m.x * 100}%;top:${m.y * 100}%`, title: `${m.label} (${m.by})`, 'aria-label': `${m.by}’s marker: ${m.label}`,
+      onclick: (ev) => { ev.stopPropagation(); partyMarkInfo(m); } }, el('span', { class: 'glyph', 'aria-hidden': 'true' }, '✦'), el('span', { class: 'pin-label' }, `${m.label} · ${m.by}`))),
+    ...marks.map((m) => el('button', { class: `pin mark${m.shared ? ' shared' : ''}`, type: 'button', style: `left:${m.x * 100}%;top:${m.y * 100}%`, title: m.label, 'aria-label': `Your marker: ${m.label}`,
       onclick: (ev) => { ev.stopPropagation(); markDialog(m); } }, el('span', { class: 'glyph', 'aria-hidden': 'true' }, '✎'), el('span', { class: 'pin-label' }, m.label))),
     ...(() => {
       const at = partyPin(pins, partyChain());
@@ -294,8 +298,17 @@ export async function viewMap(id, focusPin) {
   }
   filter.addEventListener('input', renderPins);
   // The side list of your markers (redrawn with the pins).
-  const drawMine = () => setKids(myBox, ...(marks.length ? [el('h3', { class: 'section-title' }, `Your markers (${marks.length})`), el('ul', { class: 'pin-list' }, [...marks].sort((a, b) => a.label.localeCompare(b.label)).map((m) => el('li', {},
-    el('button', { class: 'linkish', type: 'button', onclick: () => { centerOn(m); markDialog(m); } }, el('span', { class: 'glyph mark-glyph', 'aria-hidden': 'true' }, '✎'), ' ', m.label), m.note ? el('span', { class: 'muted small' }, ` ${m.note.slice(0, 60)}`) : null)))] : []));
+  // Someone else's shared marker: who left it and what it says.
+  function partyMarkInfo(m) {
+    const d = el('dialog', { class: 'dialog', 'aria-labelledby': 'pm-title' }, el('div', { class: 'dialog-body' },
+      el('h2', { id: 'pm-title' }, m.label), el('p', { class: 'muted small' }, `A marker ${m.by} shared with the party.`), m.note ? el('p', {}, m.note) : null,
+      el('div', { class: 'btnrow' }, el('button', { class: 'btn', type: 'button', onclick: () => d.close() }, 'Close'))));
+    d.addEventListener('close', () => d.remove()); document.body.append(d); d.showModal();
+  }
+  const drawMine = () => setKids(myBox, ...(partyMarks.length ? [el('h3', { class: 'section-title' }, `Shared by the party (${partyMarks.length})`), el('ul', { class: 'pin-list' }, partyMarks.map((m) => el('li', {},
+    el('button', { class: 'linkish', type: 'button', onclick: () => { centerOn(m); partyMarkInfo(m); } }, el('span', { class: 'glyph mark-glyph party', 'aria-hidden': 'true' }, '✦'), ' ', m.label), el('span', { class: 'muted small' }, ` ${m.by}`))))] : []),
+    ...(marks.length ? [el('h3', { class: 'section-title' }, `Your markers (${marks.length})`), el('ul', { class: 'pin-list' }, [...marks].sort((a, b) => a.label.localeCompare(b.label)).map((m) => el('li', {},
+    el('button', { class: 'linkish', type: 'button', onclick: () => { centerOn(m); markDialog(m); } }, el('span', { class: 'glyph mark-glyph', 'aria-hidden': 'true' }, '✎'), ' ', m.label), m.shared ? el('span', { class: 'tag' }, 'shared') : null, m.note ? el('span', { class: 'muted small' }, ` ${m.note.slice(0, 60)}`) : null)))] : []));
 
   // Pan, zoom and place pins.
   const pointers = new Map(); let last = null, pinchDist = 0, dragged = false;

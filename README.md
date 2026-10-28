@@ -118,7 +118,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
   the character's page.
 - **Measure on the map**: click points along a route on any map with a scale to see the miles and travel time at each pace.
 - **The party on the map**: a ⚑ token shows where the party is on every map with that place (or a place around it) pinned.
-- **Your own map markers**: drop private markers with notes on any map; only you see them.
+- **Your own map markers**: drop markers with notes on any map; private unless you show one to the party.
 - **Fog of war**: paint over the parts of a map the party hasn't explored; players see only what's revealed.
 - **Light or dark**: a header switch for light, dark or automatic (follows your device), remembered per browser.
 - **Members-only site**: one switch makes every page and tool need a personal code or invite link.

@@ -140,6 +140,8 @@ export function ensureSchema() {
         id serial PRIMARY KEY, map_id text NOT NULL, gm_id int NOT NULL, x real NOT NULL, y real NOT NULL,
         label text NOT NULL DEFAULT '', note text NOT NULL DEFAULT '', created_at timestamptz NOT NULL DEFAULT now())`;
       await sql`CREATE INDEX IF NOT EXISTS map_marks_idx ON map_marks (map_id, gm_id)`;
+      // A marker its maker chose to share with the party (private by default).
+      await sql`ALTER TABLE map_marks ADD COLUMN IF NOT EXISTS shared boolean NOT NULL DEFAULT false`;
       await sql`INSERT INTO members (world_id, gm_id, role) SELECT 'default', id, CASE WHEN role = 'admin' THEN 'owner' ELSE 'gm' END FROM gms
         WHERE NOT EXISTS (SELECT 1 FROM members m WHERE m.world_id = 'default') ON CONFLICT DO NOTHING`;
     })().catch((e) => { schemaReady = null; throw e; });
