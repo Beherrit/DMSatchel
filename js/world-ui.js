@@ -45,6 +45,7 @@ import { startHereButton, startHereCard } from './world-start.js';
 import { viewTags, tagNote } from './world-tags.js';
 import { pushRecent, readRecent } from './recent.js';
 import { copyPlaceDialog } from './world-copyplace.js';
+import { mergeButton } from './world-merge.js';
 import { tableSection } from './world-tables.js';
 import { parseSearch, searchHash, searchEntries } from './search.js';
 import { saveTemplateButton, templatePicker } from './world-templates.js';
@@ -333,6 +334,7 @@ function viewEntry(id, tab) {
         revealButton(e, rerenderWorld),
         saveTemplateButton(e),
         copyButton(e),
+        mergeButton(e),
         startHereButton(e),
         cardsButton(e),
         world.info?.discord && e.visibility !== 'gm' && e.status !== 'suggested' ? confirmButton('Post to Discord', async () => {

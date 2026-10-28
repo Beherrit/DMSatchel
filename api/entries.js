@@ -11,6 +11,9 @@
 // POST {suggest_edit: {entry_id, summary, body, fields, note}}   (member) suggest changes to an entry you can see
 // GET ?edits=1                          suggested edits: every open one (GMs) or your own (players)
 // PATCH {edit_id, decision: 'accept' | 'decline'}   (GM) apply a suggested edit, or turn it down
+// PATCH {merge: {from, into}}          (GM) fold one entry into another: text, fields, tags, connections, what's
+//                                   inside it, mentions, comments, standing, clocks and map pins move over; the
+//                                   merged-away entry goes to the bin
 // PATCH {give: {from, to, item, qty, cp, from_base, to_base}}   hand an item and/or coin from one character's
 //                                   sheet to another's (the giver's player or a GM). *_base: the sheet's coin and
 //                                   inventory as the page shows them, used only where the sheet never saved its own.
@@ -27,6 +30,7 @@ import { cleanGallery } from '../js/gallery.js';
 import { cleanShare, sharedWith } from '../js/sharing.js';
 import { cleanProposal, applyProposal } from '../js/edit-suggest.js';
 import { takeItem, giveItem } from '../js/handover.js';
+import { mergedEntry, relinkLinks, relinkText } from '../js/merge.js';
 import { fieldsWith } from '../js/custom-fields.js';
 import { cleanTag, chainUp } from '../js/bulk.js';
 import { cleanPrimer, primerEmpty } from '../js/zero.js';
@@ -273,6 +277,39 @@ export default route({
 
   async PATCH(req, res) {
     if (!requireMember(req, res)) return;
+    if (req.body.merge) {
+      if (!requireGm(req, res)) return;
+      const from = await loadOne(String(req.body.merge.from || '').slice(0, 40), req.world.id), into = await loadOne(String(req.body.merge.into || '').slice(0, 40), req.world.id);
+      if (!from || !into || from.deleted || into.deleted) return fail(res, 404, 'Pick two entries in this world.');
+      if (from.id === into.id) return fail(res, 400, 'That’s the same entry.');
+      const w = req.world.id;
+      // The surviving entry.
+      const m = mergedEntry(into, from);
+      await sql`UPDATE entries SET summary = ${m.summary}, body = ${m.body}, secret = ${m.secret}, fields = ${JSON.stringify(m.fields)}, tags = ${m.tags}, links = ${JSON.stringify(m.links)},
+        updated_by = ${req.gm.id}, updated_at = now(), version = version + 1 WHERE id = ${into.id} AND world_id = ${w}`;
+      // What was inside it, and every other entry's connections and [[mentions]].
+      await sql`UPDATE entries SET parent_id = ${into.id}, updated_at = now(), version = version + 1 WHERE parent_id = ${from.id} AND world_id = ${w} AND id <> ${into.id}`;
+      const others = await sql`SELECT id, summary, body, secret, links FROM entries WHERE world_id = ${w} AND id <> ${into.id} AND id <> ${from.id}
+        AND (links::text LIKE ${`%"${from.id}"%`} OR summary ILIKE ${`%[[${from.name}%`} OR body ILIKE ${`%[[${from.name}%`} OR secret ILIKE ${`%[[${from.name}%`})`;
+      for (const o of others) {
+        await sql`UPDATE entries SET links = ${JSON.stringify(relinkLinks(o.links, from.id, into.id, o.id))}, summary = ${relinkText(o.summary, from.name, into.name)},
+          body = ${relinkText(o.body, from.name, into.name)}, secret = ${relinkText(o.secret, from.name, into.name)}, updated_at = now(), version = version + 1 WHERE id = ${o.id}`;
+      }
+      // Talk, standing, clocks, suggested edits and maps about it.
+      await sql`UPDATE comments SET entry_id = ${into.id} WHERE entry_id = ${from.id}`;
+      await sql`UPDATE standing_log SET entry_id = ${into.id} WHERE entry_id = ${from.id} AND world_id = ${w}`;
+      await sql`UPDATE clocks SET entry_id = ${into.id} WHERE entry_id = ${from.id} AND world_id = ${w}`;
+      await sql`UPDATE edit_suggestions SET entry_id = ${into.id} WHERE entry_id = ${from.id} AND world_id = ${w}`;
+      await sql`UPDATE maps SET entry_id = ${into.id} WHERE entry_id = ${from.id} AND world_id = ${w}`;
+      for (const map of await sql`SELECT id, pins FROM maps WHERE world_id = ${w} AND pins::text LIKE ${`%"${from.id}"%`}`) {
+        await sql`UPDATE maps SET pins = ${JSON.stringify((map.pins || []).map((p) => (p.entry_id === from.id ? { ...p, entry_id: into.id } : p)))}::jsonb WHERE id = ${map.id}`;
+      }
+      // The merged-away entry goes to the bin (it can be restored, though what moved stays moved).
+      await sql`UPDATE entries SET deleted = true, updated_by = ${req.gm.id}, updated_at = now(), version = version + 1 WHERE id = ${from.id} AND world_id = ${w}`;
+      await record(into.id, req.gm.id, 'merge', snapshot(await loadOne(into.id, w)));
+      await record(from.id, req.gm.id, 'delete', null);
+      return send(res, 200, { entry: shape(await loadOne(into.id, w), req), moved: others.length });
+    }
     if (req.body.give) {
       const g = req.body.give;
       const from = await loadOne(String(g.from || '').slice(0, 40), req.world.id), to = await loadOne(String(g.to || '').slice(0, 40), req.world.id);
