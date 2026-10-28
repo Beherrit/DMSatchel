@@ -121,6 +121,11 @@ export function ensureSchema() {
         proposal jsonb NOT NULL, note text NOT NULL DEFAULT '', status text NOT NULL DEFAULT 'open',
         created_at timestamptz NOT NULL DEFAULT now(), decided_by int, decided_at timestamptz)`;
       await sql`CREATE INDEX IF NOT EXISTS edit_suggestions_idx ON edit_suggestions (world_id, status)`;
+      // Quick polls for the table: a question, a few choices and everyone's vote ({ memberId: choice }).
+      await sql`CREATE TABLE IF NOT EXISTS table_polls (
+        id serial PRIMARY KEY, world_id text NOT NULL, gm_id int NOT NULL, question text NOT NULL, options jsonb NOT NULL,
+        votes jsonb NOT NULL DEFAULT '{}', closed boolean NOT NULL DEFAULT false, deleted boolean NOT NULL DEFAULT false,
+        created_at timestamptz NOT NULL DEFAULT now())`;
       await sql`CREATE TABLE IF NOT EXISTS zero_answers (
         world_id text NOT NULL, gm_id int NOT NULL, answer jsonb, read_at timestamptz, updated_at timestamptz NOT NULL DEFAULT now(),
         PRIMARY KEY (world_id, gm_id))`;

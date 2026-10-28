@@ -38,6 +38,7 @@ import { talkResults } from './world-talk-search.js';
 import { shareButton } from './world-share.js';
 import { suggestEditButton, editsSection, myEditsSection } from './world-edits.js';
 import { nameCheck } from './world-namecheck.js';
+import { pollsCard } from './world-polls.js';
 import { tableSection } from './world-tables.js';
 import { parseSearch, searchHash, searchEntries } from './search.js';
 import { saveTemplateButton, templatePicker } from './world-templates.js';
@@ -134,6 +135,7 @@ function viewHome() {
       worldCalendar() ? el('p', { class: 'today-line' }, el('a', { href: '#world/calendar' }, `📅 ${todayText()}`)) : null, isMember() ? nextSessionLine() : null),
     zeroNudge(),
     noticesCard(rerenderWorld),
+    pollsCard(),
     whatsNewCard(),
     startCard(rerenderWorld),
     info.about ? el('div', { class: 'card' }, richText(info.about)) : (isGm() ? el('p', { class: 'muted' }, 'The admin can name the world and write an introduction in the Admin page.') : null),

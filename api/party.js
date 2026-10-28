@@ -21,12 +21,19 @@
 //
 // PUT {favorite: entryId, on: bool}         star or unstar an entry for yourself (members); returns your favorites
 // GET ?members=1                            the world's members with their profiles (members)
+//
+// Quick polls (members): GET ?polls=1 open ones and the last few closed · POST {poll: {question, options}} ask one
+// PATCH {poll_id, vote: i | null} vote or take it back · PATCH {poll_id, closed} (asker or GM) · DELETE ?poll=id
 // PUT {profile: {pronouns, note}}           your own profile in this world
 import { route, send, fail, sql, requireMember, requireGm, postDiscord } from './_lib/core.js';
 import { cleanDates, cleanVote, tally, dateText } from '../js/schedule.js';
 import { cleanPrimer, cleanAnswer, answerEmpty } from '../js/zero.js';
+import { cleanPoll, castVote } from '../js/polls.js';
 
 const clip = (v, n) => String(v ?? '').slice(0, n);
+// A poll as the page sees it: who voted for what (by name), and what you chose.
+const pollOut = (p, names, req) => ({ id: p.id, question: p.question, options: p.options, closed: p.closed, created_at: p.created_at, asker: p.asker, mine: p.gm_id === req.gm.id,
+  votes: Object.fromEntries(Object.entries(p.votes || {}).map(([k, v]) => [k, Number(v)])), voters: Object.fromEntries(Object.keys(p.votes || {}).map((k) => [k, names[k] || 'Someone'])) });
 const cleanProfile = (p) => ({ pronouns: clip(p?.pronouns, 40).trim(), note: clip(p?.note, 600).trim() });
 
 const pollShape = (p) => ({ id: p.id, title: p.title, note: p.note, dates: p.dates, votes: p.votes, locked: p.locked, closed: p.closed, created_at: p.created_at, created_by: p.created_by });
@@ -130,6 +137,23 @@ export default route({
   },
   async PATCH(req, res) {
     if (req.body.schedule_id !== undefined) return patchSchedule(req, res);
+    if (req.body.poll_id !== undefined) {
+      if (!requireMember(req, res)) return;
+      const p = (await sql`SELECT * FROM table_polls WHERE id = ${Number(req.body.poll_id)} AND world_id = ${req.world.id} AND NOT deleted`)[0];
+      if (!p) return fail(res, 404, 'That poll is gone.');
+      if (typeof req.body.closed === 'boolean') {
+        if (p.gm_id !== req.gm.id && !req.isGmHere) return fail(res, 403, 'Only whoever asked, or a GM, can close it.');
+        await sql`UPDATE table_polls SET closed = ${req.body.closed} WHERE id = ${p.id}`;
+      } else {
+        if (p.closed) return fail(res, 400, 'That poll is closed.');
+        const r = castVote({}, String(req.gm.id), req.body.vote, p.options.length);
+        if (r.error) return fail(res, 400, r.error);
+        // One person's vote changes on its own, so two people voting at once don't overwrite each other.
+        if (req.body.vote === null) await sql`UPDATE table_polls SET votes = votes - ${String(req.gm.id)} WHERE id = ${p.id}`;
+        else await sql`UPDATE table_polls SET votes = votes || jsonb_build_object(${String(req.gm.id)}::text, ${Number(req.body.vote)}::int) WHERE id = ${p.id}`;
+      }
+      return send(res, 200, { ok: true });
+    }
     if (req.body.primer !== undefined) {
       if (!requireGm(req, res)) return;
       const p = { ...cleanPrimer(req.body.primer), updated_at: new Date().toISOString(), updated_by: req.gm.name };
@@ -141,6 +165,13 @@ export default route({
   async GET(req, res) {
     if (req.query?.schedule) return getSchedule(req, res);
     if (req.query?.zero) return getZero(req, res);
+    if (req.query?.polls) {
+      if (!requireMember(req, res)) return;
+      const rows = await sql`SELECT p.*, g.name AS asker FROM table_polls p LEFT JOIN gms g ON g.id = p.gm_id
+        WHERE p.world_id = ${req.world.id} AND NOT p.deleted ORDER BY p.closed, p.created_at DESC LIMIT 15`;
+      const names = Object.fromEntries((await sql`SELECT g.id, g.name FROM members m JOIN gms g ON g.id = m.gm_id WHERE m.world_id = ${req.world.id}`).map((m) => [m.id, m.name]));
+      return send(res, 200, { me: req.gm.id, polls: rows.map((p) => pollOut(p, names, req)) });
+    }
     if (req.query?.members) {
       if (!requireMember(req, res)) return;
       const rows = await sql`SELECT g.id, g.name, m.role, m.profile FROM members m JOIN gms g ON g.id = m.gm_id WHERE m.world_id = ${req.world.id} ORDER BY g.name`;
@@ -167,6 +198,14 @@ export default route({
         ON CONFLICT (world_id, gm_id) DO UPDATE SET read_at = COALESCE(zero_answers.read_at, now())`;
       return send(res, 200, { ok: true });
     }
+    if (b.poll) {
+      const c = cleanPoll(b.poll);
+      if (c.error) return fail(res, 400, c.error);
+      const open = (await sql`SELECT count(*)::int AS n FROM table_polls WHERE world_id = ${req.world.id} AND NOT closed AND NOT deleted`)[0].n;
+      if (open >= 10) return fail(res, 400, 'There are 10 open polls already. Close one first.');
+      const row = (await sql`INSERT INTO table_polls (world_id, gm_id, question, options) VALUES (${req.world.id}, ${req.gm.id}, ${c.question}, ${JSON.stringify(c.options)}::jsonb) RETURNING id`)[0];
+      return send(res, 201, { id: row.id });
+    }
     if (b.schedule) {
       if (!requireGm(req, res)) return;
       const dates = cleanDates(b.schedule.dates);
@@ -187,6 +226,13 @@ export default route({
   },
   async DELETE(req, res) {
     if (!requireMember(req, res)) return;
+    if (req.query?.poll) {
+      const p = (await sql`SELECT gm_id FROM table_polls WHERE id = ${Number(req.query.poll)} AND world_id = ${req.world.id} AND NOT deleted`)[0];
+      if (!p) return fail(res, 404, 'That poll is gone.');
+      if (p.gm_id !== req.gm.id && !req.isGmHere) return fail(res, 403, 'Only whoever asked, or a GM, can remove it.');
+      await sql`UPDATE table_polls SET deleted = true WHERE id = ${Number(req.query.poll)}`;
+      return send(res, 200, { ok: true });
+    }
     if (req.query?.schedule) {
       if (!requireGm(req, res)) return;
       const rows = await sql`UPDATE schedule_polls SET deleted = true WHERE id = ${Number(req.query.schedule)} AND world_id = ${req.world.id} RETURNING locked, dates`;
