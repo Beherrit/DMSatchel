@@ -1318,3 +1318,6 @@ div.poll-row { cursor: default }
 .pin.mark.shared .glyph { border-style: solid }
 .pin.party-mark .glyph { color: var(--brass); border: 2px solid var(--brass) }
 .mark-glyph.party { color: var(--brass) }
+.w-follows summary { cursor: pointer; list-style: revert }
+.follow-dot { color: var(--accent); font-weight: 700 }
+.btn.follow.on { font-weight: 700 }

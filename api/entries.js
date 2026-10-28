@@ -147,12 +147,12 @@ export default route({
     const w = req.world;
     const now = (await sql`SELECT now() AS now`)[0].now;
     // A new sitting (three hours since this member was last here) moves their "last visit" mark forward.
-    let prevVisit = null, favorites;
+    let prevVisit = null, favorites, following;
     if (req.gm && req.role && !bin) {
       const m = (await sql`UPDATE members SET prev_visit = CASE WHEN seen_at IS NULL OR seen_at < now() - interval '3 hours' THEN seen_at ELSE prev_visit END, seen_at = now()
-        WHERE world_id = ${w.id} AND gm_id = ${req.gm.id} RETURNING prev_visit, favorites`)[0];
+        WHERE world_id = ${w.id} AND gm_id = ${req.gm.id} RETURNING prev_visit, favorites, following`)[0];
       prevVisit = m ? m.prev_visit || null : undefined;
-      if (m) favorites = Array.isArray(m.favorites) ? m.favorites : [];
+      if (m) { favorites = Array.isArray(m.favorites) ? m.favorites : []; following = Array.isArray(m.following) ? m.following : []; }
     }
     // Has this member read the session zero page yet? (Only asked when there is one.)
     let zeroRead;
@@ -167,6 +167,7 @@ export default route({
         primer: w.primer && !primerEmpty(w.primer) ? { tone: cleanPrimer(w.primer).tone, updated_at: w.primer.updated_at || null } : null,
         ...(zeroRead !== undefined ? { zero_read: zeroRead } : {}),
         ...(favorites ? { favorites } : {}),
+        ...(following ? { following } : {}),
         // Where the party is (from session prep), when this person can see that place.
         party_at: partyAt(w, rows, req), clock: readClock(w.clock), tag_notes: w.tag_notes || {},
         // Start here: only what this person can see.

@@ -131,6 +131,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Start here**: GMs pick the entries newcomers should read first; they lead the front page and the session zero page.
 - **Session zero**: a primer every member reads (pitch, tone, house rules, safety tools, lines and veils); players tell the GMs privately what to keep out, optionally without their name.
 - **Your own fields**: GMs add extra fields to any kind of entry (shared or GM-only), shown on the form and the page.
+- **Follow an entry**: hear about changes others make to the entries you care about.
 - **Favorites**: star entries you keep going back to; they sit at the top of your world sidebar.
 - **Is that name taken?**: the entry form warns when the world already has an entry with that name, or a close one.
 - **Make a copy**: GMs duplicate any entry and edit the copy.

@@ -28,7 +28,7 @@ import { bulkControls } from './world-bulk.js';
 import { customFieldsButton } from './world-fields.js';
 import { goalsSection } from './world-goals.js';
 import { mentionsCard } from './world-mentions.js';
-import { starButton, favoritesNav } from './world-favorites.js';
+import { starButton, favoritesNav, followButton, followingNav } from './world-favorites.js';
 import { rewardCard } from './world-reward.js';
 import { appearances } from './appearances.js';
 import { withPronouns } from './world-profiles.js';
@@ -93,6 +93,7 @@ function renderSide() {
     el('a', { href: '#world', class: 'w-home' }, world.info?.name || 'The World'),
     search,
     favoritesNav(),
+    followingNav(session.gm?.name),
     isPlayer() ? el('div', { class: 'w-gm w-player' }, el('a', { class: 'btn primary small', href: '#world/new/character' }, '+ My character'), el('a', { class: 'btn small', href: '#world/new/journal' }, '+ Journal entry'),
       el('a', { class: 'btn ghost small', href: '#world/new/lore' }, 'Suggest an entry'), el('a', { class: 'btn ghost small', href: '#world/mine' }, 'My things'), el('a', { class: 'btn ghost small', href: '#world/export' }, 'Export')) : null,
     el('nav', { class: 'w-kinds w-tools', 'aria-label': 'World views' },
@@ -311,8 +312,8 @@ function viewEntry(id, tab) {
     crumbs.length ? el('nav', { class: 'crumbs', 'aria-label': 'Located in' }, crumbs.flatMap((c, i) => [i ? ' › ' : '', link(c)])) : null,
     el('div', { class: 'panel-head row' },
       el('div', {}, el('div', { class: 'eyebrow' }, kindLabel(e.kind), e.fields?.type ? ` · ${e.fields.type}` : ''), el('h2', {}, e.name), stateBadges(e).length ? el('div', { class: 'badges' }, stateBadges(e)) : null),
-      !isGm() ? el('div', { class: 'btnrow' }, starButton(e), e.can_edit ? el('a', { class: 'btn', href: `#world/edit/${e.id}` }, 'Edit') : null, suggestEditButton(e)) : null,
-      isGm() ? el('div', { class: 'btnrow' }, starButton(e), el('a', { class: 'btn', href: `#world/edit/${e.id}` }, 'Edit'),
+      !isGm() ? el('div', { class: 'btnrow' }, starButton(e), followButton(e), e.can_edit ? el('a', { class: 'btn', href: `#world/edit/${e.id}` }, 'Edit') : null, suggestEditButton(e)) : null,
+      isGm() ? el('div', { class: 'btnrow' }, starButton(e), followButton(e), el('a', { class: 'btn', href: `#world/edit/${e.id}` }, 'Edit'),
         showButton(e),
         revealButton(e, rerenderWorld),
         saveTemplateButton(e),
@@ -681,10 +682,13 @@ export function mountWorld(root) {
       if (all.some((c) => c.shown)) checkShown();
       if (all.some((c) => c.notice)) { drawNoticeBanner(); if (location.hash === '#world' || location.hash === '#world/') rerenderWorld(); }
       const changes = all.filter((c) => !c.shown && !c.notice);
+      // Something you follow changed: say so on its own, by name.
+      const followed = changes.filter((c) => c.change !== 'removed' && c.by && (world.info?.following || []).includes(c.entry.id));
+      if (followed.length) { toast(`🔔 ${followed.map((c) => c.entry.name).join(', ')} (you follow ${followed.length === 1 ? 'it' : 'them'}) changed by ${[...new Set(followed.map((c) => c.by))].join(', ')}`); renderSide(); }
       if (changes.length) {
         const people = [...new Set(changes.map((c) => c.by).filter(Boolean))];
         const one = changes.length === 1 && changes[0];
-        toast(one ? (one.calendar ? 'The calendar changed' : one.change === 'removed' ? `${one.entry.name} was removed or hidden` : `${one.by || 'Someone'} ${one.change === 'new' ? 'added' : 'edited'} ${one.entry.name}`)
+        if (!followed.length) toast(one ? (one.calendar ? 'The calendar changed' : one.change === 'removed' ? `${one.entry.name} was removed or hidden` : `${one.by || 'Someone'} ${one.change === 'new' ? 'added' : 'edited'} ${one.entry.name}`)
           : `${changes.length} changes${people.length ? ` from ${people.join(', ')}` : ''}`);
         // Don't redraw under someone who is typing; their form keeps its input and the new data shows next time.
         const typing = /^#world\/(new|edit)\//.test(location.hash) || main.contains(document.activeElement) && ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName);

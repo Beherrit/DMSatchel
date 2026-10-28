@@ -15,7 +15,7 @@ export function whatsNewCard() {
   const draw = (talk) => {
     const me = session.gm?.name;
     const mine = worldEntries().filter((e) => e.kind === 'character' && e.owner_id === session.gm?.id).map((e) => e.id);
-    const r = whatsNew({ entries: worldEntries(), since, me, myCharacterIds: mine, talk });
+    const r = whatsNew({ entries: worldEntries(), since, me, myCharacterIds: mine, talk, following: world.info?.following || [] });
     if (!r.total) { box.hidden = true; return; }
     box.hidden = false;
     const group = (title, list, line) => (list.length ? el('div', { class: 'wn-group' }, el('h4', {}, `${title} (${list.length})`),
@@ -25,6 +25,7 @@ export function whatsNewCard() {
       el('div', { class: 'entry-head' }, el('h3', {}, `Since your last visit (${when(since)})`),
         el('button', { class: 'btn small ghost', type: 'button', onclick: () => { try { sessionStorage.setItem(dismissKey(), since); } catch { /* ignore */ } box.remove(); } }, 'Got it')),
       el('div', { class: 'wn-grid' },
+        group('🔔 You follow', r.followed, entryLine),
         group('Session logs', r.sessions, entryLine),
         group('Handouts', r.handouts, entryLine),
         group('Downtime resolved', r.downtime, (e) => el('li', {}, link(e), e.fields?.outcome ? el('span', { class: 'muted small' }, ` ${String(e.fields.outcome).slice(0, 80)}${String(e.fields.outcome).length > 80 ? '…' : ''}`) : null)),

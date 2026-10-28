@@ -39,3 +39,12 @@ test('browser-side visits use the same three-hour sitting rule', () => {
   assert.equal(localVisit(store, 'k', t0 + 6 * h), new Date(t0 + h).toISOString(), 'new sitting: since the end of the last one');
   assert.equal(localVisit(store, 'k', t0 + 7 * h), new Date(t0 + h).toISOString(), 'stays put within the sitting');
 });
+
+test('what you follow comes first and is not repeated', () => {
+  const F = (id, kind, extra = {}) => ({ id, kind, name: id, status: 'live', created_at: '2026-01-01', updated_at: '2026-02-01', created_by: 'Bo', updated_by: 'Bo', ...extra });
+  const r = whatsNew({ entries: [F('q', 'quest'), F('n', 'npc'), F('m', 'npc', { updated_by: 'Pip' })], since: '2026-01-15', me: 'Pip', following: ['q', 'n', 'm'] });
+  assert.deepEqual(r.followed.map((e) => e.id).sort(), ['n', 'q']);
+  assert.equal(r.quests.length, 0);
+  assert.equal(r.changed.length, 0);
+  assert.equal(r.total, 2);
+});

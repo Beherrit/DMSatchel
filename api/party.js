@@ -20,6 +20,7 @@
 // POST {zero_read: true}                    you've read the page
 //
 // PUT {favorite: entryId, on: bool}         star or unstar an entry for yourself (members); returns your favorites
+// PUT {follow: entryId, on: bool}           follow or unfollow an entry (members); returns what you follow
 // GET ?members=1                            the world's members with their profiles (members)
 //
 // Quick polls (members): GET ?polls=1 open ones and the last few closed · POST {poll: {question, options}, discord?} ask one
@@ -124,6 +125,14 @@ export default route({
       const p = cleanProfile(req.body.profile);
       await sql`UPDATE members SET profile = ${JSON.stringify(p)}::jsonb WHERE world_id = ${req.world.id} AND gm_id = ${req.gm.id}`;
       return send(res, 200, { profile: p });
+    }
+    if (req.body.follow !== undefined) {
+      if (!requireMember(req, res)) return;
+      const id = clip(req.body.follow, 40);
+      const cur = (await sql`SELECT following FROM members WHERE world_id = ${req.world.id} AND gm_id = ${req.gm.id}`)[0];
+      const next = [...(Array.isArray(cur?.following) ? cur.following : []).filter((x) => x !== id), ...(req.body.on ? [id] : [])].slice(-200);
+      await sql`UPDATE members SET following = ${JSON.stringify(next)}::jsonb WHERE world_id = ${req.world.id} AND gm_id = ${req.gm.id}`;
+      return send(res, 200, { following: next });
     }
     if (req.body.favorite !== undefined) {
       if (!requireMember(req, res)) return;
