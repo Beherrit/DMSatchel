@@ -112,6 +112,15 @@ to the log at the bottom.
 41. [x] **Printable session sheet.** One page for the table from session prep: where the party is, local NPCs with
     roles and attitudes, jobs, rumors, today's weather and a rolled encounter, ready to print.
 
+42. [ ] **Attendance and XP.** Each session log records who came; XP or milestones add up per character, and the
+    party page shows who's due a level (and the Forge level-up is one click away).
+43. [ ] **Reveal a place and everything in it.** One GM action reveals a place with the people, rooms, items and
+    quests inside it (with a preview and a choice of what to include).
+44. [ ] **Items in inventories.** Lines in a character's inventory that name a world or library item link to it, and
+    magic items show what they do right on the sheet.
+45. [ ] **Quick journal note from anywhere.** Players can jot a journal note from any page (linked to the page they're
+    on) without leaving it.
+
 ## Ideas parking lot
 
 ## Log
