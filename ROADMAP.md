@@ -138,6 +138,15 @@ to the log at the bottom.
 53. [x] **Party bonds.** How the player characters are tied to each other (siblings, rivals, owes a debt…), set by
     players for their own characters, shown on the party page and character pages.
 
+54. [ ] **Phone pass.** Check every page added since the last phone review at phone width (no sideways scrolling,
+    tap targets, dialogs that fit), and fix what's off.
+55. [ ] **What needs writing.** A GM page that finds thin spots: entries with no summary, places with nobody in
+    them, NPCs with no voice or wants, quests with no objectives, hidden entries never revealed.
+56. [ ] **Sessions on the in-world calendar.** Session logs with an in-world date show on the calendar, so the
+    world's timeline and the table's history line up.
+57. [ ] **Faster first load.** Load the rarely used pages and tools only when they're opened, so the site starts
+    faster on phones.
+
 ## Ideas parking lot
 
 ## Log
