@@ -27,6 +27,7 @@ import { objectivesSection } from './world-objectives.js';
 import { whatsNewCard } from './world-whatsnew.js';
 import { viewSessionSheet } from './world-sheet.js';
 import { attendanceSection } from './world-attendance.js';
+import { revealButton } from './world-reveal.js';
 import { viewExport } from './world-export.js';
 import { viewClocks, clocksWidget } from './world-clocks.js';
 import { viewRumors } from './world-rumors.js';
@@ -221,6 +222,7 @@ function viewEntry(id, tab) {
       !isGm() && e.can_edit ? el('div', { class: 'btnrow' }, el('a', { class: 'btn', href: `#world/edit/${e.id}` }, 'Edit')) : null,
       isGm() ? el('div', { class: 'btnrow' }, el('a', { class: 'btn', href: `#world/edit/${e.id}` }, 'Edit'),
         showButton(e),
+        revealButton(e, rerenderWorld),
         world.info?.discord && e.visibility !== 'gm' && e.status !== 'suggested' ? confirmButton('Post to Discord', async () => {
           try { await api('settings', { method: 'POST', body: { post: e.id } }); toast(`Posted ${e.name} to Discord`); } catch (err) { toast(err.message, 'bad'); }
         }, 'btn ghost') : null,

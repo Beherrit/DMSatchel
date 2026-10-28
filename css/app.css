@@ -991,3 +991,8 @@ body.gated .mainnav, body.gated #toolnav, body.gated #panels, body.gated #notebo
 .adv-table { border-collapse: collapse; width: 100% }
 .adv-table th, .adv-table td { padding: 4px 8px; border-bottom: 1px solid var(--line); text-align: left }
 .due-tag { background: var(--good); color: #fff; text-decoration: none }
+
+/* Reveal with contents */
+.reveal-dialog { width: min(560px, calc(100vw - 32px)) }
+.reveal-groups { max-height: 55vh; overflow: auto; display: grid; gap: 6px }
+.reveal-groups h4 { margin: 6px 0 2px }

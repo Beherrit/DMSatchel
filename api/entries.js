@@ -190,6 +190,17 @@ export default route({
 
   async PATCH(req, res) {
     if (!requireMember(req, res)) return;
+    // Batch reveal or hide (GMs): {ids: [...], visibility}. Suggestions stay suggestions.
+    if (Array.isArray(req.body?.ids)) {
+      if (!requireGm(req, res)) return;
+      const vis = req.body.visibility === 'gm' ? 'gm' : 'all';
+      const ids = [...new Set(req.body.ids.map((x) => String(x).slice(0, 40)))].slice(0, 300);
+      const rows = await sql`UPDATE entries SET visibility = ${vis}, updated_by = ${req.gm.id}, updated_at = now(), version = version + 1
+        WHERE world_id = ${req.world.id} AND id = ANY(${ids}) AND NOT deleted AND visibility <> ${vis} RETURNING id`;
+      for (const r of rows) await record(r.id, req.gm.id, vis === 'all' ? 'reveal' : 'hide', null);
+      const changed = rows.length ? await Promise.all(rows.map((r) => loadOne(r.id, req.world.id))) : [];
+      return send(res, 200, { entries: changed.map((e) => shape(e, req)) });
+    }
     const { id, visibility, status } = req.body || {};
     const current = id && await loadOne(id, req.world.id);
     if (!current || current.deleted) return fail(res, 404, 'That entry doesn’t exist.');
