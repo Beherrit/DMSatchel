@@ -95,6 +95,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Quest objectives**: a checklist of steps per quest, some secret until revealed, with progress on the boards.
 - **Your own roll tables**: write random tables (weights, dice, choices, tables inside tables) and roll them in play.
 - **What needs writing**: a GM list of thin spots (undescribed entries, empty places, flat NPCs, quests with no steps).
+- **Spreadsheet import**: bring in a CSV of NPCs, items or places, say which column is which, and check a preview first.
 - **Entry templates**: save any entry as a template and start new ones from it.
 - **Quick notes**: jot a journal note from any page (button or the j key), linked to what you're looking at.
 - **Private notes**: everyone can keep their own notes on any page, seen by nobody else.

@@ -878,10 +878,11 @@ body.gated .mainnav, body.gated #toolnav, body.gated #panels, body.gated #notebo
 /* ---- import ---- */
 .import-sources { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 12px }
 .import-sources textarea { width: 100% }
-.import-sources input[type="file"] { max-width: 100% }
+.import-sources input[type="file"] { max-width: 100%; min-width: 0 }
+.import-sources .card { min-width: 0; grid-template-columns: minmax(0, 1fr) }
 .import-preview { display: grid; gap: 10px }
 .import-table td { vertical-align: top }
-.import-table tr.muted td { opacity: .6 }
+.import-table tr.muted td, .import-table tr.muted strong { color: var(--muted) }
 
 /* Next session */
 .sched-poll { margin-bottom: 16px }
@@ -1190,3 +1191,5 @@ li.picking:has(.bulk-pick:checked) { outline: 2px solid var(--accent, #2c6e63); 
 .nt-text { flex: 1 1 100%; margin: 0; white-space: pre-line }
 .nt-row { display: flex; flex-wrap: wrap; align-items: end; gap: 10px }
 .nt-new summary { cursor: pointer }
+#imp-csv-paste { display: block; max-width: 100%; margin: 8px 0 }
+.csv-table select { width: auto; max-width: 100% }

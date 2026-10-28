@@ -1,11 +1,12 @@
-// Import Markdown notes into the world (GMs): pick files, a whole folder (an Obsidian vault works), or paste a
-// document; check the preview; import. Entries are created in batches, then "located in" parents and connections
-// are matched by name. Route: #world/import
+// Import notes into the world (GMs): pick Markdown files, a whole folder (an Obsidian vault works), paste a document,
+// or bring a spreadsheet (CSV) and say which column is which; check the preview; import. Entries are created in
+// batches, then "located in" parents and connections are matched by name. Route: #world/import
 import { el, toast, setKids } from './dom.js';
 import { isGm } from './api.js';
-import { worldEntries, createEntries, patchEntry, findByName, getEntry, notice } from './world-store.js';
+import { worldEntries, createEntries, patchEntry, findByName, getEntry, notice, kindFields } from './world-store.js';
 import { KINDS, KIND_ORDER } from './world-schema.js';
 import { parseFile, parseDocument, checkDrafts } from './md-import.js';
+import { parseCSV, guessMapping, rowsToDrafts } from './csv.js';
 
 const MAX_FILES = 1000, MAX_BYTES = 400_000;
 let drafts = [];
@@ -33,6 +34,48 @@ export function viewImport(rerender) {
   const files = el('input', { type: 'file', id: 'imp-files', 'aria-label': 'Choose Markdown files', multiple: true, accept: '.md,.markdown,.txt,text/markdown,text/plain' });
   const folder = el('input', { type: 'file', id: 'imp-folder', 'aria-label': 'Choose a folder of notes', multiple: true, webkitdirectory: '', directory: '' });
   const paste = el('textarea', { id: 'imp-paste', 'aria-label': 'Paste Markdown', rows: 8, placeholder: '## Bog Hag\nLives in the fen. Mimics voices.\n\n## Brindle\nA muddy river town…' });
+
+  // A spreadsheet: pick which column is which, then preview like any other import.
+  const sheetFile = el('input', { type: 'file', id: 'imp-csv', 'aria-label': 'Choose a CSV file', accept: '.csv,.tsv,.txt,text/csv,text/tab-separated-values' });
+  const sheetPaste = el('textarea', { id: 'imp-csv-paste', 'aria-label': 'Paste spreadsheet rows', rows: 4, placeholder: 'Name,Role,Located in\nAnn,Smith,Brindle' });
+  const mapBox = el('div', { class: 'csv-map' });
+  let sheet = null; // { name, headers, rows, kind, mapping }
+  const BASIC = [['', 'Skip this column'], ['name', 'Name'], ['kind', 'Kind of entry'], ['summary', 'Summary'], ['body', 'Description'], ['tags', 'Tags'], ['parent', 'Located in'], ['secret', 'GM-only secret']];
+  const fieldsFor = (k) => kindFields(k).filter(([, , type]) => !['hidden', 'image'].includes(type));
+  const readSheet = (text, name) => {
+    const rows = parseCSV(text);
+    if (rows.length < 2) { status.textContent = 'That needs a header row and at least one row of entries.'; status.className = 'form-status error'; return; }
+    const headers = rows[0];
+    sheet = { name, headers, rows: rows.slice(1), kind: 'npc' };
+    sheet.mapping = guessMapping(headers, fieldsFor(sheet.kind));
+    status.textContent = `${sheet.rows.length} row${sheet.rows.length === 1 ? '' : 's'} and ${headers.length} columns. Say which column is which, then preview.`; status.className = 'form-status';
+    drawMap();
+  };
+  sheetFile.addEventListener('change', async () => { const f = sheetFile.files[0]; if (f) readSheet(await f.text(), f.name); });
+  function drawMap() {
+    if (!sheet) { setKids(mapBox); return; }
+    const kind = el('select', { id: 'csv-kind' }, KIND_ORDER.map((k) => el('option', { value: k }, KINDS[k].label)));
+    kind.value = sheet.kind;
+    kind.addEventListener('change', () => { sheet.kind = kind.value; sheet.mapping = guessMapping(sheet.headers, fieldsFor(sheet.kind)); drawMap(); });
+    const options = [...BASIC, ...fieldsFor(sheet.kind).map(([k, l]) => [`f:${k}`, `${KINDS[sheet.kind].label} field: ${l}`])];
+    const named = sheet.mapping.includes('name');
+    setKids(mapBox, el('section', { class: 'card' },
+      el('h3', {}, `Columns in ${sheet.name}`),
+      el('div', { class: 'field' }, el('label', { for: 'csv-kind' }, 'These rows are (unless a column says otherwise)'), kind),
+      el('div', { class: 'table-wrap' }, el('table', { class: 'import-table csv-table' },
+        el('thead', {}, el('tr', {}, ['Column', 'First row', 'Goes into'].map((h) => el('th', { scope: 'col' }, h)))),
+        el('tbody', {}, sheet.headers.map((h, i) => {
+          const sel = el('select', { 'aria-label': `Where “${h || `column ${i + 1}`}” goes` }, options.map(([v, t]) => el('option', { value: v }, t)));
+          sel.value = sheet.mapping[i] || '';
+          sel.addEventListener('change', () => { sheet.mapping[i] = sel.value; drawMap(); });
+          return el('tr', {}, el('th', { scope: 'row' }, h || `Column ${i + 1}`), el('td', { class: 'small muted' }, String(sheet.rows[0]?.[i] ?? '').slice(0, 80)), el('td', {}, sel));
+        })))),
+      named ? null : el('p', { class: 'form-status error' }, 'Pick the column with the names first.'),
+      el('button', { class: 'btn small', type: 'button', disabled: named ? null : true, onclick: () => {
+        drafts = checkDrafts(rowsToDrafts(sheet.rows, sheet.mapping, sheet.kind, sheet.name), worldEntries()).map((d) => ({ ...d, include: d.status === 'new' }));
+        status.textContent = `${drafts.length} entr${drafts.length === 1 ? 'y' : 'ies'} from the spreadsheet.`; status.className = 'form-status'; draw();
+      } }, 'Preview the entries')));
+  }
 
   const load = async (list) => {
     status.textContent = 'Reading…'; status.className = 'form-status';
@@ -109,7 +152,7 @@ export function viewImport(rerender) {
 
   return el('div', { class: 'w-view import-view' },
     el('div', { class: 'panel-head' }, el('h2', {}, 'Import notes'),
-      el('p', {}, 'Bring in Markdown notes: one file per entry (an Obsidian vault folder works, with front matter and [[links]]), or one document with a heading per entry, including this app’s own export. You’ll see a preview before anything is saved.')),
+      el('p', {}, 'Bring in a spreadsheet of entries, or Markdown notes: one file per entry (an Obsidian vault folder works, with front matter and [[links]]), or one document with a heading per entry, including this app’s own export. You’ll see a preview before anything is saved.')),
     el('div', { class: 'import-sources' },
       el('section', { class: 'card' }, el('h3', {}, 'Files'), el('p', { class: 'muted small' }, '.md or .txt; pick several at once. The folder a file sits in hints its kind (“NPCs”, “Towns”, “Bestiary”…).'), files),
       el('section', { class: 'card' }, el('h3', {}, 'A whole folder'), el('p', { class: 'muted small' }, 'Every Markdown file inside, including subfolders. Obsidian settings and trash are skipped.'), folder),
@@ -118,7 +161,9 @@ export function viewImport(rerender) {
           if (!paste.value.trim()) { paste.focus(); return; }
           drafts = checkDrafts(parseDocument(paste.value), worldEntries()).map((d) => ({ ...d, include: d.status === 'new' }));
           status.textContent = `${drafts.length} entr${drafts.length === 1 ? 'y' : 'ies'} found.`; status.className = 'form-status'; draw();
-        } }, 'Read it'))),
-    status, preview,
+        } }, 'Read it')),
+      el('section', { class: 'card' }, el('h3', {}, 'A spreadsheet'), el('p', { class: 'muted small' }, 'A CSV from Excel, Google Sheets or Numbers (File › Download › CSV), one entry per row with a header row. Or paste the rows.'), sheetFile, sheetPaste,
+        el('button', { class: 'btn small', type: 'button', onclick: () => { if (!sheetPaste.value.trim()) { sheetPaste.focus(); return; } readSheet(sheetPaste.value, 'the pasted rows'); } }, 'Read the rows'))),
+    status, mapBox, preview,
     el('p', { class: 'muted small' }, 'Kinds come from front matter (type: npc), the folder name, or the section heading; anything unclear becomes Lore, and you can change it in the preview. Entries already in the world are left alone.'));
 }
