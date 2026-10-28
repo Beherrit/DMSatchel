@@ -171,6 +171,14 @@ to the log at the bottom.
     place pinned, for players too; GMs can set it from the map.
 69. [x] **See it as a player.** A GM switch that shows the world the way players see it (no hidden entries, secrets,
     suggestions or GM-only fields) to check what's been revealed, with a banner and one click back.
+70. [ ] **Quest rewards to the treasury.** Marking a quest Completed offers to add its reward to the party treasury
+    (coin and items parsed from the reward text), logged against the quest and the current session.
+71. [ ] **Who shows up where.** NPC pages list the sessions they appeared in and when they were last seen; session
+    prep lists recurring NPCs tied to where the party is who haven't appeared for a while.
+72. [ ] **Light, dark or automatic.** A theme switch in the header (the styles already support both), remembered on
+    this device.
+73. [ ] **Member profiles.** Each member sets their pronouns and a short note for the table (availability, what
+    they enjoy); shown on the party page, member lists and session zero answers.
 
 ## Ideas parking lot
 
