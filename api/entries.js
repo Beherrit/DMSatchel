@@ -18,6 +18,7 @@ import { forPlayers } from '../js/objectives.js';
 import { goalsForOthers } from '../js/goals.js';
 import { cleanTag, chainUp } from '../js/bulk.js';
 import { cleanPrimer, primerEmpty } from '../js/zero.js';
+import { activeNotices } from '../js/notices.js';
 import { readCustom, customForPlayers, customKeys, secretCustomKeys, isCustomKey } from '../js/custom-fields.js';
 
 const clip = (v, n) => String(v ?? '').slice(0, n);
@@ -108,6 +109,7 @@ export default route({
       return send(res, 200, {
         changed: rows.filter((r) => !r.deleted && visibleTo(r, req)).map((r) => shape(r, req)),
         removed: rows.filter((r) => r.deleted || !visibleTo(r, req)).map((r) => r.id), now, cal: req.world.cal || null, shown: req.world.shown || null,
+        ...(req.role ? { notices: activeNotices(req.world.notices) } : {}),
       });
     }
     if (id) {
@@ -143,6 +145,7 @@ export default route({
         ...(favorites ? { favorites } : {}),
         // Where the party is (from session prep), when this person can see that place.
         party_at: partyAt(w, rows, req),
+        ...(req.role ? { notices: activeNotices(w.notices) } : {}),
         // Members' pronouns by person, to show beside their names.
         ...(req.role ? { pronouns: Object.fromEntries((await sql`SELECT gm_id, profile->>'pronouns' AS p FROM members WHERE world_id = ${w.id} AND profile->>'pronouns' <> ''`).map((r) => [r.gm_id, r.p])) } : {}),
         ...(req.isGmHere ? { templates: Array.isArray(w.templates) ? w.templates : [] } : {}) },

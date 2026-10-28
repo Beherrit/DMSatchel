@@ -179,7 +179,7 @@ to the log at the bottom.
     this device.
 73. [x] **Member profiles.** Each member sets their pronouns and a short note for the table (availability, what
     they enjoy); shown on the party page, member lists and session zero answers.
-74. [ ] **Notices from the GMs.** A GM posts a short notice ("No game this Friday", "Level up before next session") that
+74. [x] **Notices from the GMs.** A GM posts a short notice ("No game this Friday", "Level up before next session") that
     shows on the world's front page and as a banner for every member until they dismiss it or it expires.
 75. [ ] **Import from a spreadsheet.** GMs paste or upload a CSV (a list of NPCs, items, places) and map its columns to
     entry fields, with a preview before anything is created.
@@ -265,3 +265,4 @@ to the log at the bottom.
 - Who shows up where: NPC pages say "Last seen in Session N (k sessions ago) · in m sessions" under the heading (the existing "Appears in sessions" list stays at the foot). Session prep has "Who might turn up in <town>": people in the party's town (or wherever it is) met before but not in the last two sessions, longest absent first, then key people not met yet, each with their role and when they were last seen. Appearances come from session logs' [[links]] in any text or field, and the sessions' connections. js/appearances.js unit tested.
 - Light, dark or automatic: a ◐ / ☀ / ☾ button in the header cycles automatic (follows the device), light and dark; the choice is kept in this browser and applied by a tiny script in the page head before anything draws, so it never flashes the other theme. The browser bar colour follows. Checked with axe in dark mode and at phone width.
 - Member profiles: the party page has an "At the table" list of the world's members with their role, pronouns and a short note (when they can play, what they enjoy); each person edits their own row (pronouns with common choices suggested). Pronouns travel with the world load, so character pages read "Played by Pip (she/her)". Additive members.profile jsonb; GET ?members and PUT {profile} on the party API, tested against PGlite.
+- Notices from the GMs: a 📣 Notices card on the world front page. GMs post a notice (up to 500 characters, optionally "show until" a date) and take notices down; the newest ten are kept. Members see current notices on the front page, and the newest one they haven't dismissed as a banner over every world page ("Got it" dismisses it in that browser). New notices arrive with the 20-second live sync. Additive worlds.notices jsonb; settings PATCH {notice: add | remove}. js/notices.js unit tested; API tested against PGlite.

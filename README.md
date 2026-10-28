@@ -101,6 +101,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Attitudes**: how each NPC and power feels about each character, on both pages and in session prep.
 - **Quest rewards**: completing a quest offers to put its reward (coin and items read from the text) into the party treasury.
 - **Split the loot**: share the party treasury's coin between characters, by shares, straight onto their sheets.
+- **Notices**: GMs post short notices ("No game this Friday") on the front page, shown as a banner until dismissed or expired.
 - **Show to the table**: a GM pops a handout (or any entry) up on every player's screen.
 - **Next session**: propose a few dates, everyone answers yes / maybe / no, lock in the best one and post it to
   Discord. The date shows on the world's home page.

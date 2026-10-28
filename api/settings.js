@@ -2,6 +2,7 @@
 // PATCH {cal}  set the in-world calendar and today's date (any GM: days pass during play).
 // PUT {discord_webhook}  (owner) a Discord webhook link; it never leaves the server. Empty string removes it.
 // PATCH {prep: {location_id, notes}}   (GM) session prep: where the party is, and the GMs' scratch pad.
+// PATCH {notice: {add: {text, until}} | {remove: id}}   (GM) notices on the world's front page
 // PATCH {secret: {add} | {id, found, session} | {id, text} | {remove}}   (GM) secrets and clues in session prep
 // POST {post: entryId}   (GM) post an entry's summary and text to the world's Discord channel.
 // PATCH {template: {name, kind, summary, body, fields, tags, secret}}  (GM) save an entry template; {template_remove: id} delete one
@@ -12,6 +13,7 @@ import { cleanCalendar } from '../js/calendar.js';
 import { KINDS } from '../js/world-schema.js';
 import { readCustom, cleanCustomList, customKeys } from '../js/custom-fields.js';
 import { applySecret } from '../js/secrets.js';
+import { applyNotice } from '../js/notices.js';
 
 const WEBHOOK = /^https:\/\/(?:ptb\.|canary\.)?(?:discord|discordapp)\.com\/api\/webhooks\/\d+\/[\w-]+$/;
 const plain = (t) => String(t || '').replace(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g, (_, n, l) => l || n);
@@ -111,6 +113,13 @@ export default route({
       return send(res, 200, { shown, revealed: e.visibility === 'gm' });
     }
     // Secrets and clues in session prep, one change at a time: {secret: {add} | {id, found, session} | {id, text} | {remove}}.
+    // Notices from the GMs: {notice: {add: {text, until}} | {remove: id}}.
+    if (req.body.notice) {
+      const r = applyNotice(req.world.notices, req.body.notice, req.gm.name);
+      if (r.error) return fail(res, 400, r.error);
+      await sql`UPDATE worlds SET notices = ${JSON.stringify(r.list)}::jsonb WHERE id = ${req.world.id}`;
+      return send(res, 200, { notices: r.list });
+    }
     if (req.body.secret) {
       const r = applySecret(req.world.prep?.secrets, req.body.secret, req.gm.name);
       if (r.error) return fail(res, 400, r.error);

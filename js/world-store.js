@@ -137,6 +137,10 @@ export async function syncWorld(me) {
     world.info = { ...world.info, shown: r.shown };
     out.push({ entry: { name: 'the table' }, change: 'shown', by: r.shown?.by || null, shown: true });
   }
+  if (r.notices !== undefined && stable(r.notices) !== stable(world.info?.notices ?? [])) {
+    world.info = { ...world.info, notices: r.notices };
+    out.push({ entry: { name: 'the notices' }, change: 'notice', by: r.notices[0]?.by || null, notice: true });
+  }
   if (r.cal !== undefined && stable(r.cal) !== stable(world.info?.cal ?? null)) {
     world.info = { ...world.info, cal: r.cal };
     out.push({ entry: { name: 'the calendar' }, change: 'edit', by: null, calendar: true });

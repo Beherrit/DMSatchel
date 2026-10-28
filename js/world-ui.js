@@ -32,6 +32,7 @@ import { starButton, favoritesNav } from './world-favorites.js';
 import { rewardCard } from './world-reward.js';
 import { appearances } from './appearances.js';
 import { withPronouns } from './world-profiles.js';
+import { noticesCard, drawNoticeBanner } from './world-notices.js';
 import { tableSection } from './world-tables.js';
 import { parseSearch, searchHash, searchEntries } from './search.js';
 import { saveTemplateButton, templatePicker } from './world-templates.js';
@@ -126,6 +127,7 @@ function viewHome() {
     el('div', { class: 'panel-head' }, el('h2', {}, info.name || 'The World'), info.tagline ? el('p', {}, info.tagline) : null,
       worldCalendar() ? el('p', { class: 'today-line' }, el('a', { href: '#world/calendar' }, `📅 ${todayText()}`)) : null, isMember() ? nextSessionLine() : null),
     zeroNudge(),
+    noticesCard(rerenderWorld),
     whatsNewCard(),
     startCard(rerenderWorld),
     info.about ? el('div', { class: 'card' }, richText(info.about)) : (isGm() ? el('p', { class: 'muted' }, 'The admin can name the world and write an introduction in the Admin page.') : null),
@@ -592,6 +594,7 @@ export async function showWorld(parts, { keepScroll = false } = {}) {
   else node = viewHome();
   const y = window.scrollY;
   setKids(main, node);
+  drawNoticeBanner();
   for (const a of side.querySelectorAll('.w-kinds a')) a.classList.toggle('active', Boolean((view === 'k' && a.dataset.kind === arg) || (view === 'e' && world.entries.get(arg)?.kind === a.dataset.kind) || (a.dataset.view && (a.dataset.view === view || (a.dataset.view === 'maps' && view === 'map')))));
   window.scrollTo({ top: keepScroll ? y : 0 });
 }
@@ -639,7 +642,8 @@ export function mountWorld(root) {
     try {
       const all = await syncWorld(session.gm?.name);
       if (all.some((c) => c.shown)) checkShown();
-      const changes = all.filter((c) => !c.shown);
+      if (all.some((c) => c.notice)) { drawNoticeBanner(); if (location.hash === '#world' || location.hash === '#world/') rerenderWorld(); }
+      const changes = all.filter((c) => !c.shown && !c.notice);
       if (changes.length) {
         const people = [...new Set(changes.map((c) => c.by).filter(Boolean))];
         const one = changes.length === 1 && changes[0];
