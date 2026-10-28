@@ -108,6 +108,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Fog of war**: paint over the parts of a map the party hasn't explored; players see only what's revealed.
 - **Members-only site**: one switch makes every page and tool need a personal code or invite link.
 - **Hidden entries**: GMs can keep any entry hidden from players while they prep, then reveal it in one click.
+- **Spotlight**: session prep shows which characters the recent session logs name least, with their goals as hooks.
 - **Character goals**: players write short and long-term goals (some kept from the party); GMs see them in session prep.
 - **Secrets and clues**: a running list in session prep of things the party could find out; tick them off as they come out.
 - **Session zero**: a primer every member reads (pitch, tone, house rules, safety tools, lines and veils); players tell the GMs privately what to keep out, optionally without their name.

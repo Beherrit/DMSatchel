@@ -1135,3 +1135,6 @@ li.picking:has(.bulk-pick:checked) { outline: 2px solid var(--accent, #2c6e63); 
 .goal-state { width: auto }
 .goal-add { display: flex; flex-wrap: wrap; gap: 6px; align-items: center }
 .goal-add input[type=text] { flex: 1 1 14rem; min-width: 0 }
+.spotlight-list li { padding: 6px 0; border-bottom: 1px dashed var(--line) }
+.spotlight-list li:last-child { border-bottom: 0 }
+.due-tag { margin-left: 6px; background: var(--accent); color: var(--accent-ink) }

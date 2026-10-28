@@ -1,5 +1,5 @@
 // Session prep (GMs): everything for the next session on one page. Last time, where the party is and what's there,
-// secrets and clues, quests in play, clocks about to finish, what's coming on the calendar, the party's state, loose threads, and a
+// secrets and clues, quests in play, who's due some spotlight, clocks about to finish, what's coming on the calendar, the party's state, loose threads, and a
 // scratch pad the GMs share. Route: #world/prep
 import { el, toast, setKids } from './dom.js';
 import { recapButton } from './world-recap.js';
@@ -16,6 +16,7 @@ import { rollEncounter, rollWeather, seasonOf } from './encounters.js';
 import { vitals } from './sheet-ui.js';
 import { secretsCard } from './world-secrets.js';
 import { readGoals, activeGoals } from './goals.js';
+import { spotlight } from './spotlight.js';
 
 const ACTIVE_PC = (e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
 const card = (title, ...kids) => el('section', { class: 'card prep-card' }, el('h3', {}, title), ...kids);
@@ -136,6 +137,25 @@ function partySection() {
     el('a', { class: 'small', href: '#world/party' }, 'Party page and treasury'));
 }
 
+// Who's had the least attention in the last few session logs, with what they want, so every player gets a turn.
+const RECENT = 4;
+function spotlightSection() {
+  const rows = spotlight(worldEntries(), RECENT);
+  if (!rows.length || !sessions().length) return null;
+  const plain = (t) => t.replace(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g, (_, a, b) => b || a);
+  return card('Spotlight',
+    el('p', { class: 'muted small' }, `Who the last ${Math.min(RECENT, sessions().length)} session logs name least, out of the sessions each character was at. Sessions they missed don’t count.`),
+    el('ul', { class: 'plain prep-list spotlight-list' }, rows.map((r) => {
+      const due = r.attended > 0 && r.share < 0.5;
+      const wants = activeGoals(readGoals(r.character)).slice(0, 2);
+      return el('li', { class: due ? 'due' : '' },
+        el('div', {}, link(r.character), due ? el('span', { class: 'tag due-tag' }, 'due a turn') : null),
+        el('div', { class: 'muted small' }, r.attended ? `Named in ${r.featured} of ${r.attended} session${r.attended === 1 ? '' : 's'} they played` : 'Missed the last few sessions',
+          r.last ? ` · last in session ${r.last}` : ' · not named in a log yet'),
+        wants.length ? el('div', { class: 'small' }, el('strong', {}, 'Hooks: '), wants.map((g) => plain(g.text)).join(' · ')) : null);
+    })));
+}
+
 function threadsSection(gmThreads, table) {
   const suggestions = worldEntries().filter((e) => e.status === 'suggested');
   const since = sessions()[0]?.created_at || '';
@@ -187,5 +207,5 @@ export async function viewPrep(rerender) {
       el('a', { class: 'btn small', href: '#world/calendar' }, 'Move time on')),
     el('div', { class: 'prep-columns' },
       el('div', { class: 'prep-main' }, lastTime(), whereSection(prep, rerender), secretsCard(prep, next), questsSection(), scratchPad(prep)),
-      el('div', { class: 'prep-side' }, partySection(), clocksSection(), calendarSection(), threadsSection(gmThreads, table))));
+      el('div', { class: 'prep-side' }, partySection(), spotlightSection(), clocksSection(), calendarSection(), threadsSection(gmThreads, table))));
 }
