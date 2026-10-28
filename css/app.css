@@ -1066,3 +1066,18 @@ body.gated .mainnav, body.gated #toolnav, body.gated #panels, body.gated #notebo
 .link-pop { position: fixed; z-index: 60; margin: 0; padding: 4px; list-style: none; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 8px 24px rgb(0 0 0 / .18); max-height: 260px; overflow: auto }
 .link-pop li { padding: 6px 8px; border-radius: 6px; cursor: pointer; display: flex; justify-content: space-between; gap: 8px }
 .link-pop li.active { background: var(--sunk) }
+
+/* Bulk actions */
+.bulk-bar { position: sticky; bottom: 8px; z-index: 20; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 12px; padding: 8px 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 6px 20px rgb(0 0 0 / .15) }
+.bulk-bar[hidden] { display: none }
+.bulk-group { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; padding-left: 8px; border-left: 1px solid var(--line) }
+.bulk-group select, .bulk-group input { width: auto; max-width: 12rem }
+.bulk-count { font-weight: 600; min-width: 8.5em }
+li.picking { position: relative }
+.bulk-box { position: absolute; top: 6px; right: 6px; z-index: 2; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 6px; background: var(--surface); border: 1px solid var(--line); cursor: pointer }
+.bulk-box input { width: 18px; height: 18px; margin: 0; accent-color: var(--accent) }
+li.picking:has(.bulk-pick:checked) { outline: 2px solid var(--accent, #2c6e63); outline-offset: 1px }
+@media (max-width: 640px) {
+  .bulk-group { border-left: 0; padding-left: 0 }
+  .bulk-bar { bottom: 64px } /* clear of the quick-note button */
+}

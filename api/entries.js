@@ -7,13 +7,15 @@
 // POST {entries:[...], mode:'batch'}   up to 25 at once (GM) · mode:'import' restores a backup (owner)
 // PUT ?id= {entry}  update; send the version you loaded or get 409. Players may edit only their own entries.
 // PATCH {id, visibility?, status?}     GM quick changes: reveal or hide, approve a suggestion
+// PATCH {ids, visibility | add_tag | remove_tag | move_to}   the same for many entries at once (GM)
 // PATCH {id, claim: true} · {id, owner: null}   claim an unowned character (member) · unassign it (GM)
 // DELETE ?id=       move to the bin (GM, or a player's own entry) · DELETE ?id=&restore=1 brings it back (GM)
 //
 // Players never receive: GM-only entries, other people's pending suggestions, secrets, or GM-only links.
 import { route, send, fail, sql, newId, requireGm, requireMember, requireOwner } from './_lib/core.js';
-import { KINDS, isKind, LIMITS, PLAYER_KINDS, isImageRef, gmOnlyFields } from '../js/world-schema.js';
+import { KINDS, isKind, LIMITS, PLAYER_KINDS, PLACE_KINDS, isImageRef, gmOnlyFields } from '../js/world-schema.js';
 import { forPlayers } from '../js/objectives.js';
+import { cleanTag, chainUp } from '../js/bulk.js';
 
 const clip = (v, n) => String(v ?? '').slice(0, n);
 
@@ -57,6 +59,9 @@ async function loadOne(id, worldId) {
     WHERE e.id = ${id} AND e.world_id = ${worldId}`;
   return rows[0];
 }
+
+// What the history keeps for a version (the same shape an edit saves).
+const snapshot = (r) => ({ kind: r.kind, name: r.name, summary: r.summary, body: r.body, fields: r.fields, secret: r.secret, tags: r.tags, links: r.links, parent_id: r.parent_id, visibility: r.visibility });
 
 async function record(entryId, gmId, action, snapshot) {
   await sql`INSERT INTO history (entry_id, gm_id, action, snapshot) VALUES (${entryId}, ${gmId}, ${action}, ${JSON.stringify(snapshot)})`;
@@ -191,11 +196,42 @@ export default route({
 
   async PATCH(req, res) {
     if (!requireMember(req, res)) return;
-    // Batch reveal or hide (GMs): {ids: [...], visibility}. Suggestions stay suggestions.
+    // Bulk changes (GMs): {ids: [...]} with one of visibility ('all' | 'gm'), add_tag, remove_tag, or move_to (a place's
+    // id, or null to take them out of any place). Suggestions stay suggestions.
     if (Array.isArray(req.body?.ids)) {
       if (!requireGm(req, res)) return;
-      const vis = req.body.visibility === 'gm' ? 'gm' : 'all';
       const ids = [...new Set(req.body.ids.map((x) => String(x).slice(0, 40)))].slice(0, 300);
+      const b = req.body;
+      if ('add_tag' in b || 'remove_tag' in b || 'move_to' in b) {
+        let rows;
+        if ('move_to' in b) {
+          const to = b.move_to ? String(b.move_to).slice(0, 40) : null;
+          let chain = new Set();
+          if (to) {
+            const place = await loadOne(to, req.world.id);
+            if (!place || place.deleted || !PLACE_KINDS.includes(place.kind)) return fail(res, 400, 'Pick a region, area, settlement or location to move them into.');
+            const all = await sql`SELECT id, parent_id FROM entries WHERE world_id = ${req.world.id}`;
+            const up = new Map(all.map((r) => [r.id, r.parent_id]));
+            chain = chainUp((id) => up.get(id) || null, to);
+          }
+          const can = ids.filter((id) => !chain.has(id));
+          rows = can.length ? await sql`UPDATE entries SET parent_id = ${to}, updated_by = ${req.gm.id}, updated_at = now(), version = version + 1
+            WHERE world_id = ${req.world.id} AND id = ANY(${can}) AND NOT deleted AND parent_id IS DISTINCT FROM ${to} RETURNING id` : [];
+        } else if ('add_tag' in b) {
+          const tag = cleanTag(b.add_tag);
+          if (!tag) return fail(res, 400, 'Type a tag.');
+          rows = await sql`UPDATE entries SET tags = array_append(tags, ${tag}), updated_by = ${req.gm.id}, updated_at = now(), version = version + 1
+            WHERE world_id = ${req.world.id} AND id = ANY(${ids}) AND NOT deleted AND NOT (${tag} = ANY(tags)) AND cardinality(tags) < ${LIMITS.tags} RETURNING id`;
+        } else {
+          const tag = cleanTag(b.remove_tag);
+          rows = await sql`UPDATE entries SET tags = array_remove(tags, ${tag}), updated_by = ${req.gm.id}, updated_at = now(), version = version + 1
+            WHERE world_id = ${req.world.id} AND id = ANY(${ids}) AND NOT deleted AND ${tag} = ANY(tags) RETURNING id`;
+        }
+        const changed = rows.length ? await Promise.all(rows.map((r) => loadOne(r.id, req.world.id))) : [];
+        for (const e of changed) await record(e.id, req.gm.id, 'edit', snapshot(e));
+        return send(res, 200, { entries: changed.map((e) => shape(e, req)), skipped: ids.length - changed.length });
+      }
+      const vis = b.visibility === 'gm' ? 'gm' : 'all';
       const rows = await sql`UPDATE entries SET visibility = ${vis}, updated_by = ${req.gm.id}, updated_at = now(), version = version + 1
         WHERE world_id = ${req.world.id} AND id = ANY(${ids}) AND NOT deleted AND visibility <> ${vis} RETURNING id`;
       for (const r of rows) await record(r.id, req.gm.id, vis === 'all' ? 'reveal' : 'hide', null);

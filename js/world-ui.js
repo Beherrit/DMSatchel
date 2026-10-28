@@ -24,6 +24,7 @@ import { attendanceSection } from './world-attendance.js';
 import { revealButton } from './world-reveal.js';
 import { quickNoteButton } from './world-quicknote.js';
 import { initLinkSuggest } from './link-suggest.js';
+import { bulkControls } from './world-bulk.js';
 import { tableSection } from './world-tables.js';
 import { parseSearch, searchHash, searchEntries } from './search.js';
 import { saveTemplateButton, templatePicker } from './world-templates.js';
@@ -123,7 +124,7 @@ function viewHome() {
 }
 
 function entryCard(e) {
-  return el('li', { class: `entry-card${e.visibility === 'gm' ? ' is-hidden' : ''}${e.status === 'suggested' ? ' is-suggested' : ''}` }, thumb(e), el('div', { class: 'card-title' }, link(e), stateBadges(e)), e.summary ? el('p', {}, e.summary.length > 180 ? `${e.summary.slice(0, 178)}…` : e.summary) : null,
+  return el('li', { 'data-id': e.id, class: `entry-card${e.visibility === 'gm' ? ' is-hidden' : ''}${e.status === 'suggested' ? ' is-suggested' : ''}` }, thumb(e), el('div', { class: 'card-title' }, link(e), stateBadges(e)), e.summary ? el('p', {}, e.summary.length > 180 ? `${e.summary.slice(0, 178)}…` : e.summary) : null,
     e.tags?.length ? el('div', { class: 'tags' }, e.tags.map((t) => el('a', { class: 'tagchip', href: `#world/q/${encodeURIComponent(`#${t}`)}` }, `#${t}`))) : null);
 }
 
@@ -141,21 +142,24 @@ function viewKind(kind) {
   }
   else if (kind === 'session') list.sort((a, b) => (parseFloat(b.fields.number) || 0) - (parseFloat(a.fields.number) || 0) || String(b.fields.played_on || b.created_at).localeCompare(String(a.fields.played_on || a.created_at)));
   else list.sort(byName);
+  const listNode = list.length ? (kind === 'session' ? sessionList(list) : kind === 'event'
+      ? el('ol', { class: 'timeline' }, list.map((e) => (e.kind === 'session'
+        ? el('li', { class: 'tl-session', 'data-id': e.id }, el('span', { class: 'date' }, e.fields.world_date), el('div', {}, el('span', { class: 'tag' }, 'Played'), ' ', link(e), e.fields.played_on ? el('span', { class: 'muted small' }, ` at the table ${e.fields.played_on}`) : null, e.summary ? el('p', {}, e.summary) : null))
+        : el('li', { 'data-id': e.id }, el('span', { class: 'date' }, e.fields.date || e.fields.sort || '—'), el('div', {}, link(e), e.summary ? el('p', {}, e.summary) : null)))))
+      : el('ul', { class: 'entry-grid' }, list.map(entryCard))) : null;
+  const bulk = listNode ? bulkControls(list, listNode) : {};
   return el('div', { class: 'w-view' },
     el('div', { class: 'panel-head row' }, el('div', {}, el('h2', {}, KINDS[kind].plural), el('p', {}, KINDS[kind].blurb)),
-      kind === 'session' && isGm() ? el('div', { class: 'btnrow' }, recapButton('btn'), el('a', { class: 'btn primary', href: '#world/new/session' }, 'New session'))
-        : isGm() || (isMember() && PLAYER_KINDS.includes(kind)) ? el('a', { class: 'btn primary', href: `#world/new/${kind}` }, `New ${lower(kindLabel(kind))}`)
-        : isMember() ? el('a', { class: 'btn', href: `#world/new/${kind}` }, `Suggest a ${lower(kindLabel(kind))}`) : null),
-    list.length ? (kind === 'session' ? sessionList(list) : kind === 'event'
-      ? el('ol', { class: 'timeline' }, list.map((e) => (e.kind === 'session'
-        ? el('li', { class: 'tl-session' }, el('span', { class: 'date' }, e.fields.world_date), el('div', {}, el('span', { class: 'tag' }, 'Played'), ' ', link(e), e.fields.played_on ? el('span', { class: 'muted small' }, ` at the table ${e.fields.played_on}`) : null, e.summary ? el('p', {}, e.summary) : null))
-        : el('li', {}, el('span', { class: 'date' }, e.fields.date || e.fields.sort || '—'), el('div', {}, link(e), e.summary ? el('p', {}, e.summary) : null)))))
-      : el('ul', { class: 'entry-grid' }, list.map(entryCard)))
+      el('div', { class: 'btnrow' }, bulk.button,
+        kind === 'session' && isGm() ? [recapButton('btn'), el('a', { class: 'btn primary', href: '#world/new/session' }, 'New session')]
+          : isGm() || (isMember() && PLAYER_KINDS.includes(kind)) ? el('a', { class: 'btn primary', href: `#world/new/${kind}` }, `New ${lower(kindLabel(kind))}`)
+          : isMember() ? el('a', { class: 'btn', href: `#world/new/${kind}` }, `Suggest a ${lower(kindLabel(kind))}`) : null)),
+    listNode ? [listNode, bulk.bar]
       : notice(`No ${KINDS[kind].plural.replace(/^(?!NPC)\w+/, (w) => w.toLowerCase())} yet`, isGm() ? 'Add the first one.' : PLAYER_KINDS.includes(kind) && isMember() ? 'Add the first one.' : 'The GMs haven’t added any yet.'));
 }
 
 function sessionList(list) {
-  return el('ol', { class: 'session-list' }, list.map((e) => el('li', { class: 'card' },
+  return el('ol', { class: 'session-list' }, list.map((e) => el('li', { class: 'card', 'data-id': e.id },
     el('div', { class: 'entry-head' }, el('span', { class: 'eyebrow' }, [e.fields.number && `Session ${e.fields.number}`, e.fields.played_on, e.fields.world_date].filter(Boolean).join(' · ') || 'Session'),
       e.fields.gm ? el('span', { class: 'muted small' }, `GM ${e.fields.gm}`) : null),
     link(e), e.summary ? el('p', {}, e.summary) : null,
@@ -182,7 +186,9 @@ function viewSearch(raw) {
   const filtered = f.kind || f.tag || f.inside || f.state;
   const tagOnly = /^#\S+$/.test(f.q.trim()) ? f.q.trim().slice(1) : !f.q && f.tag && !f.kind && !f.inside && !f.state ? f.tag : null;
   const title = tagOnly ? `Tagged #${tagOnly}` : f.q ? `Search: “${f.q}”` : 'Search the world';
-  return el('div', { class: 'w-view' }, el('div', { class: 'panel-head' }, el('h2', {}, title), el('p', {}, `${hits.length} result${hits.length === 1 ? '' : 's'}${place ? ` in ${place.name}` : ''}`)),
+  const grid = hits.length && (f.q || filtered) ? el('ul', { class: 'entry-grid' }, hits.slice(0, 200).map((e) => { const c = entryCard(e); c.prepend(el('span', { class: 'kind-tag' }, kindLabel(e.kind))); return c; })) : null;
+  const bulk = grid ? bulkControls(hits.slice(0, 200), grid) : {};
+  return el('div', { class: 'w-view' }, el('div', { class: 'panel-head row' }, el('div', {}, el('h2', {}, title), el('p', {}, `${hits.length} result${hits.length === 1 ? '' : 's'}${place ? ` in ${place.name}` : ''}`)), bulk.button),
     el('div', { class: 'controls search-filters' }, q, el('button', { class: 'btn small', type: 'button', onclick: () => go({ q: q.value.trim() }) }, 'Search'),
       sel('sf-kind', 'Kind', f.kind, [['', 'Any kind'], ...kinds.map((k) => [k, KINDS[k].plural])], 'kind'),
       tags.length ? sel('sf-tag', 'Tag', f.tag, [['', 'Any tag'], ...tags.map((t) => [t, `#${t}`])], 'tag') : null,
@@ -190,7 +196,7 @@ function viewSearch(raw) {
       gm ? sel('sf-state', 'Show', f.state, [['', 'Everything'], ['hidden', 'Hidden from players'], ['suggested', 'Suggestions']], 'state') : null,
       filtered ? el('button', { class: 'btn small ghost', type: 'button', onclick: () => go({ kind: '', tag: '', inside: '', state: '' }) }, 'Clear filters') : null),
     !f.q && !filtered ? el('p', { class: 'muted' }, 'Type some words, or pick a kind, tag or place to list what’s there.')
-      : hits.length ? el('ul', { class: 'entry-grid' }, hits.slice(0, 200).map((e) => { const c = entryCard(e); c.prepend(el('span', { class: 'kind-tag' }, kindLabel(e.kind))); return c; }))
+      : grid ? [grid, bulk.bar]
         : notice('No matches', 'Try fewer words, or clear a filter.'),
     hits.length > 200 ? el('p', { class: 'muted' }, `Showing the first 200 of ${hits.length}. Add another word or a filter to narrow it down.`) : null);
 }
