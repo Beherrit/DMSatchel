@@ -1052,3 +1052,8 @@ body.gated .mainnav, body.gated #toolnav, body.gated #panels, body.gated #notebo
   input[type=range] { min-height: 32px }
 }
 .w-main { padding-bottom: 64px } /* room for the floating Note button */
+
+/* What needs writing */
+.todo-group { margin-bottom: 12px }
+.todo-list li { display: flex; flex-wrap: wrap; gap: 6px; align-items: baseline; margin: 3px 0 }
+.todo-list .btn { margin-left: auto }

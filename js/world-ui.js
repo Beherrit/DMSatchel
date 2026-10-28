@@ -36,6 +36,7 @@ import { fillHistory } from './world-history.js';
 import { viewCards, cardsButton } from './world-cards.js';
 import { encounterCard } from './encounter-ui.js';
 import { bondsSection } from './world-bonds.js';
+import { viewTodo } from './world-todo.js';
 import { viewExport } from './world-export.js';
 import { viewClocks, clocksWidget } from './world-clocks.js';
 import { viewRumors } from './world-rumors.js';
@@ -85,7 +86,7 @@ function renderSide() {
       isGm() ? el('a', { href: '#world/talk', 'data-view': 'talk' }, el('span', {}, 'GM discussions'), el('span', { class: 'count', id: 'w-talk-count' }, '')) : null),
     el('nav', { class: 'w-kinds', 'aria-label': 'Entry types' }, KIND_ORDER.map((k) => el('a', { href: `#world/k/${k}`, 'data-kind': k }, el('span', {}, KINDS[k].plural), el('span', { class: 'count' }, counts[k] || 0)))),
     isGm() ? el('div', { class: 'w-gm' }, el('a', { class: 'btn primary small', href: '#world/prep' }, 'Session prep'), el('a', { class: 'btn small', href: '#world/new/npc' }, '+ New entry'), el('a', { class: 'btn ghost small', href: '#world/bin' }, 'Bin'),
-      el('a', { class: 'btn ghost small', href: '#world/export' }, 'Export & print'), el('a', { class: 'btn ghost small', href: '#world/import' }, 'Import notes'),
+      el('a', { class: 'btn ghost small', href: '#world/export' }, 'Export & print'), el('a', { class: 'btn ghost small', href: '#world/import' }, 'Import notes'), el('a', { class: 'btn ghost small', href: '#world/todo' }, 'What needs writing'),
       suggested ? el('a', { class: 'btn small suggest-btn', href: '#world/suggestions' }, `Suggestions (${suggested})`) : null) : null,
     !isMember() && signedIn() ? el('p', { class: 'muted small w-visitor' }, 'You’re browsing as a visitor. Ask the owner for an invite to add things.') : null,
   );
@@ -534,6 +535,7 @@ export async function showWorld(parts, { keepScroll = false } = {}) {
   else if (view === 'table') node = await viewTable();
   else if (view === 'prep') node = await viewPrep(rerenderWorld);
   else if (view === 'sheet') node = await viewSessionSheet();
+  else if (view === 'todo') node = viewTodo();
   else if (view === 'cards') node = await viewCards(arg);
   else if (view === 'powers') node = viewPowers(rerenderWorld);
   else if (view === 'library') node = viewLibrary(arg, rerenderWorld);
