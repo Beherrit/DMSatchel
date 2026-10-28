@@ -1220,3 +1220,9 @@ li.picking:has(.bulk-pick:checked) { outline: 2px solid var(--accent, #2c6e63); 
 /* Handouts for one player */
 .shared-tag { background: var(--accent); color: var(--accent-ink) }
 .share-list li { padding: 4px 0 }
+
+/* Suggested edits */
+.edit-list { display: grid; gap: 10px; margin: 8px 0 }
+.edit-list .diff-list { margin: 6px 0 }
+.se-dialog { width: min(760px, calc(100vw - 24px)) }
+.edit-accepted { background: var(--accent); color: var(--accent-ink) }

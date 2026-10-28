@@ -115,6 +115,12 @@ export function ensureSchema() {
       await sql`ALTER TABLE worlds ADD COLUMN IF NOT EXISTS notices jsonb`;
       // Hidden entries given to chosen members (ids): they can see it, nobody else but the GMs can.
       await sql`ALTER TABLE entries ADD COLUMN IF NOT EXISTS shared_with jsonb`;
+      // Edits players suggest to entries they can't edit themselves, waiting for a GM: { summary?, body?, fields? }.
+      await sql`CREATE TABLE IF NOT EXISTS edit_suggestions (
+        id serial PRIMARY KEY, world_id text NOT NULL, entry_id text NOT NULL, gm_id int NOT NULL, base_version int,
+        proposal jsonb NOT NULL, note text NOT NULL DEFAULT '', status text NOT NULL DEFAULT 'open',
+        created_at timestamptz NOT NULL DEFAULT now(), decided_by int, decided_at timestamptz)`;
+      await sql`CREATE INDEX IF NOT EXISTS edit_suggestions_idx ON edit_suggestions (world_id, status)`;
       await sql`CREATE TABLE IF NOT EXISTS zero_answers (
         world_id text NOT NULL, gm_id int NOT NULL, answer jsonb, read_at timestamptz, updated_at timestamptz NOT NULL DEFAULT now(),
         PRIMARY KEY (world_id, gm_id))`;

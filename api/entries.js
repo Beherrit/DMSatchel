@@ -8,6 +8,9 @@
 // PUT ?id= {entry}  update; send the version you loaded or get 409. Players may edit only their own entries.
 // PATCH {id, visibility?, status?}     GM quick changes: reveal or hide, approve a suggestion
 // PATCH {ids, visibility | add_tag | remove_tag | move_to}   the same for many entries at once (GM)
+// POST {suggest_edit: {entry_id, summary, body, fields, note}}   (member) suggest changes to an entry you can see
+// GET ?edits=1                          suggested edits: every open one (GMs) or your own (players)
+// PATCH {edit_id, decision: 'accept' | 'decline'}   (GM) apply a suggested edit, or turn it down
 // PATCH {id, share: [member ids]}     (GM) give a hidden entry to chosen members only ([] takes it back)
 // PATCH {id, claim: true} · {id, owner: null}   claim an unowned character (member) · unassign it (GM)
 // DELETE ?id=       move to the bin (GM, or a player's own entry) · DELETE ?id=&restore=1 brings it back (GM)
@@ -19,6 +22,8 @@ import { forPlayers } from '../js/objectives.js';
 import { goalsForOthers } from '../js/goals.js';
 import { cleanGallery } from '../js/gallery.js';
 import { cleanShare, sharedWith } from '../js/sharing.js';
+import { cleanProposal, applyProposal } from '../js/edit-suggest.js';
+import { fieldsWith } from '../js/custom-fields.js';
 import { cleanTag, chainUp } from '../js/bulk.js';
 import { cleanPrimer, primerEmpty } from '../js/zero.js';
 import { activeNotices } from '../js/notices.js';
@@ -105,6 +110,13 @@ async function insert(e, req, { owner = null, status = 'live', id = newId() } = 
 export default route({
   async GET(req, res) {
     const { id, bin, since } = req.query || {};
+    if (req.query?.edits) {
+      if (!requireMember(req, res)) return;
+      const rows = req.isGmHere
+        ? await sql`SELECT s.*, g.name AS by FROM edit_suggestions s LEFT JOIN gms g ON g.id = s.gm_id WHERE s.world_id = ${req.world.id} AND s.status = 'open' ORDER BY s.created_at`
+        : await sql`SELECT s.*, g.name AS by FROM edit_suggestions s LEFT JOIN gms g ON g.id = s.gm_id WHERE s.world_id = ${req.world.id} AND s.gm_id = ${req.gm.id} ORDER BY s.created_at DESC LIMIT 30`;
+      return send(res, 200, { edits: rows.map((s) => ({ id: s.id, entry_id: s.entry_id, by: s.by, base_version: s.base_version, proposal: s.proposal, note: s.note, status: s.status, created_at: s.created_at, decided_at: s.decided_at })) });
+    }
     if (since) {
       const t = new Date(since);
       if (Number.isNaN(t.getTime())) return fail(res, 400, 'Bad time.');
@@ -153,6 +165,7 @@ export default route({
         // Where the party is (from session prep), when this person can see that place.
         party_at: partyAt(w, rows, req),
         ...(req.role ? { notices: activeNotices(w.notices) } : {}),
+        ...(req.isGmHere ? { edits_open: (await sql`SELECT count(*)::int AS n FROM edit_suggestions WHERE world_id = ${w.id} AND status = 'open'`)[0].n } : {}),
         // Members' pronouns by person, to show beside their names.
         ...(req.role ? { pronouns: Object.fromEntries((await sql`SELECT gm_id, profile->>'pronouns' AS p FROM members WHERE world_id = ${w.id} AND profile->>'pronouns' <> ''`).map((r) => [r.gm_id, r.p])) } : {}),
         ...(req.isGmHere ? { templates: Array.isArray(w.templates) ? w.templates : [] } : {}) },
@@ -162,6 +175,18 @@ export default route({
 
   async POST(req, res) {
     if (!requireMember(req, res)) return;
+    if (req.body.suggest_edit) {
+      const b = req.body.suggest_edit;
+      const cur = await loadOne(String(b.entry_id || '').slice(0, 40), req.world.id);
+      if (!cur || cur.deleted || !visibleTo(cur, req) || cur.status !== 'live') return fail(res, 404, 'That entry doesn’t exist.');
+      const proposal = cleanProposal(cur, b, fieldsWith(cur.kind, customOf(req)));
+      if (!Object.keys(proposal).length) return fail(res, 400, 'Nothing changed: edit something first.');
+      const open = (await sql`SELECT count(*)::int AS n FROM edit_suggestions WHERE world_id = ${req.world.id} AND gm_id = ${req.gm.id} AND status = 'open'`)[0].n;
+      if (open >= 30) return fail(res, 400, 'You have 30 suggestions waiting already. Give the GMs a moment.');
+      const row = (await sql`INSERT INTO edit_suggestions (world_id, entry_id, gm_id, base_version, proposal, note)
+        VALUES (${req.world.id}, ${cur.id}, ${req.gm.id}, ${cur.version}, ${JSON.stringify(proposal)}::jsonb, ${clip(b.note, 1000).trim()}) RETURNING id`)[0];
+      return send(res, 201, { edit: { id: row.id, entry_id: cur.id, proposal, status: 'open' } });
+    }
     if (req.body.mode === 'import') {
       if (!requireOwner(req, res)) return;
       const list = Array.isArray(req.body.entries) ? req.body.entries.slice(0, 5000) : [];
@@ -240,6 +265,24 @@ export default route({
 
   async PATCH(req, res) {
     if (!requireMember(req, res)) return;
+    if (req.body.edit_id !== undefined) {
+      if (!requireGm(req, res)) return;
+      const s = (await sql`SELECT * FROM edit_suggestions WHERE id = ${Number(req.body.edit_id)} AND world_id = ${req.world.id}`)[0];
+      if (!s || s.status !== 'open') return fail(res, 404, 'That suggestion was already handled.');
+      if (req.body.decision === 'accept') {
+        const cur = await loadOne(s.entry_id, req.world.id);
+        if (!cur || cur.deleted) return fail(res, 404, 'That entry was deleted.');
+        const next = applyProposal(cur, s.proposal);
+        await sql`UPDATE entries SET summary = ${next.summary}, body = ${next.body}, fields = ${JSON.stringify(next.fields)}, updated_by = ${req.gm.id}, updated_at = now(), version = version + 1
+          WHERE id = ${cur.id} AND world_id = ${req.world.id}`;
+        const after = await loadOne(cur.id, req.world.id);
+        await record(cur.id, req.gm.id, 'edit', snapshot(after));
+        await sql`UPDATE edit_suggestions SET status = 'accepted', decided_by = ${req.gm.id}, decided_at = now() WHERE id = ${s.id}`;
+        return send(res, 200, { entry: shape(after, req), status: 'accepted' });
+      }
+      await sql`UPDATE edit_suggestions SET status = 'declined', decided_by = ${req.gm.id}, decided_at = now() WHERE id = ${s.id}`;
+      return send(res, 200, { status: 'declined' });
+    }
     // Bulk changes (GMs): {ids: [...]} with one of visibility ('all' | 'gm'), add_tag, remove_tag, or move_to (a place's
     // id, or null to take them out of any place). Suggestions stay suggestions.
     if (Array.isArray(req.body?.ids)) {

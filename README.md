@@ -104,6 +104,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Quest rewards**: completing a quest offers to put its reward (coin and items read from the text) into the party treasury.
 - **Split the loot**: share the party treasury's coin between characters, by shares, straight onto their sheets.
 - **Notices**: GMs post short notices ("No game this Friday") on the front page, shown as a banner until dismissed or expired.
+- **Suggest an edit**: players propose changes to entries they can't edit; GMs see the difference and accept or decline.
 - **Handouts for one player**: GMs give a hidden handout (or any entry) to chosen players only.
 - **Show to the table**: a GM pops a handout (or any entry) up on every player's screen.
 - **Next session**: propose a few dates, everyone answers yes / maybe / no, lock in the best one and post it to

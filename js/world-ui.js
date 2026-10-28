@@ -36,6 +36,7 @@ import { noticesCard, drawNoticeBanner } from './world-notices.js';
 import { gallerySection } from './world-gallery.js';
 import { talkResults } from './world-talk-search.js';
 import { shareButton } from './world-share.js';
+import { suggestEditButton, editsSection, myEditsSection } from './world-edits.js';
 import { tableSection } from './world-tables.js';
 import { parseSearch, searchHash, searchEntries } from './search.js';
 import { saveTemplateButton, templatePicker } from './world-templates.js';
@@ -106,7 +107,7 @@ function renderSide() {
     el('nav', { class: 'w-kinds', 'aria-label': 'Entry types' }, KIND_ORDER.map((k) => el('a', { href: `#world/k/${k}`, 'data-kind': k }, el('span', {}, KINDS[k].plural), el('span', { class: 'count' }, counts[k] || 0)))),
     isGm() ? el('div', { class: 'w-gm' }, el('a', { class: 'btn primary small', href: '#world/prep' }, 'Session prep'), el('a', { class: 'btn small', href: '#world/new/npc' }, '+ New entry'), el('a', { class: 'btn ghost small', href: '#world/bin' }, 'Bin'),
       el('a', { class: 'btn ghost small', href: '#world/export' }, 'Export & print'), el('a', { class: 'btn ghost small', href: '#world/import' }, 'Import notes'), el('a', { class: 'btn ghost small', href: '#world/todo' }, 'What needs writing'), el('button', { class: 'btn ghost small', type: 'button', title: 'Check what players can see (this tab only)', onclick: () => setPreview(true) }, '👁 See it as a player'),
-      suggested ? el('a', { class: 'btn small suggest-btn', href: '#world/suggestions' }, `Suggestions (${suggested})`) : null) : null,
+      suggested + (world.info?.edits_open || 0) ? el('a', { class: 'btn small suggest-btn', href: '#world/suggestions' }, `Suggestions (${suggested + (world.info?.edits_open || 0)})`) : null) : null,
     !isMember() && signedIn() ? el('p', { class: 'muted small w-visitor' }, 'You’re browsing as a visitor. Ask the owner for an invite to add things.') : null,
   );
 }
@@ -298,7 +299,7 @@ function viewEntry(id, tab) {
     crumbs.length ? el('nav', { class: 'crumbs', 'aria-label': 'Located in' }, crumbs.flatMap((c, i) => [i ? ' › ' : '', link(c)])) : null,
     el('div', { class: 'panel-head row' },
       el('div', {}, el('div', { class: 'eyebrow' }, kindLabel(e.kind), e.fields?.type ? ` · ${e.fields.type}` : ''), el('h2', {}, e.name), stateBadges(e).length ? el('div', { class: 'badges' }, stateBadges(e)) : null),
-      !isGm() ? el('div', { class: 'btnrow' }, starButton(e), e.can_edit ? el('a', { class: 'btn', href: `#world/edit/${e.id}` }, 'Edit') : null) : null,
+      !isGm() ? el('div', { class: 'btnrow' }, starButton(e), e.can_edit ? el('a', { class: 'btn', href: `#world/edit/${e.id}` }, 'Edit') : null, suggestEditButton(e)) : null,
       isGm() ? el('div', { class: 'btnrow' }, starButton(e), el('a', { class: 'btn', href: `#world/edit/${e.id}` }, 'Edit'),
         showButton(e),
         revealButton(e, rerenderWorld),
@@ -342,7 +343,8 @@ function viewSuggestions() {
       el('span', { class: 'actions' },
         el('button', { class: 'btn small primary', type: 'button', onclick: async () => { try { await setEntryState(e, { status: 'live' }); toast(`Approved ${e.name}`); rerenderWorld(); } catch (err) { toast(err.message, 'bad'); } } }, 'Approve'),
         confirmButton('Reject', async () => { try { await api('entries', { method: 'DELETE', query: { id: e.id } }); world.entries.delete(e.id); toast('Rejected'); rerenderWorld(); } catch (err) { toast(err.message, 'bad'); } }, 'btn small ghost')))))
-      : notice('Nothing waiting', 'When a player suggests an NPC, a place or a rumor, it shows up here.'));
+      : (world.info?.edits_open ? null : notice('Nothing waiting', 'When a player suggests an NPC, a place, a rumor or an edit to an entry, it shows up here.')),
+    editsSection(rerenderWorld));
 }
 
 function viewMine() {
@@ -354,6 +356,7 @@ function viewMine() {
       group('Suggestions', list.filter((e) => !PLAYER_KINDS.includes(e.kind)))]
       : notice('Nothing yet', 'Add your character, keep a journal, or suggest something the GMs might add to the world.',
         isMember() ? el('div', { class: 'btnrow' }, el('a', { class: 'btn primary', href: '#world/new/character' }, '+ My character'), el('a', { class: 'btn', href: '#world/new/journal' }, '+ Journal entry')) : null),
+    myEditsSection(),
     isMember() ? myNotesSection() : null);
 }
 
