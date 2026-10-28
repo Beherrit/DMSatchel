@@ -98,6 +98,9 @@ export function ensureSchema() {
       await sql`ALTER TABLE maps ADD COLUMN IF NOT EXISTS fog jsonb`;
       // The entry a GM is showing to the table right now: { entry_id, at, by }.
       await sql`ALTER TABLE worlds ADD COLUMN IF NOT EXISTS shown jsonb`;
+      // "What's new since you were last here": when each member last used the world, and when their previous sitting ended.
+      await sql`ALTER TABLE members ADD COLUMN IF NOT EXISTS seen_at timestamptz`;
+      await sql`ALTER TABLE members ADD COLUMN IF NOT EXISTS prev_visit timestamptz`;
       await sql`INSERT INTO members (world_id, gm_id, role) SELECT 'default', id, CASE WHEN role = 'admin' THEN 'owner' ELSE 'gm' END FROM gms
         WHERE NOT EXISTS (SELECT 1 FROM members m WHERE m.world_id = 'default') ON CONFLICT DO NOTHING`;
     })().catch((e) => { schemaReady = null; throw e; });

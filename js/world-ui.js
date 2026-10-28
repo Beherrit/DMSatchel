@@ -24,6 +24,7 @@ import { showButton, checkShown } from './world-show.js';
 import { attitudesOfCharacter, attitudesToward } from './world-attitudes.js';
 import { noteBox, myNotesSection } from './world-notes.js';
 import { objectivesSection } from './world-objectives.js';
+import { whatsNewCard } from './world-whatsnew.js';
 import { viewExport } from './world-export.js';
 import { viewClocks, clocksWidget } from './world-clocks.js';
 import { viewRumors } from './world-rumors.js';
@@ -89,6 +90,7 @@ function viewHome() {
   return el('div', { class: 'w-view' },
     el('div', { class: 'panel-head' }, el('h2', {}, info.name || 'The World'), info.tagline ? el('p', {}, info.tagline) : null,
       worldCalendar() ? el('p', { class: 'today-line' }, el('a', { href: '#world/calendar' }, `📅 ${todayText()}`)) : null, isMember() ? nextSessionLine() : null),
+    whatsNewCard(),
     startCard(rerenderWorld),
     info.about ? el('div', { class: 'card' }, richText(info.about)) : (isGm() ? el('p', { class: 'muted' }, 'The admin can name the world and write an introduction in the Admin page.') : null),
     all.length ? null : notice('This world is empty', isGm() ? 'Start with a region or a city, then fill it with factions and people. Anything from the table tools can be sent here with “Add to world”.' : 'The GMs haven’t added anything yet.',

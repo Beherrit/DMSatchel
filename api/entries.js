@@ -80,6 +80,7 @@ export default route({
         LEFT JOIN gms c ON c.id = e.created_by LEFT JOIN gms u ON u.id = e.updated_by LEFT JOIN gms o ON o.id = e.owner_id
         WHERE e.world_id = ${req.world.id} AND e.updated_at >= ${t.toISOString()} ORDER BY e.updated_at LIMIT 500`;
       const now = (await sql`SELECT now() AS now`)[0].now;
+      if (req.gm && req.role) await sql`UPDATE members SET seen_at = now() WHERE world_id = ${req.world.id} AND gm_id = ${req.gm.id} AND (seen_at IS NULL OR seen_at < now() - interval '5 minutes')`;
       return send(res, 200, {
         changed: rows.filter((r) => !r.deleted && visibleTo(r, req)).map((r) => shape(r, req)),
         removed: rows.filter((r) => r.deleted || !visibleTo(r, req)).map((r) => r.id), now, cal: req.world.cal || null, shown: req.world.shown || null,
@@ -95,10 +96,19 @@ export default route({
       : await sql`SELECT e.*, c.name AS created_by_name, u.name AS updated_by_name, o.name AS owner_name FROM entries e LEFT JOIN gms c ON c.id = e.created_by LEFT JOIN gms u ON u.id = e.updated_by LEFT JOIN gms o ON o.id = e.owner_id WHERE e.world_id = ${req.world.id} AND NOT e.deleted ORDER BY e.name`;
     const w = req.world;
     const now = (await sql`SELECT now() AS now`)[0].now;
+    // A new sitting (three hours since this member was last here) moves their "last visit" mark forward.
+    let prevVisit = null;
+    if (req.gm && req.role && !bin) {
+      const m = (await sql`UPDATE members SET prev_visit = CASE WHEN seen_at IS NULL OR seen_at < now() - interval '3 hours' THEN seen_at ELSE prev_visit END, seen_at = now()
+        WHERE world_id = ${w.id} AND gm_id = ${req.gm.id} RETURNING prev_visit`)[0];
+      prevVisit = m ? m.prev_visit || null : undefined;
+    }
     send(res, 200, {
       now,
       entries: rows.filter((r) => visibleTo(r, req)).map((r) => shape(r, req)),
-      world: { id: w.id, slug: w.slug, name: w.name, tagline: w.tagline, about: w.about, calendar: w.calendar, public: w.public, cal: w.cal || null, discord: Boolean(w.discord_webhook), next_session: w.next_session || null, shown: w.shown || null },
+      world: { id: w.id, slug: w.slug, name: w.name, tagline: w.tagline, about: w.about, calendar: w.calendar, public: w.public, cal: w.cal || null, discord: Boolean(w.discord_webhook), next_session: w.next_session || null, shown: w.shown || null,
+        // null: first visit; missing: not a member row (the client remembers visits itself).
+        ...(prevVisit !== undefined ? { prev_visit: prevVisit } : {}) },
       role: req.role,
     });
   },

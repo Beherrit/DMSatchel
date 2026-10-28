@@ -5,6 +5,7 @@ import { KINDS } from './world-schema.js';
 import { setLibraryItems } from './magic-items.js';
 import { libraryItems, librarySpecies, librarySubclasses, libraryClasses, librarySpells, libraryBackgrounds, libraryFeats } from './library.js';
 import { setCharacterLibrary } from './character.js';
+import { visitSince } from './whatsnew.js';
 import { CLASSES, BACKGROUNDS } from './rules2024.js';
 
 // A Map that drops the lookup index whenever an entry is added, changed or removed.
@@ -35,7 +36,7 @@ export async function loadWorld(force) {
     try {
       const [r, s, m] = await Promise.all([api('entries'), api('standings').catch(() => null), api('maps').catch(() => null)]);
       world.entries = new Entries(r.entries.map((e) => [e.id, e]));
-      world.info = r.world; world.role = r.role || null; world.syncedAt = r.now || null; world.standings = s; world.maps = m?.maps || [];
+      world.info = r.world; world.role = r.role || null; world.visitSince = visitSince(r.world); world.syncedAt = r.now || null; world.standings = s; world.maps = m?.maps || [];
       world.loaded = true; world.error = null;
     } catch (e) { world.error = e; }
     world.loading = null;

@@ -956,3 +956,9 @@ body.gated .mainnav, body.gated #toolnav, body.gated #panels, body.gated #notebo
 .obj-tick { color: var(--good); width: 1em }
 .obj-add { margin-top: 8px }
 .obj-add input[type=text] { flex: 1; min-width: 12em }
+
+/* Since your last visit */
+.whats-new { border-left: 3px solid var(--brass) }
+.wn-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr)); gap: 4px 20px }
+.wn-group h4 { margin: 8px 0 4px }
+.wn-group li { margin: 2px 0 }
