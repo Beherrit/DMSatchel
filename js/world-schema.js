@@ -70,7 +70,9 @@ export const KINDS = {
   },
   session: {
     label: 'Session', plural: 'Session Log', blurb: 'What happened at the table, who ran it and who played.',
-    fields: [['number', 'Session number'], ['played_on', 'Played on (real date)'], ['world_date', 'In-world date'], ['gm', 'GM'], ['players', 'Players & characters', 'long'], ['xp', 'XP or milestone'], ['loot', 'Loot handed out', 'long'], ['next', 'Next time', 'long']],
+    fields: [['number', 'Session number'], ['played_on', 'Played on (real date)'], ['world_date', 'In-world date'], ['gm', 'GM'], ['players', 'Players & characters', 'long'], ['xp', 'XP or milestone'], ['loot', 'Loot handed out', 'long'], ['next', 'Next time', 'long'],
+      // Who came, XP each and whether it was a milestone (see advancement.js); GMs set it on the session page.
+      ['attendance', 'Attendance', 'hidden', null, { gmOnly: true }]],
   },
   journal: {
     label: 'Journal', plural: 'Journals & Notes', blurb: 'Diaries, session notes, letters and theories, by players and GMs.',

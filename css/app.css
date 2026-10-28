@@ -984,3 +984,10 @@ body.gated .mainnav, body.gated #toolnav, body.gated #panels, body.gated #notebo
   .ss-block { border-top-color: #000 }
   .ss-enc .card, .ss-enc .btnrow { border: 0; padding: 0 }
 }
+
+/* Attendance and advancement */
+.attend-list li { display: flex; gap: 10px; align-items: center; margin: 4px 0 }
+.attend-list label { min-width: 10em }
+.adv-table { border-collapse: collapse; width: 100% }
+.adv-table th, .adv-table td { padding: 4px 8px; border-bottom: 1px solid var(--line); text-align: left }
+.due-tag { background: var(--good); color: #fff; text-decoration: none }
