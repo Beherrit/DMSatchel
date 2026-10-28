@@ -39,6 +39,7 @@ import { shareButton } from './world-share.js';
 import { suggestEditButton, editsSection, myEditsSection } from './world-edits.js';
 import { nameCheck } from './world-namecheck.js';
 import { pollsCard } from './world-polls.js';
+import { clockCard } from './world-clock.js';
 import { tableSection } from './world-tables.js';
 import { parseSearch, searchHash, searchEntries } from './search.js';
 import { saveTemplateButton, templatePicker } from './world-templates.js';
@@ -134,8 +135,8 @@ function viewHome() {
     el('div', { class: 'panel-head' }, el('h2', {}, info.name || 'The World'), info.tagline ? el('p', {}, info.tagline) : null,
       worldCalendar() ? el('p', { class: 'today-line' }, el('a', { href: '#world/calendar' }, `📅 ${todayText()}`)) : null, isMember() ? nextSessionLine() : null),
     zeroNudge(),
-    noticesCard(rerenderWorld),
-    pollsCard(),
+    // The table's things side by side: notices, quick polls, time and light.
+    el('div', { class: 'home-table' }, noticesCard(rerenderWorld), pollsCard(), clockCard()),
     whatsNewCard(),
     startCard(rerenderWorld),
     info.about ? el('div', { class: 'card' }, richText(info.about)) : (isGm() ? el('p', { class: 'muted' }, 'The admin can name the world and write an introduction in the Admin page.') : null),

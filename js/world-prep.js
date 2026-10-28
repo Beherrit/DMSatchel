@@ -17,6 +17,7 @@ import { vitals } from './sheet-ui.js';
 import { secretsCard } from './world-secrets.js';
 import { readGoals, activeGoals } from './goals.js';
 import { spotlight } from './spotlight.js';
+import { clockCard } from './world-clock.js';
 import { appearances, dueBack } from './appearances.js';
 
 const ACTIVE_PC = (e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
@@ -223,5 +224,5 @@ export async function viewPrep(rerender) {
       el('a', { class: 'btn small', href: '#world/calendar' }, 'Move time on')),
     el('div', { class: 'prep-columns' },
       el('div', { class: 'prep-main' }, lastTime(), whereSection(prep, rerender), secretsCard(prep, next), turnUpSection(prep), questsSection(), scratchPad(prep)),
-      el('div', { class: 'prep-side' }, partySection(), spotlightSection(), clocksSection(), calendarSection(), threadsSection(gmThreads, table))));
+      el('div', { class: 'prep-side' }, clockCard(), partySection(), spotlightSection(), clocksSection(), calendarSection(), threadsSection(gmThreads, table))));
 }

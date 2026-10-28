@@ -2,6 +2,7 @@
 // PATCH {cal}  set the in-world calendar and today's date (any GM: days pass during play).
 // PUT {discord_webhook}  (owner) a Discord webhook link; it never leaves the server. Empty string removes it.
 // PATCH {prep: {location_id, notes}}   (GM) session prep: where the party is, and the GMs' scratch pad.
+// PATCH {clock: {advance} | {set} | {add_light} | {remove_light}}   (GM) time of day and lights during play
 // PATCH {notice: {add: {text, until}} | {remove: id}}   (GM) notices on the world's front page
 // PATCH {secret: {add} | {id, found, session} | {id, text} | {remove}}   (GM) secrets and clues in session prep
 // POST {post: entryId}   (GM) post an entry's summary and text to the world's Discord channel.
@@ -9,11 +10,12 @@
 // PATCH {show: entryId | null}  (GM) show an entry to everyone with the world open (revealing it if hidden), or stop.
 // PATCH {custom_fields: {kind, list}}  (GM) the world's own fields for one kind of entry (an empty list removes them)
 import { route, send, fail, sql, requireOwner, requireGm, postDiscord } from './_lib/core.js';
-import { cleanCalendar } from '../js/calendar.js';
+import { cleanCalendar, advance } from '../js/calendar.js';
 import { KINDS } from '../js/world-schema.js';
 import { readCustom, cleanCustomList, customKeys } from '../js/custom-fields.js';
 import { applySecret } from '../js/secrets.js';
 import { applyNotice } from '../js/notices.js';
+import { readClock, advanceClock, setTime, addLight, removeLight } from '../js/clock.js';
 
 const WEBHOOK = /^https:\/\/(?:ptb\.|canary\.)?(?:discord|discordapp)\.com\/api\/webhooks\/\d+\/[\w-]+$/;
 const plain = (t) => String(t || '').replace(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g, (_, n, l) => l || n);
@@ -113,6 +115,19 @@ export default route({
       return send(res, 200, { shown, revealed: e.visibility === 'gm' });
     }
     // Secrets and clues in session prep, one change at a time: {secret: {add} | {id, found, session} | {id, text} | {remove}}.
+    // The time of day and the lights (any GM, during play): {clock: {advance: minutes} | {set: minutes} |
+    // {add_light: {name, minutes}} | {remove_light: id}}. Passing midnight moves the calendar on.
+    if (req.body.clock) {
+      const c = req.body.clock;
+      let clock = readClock(req.world.clock), cal = req.world.cal || null, out = [], days = 0;
+      if (c.advance !== undefined) ({ clock, days, out } = advanceClock(clock, c.advance));
+      else if (c.set !== undefined) clock = setTime(clock, c.set);
+      else if (c.add_light) { const r = addLight(clock, c.add_light.name, c.add_light.minutes); if (r.error) return fail(res, 400, r.error); clock = r.clock; }
+      else if (c.remove_light) clock = removeLight(clock, String(c.remove_light));
+      if (days && cal) { cal = advance(cal, days); await sql`UPDATE worlds SET cal = ${JSON.stringify(cal)} WHERE id = ${req.world.id}`; }
+      await sql`UPDATE worlds SET clock = ${JSON.stringify(clock)}::jsonb WHERE id = ${req.world.id}`;
+      return send(res, 200, { clock, cal, days, out });
+    }
     // Notices from the GMs: {notice: {add: {text, until}} | {remove: id}}.
     if (req.body.notice) {
       const r = applyNotice(req.world.notices, req.body.notice, req.gm.name);

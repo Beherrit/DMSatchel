@@ -31,6 +31,7 @@ import { fieldsWith } from '../js/custom-fields.js';
 import { cleanTag, chainUp } from '../js/bulk.js';
 import { cleanPrimer, primerEmpty } from '../js/zero.js';
 import { activeNotices } from '../js/notices.js';
+import { readClock } from '../js/clock.js';
 import { readCustom, customForPlayers, customKeys, secretCustomKeys, isCustomKey } from '../js/custom-fields.js';
 
 const clip = (v, n) => String(v ?? '').slice(0, n);
@@ -132,7 +133,7 @@ export default route({
       return send(res, 200, {
         changed: rows.filter((r) => !r.deleted && visibleTo(r, req)).map((r) => shape(r, req)),
         removed: rows.filter((r) => r.deleted || !visibleTo(r, req)).map((r) => r.id), now, cal: req.world.cal || null, shown: req.world.shown || null,
-        ...(req.role ? { notices: activeNotices(req.world.notices) } : {}),
+        ...(req.role ? { notices: activeNotices(req.world.notices) } : {}), clock: readClock(req.world.clock),
       });
     }
     if (id) {
@@ -167,7 +168,7 @@ export default route({
         ...(zeroRead !== undefined ? { zero_read: zeroRead } : {}),
         ...(favorites ? { favorites } : {}),
         // Where the party is (from session prep), when this person can see that place.
-        party_at: partyAt(w, rows, req),
+        party_at: partyAt(w, rows, req), clock: readClock(w.clock),
         ...(req.role ? { notices: activeNotices(w.notices) } : {}),
         ...(req.isGmHere ? { edits_open: (await sql`SELECT count(*)::int AS n FROM edit_suggestions WHERE world_id = ${w.id} AND status = 'open'`)[0].n } : {}),
         // Members' pronouns by person, to show beside their names.

@@ -141,6 +141,10 @@ export async function syncWorld(me) {
     world.info = { ...world.info, notices: r.notices };
     out.push({ entry: { name: 'the notices' }, change: 'notice', by: r.notices[0]?.by || null, notice: true });
   }
+  if (r.clock !== undefined && stable(r.clock) !== stable(world.info?.clock ?? null)) {
+    world.info = { ...world.info, clock: r.clock };
+    window.dispatchEvent(new Event('world:clock'));
+  }
   if (r.cal !== undefined && stable(r.cal) !== stable(world.info?.cal ?? null)) {
     world.info = { ...world.info, cal: r.cal };
     out.push({ entry: { name: 'the calendar' }, change: 'edit', by: null, calendar: true });

@@ -54,5 +54,5 @@ export function noticesCard(rerender) {
       el('span', { class: 'muted small' }, `${n.by || 'A GM'}, ${when(n.at)}${n.until ? ` · until ${when(`${n.until}T12:00:00`)}` : ''}`),
       isGm() ? el('button', { class: 'btn small ghost', type: 'button', 'aria-label': `Take down: ${n.text}`, onclick: () => send({ remove: n.id }, 'Notice taken down', rerender) }, 'Take down') : null)))
       : null,
-    isGm() && !items.length ? el('details', { class: 'nt-new' }, el('summary', {}, 'Post a notice for the whole table'), form) : form);
+    form ? el('details', { class: 'nt-new' }, el('summary', {}, 'Post a notice for the whole table'), form) : null);
 }
