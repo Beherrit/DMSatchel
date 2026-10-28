@@ -1061,3 +1061,8 @@ body.gated .mainnav, body.gated #toolnav, body.gated #panels, body.gated #notebo
 /* Sessions on the in-world calendar and timeline */
 .cal-item.k-session { background: color-mix(in srgb, var(--accent) 16%, transparent); font-weight: 600 }
 .timeline li.tl-session::before { background: var(--accent); border-radius: 2px }
+
+/* [[link]] suggestions */
+.link-pop { position: fixed; z-index: 60; margin: 0; padding: 4px; list-style: none; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 8px 24px rgb(0 0 0 / .18); max-height: 260px; overflow: auto }
+.link-pop li { padding: 6px 8px; border-radius: 6px; cursor: pointer; display: flex; justify-content: space-between; gap: 8px }
+.link-pop li.active { background: var(--sunk) }
