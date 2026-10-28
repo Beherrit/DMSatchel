@@ -27,6 +27,7 @@ import { initLinkSuggest } from './link-suggest.js';
 import { bulkControls } from './world-bulk.js';
 import { customFieldsButton } from './world-fields.js';
 import { goalsSection } from './world-goals.js';
+import { mentionsCard } from './world-mentions.js';
 import { tableSection } from './world-tables.js';
 import { parseSearch, searchHash, searchEntries } from './search.js';
 import { saveTemplateButton, templatePicker } from './world-templates.js';
@@ -261,6 +262,7 @@ function viewEntry(id, tab) {
       renderStock(e.fields?.stock) || el('p', { class: 'muted' }, 'No stock listed yet.')) : null,
     e.body ? el('section', {}, richText(e.body)) : null,
     isGm() && e.secret ? el('aside', { class: 'secret' }, el('div', { class: 'eyebrow' }, 'GM only'), richText(e.secret)) : null,
+    mentionsCard(e, rerenderWorld),
     out.length || incoming.length ? el('section', {}, el('h3', { class: 'section-title' }, 'Connections'),
       el('ul', { class: 'links' },
         out.map((l) => el('li', { class: l.secret ? 'secret-link' : '' }, el('span', { class: 'rel' }, l.label), ' ', link(l.target), el('span', { class: 'kind-tag' }, kindLabel(l.target.kind)), l.secret ? el('span', { class: 'tag' }, 'GM only') : null)),

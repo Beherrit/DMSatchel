@@ -114,6 +114,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Session zero**: a primer every member reads (pitch, tone, house rules, safety tools, lines and veils); players tell the GMs privately what to keep out, optionally without their name.
 - **Your own fields**: GMs add extra fields to any kind of entry (shared or GM-only), shown on the form and the page.
 - **Many at once**: GMs tick entries on any list or search and reveal, hide, tag, untag or move them into a place together.
+- **Link the mentions**: entry pages show GMs names written as plain text that could be links, and link them in one click.
 - **Link suggestions**: typing [[ in any text box suggests entry names; pick one to finish the link.
 - **Admin**: world owners manage members and roles, rotate invite links, name the world, see recent activity, and
   download or import a full backup. The site admin can see every world and every account.
