@@ -64,6 +64,12 @@ function shape(row, req) {
   return out;
 }
 
+const partyAt = (w, rows, req) => {
+  const id = w.prep?.location_id;
+  const row = id && rows.find((r) => r.id === id);
+  return row && !row.deleted && visibleTo(row, req) ? id : null;
+};
+
 const visibleTo = (row, req) => req.isGmHere || (row.owner_id && req.gm && row.owner_id === req.gm.id) || (row.visibility === 'all' && row.status === 'live');
 
 async function loadOne(id, worldId) {
@@ -135,6 +141,8 @@ export default route({
         primer: w.primer && !primerEmpty(w.primer) ? { tone: cleanPrimer(w.primer).tone, updated_at: w.primer.updated_at || null } : null,
         ...(zeroRead !== undefined ? { zero_read: zeroRead } : {}),
         ...(favorites ? { favorites } : {}),
+        // Where the party is (from session prep), when this person can see that place.
+        party_at: partyAt(w, rows, req),
         ...(req.isGmHere ? { templates: Array.isArray(w.templates) ? w.templates : [] } : {}) },
       role: req.role,
     });

@@ -1150,3 +1150,8 @@ li.picking:has(.bulk-pick:checked) { outline: 2px solid var(--accent, #2c6e63); 
 .w-favs ul { list-style: none; padding: 0; margin: 0 }
 .w-favs li { padding: 3px 0 }
 .btn.star.on { color: #9a6a00 }
+
+/* The party on the map */
+.pin.party-token { z-index: 4; transform: translate(-50%, -50%) scale(var(--inv)) translateY(-26px) }
+.pin.party-token .glyph { width: 26px; height: 26px; font-size: 14px; background: var(--accent); color: var(--accent-ink); border-color: var(--accent-ink) }
+.pin.party-token .pin-label { left: 30px; background: var(--accent); color: var(--accent-ink) }

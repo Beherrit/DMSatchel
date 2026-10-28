@@ -167,7 +167,7 @@ to the log at the bottom.
     the edit form with the copy, named "… (copy)".
 67. [x] **Your favorites.** Everyone stars the entries they keep going back to; starred entries sit at the top of the
     world sidebar, for that person only.
-68. [ ] **The party on the map.** Where the party is (from session prep) shows as a marker on every map that has that
+68. [x] **The party on the map.** Where the party is (from session prep) shows as a marker on every map that has that
     place pinned, for players too; GMs can set it from the map.
 69. [ ] **See it as a player.** A GM switch that shows the world the way players see it (no hidden entries, secrets,
     suggestions or GM-only fields) to check what's been revealed, with a banner and one click back.
@@ -243,3 +243,4 @@ to the log at the bottom.
 - Link the mentions: on an entry's page GMs get a folded "N names here could be links" card listing other entries whose names appear as plain text in its summary, description, long fields or GM secret (whole words, matching case, names of four letters or more, nothing inside existing links, a longer name like "Red Hand" always beating "Hand" inside it, even once linked). "Link" turns the first plain mention of that name into a [[link]]; "Link all" does every listed name. The card stays open while you work through it. js/mentions.js unit tested.
 - Make a copy: a "Make a copy" button on every entry page (GMs) opens the new-entry form filled from it: name "… (copy)", summary, description, GM secret, tags, connections, place, visibility and fields, leaving behind what belongs to one character or session (play state, what they know, attitudes, goals, attendance, rumor spread, quest objectives).
 - Your favorites: a ☆ Favorite button on every entry page for members; starred entries (newest first, up to 12 shown) sit under "★ Favorites" at the top of the world sidebar, for that person only. Kept on the membership (additive members.favorites jsonb, returned with the world load), so they follow the person to any device. PUT {favorite, on} on the party API; tested against PGlite.
+- The party on the map: the party's location from session prep now travels with the world load as party_at, but only when the person can see that place (a hidden lair is never given away). Every map draws a ⚑ "The party" token above the pin for that place, or above the nearest pinned place that contains it ("The party (The Drowned Bell)" on the region map); clicking it opens that pin. GMs get "⚑ The party is here" in any place pin's popup, which updates session prep; changing it in prep updates the maps too. Fogged pins stay hidden for players, token included. js/party-pin.js unit tested; visibility tested against PGlite.

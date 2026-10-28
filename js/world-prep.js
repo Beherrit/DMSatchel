@@ -51,7 +51,7 @@ function whereSection(prep, rerender) {
   const sel = el('select', { id: 'prep-where', 'aria-label': 'Where the party is' }, el('option', { value: '' }, 'Somewhere on the road'),
     places.map((p) => el('option', { value: p.id }, `${p.name} (${kindLabel(p.kind).toLowerCase()})`)));
   sel.value = here ? here.id : '';
-  sel.addEventListener('change', async () => { try { await savePrep({ location_id: sel.value || null }); toast('Party location saved'); rerender(); } catch (err) { toast(err.message, 'bad'); } });
+  sel.addEventListener('change', async () => { try { const p = await savePrep({ location_id: sel.value || null }); world.info = { ...world.info, party_at: p.location_id || null }; toast('Party location saved'); rerender(); } catch (err) { toast(err.message, 'bad'); } });
   const pick = el('div', { class: 'controls' }, el('label', { for: 'prep-where' }, 'The party is in'), sel);
   if (!here) return card('Where the party is', pick, empty('Pick where the party is to see who and what is around them.'));
   const inside = descendantsOf(here.id);

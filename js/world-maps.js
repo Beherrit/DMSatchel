@@ -9,6 +9,19 @@ import { KINDS, PLACE_KINDS, pinIconFor } from './world-schema.js';
 import { placeDrawer } from './world-place.js';
 import { randomTownName, areaDraft } from './generators.js';
 import { fogGrid, newFog, encodeFog, decodeFog, paintFog, hiddenShare } from './fog.js';
+import { partyPin } from './party-pin.js';
+
+// The party's place, then each place above it (for the party token).
+const partyChain = () => { const at = world.info?.party_at && getEntry(world.info.party_at); return at ? [at.id, ...trail(at).reverse().map((p) => p.id)] : []; };
+
+// GMs: the party is here now (saved as session prep's location).
+async function setPartyAt(entry) {
+  try {
+    const r = await api('settings', { method: 'PATCH', body: { prep: { location_id: entry.id } } });
+    world.info = { ...world.info, party_at: r.prep.location_id };
+    toast(`The party is in ${entry.name}`);
+  } catch (err) { toast(err.message, 'bad'); }
+}
 
 export const PIN_ICONS = { region: ['Region', '⬢'], area: ['Area', '◍'], city: ['City', '■'], town: ['Town', '●'], port: ['Port', '◗'], dungeon: ['Dungeon', '▼'], temple: ['Temple', '✚'], camp: ['Camp', '▲'], danger: ['Danger', '✕'], poi: ['Point of interest', '◆'] };
 const imageUrl = (m) => `/api/maps?id=${encodeURIComponent(m.id)}&image=1&v=${m.version}`;
@@ -203,7 +216,8 @@ export async function viewMap(id, focusPin) {
           entry ? el('a', { class: 'btn small primary', href: `#world/e/${entry.id}` }, 'Open page') : null,
           subMaps.map((m) => el('a', { class: 'btn small', href: `#world/map/${m.id}` }, `Open ${m.name}`)),
           isGm() ? el('button', { class: 'btn small ghost', type: 'button', onclick: () => showPin(pin, true) }, 'Edit pin') : null,
-          isGm() ? el('button', { class: 'btn small ghost', type: 'button', onclick: () => startMove(pin) }, 'Move') : null),
+          isGm() ? el('button', { class: 'btn small ghost', type: 'button', onclick: () => startMove(pin) }, 'Move') : null,
+          isGm() && entry && PLACE_KINDS.includes(entry.kind) && world.info?.party_at !== entry.id ? el('button', { class: 'btn small ghost', type: 'button', onclick: async () => { await setPartyAt(entry); renderPins(); showPin(pin); } }, '⚑ The party is here') : null),
         map.miles && pins.length > 1 ? travelPicker(pin) : null,
         entry && PLACE_KINDS.includes(entry.kind) ? placeDrawer(entry, () => showPin(pin)) : null,
         !entry && isGm() ? el('p', { class: 'muted small' }, 'This pin isn’t linked to an entry yet. Use “Edit pin” to link one or create it.') : null);
@@ -253,6 +267,14 @@ export async function viewMap(id, focusPin) {
     const q = filter.value.trim().toLowerCase();
     setKids(layer, ...marks.map((m) => el('button', { class: 'pin mark', type: 'button', style: `left:${m.x * 100}%;top:${m.y * 100}%`, title: m.label, 'aria-label': `Your marker: ${m.label}`,
       onclick: (ev) => { ev.stopPropagation(); markDialog(m); } }, el('span', { class: 'glyph', 'aria-hidden': 'true' }, '✎'), el('span', { class: 'pin-label' }, m.label))),
+    ...(() => {
+      const at = partyPin(pins, partyChain());
+      if (!at) return [];
+      const place = getEntry(world.info.party_at);
+      return [el('button', { class: 'pin party-token', type: 'button', style: `left:${at.pin.x * 100}%;top:${at.pin.y * 100}%`, title: `The party is ${at.exact ? 'here' : `in ${place.name}`}`,
+        'aria-label': `The party is ${at.exact ? `here, in ${place.name}` : `in ${place.name}, in ${at.pin.label}`}`, onclick: (ev) => { ev.stopPropagation(); showPin(at.pin); } },
+        el('span', { class: 'glyph', 'aria-hidden': 'true' }, '⚑'), el('span', { class: 'pin-label' }, at.exact ? 'The party' : `The party (${place.name})`))];
+    })(),
     ...pins.map((p) => el('button', {
       class: `pin pin-${p.icon || 'poi'}${p.secret ? ' secret' : ''}${p.entry_id && mapsOf(p.entry_id).some((m) => m.id !== map.id) ? ' has-map' : ''}`, type: 'button', 'data-id': p.id, style: `left:${p.x * 100}%;top:${p.y * 100}%`,
       title: p.label, 'aria-label': p.label, onclick: (ev) => { ev.stopPropagation(); showPin(p); },
