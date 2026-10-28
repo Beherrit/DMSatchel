@@ -10,6 +10,7 @@ import { placeDrawer } from './world-place.js';
 import { randomTownName, areaDraft } from './generators.js';
 import { fogGrid, newFog, encodeFog, decodeFog, paintFog, hiddenShare } from './fog.js';
 import { partyPin } from './party-pin.js';
+import { routeMiles, milesText } from './map-route.js';
 
 // The party's place, then each place above it (for the party token).
 const partyChain = () => { const at = world.info?.party_at && getEntry(world.info.party_at); return at ? [at.id, ...trail(at).reverse().map((p) => p.id)] : []; };
@@ -89,6 +90,7 @@ export async function viewMap(id, focusPin) {
   let marks = [];
   try { const r = await api('maps', { query: { id } }); map = r.map; marks = r.mine || []; } catch (err) { return notice('Couldn’t open the map', err.message); }
   let marking = false;
+  let measuring = false, route = [];
   const myBox = el('div', { class: 'my-marks' });
   let pins = map.pins || [];
   let scale = 1, tx = 0, ty = 0, adding = false, openPin = null;
@@ -100,7 +102,12 @@ export async function viewMap(id, focusPin) {
   const pop = el('div', { class: 'pin-pop', hidden: true });
   // Fog of war: one canvas pixel per cell, stretched over the map (the browser's smoothing softens the edges).
   const fogCanvas = el('canvas', { class: `fog-layer${isGm() ? ' gm' : ''}`, 'aria-hidden': 'true' });
-  stage.append(img, fogCanvas, layer); viewport.append(stage, pop);
+  // The ruler's route, drawn over the map (coordinates in thousandths of the width; the height keeps the map's shape).
+  const ratio = (map.height || 1) / (map.width || 1);
+  const NS = 'http://www.w3.org/2000/svg';
+  const routeSvg = document.createElementNS(NS, 'svg');
+  routeSvg.setAttribute('class', 'route-layer'); routeSvg.setAttribute('viewBox', `0 0 1000 ${1000 * ratio}`); routeSvg.setAttribute('preserveAspectRatio', 'none'); routeSvg.setAttribute('aria-hidden', 'true');
+  stage.append(img, fogCanvas, routeSvg, layer); viewport.append(stage, pop);
   const dims = map.fog ? { cols: map.fog.cols, rows: map.fog.rows } : fogGrid(map.width, map.height);
   let cells = map.fog ? decodeFog(map.fog.bits, dims.cols * dims.rows) : newFog(dims.cols, dims.rows, true);
   let fogOn = Boolean(map.fog?.on), fogMode = false, brush = 0, radius = 3, painting = false;
@@ -321,6 +328,7 @@ export async function viewMap(id, focusPin) {
     const x = (ev.clientX - s.left) / s.width, y = (ev.clientY - s.top) / s.height;
     if (x < 0 || x > 1 || y < 0 || y > 1) return;
     if (moving?.mark) { const mk = moving.mark; moving = null; viewport.classList.remove('placing'); api('maps', { method: 'POST', body: { mark: { ...mk, map_id: map.id, x, y } } }).then((r) => { marks = marks.map((m) => (m.id === mk.id ? r.mark : m)); status.textContent = 'Marker moved.'; renderPins(); }).catch((err) => toast(err.message, 'bad')); return; }
+    if (measuring) { route.push({ x, y }); drawRoute(); return; }
     if (marking) { marking = false; viewport.classList.remove('placing'); markBtn.setAttribute('aria-pressed', 'false'); status.textContent = ''; markDialog({ x, y, label: '', note: '' }); return; }
     if (moving) { const m = moving; moving = null; viewport.classList.remove('placing'); save(pins.map((p) => (p.id === m.id ? { ...p, x, y } : p)), 'Pin moved.'); return; }
     if (adding) {
@@ -356,6 +364,32 @@ export async function viewMap(id, focusPin) {
     marking = !marking; adding = false; moving = null; markBtn.setAttribute('aria-pressed', String(marking)); viewport.classList.toggle('placing', marking);
     status.textContent = marking ? 'Click the map where your marker goes.' : ''; status.className = 'form-status';
   } }, '+ My marker');
+
+  // The ruler: click points along a route to see how far it is, and how long it takes at each pace.
+  const routeInfo = el('div', { class: 'route-info', role: 'status' });
+  function drawRoute() {
+    const pts = route.map((p) => `${p.x * 1000},${p.y * 1000 * ratio}`).join(' ');
+    routeSvg.replaceChildren(...(route.length > 1 ? [Object.assign(document.createElementNS(NS, 'polyline'), {})] : []), ...route.map(() => document.createElementNS(NS, 'circle')));
+    if (route.length > 1) { const line = routeSvg.firstChild; line.setAttribute('points', pts); line.setAttribute('class', 'route-line'); line.setAttribute('vector-effect', 'non-scaling-stroke'); }
+    [...routeSvg.querySelectorAll('circle')].forEach((c, i) => { c.setAttribute('cx', route[i].x * 1000); c.setAttribute('cy', route[i].y * 1000 * ratio); c.setAttribute('r', 5); c.setAttribute('class', 'route-dot'); c.setAttribute('vector-effect', 'non-scaling-stroke'); });
+    const r = routeMiles(route, map.miles || 0, ratio);
+    setKids(routeInfo, route.length < 2 ? el('span', { class: 'muted small' }, route.length ? 'Click the next point.' : 'Click points along the route, one after another.')
+      : [el('strong', {}, milesText(r.total)), r.legs.length > 1 ? el('span', { class: 'muted small' }, ` in ${r.legs.length} legs (${r.legs.map(milesText).join(' + ')})`) : null,
+        el('p', { class: 'small route-time' }, travelText(r.total).replace(/^\d+ miles: /, 'Travel time: '))]);
+  }
+  const measureBar = el('div', { class: 'measure-bar card', hidden: true }, routeInfo,
+    el('div', { class: 'btnrow' },
+      el('button', { class: 'btn small ghost', type: 'button', onclick: () => { route.pop(); drawRoute(); } }, 'Undo point'),
+      el('button', { class: 'btn small ghost', type: 'button', onclick: () => { route = []; drawRoute(); } }, 'Clear'),
+      el('button', { class: 'btn small', type: 'button', onclick: () => toggleMeasure(false) }, 'Done')));
+  function toggleMeasure(on = !measuring) {
+    measuring = on; adding = false; marking = false; moving = null;
+    measureBtn.setAttribute('aria-pressed', String(on)); measureBar.hidden = !on; viewport.classList.toggle('placing', on);
+    if (!on) route = [];
+    drawRoute();
+  }
+  const measureBtn = el('button', { class: 'btn small', type: 'button', 'aria-pressed': 'false', title: 'Measure a route on this map', onclick: () => toggleMeasure() }, 'Measure');
+  viewport.addEventListener('keydown', (ev) => { if (measuring && ev.key === 'Escape') toggleMeasure(false); });
 
   // The GM's fog tools: paint to reveal or hide, show or hide the fog to players, cover or clear everything.
   let fogInfo = null;
@@ -396,6 +430,7 @@ export async function viewMap(id, focusPin) {
     isGm() ? addBtn : null,
     isGm() ? fogBtn : null,
     isMember() ? markBtn : null,
+    map.miles ? measureBtn : null,
     scaleControl());
 
   const entry = map.entry_id && getEntry(map.entry_id);
@@ -408,7 +443,7 @@ export async function viewMap(id, focusPin) {
         try { await api('maps', { method: 'DELETE', query: { id: map.id } }); world.maps = (world.maps || []).filter((m) => m.id !== map.id); toast('Map deleted'); location.hash = 'world/maps'; }
         catch (err) { toast(err.message, 'bad'); }
       }, 'btn ghost small')) : null),
-    toolbar, fogTools, viewport, status,
+    toolbar, fogTools, measureBar, viewport, status,
     el('div', { class: 'map-side' }, el('h3', { class: 'section-title' }, 'Pins'), filter, list, myBox),
     el('p', { class: 'muted small' }, `Last changed ${whenTime(map.updated_at)}${map.updated_by ? ` by ${map.updated_by}` : ''}. Drag to pan; scroll, pinch or use + and − to zoom.`),
     nameList());
