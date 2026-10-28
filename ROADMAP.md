@@ -187,6 +187,14 @@ to the log at the bottom.
     besides the main picture, with a viewer.
 77. [x] **Search the talk.** Search finds words in table talk and (for GMs) GM discussions too, linking to the
     comment on its entry.
+78. [ ] **Handouts for one player.** A GM gives a handout (or any entry) to chosen players only: a letter only the
+    rogue found, a vision for the cleric. Everyone else, other players included, can't see it until it's revealed.
+79. [ ] **Suggest an edit.** Players propose changes to an existing entry (a correction, what they learned); GMs see
+    the difference and accept or turn it down.
+80. [ ] **Hand it over.** On a character's sheet, give an item (and some coin) to another party member in one step,
+    noted on both sheets.
+81. [ ] **Print a character.** A clean printable page for a world character, built from their saved sheet and play
+    state, for players who like paper at the table.
 
 ## Ideas parking lot
 
