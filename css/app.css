@@ -996,3 +996,7 @@ body.gated .mainnav, body.gated #toolnav, body.gated #panels, body.gated #notebo
 .reveal-dialog { width: min(560px, calc(100vw - 32px)) }
 .reveal-groups { max-height: 55vh; overflow: auto; display: grid; gap: 6px }
 .reveal-groups h4 { margin: 6px 0 2px }
+
+/* Items named in an inventory */
+.inv-items { margin-top: 6px }
+.inv-list li { margin: 4px 0; padding-left: 8px; border-left: 2px solid var(--line) }

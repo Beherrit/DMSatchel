@@ -5,7 +5,9 @@ import { el, toast, confirmButton, setKids } from './dom.js';
 import { generateCharacter, characterText, abilityMod, fmtMod } from './character.js';
 import { ABILITIES, ABILITY_NAMES } from './rules2024.js';
 import { ORD } from './spells.js';
-import { world, patchEntry } from './world-store.js';
+import { world, patchEntry, worldEntries, link } from './world-store.js';
+import { MAGIC_ITEMS, RARITIES } from './magic-items.js';
+import { matchItems } from './inventory-items.js';
 import { coinText, parseCoins } from './economy.js';
 
 export const CONDITIONS = ['Blinded', 'Charmed', 'Deafened', 'Frightened', 'Grappled', 'Incapacitated', 'Invisible', 'Paralyzed', 'Petrified', 'Poisoned', 'Prone', 'Restrained', 'Stunned', 'Unconscious'];
@@ -177,9 +179,27 @@ export function sheetSection(e, rerender) {
 
   function textBox(key, label, rows) {
     const t = el('textarea', { rows, 'aria-label': label, readonly: can ? null : true }, play[key] || '');
+    if (key === 'inventory') t.addEventListener('input', () => { play.inventory = t.value; drawItems(); });
     t.addEventListener('change', () => { play[key] = t.value.slice(0, 15000); save(e.id, play); toast(`${label} saved`); });
     return el('div', { class: 'field wide' }, el('label', {}, label), t);
   }
+
+  // Items named in the inventory that the world, the library or the SRD knows: link them and say what they do.
+  const itemsBox = el('div', { class: 'inv-items' });
+  let itemTimer = null;
+  function drawItems() {
+    clearTimeout(itemTimer);
+    itemTimer = setTimeout(() => {
+      const worldItems = worldEntries().filter((x) => x.kind === 'item').map((x) => ({ name: x.name, entry: x, rarity: x.fields?.rarity, summary: x.summary || String(x.fields?.properties || '').split('\n')[0] }));
+      const known = new Set(worldItems.map((x) => x.name.toLowerCase()));
+      const srd = MAGIC_ITEMS.filter((m) => !/,\s*\+\d/.test(m.name) && !known.has(m.name.toLowerCase())).map((m) => ({ name: m.name, rarity: RARITIES[m.rarity], summary: m.summary, attunement: m.attunement }));
+      const found = matchItems(play.inventory, [...worldItems, ...srd]);
+      setKids(itemsBox, found.length ? [el('span', { class: 'eyebrow' }, 'Items on this sheet'), el('ul', { class: 'plain inv-list' }, found.map((x) => el('li', {},
+        x.entry ? link(x.entry) : el('strong', {}, x.name), x.rarity ? el('span', { class: 'muted small' }, ` ${x.rarity}${x.attunement ? ', attunement' : ''}`) : null,
+        x.summary ? el('div', { class: 'small' }, x.summary.length > 220 ? `${x.summary.slice(0, 219)}…` : x.summary) : null)))] : []);
+    }, 250);
+  }
+  function inventoryItems() { drawItems(); return itemsBox; }
 
   function manual() {
     if (ch || !can) return null;
@@ -218,7 +238,7 @@ export function sheetSection(e, rerender) {
       ch ? el('div', { class: 'abilities' }, ABILITIES.map((k) => el('div', { class: 'ability', title: ABILITY_NAMES[k] },
         el('span', { class: 'ab-name' }, k), el('span', { class: 'ab-mod' }, fmtMod(abilityMod(ch.abilities.scores[k]))), el('span', { class: 'ab-score' }, ch.abilities.scores[k])))) : null,
       ch ? el('details', { class: 'sheet-more' }, el('summary', {}, 'Saves, skills, attacks, spells and features'), fullSheet(ch)) : null,
-      el('div', { class: 'pc-cols' }, purse(), textBox('inventory', 'Inventory', 6)),
+      el('div', { class: 'pc-cols' }, purse(), textBox('inventory', 'Inventory', 6)), inventoryItems(),
       textBox('notes', 'Notes', 4));
   }
   draw();
