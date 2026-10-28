@@ -179,6 +179,14 @@ to the log at the bottom.
     this device.
 73. [x] **Member profiles.** Each member sets their pronouns and a short note for the table (availability, what
     they enjoy); shown on the party page, member lists and session zero answers.
+74. [ ] **Notices from the GMs.** A GM posts a short notice ("No game this Friday", "Level up before next session") that
+    shows on the world's front page and as a banner for every member until they dismiss it or it expires.
+75. [ ] **Import from a spreadsheet.** GMs paste or upload a CSV (a list of NPCs, items, places) and map its columns to
+    entry fields, with a preview before anything is created.
+76. [ ] **More than one picture.** Entries can hold a small gallery (a town from different angles, a handout's pages)
+    besides the main picture, with a viewer.
+77. [ ] **Search the talk.** Search finds words in table talk and (for GMs) GM discussions too, linking to the
+    comment on its entry.
 
 ## Ideas parking lot
 
