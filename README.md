@@ -146,6 +146,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Picture wall**: every picture in the world on one page (portraits, places, galleries, maps), by kind and tag.
 - **Text size**: an “A” button in the header makes all text larger, largest or smaller, remembered per browser.
 - **Previously on…**: the front page opens with the last session's summary and where the party left off.
+- **Rename a tag**: rename a tag across every entry, or fold it into another, from its page.
 - **Travel takes time**: after moving the party on a scaled map, offer to move the calendar on by the journey's days at each pace.
 - **Conditions at a glance**: a character's conditions say what they do, and the Reference has every condition (SRD 5.2).
 - **Join by QR code**: Admin shows an invite as a QR code; people at the table join by pointing a phone camera.

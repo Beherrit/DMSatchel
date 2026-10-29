@@ -302,6 +302,13 @@ to the log at the bottom.
     does, from the SRD.
 137. [x] **Travel takes time.** After moving the party on a map with a scale, offer to move the calendar on by the
     travel time.
+138. [x] **Rename a tag.** A tag's page can rename it (or fold it into another tag) across every entry at once.
+139. [ ] **Their story so far.** A character's page gathers their story: sessions played, quests they finished,
+    goals reached, wishes come true, and where their journey went.
+140. [ ] **Who holds what.** A map switch tints each pin by the faction that controls the place (from "Controlled
+    by", "Ruled by" or a connection), with a key.
+141. [ ] **Between sessions.** Session prep gathers what players did since the last session: journals, downtime,
+    suggestions, questions and table talk, in one card.
 
 ## Ideas parking lot
 
@@ -444,3 +451,4 @@ to the log at the bottom.
 - Join by QR code: Admin → Members has "QR code" beside each invite link. It opens a big code (always black on white, so it scans in dark mode too) with the link written underneath; pointing a phone camera at it opens the invite. The app makes the code itself (js/qr.js: byte mode, error correction M, versions 1–10, any text up to 213 bytes, no outside library). Checked by decoding with an independent reader (jsQR, test-only) at every version from 1 to 10, with UTF-8 text, and from a screenshot of the dialog; unit tests cover version choice and the fixed patterns.
 - Conditions at a glance: on a character's sheet, each condition chip says what it does on hover, and "What these do" (open while any apply) lists the effects of the character's current conditions and Exhaustion, with every other condition under "All conditions". The Reference section has a Conditions tab. Short paraphrases from the SRD 5.2 (CC BY 4.0, credited); js/conditions.js now holds the list and the texts (unit tested that every condition has one).
 - Travel takes time: when a GM moves the party ("The party is here" on a map pin) on a map with a scale and the world has a calendar, a dialog offers to move the calendar on: "From Brindle to Sedge is 60 miles. Today is … — 2 days (fast pace) · 3 days (normal pace) · 4 days (slow pace) · Not now". A trip under a day's march asks nothing. travelDayOptions (js/map-route.js) unit tested.
+- Rename a tag: a tag's page has "Rename tag" for GMs: type a new name, or pick an existing tag to fold this one into it. Every entry with the tag changes in one go (no doubles when an entry already has the other tag), each change goes into the history, and the tag's description moves with it unless the other tag has its own. PATCH entries {rename_tag: {from, to}}; tested against PGlite.

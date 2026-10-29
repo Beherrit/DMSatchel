@@ -2,7 +2,7 @@
 // tagged search) a short description GMs can write, so "#smugglers" can say who the smugglers are.
 import { el, toast, setKids } from './dom.js';
 import { api, isGm } from './api.js';
-import { world, worldEntries, richText, notice } from './world-store.js';
+import { world, worldEntries, richText, notice, loadWorld } from './world-store.js';
 import { stripMarks } from './rich.js';
 
 const plain = (t) => stripMarks(t);
@@ -22,13 +22,49 @@ export function viewTags() {
 }
 
 // On a tag's page: its description, and (GMs) a way to write it.
+// GMs: rename a tag on every entry (or fold it into another tag); its description moves with it.
+function renameDialog(from) {
+  const input = el('input', { type: 'text', id: 'rt-to', list: 'rt-tags', value: from, maxlength: 40, autocomplete: 'off' });
+  const n = worldEntries().filter((e) => (e.tags || []).includes(from)).length;
+  const status = el('p', { class: 'form-status', role: 'status' });
+  const dlg = el('dialog', { class: 'dialog', 'aria-labelledby': 'rt-title' }, el('form', { class: 'dialog-body', method: 'dialog' },
+    el('h2', { id: 'rt-title' }, `Rename #${from}`),
+    el('p', {}, `On ${n} entr${n === 1 ? 'y' : 'ies'}. Pick an existing tag to fold #${from} into it.`),
+    el('div', { class: 'field' }, el('label', { for: 'rt-to' }, 'New name'), input,
+      el('datalist', { id: 'rt-tags' }, [...new Set(worldEntries().flatMap((e) => e.tags || []))].filter((t) => t !== from).sort().map((t) => el('option', { value: t })))),
+    status,
+    el('div', { class: 'btnrow' }, el('button', { class: 'btn primary', type: 'submit' }, 'Rename'), el('button', { class: 'btn', type: 'button', onclick: () => dlg.close() }, 'Cancel'))));
+  dlg.querySelector('form').addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const to = input.value.trim().replace(/^#+/, '').toLowerCase();
+    if (!to || to === from) { input.focus(); return; }
+    status.textContent = 'Renaming…'; status.className = 'form-status';
+    try {
+      const r = await api('entries', { method: 'PATCH', body: { rename_tag: { from, to } } });
+      // The description moves too, unless the other tag has its own.
+      const notes = world.info?.tag_notes || {};
+      if (notes[from] && !notes[to]) {
+        const a = await api('settings', { method: 'PATCH', body: { tag_note: { tag: to, text: notes[from] } } });
+        const b = await api('settings', { method: 'PATCH', body: { tag_note: { tag: from, text: '' } } });
+        world.info = { ...world.info, tag_notes: b.tag_notes || a.tag_notes };
+      }
+      await loadWorld(true);
+      toast(`#${from} is now #${to} on ${r.renamed} entr${r.renamed === 1 ? 'y' : 'ies'}`);
+      dlg.close(); location.hash = `world/q/${encodeURIComponent(`#${to}`)}`;
+    } catch (err) { status.textContent = err.message; status.className = 'form-status error'; }
+  });
+  dlg.addEventListener('close', () => dlg.remove());
+  document.body.append(dlg); dlg.showModal(); input.select();
+}
+
 export function tagNote(tag, rerender) {
   const t = String(tag || '').toLowerCase();
   const text = world.info?.tag_notes?.[t] || '';
   if (!text && !isGm()) return null;
   const box = el('section', { class: 'card tag-note' });
   const show = () => setKids(box, text ? richText(text) : el('p', { class: 'muted small' }, `No description yet. Say what #${t} means in this world.`),
-    isGm() ? el('div', { class: 'btnrow' }, el('button', { class: 'btn small ghost', type: 'button', onclick: edit }, text ? 'Edit description' : 'Describe this tag')) : null);
+    isGm() ? el('div', { class: 'btnrow' }, el('button', { class: 'btn small ghost', type: 'button', onclick: edit }, text ? 'Edit description' : 'Describe this tag'),
+      el('button', { class: 'btn small ghost', type: 'button', onclick: () => renameDialog(t) }, 'Rename tag')) : null);
   function edit() {
     const ta = el('textarea', { rows: 3, 'aria-label': `Description of #${t}`, maxlength: 2000 }, text);
     setKids(box, ta, el('p', { class: 'muted small' }, 'Everyone who can see the tag sees this. [[Links]] work.'),

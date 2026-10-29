@@ -8,6 +8,7 @@
 // PUT ?id= {entry}  update; send the version you loaded or get 409. Players may edit only their own entries.
 // PATCH {id, visibility?, status?}     GM quick changes: reveal or hide, approve a suggestion
 // PATCH {ids, visibility | add_tag | remove_tag | move_to}   the same for many entries at once (GM)
+// PATCH {rename_tag: {from, to}}       (GM) rename a tag on every entry, or fold it into another tag
 // POST {suggest_edit: {entry_id, summary, body, fields, note}}   (member) suggest changes to an entry you can see
 // GET ?edits=1                          suggested edits: every open one (GMs) or your own (players)
 // PATCH {edit_id, decision: 'accept' | 'decline'}   (GM) apply a suggested edit, or turn it down
@@ -385,6 +386,19 @@ export default route({
       }
       await sql`UPDATE edit_suggestions SET status = 'declined', decided_by = ${req.gm.id}, decided_at = now() WHERE id = ${s.id}`;
       return send(res, 200, { status: 'declined' });
+    }
+    if (req.body?.rename_tag) {
+      if (!requireGm(req, res)) return;
+      const from = cleanTag(req.body.rename_tag.from), to = cleanTag(req.body.rename_tag.to);
+      if (!from || !to) return fail(res, 400, 'Type the new name for the tag.');
+      if (from === to) return fail(res, 400, 'That’s the same name.');
+      // Into a tag an entry already has: just drop the old one (no doubles).
+      const rows = await sql`UPDATE entries SET tags = CASE WHEN ${to} = ANY(tags) THEN array_remove(tags, ${from}) ELSE array_replace(tags, ${from}, ${to}) END,
+          updated_by = ${req.gm.id}, updated_at = now(), version = version + 1
+        WHERE world_id = ${req.world.id} AND NOT deleted AND ${from} = ANY(tags) RETURNING id`;
+      const changed = rows.length ? await Promise.all(rows.map((r) => loadOne(r.id, req.world.id))) : [];
+      for (const e of changed) await record(e.id, req.gm.id, 'edit', snapshot(e));
+      return send(res, 200, { entries: changed.map((e) => shape(e, req)), renamed: changed.length });
     }
     // Bulk changes (GMs): {ids: [...]} with one of visibility ('all' | 'gm'), add_tag, remove_tag, or move_to (a place's
     // id, or null to take them out of any place). Suggestions stay suggestions.
