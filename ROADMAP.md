@@ -333,6 +333,15 @@ to the log at the bottom.
 153. [x] **Job board poster.** A town's open jobs as a printable notice-board poster (or shown to the table), in the
     voice of the posters pinned up in the square.
 
+154. [ ] **Also known as.** Entries can carry other names (a title, an old name, what the locals call it); search,
+    mentions and the name check find them under any of them.
+155. [ ] **How old they are.** NPC and character pages show their age today, from their birth date and the in-world
+    calendar; Who's who shows it too.
+156. [ ] **A rival party.** Roll a rival adventuring party (a name, four members with classes and a grudge, what
+    they're after) and save it as a guild with its people.
+157. [ ] **Tavern menu.** A tavern's page can roll a bill of fare (drinks, dishes, a bed for the night, priced to suit
+    the town) to read out or print.
+
 ## Ideas parking lot
 
 ## Log
