@@ -3,7 +3,7 @@
 // feed (#world/table).
 import { el, toast, confirmButton, setKids } from './dom.js';
 import { api, session, isGm, isMember, isOwner } from './api.js';
-import { getEntry, link, kindLabel, whenTime, notice, richText } from './world-store.js';
+import { world, getEntry, link, kindLabel, whenTime, notice, richText } from './world-store.js';
 import { reactionBar } from './world-react.js';
 
 const ROOMS = {
@@ -118,8 +118,23 @@ export async function viewTalk() {
   } catch (err) { return notice('Couldn’t load discussions', err.message); }
 }
 
+// New table talk: comments others posted since your last visit (the world load brings their times) that are newer
+// than when you last opened Table talk in this browser.
+const seenKey = () => `satchel-table-seen-${session.worldKey || 'world'}`;
+export function tableNewCount() {
+  let seen = 0;
+  try { seen = Number(localStorage.getItem(seenKey())) || 0; } catch { /* storage blocked */ }
+  return (world.info?.table_new || []).filter((t) => Date.parse(t) > seen).length;
+}
+function markTableSeen() {
+  try { localStorage.setItem(seenKey(), String(Date.now())); } catch { /* storage blocked */ }
+  const c = document.querySelector('a[data-view="table"] .count');
+  if (c) { c.textContent = '💬'; c.classList.remove('new'); }
+}
+
 // The latest table talk across the world, newest first.
 export async function viewTable() {
+  markTableSeen();
   try {
     const { comments } = await api('comments', { query: { recent: 'table' } });
     return el('div', { class: 'w-view' },

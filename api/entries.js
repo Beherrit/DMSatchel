@@ -192,6 +192,11 @@ export default route({
         ...(req.role ? { notices: activeNotices(w.notices), ask_unread: await askUnread(req) } : {}),
         // Who's coming to the next session (members, once it's set).
         ...(req.role && rsvpOpen(w.next_session) ? { rsvp: rsvpSummary(await sql`SELECT g.id, g.name, m.rsvp FROM members m JOIN gms g ON g.id = m.gm_id WHERE m.world_id = ${w.id}`, new Date(w.next_session).toISOString(), req.gm?.id) } : {}),
+        // Table talk others posted since this member's last visit (just the times; the page counts what's unread).
+        ...(req.role && req.gm && prevVisit ? { table_new: (await sql`SELECT c.created_at FROM comments c JOIN entries e ON e.id = c.entry_id
+          WHERE e.world_id = ${w.id} AND NOT e.deleted AND c.audience = 'table' AND c.created_at > ${prevVisit} AND c.gm_id <> ${req.gm.id}
+            AND (${req.isGmHere} OR (NOT c.hidden AND e.status = 'live' AND (e.visibility = 'all' OR e.owner_id = ${req.gm.id})))
+          ORDER BY c.created_at DESC LIMIT 50`).map((r) => r.created_at) } : {}),
         // A line from the quote wall for the front page, a different one each load.
         ...(req.role ? { quote: (await sql`SELECT id, text, said_by, session_id FROM table_quotes WHERE world_id = ${w.id} AND NOT deleted ORDER BY random() LIMIT 1`)[0] || null } : {}),
         ...(req.isGmHere ? { edits_open: (await sql`SELECT count(*)::int AS n FROM edit_suggestions WHERE world_id = ${w.id} AND status = 'open'`)[0].n } : {}),

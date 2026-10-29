@@ -293,7 +293,7 @@ to the log at the bottom.
 131. [x] **Forgiving search.** A typo or two still finds things in Ctrl+K search and the world search box.
 132. [x] **Quests by status.** The quests list grouped: in play, on offer, rumored, then done and failed folded
     away.
-133. [ ] **New table talk.** The sidebar's Table talk shows how many comments are new since your last visit.
+133. [x] **New table talk.** The sidebar's Table talk shows how many comments are new since your last visit.
 
 ## Ideas parking lot
 
@@ -431,3 +431,4 @@ to the log at the bottom.
 - How far from the party: on a map with a scale, a pin's card says "⚑ From the party: 60 miles: fast 2 days, normal 2.5 days, slow 3.3 days", measured from the party's pin (the place they're in, or the nearest place around it that's pinned). Not shown on the party's own pin or maps without a scale. Also: a full accessibility (axe), phone-width and dialog sweep of the app after #97–#129: all clean.
 - Forgiving search: in Ctrl+K and the world search, a word of four letters or more also matches a name or tag word a typo away (two for long words), whole or as the start of a longer word: "brimdle" finds Brindle, "silvrhand" The Silverhand, "nroth" the north tag. Near misses rank after everything that matched as typed, and descriptions still need the exact word, so results stay predictable. nearWord unit tested.
 - Quests by status: the Quests & Plots list is grouped: In play, On offer, Rumored and No status yet (open), then Done and Failed or abandoned (folded), each with a count; bulk actions still work across the groups. js/quest-groups.js unit tested.
+- New table talk: the world load brings the times of table-talk comments others posted since your last visit (at most 50; on entries you can see; hidden ones only for GMs), and the sidebar's Table talk shows "2 new" (a folded "At the table" group gets its dot). Opening Table talk clears the count in this browser. Tested against PGlite.

@@ -10,7 +10,7 @@ import { stripMarks } from './rich.js';
 import { world, worldEntries, getEntry, loadWorld, byName, kindLabel, kindFields, richInline, link, when, findByName, mentions, richText, contentsNav, notice, nameList } from './world-store.js';
 import { viewMaps, viewMap, pinsFor } from './world-maps.js';
 import { viewStandings, standingWidget } from './world-standings.js';
-import { viewTalk, talkWidget, tableWidget, viewTable } from './world-talk.js';
+import { viewTalk, talkWidget, tableWidget, viewTable, tableNewCount } from './world-talk.js';
 import { placeHub, viewAtlas, placeCounts } from './world-place.js';
 import { viewParty } from './world-party.js';
 import { viewSchedule, nextSessionLine, rsvpCard } from './world-schedule.js';
@@ -155,7 +155,7 @@ function renderSide() {
         isMember() ? el('a', { href: '#world/schedule', 'data-view': 'schedule' }, el('span', {}, 'Next session'), el('span', { class: 'count' }, world.info?.next_session && Date.parse(world.info.next_session) > Date.now() - 86400000 ? new Date(world.info.next_session).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '')) : null,
         isMember() ? el('a', { href: '#world/downtime', 'data-view': 'downtime' }, el('span', {}, 'Downtime'), el('span', { class: 'count' }, isGm() ? (worldEntries().filter((d) => d.kind === 'downtime' && !d.fields?.resolved).length || '') : '')) : null,
         el('a', { href: '#world/calendar', 'data-view': 'calendar', title: todayText() }, el('span', {}, 'Calendar'), el('span', { class: 'count cal-count' }, worldCalendar() ? todayText().split(', ').pop().replace(/ \d+.*$/, '') : '')),
-        el('a', { href: '#world/table', 'data-view': 'table' }, el('span', {}, 'Table talk'), el('span', { class: 'count' }, '💬')),
+        el('a', { href: '#world/table', 'data-view': 'table' }, el('span', {}, 'Table talk'), tableNewCount() ? el('span', { class: 'count new' }, `${tableNewCount()} new`) : el('span', { class: 'count' }, '💬')),
         askNav(),
         isMember() ? el('a', { href: '#world/quotes', 'data-view': 'quotes' }, el('span', {}, 'Quote wall'), el('span', { class: 'count' }, '❝')) : null,
         isGm() ? el('a', { href: '#world/talk', 'data-view': 'talk' }, el('span', {}, 'GM discussions'), el('span', { class: 'count', id: 'w-talk-count' }, '')) : null,
