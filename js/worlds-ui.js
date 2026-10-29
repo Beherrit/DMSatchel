@@ -71,17 +71,21 @@ function createForm() {
   const name = el('input', { type: 'text', id: 'c-wname', required: true, maxlength: 120, placeholder: 'e.g. The Shattered Coast' });
   const tagline = el('input', { type: 'text', id: 'c-wtag', maxlength: 240, placeholder: 'One line that sets the tone (optional)' });
   const pub = el('input', { type: 'checkbox', id: 'c-wpub' });
+  // Start like one of your worlds: its calendar, own fields, templates, session zero page and tag descriptions.
+  const mine = (session.worlds || []).filter((w) => ['owner', 'gm'].includes(w.role));
+  const like = mine.length ? el('select', { id: 'c-wlike' }, el('option', { value: '' }, 'A blank world'), mine.map((w) => el('option', { value: w.id }, `Like ${w.name}`))) : null;
   const form = el('form', { class: 'card edit-form', id: 'create-world' },
     el('h3', {}, 'Create a world'),
     el('p', { class: 'muted' }, 'You’ll be its owner. Then share a GM invite with your co-GMs and a player invite with your players.'),
     el('div', { class: 'field' }, el('label', { for: 'c-wname' }, 'Name'), name),
     el('div', { class: 'field' }, el('label', { for: 'c-wtag' }, 'Tagline'), tagline),
+    like ? el('div', { class: 'field' }, el('label', { for: 'c-wlike' }, 'Start from'), like, el('small', { class: 'muted' }, 'A world like one of yours brings its calendar, own fields, templates, session zero page and tag descriptions, but none of its entries.')) : null,
     el('label', { class: 'check' }, pub, ' Anyone with the link can read it (players still need an invite to add things)'),
     status, el('div', { class: 'btnrow' }, el('button', { class: 'btn primary', type: 'submit' }, 'Create world')));
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     try {
-      const r = await api('worlds', { method: 'POST', body: { name: name.value, tagline: tagline.value, public: pub.checked } });
+      const r = await api('worlds', { method: 'POST', body: { name: name.value, tagline: tagline.value, public: pub.checked, ...(like?.value ? { like: like.value } : {}) } });
       await refreshWorlds(); setWorld(r.world.slug);
       toast(`Created ${r.world.name}`); location.hash = 'admin/members';
     } catch (err) { status.textContent = err.message; status.className = 'form-status error'; }

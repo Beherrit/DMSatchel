@@ -11,6 +11,8 @@
 // GET ?id=&backup=1           (owner) the world's settings, maps (images that are links; uploaded ones come from the
 //                             maps API), standing, clocks, treasury and quotes. Entries come from the entries API.
 // POST {restore: {world}}     a new world from a backup's settings; you own it ("<name> (restored)")
+// POST {name, like: worldId}   a new world with the settings of one you GM (calendar, own fields, templates, session
+//                             zero, tag descriptions), none of its entries; you own it
 // POST {restore_extras: {id, standing, clocks, ledger, quotes}}   (owner of that world) add a backup's rows to it
 import { route, send, fail, sql, newCode, newId, requireSignedIn, slugify, worldContext, myWorlds } from './_lib/core.js';
 
@@ -86,6 +88,13 @@ export default route({
     if (!requireSignedIn(req, res)) return;
     if (req.body.restore_extras) return restoreExtras(req, res, req.body.restore_extras);
     if (req.body.restore) req.body = { ...req.body.restore.world, restoring: req.body.restore.world || {} };
+    if (req.body.like) {
+      const src = (await sql`SELECT w.* FROM worlds w LEFT JOIN members m ON m.world_id = w.id AND m.gm_id = ${req.gm.id}
+        WHERE w.id = ${String(req.body.like).slice(0, 80)} AND NOT w.archived AND (m.role IN ('owner', 'gm') OR ${req.gm.role === 'admin'})`)[0];
+      if (!src) return fail(res, 404, 'You can only copy the settings of a world you GM.');
+      // The calendar comes along as it stands; nothing about play (prep, time of day, start here) does.
+      req.body = { name: req.body.name, tagline: req.body.tagline, liking: { calendar: src.calendar, cal: src.cal, templates: src.templates, custom_fields: src.custom_fields, primer: src.primer, tag_notes: src.tag_notes } };
+    }
     const name = String(req.body.name || '').trim().slice(0, 120);
     if (!name) return fail(res, 400, 'Give the world a name.');
     const count = (await sql`SELECT count(*)::int AS n FROM members WHERE gm_id = ${req.gm.id} AND role = 'owner'`)[0].n;
@@ -97,6 +106,12 @@ export default route({
       VALUES (${id}, ${slug}, ${name}, ${String(req.body.tagline || '').slice(0, 240)}, ${Boolean(req.body.public)}, ${newCode()}, ${newCode()}, ${req.gm.id})`;
     await sql`INSERT INTO members (world_id, gm_id, role) VALUES (${id}, ${req.gm.id}, 'owner')`;
     // Restoring a backup: its settings come along (the entries, maps and the rest follow in their own requests).
+    const lk = req.body.liking;
+    if (lk) {
+      const j = (v) => (v && typeof v === 'object' ? JSON.stringify(v) : null);
+      await sql`UPDATE worlds SET calendar = ${String(lk.calendar || '').slice(0, 2000)}, cal = ${j(lk.cal)}::jsonb, templates = ${j(lk.templates)}::jsonb,
+        custom_fields = ${j(lk.custom_fields)}::jsonb, primer = ${j(lk.primer)}::jsonb, tag_notes = ${j(lk.tag_notes)}::jsonb WHERE id = ${id}`;
+    }
     const r = req.body.restoring;
     if (r) {
       const j = (v) => (v && typeof v === 'object' ? JSON.stringify(v) : null);
