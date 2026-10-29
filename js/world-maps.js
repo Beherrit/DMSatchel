@@ -10,7 +10,10 @@ import { placeDrawer } from './world-place.js';
 import { randomTownName, areaDraft } from './generators.js';
 import { fogGrid, newFog, encodeFog, decodeFog, paintFog, hiddenShare } from './fog.js';
 import { partyPin } from './party-pin.js';
-import { routeMiles, milesText } from './map-route.js';
+import { routeMiles, milesText, travelDayOptions } from './map-route.js';
+import { travel } from './encounters.js';
+import { worldCalendar, todayText } from './world-calendar.js';
+import { advance, formatDate, today } from './calendar.js';
 import { journeyOnMap } from './journey.js';
 import { journey, chainOf, notePartyMove } from './world-journey.js';
 
@@ -240,7 +243,7 @@ export async function viewMap(id, focusPin) {
           subMaps.map((m) => el('a', { class: 'btn small', href: `#world/map/${m.id}` }, `Open ${m.name}`)),
           isGm() ? el('button', { class: 'btn small ghost', type: 'button', onclick: () => showPin(pin, true) }, 'Edit pin') : null,
           isGm() ? el('button', { class: 'btn small ghost', type: 'button', onclick: () => startMove(pin) }, 'Move') : null,
-          isGm() && entry && PLACE_KINDS.includes(entry.kind) && world.info?.party_at !== entry.id ? el('button', { class: 'btn small ghost', type: 'button', onclick: async () => { await setPartyAt(entry); renderPins(); showPin(pin); } }, '⚑ The party is here') : null),
+          isGm() && entry && PLACE_KINDS.includes(entry.kind) && world.info?.party_at !== entry.id ? el('button', { class: 'btn small ghost', type: 'button', onclick: async () => { const from = map.miles && partyPin(pins, partyChain()); await setPartyAt(entry); renderPins(); showPin(pin); const to = partyPin(pins, partyChain()); if (from && to && from.pin.id !== to.pin.id) offerDaysPass(from.pin, to.pin); } }, '⚑ The party is here') : null),
         // How far from the party (when the map has a scale and the party is on it somewhere else).
         (() => { const at = map.miles && partyPin(pins, partyChain()); return at && at.pin.id !== pin.id ? el('p', { class: 'small from-party' }, el('span', { 'aria-hidden': 'true' }, '⚑ '), `From the party: ${travelText(milesBetween(at.pin, pin))}.`) : null; })(),
         map.miles && pins.length > 1 ? travelPicker(pin) : null,
@@ -261,6 +264,25 @@ export async function viewMap(id, focusPin) {
     const show = () => { const to = pins.find((p) => p.id === sel.value); out.textContent = to ? `To ${to.label}: ${travelText(milesBetween(pin, to), { difficult: diff.checked })}.` : ''; };
     sel.addEventListener('change', show); diff.addEventListener('change', show);
     return el('div', { class: 'travel-pick' }, el('div', { class: 'controls' }, sel, el('label', { class: 'check' }, diff, ' Rough going')), out);
+  }
+  // Travel takes time: after the party moves on a scaled map, offer to move the calendar on by the journey.
+  function offerDaysPass(a, b) {
+    const cal = worldCalendar();
+    const miles = milesBetween(a, b), opts = travelDayOptions(travel(miles));
+    if (!cal || !opts.length) return;
+    const dlg = el('dialog', { class: 'dialog', 'aria-labelledby': 'dp-title' }, el('div', { class: 'dialog-body' },
+      el('h2', { id: 'dp-title' }, 'Move the calendar on?'),
+      el('p', {}, `From ${a.label} to ${b.label} is ${milesText(miles)}. Today is ${todayText(cal)}.`),
+      el('div', { class: 'btnrow' }, opts.map(([pace, days]) => el('button', { class: `btn${pace === 'Normal' ? ' primary' : ''}`, type: 'button', onclick: async () => {
+        try {
+          const r = await api('settings', { method: 'PATCH', body: { cal: advance(cal, days) } });
+          world.info = { ...world.info, cal: r.cal };
+          toast(`${days} day${days === 1 ? '' : 's'} pass: it’s now ${formatDate(r.cal, today(r.cal))}`); dlg.close();
+        } catch (err) { toast(err.message, 'bad'); }
+      } }, `${days} day${days === 1 ? '' : 's'} (${pace.toLowerCase()} pace)`)),
+        el('button', { class: 'btn ghost', type: 'button', onclick: () => dlg.close() }, 'Not now'))));
+    dlg.addEventListener('close', () => dlg.remove());
+    document.body.append(dlg); dlg.showModal();
   }
   function closePop() { openPin = null; pop.hidden = true; for (const b of layer.children) b.classList.remove('active'); renderPins(); }
 

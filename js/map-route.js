@@ -13,3 +13,9 @@ export function routeMiles(points, miles, ratio = 1) {
 
 // Short distances in a readable form: "0.4 miles", "12 miles".
 export const milesText = (m) => `${m < 10 ? m.toFixed(1).replace(/\.0$/, '') : Math.round(m).toLocaleString('en-US')} mile${m === 1 ? '' : 's'}`;
+
+// Travel takes time: whole days of travel at each pace, for moving the calendar on after the party moves
+// (travel(miles) from encounters.js → [[pace, days]]). A trip under a day's march suggests nothing.
+export function travelDayOptions(t) {
+  return Object.entries(t || {}).filter(([, v]) => v.hours >= 8).map(([pace, v]) => [pace, Math.max(1, Math.ceil(v.days - 0.05))]);
+}
