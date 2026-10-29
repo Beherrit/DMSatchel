@@ -68,6 +68,7 @@ import { ageOf, ageText } from './birthdays.js';
 import { deadlineOf, deadlineText } from './deadline.js';
 import { menuCard } from './world-menu.js';
 import { buyBox } from './world-buy.js';
+import { chainSection } from './world-questchain.js';
 import './world-living.js';
 import { cleanMusic } from './music.js';
 import { musicLine } from './world-music.js';
@@ -356,7 +357,7 @@ function viewEntry(id, tab) {
   const sessions = all.filter((x) => x.kind === 'session' && x.id !== id && (mentions(`${x.body}\n${x.summary}\n${Object.values(x.fields || {}).join('\n')}`).has(id) || (x.links || []).some((l) => l.id === id)))
     .sort((a, b) => (parseFloat(b.fields.number) || 0) - (parseFloat(a.fields.number) || 0));
   const pins = pinsFor(id);
-  const fieldRows = kindFields(e.kind).filter((fd) => fieldApplies(fd, e.fields)).filter(([k, , type]) => e.fields?.[k] && !['stats', 'spells', 'level', 'stock', 'market', 'encounters'].includes(k) && type !== 'hidden' && type !== 'image' && !(k === 'sheet' && e.fields.forge)).map(([k, label, type, , o]) => [o?.gmSecret ? `${label} (GMs only)` : label, k === 'born' && ageOf(worldCalendar(), e) ? `${e.fields[k]} (${ageText(ageOf(worldCalendar(), e))})` : k === 'deadline' && deadlineOf(worldCalendar(), e) ? `${e.fields[k]} (${deadlineText(deadlineOf(worldCalendar(), e).left)})` : e.fields[k], type]);
+  const fieldRows = kindFields(e.kind).filter((fd) => fieldApplies(fd, e.fields)).filter(([k, , type]) => e.fields?.[k] && !['stats', 'spells', 'level', 'stock', 'market', 'encounters', 'follows'].includes(k) && type !== 'hidden' && type !== 'image' && !(k === 'sheet' && e.fields.forge)).map(([k, label, type, , o]) => [o?.gmSecret ? `${label} (GMs only)` : label, k === 'born' && ageOf(worldCalendar(), e) ? `${e.fields[k]} (${ageText(ageOf(worldCalendar(), e))})` : k === 'deadline' && deadlineOf(worldCalendar(), e) ? `${e.fields[k]} (${deadlineText(deadlineOf(worldCalendar(), e).left)})` : e.fields[k], type]);
 
   const history = el('div', { class: 'history', hidden: true });
   const isPlace = PLACE_KINDS.includes(e.kind);
@@ -385,6 +386,7 @@ function viewEntry(id, tab) {
     attitudesToward(e, rerenderWorld),
     rewardCard(e, rerenderWorld),
     objectivesSection(e, rerenderWorld),
+    chainSection(e, rerenderWorld),
     tableSection(e),
     e.kind === 'encounter' && e.fields?.enc ? (() => { try { return encounterCard(JSON.parse(e.fields.enc), { title: 'Saved encounter', save: false }); } catch { return null; } })() : null,
     attendanceSection(e, rerenderWorld),

@@ -147,7 +147,10 @@ function questSection(place, rerender, compact) {
           q.fields?.patron ? el('p', { class: 'muted small' }, `Ask for: ${q.fields.patron}`) : null,
           q.parent_id !== place.id && getEntry(q.parent_id) ? el('p', { class: 'muted small' }, 'Posted in ', link(getEntry(q.parent_id))) : null,
           isGm() && !compact ? el('select', { class: 'status-sel', 'aria-label': `Status of ${q.name}`, onchange: async (ev) => {
-            try { await patchEntry(q, { fields: { status: ev.target.value } }); toast(`${q.name}: ${ev.target.value}`); rerender(); } catch (err) { toast(err.message, 'bad'); }
+            try {
+              const saved = await patchEntry(q, { fields: { status: ev.target.value } }); toast(`${q.name}: ${ev.target.value}`); rerender();
+              if (ev.target.value === 'Completed') (await import('./world-questchain.js')).offerNext(saved, rerender);
+            } catch (err) { toast(err.message, 'bad'); }
           } }, QUEST_STATUSES.map((st) => { const o = el('option', { value: st }, st); if (st === s) o.selected = true; return o; })) : null);
       })) : el('p', { class: 'muted' }, filter === 'open' ? (isGm() ? 'The board is empty. Roll a job, or write one.' : 'No open jobs on the board right now.') : 'Nothing here.'),
       compact && quests.length > shown.length ? el('a', { href: `#world/e/${place.id}/quests`, class: 'small' }, `Whole board (${quests.length}) →`) : null);

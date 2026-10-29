@@ -1653,3 +1653,9 @@ details.quest-group > summary .section-title { display: inline }
 .deadline-pill { font-size: calc(12px * var(--ts, 1)); font-weight: 600; color: var(--muted) }
 .deadline-pill.soon { color: var(--danger) }
 .notice .deadline-pill { color: #5a4a2a } .notice .deadline-pill.soon { color: #9b2a1a }
+/* Quest chains */
+.quest-chain { display: grid; gap: 4px; margin: 6px 0; padding: 0; list-style: none; counter-reset: none }
+.quest-chain li { padding-left: 18px; position: relative }
+.quest-chain li::before { content: '↓'; position: absolute; left: 2px; color: var(--muted) }
+.quest-chain li:first-child::before { content: '•' }
+.quest-chain .chain-next::before { content: '→' }
