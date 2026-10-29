@@ -8,14 +8,16 @@ import { isGm, session } from './api.js';
 import { makeRng } from './rng.js';
 import { world, worldEntries, loadWorld } from './world-store.js';
 import { libraryClasses, librarySpells } from './library.js';
+import { priceGroups } from './price-list.js';
+import { fmtPrice } from './economy.js';
 
 // The open world's library: its classes and spells appear beside the SRD ones, marked as yours.
 const libClasses = () => (world.loaded ? libraryClasses(worldEntries()).filter((c) => !CLASSES[c.name]) : []);
 const libSpells = () => (world.loaded ? librarySpells(worldEntries(), [...Object.keys(CLASSES), ...libClasses().map((c) => c.name)]) : []);
 const yours = (source) => el('span', { class: 'tag lib-source' }, source || 'your library');
 
-const TABS = [['classes', 'Classes'], ['species', 'Species'], ['backgrounds', 'Backgrounds'], ['feats', 'Feats'], ['spells', 'Spells'], ['items', 'Magic items'], ['conditions', 'Conditions'], ['slots', 'Spell slots']];
-let root, body, filter;
+const TABS = [['classes', 'Classes'], ['species', 'Species'], ['backgrounds', 'Backgrounds'], ['feats', 'Feats'], ['spells', 'Spells'], ['items', 'Magic items'], ['conditions', 'Conditions'], ['slots', 'Spell slots'], ['prices', 'Prices']];
+let root, body, filter, current = 'classes';
 
 const card = (title, sub, ...kids) => el('article', { class: 'card ref-card', 'data-search': `${title} ${sub}`.toLowerCase() }, el('h3', {}, title), sub ? el('p', { class: 'card-sub' }, sub) : null, ...kids);
 const dl = (rows) => el('dl', { class: 'traits' }, rows.filter(([, v]) => v).flatMap(([k, v]) => [el('dt', {}, k), el('dd', {}, el('span', {}, v))]));
@@ -87,10 +89,19 @@ function slots() {
     el('div', { class: 'table-wrap' }, el('table', { class: 'slots' }, el('thead', {}, head), el('tbody', {}, rows))))];
 }
 
+// What things cost: the shops' price list (SRD 5.1), by kind, narrowed by the filter box row by row.
+function prices() {
+  const groups = priceGroups(filter.value);
+  if (!groups.length) return [el('p', { class: 'muted' }, 'Nothing by that name. Shops in your world can stock anything; these are the usual prices.')];
+  return groups.map(({ cat, rows }) => card(cat, `${rows.length} price${rows.length === 1 ? '' : 's'}`,
+    el('table', { class: 'price-table' }, el('caption', { class: 'sr-only' }, `${cat} prices`), el('tbody', {}, rows.map(([n, gp]) => el('tr', {}, el('td', {}, n), el('td', { class: 'num' }, fmtPrice(gp))))))));
+}
+
 export function showReference(tab = 'classes') {
   if (!TABS.some(([k]) => k === tab)) tab = 'classes';
+  current = tab;
   for (const b of root.querySelectorAll('.subtabs a')) b.setAttribute('aria-current', b.dataset.tab === tab ? 'page' : 'false');
-  setKids(body, ...{ classes, species, backgrounds, feats, spells, items, conditions, slots }[tab]());
+  setKids(body, ...{ classes, species, backgrounds, feats, spells, items, conditions, slots, prices }[tab]());
   applyFilter();
   // Load the open world once, so its library classes and spells show here too.
   if (!world.loaded && !triedWorld && session.configured !== false && ['classes', 'spells'].includes(tab)) {
@@ -100,6 +111,7 @@ export function showReference(tab = 'classes') {
 }
 let triedWorld = false;
 function applyFilter() {
+  if (current === 'prices') { setKids(body, ...prices()); return; }
   const q = filter.value.trim().toLowerCase();
   for (const c of body.children) c.hidden = q && !c.classList.contains('ref-filters') && !c.textContent.toLowerCase().includes(q);
 }

@@ -1622,3 +1622,7 @@ details.quest-group > summary .section-title { display: inline }
   body.print-menu .menu-card { position: absolute; inset: 0 auto auto 0; width: 100% }
   body.print-menu .menu-card button, body.print-menu .menu-card .btnrow { display: none }
 }
+/* Price list (Reference) */
+.price-table { width: 100%; border-collapse: collapse }
+.price-table td { padding: 3px 0; border-bottom: 1px dotted var(--line) }
+.price-table td.num { text-align: right; white-space: nowrap; padding-left: 12px; font-variant-numeric: tabular-nums }
