@@ -276,7 +276,7 @@ to the log at the bottom.
     with a button to create each one.
 123. [x] **Add to your calendar.** The next session as a calendar file (and a Google Calendar link), so it lands in
     everyone's own calendar with the world's name and a link back.
-124. [ ] **On this day.** The front page notes what happened on today's in-world date in earlier years, and whose
+124. [x] **On this day.** The front page notes what happened on today's in-world date in earlier years, and whose
     birthday or which holiday it is.
 125. [ ] **Roll a name.** A "Roll" beside the name field for NPCs, settlements, taverns and shops, using the app's
     name tables (and an NPC's ancestry).
@@ -408,3 +408,4 @@ to the log at the bottom.
 - Who's who: "Who's who" (sidebar, Extras) lists every NPC the session log has met (a session links them with [[Name]] or connects to them), alphabetically: portrait (or an initial), name and pronunciation, role and where they are, their summary in a line, and "Met in 3 sessions · last in Session 12". The dead stay, struck through and tagged. Built from what the viewer can see, so a player's printout never names a hidden NPC; prints two columns to a page. js/cast.js unit tested.
 - Missing links: "What needs writing" opens with "Links that lead nowhere yet": every [[name]] in any text (summaries, descriptions, GM secrets, long fields) that matches no entry, ignoring case and spacing, most mentioned first, with the entries that mention it. Pick a kind beside it and "Create" opens the new-entry form with the name filled in; once saved, every mention becomes a link. js/thin.js missingLinks unit tested.
 - Add to your calendar: beside "Next session" (front page and the Next session page), "Add to calendar" offers a calendar file (.ics: Apple Calendar, Outlook and most others) and a Google Calendar link. The event is named for the world, runs four hours from the locked date, links back to the world and has a reminder two hours before. js/ics.js unit tested (escaping, line folding, CRLF).
+- On this day: when the world has a calendar, the front page shows "On this day: 3 Thawmoon 1040" if anything falls on today's in-world date: holidays, birthdays ("Ann turns 40") and anniversaries of dated events and sessions from earlier years ("50 years ago today: Fall of Brindle"; only dates that name their year count). Quiet days show nothing. js/onthisday.js unit tested.

@@ -69,7 +69,7 @@ import { viewRumors } from './world-rumors.js';
 import { familySection, clanTree, viewFamily } from './world-family.js';
 import { knowsButtons, knownSection } from './world-known.js';
 import { startCard, markPartySeen } from './onboarding.js';
-import { viewCalendar, worldCalendar, todayText } from './world-calendar.js';
+import { viewCalendar, worldCalendar, todayText, onThisDayCard } from './world-calendar.js';
 import { parseDate, toDays, yearLength } from './calendar.js';
 import { sheetSection } from './sheet-ui.js';
 import { pictureField, figure, thumb } from './image-ui.js';
@@ -202,6 +202,7 @@ function viewHome() {
       worldCalendar() ? el('p', { class: 'today-line' }, el('a', { href: '#world/calendar' }, `📅 ${todayText()}`)) : null, isMember() ? nextSessionLine() : null),
     zeroNudge(),
     previouslyCard(),
+    onThisDayCard(),
     quoteCard(),
     // Open for newcomers (no earlier visit, or session zero not read yet), folded for everyone else.
     startHereCard({ fresh: !world.info?.prev_visit || world.info?.zero_read === false }),

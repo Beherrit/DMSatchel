@@ -5,6 +5,7 @@ import { api, isGm } from './api.js';
 import { world, worldEntries, link, kindLabel, notice } from './world-store.js';
 import { birthdaysBetween, birthdayText } from './birthdays.js';
 import { repeatsBetween } from './repeats.js';
+import { onThisDay, yearsAgoText } from './onthisday.js';
 import { PRESETS, makeCalendar, cleanCalendar, toDays, fromDays, advance, today, formatDate, parseDate, moonPhase, moonEvent, holidaysOn } from './calendar.js';
 
 // Fields that hold an in-world date, by kind.
@@ -173,3 +174,16 @@ export function viewCalendar(arg, sub, rerender) {
   return node;
 }
 
+
+// The front page's "On this day": what happened on today's in-world date in earlier years, birthdays and holidays.
+export function onThisDayCard() {
+  const cal = worldCalendar();
+  if (!cal) return null;
+  const { anniversaries, birthdays, holidays } = onThisDay(cal, worldEntries());
+  if (!anniversaries.length && !birthdays.length && !holidays.length) return null;
+  return el('section', { class: 'card on-this-day' }, el('h3', {}, `On this day: ${formatDate(cal, today(cal))}`),
+    el('ul', { class: 'plain' },
+      holidays.map((h) => el('li', {}, `🎉 ${h.name}`)),
+      birthdays.map((b) => el('li', {}, '🎂 ', link(b.entry), b.age ? ` turns ${b.age}` : '’s birthday')),
+      anniversaries.slice(0, 5).map((a) => el('li', {}, el('span', { class: 'muted' }, `${yearsAgoText(a.yearsAgo)}: `), link(a.entry)))));
+}
