@@ -15,6 +15,7 @@ function help() {
           row(['Ctrl K'], 'Search everything (⌘K on a Mac)'), row(['/'], 'Search everything'), row(['?'], 'This list'),
           row(['n'], 'New world entry (GMs; players get a new journal entry)'),
           row(['j'], 'Quick note: a journal entry about the page you’re on'),
+          row(['['], 'Previous entry of the same kind'), row([']'], 'Next entry of the same kind'),
           Object.entries(GO).map(([k, [, label]]) => row(['g', k], `Go to ${label}`)),
           row(['Esc'], 'Close a dialog or a map pin'))),
         el('div', { class: 'btnrow' }, el('button', { class: 'btn primary', type: 'button', onclick: () => dialog.close() }, 'Close'))));
@@ -33,6 +34,7 @@ export function initShortcuts() {
     pendingG = 0;
     if (ev.key === 'g') { pendingG = Date.now(); return; }
     if (ev.key === '?') { ev.preventDefault(); help(); return; }
+    if ((ev.key === '[' || ev.key === ']') && location.hash.startsWith('#world/e/')) { const a = document.querySelector(`.entry-nav a[rel="${ev.key === '[' ? 'prev' : 'next'}"]`); if (a) { ev.preventDefault(); location.hash = a.getAttribute('href').slice(1); } return; }
     if (ev.key === 'j' && isMember() && location.hash.startsWith('#world')) { ev.preventDefault(); import('./world-quicknote.js').then((m) => m.openQuickNote()); return; }
     if (ev.key === 'n' && isMember()) { ev.preventDefault(); location.hash = isGm() ? 'world/new/npc' : 'world/new/journal'; }
   });

@@ -1525,3 +1525,8 @@ div.poll-row { cursor: default }
 .rsvp-who { flex-basis: 100%; color: var(--muted) }
 .rsvp.compact .rsvp-who { color: inherit }
 .rsvp-who strong { color: var(--ink) }
+
+/* Next and previous */
+.entry-nav { display: flex; justify-content: space-between; gap: 12px; margin-top: 18px; padding-top: 10px; border-top: 1px solid var(--line); font-size: calc(15px * var(--ts, 1)) }
+.entry-nav a { max-width: 48%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+@media print { .entry-nav { display: none } }

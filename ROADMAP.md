@@ -286,7 +286,7 @@ to the log at the bottom.
     page and session prep show who's in.
 128. [x] **Picture descriptions.** A short description for an entry's picture, read by screen readers and shown
     on hover; gallery captions do the same for theirs.
-129. [ ] **Next and previous.** Arrows on an entry's page to the next and previous entry of the same kind, with
+129. [x] **Next and previous.** Arrows on an entry's page to the next and previous entry of the same kind, with
     [ and ] on the keyboard.
 
 ## Ideas parking lot
@@ -421,3 +421,4 @@ to the log at the bottom.
 - Who has read it: when a player opens a handout they can see, their browser tells the server once per visit (GMs, and GMs previewing as a player, aren't counted). On the handout's page GMs see "👁 Read by Pip (Oct 29) · not yet: Bo". Additive entry_reads table (first and latest time per player and handout); party API POST {read}, GET ?reads (GMs only). Tested against PGlite: hidden handouts and other kinds can't be marked read.
 - Coming or not: once a next session is set, the front page asks members "Are you coming?" with "I'm coming" / "Can't make it" (press again to take it back) and shows "Coming: … · Can't make it: … · Not answered: …"; session prep has a "Who's coming" card. An answer belongs to the date it was given for, so moving the session asks everyone again. Additive members.rsvp column; party PUT {rsvp}; the summary comes with the world load. js/rsvp.js unit tested; routes tested against PGlite.
 - Picture descriptions: under an entry's picture in the form, "Describe the picture" (up to 300 characters, kept as fields.image_alt). The entry page's picture uses it as its alt text (read by screen readers) and hover title, and the picture wall uses it as the caption; gallery pictures' captions now show on hover too. Small avatars beside names stay decorative. The server keeps a description only alongside a picture. Tested in the browser (with axe) and against PGlite.
+- Next and previous: the foot of every entry page has "← Ann" and "Cob →" to the neighbouring entries of the same kind (sessions in number order, everything else by name; suggestions only among suggestions), and [ and ] do the same on the keyboard (listed under ?). Hidden when printing. js/neighbors.js unit tested.

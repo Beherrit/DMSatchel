@@ -31,6 +31,7 @@ import { goalsSection } from './world-goals.js';
 import { wishesSection } from './world-wishes.js';
 import { farewellCard } from './world-hall.js';
 import { noteRead, readsLine } from './world-reads.js';
+import { neighbors } from './neighbors.js';
 import { askNav, askAboutLink } from './world-ask.js';
 import { quoteCard } from './world-quotes.js';
 import { previouslyCard } from './world-previously.js';
@@ -307,6 +308,15 @@ function viewSearch(raw) {
     talkResults(f.q));
 }
 
+// Next and previous of the same kind, at the foot of an entry's page ([ and ] on the keyboard).
+function entryNav(e) {
+  const { prev, next } = neighbors(worldEntries(), e);
+  if (!prev && !next) return null;
+  return el('nav', { class: 'entry-nav', 'aria-label': `More ${KINDS[e.kind]?.plural.toLowerCase() || 'entries'}` },
+    prev ? el('a', { href: `#world/e/${prev.id}`, rel: 'prev' }, el('span', { 'aria-hidden': 'true' }, '← '), el('span', { class: 'sr-only' }, 'Previous: '), prev.name) : el('span'),
+    next ? el('a', { href: `#world/e/${next.id}`, rel: 'next' }, el('span', { class: 'sr-only' }, 'Next: '), next.name, el('span', { 'aria-hidden': 'true' }, ' →')) : el('span'));
+}
+
 function viewEntry(id, tab) {
   const e = world.entries.get(id);
   if (!e) return notice('Entry not found', 'It may have been deleted, or the link is wrong.');
@@ -379,7 +389,7 @@ function viewEntry(id, tab) {
     history,
     noteBox(e),
     tableWidget(e),
-    isGm() ? talkWidget(e) : null);
+    isGm() ? talkWidget(e) : null, entryNav(e));
   const node = el('article', { class: 'w-view entry-view' },
     crumbs.length ? el('nav', { class: 'crumbs', 'aria-label': 'Located in' }, crumbs.flatMap((c, i) => [i ? ' › ' : '', link(c)])) : null,
     el('div', { class: 'panel-head row' },
