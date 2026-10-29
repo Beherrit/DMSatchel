@@ -313,7 +313,7 @@ to the log at the bottom.
     on every selected entry of the same kind.
 143. [x] **A new world like this one.** Start a fresh world with this one's calendar, own fields, templates, session
     zero page and tag descriptions, but none of its entries.
-144. [ ] **More shortcuts.** On an entry's page: e to edit, s to star, f to follow.
+144. [x] **More shortcuts.** On an entry's page: e to edit, s to star, f to follow.
 145. [ ] **Export to a spreadsheet.** Download any kind of entry as a CSV file with its fields as columns, the
     mirror of importing from a spreadsheet.
 
@@ -464,3 +464,4 @@ to the log at the bottom.
 - Between sessions: session prep opens (after "Last time") with "Between sessions (since Session 4)": journal entries written since the latest session was logged (with who wrote them), downtime asked for or changed (marked "to resolve" until it is), new suggestions, player questions waiting for an answer, and how much table talk there's been, each linking to where to deal with it. Quiet weeks say so. js/between.js unit tested.
 - Set a field for many: the bulk bar (Select on any list) has a field picker with the short-text and pick-list fields of the kinds on the list (status, role, ancestry, type, rarity…), a value box (a list of the allowed values for pick-list fields; blank clears) and "Set". It changes every selected entry whose kind has that field, refuses a value any selected kind doesn't allow, skips entries already set that way, and records each change in the history. PATCH entries {ids, set_field}; settableFields and setFieldValue (js/bulk.js) unit tested; route tested against PGlite.
 - A new world like this one: the Worlds page's "Create a world" form has "Start from": a blank world, or "Like <world>" for any world you GM. The new world (yours) gets that world's calendar as it stands, own fields, entry templates, session zero page and tag descriptions; none of its entries, members, maps or play state, and the original is untouched. POST worlds {name, like}; tested against PGlite (players can't copy, the original keeps its entries).
+- More shortcuts: on an entry's page, e opens the edit form (when you may edit it), s stars it and f follows it, like pressing the buttons; ? lists them with the others. Ignored while typing in a field.
