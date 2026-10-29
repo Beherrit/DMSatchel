@@ -316,6 +316,14 @@ to the log at the bottom.
 144. [x] **More shortcuts.** On an entry's page: e to edit, s to star, f to follow.
 145. [x] **Export to a spreadsheet.** Download any kind of entry as a CSV file with its fields as columns, the
     mirror of importing from a spreadsheet.
+146. [ ] **Pin a note to the session.** GMs jot reminders on the next session ("give Pip the letter") that show at
+    the top of session prep and on the printable sheet, ticked off when done.
+147. [ ] **Faction news.** After a faction turn, offer a ready-made notice for the players about what's visibly
+    changed (clocks that filled, standing that moved), for GMs to edit and post.
+148. [ ] **Places at a glance.** A settlement's page shows a small panel: who leads it, who holds it, how many
+    people, shops and open jobs are there, and its mood music and weather today.
+149. [ ] **Recently changed for GMs.** A GM-only "Recently changed" list on the front page: the last dozen edits by
+    anyone, with who and when, linking to each entry's history.
 
 ## Ideas parking lot
 
