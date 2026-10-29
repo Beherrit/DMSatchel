@@ -72,7 +72,7 @@ export const KINDS = {
   },
   event: {
     label: 'Event', plural: 'History & Events', blurb: 'The timeline: wars, founding dates, campaign sessions.',
-    fields: [['date', 'Date (in world)'], ['sort', 'Sort year (number)'], ['era', 'Era'], ['participants', 'Who was involved', 'long'], ['outcome', 'Outcome', 'long']],
+    fields: [['date', 'Date (in world)'], ['repeats', 'Repeats', 'select', ['Every week', 'Every month', 'Every year']], ['until', 'Repeats until (in-world date)'], ['sort', 'Sort year (number)'], ['era', 'Era'], ['participants', 'Who was involved', 'long'], ['outcome', 'Outcome', 'long']],
   },
   session: {
     label: 'Session', plural: 'Session Log', blurb: 'What happened at the table, who ran it and who played.',

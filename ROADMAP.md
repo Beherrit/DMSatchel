@@ -261,7 +261,7 @@ to the log at the bottom.
     and "where we left off", so everyone arrives remembering.
 115. [x] **Text size.** A per-browser setting for larger (or smaller) text across the app, for phones and tired
     eyes at the end of a long session.
-116. [ ] **Repeating events.** Calendar events that come round every week, month or year (market day, the council's
+116. [x] **Repeating events.** Calendar events that come round every week, month or year (market day, the council's
     moot, a feast), shown on the calendar and in session prep.
 117. [ ] **Prep checklist.** The GMs' own list of things to do before each session (print sheets, update the map),
     ticked off in session prep and cleared when a new session starts.
@@ -385,3 +385,4 @@ to the log at the bottom.
 - Birthdays on the calendar: player characters and NPCs have a "Birthday (in-world date)" field (any date the calendar reads: "3 Thawmoon", "3 Thawmoon 1000"). Birthdays recur every year: "🎂 Ann" in the calendar's month grid, "🎂 Ann turns 40" in the day's detail (an age when a birth year was given, nothing before it), and in session prep's "Coming up" for the next two weeks, including across New Year. The dead are left out. js/birthdays.js unit tested.
 - Previously on…: the world's front page has a "Previously on… Session 12" card from the latest session the viewer can see: its summary, "Where we left off" (the session's "Next time" field, formatted) and a link to the full session with its in-world date. It's open when the next session is within a week and folded otherwise, so it never crowds the page between campaigns.
 - Text size: an "A" button beside the theme switch cycles Normal → Larger (A+, 115%) → Largest (A++, 130%) → Smaller (A−, 90%), remembered per browser and applied before the page draws. Every font size in the stylesheet is multiplied by one --ts variable, so text grows while layouts, maps and pins keep their geometry (no page zoom); printing always uses the normal size. Checked on a phone at the largest size: no sideways scrolling.
+- Repeating events: events have "Repeats" (every week, every month, every year) and an optional "Repeats until" date. From their own date on, they come round again on the calendar ("↻ Market day" in the month grid; the day's detail says how often) and in session prep's "Coming up". A week is the calendar's own week length; a monthly event skips months too short for its day. js/repeats.js unit tested.
