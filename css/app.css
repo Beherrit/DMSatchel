@@ -1478,3 +1478,21 @@ div.poll-row { cursor: default }
 .ck-tools { display: inline-flex; gap: 2px }
 .ck-add { display: flex; flex-wrap: wrap; gap: 6px }
 .ck-add input { flex: 1 1 10rem; min-width: 0 }
+
+/* Cards to hand across the table (items, spells): poker size when printed, nine to a page */
+.play-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(240px, 100%), 1fr)); gap: 12px; align-items: start }
+.play-card { border: 2px solid var(--ink); border-radius: 10px; padding: 10px 12px; background: var(--surface); display: grid; gap: 4px; break-inside: avoid; font-size: calc(14px * var(--ts, 1)) }
+.play-card header { display: flex; justify-content: space-between; gap: 6px; align-items: start; border-bottom: 1px solid var(--line); padding-bottom: 4px }
+.play-card h3 { margin: 0; font-family: var(--f-display); font-size: calc(18px * var(--ts, 1)); line-height: 1.15 }
+.pc-sub { margin: 0; font-style: italic; color: var(--muted); font-size: calc(13px * var(--ts, 1)) }
+.pc-pic { width: 100%; max-height: 110px; object-fit: contain }
+.pc-text p { margin: 0 0 4px; white-space: pre-line }
+.pc-foot { border-top: 1px dashed var(--line); padding-top: 4px; font-size: calc(12px * var(--ts, 1)); color: var(--muted) }
+@media print {
+  .play-cards { grid-template-columns: repeat(3, 63mm); grid-auto-rows: 88mm; gap: 3mm; justify-content: center }
+  .play-card { height: 88mm; overflow: hidden; border-color: #000; border-radius: 3mm; padding: 3mm; font-size: 8pt; align-content: start }
+  .play-card h3 { font-size: 11pt }
+  .pc-sub, .pc-foot { font-size: 7pt; color: #333 }
+  .pc-pic { max-height: 22mm }
+  .play-card:nth-child(9n) { break-after: page }
+}

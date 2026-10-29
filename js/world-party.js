@@ -19,6 +19,7 @@ import { coinText, parseCoins } from './economy.js';
 import { tableCard } from './world-profiles.js';
 import { journeySection } from './world-journey.js';
 import { wishedBy } from './world-wishes.js';
+import { itemsNamed } from './play-cards.js';
 
 function members(chars) {
   const active = chars.filter(ACTIVE), former = chars.filter((e) => !ACTIVE(e));
@@ -47,7 +48,8 @@ function treasury(state, chars, reload) {
     el('div', { class: 'coin-total' }, el('span', { class: 'eyebrow' }, 'Coin'), el('strong', {}, coinText(cp)),
       share ? el('span', { class: 'muted small' }, `${coinText(share)} each if split ${active.length} ways`) : null),
     items.length ? el('div', {}, el('span', { class: 'eyebrow' }, 'Items held'),
-      el('ul', { class: 'plain item-held' }, items.map((i) => el('li', {}, i.qty > 1 ? `${i.qty} × ` : '', el('strong', {}, i.item), i.holder ? el('span', { class: 'muted small' }, ` (${i.holder})`) : null, wishedBy(i.item, active)))))
+      el('ul', { class: 'plain item-held' }, items.map((i) => el('li', {}, i.qty > 1 ? `${i.qty} × ` : '', el('strong', {}, i.item), i.holder ? el('span', { class: 'muted small' }, ` (${i.holder})`) : null, wishedBy(i.item, active)))),
+      itemsNamed(worldEntries(), items.map((i) => i.item)).length ? el('a', { class: 'small', href: '#world/itemcards/held' }, 'Print cards for these items') : null)
       : el('p', { class: 'muted small' }, 'No items in the shared stash.'));
   if (isGm() && active.length && cp > 0) box.append(splitForm(cp, active, reload));
   if (isMember()) box.append(ledgerForm(chars, reload));
