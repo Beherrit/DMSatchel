@@ -10,6 +10,7 @@ import { progressBadge } from './world-objectives.js';
 import { advancementSection } from './world-attendance.js';
 import { partyBondsSection } from './world-bonds.js';
 import { splitCoins } from './economy.js';
+import { coinChart } from './world-coinchart.js';
 
 const ACTIVE = (e) => !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
 
@@ -47,6 +48,7 @@ function treasury(state, chars, reload) {
   box.append(
     el('div', { class: 'coin-total' }, el('span', { class: 'eyebrow' }, 'Coin'), el('strong', {}, coinText(cp)),
       share ? el('span', { class: 'muted small' }, `${coinText(share)} each if split ${active.length} ways`) : null),
+    coinChart(lines),
     items.length ? el('div', {}, el('span', { class: 'eyebrow' }, 'Items held'),
       el('ul', { class: 'plain item-held' }, items.map((i) => el('li', {}, i.qty > 1 ? `${i.qty} × ` : '', el('strong', {}, i.item), i.holder ? el('span', { class: 'muted small' }, ` (${i.holder})`) : null, wishedBy(i.item, active)))),
       itemsNamed(worldEntries(), items.map((i) => i.item)).length ? el('a', { class: 'small', href: '#world/itemcards/held' }, 'Print cards for these items') : null)
