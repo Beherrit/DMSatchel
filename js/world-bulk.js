@@ -1,11 +1,11 @@
 // Bulk actions (GMs): "Select" on an entry list or search results puts a tick box on each entry and a bar with
 // Reveal, Hide, Add or remove a tag, and Move into a place. The selection survives the redraw after each action,
 // so several changes can be made to the same entries.
-import { el, toast } from './dom.js';
+import { el, toast, setKids } from './dom.js';
 import { api, isGm } from './api.js';
 import { world, worldEntries, byName } from './world-store.js';
 import { PLACE_KINDS } from './world-schema.js';
-import { cleanTag, movable } from './bulk.js';
+import { cleanTag, movable, settableFields } from './bulk.js';
 
 let state = null; // { hash, ids: Set }
 
@@ -25,6 +25,7 @@ export function bulkControls(list, container) {
     el('span', { class: 'bulk-group' }, tagIn, act('Add tag', () => tag('add_tag')), act('Remove tag', () => tag('remove_tag')),
       el('datalist', { id: 'bulk-tags' }, [...new Set(worldEntries().flatMap((e) => e.tags || []))].sort().map((t) => el('option', { value: t })))),
     el('span', { class: 'bulk-group' }, moveTo, act('Move', move)),
+    setGroup(),
     act('Done', off, 'btn small ghost'));
   const button = el('button', { class: 'btn', type: 'button', 'aria-pressed': 'false', onclick: () => (state ? off() : on(new Set())) }, 'Select');
 
@@ -63,6 +64,25 @@ export function bulkControls(list, container) {
       toast(`${verb} ${plural(n, 'entry', 'entries')}${what}${note || (same ? ` (${same} already ${body.visibility ? (body.visibility === 'all' ? 'visible' : 'hidden') : 'that way'})` : '')}`);
       window.dispatchEvent(new Event('world:rerender'));
     } catch (err) { toast(err.message, 'bad'); }
+  }
+  // Set one field (an NPC's status, a quest's status…) on every selected entry whose kind has it.
+  function setGroup() {
+    const fields = settableFields(list.map((e) => e.kind));
+    if (!fields.length) return null;
+    const which = el('select', { 'aria-label': 'Field to set' }, fields.map((f, i) => el('option', { value: String(i) }, f.label)));
+    const valueBox = el('span');
+    let value;
+    const draw = () => {
+      const f = fields[Number(which.value)];
+      value = f.options ? el('select', { 'aria-label': `New ${f.label.toLowerCase()}` }, el('option', { value: '' }, '— clear —'), f.options.map((o) => el('option', { value: o }, o)))
+        : el('input', { type: 'text', 'aria-label': `New ${f.label.toLowerCase()}`, placeholder: 'value (blank clears)', size: 12 });
+      setKids(valueBox, value);
+    };
+    which.addEventListener('change', draw); draw();
+    return el('span', { class: 'bulk-group' }, which, valueBox, act('Set', () => {
+      const f = fields[Number(which.value)];
+      send({ set_field: { key: f.key, value: value.value } }, 'Updated', ` (${f.label}: ${value.value || 'cleared'})`);
+    }));
   }
   function tag(key) {
     const t = cleanTag(tagIn.value);

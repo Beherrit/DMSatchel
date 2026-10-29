@@ -30,3 +30,16 @@ test('loops in the data do not hang', () => {
 test('tags among the picked entries, most common first', () => {
   assert.deepEqual(tagsAmong(world, ['t', 'l', 'n']), [{ tag: 'key', n: 2 }, { tag: 'town', n: 1 }]);
 });
+
+test('settable fields and their values', async () => {
+  const { settableFields, setFieldValue } = await import('../js/bulk.js');
+  const f = settableFields(['npc', 'npc']);
+  const status = f.find((x) => x.key === 'status');
+  assert.ok(status && status.options.includes('Dead') && status.kinds.join() === 'npc');
+  assert.ok(!f.some((x) => x.key === 'appearance' || x.key === 'stats')); // long text stays out
+  assert.deepEqual(setFieldValue('npc', 'status', 'Dead'), { ok: true, value: 'Dead' });
+  assert.ok(setFieldValue('npc', 'status', 'Asleep').error);
+  assert.deepEqual(setFieldValue('npc', 'role', '  Smith '), { ok: true, value: 'Smith' });
+  assert.ok(setFieldValue('npc', 'appearance', 'x').error);
+  assert.deepEqual(setFieldValue('npc', 'status', ''), { ok: true, value: '' });
+});

@@ -146,6 +146,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Picture wall**: every picture in the world on one page (portraits, places, galleries, maps), by kind and tag.
 - **Text size**: an “A” button in the header makes all text larger, largest or smaller, remembered per browser.
 - **Previously on…**: the front page opens with the last session's summary and where the party left off.
+- **Set a field for many**: bulk actions set one field (a status, a type, a role) on every selected entry that has it.
 - **Between sessions**: session prep gathers the players' journals, downtime, suggestions, questions and table talk since the last session.
 - **Who holds what**: a map switch tints each pin by the faction, guild or house that controls the place, with a key.
 - **Their story so far**: a character's page gathers sessions played, quests finished, goals reached, wishes come true and what they carry.

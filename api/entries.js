@@ -8,6 +8,7 @@
 // PUT ?id= {entry}  update; send the version you loaded or get 409. Players may edit only their own entries.
 // PATCH {id, visibility?, status?}     GM quick changes: reveal or hide, approve a suggestion
 // PATCH {ids, visibility | add_tag | remove_tag | move_to}   the same for many entries at once (GM)
+// PATCH {ids, set_field: {key, value}}  (GM) set one field on every selected entry whose kind has it ('' clears it)
 // PATCH {rename_tag: {from, to}}       (GM) rename a tag on every entry, or fold it into another tag
 // POST {suggest_edit: {entry_id, summary, body, fields, note}}   (member) suggest changes to an entry you can see
 // GET ?edits=1                          suggested edits: every open one (GMs) or your own (players)
@@ -38,7 +39,7 @@ import { cleanMusic } from '../js/music.js';
 import { journeyFor } from '../js/journey.js';
 import { askUnread } from './_lib/ask.js';
 import { rsvpSummary, rsvpOpen } from '../js/rsvp.js';
-import { cleanTag, chainUp } from '../js/bulk.js';
+import { cleanTag, chainUp, setFieldValue } from '../js/bulk.js';
 import { cleanPrimer, primerEmpty } from '../js/zero.js';
 import { activeNotices } from '../js/notices.js';
 import { readClock } from '../js/clock.js';
@@ -406,6 +407,23 @@ export default route({
       if (!requireGm(req, res)) return;
       const ids = [...new Set(req.body.ids.map((x) => String(x).slice(0, 40)))].slice(0, 300);
       const b = req.body;
+      if (b.set_field) {
+        const key = String(b.set_field.key || '').slice(0, 40);
+        // Only the kinds actually selected that have this field.
+        const picked = (await sql`SELECT DISTINCT kind FROM entries WHERE world_id = ${req.world.id} AND id = ANY(${ids}) AND NOT deleted`).map((r) => r.kind);
+        const kinds = picked.filter((k) => setFieldValue(k, key, '').ok);
+        if (!kinds.length) return fail(res, 400, 'That field can’t be set for many at once.');
+        const checks = kinds.map((k) => setFieldValue(k, key, b.set_field.value));
+        const bad = checks.find((c) => c.error);
+        if (bad) return fail(res, 400, bad.error);
+        const value = checks[0].value;
+        const rows = await sql`UPDATE entries SET fields = CASE WHEN ${value} = '' THEN COALESCE(fields, '{}'::jsonb) - ${key}::text ELSE jsonb_set(COALESCE(fields, '{}'::jsonb), ARRAY[${key}]::text[], to_jsonb(${value}::text)) END,
+            updated_by = ${req.gm.id}, updated_at = now(), version = version + 1
+          WHERE world_id = ${req.world.id} AND id = ANY(${ids}) AND NOT deleted AND kind = ANY(${kinds}) AND COALESCE(fields ->> ${key}, '') <> ${value} RETURNING id`;
+        const changed = rows.length ? await Promise.all(rows.map((r) => loadOne(r.id, req.world.id))) : [];
+        for (const e of changed) await record(e.id, req.gm.id, 'edit', snapshot(e));
+        return send(res, 200, { entries: changed.map((e) => shape(e, req)), skipped: ids.length - changed.length });
+      }
       if ('add_tag' in b || 'remove_tag' in b || 'move_to' in b) {
         let rows;
         if ('move_to' in b) {

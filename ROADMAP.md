@@ -309,6 +309,13 @@ to the log at the bottom.
     by", "Ruled by" or a connection), with a key.
 141. [x] **Between sessions.** Session prep gathers what players did since the last session: journals, downtime,
     suggestions, questions and table talk, in one card.
+142. [x] **Set a field for many.** Bulk actions can set one field (an NPC's status, a quest's status, a shop's type)
+    on every selected entry of the same kind.
+143. [ ] **A new world like this one.** Start a fresh world with this one's calendar, own fields, templates, session
+    zero page and tag descriptions, but none of its entries.
+144. [ ] **More shortcuts.** On an entry's page: e to edit, s to star, f to follow.
+145. [ ] **Export to a spreadsheet.** Download any kind of entry as a CSV file with its fields as columns, the
+    mirror of importing from a spreadsheet.
 
 ## Ideas parking lot
 
@@ -455,3 +462,4 @@ to the log at the bottom.
 - Their story so far: a player character's page has "Their story so far": sessions played (attendance, connections or [[mentions]] in the log; "from Session 1 to Session 12"), completed quests connected to them or mentioning them, goals reached, wishes come true (only for those who can see the wish list), and the items whose holder is them. Built from what the world already records; nothing new to fill in. The party's journey is the party's, so it stays on the party page. js/story.js unit tested.
 - Who holds what: maps have a "Who holds what" switch. Each pinned place is held by a faction, guild or house when it says so itself (a connection labelled controlled / ruled / held / owned / claimed / governed / run by, or its Ruled by, Controlled by, Led by or Owner field naming one), otherwise by whoever holds the place around it. Held pins take that power's colour, their labels say "held by …", and a key above the map lists the powers with counts. Colours are the reference categorical palette in fixed order (light and dark steps), assigned by each power's place among the world's powers sorted by name, so a power keeps its colour whatever is on screen; a ninth and later share a neutral grey. js/control.js unit tested.
 - Between sessions: session prep opens (after "Last time") with "Between sessions (since Session 4)": journal entries written since the latest session was logged (with who wrote them), downtime asked for or changed (marked "to resolve" until it is), new suggestions, player questions waiting for an answer, and how much table talk there's been, each linking to where to deal with it. Quiet weeks say so. js/between.js unit tested.
+- Set a field for many: the bulk bar (Select on any list) has a field picker with the short-text and pick-list fields of the kinds on the list (status, role, ancestry, type, rarity…), a value box (a list of the allowed values for pick-list fields; blank clears) and "Set". It changes every selected entry whose kind has that field, refuses a value any selected kind doesn't allow, skips entries already set that way, and records each change in the history. PATCH entries {ids, set_field}; settableFields and setFieldValue (js/bulk.js) unit tested; route tested against PGlite.
