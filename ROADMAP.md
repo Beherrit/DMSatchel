@@ -234,6 +234,14 @@ to the log at the bottom.
     and beside loot, and players tick a wish off when it comes true.
 101. [x] **Read-aloud in prep.** The session prep page and printable session sheet gather the "> read-aloud" boxes
     from the entries planned for that session, in order, ready to read.
+102. [x] **Likely duplicates.** A GM page listing entries that look like the same thing (same or near names),
+    with "Merge" and "Not the same" (remembered), so a big imported world stays tidy.
+103. [ ] **Roll a detail.** Small roll buttons beside NPC looks, voice, manner and wants, and place features, in the
+    entry form, filled from the app's generators; roll again or keep typing.
+104. [ ] **Hall of heroes.** A page remembering characters who died or retired: how and when, an epitaph from
+    their player, and the sessions they played.
+105. [ ] **Ask the GM.** A private question thread between each player and the GMs, between sessions, with a
+    badge when there's an answer.
 
 ## Ideas parking lot
 
@@ -340,3 +348,4 @@ to the log at the bottom.
 - Where the party has been: setting where the party is (session prep, or "The party is here" on a map pin) adds a stop with the time, the in-world date and the GM; staying put adds nothing; the last 300 are kept in the world's session prep (prep.journey, no new column). The world load sends each person the stops at places they can see (a hidden place in between doesn't split a stay). Maps draw a dotted route through the stops at each place's pin, or the pin of the nearest place containing it, with a "Route so far" switch. The party page's "The journey" lists the stops newest first with in-world and real dates (older ones folded); GMs can strike a mistaken stop (PATCH settings {journey_remove}). js/journey.js unit tested; routes tested against PGlite.
 - Wish lists: a character's page has a "Wish list" for its player and the GMs (other players never receive it): add a wish, tick it off when it comes true (it's struck through and dated), or remove it. Session prep's party card shows each character's open wishes under their goals, and the party treasury marks items held that answer a wish ("★ Pip wishes for this"; the whole name, or every meaningful word of the wish, e.g. "an elvenkind cloak" matches Cloak of Elvenkind). Kept as fields.wishes on the character. js/wishes.js unit tested; privacy tested against PGlite.
 - Read-aloud in prep: session prep has a "Read-aloud" card and the printable session sheet a "Read-aloud" block: the "> " boxes from what's planned for the next session, in order: entries the GM scratch pad [[mentions]] (in the order mentioned), then where the party is and everything inside it, then quests in play, each entry once. Boxes come from the description, then long fields (labelled, e.g. Notable features), then the GM secret. The card keeps formatting; the sheet prints plain text in full. js/read-aloud.js unit tested.
+- Likely duplicates: "What needs writing" links to a GM page of entry pairs that may be the same thing: the same name (across kinds) or a near one within a kind (a typo or two, "The", a plural, one name inside the other). Sessions, journals and downtime are left out, and names with different numbers (Session 12 / 13, Room 1 / 2) are never near; that last rule also quiets the "Is that name taken?" check. Each pair shows both entries with their opening lines; "Keep this one…" opens the merge dialog set up to fold the other into it (now finds the right one when both share a name), and "Not the same" is remembered for all GMs (prep.not_dupes; PATCH settings {not_dupe}). js/duplicates.js unit tested; route tested against PGlite.

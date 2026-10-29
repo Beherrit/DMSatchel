@@ -1357,3 +1357,10 @@ div.poll-row { cursor: default }
 .ra-box .eyebrow { display: block; margin-bottom: 2px }
 .ss-ra + .ss-ra { margin-top: 6px }
 .ss-ra blockquote { margin: 2px 0 4px; padding-left: 8px; border-left: 3px solid var(--ink); font-style: italic; font-size: 14px }
+
+/* Likely duplicates */
+.dp-list > li + li { margin-top: 10px }
+.dp-sides { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; margin: 6px 0 8px }
+.dp-side .kind-tag { margin-left: 6px }
+.dp-side p { margin: 4px 0 6px }
+@media (max-width: 560px) { .dp-sides { grid-template-columns: minmax(0, 1fr) } }

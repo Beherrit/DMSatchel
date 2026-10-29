@@ -3,6 +3,7 @@
 // PUT {discord_webhook}  (owner) a Discord webhook link; it never leaves the server. Empty string removes it.
 // PATCH {prep: {location_id, notes}}   (GM) session prep: where the party is, and the GMs' scratch pad. Moving the
 //   party adds a stop to prep.journey (with the in-world date); PATCH {journey_remove: at} strikes one.
+// PATCH {not_dupe: 'idA|idB'}   (GM) two entries with alike names are different things (prep.not_dupes)
 // PATCH {tag_note: {tag, text}}   (GM) a tag's description on its page
 // PATCH {start_here: {id, on} | {order}}   (GM) the entries newcomers should read first
 // PATCH {clock: {advance} | {set} | {add_light} | {remove_light}}   (GM) time of day and lights during play
@@ -177,6 +178,13 @@ export default route({
       if (r.error) return fail(res, 400, r.error);
       await sql`UPDATE worlds SET prep = jsonb_set(COALESCE(prep, '{}'::jsonb), '{secrets}', ${JSON.stringify(r.list)}::jsonb) WHERE id = ${req.world.id}`;
       return send(res, 200, { secrets: r.list });
+    }
+    if (req.body.not_dupe !== undefined) {
+      const key = String(req.body.not_dupe).split('|').map((x) => x.trim().slice(0, 40)).filter(Boolean).sort().join('|');
+      if (key.split('|').length !== 2) return fail(res, 400, 'Name two entries.');
+      const list = [...new Set([...(Array.isArray(req.world.prep?.not_dupes) ? req.world.prep.not_dupes : []), key])].slice(-2000);
+      await sql`UPDATE worlds SET prep = jsonb_set(COALESCE(prep, '{}'::jsonb), '{not_dupes}', ${JSON.stringify(list)}::jsonb) WHERE id = ${req.world.id}`;
+      return send(res, 200, { not_dupes: list });
     }
     if (req.body.journey_remove !== undefined) {
       const list = removeStop(req.world.prep?.journey, String(req.body.journey_remove));

@@ -18,7 +18,8 @@ export function viewTodo() {
   const spots = thinSpots(worldEntries());
   const total = GROUPS.reduce((t, [k]) => t + spots[k].length, 0);
   return el('div', { class: 'w-view todo-view' },
-    el('div', { class: 'panel-head' }, el('h2', {}, 'What needs writing'), el('p', {}, total ? `${total} thin spot${total === 1 ? '' : 's'} to fill in, most useful first.` : 'Nothing thin: every entry has something written, every place has people in it.')),
+    el('div', { class: 'panel-head' }, el('h2', {}, 'What needs writing'), el('p', {}, total ? `${total} thin spot${total === 1 ? '' : 's'} to fill in, most useful first.` : 'Nothing thin: every entry has something written, every place has people in it.'),
+      el('p', { class: 'small' }, el('a', { href: '#world/dupes' }, 'Likely duplicates'), ': entries that may be the same thing, to merge.')),
     GROUPS.map(([k, title, hint]) => {
       const list = [...spots[k]].sort(byName);
       return list.length ? el('section', { class: 'card todo-group' }, el('h3', {}, `${title} (${list.length})`), el('p', { class: 'muted small' }, hint),

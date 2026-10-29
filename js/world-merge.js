@@ -8,14 +8,15 @@ import { similarNames } from './name-check.js';
 
 export function mergeButton(e) {
   if (!isGm() || e.status === 'suggested') return null;
-  return el('button', { class: 'btn small', type: 'button', title: 'Fold this entry into another one for the same thing', onclick: () => openDialog(e) }, 'Merge into…');
+  return el('button', { class: 'btn small', type: 'button', title: 'Fold this entry into another one for the same thing', onclick: () => openMergeDialog(e) }, 'Merge into…');
 }
 
-function openDialog(from) {
+// into: an entry to suggest keeping; onDone(into): instead of opening the kept entry afterwards.
+export function openMergeDialog(from, into = null, onDone = null) {
   const all = worldEntries().filter((x) => x.id !== from.id && x.status !== 'suggested');
   const near = similarNames(from.name, all, from.id), likely = [...near.exact, ...near.close];
   const sameKind = all.filter((x) => x.kind === from.kind).sort(byName);
-  const target = el('input', { type: 'text', id: 'mg-into', list: 'mg-names', value: likely[0]?.name || '', placeholder: 'The entry to keep', autocomplete: 'off' });
+  const target = el('input', { type: 'text', id: 'mg-into', list: 'mg-names', value: into?.name || likely[0]?.name || '', placeholder: 'The entry to keep', autocomplete: 'off' });
   const status = el('p', { class: 'form-status', role: 'status' });
   const d = el('dialog', { class: 'dialog', 'aria-labelledby': 'mg-title' }, el('form', { class: 'dialog-body', method: 'dialog' },
     el('h2', { id: 'mg-title' }, `Merge ${from.name} into…`),
@@ -27,14 +28,16 @@ function openDialog(from) {
     el('div', { class: 'btnrow' }, el('button', { class: 'btn primary', type: 'submit' }, 'Merge'), el('button', { class: 'btn', type: 'button', onclick: () => d.close() }, 'Cancel'))));
   d.querySelector('form').addEventListener('submit', async (ev) => {
     ev.preventDefault();
-    const into = findByName(target.value.trim());
-    if (!into || into.id === from.id) { status.textContent = 'Pick another entry from the world by its name.'; status.className = 'form-status error'; target.focus(); return; }
+    // Two entries can share a name (that's often why they're merged): pick the one that isn't this one.
+    const name = target.value.trim().toLowerCase();
+    const keep = into && into.name.toLowerCase() === name ? into : all.find((x) => x.name.toLowerCase() === name) || findByName(target.value.trim());
+    if (!keep || keep.id === from.id) { status.textContent = 'Pick another entry from the world by its name.'; status.className = 'form-status error'; target.focus(); return; }
     status.textContent = 'Merging…'; status.className = 'form-status';
     try {
-      const r = await api('entries', { method: 'PATCH', body: { merge: { from: from.id, into: into.id } } });
+      const r = await api('entries', { method: 'PATCH', body: { merge: { from: from.id, into: keep.id } } });
       await loadWorld(true);
-      toast(`Merged ${from.name} into ${into.name}${r.moved ? ` (${r.moved} other entr${r.moved === 1 ? 'y' : 'ies'} updated)` : ''}`);
-      d.close(); location.hash = `world/e/${into.id}`;
+      toast(`Merged ${from.name} into ${keep.name}${r.moved ? ` (${r.moved} other entr${r.moved === 1 ? 'y' : 'ies'} updated)` : ''}`);
+      d.close(); if (onDone) onDone(keep); else location.hash = `world/e/${keep.id}`;
     } catch (err) { status.textContent = err.message; status.className = 'form-status error'; }
   });
   d.addEventListener('close', () => d.remove());

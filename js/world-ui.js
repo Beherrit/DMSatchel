@@ -75,6 +75,7 @@ import { patchEntry, setEntryState, stateBadges, syncWorld, descendantsOf } from
 const lazyView = (load, name) => async (...args) => (await load())[name](...args);
 const viewWeb = lazyView(() => import('./world-web.js'), 'viewWeb');
 const viewSay = lazyView(() => import('./world-say.js'), 'viewSay');
+const viewDupes = lazyView(() => import('./world-dupes.js'), 'viewDupes');
 const viewPrep = lazyView(() => import('./world-prep.js'), 'viewPrep');
 const viewPowers = lazyView(() => import('./world-powers.js'), 'viewPowers');
 const viewLibrary = lazyView(() => import('./world-library.js'), 'viewLibrary');
@@ -617,6 +618,7 @@ export async function showWorld(parts, { keepScroll = false } = {}) {
   else if (view === 'q') node = viewSearch(arg || '');
   else if (view === 'tags') node = viewTags();
   else if (view === 'say') node = await viewSay();
+  else if (view === 'dupes') node = await viewDupes();
   else if (view === 'bin') node = await viewBin();
   else if (view === 'atlas') node = viewAtlas();
   else if (view === 'maps') node = viewMaps();

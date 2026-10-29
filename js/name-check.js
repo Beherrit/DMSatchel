@@ -1,7 +1,7 @@
 // Is that name taken? While a new entry is being named, find entries with the same name, or one close enough to be
 // the same thing ("The Brindle" / "Brindle", "Brindel" / "Brindle"). Pure, so it can be tested.
 
-const norm = (s) => String(s || '').toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g, '').replace(/^(the|a|an)\s+/, '').replace(/[^a-z0-9]+/g, ' ').trim();
+export const normName = (s) => String(s || '').toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g, '').replace(/^(the|a|an)\s+/, '').replace(/[^a-z0-9]+/g, ' ').trim();
 
 // Edit distance where swapping two neighbouring letters counts as one edit, giving up early past `max`.
 function distance(a, b, max) {
@@ -20,20 +20,29 @@ function distance(a, b, max) {
   return prev[b.length];
 }
 
+// How alike two normalised names are: 'exact', 1 (a typo or two apart), 2 (one inside the other, or a plural), or 0.
+// Names with different numbers in them ("Session 12", "Session 13") are never close.
+export function closeness(n, m) {
+  if (!n || !m) return 0;
+  if (n === m) return 'exact';
+  if ((n.match(/\d+/g) || []).join() !== (m.match(/\d+/g) || []).join()) return 0;
+  const max = n.length >= 9 ? 2 : 1;
+  if (n.length >= 5 && m.length >= 5 && distance(n, m, max) <= max) return 1;
+  const inside = Math.min(n.length, m.length) >= 4 && (m === n.replace(/s$/, '') || n === m.replace(/s$/, '') || (` ${m} `).includes(` ${n} `) || (` ${n} `).includes(` ${m} `));
+  return inside ? 2 : 0;
+}
+
 // → { exact: [entries], close: [entries] } (at most five close ones, nearest first).
 export function similarNames(name, entries, selfId) {
-  const n = norm(name);
+  const n = normName(name);
   if (n.length < 3) return { exact: [], close: [] };
   const exact = [], close = [];
   for (const e of entries) {
     if (e.id === selfId) continue;
-    const m = norm(e.name);
+    const m = normName(e.name);
     if (!m) continue;
-    if (m === n) { exact.push(e); continue; }
-    const max = n.length >= 9 ? 2 : 1;
-    const typo = n.length >= 5 && m.length >= 5 && distance(n, m, max) <= max;
-    const inside = Math.min(n.length, m.length) >= 4 && (m === n.replace(/s$/, '') || n === m.replace(/s$/, '') || (` ${m} `).includes(` ${n} `) || (` ${n} `).includes(` ${m} `));
-    if (typo || inside) close.push([e, typo ? 1 : 2]);
+    const c = closeness(n, m);
+    if (c === 'exact') exact.push(e); else if (c) close.push([e, c]);
   }
   return { exact, close: close.sort((a, b) => a[1] - b[1] || a[0].name.localeCompare(b[0].name)).slice(0, 5).map(([e]) => e) };
 }
