@@ -144,6 +144,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **The world in numbers**: entries, words, sessions, the most talked-about NPCs, the busiest places, who has written the most and other records.
 - **Contents for long entries**: three or more “## ” headings in a description give a small table of contents that jumps to each part.
 - **Picture wall**: every picture in the world on one page (portraits, places, galleries, maps), by kind and tag.
+- **Mood music**: a music or ambience link on any entry; places inherit it from the place around them, and session prep offers it for where the party is.
 - **Reactions**: 👍 😂 😮 ❤️ 🎲 on table talk and quotes, with who reacted.
 - **Quote wall**: memorable lines from the table, with who said them and when; a random one greets you on the front page.
 - **Ask the GM**: a private thread between each player and the GMs for questions between sessions, with a badge and a toast when something new arrives.

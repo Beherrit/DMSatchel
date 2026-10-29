@@ -1452,3 +1452,7 @@ div.poll-row { cursor: default }
 .react-add { color: var(--muted) }
 .react-n { font-size: 13px }
 .react:disabled { cursor: default }
+
+/* Mood music */
+.music-line { margin: .1rem 0 .3rem; font-size: 14px }
+.music-line a { text-decoration: underline; text-underline-offset: 2px }

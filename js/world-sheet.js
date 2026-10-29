@@ -15,6 +15,7 @@ import { sortSecrets } from './secrets.js';
 import { stripMarks } from './rich.js';
 import { sayOf } from './say.js';
 import { readAloudPrint } from './world-readaloud.js';
+import { musicFor } from './music.js';
 
 const ACTIVE_PC = (e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
 const townOf = (place) => (place?.kind === 'settlement' ? place : [...trail(place)].reverse().find((p) => p.kind === 'settlement') || null);
@@ -63,6 +64,7 @@ export async function viewSessionSheet() {
         : el('p', { class: 'muted' }, 'No active characters.')),
       here ? block(here.name, here.summary ? el('p', {}, cut(here.summary, 300)) : null,
         weather ? el('p', {}, el('strong', {}, 'Weather: '), weather.line) : null,
+        (() => { const m = musicFor([here, ...trail(here).reverse()]); return m ? el('p', { class: 'small' }, el('strong', {}, 'Music: '), m.url) : null; })(),
         shops.length ? el('p', { class: 'small' }, el('strong', {}, 'Shops: '), shops.map((s) => s.name).join(', ')) : null) : null,
       people.length ? block(`Who’s around (${people.length})`, el('ul', { class: 'ss-list' }, people.map((p) => {
         const att = towards(all, p.id);

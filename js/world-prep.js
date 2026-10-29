@@ -23,6 +23,7 @@ import { appearances, dueBack } from './appearances.js';
 import { stripMarks } from './rich.js';
 import { notePartyMove } from './world-journey.js';
 import { readAloudList } from './world-readaloud.js';
+import { musicLine } from './world-music.js';
 
 const ACTIVE_PC = (e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
 const card = (title, ...kids) => el('section', { class: 'card prep-card' }, el('h3', {}, title), ...kids);
@@ -74,7 +75,7 @@ function whereSection(prep, rerender) {
   const weather = rollWeather({ terrain, season, seed: `${here.id}:${cal ? todayText(cal) : new Date().toDateString()}` });
   const encBox = el('div');
   const party = partyDefaults();
-  return card(`Where the party is: ${here.name}`, pick,
+  return card(`Where the party is: ${here.name}`, pick, musicLine(here, 'music-line prep-music'),
     el('div', { class: 'prep-grid' },
       el('div', {}, el('h4', {}, `People (${people.length})`),
         people.length ? list([...key, ...people.filter((p) => !key.includes(p))].slice(0, 12), (p) => [link(p), el('span', { class: 'muted small' }, ` ${p.fields?.role || ''}`), key.includes(p) ? el('span', { class: 'tag' }, 'key') : null, attitudeLine(p) ? el('div', {}, attitudeLine(p)) : null])
