@@ -33,6 +33,7 @@ import { takeItem, giveItem } from '../js/handover.js';
 import { mergedEntry, relinkLinks, relinkText } from '../js/merge.js';
 import { fieldsWith } from '../js/custom-fields.js';
 import { cleanSay } from '../js/say.js';
+import { journeyFor } from '../js/journey.js';
 import { cleanTag, chainUp } from '../js/bulk.js';
 import { cleanPrimer, primerEmpty } from '../js/zero.js';
 import { activeNotices } from '../js/notices.js';
@@ -150,7 +151,7 @@ export default route({
     const rows = bin && req.isGmHere
       ? await sql`SELECT e.*, c.name AS created_by_name, u.name AS updated_by_name, o.name AS owner_name FROM entries e LEFT JOIN gms c ON c.id = e.created_by LEFT JOIN gms u ON u.id = e.updated_by LEFT JOIN gms o ON o.id = e.owner_id WHERE e.world_id = ${req.world.id} AND e.deleted ORDER BY e.updated_at DESC`
       : await sql`SELECT e.*, c.name AS created_by_name, u.name AS updated_by_name, o.name AS owner_name FROM entries e LEFT JOIN gms c ON c.id = e.created_by LEFT JOIN gms u ON u.id = e.updated_by LEFT JOIN gms o ON o.id = e.owner_id WHERE e.world_id = ${req.world.id} AND NOT e.deleted ORDER BY e.name`;
-    const w = req.world;
+    const w = req.world, byId = new Map(rows.map((r) => [r.id, r]));
     const now = (await sql`SELECT now() AS now`)[0].now;
     // A new sitting (three hours since this member was last here) moves their "last visit" mark forward.
     let prevVisit = null, favorites, following;
@@ -175,7 +176,10 @@ export default route({
         ...(favorites ? { favorites } : {}),
         ...(following ? { following } : {}),
         // Where the party is (from session prep), when this person can see that place.
-        party_at: partyAt(w, rows, req), clock: readClock(w.clock), tag_notes: w.tag_notes || {},
+        party_at: partyAt(w, rows, req),
+        // Where the party has been: stops at places this person can see.
+        journey: journeyFor(w.prep?.journey, (id) => { const r = byId.get(id); return r && !r.deleted && visibleTo(r, req); }),
+        clock: readClock(w.clock), tag_notes: w.tag_notes || {},
         // Start here: only what this person can see.
         start_here: (Array.isArray(w.start_here) ? w.start_here : []).filter((id) => { const r = rows.find((x) => x.id === id); return r && !r.deleted && visibleTo(r, req); }),
         ...(req.role ? { notices: activeNotices(w.notices) } : {}),

@@ -1,7 +1,8 @@
 // GET the current world's name and description · PUT to change them (world owner).
 // PATCH {cal}  set the in-world calendar and today's date (any GM: days pass during play).
 // PUT {discord_webhook}  (owner) a Discord webhook link; it never leaves the server. Empty string removes it.
-// PATCH {prep: {location_id, notes}}   (GM) session prep: where the party is, and the GMs' scratch pad.
+// PATCH {prep: {location_id, notes}}   (GM) session prep: where the party is, and the GMs' scratch pad. Moving the
+//   party adds a stop to prep.journey (with the in-world date); PATCH {journey_remove: at} strikes one.
 // PATCH {tag_note: {tag, text}}   (GM) a tag's description on its page
 // PATCH {start_here: {id, on} | {order}}   (GM) the entries newcomers should read first
 // PATCH {clock: {advance} | {set} | {add_light} | {remove_light}}   (GM) time of day and lights during play
@@ -12,7 +13,8 @@
 // PATCH {show: entryId | null}  (GM) show an entry to everyone with the world open (revealing it if hidden), or stop.
 // PATCH {custom_fields: {kind, list}}  (GM) the world's own fields for one kind of entry (an empty list removes them)
 import { route, send, fail, sql, requireOwner, requireGm, postDiscord } from './_lib/core.js';
-import { cleanCalendar, advance } from '../js/calendar.js';
+import { cleanCalendar, advance, formatDate, today } from '../js/calendar.js';
+import { addStop, removeStop } from '../js/journey.js';
 import { KINDS } from '../js/world-schema.js';
 import { readCustom, cleanCustomList, customKeys } from '../js/custom-fields.js';
 import { applySecret } from '../js/secrets.js';
@@ -176,6 +178,11 @@ export default route({
       await sql`UPDATE worlds SET prep = jsonb_set(COALESCE(prep, '{}'::jsonb), '{secrets}', ${JSON.stringify(r.list)}::jsonb) WHERE id = ${req.world.id}`;
       return send(res, 200, { secrets: r.list });
     }
+    if (req.body.journey_remove !== undefined) {
+      const list = removeStop(req.world.prep?.journey, String(req.body.journey_remove));
+      await sql`UPDATE worlds SET prep = jsonb_set(COALESCE(prep, '{}'::jsonb), '{journey}', ${JSON.stringify(list)}::jsonb) WHERE id = ${req.world.id}`;
+      return send(res, 200, { journey: list });
+    }
     if (req.body.prep !== undefined) {
       const p = req.body.prep || {};
       const cur = req.world.prep || {};
@@ -184,6 +191,12 @@ export default route({
         notes: p.notes === undefined ? cur.notes || '' : String(p.notes).slice(0, 20000),
         updated_by: req.gm.name, updated_at: new Date().toISOString(),
       };
+      // Where the party has been: a stop each time they move somewhere new.
+      if (next.location_id && next.location_id !== (cur.location_id || null)) {
+        let day = '';
+        try { if (req.world.cal) day = formatDate(req.world.cal, today(req.world.cal)); } catch { /* no calendar */ }
+        next.journey = addStop(cur.journey, { id: next.location_id, at: next.updated_at, day, by: req.gm.name });
+      }
       // Merged into what's stored, so the secrets list (changed on its own) is never dropped.
       await sql`UPDATE worlds SET prep = COALESCE(prep, '{}'::jsonb) || ${JSON.stringify(next)}::jsonb WHERE id = ${req.world.id}`;
       return send(res, 200, { prep: { ...cur, ...next } });

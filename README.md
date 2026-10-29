@@ -137,6 +137,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Is that name taken?**: the entry form warns when the world already has an entry with that name, or a close one.
 - **Make a copy**: GMs duplicate any entry and edit the copy; a place can bring its people, shops and sub-places along.
 - **Say it right**: a pronunciation beside any name, shown on its page, NPC cards and the session sheet, with an A–Z guide for the world.
+- **Where the party has been**: each move of the party is kept with the in-world date; maps draw the route so far and the party page lists the journey.
 - **Merge two entries**: GMs fold a duplicate into the entry they keep; texts, tags, connections, what's inside it, mentions, talk, standing and map pins move over, and the spare goes to the bin.
 - **Many at once**: GMs tick entries on any list or search and reveal, hide, tag, untag or move them into a place together.
 - **Tag pages**: a list of every tag with counts, and a description on each tag's page.

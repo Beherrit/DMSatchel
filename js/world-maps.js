@@ -11,6 +11,8 @@ import { randomTownName, areaDraft } from './generators.js';
 import { fogGrid, newFog, encodeFog, decodeFog, paintFog, hiddenShare } from './fog.js';
 import { partyPin } from './party-pin.js';
 import { routeMiles, milesText } from './map-route.js';
+import { journeyOnMap } from './journey.js';
+import { journey, chainOf, notePartyMove } from './world-journey.js';
 
 // The party's place, then each place above it (for the party token).
 const partyChain = () => { const at = world.info?.party_at && getEntry(world.info.party_at); return at ? [at.id, ...trail(at).reverse().map((p) => p.id)] : []; };
@@ -19,6 +21,7 @@ const partyChain = () => { const at = world.info?.party_at && getEntry(world.inf
 async function setPartyAt(entry) {
   try {
     const r = await api('settings', { method: 'PATCH', body: { prep: { location_id: entry.id } } });
+    if (world.info?.party_at !== r.prep.location_id) notePartyMove(r.prep.location_id);
     world.info = { ...world.info, party_at: r.prep.location_id };
     toast(`The party is in ${entry.name}`);
   } catch (err) { toast(err.message, 'bad'); }
@@ -107,7 +110,20 @@ export async function viewMap(id, focusPin) {
   const NS = 'http://www.w3.org/2000/svg';
   const routeSvg = document.createElementNS(NS, 'svg');
   routeSvg.setAttribute('class', 'route-layer'); routeSvg.setAttribute('viewBox', `0 0 1000 ${1000 * ratio}`); routeSvg.setAttribute('preserveAspectRatio', 'none'); routeSvg.setAttribute('aria-hidden', 'true');
-  stage.append(img, fogCanvas, routeSvg, layer); viewport.append(stage, pop);
+  // Where the party has been: their stops on this map, joined up (under the ruler's route).
+  const journeySvg = document.createElementNS(NS, 'svg');
+  journeySvg.setAttribute('class', 'journey-layer'); journeySvg.setAttribute('viewBox', `0 0 1000 ${1000 * ratio}`); journeySvg.setAttribute('preserveAspectRatio', 'none'); journeySvg.setAttribute('aria-hidden', 'true');
+  let showJourney = true;
+  const journeyPoints = () => journeyOnMap(journey(), pins, chainOf);
+  function drawJourney() {
+    const pts = showJourney ? journeyPoints() : [];
+    const node = (tag, attrs) => { const n = document.createElementNS(NS, tag); for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v); return n; };
+    journeySvg.replaceChildren(...(pts.length > 1 ? [node('polyline', { points: pts.map((p) => `${p.x * 1000},${p.y * 1000 * ratio}`).join(' '), class: 'journey-line', 'vector-effect': 'non-scaling-stroke' })] : []),
+      ...(pts.length > 1 ? pts.map((p) => node('circle', { cx: p.x * 1000, cy: p.y * 1000 * ratio, r: 4, class: 'journey-dot', 'vector-effect': 'non-scaling-stroke' })) : []));
+    journeyBtn.hidden = journeyPoints().length < 2;
+  }
+  const journeyBtn = el('button', { class: 'btn small', type: 'button', 'aria-pressed': 'true', title: 'Show where the party has been on this map', onclick: () => { showJourney = !showJourney; journeyBtn.setAttribute('aria-pressed', String(showJourney)); drawJourney(); } }, 'Route so far');
+  stage.append(img, fogCanvas, journeySvg, routeSvg, layer); viewport.append(stage, pop);
   const dims = map.fog ? { cols: map.fog.cols, rows: map.fog.rows } : fogGrid(map.width, map.height);
   let cells = map.fog ? decodeFog(map.fog.bits, dims.cols * dims.rows) : newFog(dims.cols, dims.rows, true);
   let fogOn = Boolean(map.fog?.on), fogMode = false, brush = 0, radius = 3, painting = false;
@@ -294,7 +310,7 @@ export async function viewMap(id, focusPin) {
     setKids(list, ...(shown.length ? shown.map((p) => el('li', {}, el('button', { class: 'linkish', type: 'button', onclick: () => { centerOn(p); showPin(p); } },
       el('span', { class: `glyph pin-${p.icon || 'poi'}` }, PIN_ICONS[p.icon || 'poi'][1]), ' ', p.label), p.secret ? el('span', { class: 'tag' }, 'GM') : null))
       : [el('li', { class: 'muted small' }, pins.length ? 'No pins match.' : 'No pins yet.')]));
-    drawMine();
+    drawMine(); drawJourney();
   }
   filter.addEventListener('input', renderPins);
   // The side list of your markers (redrawn with the pins).
@@ -444,6 +460,7 @@ export async function viewMap(id, focusPin) {
     isGm() ? fogBtn : null,
     isMember() ? markBtn : null,
     map.miles ? measureBtn : null,
+    journeyBtn,
     scaleControl());
 
   const entry = map.entry_id && getEntry(map.entry_id);
