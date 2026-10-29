@@ -24,6 +24,7 @@ import { stripMarks } from './rich.js';
 import { notePartyMove } from './world-journey.js';
 import { readAloudList } from './world-readaloud.js';
 import { musicLine } from './world-music.js';
+import { birthdaysBetween } from './birthdays.js';
 
 const ACTIVE_PC = (e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
 const card = (title, ...kids) => el('section', { class: 'card prep-card' }, el('h3', {}, title), ...kids);
@@ -137,9 +138,10 @@ function calendarSection() {
   const soon = [];
   for (let i = 0; i <= 14; i++) for (const h of holidaysOn(cal, fromDays(cal, now + i))) soon.push({ n: now + i, text: `🎉 ${h.name}` });
   for (const x of datedEntries(cal)) if (x.n >= now && x.n <= now + 14) soon.push({ n: x.n, entry: x.entry });
+  for (const x of birthdaysBetween(cal, worldEntries(), now, now + 14)) soon.push({ n: x.n, entry: x.entry, birthday: x });
   soon.sort((a, b) => a.n - b.n);
   return card('Coming up (next two weeks)', el('p', { class: 'muted small' }, `Today: ${todayText(cal)}`),
-    soon.length ? list(soon, (s) => [el('span', { class: 'date' }, s.n === now ? 'Today' : `in ${s.n - now}d`), ' ', s.entry ? link(s.entry) : s.text])
+    soon.length ? list(soon, (s) => [el('span', { class: 'date' }, s.n === now ? 'Today' : `in ${s.n - now}d`), ' ', s.birthday ? ['🎂 ', link(s.entry), s.birthday.age ? ` turns ${s.birthday.age}` : '’s birthday'] : s.entry ? link(s.entry) : s.text])
       : empty('Nothing on the calendar.'),
     el('a', { class: 'small', href: '#world/calendar' }, 'Calendar'));
 }

@@ -3,6 +3,7 @@
 import { el, toast, setKids } from './dom.js';
 import { api, isGm } from './api.js';
 import { world, worldEntries, link, kindLabel, notice } from './world-store.js';
+import { birthdaysBetween, birthdayText } from './birthdays.js';
 import { PRESETS, makeCalendar, cleanCalendar, toDays, fromDays, advance, today, formatDate, parseDate, moonPhase, moonEvent, holidaysOn } from './calendar.js';
 
 // Fields that hold an in-world date, by kind.
@@ -95,6 +96,7 @@ export function viewCalendar(arg, sub, rerender) {
   const next = shown.month < cal.months.length - 1 ? [shown.year, shown.month + 1] : [shown.year + 1, 0];
   const dated = datedEntries(cal);
   const first = toDays(cal, { ...shown, day: 1 });
+  const births = birthdaysBetween(cal, worldEntries(), first, first + cal.months[shown.month].days - 1);
   const offset = ((first % cal.weekdays.length) + cal.weekdays.length) % cal.weekdays.length;
   const nowN = toDays(cal, now);
   const detail = el('div', { class: 'cal-detail' });
@@ -106,6 +108,7 @@ export function viewCalendar(arg, sub, rerender) {
       el('div', { class: 'entry-head' }, el('h3', {}, formatDate(cal, d, { weekday: true })), n === nowN ? el('span', { class: 'tag' }, 'Today') : el('span', { class: 'muted small' }, `${Math.abs(n - nowN)} days ${n < nowN ? 'ago' : 'from now'}`)),
       cal.moons.length ? el('p', { class: 'small' }, cal.moons.map((m) => { const p = moonPhase(cal, m, d); return `${p.icon} ${m.name}: ${p.name.toLowerCase()}`; }).join(' · ')) : null,
       holidaysOn(cal, d).map((h) => el('p', { class: 'holiday' }, `🎉 ${h.name}`)),
+      births.filter((x) => x.n === n).map((x) => el('p', { class: 'birthday' }, '🎂 ', link(x.entry), x.age ? ` turns ${x.age}` : '’s birthday')),
       items.length ? el('ul', { class: 'entry-list' }, items.map((x) => el('li', {}, link(x.entry), el('span', { class: 'kind-tag' }, kindLabel(x.entry.kind))))) : el('p', { class: 'muted small' }, 'Nothing recorded on this day.'),
       isGm() ? el('div', { class: 'btnrow' },
         n !== nowN ? el('button', { class: 'btn small', type: 'button', onclick: async () => { if (await saveCal({ ...cal, ...d }, `Today is now ${formatDate(cal, d)}`)) rerender(); } }, 'Make this today') : null,
@@ -125,6 +128,7 @@ export function viewCalendar(arg, sub, rerender) {
     } },
       el('span', { class: 'cal-day' }, day, full.length ? el('span', { class: 'cal-moon' }, full.join('')) : null),
       hol.map((h) => el('span', { class: 'cal-hol' }, h.name)),
+      births.filter((x) => x.n === n).map((x) => el('span', { class: 'cal-item cal-bday', title: birthdayText(x) }, `🎂 ${x.entry.name}`)),
       items.slice(0, 3).map((x) => el('span', { class: `cal-item k-${x.entry.kind}`, title: x.entry.kind === 'session' ? `Played: ${x.entry.name}` : x.entry.name }, x.entry.kind === 'session' ? `▶ ${x.entry.name}` : x.entry.name)),
       items.length > 3 ? el('span', { class: 'cal-more' }, `+${items.length - 3} more`) : null));
   }

@@ -1456,3 +1456,7 @@ div.poll-row { cursor: default }
 /* Mood music */
 .music-line { margin: .1rem 0 .3rem; font-size: 14px }
 .music-line a { text-decoration: underline; text-underline-offset: 2px }
+
+/* Birthdays on the calendar */
+.cal-item.cal-bday { background: transparent; border: 1px dashed var(--line); color: var(--ink) }
+.birthday { margin: 4px 0 }

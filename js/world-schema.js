@@ -46,11 +46,11 @@ export const KINDS = {
   },
   npc: {
     label: 'NPC', plural: 'NPCs', blurb: 'People the party can meet.',
-    fields: [['ancestry', 'Ancestry'], ['role', 'Role or job'], ['status', 'Status', 'select', ['Alive', 'Dead', 'Missing', 'Unknown', 'Undead']], ['appearance', 'Appearance', 'long'], ['personality', 'Personality', 'long'], ['voice', 'Voice & mannerisms'], ['wants', 'Wants', 'long'], ['level', 'Class & level'], ['stats', 'Stat block', 'long'], ['spells', 'Spellcasting', 'long']],
+    fields: [['ancestry', 'Ancestry'], ['role', 'Role or job'], ['status', 'Status', 'select', ['Alive', 'Dead', 'Missing', 'Unknown', 'Undead']], ['appearance', 'Appearance', 'long'], ['personality', 'Personality', 'long'], ['voice', 'Voice & mannerisms'], ['wants', 'Wants', 'long'], ['born', 'Birthday (in-world date)'], ['level', 'Class & level'], ['stats', 'Stat block', 'long'], ['spells', 'Spellcasting', 'long']],
   },
   character: {
     label: 'Player Character', plural: 'Player Characters', blurb: 'The heroes, past and present.',
-    fields: [['player', 'Player'], ['species', 'Species'], ['class', 'Class'], ['level', 'Level'], ['background', 'Background'], ['status', 'Status', 'select', ['Active', 'Retired', 'Dead', 'Missing']], ['sheet', 'Sheet & backstory', 'long'],
+    fields: [['player', 'Player'], ['species', 'Species'], ['class', 'Class'], ['level', 'Level'], ['background', 'Background'], ['born', 'Birthday (in-world date)'], ['status', 'Status', 'select', ['Active', 'Retired', 'Dead', 'Missing']], ['sheet', 'Sheet & backstory', 'long'],
       // Kept out of forms: the Character Forge recipe (rebuilds the full sheet) and the live play state.
       ['forge', 'Forge recipe', 'hidden'], ['play', 'Play state', 'hidden'], ['known', 'What they know', 'hidden'],
       // How NPCs and powers feel about this character (see attitudes.js); only GMs set it.
