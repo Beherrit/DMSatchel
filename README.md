@@ -151,6 +151,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Recently changed for GMs**: the front page lists the last dozen changes by anyone, with who and when, each linking straight to that entry's history.
 - **A forecast for the week**: session prep shows the next six days of weather where the party is, matching what each day shows when it comes.
 - **Reading for next session**: GMs pick a few entries for players to read beforehand; players tick them off on the front page and GMs see who has.
+- **Reveal on a date**: set a hidden entry to reveal itself to players on a chosen day, for a letter that arrives or a festival that's announced.
 - **Export to a spreadsheet**: download any kind of entry as a CSV file with its fields as columns; it imports back as it is.
 - **A new world like this one**: start a world with another's calendar, own fields, templates, session zero page and tag descriptions, but none of its entries.
 - **Set a field for many**: bulk actions set one field (a status, a type, a role) on every selected entry that has it.

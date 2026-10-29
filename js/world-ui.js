@@ -33,6 +33,7 @@ import { wishesSection } from './world-wishes.js';
 import { farewellCard } from './world-hall.js';
 import { noteRead, readsLine } from './world-reads.js';
 import { readingCard, noteReading } from './world-reading.js';
+import { revealDateLine } from './world-revealdate.js';
 import { neighbors } from './neighbors.js';
 import { questGroups } from './quest-groups.js';
 import { partyPageButton, partyPageNote, partyPageForm, canPartyEdit } from './world-partypage.js';
@@ -438,6 +439,7 @@ function viewEntry(id, tab) {
     knowsButtons(e, rerenderWorld),
     e.status === 'suggested' ? suggestionBanner(e) : null,
     e.visibility === 'gm' && isGm() ? el('p', { class: 'hidden-note muted small' }, 'Players can’t see this entry, or find it in search or on maps. Reveal it when they discover it.') : null,
+    revealDateLine(e, rerenderWorld),
     isPlace ? placeSummary(e) : null,
     isPlace ? placeHub(e, tab, overview, rerenderWorld) : overview());
   // #world/e/<id>/history (from the front page's "Recently changed"): open with the history showing.

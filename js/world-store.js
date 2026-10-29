@@ -208,6 +208,7 @@ export async function setEntryState(entry, { visibility, status }) {
 export function stateBadges(e) {
   return [e.shared ? el('span', { class: 'tag shared-tag', title: 'The GMs gave this to you; other players can’t see it' }, 'Just for you')
     : e.visibility === 'gm' ? el('span', { class: 'tag hidden-tag', title: 'Only GMs can see this entry' }, e.shared_with?.length ? `GMs + ${e.shared_with.length} player${e.shared_with.length === 1 ? '' : 's'}` : 'GMs only') : null,
+    e.reveal_at && e.visibility === 'gm' ? el('span', { class: 'tag hidden-tag', title: 'Reveals itself to players on this day' }, `⏳ ${new Date(e.reveal_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}`) : null,
     e.status === 'suggested' ? el('span', { class: 'tag suggest-tag', title: 'Suggested by a player; a GM hasn’t approved it yet' }, 'Suggested') : null].filter(Boolean);
 }
 

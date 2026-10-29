@@ -1587,3 +1587,4 @@ details.quest-group > summary .section-title { display: inline }
 .reading-list li.done a { color: var(--muted) }
 .reading-tick { font-weight: 700; width: 1.2em; color: var(--good) }
 .reading-list li:not(.done) .reading-tick { color: var(--muted) }
+.reveal-date { margin: 4px 0 0 } .reveal-date summary { cursor: pointer; color: var(--muted) } .reveal-date .controls { margin-top: 4px }

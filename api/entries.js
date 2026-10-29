@@ -38,6 +38,7 @@ import { cleanSay } from '../js/say.js';
 import { cleanMusic } from '../js/music.js';
 import { journeyFor } from '../js/journey.js';
 import { readingFor } from '../js/reading.js';
+import { cleanRevealAt } from '../js/reveal-date.js';
 import { askUnread } from './_lib/ask.js';
 import { rsvpSummary, rsvpOpen } from '../js/rsvp.js';
 import { cleanTag, chainUp, setFieldValue } from '../js/bulk.js';
@@ -84,7 +85,7 @@ function shape(row, req) {
     // Players may edit their own entries, and pages the GMs opened to the party (text only; see PUT).
     can_edit: Boolean(gmView || (req.role && (mine || row.fields?.party_edit === 'yes'))),
   };
-  if (gmView) { out.secret = row.secret; out.deleted = row.deleted; out.shared_with = cleanShare(row.shared_with); }
+  if (gmView) { out.secret = row.secret; out.deleted = row.deleted; out.shared_with = cleanShare(row.shared_with); out.reveal_at = row.reveal_at || null; }
   else if (row.visibility === 'gm' && sharedWith(row, req.gm?.id)) out.shared = true;
   else {
     if (row.fields?.objectives) out.fields = { ...row.fields, objectives: forPlayers(row.fields.objectives) };
@@ -137,6 +138,14 @@ async function record(entryId, gmId, action, snapshot) {
   await sql`INSERT INTO history (entry_id, gm_id, action, snapshot) VALUES (${entryId}, ${gmId}, ${action}, ${JSON.stringify(snapshot)})`;
 }
 
+// Hidden entries whose reveal date has come: shown to players now, by the first load of the world after it (no
+// scheduler needed). Logged as a reveal by no one in particular.
+async function revealDue(worldId) {
+  const rows = await sql`UPDATE entries SET visibility = 'all', reveal_at = NULL, updated_at = now(), version = version + 1
+    WHERE world_id = ${worldId} AND reveal_at IS NOT NULL AND reveal_at <= now() AND NOT deleted RETURNING id`;
+  for (const r of rows) await record(r.id, null, 'reveal', null);
+}
+
 async function insert(e, req, { owner = null, status = 'live', id = newId() } = {}) {
   await sql`INSERT INTO entries (id, world_id, kind, name, summary, body, fields, secret, tags, links, parent_id, created_by, updated_by, visibility, owner_id, status)
     VALUES (${id}, ${req.world.id}, ${e.kind}, ${e.name}, ${e.summary}, ${e.body}, ${JSON.stringify(e.fields)}, ${e.secret}, ${e.tags}, ${JSON.stringify(e.links)},
@@ -155,6 +164,7 @@ export default route({
         : await sql`SELECT s.*, g.name AS by FROM edit_suggestions s LEFT JOIN gms g ON g.id = s.gm_id WHERE s.world_id = ${req.world.id} AND s.gm_id = ${req.gm.id} ORDER BY s.created_at DESC LIMIT 30`;
       return send(res, 200, { edits: rows.map((s) => ({ id: s.id, entry_id: s.entry_id, by: s.by, base_version: s.base_version, proposal: s.proposal, note: s.note, status: s.status, created_at: s.created_at, decided_at: s.decided_at })) });
     }
+    if (!req.query?.edits) await revealDue(req.world.id);
     if (since) {
       const t = new Date(since);
       if (Number.isNaN(t.getTime())) return fail(res, 400, 'Bad time.');
@@ -315,7 +325,7 @@ export default route({
     const version = Number(req.body.entry?.version);
     const rows = await sql`UPDATE entries SET kind = ${e.kind}, name = ${e.name}, summary = ${e.summary}, body = ${e.body}, fields = ${JSON.stringify(e.fields)},
       secret = ${e.secret}, tags = ${e.tags}, links = ${JSON.stringify(e.links)}, parent_id = ${e.parent_id}, visibility = ${e.visibility},
-      updated_by = ${req.gm.id}, updated_at = now(), version = version + 1
+      reveal_at = CASE WHEN ${e.visibility} = 'all' THEN NULL ELSE reveal_at END, updated_by = ${req.gm.id}, updated_at = now(), version = version + 1
       WHERE id = ${id} AND world_id = ${req.world.id} AND version = ${version} RETURNING id`;
     if (!rows.length) {
       return fail(res, 409, `${current.updated_by_name || 'Someone'} saved this entry while you were editing. Your changes are still in the form: copy anything you need, then reload to see theirs.`, { entry: shape(current, req) });
@@ -472,7 +482,7 @@ export default route({
         return send(res, 200, { entries: changed.map((e) => shape(e, req)), skipped: ids.length - changed.length });
       }
       const vis = b.visibility === 'gm' ? 'gm' : 'all';
-      const rows = await sql`UPDATE entries SET visibility = ${vis}, updated_by = ${req.gm.id}, updated_at = now(), version = version + 1
+      const rows = await sql`UPDATE entries SET visibility = ${vis}, reveal_at = NULL, updated_by = ${req.gm.id}, updated_at = now(), version = version + 1
         WHERE world_id = ${req.world.id} AND id = ANY(${ids}) AND NOT deleted AND visibility <> ${vis} RETURNING id`;
       for (const r of rows) await record(r.id, req.gm.id, vis === 'all' ? 'reveal' : 'hide', null);
       const changed = rows.length ? await Promise.all(rows.map((r) => loadOne(r.id, req.world.id))) : [];
@@ -500,9 +510,17 @@ export default route({
       await record(id, req.gm.id, ids.length ? 'share' : 'unshare', null);
       return send(res, 200, { entry: shape(await loadOne(id, req.world.id), req) });
     }
+    // {id, reveal_at}: set (or clear, with null) the day a hidden entry reveals itself.
+    if (req.body.reveal_at !== undefined) {
+      const r = cleanRevealAt(req.body.reveal_at);
+      if (r.error) return fail(res, 400, r.error);
+      if (r.at && (current.visibility !== 'gm' || current.status !== 'live')) return fail(res, 400, 'Only a hidden entry can be revealed later.');
+      await sql`UPDATE entries SET reveal_at = ${r.at}, updated_by = ${req.gm.id}, updated_at = now(), version = version + 1 WHERE id = ${id} AND world_id = ${req.world.id}`;
+      return send(res, 200, { entry: shape(await loadOne(id, req.world.id), req) });
+    }
     const vis = visibility === 'gm' || visibility === 'all' ? visibility : current.visibility;
     const st = status === 'live' || status === 'suggested' ? status : current.status;
-    await sql`UPDATE entries SET visibility = ${vis}, status = ${st}, updated_by = ${req.gm.id}, updated_at = now(), version = version + 1 WHERE id = ${id} AND world_id = ${req.world.id}`;
+    await sql`UPDATE entries SET visibility = ${vis}, status = ${st}, reveal_at = NULL, updated_by = ${req.gm.id}, updated_at = now(), version = version + 1 WHERE id = ${id} AND world_id = ${req.world.id}`;
     await record(id, req.gm.id, st !== current.status ? (st === 'live' ? 'approve' : 'unapprove') : vis === 'all' ? 'reveal' : 'hide', null);
     send(res, 200, { entry: shape(await loadOne(id, req.world.id), req) });
   },
