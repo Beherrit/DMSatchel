@@ -1,10 +1,11 @@
 // Next session: a GM proposes a few dates, everyone answers yes / maybe / no, the best date stands out, and a GM
 // locks one in (it shows on the world home) and can post the poll or the date to Discord.
 // Route: #world/schedule
-import { el, toast, confirmButton, setKids } from './dom.js';
+import { el, toast, confirmButton, setKids, download } from './dom.js';
 import { api, isGm, isMember } from './api.js';
 import { world, notice } from './world-store.js';
 import { tally, dateText, untilText, ANSWERS, MAX_DATES } from './schedule.js';
+import { sessionIcs, googleCalendarUrl } from './ics.js';
 
 const LABEL = { yes: 'Yes', maybe: 'Maybe', no: 'No' };
 const pad = (n) => String(n).padStart(2, '0');
@@ -15,7 +16,20 @@ const localValue = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.g
 export function nextSessionLine() {
   const at = world.info?.next_session;
   if (!at || Date.parse(at) < Date.now() - 86400000) return null;
-  return el('p', { class: 'today-line next-session' }, el('a', { href: '#world/schedule' }, `🗓 Next session: ${dateText(at)} (${untilText(at)})`));
+  return el('p', { class: 'today-line next-session' }, el('a', { href: '#world/schedule' }, `🗓 Next session: ${dateText(at)} (${untilText(at)})`), ' ', addToCalendar(at));
+}
+
+// "Add to calendar": an .ics file (Apple, Outlook and most others) or a Google Calendar link, named for the world and
+// linking back to it.
+function addToCalendar(at) {
+  const name = world.info?.name || 'Our game';
+  const back = `${location.origin}/?w=${encodeURIComponent(world.info?.slug || '')}#world`;
+  const ev = { start: at, title: `${name}: next session`, url: back, description: 'The table meets again. Session notes and prep are in the DM’s Satchel.' };
+  const box = el('details', { class: 'add-cal' }, el('summary', {}, 'Add to calendar'),
+    el('span', { class: 'add-cal-links' },
+      el('button', { class: 'linkish', type: 'button', onclick: () => download(`${(world.info?.slug || 'session')}-next-session.ics`, sessionIcs({ ...ev, uid: `${world.info?.id || 'world'}-${Date.parse(at)}@dmsatchel` }), 'text/calendar') }, 'Calendar file (.ics)'),
+      ' · ', el('a', { href: googleCalendarUrl(ev), target: '_blank', rel: 'noopener noreferrer' }, 'Google Calendar', el('span', { class: 'sr-only' }, ' (opens in a new tab)'))));
+  return box;
 }
 
 function proposeForm(after) {
