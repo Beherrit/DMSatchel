@@ -32,6 +32,7 @@ import { betweenSessions } from './between.js';
 import { remindersCard } from './world-reminders.js';
 import { readingPrepCard } from './world-reading.js';
 import { dayWeather, forecast } from './forecast.js';
+import { deadlineOf, deadlineText } from './deadline.js';
 
 const ACTIVE_PC = (e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
 const card = (title, ...kids) => el('section', { class: 'card prep-card' }, el('h3', {}, title), ...kids);
@@ -120,9 +121,14 @@ function turnUpSection(prep) {
 }
 
 function questsSection() {
-  const active = worldEntries().filter((e) => e.kind === 'quest' && e.fields?.status === 'Active').sort(byName);
+  const cal = worldCalendar(), due = (q) => deadlineOf(cal, q);
+  const active = worldEntries().filter((e) => e.kind === 'quest' && e.fields?.status === 'Active').sort((a, b) => (due(a)?.left ?? 1e9) - (due(b)?.left ?? 1e9) || byName(a, b));
+  // Open jobs nobody has taken yet whose time is running out (two weeks or less).
+  const waiting = worldEntries().filter((e) => e.kind === 'quest' && e.fields?.status !== 'Active' && due(e) && due(e).left <= 14).sort((a, b) => due(a).left - due(b).left);
+  const pill = (q) => (due(q) ? el('span', { class: `deadline-pill${due(q).left <= 3 ? ' soon' : ''}` }, ` ⏳ ${deadlineText(due(q).left)}`) : null);
   return card(`Quests in play (${active.length})`,
-    active.length ? list(active, (q) => [link(q), q.fields?.patron ? el('span', { class: 'muted small' }, ` for ${q.fields.patron}`) : null,
+    waiting.length ? el('p', { class: 'small' }, el('strong', {}, 'Running out of time: '), waiting.flatMap((q, i) => [i ? ', ' : '', link(q), ` (${deadlineText(due(q).left)})`])) : null,
+    active.length ? list(active, (q) => [link(q), pill(q), q.fields?.patron ? el('span', { class: 'muted small' }, ` for ${q.fields.patron}`) : null,
       q.fields?.stakes ? el('div', { class: 'muted small' }, q.fields.stakes.length > 140 ? `${q.fields.stakes.slice(0, 138)}…` : q.fields.stakes) : null])
       : empty('No active quests. Mark a quest Active when the party takes it on.'));
 }

@@ -1650,3 +1650,6 @@ details.quest-group > summary .section-title { display: inline }
 .coin-table td.num { text-align: right; white-space: nowrap }
 .coin-table td.nowrap { white-space: nowrap }
 .buy-box { margin-top: 10px } .buy-form .controls { flex-wrap: wrap } .bad-line { color: var(--danger) }
+.deadline-pill { font-size: calc(12px * var(--ts, 1)); font-weight: 600; color: var(--muted) }
+.deadline-pill.soon { color: var(--danger) }
+.notice .deadline-pill { color: #5a4a2a } .notice .deadline-pill.soon { color: #9b2a1a }

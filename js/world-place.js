@@ -7,6 +7,7 @@ import { progressBadge } from './world-objectives.js';
 import { wildsSection, placeTerrains } from './encounter-ui.js';
 import { worldCalendar } from './world-calendar.js';
 import { dayWeather } from './forecast.js';
+import { deadlineOf, deadlineText } from './deadline.js';
 import { controllers } from './control.js';
 import { glanceOf } from './glance.js';
 import { visitedPlaces } from './visited.js';
@@ -141,6 +142,7 @@ function questSection(place, rerender, compact) {
           el('span', { class: 'pinhead', 'aria-hidden': 'true' }),
           el('div', { class: 'notice-top' }, el('span', { class: `status-pill ${statusClass(s)}` }, s), q.fields?.reward ? el('span', { class: 'reward' }, q.fields.reward) : null),
           el('h5', {}, link(q)), progressBadge(q),
+          ((d) => (d ? el('span', { class: `deadline-pill${d.left <= 3 ? ' soon' : ''}` }, `⏳ ${deadlineText(d.left)}`) : null))(deadlineOf(worldCalendar(), q)),
           q.summary ? el('p', {}, q.summary) : null,
           q.fields?.patron ? el('p', { class: 'muted small' }, `Ask for: ${q.fields.patron}`) : null,
           q.parent_id !== place.id && getEntry(q.parent_id) ? el('p', { class: 'muted small' }, 'Posted in ', link(getEntry(q.parent_id))) : null,

@@ -9,7 +9,7 @@ import { onThisDay, yearsAgoText } from './onthisday.js';
 import { PRESETS, makeCalendar, cleanCalendar, toDays, fromDays, advance, today, formatDate, parseDate, moonPhase, moonEvent, holidaysOn } from './calendar.js';
 
 // Fields that hold an in-world date, by kind.
-const DATE_FIELDS = { event: ['date'], session: ['world_date'], journal: ['date'], handout: ['found'] };
+const DATE_FIELDS = { event: ['date'], session: ['world_date'], journal: ['date'], handout: ['found'], quest: ['deadline'] };
 
 export const worldCalendar = () => cleanCalendar(world.info?.cal);
 
@@ -24,6 +24,8 @@ export function todayText(cal = worldCalendar()) {
 export function datedEntries(cal) {
   const out = [];
   for (const e of worldEntries()) {
+    // A finished quest's deadline doesn't matter any more.
+    if (e.kind === 'quest' && ['Completed', 'Failed', 'Abandoned'].includes(e.fields?.status)) continue;
     for (const f of DATE_FIELDS[e.kind] || []) {
       const d = parseDate(cal, e.fields?.[f]);
       if (d) { out.push({ entry: e, date: d, n: toDays(cal, d) }); break; }
@@ -135,7 +137,7 @@ export function viewCalendar(arg, sub, rerender) {
       el('span', { class: 'cal-day' }, day, full.length ? el('span', { class: 'cal-moon' }, full.join('')) : null),
       hol.map((h) => el('span', { class: 'cal-hol' }, h.name)),
       births.filter((x) => x.n === n).map((x) => el('span', { class: 'cal-item cal-bday', title: birthdayText(x) }, `🎂 ${x.entry.name}`)),
-      items.slice(0, 3).map((x) => el('span', { class: `cal-item k-${x.entry.kind}`, title: x.entry.kind === 'session' ? `Played: ${x.entry.name}` : x.entry.name }, x.entry.kind === 'session' ? `▶ ${x.entry.name}` : x.repeat ? `↻ ${x.entry.name}` : x.entry.name)),
+      items.slice(0, 3).map((x) => el('span', { class: `cal-item k-${x.entry.kind}`, title: x.entry.kind === 'session' ? `Played: ${x.entry.name}` : x.entry.name }, x.entry.kind === 'session' ? `▶ ${x.entry.name}` : x.entry.kind === 'quest' ? `⏳ ${x.entry.name}` : x.repeat ? `↻ ${x.entry.name}` : x.entry.name)),
       items.length > 3 ? el('span', { class: 'cal-more' }, `+${items.length - 3} more`) : null));
   }
 
