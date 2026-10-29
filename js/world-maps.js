@@ -12,7 +12,7 @@ import { fogGrid, newFog, encodeFog, decodeFog, paintFog, hiddenShare } from './
 import { partyPin } from './party-pin.js';
 import { routeMiles, milesText, travelDayOptions } from './map-route.js';
 import { travel } from './encounters.js';
-import { worldCalendar, todayText } from './world-calendar.js';
+import { worldCalendar, todayText, daysPassed } from './world-calendar.js';
 import { advance, formatDate, today } from './calendar.js';
 import { journeyOnMap } from './journey.js';
 import { controllers, powerSlots } from './control.js';
@@ -278,7 +278,7 @@ export async function viewMap(id, focusPin) {
         try {
           const r = await api('settings', { method: 'PATCH', body: { cal: advance(cal, days) } });
           world.info = { ...world.info, cal: r.cal };
-          toast(`${days} day${days === 1 ? '' : 's'} pass: it’s now ${formatDate(r.cal, today(r.cal))}`); dlg.close();
+          toast(`${days} day${days === 1 ? '' : 's'} pass: it’s now ${formatDate(r.cal, today(r.cal))}`); dlg.close(); daysPassed(days);
         } catch (err) { toast(err.message, 'bad'); }
       } }, `${days} day${days === 1 ? '' : 's'} (${pace.toLowerCase()} pace)`)),
         el('button', { class: 'btn ghost', type: 'button', onclick: () => dlg.close() }, 'Not now'))));

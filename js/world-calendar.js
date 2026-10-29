@@ -13,6 +13,9 @@ const DATE_FIELDS = { event: ['date'], session: ['world_date'], journal: ['date'
 
 export const worldCalendar = () => cleanCalendar(world.info?.cal);
 
+// Days went by (the calendar moved forward): living costs and the like listen for this.
+export const daysPassed = (days) => window.dispatchEvent(new CustomEvent('world:days', { detail: { days } }));
+
 export function todayText(cal = worldCalendar()) {
   return cal ? formatDate(cal, today(cal), { weekday: true }) : '';
 }
@@ -138,7 +141,7 @@ export function viewCalendar(arg, sub, rerender) {
 
   const pass = (days, label) => el('button', { class: 'btn small', type: 'button', onclick: async () => {
     const c2 = advance(cal, days);
-    if (await saveCal(c2, `${label}: it’s now ${formatDate(c2, today(c2), { weekday: true })}`)) { location.hash = `world/calendar/${c2.year}/${c2.month}`; rerender(); }
+    if (await saveCal(c2, `${label}: it’s now ${formatDate(c2, today(c2), { weekday: true })}`)) { location.hash = `world/calendar/${c2.year}/${c2.month}`; rerender(); daysPassed(days); }
   } }, label);
   const custom = el('input', { type: 'number', class: 'hp-amt', 'aria-label': 'Days', placeholder: 'days' });
 
@@ -157,7 +160,7 @@ export function viewCalendar(arg, sub, rerender) {
         custom, el('button', { class: 'btn small ghost', type: 'button', onclick: async () => {
           const n = Math.round(Number(custom.value) || 0); if (!n) { custom.focus(); return; }
           const c2 = advance(cal, n);
-          if (await saveCal(c2, `${Math.abs(n)} days ${n > 0 ? 'pass' : 'rewound'}: ${formatDate(c2, today(c2))}`)) { location.hash = `world/calendar/${c2.year}/${c2.month}`; rerender(); }
+          if (await saveCal(c2, `${Math.abs(n)} days ${n > 0 ? 'pass' : 'rewound'}: ${formatDate(c2, today(c2))}`)) { location.hash = `world/calendar/${c2.year}/${c2.month}`; rerender(); if (n > 0) daysPassed(n); }
         } }, 'Go')) : null),
     el('div', { class: 'cal-nav' },
       el('button', { class: 'btn small', type: 'button', 'aria-label': 'Previous month', onclick: () => go(...prev) }, '‹'),

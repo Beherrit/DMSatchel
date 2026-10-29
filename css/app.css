@@ -1627,3 +1627,4 @@ details.quest-group > summary .section-title { display: inline }
 .price-table td { padding: 3px 0; border-bottom: 1px dotted var(--line) }
 .price-table td.num { text-align: right; white-space: nowrap; padding-left: 12px; font-variant-numeric: tabular-nums }
 .unvisited-tag { color: var(--muted); border-style: dashed } .atlas-visited { margin: 8px 0; display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center }
+.plain-fieldset { border: 0; padding: 0; margin: 8px 0; display: grid; gap: 4px } .plain-fieldset legend { font-weight: 600; padding: 0; margin-bottom: 4px }

@@ -66,6 +66,7 @@ import { cleanSay, sayOf } from './say.js';
 import { cleanAka, akaOf } from './aka.js';
 import { ageOf, ageText } from './birthdays.js';
 import { menuCard } from './world-menu.js';
+import './world-living.js';
 import { cleanMusic } from './music.js';
 import { musicLine } from './world-music.js';
 import { tableSection } from './world-tables.js';
