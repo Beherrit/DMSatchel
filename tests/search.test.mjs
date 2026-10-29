@@ -33,3 +33,11 @@ test('search links round-trip', () => {
   assert.deepEqual(parseSearch(h.slice('world/q/'.length)), f);
   assert.deepEqual(parseSearch(''), { q: '', kind: '', tag: '', inside: '', state: '' });
 });
+
+test('a typo in a name or tag still finds it, after exact matches', () => {
+  const list = [{ id: 'b', kind: 'settlement', name: 'Brindle', summary: '', tags: ['north'] }, { id: 'x', kind: 'npc', name: 'Ann', summary: 'Lives in Brindle.', tags: [] }, { id: 'y', kind: 'npc', name: 'Cob', summary: '', tags: [] }];
+  assert.deepEqual(searchEntries(list, { q: 'brimdle' }).map((e) => e.id), ['b']);
+  assert.deepEqual(searchEntries(list, { q: 'brindle' }).map((e) => e.id), ['b', 'x']);
+  assert.deepEqual(searchEntries(list, { q: 'nroth' }).map((e) => e.id), ['b']);
+  assert.deepEqual(searchEntries(list, { q: 'dragon' }).map((e) => e.id), []);
+});

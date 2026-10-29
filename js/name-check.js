@@ -32,6 +32,18 @@ export function closeness(n, m) {
   return inside ? 2 : 0;
 }
 
+// Forgiving search: does a typed word (4+ letters) nearly match one of these words? A typo or two away (two for
+// long words), whole or as the start of a longer word ("brimdle" finds Brindle, "silvr" finds Silverhand).
+export function nearWord(word, tokens) {
+  const w = String(word).toLowerCase();
+  if (w.length < 4) return false;
+  const max = w.length >= 8 ? 2 : 1;
+  return (tokens || []).some((t) => { const s = String(t).toLowerCase(); return Math.abs(s.length - w.length) <= max ? distance(w, s, max) <= max : s.length > w.length && distance(w, s.slice(0, w.length), max) <= max; });
+}
+
+// The words of a name or tag list, for nearWord.
+export const wordsOf = (...texts) => texts.join(' ').toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g, '').split(/[^a-z0-9]+/).filter((x) => x.length >= 3);
+
 // → { exact: [entries], close: [entries] } (at most five close ones, nearest first).
 export function similarNames(name, entries, selfId) {
   const n = normName(name);

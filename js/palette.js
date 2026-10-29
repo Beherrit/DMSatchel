@@ -4,6 +4,7 @@ import { TOOL_LIST } from './tool-list.js';
 import { KINDS, KIND_ORDER } from './world-schema.js';
 import { session, isGm, isAdmin, isOwner, isPlayer } from './api.js';
 import { readRecent } from './recent.js';
+import { nearWord, wordsOf } from './name-check.js';
 
 // The rules, magic items and the world load the first time the palette opens, not with every page.
 let M = null;
@@ -65,6 +66,8 @@ function score(item, q) {
   if ((item.haystack || '').toLowerCase().includes(q)) return 15;
   const words = q.split(/\s+/).filter(Boolean);
   if (words.length > 1 && words.every((w) => `${name} ${(item.haystack || '').toLowerCase()} ${item.group.toLowerCase()}`.includes(w))) return 20;
+  // A typo or two: still found, below everything that matched as typed.
+  if (words.length && words.every((w) => nearWord(w, wordsOf(item.label)))) return 10;
   return 0;
 }
 

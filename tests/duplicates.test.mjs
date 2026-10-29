@@ -23,3 +23,10 @@ test('numbered names are not near each other in the name check either', () => {
   assert.deepEqual(similarNames('Session 13', [E('s', 'session', 'Session 12')]).close, []);
   assert.equal(similarNames('Brindel', [E('b', 'settlement', 'Brindle')]).close.length, 1);
 });
+
+test('nearWord forgives a typo or two, whole or as a start', async () => {
+  const { nearWord, wordsOf } = await import('../js/name-check.js');
+  const toks = wordsOf('The Silverhand Brindle', 'north-road');
+  assert.ok(nearWord('brimdle', toks)); assert.ok(nearWord('silvr', toks)); assert.ok(nearWord('nroth', toks));
+  assert.ok(!nearWord('bri', toks)); assert.ok(!nearWord('dragon', toks));
+});
