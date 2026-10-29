@@ -5,6 +5,7 @@ import { api, isGm, isMember, session } from './api.js';
 import { world, worldEntries, getEntry, link, when, notice } from './world-store.js';
 import { sessionOrder } from './appearances.js';
 import { quotedMost } from './quotes.js';
+import { reactionBar } from './world-react.js';
 
 const saidLine = (q) => [q.said_by ? `— ${q.said_by}` : '— someone at the table', getEntry(q.session_id) ? [', ', link(getEntry(q.session_id))] : null];
 
@@ -55,6 +56,7 @@ export async function viewQuotes() {
       shown.length ? el('ul', { class: 'plain qt-list' }, shown.map((q) => el('li', {}, el('figure', { class: 'card quote-card' },
         el('blockquote', {}, `“${q.text}”`),
         el('figcaption', { class: 'small' }, saidLine(q), el('span', { class: 'muted' }, ` · added by ${q.added_by || 'someone'}, ${when(q.created_at)}`)),
+        reactionBar(q.reactions, async (react, on) => { const r = (await api('party', { method: 'PATCH', body: { quote_id: q.id, react, on } })).reactions; q.reactions = r; return r; }),
         q.gm_id === session.gm?.id || isGm() ? confirmButton('Take down', async () => { try { await api('party', { method: 'DELETE', query: { quote: q.id } }); await load(); } catch (err) { toast(err.message, 'bad'); } }) : null))))
         : notice('Nothing on the wall yet', 'When someone says something worth remembering, put it here.'));
   };

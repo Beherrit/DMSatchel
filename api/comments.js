@@ -6,6 +6,7 @@
 // GET ?recent=table                 the latest table talk across the world (anyone who can read the world)
 // POST {entry_id, body, parent_id, audience}   start a thread or reply (table: any member; gm: GMs)
 // PATCH {id, resolved}   resolve or reopen a GM thread · {id, hidden} hide table talk (GM) · {id, body} edit your own
+// PATCH {id, react: emoji, on}   add or take back your reaction on table talk (members)
 // DELETE ?id=            delete your own comment (GMs may delete any table comment; the owner any comment)
 //
 // Private notes (audience 'note'): one per person per entry, seen only by whoever wrote it, never by GMs or the owner.
@@ -17,6 +18,8 @@
 //                                   (GMs), and your own private notes; newest first, at most 40
 import { route, send, fail, sql, requireGm, requireMember } from './_lib/core.js';
 import { sharedWith } from '../js/sharing.js';
+import { isReaction } from '../js/reactions.js';
+import { react } from './_lib/react.js';
 
 const room = (v) => (v === 'table' ? 'table' : 'gm');
 // Can this request see the entry? Same rule as the entries API.
@@ -54,7 +57,7 @@ export default route({
       return send(res, 200, { notes: rows.filter((r) => sees(r, req) && (!only || r.entry_id === only)).map(({ owner_id, visibility, status, deleted, shared_with, ...r }) => r) });
     }
     if (recent === 'table') {
-      const rows = await sql`SELECT c.id, c.entry_id, c.parent_id, c.body, c.created_at, c.hidden, c.gm_id, g.name AS gm, e.name AS entry_name, e.kind, e.owner_id, e.visibility, e.status, e.deleted, e.shared_with
+      const rows = await sql`SELECT c.id, c.entry_id, c.parent_id, c.body, c.created_at, c.hidden, c.gm_id, c.reactions, g.name AS gm, e.name AS entry_name, e.kind, e.owner_id, e.visibility, e.status, e.deleted, e.shared_with
         FROM comments c LEFT JOIN gms g ON g.id = c.gm_id JOIN entries e ON e.id = c.entry_id
         WHERE c.audience = 'table' AND e.world_id = ${req.world.id} AND NOT e.deleted ORDER BY c.created_at DESC LIMIT 200`;
       const out = rows.filter((r) => sees(r, req) && (!r.hidden || req.isGmHere)).slice(0, 60)
@@ -66,7 +69,7 @@ export default route({
       if (which === 'gm' && !requireGm(req, res)) return;
       const e = await entryFor(entryId, req);
       if (!sees(e, req)) return fail(res, 404, 'That entry doesn’t exist.');
-      const rows = await sql`SELECT c.id, c.entry_id, c.parent_id, c.body, c.resolved, c.hidden, c.created_at, c.edited_at, c.gm_id, g.name AS gm
+      const rows = await sql`SELECT c.id, c.entry_id, c.parent_id, c.body, c.resolved, c.hidden, c.created_at, c.edited_at, c.gm_id, c.reactions, g.name AS gm
         FROM comments c LEFT JOIN gms g ON g.id = c.gm_id WHERE c.entry_id = ${entryId} AND c.audience = ${which} ORDER BY c.created_at`;
       // Hidden table talk stays visible to GMs and to whoever wrote it.
       return send(res, 200, { comments: rows.filter((c) => !c.hidden || req.isGmHere || c.gm_id === req.gm?.id) });
@@ -111,8 +114,13 @@ export default route({
   async PATCH(req, res) {
     if (!requireMember(req, res)) return;
     const id = Number(req.body.id);
-    const cur = (await sql`SELECT c.id, c.gm_id, c.audience FROM comments c JOIN entries e ON e.id = c.entry_id WHERE c.id = ${id} AND e.world_id = ${req.world.id}`)[0];
+    const cur = (await sql`SELECT c.id, c.gm_id, c.audience, c.hidden, e.owner_id, e.visibility, e.status, e.deleted, e.shared_with FROM comments c JOIN entries e ON e.id = c.entry_id WHERE c.id = ${id} AND e.world_id = ${req.world.id}`)[0];
     if (!cur || (cur.audience === 'gm' && !req.isGmHere) || (cur.audience === 'note' && cur.gm_id !== req.gm.id)) return fail(res, 404, 'That comment was deleted.');
+    if (req.body.react !== undefined) {
+      if (cur.audience !== 'table' || !sees(cur, req) || (cur.hidden && !req.isGmHere)) return fail(res, 404, 'That comment was deleted.');
+      if (!isReaction(req.body.react)) return fail(res, 400, 'Pick one of the reactions.');
+      return send(res, 200, { reactions: await react('comments', id, req.body.react, req.gm, req.body.on !== false) });
+    }
     if (typeof req.body.resolved === 'boolean') {
       if (!req.isGmHere) return fail(res, 403, 'Only GMs can resolve threads.');
       await sql`UPDATE comments SET resolved = ${req.body.resolved} WHERE id = ${id}`;

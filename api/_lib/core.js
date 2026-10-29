@@ -148,6 +148,9 @@ export function ensureSchema() {
         id serial PRIMARY KEY, world_id text NOT NULL, gm_id int NOT NULL, text text NOT NULL, said_by text NOT NULL DEFAULT '',
         session_id text, deleted boolean NOT NULL DEFAULT false, created_at timestamptz NOT NULL DEFAULT now())`;
       await sql`CREATE INDEX IF NOT EXISTS table_quotes_idx ON table_quotes (world_id, created_at)`;
+      // Reactions on table talk and quotes: { emoji: { personId: name } }.
+      await sql`ALTER TABLE comments ADD COLUMN IF NOT EXISTS reactions jsonb`;
+      await sql`ALTER TABLE table_quotes ADD COLUMN IF NOT EXISTS reactions jsonb`;
       // Private map markers: each person's own notes on a map ("we camped here"), seen only by them.
       await sql`CREATE TABLE IF NOT EXISTS map_marks (
         id serial PRIMARY KEY, map_id text NOT NULL, gm_id int NOT NULL, x real NOT NULL, y real NOT NULL,

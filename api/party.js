@@ -35,13 +35,15 @@
 // DELETE ?ask=id                            take back your own message
 //
 // The quote wall (members): GET ?quotes=1 every quote, newest first · POST {quote: {text, said_by, session_id}}
-// DELETE ?quote=id (whoever added it, or a GM)
+// DELETE ?quote=id (whoever added it, or a GM) · PATCH {quote_id, react: emoji, on} add or take back your reaction
 import { route, send, fail, sql, requireMember, requireGm, postDiscord } from './_lib/core.js';
 import { cleanDates, cleanVote, tally, dateText } from '../js/schedule.js';
 import { cleanPrimer, cleanAnswer, answerEmpty } from '../js/zero.js';
 import { cleanPoll, castVote } from '../js/polls.js';
 import { askUnread } from './_lib/ask.js';
 import { cleanQuote } from '../js/quotes.js';
+import { isReaction } from '../js/reactions.js';
+import { react } from './_lib/react.js';
 
 const clip = (v, n) => String(v ?? '').slice(0, n);
 // A poll as the page sees it: who voted for what (by name), and what you chose.
@@ -201,6 +203,13 @@ export default route({
   },
   async PATCH(req, res) {
     if (req.body.schedule_id !== undefined) return patchSchedule(req, res);
+    if (req.body.quote_id !== undefined) {
+      if (!requireMember(req, res)) return;
+      if (!isReaction(req.body.react)) return fail(res, 400, 'Pick one of the reactions.');
+      const q = (await sql`SELECT id FROM table_quotes WHERE id = ${Number(req.body.quote_id)} AND world_id = ${req.world.id} AND NOT deleted`)[0];
+      if (!q) return fail(res, 404, 'That quote was taken down.');
+      return send(res, 200, { reactions: await react('quotes', q.id, req.body.react, req.gm, req.body.on !== false) });
+    }
     if (req.body.poll_id !== undefined) {
       if (!requireMember(req, res)) return;
       const p = (await sql`SELECT * FROM table_polls WHERE id = ${Number(req.body.poll_id)} AND world_id = ${req.world.id} AND NOT deleted`)[0];
@@ -230,7 +239,7 @@ export default route({
     if (req.query?.ask) return getAsk(req, res);
     if (req.query?.quotes) {
       if (!requireMember(req, res)) return;
-      const quotes = await sql`SELECT q.id, q.text, q.said_by, q.session_id, q.created_at, q.gm_id, g.name AS added_by FROM table_quotes q LEFT JOIN gms g ON g.id = q.gm_id
+      const quotes = await sql`SELECT q.id, q.text, q.said_by, q.session_id, q.created_at, q.gm_id, q.reactions, g.name AS added_by FROM table_quotes q LEFT JOIN gms g ON g.id = q.gm_id
         WHERE q.world_id = ${req.world.id} AND NOT q.deleted ORDER BY q.created_at DESC, q.id DESC LIMIT 1000`;
       return send(res, 200, { quotes });
     }

@@ -4,6 +4,7 @@
 import { el, toast, confirmButton, setKids } from './dom.js';
 import { api, session, isGm, isMember, isOwner } from './api.js';
 import { getEntry, link, kindLabel, whenTime, notice, richText } from './world-store.js';
+import { reactionBar } from './world-react.js';
 
 const ROOMS = {
   gm: { title: 'GM discussion', note: 'Only GMs can see this', start: 'Start thread', empty: 'No open threads. Plan with the other GMs here: “I’m bringing her back in session 14” or “Don’t kill him yet, I need him.”' },
@@ -30,8 +31,11 @@ function commentNode(c, reload, { isReply, audience }) {
         audience === 'table' && isGm() ? el('button', { class: 'btn small ghost', type: 'button', onclick: act({ hidden: !c.hidden }, c.hidden ? 'Shown again' : 'Hidden from players') }, c.hidden ? 'Show' : 'Hide') : null,
         mine ? el('button', { class: 'btn small ghost', type: 'button', onclick: edit }, 'Edit') : null,
         canDelete ? confirmButton('Delete', async () => { try { await api('comments', { method: 'DELETE', query: { id: c.id } }); reload(); } catch (err) { toast(err.message, 'bad'); } }) : null)),
-    bodyBox);
+    bodyBox,
+    audience === 'table' ? tableReactions(c) : null);
 }
+
+const tableReactions = (c) => reactionBar(c.reactions, async (react, on) => (await api('comments', { method: 'PATCH', body: { id: c.id, react, on } })).reactions);
 
 function composer(entryId, parentId, reload, placeholder, audience) {
   const ta = el('textarea', { rows: parentId ? 2 : 3, placeholder, 'aria-label': placeholder });
@@ -124,7 +128,7 @@ export async function viewTable() {
         const e = getEntry(c.entry_id);
         return el('li', { class: c.hidden ? 'hidden-comment' : '' }, e ? link(e) : el('span', {}, c.entry_name), el('span', { class: 'kind-tag' }, kindLabel(c.kind)),
           el('span', { class: 'talk-snippet' }, `${c.gm || 'Someone'}${c.parent_id ? ' (reply)' : ''}: ${c.body.length > 160 ? `${c.body.slice(0, 158)}…` : c.body}`),
-          el('span', { class: 'muted small' }, whenTime(c.created_at)));
+          el('span', { class: 'muted small' }, whenTime(c.created_at)), tableReactions(c));
       })) : notice('Quiet so far', isMember() ? 'Open a quest, a handout or a rumor and say something about it.' : 'Nobody has said anything yet.'));
   } catch (err) { return notice('Couldn’t load table talk', err.message); }
 }
