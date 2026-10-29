@@ -1511,3 +1511,5 @@ div.poll-row { cursor: default }
 .cast p { margin: 2px 0 }
 .cast.dead .cast-name a { text-decoration: line-through }
 @media print { .cast-list { grid-template-columns: 1fr 1fr; gap: 4mm 8mm } .cast { font-size: 9pt; border-color: #999 } .cast .avatar { width: 12mm; height: 12mm } }
+.missing-list li { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px }
+.missing-make { margin-left: auto; display: inline-flex; gap: 6px; align-items: center }

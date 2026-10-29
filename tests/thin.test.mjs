@@ -26,3 +26,10 @@ test('thin spots are found', () => {
   assert.deepEqual(r.longHidden.map((e) => e.id), ['h']);
   assert.deepEqual(r.unconnected.map((e) => e.id), ['h']);
 });
+
+test('missingLinks finds names that point at nothing, most mentioned first', async () => {
+  const { missingLinks } = await import('../js/thin.js');
+  const list = [{ id: 'a', kind: 'npc', name: 'Ann', body: 'Knows [[Bram]] and [[the  Gate|gate]].' }, { id: 'b', kind: 'npc', name: 'Cob', summary: '[[bram]] owes [[Ann]].', fields: { wants: 'To find [[The Gate]].' } },
+    { id: 'c', kind: 'npc', name: 'Dee', body: '[[Ghost]]', status: 'suggested' }];
+  assert.deepEqual(missingLinks(list).map((x) => [x.name, x.from.map((e) => e.id)]), [['Bram', ['a', 'b']], ['the Gate', ['a', 'b']]]);
+});

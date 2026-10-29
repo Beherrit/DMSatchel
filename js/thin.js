@@ -5,6 +5,26 @@ import { readObjectives } from './objectives.js';
 // Kinds that are records of play or reference, not things to flesh out.
 const SKIP = new Set(['session', 'journal', 'downtime', 'rule', 'creature', 'table', 'encounter', 'character', 'handout']);
 
+// [[Names]] that point at no entry yet: → [{ name, from: [entries that mention it] }], most mentioned first.
+// Names are compared ignoring case and spacing, the way links are followed.
+export function missingLinks(entries) {
+  const live = entries.filter((e) => (e.status || 'live') === 'live' && !e.deleted);
+  const norm = (s) => String(s).toLowerCase().replace(/\s+/g, ' ').trim();
+  const known = new Set(live.map((e) => norm(e.name)));
+  const missing = new Map();
+  for (const e of live) {
+    const text = [e.summary, e.body, e.secret, ...Object.values(e.fields || {}).filter((v) => typeof v === 'string')].join('\n');
+    for (const m of text.matchAll(/\[\[([^\]|]+)(?:\|[^\]]+)?\]\]/g)) {
+      const name = m[1].replace(/\s+/g, ' ').trim(), k = norm(name);
+      if (!k || known.has(k)) continue;
+      if (!missing.has(k)) missing.set(k, { name, from: [] });
+      const x = missing.get(k);
+      if (!x.from.includes(e)) x.from.push(e);
+    }
+  }
+  return [...missing.values()].sort((a, b) => b.from.length - a.from.length || a.name.localeCompare(b.name));
+}
+
 export function thinSpots(entries, now = Date.now()) {
   const live = entries.filter((e) => (e.status || 'live') === 'live' && !e.deleted);
   const childrenOf = new Map();

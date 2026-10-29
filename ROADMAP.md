@@ -272,6 +272,14 @@ to the log at the bottom.
 120. [x] **Spell cards.** Printable cards for a character's spells from their spellbook, nine to a page.
 121. [x] **Who's who.** A printable cast list of the people the party has met (from the session log), with
     pictures, pronunciations and one line each, safe to hand to players.
+122. [x] **Missing links.** "What needs writing" lists [[names]] that point at no entry yet, where they're mentioned,
+    with a button to create each one.
+123. [ ] **Add to your calendar.** The next session as a calendar file (and a Google Calendar link), so it lands in
+    everyone's own calendar with the world's name and a link back.
+124. [ ] **On this day.** The front page notes what happened on today's in-world date in earlier years, and whose
+    birthday or which holiday it is.
+125. [ ] **Roll a name.** A "Roll" beside the name field for NPCs, settlements, taverns and shops, using the app's
+    name tables (and an NPC's ancestry).
 
 ## Ideas parking lot
 
@@ -398,3 +406,4 @@ to the log at the bottom.
 - Item cards: "Print card" on an item's page, "Print cards" on the Items list, "Print cards for these items" under the treasury's items held (matched to item entries by name), and #world/itemcards/t:<tag> for a tag. Each card has the name, type · rarity · attunement, a picture if there is one, what it does (properties, else the description, trimmed at a sentence) and value or source; never the GM secret. Printed, they're exactly 63 × 88 mm, three across and nine to a page; ✕ leaves one out. js/play-cards.js unit tested.
 - Spell cards: "Spell cards" on the page of any character made in the Character Forge who casts spells prints a card with their class and level, save DC and spell attack, a row of boxes per slot level (or pact slots) to tick in pencil, and their cantrips and prepared spells by level. Any of those spells that are in the world's library get a full card of their own (level, classes, what it does), and the library's Spells tab has "Print these as spell cards"; #world/spellcards prints every caster in the party. The app carries spell names, not the SRD spell texts, so SRD spells appear by name on the caster's card rather than on cards of their own. Same 63 × 88 mm print layout as item cards. Card builders unit tested.
 - Who's who: "Who's who" (sidebar, Extras) lists every NPC the session log has met (a session links them with [[Name]] or connects to them), alphabetically: portrait (or an initial), name and pronunciation, role and where they are, their summary in a line, and "Met in 3 sessions · last in Session 12". The dead stay, struck through and tagged. Built from what the viewer can see, so a player's printout never names a hidden NPC; prints two columns to a page. js/cast.js unit tested.
+- Missing links: "What needs writing" opens with "Links that lead nowhere yet": every [[name]] in any text (summaries, descriptions, GM secrets, long fields) that matches no entry, ignoring case and spacing, most mentioned first, with the entries that mention it. Pick a kind beside it and "Create" opens the new-entry form with the name filled in; once saved, every mention becomes a link. js/thin.js missingLinks unit tested.
