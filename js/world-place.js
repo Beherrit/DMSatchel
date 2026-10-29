@@ -192,6 +192,7 @@ function powersSection(place, rerender) {
   const row = (e, how) => el('li', {}, link(e), el('span', { class: 'kind-tag' }, kindLabel(e.kind)), el('span', { class: 'muted small' }, how || e.fields?.type || e.fields?.trade || e.fields?.ancestry || ''));
   return el('section', { class: 'hub-sec' },
     isGm() ? el('div', { class: 'hub-tools' }, add('Guild', 'guild'), add('Faction', 'faction'), add('Family', 'clan'),
+      el('button', { class: 'btn small', type: 'button', onclick: async () => { const { rivalBox } = await import('./world-rival.js'); slot.prepend(rivalBox(place, rerender)); } }, '+ Rival party'),
       pickExisting('Bring an existing faction, guild or house here…', ORG_KINDS, (x) => inside.includes(x), async (x) => { await patchEntry(x, { parent_id: place.id }); toast(`${x.name} is now based in ${place.name}`); rerender(); })) : null,
     slot,
     inside.length || linked.length ? el('ul', { class: 'entry-list' }, inside.map((e) => row(e)), linked.map((e) => row(e, (e.links.find((l) => l.id === place.id) || {}).label)))

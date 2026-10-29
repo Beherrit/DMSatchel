@@ -1604,3 +1604,5 @@ details.quest-group > summary .section-title { display: inline }
 .show-dialog .poster { box-shadow: none; padding: 14px }
 @media print { .poster-view .panel-head { display: none } .poster { box-shadow: none; border-color: #000 } .poster-headline { color: #000 } }
 .aka-line { margin: 2px 0 0 }
+.rival-members { display: grid; gap: 6px; margin: 8px 0 }
+.secret-line { background: var(--secret-bg); border-left: 3px solid var(--danger); padding: 4px 8px; border-radius: 4px }
