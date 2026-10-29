@@ -69,6 +69,7 @@ import { deadlineOf, deadlineText } from './deadline.js';
 import { menuCard } from './world-menu.js';
 import { buyBox } from './world-buy.js';
 import { chainSection } from './world-questchain.js';
+import { dayWeather } from './forecast.js';
 import './world-living.js';
 import { cleanMusic } from './music.js';
 import { musicLine } from './world-music.js';
@@ -78,7 +79,7 @@ import { saveTemplateButton, templatePicker } from './world-templates.js';
 import { fillHistory } from './world-history.js';
 import { changesCard } from './world-changes.js';
 import { viewCards, cardsButton } from './world-cards.js';
-import { encounterCard } from './encounter-ui.js';
+import { encounterCard, placeTerrains } from './encounter-ui.js';
 import { bondsSection } from './world-bonds.js';
 import { viewClocks, clocksWidget } from './world-clocks.js';
 import { viewRumors } from './world-rumors.js';
@@ -209,6 +210,14 @@ function zeroNudge() {
     el('a', { class: 'btn primary', href: '#world/zero' }, 'Read session zero'));
 }
 
+// Today's weather where the party is, for everyone who can see that place: the same roll session prep shows.
+function tableWeather() {
+  const here = getEntry(world.info?.party_at);
+  if (!here || !isMember()) return null;
+  const w = dayWeather(here.id, placeTerrains(here), worldCalendar());
+  return el('p', { class: 'weather-line small' }, el('span', { 'aria-hidden': 'true' }, '🌤 '), 'In ', link(here), `: ${w.line}`, w.rules.length && isGm() ? el('span', { class: 'muted' }, ` ${w.rules[0]}`) : null);
+}
+
 function viewHome() {
   const all = worldEntries();
   const recent = [...all].sort((a, b) => String(b.updated_at).localeCompare(String(a.updated_at))).slice(0, 12);
@@ -216,7 +225,8 @@ function viewHome() {
   const keyNpcs = all.filter((e) => e.kind === 'npc' && (e.tags || []).includes('key')).sort(byName);
   return el('div', { class: 'w-view' },
     el('div', { class: 'panel-head' }, el('h2', {}, info.name || 'The World'), info.tagline ? el('p', {}, info.tagline) : null,
-      worldCalendar() ? el('p', { class: 'today-line' }, el('a', { href: '#world/calendar' }, `📅 ${todayText()}`)) : null, isMember() ? nextSessionLine() : null, rsvpCard()),
+      worldCalendar() ? el('p', { class: 'today-line' }, el('a', { href: '#world/calendar' }, `📅 ${todayText()}`)) : null,
+      tableWeather(), isMember() ? nextSessionLine() : null, rsvpCard()),
     zeroNudge(),
     previouslyCard(),
     readingCard(),

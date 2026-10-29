@@ -1659,3 +1659,4 @@ details.quest-group > summary .section-title { display: inline }
 .quest-chain li::before { content: '↓'; position: absolute; left: 2px; color: var(--muted) }
 .quest-chain li:first-child::before { content: '•' }
 .quest-chain .chain-next::before { content: '→' }
+.weather-line { margin: 2px 0 0; color: var(--muted) }
