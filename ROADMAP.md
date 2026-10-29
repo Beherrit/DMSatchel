@@ -324,6 +324,14 @@ to the log at the bottom.
     people, shops and open jobs are there, and its mood music and weather today.
 149. [x] **Recently changed for GMs.** A GM-only "Recently changed" list on the front page: the last dozen edits by
     anyone, with who and when, linking to each entry's history.
+150. [ ] **A forecast for the week.** Session prep shows the next few in-world days of weather where the party is,
+    matching what each day will show when it comes, so GMs can plan a storm.
+151. [ ] **Reading for next session.** GMs pick a few entries for players to read before the next session; players
+    see the list on the front page and tick off what they've read.
+152. [ ] **Reveal on a date.** A hidden entry can be set to reveal itself to players on a chosen day, for a letter
+    that arrives or a festival that's announced, without the GM having to remember.
+153. [ ] **Job board poster.** A town's open jobs as a printable notice-board poster (or shown to the table), in the
+    voice of the posters pinned up in the square.
 
 ## Ideas parking lot
 
