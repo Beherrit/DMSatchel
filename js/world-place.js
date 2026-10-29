@@ -9,6 +9,7 @@ import { worldCalendar } from './world-calendar.js';
 import { dayWeather } from './forecast.js';
 import { controllers } from './control.js';
 import { glanceOf } from './glance.js';
+import { visitedPlaces } from './visited.js';
 import { thumb } from './image-ui.js';
 import { el, toast, setKids } from './dom.js';
 import { isGm } from './api.js';
@@ -318,6 +319,13 @@ export function placeDrawer(place, rerender) {
 const atlasOpen = new Set();
 export function viewAtlas() {
   const places = worldEntries().filter((e) => PLACE_KINDS.includes(e.kind));
+  // GMs: where the party hasn't been yet (once the party has been anywhere at all).
+  const stops = (world.info?.journey || []).map((s) => s.id);
+  const tracking = isGm() && (stops.length > 0 || Boolean(world.info?.party_at));
+  const visited = tracking ? visitedPlaces(stops, world.entries, world.info?.party_at) : new Set();
+  const unvisited = (e) => tracking && !visited.has(e.id);
+  const notYet = () => el('span', { class: 'tag unvisited-tag', title: 'The party hasn’t been here yet' }, 'not yet visited');
+  const onlyNew = tracking ? el('input', { type: 'checkbox', id: 'at-new' }) : null;
   const roots = places.filter((e) => !e.parent_id || !getEntry(e.parent_id) || !PLACE_KINDS.includes(getEntry(e.parent_id).kind)).sort((a, b) => PLACE_KINDS.indexOf(a.kind) - PLACE_KINDS.indexOf(b.kind) || byName(a, b));
   const filter = el('input', { type: 'search', placeholder: 'Filter places…', 'aria-label': 'Filter places' });
   const tree = el('div', { class: 'atlas' });
@@ -333,7 +341,7 @@ export function viewAtlas() {
     } }, open ? '▾' : '▸') : el('span', { class: 'tree-toggle' });
     const allowed = CHILD_PLACES[e.kind] || [];
     return el('li', { 'data-name': e.name.toLowerCase() },
-      el('div', { class: `tree-row k-${e.kind}` }, toggle, el('span', { class: 'tree-dot', 'aria-hidden': 'true' }), link(e), el('span', { class: 'kind-tag' }, e.fields?.type || e.fields?.size || kindLabel(e.kind)),
+      el('div', { class: `tree-row k-${e.kind}` }, toggle, el('span', { class: 'tree-dot', 'aria-hidden': 'true' }), link(e), el('span', { class: 'kind-tag' }, e.fields?.type || e.fields?.size || kindLabel(e.kind)), unvisited(e) ? notYet() : null,
         el('span', { class: 'tree-counts' },
           c.people ? el('a', { href: `#world/e/${e.id}/people`, title: 'People' }, `${c.people} people`) : null,
           c.openQuests ? el('a', { href: `#world/e/${e.id}/quests`, title: 'Open jobs' }, `${c.openQuests} jobs`) : null),
@@ -345,21 +353,26 @@ export function viewAtlas() {
   }
   function draw() {
     const q = filter.value.trim().toLowerCase();
-    if (q) {
-      const hits = places.filter((e) => e.name.toLowerCase().includes(q)).sort(byName);
-      setKids(tree, hits.length ? el('ul', { class: 'tree' }, hits.map((e) => el('li', {}, el('div', { class: `tree-row k-${e.kind}` }, el('span', { class: 'tree-dot' }), link(e), el('span', { class: 'kind-tag' }, kindLabel(e.kind)),
+    if (q || onlyNew?.checked) {
+      const hits = places.filter((e) => e.name.toLowerCase().includes(q) && (!onlyNew?.checked || unvisited(e))).sort(byName);
+      setKids(tree, hits.length ? el('ul', { class: 'tree' }, hits.map((e) => el('li', {}, el('div', { class: `tree-row k-${e.kind}` }, el('span', { class: 'tree-dot' }), link(e), el('span', { class: 'kind-tag' }, kindLabel(e.kind)), unvisited(e) ? notYet() : null,
         el('span', { class: 'muted small' }, (getEntry(e.parent_id) ? ['in ', link(getEntry(e.parent_id))] : null)))))) : el('p', { class: 'muted' }, 'No places match.'));
       return;
     }
     setKids(tree, roots.length ? el('ul', { class: 'tree' }, roots.map((e) => node(e, 0))) : null);
   }
   filter.addEventListener('input', draw);
+  onlyNew?.addEventListener('change', draw);
   draw();
+  const seenCount = places.filter((e) => visited.has(e.id)).length;
   return el('div', { class: 'w-view' },
     el('div', { class: 'panel-head row' }, el('div', {}, el('h2', {}, 'Atlas'), el('p', {}, 'Every region, area, town and place, nested the way they sit in the world, with who lives there and how many jobs are open.')),
       isGm() ? el('div', { class: 'btnrow' }, el('a', { class: 'btn primary small', href: '#world/new/region' }, '+ Region'),
         el('button', { class: 'btn small', type: 'button', onclick: () => slot.replaceChildren(previewBox('A new area', () => areaDraft(null), 1, rerender)) }, '+ Random area')) : null),
-    filter, slot,
+    filter,
+    tracking && places.length ? el('p', { class: 'small atlas-visited' }, `The party has been to ${seenCount} of ${places.length} places. `,
+      el('label', { class: 'check', for: 'at-new' }, onlyNew, ' Show only where they haven’t been')) : null,
+    slot,
     roots.length ? tree : notice('No places yet', isGm() ? 'Start with a region (a kingdom, a province, a wild land), then add areas and towns inside it.' : 'The GMs haven’t mapped out any places yet.'),
     nameList());
 }
