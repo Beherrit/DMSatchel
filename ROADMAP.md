@@ -250,6 +250,13 @@ to the log at the bottom.
     top that jumps to each part.
 109. [x] **The world in numbers.** A page of counts and fun facts: sessions played, the most-mentioned NPCs, the
     busiest places, who has written the most, the longest-running quest.
+110. [x] **A tidier sidebar.** The world's views grouped under folding headings (At the table, The world,
+    Extras), remembered per browser, with counts and badges kept, so the list stays short.
+111. [ ] **Reactions.** A quick emoji reaction (👍 😂 😮 ❤️ 🎲) on table talk and on the quote wall, with who reacted.
+112. [ ] **Mood music.** A music or ambience link on any place or scene, played from its page, and offered in
+    session prep for where the party is.
+113. [ ] **Birthdays on the calendar.** Characters' and NPCs' in-world birthdays recur every year on the calendar
+    and in session prep's "Coming up".
 
 ## Ideas parking lot
 
@@ -364,3 +371,4 @@ to the log at the bottom.
 - Picture wall: "Picture wall" in the sidebar shows every picture in the world as a grid of squares: each entry's main picture and its gallery (with captions), then the maps, each picture once. Filters for kind (with counts, maps included) and tag; the first 120 show, then "Show all". Each square opens its entry or map. Players see only what they can see, and never a fogged map whole (those stay under their fog on the map page). Also: the new card lists (quotes, duplicates, hall, questions) no longer show list bullets. js/picture-wall.js unit tested.
 - Contents for long entries: a description with three or more "## " headings gets a small "Contents" box (floated beside the text; full width on phones) listing the parts. Each link scrolls to its heading and moves focus there without changing the page address, so routing and the back button still work. Heading ids are readable and unique (sec-history, sec-history-2). js/contents.js unit tested.
 - The world in numbers: "In numbers" in the sidebar: tiles for entries (and how many kinds), words written, sessions played (first to last), player characters (and how many fell) and quests completed; then the most talked-about NPCs (how many other entries mention or connect to them), the busiest places (everything located inside, at any depth), who has written the most entries, and records: the most connected entry, the longest-running open quest and the most common kinds. Built from what the viewer can see, so players never count hidden things. js/world-stats.js unit tested.
+- A tidier sidebar: the world's views now sit in three folding groups: At the table (party, session zero, next session, downtime, calendar, table talk, questions, quote wall, GM discussions), The world (atlas, maps, web, who stands where, clocks, standing, tags, library) and Extras (picture wall, in numbers, say it right, and a new link to the Hall of heroes). Open or shut is remembered per browser (Extras starts shut); the group holding the page you're on opens; a shut group shows a dot (and says "something new" to screen readers) when something inside has news. On phones the links stay in a grid.

@@ -112,6 +112,19 @@ function recentNav() {
   return el('details', { class: 'w-favs w-recent' }, el('summary', { class: 'w-favs-h' }, '🕘 Recently viewed'), el('ul', {}, list.map((e) => el('li', {}, link(e)))));
 }
 
+// A folding group of world views; open or shut is remembered in this browser. A shut group shows a dot when
+// something inside it has news (a "new" count).
+function navGroup(key, title, open, links) {
+  let saved = null;
+  try { saved = localStorage.getItem(`satchel-nav-${key}`); } catch { /* storage blocked */ }
+  const list = links.filter(Boolean);
+  const news = list.some((a) => a.querySelector('.count.new') || a.querySelector('.count')?.textContent === 'new');
+  const d = el('details', { class: 'w-group', open: (saved === null ? open : saved === '1') || null },
+    el('summary', {}, title, news ? [el('span', { class: 'w-dot', 'aria-hidden': 'true' }), el('span', { class: 'sr-only' }, ' (something new)')] : null), el('div', { class: 'w-group-links' }, list));
+  d.addEventListener('toggle', () => { try { localStorage.setItem(`satchel-nav-${key}`, d.open ? '1' : '0'); } catch { /* storage blocked */ } });
+  return d;
+}
+
 function renderSide() {
   const counts = {}; for (const e of world.entries.values()) counts[e.kind] = (counts[e.kind] || 0) + 1;
   const suggested = worldEntries().filter((e) => e.status === 'suggested').length;
@@ -126,26 +139,33 @@ function renderSide() {
     isPlayer() ? el('div', { class: 'w-gm w-player' }, el('a', { class: 'btn primary small', href: '#world/new/character' }, '+ My character'), el('a', { class: 'btn small', href: '#world/new/journal' }, '+ Journal entry'),
       el('a', { class: 'btn ghost small', href: '#world/new/lore' }, 'Suggest an entry'), el('a', { class: 'btn ghost small', href: '#world/mine' }, 'My things'), el('a', { class: 'btn ghost small', href: '#world/export' }, 'Export')) : null,
     el('nav', { class: 'w-kinds w-tools', 'aria-label': 'World views' },
-      el('a', { href: '#world/party', 'data-view': 'party' }, el('span', {}, 'The Party'), el('span', { class: 'count' }, worldEntries().filter((e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status)).length)),
-      isMember() && (world.info?.primer || isGm()) ? el('a', { href: '#world/zero', 'data-view': 'zero' }, el('span', {}, 'Session zero'), el('span', { class: 'count' }, world.info?.zero_read === false ? 'new' : '')) : null,
-      isMember() ? el('a', { href: '#world/schedule', 'data-view': 'schedule' }, el('span', {}, 'Next session'), el('span', { class: 'count' }, world.info?.next_session && Date.parse(world.info.next_session) > Date.now() - 86400000 ? new Date(world.info.next_session).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '')) : null,
-      isMember() ? el('a', { href: '#world/downtime', 'data-view': 'downtime' }, el('span', {}, 'Downtime'), el('span', { class: 'count' }, isGm() ? (worldEntries().filter((d) => d.kind === 'downtime' && !d.fields?.resolved).length || '') : '')) : null,
-      el('a', { href: '#world/calendar', 'data-view': 'calendar', title: todayText() }, el('span', {}, 'Calendar'), el('span', { class: 'count cal-count' }, worldCalendar() ? todayText().split(', ').pop().replace(/ \d+.*$/, '') : '')),
-      el('a', { href: '#world/atlas', 'data-view': 'atlas' }, el('span', {}, 'Atlas'), el('span', { class: 'count' }, worldEntries().filter((e) => PLACE_KINDS.includes(e.kind)).length)),
-      el('a', { href: '#world/maps', 'data-view': 'maps' }, el('span', {}, 'Maps'), el('span', { class: 'count' }, (world.maps || []).length)),
-      el('a', { href: '#world/pictures', 'data-view': 'pictures' }, el('span', {}, 'Picture wall'), el('span', { class: 'count' }, '▣')),
-      el('a', { href: '#world/numbers', 'data-view': 'numbers' }, el('span', {}, 'In numbers'), el('span', { class: 'count' }, '#')),
-      el('a', { href: '#world/web', 'data-view': 'web' }, el('span', {}, 'Relationship web'), el('span', { class: 'count' }, '◎')),
-      el('a', { href: '#world/library', 'data-view': 'library' }, el('span', {}, 'Your library'), el('span', { class: 'count' }, worldEntries().filter((e) => e.kind === 'creature' || e.kind === 'rule' || (e.kind === 'item' && e.fields?.source)).length)),
-      el('a', { href: '#world/powers', 'data-view': 'powers' }, el('span', {}, 'Who stands where'), el('span', { class: 'count' }, '▦')),
-      el('a', { href: '#world/clocks', 'data-view': 'clocks' }, el('span', {}, 'Faction clocks'), el('span', { class: 'count' }, (world.standings?.clocks || []).length)),
-      el('a', { href: '#world/standings', 'data-view': 'standings' }, el('span', {}, 'Party standing'), el('span', { class: 'count' }, Object.keys(world.standings?.current || {}).length)),
-      el('a', { href: '#world/tags', 'data-view': 'tags' }, el('span', {}, 'Tags'), el('span', { class: 'count' }, new Set(worldEntries().flatMap((e) => e.tags || [])).size || '')),
-      el('a', { href: '#world/say', 'data-view': 'say' }, el('span', {}, 'Say it right'), el('span', { class: 'count' }, worldEntries().filter((e) => sayOf(e)).length || '')),
-      el('a', { href: '#world/table', 'data-view': 'table' }, el('span', {}, 'Table talk'), el('span', { class: 'count' }, '💬')),
-      askNav(),
-      isMember() ? el('a', { href: '#world/quotes', 'data-view': 'quotes' }, el('span', {}, 'Quote wall'), el('span', { class: 'count' }, '❝')) : null,
-      isGm() ? el('a', { href: '#world/talk', 'data-view': 'talk' }, el('span', {}, 'GM discussions'), el('span', { class: 'count', id: 'w-talk-count' }, '')) : null),
+      navGroup('table', 'At the table', true, [
+        el('a', { href: '#world/party', 'data-view': 'party' }, el('span', {}, 'The Party'), el('span', { class: 'count' }, worldEntries().filter((e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status)).length)),
+        isMember() && (world.info?.primer || isGm()) ? el('a', { href: '#world/zero', 'data-view': 'zero' }, el('span', {}, 'Session zero'), el('span', { class: 'count' }, world.info?.zero_read === false ? 'new' : '')) : null,
+        isMember() ? el('a', { href: '#world/schedule', 'data-view': 'schedule' }, el('span', {}, 'Next session'), el('span', { class: 'count' }, world.info?.next_session && Date.parse(world.info.next_session) > Date.now() - 86400000 ? new Date(world.info.next_session).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '')) : null,
+        isMember() ? el('a', { href: '#world/downtime', 'data-view': 'downtime' }, el('span', {}, 'Downtime'), el('span', { class: 'count' }, isGm() ? (worldEntries().filter((d) => d.kind === 'downtime' && !d.fields?.resolved).length || '') : '')) : null,
+        el('a', { href: '#world/calendar', 'data-view': 'calendar', title: todayText() }, el('span', {}, 'Calendar'), el('span', { class: 'count cal-count' }, worldCalendar() ? todayText().split(', ').pop().replace(/ \d+.*$/, '') : '')),
+        el('a', { href: '#world/table', 'data-view': 'table' }, el('span', {}, 'Table talk'), el('span', { class: 'count' }, '💬')),
+        askNav(),
+        isMember() ? el('a', { href: '#world/quotes', 'data-view': 'quotes' }, el('span', {}, 'Quote wall'), el('span', { class: 'count' }, '❝')) : null,
+        isGm() ? el('a', { href: '#world/talk', 'data-view': 'talk' }, el('span', {}, 'GM discussions'), el('span', { class: 'count', id: 'w-talk-count' }, '')) : null,
+      ]),
+      navGroup('world', 'The world', true, [
+        el('a', { href: '#world/atlas', 'data-view': 'atlas' }, el('span', {}, 'Atlas'), el('span', { class: 'count' }, worldEntries().filter((e) => PLACE_KINDS.includes(e.kind)).length)),
+        el('a', { href: '#world/maps', 'data-view': 'maps' }, el('span', {}, 'Maps'), el('span', { class: 'count' }, (world.maps || []).length)),
+        el('a', { href: '#world/web', 'data-view': 'web' }, el('span', {}, 'Relationship web'), el('span', { class: 'count' }, '◎')),
+        el('a', { href: '#world/powers', 'data-view': 'powers' }, el('span', {}, 'Who stands where'), el('span', { class: 'count' }, '▦')),
+        el('a', { href: '#world/clocks', 'data-view': 'clocks' }, el('span', {}, 'Faction clocks'), el('span', { class: 'count' }, (world.standings?.clocks || []).length)),
+        el('a', { href: '#world/standings', 'data-view': 'standings' }, el('span', {}, 'Party standing'), el('span', { class: 'count' }, Object.keys(world.standings?.current || {}).length)),
+        el('a', { href: '#world/tags', 'data-view': 'tags' }, el('span', {}, 'Tags'), el('span', { class: 'count' }, new Set(worldEntries().flatMap((e) => e.tags || [])).size || '')),
+        el('a', { href: '#world/library', 'data-view': 'library' }, el('span', {}, 'Your library'), el('span', { class: 'count' }, worldEntries().filter((e) => e.kind === 'creature' || e.kind === 'rule' || (e.kind === 'item' && e.fields?.source)).length)),
+      ]),
+      navGroup('extras', 'Extras', false, [
+        el('a', { href: '#world/pictures', 'data-view': 'pictures' }, el('span', {}, 'Picture wall'), el('span', { class: 'count' }, '▣')),
+        el('a', { href: '#world/numbers', 'data-view': 'numbers' }, el('span', {}, 'In numbers'), el('span', { class: 'count' }, '#')),
+        el('a', { href: '#world/say', 'data-view': 'say' }, el('span', {}, 'Say it right'), el('span', { class: 'count' }, worldEntries().filter((e) => sayOf(e)).length || '')),
+        el('a', { href: '#world/hall', 'data-view': 'hall' }, el('span', {}, 'Hall of heroes'), el('span', { class: 'count' }, worldEntries().filter((e) => e.kind === 'character' && ['Retired', 'Dead', 'Missing'].includes(e.fields?.status)).length || '')),
+      ])),
     el('nav', { class: 'w-kinds', 'aria-label': 'Entry types' }, KIND_ORDER.map((k) => el('a', { href: `#world/k/${k}`, 'data-kind': k }, el('span', {}, KINDS[k].plural), el('span', { class: 'count' }, counts[k] || 0)))),
     isGm() ? el('div', { class: 'w-gm' }, el('a', { class: 'btn primary small', href: '#world/prep' }, 'Session prep'), el('a', { class: 'btn small', href: '#world/new/npc' }, '+ New entry'), el('a', { class: 'btn ghost small', href: '#world/bin' }, 'Bin'),
       el('a', { class: 'btn ghost small', href: '#world/export' }, 'Export & print'), el('a', { class: 'btn ghost small', href: '#world/import' }, 'Import notes'), el('a', { class: 'btn ghost small', href: '#world/todo' }, 'What needs writing'), el('button', { class: 'btn ghost small', type: 'button', title: 'Check what players can see (this tab only)', onclick: () => setPreview(true) }, '👁 See it as a player'),
@@ -679,6 +699,8 @@ export async function showWorld(parts, { keepScroll = false } = {}) {
   setKids(main, node);
   drawNoticeBanner();
   for (const a of side.querySelectorAll('.w-kinds a')) a.classList.toggle('active', Boolean((view === 'k' && a.dataset.kind === arg) || (view === 'e' && world.entries.get(arg)?.kind === a.dataset.kind) || (a.dataset.view && (a.dataset.view === view || (a.dataset.view === 'maps' && view === 'map')))));
+  // The group holding the open view unfolds (without changing what's remembered).
+  for (const g of side.querySelectorAll('.w-group')) if (g.querySelector('a.active')) g.setAttribute('open', '');
   window.scrollTo({ top: keepScroll ? y : 0 });
 }
 
