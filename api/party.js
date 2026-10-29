@@ -27,6 +27,7 @@
 // PATCH {poll_id, vote: i | null} vote or take it back · PATCH {poll_id, closed} (asker or GM) · DELETE ?poll=id
 // PUT {profile: {pronouns, note}}           your own profile in this world
 // PUT {rsvp: 'yes' | 'no' | null}           coming to the next session or not (members); returns the summary
+// PUT {next_move: questId | null}           the quest this member wants to do next · DELETE ?moves=1 clears everyone's (GM)
 //
 // Ask the GM (members): a private thread between each player and the world's GMs.
 // GET ?ask=1                                players: your thread (marks the answers read); GMs: every player, with
@@ -193,6 +194,19 @@ export default route({
       const members = await sql`SELECT g.id, g.name, m.rsvp FROM members m JOIN gms g ON g.id = m.gm_id WHERE m.world_id = ${req.world.id}`;
       return send(res, 200, { rsvp: rsvpSummary(members, next, req.gm.id) });
     }
+    if (req.body.next_move !== undefined) {
+      if (!requireMember(req, res)) return;
+      let id = null;
+      if (req.body.next_move) {
+        const q = (await sql`SELECT id, kind, visibility, status, owner_id, shared_with FROM entries WHERE id = ${String(req.body.next_move).slice(0, 40)} AND world_id = ${req.world.id} AND NOT deleted`)[0];
+        const sees = q && (req.isGmHere || (q.status === 'live' && (q.visibility === 'all' || sharedWith(q, req.gm.id))));
+        if (!sees || q.kind !== 'quest') return fail(res, 404, 'Pick a quest you know about.');
+        id = q.id;
+      }
+      const saved = await sql`UPDATE members SET next_move = ${id} WHERE world_id = ${req.world.id} AND gm_id = ${req.gm.id} RETURNING gm_id`;
+      if (!saved.length) return fail(res, 400, 'Only members of this world can pick.');
+      return send(res, 200, { next_move: id });
+    }
     if (req.body.profile !== undefined) {
       if (!requireMember(req, res)) return;
       const p = cleanProfile(req.body.profile);
@@ -355,6 +369,11 @@ export default route({
   },
   async DELETE(req, res) {
     if (!requireMember(req, res)) return;
+    if (req.query?.moves) {
+      if (!requireGm(req, res)) return;
+      await sql`UPDATE members SET next_move = NULL WHERE world_id = ${req.world.id}`;
+      return send(res, 200, { ok: true });
+    }
     if (req.query?.quote) {
       const gone = await sql`UPDATE table_quotes SET deleted = true WHERE id = ${Number(req.query.quote)} AND world_id = ${req.world.id} AND NOT deleted
         AND (gm_id = ${req.gm.id} OR ${req.isGmHere}) RETURNING id`;

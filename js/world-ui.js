@@ -70,6 +70,7 @@ import { menuCard } from './world-menu.js';
 import { buyBox } from './world-buy.js';
 import { chainSection } from './world-questchain.js';
 import { hireLine } from './world-hire.js';
+import { nextMoveButton } from './world-nextmove.js';
 import { dayWeather } from './forecast.js';
 import './world-living.js';
 import { cleanMusic } from './music.js';
@@ -434,7 +435,7 @@ function viewEntry(id, tab) {
     crumbs.length ? el('nav', { class: 'crumbs', 'aria-label': 'Located in' }, crumbs.flatMap((c, i) => [i ? ' › ' : '', link(c)])) : null,
     el('div', { class: 'panel-head row' },
       el('div', {}, el('div', { class: 'eyebrow' }, kindLabel(e.kind), e.fields?.type ? ` · ${e.fields.type}` : ''), el('h2', {}, e.name), akaOf(e).length ? el('p', { class: 'aka-line muted small' }, `Also known as ${akaOf(e).join(', ')}`) : null, sayLine(e), musicLine(e), partyPageNote(e), stateBadges(e).length ? el('div', { class: 'badges' }, stateBadges(e)) : null),
-      !isGm() ? el('div', { class: 'btnrow' }, starButton(e), followButton(e), e.can_edit ? el('a', { class: 'btn', href: `#world/edit/${e.id}` }, 'Edit') : null, suggestEditButton(e), askAboutLink(e), itemCardButton(e), spellCardButton(e)) : null,
+      !isGm() ? el('div', { class: 'btnrow' }, starButton(e), followButton(e), nextMoveButton(e, rerenderWorld), e.can_edit ? el('a', { class: 'btn', href: `#world/edit/${e.id}` }, 'Edit') : null, suggestEditButton(e), askAboutLink(e), itemCardButton(e), spellCardButton(e)) : null,
       isGm() ? el('div', { class: 'btnrow' }, starButton(e), followButton(e), el('a', { class: 'btn', href: `#world/edit/${e.id}` }, 'Edit'),
         showButton(e),
         revealButton(e, rerenderWorld),

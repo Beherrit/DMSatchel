@@ -236,6 +236,9 @@ export default route({
           ORDER BY c.created_at DESC LIMIT 50`).map((r) => r.created_at) } : {}),
         // A line from the quote wall for the front page, a different one each load.
         ...(req.role ? { quote: (await sql`SELECT id, text, said_by, session_id FROM table_quotes WHERE world_id = ${w.id} AND NOT deleted ORDER BY random() LIMIT 1`)[0] || null } : {}),
+        // Our next move: this member's pick, and for GMs everyone's.
+        ...(req.role && req.gm ? { next_move: (await sql`SELECT next_move FROM members WHERE world_id = ${w.id} AND gm_id = ${req.gm.id}`)[0]?.next_move || null } : {}),
+        ...(req.isGmHere ? { moves: await sql`SELECT g.name, m.next_move AS quest_id FROM members m JOIN gms g ON g.id = m.gm_id WHERE m.world_id = ${w.id} AND m.next_move IS NOT NULL` } : {}),
         ...(req.isGmHere ? { edits_open: (await sql`SELECT count(*)::int AS n FROM edit_suggestions WHERE world_id = ${w.id} AND status = 'open'`)[0].n } : {}),
         // Members' pronouns by person, to show beside their names.
         ...(req.role ? { pronouns: Object.fromEntries((await sql`SELECT gm_id, profile->>'pronouns' AS p FROM members WHERE world_id = ${w.id} AND profile->>'pronouns' <> ''`).map((r) => [r.gm_id, r.p])) } : {}),

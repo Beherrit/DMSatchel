@@ -2,7 +2,7 @@
 // Route: #world/party
 import { el, toast, confirmButton, setKids } from './dom.js';
 import { api, isGm, isMember, session } from './api.js';
-import { worldEntries, byName, link, when, richText, setEntryState } from './world-store.js';
+import { world, worldEntries, byName, link, when, richText, setEntryState } from './world-store.js';
 import { thumb } from './image-ui.js';
 import { lastShownLine } from './world-show.js';
 import { addCoins } from './sheet-ui.js';
@@ -160,7 +160,7 @@ export async function viewParty(rerender) {
     el('div', { class: 'party-grid' },
       el('div', { class: 'party-main' }, members(chars), partyBondsSection(), advancementSection(),
         el('section', {}, el('h3', { class: 'section-title' }, 'Current quests'),
-          quests.length ? el('ul', { class: 'entry-list' }, quests.map((q) => el('li', {}, link(q), progressBadge(q), q.fields?.reward ? el('span', { class: 'muted small' }, `Reward: ${q.fields.reward}`) : null)))
+          quests.length ? el('ul', { class: 'entry-list' }, quests.map((q) => el('li', {}, link(q), world.info?.next_move === q.id ? el('span', { class: 'tag', title: 'Your pick for what’s next' }, '★ your pick') : null, progressBadge(q), q.fields?.reward ? el('span', { class: 'muted small' }, `Reward: ${q.fields.reward}`) : null)))
             : el('p', { class: 'muted' }, 'No active quests.'),
           offered ? el('p', { class: 'small' }, el('a', { href: '#world/k/quest' }, `${offered} more on offer or rumored`)) : null),
         handouts(all.filter((e) => e.kind === 'handout').sort((a, b) => String(b.updated_at).localeCompare(String(a.updated_at))), rerender),
