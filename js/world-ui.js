@@ -34,6 +34,7 @@ import { noteRead, readsLine } from './world-reads.js';
 import { neighbors } from './neighbors.js';
 import { questGroups } from './quest-groups.js';
 import { partyPageButton, partyPageNote, partyPageForm, canPartyEdit } from './world-partypage.js';
+import { storySection } from './world-story.js';
 import { askNav, askAboutLink } from './world-ask.js';
 import { quoteCard } from './world-quotes.js';
 import { previouslyCard } from './world-previously.js';
@@ -360,6 +361,7 @@ function viewEntry(id, tab) {
     e.kind === 'character' ? ownerLine(e) : null,
     goalsSection(e, rerenderWorld),
     farewellCard(e, rerenderWorld),
+    storySection(e),
     readsLine(e),
     wishesSection(e, rerenderWorld),
     e.kind === 'character' ? sheetSection(e, rerenderWorld) : null,

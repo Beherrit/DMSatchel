@@ -1548,3 +1548,10 @@ details.quest-group > summary .section-title { display: inline }
 .cond-help-item { margin: 6px 0 }
 .cond-help-item ul, .cond-lines { margin: 2px 0 0; padding-left: 18px; font-size: calc(14px * var(--ts, 1)) }
 .cond-all { margin-top: 4px }
+
+/* Their story so far */
+.story-list { margin: 0; display: grid; gap: 6px }
+.story-row { display: grid; grid-template-columns: minmax(7rem, max-content) minmax(0, 1fr); gap: 4px 12px }
+.story-row dt { color: var(--muted); font-size: calc(14px * var(--ts, 1)) }
+.story-row dd { margin: 0 }
+@media (max-width: 560px) { .story-row { grid-template-columns: minmax(0, 1fr) } }
