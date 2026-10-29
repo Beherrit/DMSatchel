@@ -1603,3 +1603,4 @@ details.quest-group > summary .section-title { display: inline }
 .poster-more, .poster-empty { text-align: center; margin: 14px 0 0 }
 .show-dialog .poster { box-shadow: none; padding: 14px }
 @media print { .poster-view .panel-head { display: none } .poster { box-shadow: none; border-color: #000 } .poster-headline { color: #000 } }
+.aka-line { margin: 2px 0 0 }

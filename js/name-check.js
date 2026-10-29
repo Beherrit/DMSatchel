@@ -51,9 +51,10 @@ export function similarNames(name, entries, selfId) {
   const exact = [], close = [];
   for (const e of entries) {
     if (e.id === selfId) continue;
-    const m = normName(e.name);
-    if (!m) continue;
-    const c = closeness(n, m);
+    // Its name or any other name it goes by (fields.aka, separated by semicolons), whichever is closest.
+    const cs = [e.name, ...String(e.fields?.aka || '').split(/;\s*/)].map(normName).filter(Boolean).map((m) => closeness(n, m)).filter(Boolean);
+    if (!cs.length) continue;
+    const c = cs.includes('exact') ? 'exact' : Math.min(...cs);
     if (c === 'exact') exact.push(e); else if (c) close.push([e, c]);
   }
   return { exact, close: close.sort((a, b) => a[1] - b[1] || a[0].name.localeCompare(b[0].name)).slice(0, 5).map(([e]) => e) };

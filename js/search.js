@@ -24,8 +24,8 @@ export function searchEntries(entries, f, opts = {}) {
   if (term.startsWith('#') && !term.includes(' ')) { tag = tag || term.slice(1); term = ''; }
   const words = term.split(/\s+/).filter(Boolean);
   const text = (e) => [e.name, e.summary, e.body, ...Object.values(e.fields || {}), ...(e.tags || []), opts.gm ? e.secret : ''].join('\n').toLowerCase();
-  const score = (e) => {
-    const n = e.name.toLowerCase();
+  const score = (e) => Math.min(...[e.name, ...String(e.fields?.aka || '').split(/;\s*/).filter(Boolean)].map((n) => scoreName(e, n.toLowerCase())));
+  const scoreName = (e, n) => {
     if (!words.length) return 0;
     if (n === term) return 0;
     if (n.startsWith(term)) return 1;

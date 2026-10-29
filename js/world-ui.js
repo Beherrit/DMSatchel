@@ -63,6 +63,7 @@ import { mergeButton } from './world-merge.js';
 import { sayLine } from './world-say.js';
 import { rollButton } from './world-roll.js';
 import { cleanSay, sayOf } from './say.js';
+import { cleanAka, akaOf } from './aka.js';
 import { cleanMusic } from './music.js';
 import { musicLine } from './world-music.js';
 import { tableSection } from './world-tables.js';
@@ -413,7 +414,7 @@ function viewEntry(id, tab) {
   const node = el('article', { class: 'w-view entry-view' },
     crumbs.length ? el('nav', { class: 'crumbs', 'aria-label': 'Located in' }, crumbs.flatMap((c, i) => [i ? ' › ' : '', link(c)])) : null,
     el('div', { class: 'panel-head row' },
-      el('div', {}, el('div', { class: 'eyebrow' }, kindLabel(e.kind), e.fields?.type ? ` · ${e.fields.type}` : ''), el('h2', {}, e.name), sayLine(e), musicLine(e), partyPageNote(e), stateBadges(e).length ? el('div', { class: 'badges' }, stateBadges(e)) : null),
+      el('div', {}, el('div', { class: 'eyebrow' }, kindLabel(e.kind), e.fields?.type ? ` · ${e.fields.type}` : ''), el('h2', {}, e.name), akaOf(e).length ? el('p', { class: 'aka-line muted small' }, `Also known as ${akaOf(e).join(', ')}`) : null, sayLine(e), musicLine(e), partyPageNote(e), stateBadges(e).length ? el('div', { class: 'badges' }, stateBadges(e)) : null),
       !isGm() ? el('div', { class: 'btnrow' }, starButton(e), followButton(e), e.can_edit ? el('a', { class: 'btn', href: `#world/edit/${e.id}` }, 'Edit') : null, suggestEditButton(e), askAboutLink(e), itemCardButton(e), spellCardButton(e)) : null,
       isGm() ? el('div', { class: 'btnrow' }, starButton(e), followButton(e), el('a', { class: 'btn', href: `#world/edit/${e.id}` }, 'Edit'),
         showButton(e),
@@ -610,6 +611,7 @@ function viewEdit(id, kindForNew) {
       gm ? el('div', { class: 'field' }, el('label', { for: 'f-visibility' }, 'Who can see it'), visSel) : null,
       input('name', 'Name', e.name, { required: true, maxlength: 200 }),
       input('say', 'Say it', e.fields.say || '', { maxlength: 80, placeholder: 'How to pronounce it, e.g. BRAM-well' }),
+      input('aka', 'Also known as', e.fields.aka || '', { maxlength: 500, placeholder: 'Other names, separated by semicolons' }),
       input('music', 'Mood music', e.fields.music || '', { type: 'url', maxlength: 500, placeholder: 'https:// link (YouTube, Spotify, Tabletop Audio…)' }),
       input('parent', 'Located in / part of', parent?.name || '', { list: 'w-names', placeholder: 'e.g. a region or city' })),
     suggestNote,
@@ -667,7 +669,7 @@ function viewEdit(id, kindForNew) {
     if (unknown.length) { status.textContent = `These connections don’t match any entry: ${unknown.join(', ')}.`; status.className = 'form-status error'; return; }
     const entry = {
       kind: kindSel.value, name: String(f.get('name')).trim(), summary: String(f.get('summary') || ''), body: String(f.get('body') || ''), secret: gm ? String(f.get('secret') || '') : existing?.secret || '', visibility: gm ? visSel.value : existing?.visibility || 'all',
-      fields: Object.fromEntries([...Object.entries(e.fields).filter(([k, v]) => v && k !== 'say' && k !== 'music' && kindFields(kindSel.value).some(([fk]) => fk === k)), ['say', cleanSay(f.get('say'))], ['music', cleanMusic(f.get('music'))], ['image_alt', e.fields.image ? String(e.fields.image_alt || '').replace(/\s+/g, ' ').trim().slice(0, 300) : '']].filter(([, v]) => v)),
+      fields: Object.fromEntries([...Object.entries(e.fields).filter(([k, v]) => v && k !== 'say' && k !== 'aka' && k !== 'music' && kindFields(kindSel.value).some(([fk]) => fk === k)), ['say', cleanSay(f.get('say'))], ['aka', cleanAka(f.get('aka'), f.get('name'))], ['music', cleanMusic(f.get('music'))], ['image_alt', e.fields.image ? String(e.fields.image_alt || '').replace(/\s+/g, ' ').trim().slice(0, 300) : '']].filter(([, v]) => v)),
       tags: String(f.get('tags') || '').split(',').map((t) => t.trim()).filter(Boolean), links, parent_id: parentEntry?.id || null, version: existing?.version,
     };
     status.textContent = 'Saving…'; status.className = 'form-status';

@@ -62,6 +62,8 @@ function idx() {
       const k = e.name.toLowerCase(); if (!byNameMap.has(k)) byNameMap.set(k, e);
       if (e.parent_id) { if (!kids.has(e.parent_id)) kids.set(e.parent_id, []); kids.get(e.parent_id).push(e); }
     }
+    // Other names (fields.aka) find an entry too, unless something is called that.
+    for (const e of world.entries.values()) for (const a of String(e.fields?.aka || '').split(/;\s*/)) { const k = a.trim().toLowerCase(); if (k && !byNameMap.has(k)) byNameMap.set(k, e); }
     index = { byNameMap, kids, map: world.entries };
   }
   return index;
