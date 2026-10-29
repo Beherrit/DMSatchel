@@ -1,12 +1,14 @@
 // Living costs (GMs): after days pass on the calendar (the calendar page, or travel on a map), offer to charge the
 // party for living: a lifestyle (SRD 5.1, per day), paid by each character from their own coin, or by the treasury
-// in one line of the loot log. Nobody's purse goes below nothing; the dialog says who came up short.
+// in one line of the loot log. Nobody's purse goes below nothing; the dialog says who came up short. Hirelings'
+// wages (see hirelings.js) come from the treasury too, as their own line.
 import { el, toast } from './dom.js';
 import { api, isGm, previewing, session } from './api.js';
 import { worldEntries } from './world-store.js';
 import { playOf, addCoins } from './sheet-ui.js';
 import { coinText } from './economy.js';
 import { LIFESTYLES, livingCosts } from './lifestyle.js';
+import { payroll } from './hirelings.js';
 
 const ACTIVE = (e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
 const keyOf = () => `satchel-lifestyle-${session.worldKey || 'default'}`;
@@ -16,13 +18,15 @@ const remember = (v) => { try { localStorage.setItem(keyOf(), v); } catch { /* p
 export async function offerLivingCosts(days) {
   if (!isGm() || previewing() || !(days > 0)) return;
   const chars = worldEntries().filter(ACTIVE).sort((a, b) => a.name.localeCompare(b.name)).map((e) => ({ id: e.id, name: e.name, cp: playOf(e).cp || 0, e }));
-  if (!chars.length) return;
+  const pay = payroll(worldEntries(), days);
+  if (!chars.length && !pay.list.length) return;
   let treasury = 0;
   try { treasury = (await api('party')).cp || 0; } catch { /* the treasury choice just shows 0 */ }
   const style = el('select', { id: 'lv-style' }, LIFESTYLES.map(([n, cp]) => { const o = el('option', { value: n }, `${n} (${cp ? `${coinText(cp)} a day` : 'free'})`); if (n === remembered()) o.selected = true; return o; }));
   const own = el('input', { type: 'radio', name: 'lv-who', id: 'lv-own', value: 'own', checked: true });
   const pot = el('input', { type: 'radio', name: 'lv-who', id: 'lv-pot', value: 'pot' });
   const preview = el('p', { class: 'small', role: 'status' });
+  const wages = pay.list.length ? el('input', { type: 'checkbox', id: 'lv-wages', checked: true }) : null;
   const plan = () => (pot.checked ? livingCosts(chars, days, style.value, treasury) : livingCosts(chars, days, style.value));
   const show = () => {
     const p = plan();
@@ -40,20 +44,24 @@ export async function offerLivingCosts(days) {
       el('label', { class: 'check', for: 'lv-own' }, own, ' Each character, from their own coin'),
       el('label', { class: 'check', for: 'lv-pot' }, pot, ` The party treasury (${coinText(treasury)})`)),
     preview,
+    wages ? el('label', { class: 'check', for: 'lv-wages' }, wages, ` Pay ${pay.list.length === 1 ? pay.list[0].entry.name : `${pay.list.length} hirelings`} ${coinText(pay.total)} in wages from the treasury`) : null,
     el('div', { class: 'btnrow' }, go, el('button', { class: 'btn', type: 'button', onclick: () => d.close() }, 'Not now'))));
   d.querySelector('form').addEventListener('submit', async (ev) => {
     ev.preventDefault();
     const p = plan(); remember(style.value);
-    if (!(pot.checked ? p.paid : p.total)) { d.close(); toast('Nothing to pay'); return; }
+    const payWages = Boolean(wages?.checked && pay.total);
+    if (!(pot.checked ? p.paid : p.total) && !payWages) { d.close(); toast('Nothing to pay'); return; }
     go.disabled = true;
     try {
+      if (payWages) await api('party', { method: 'POST', body: { cp: -pay.total, note: `Wages: ${days} day${days === 1 ? '' : 's'} for ${pay.list.map((x) => x.entry.name).join(', ')}` } });
+      const wagesNote = payWages ? `; wages ${coinText(pay.total)} from the treasury` : '';
       if (pot.checked) {
-        await api('party', { method: 'POST', body: { cp: -p.paid, note: `Living costs: ${days} day${days === 1 ? '' : 's'}, ${style.value.toLowerCase()}, ${chars.length} character${chars.length === 1 ? '' : 's'}` } });
-        toast(`The treasury paid ${coinText(p.paid)} in living costs${p.short ? ` (${coinText(p.short)} short)` : ''}`);
+        if (p.paid) await api('party', { method: 'POST', body: { cp: -p.paid, note: `Living costs: ${days} day${days === 1 ? '' : 's'}, ${style.value.toLowerCase()}, ${chars.length} character${chars.length === 1 ? '' : 's'}` } });
+        toast(`The treasury paid ${coinText(p.paid)} in living costs${p.short ? ` (${coinText(p.short)} short)` : ''}${wagesNote}`);
       } else {
         const failed = [];
         for (const x of p.each) if (x.paid) { try { await addCoins(chars.find((c) => c.id === x.id).e, -x.paid); } catch { failed.push(x.name); } }
-        toast(failed.length ? `Charged, but these sheets didn’t update: ${failed.join(', ')}` : `Living costs paid: ${coinText(p.total)} in all`, failed.length ? 'bad' : undefined);
+        toast(failed.length ? `Charged, but these sheets didn’t update: ${failed.join(', ')}` : `Living costs paid: ${coinText(p.total)} in all${wagesNote}`, failed.length ? 'bad' : undefined);
       }
       d.close();
       window.dispatchEvent(new Event('world:rerender'));

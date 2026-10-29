@@ -69,6 +69,7 @@ import { deadlineOf, deadlineText } from './deadline.js';
 import { menuCard } from './world-menu.js';
 import { buyBox } from './world-buy.js';
 import { chainSection } from './world-questchain.js';
+import { hireLine } from './world-hire.js';
 import { dayWeather } from './forecast.js';
 import './world-living.js';
 import { cleanMusic } from './music.js';
@@ -460,6 +461,7 @@ function viewEntry(id, tab) {
     e.status === 'suggested' ? suggestionBanner(e) : null,
     e.visibility === 'gm' && isGm() ? el('p', { class: 'hidden-note muted small' }, 'Players can’t see this entry, or find it in search or on maps. Reveal it when they discover it.') : null,
     revealDateLine(e, rerenderWorld),
+    hireLine(e, rerenderWorld),
     isPlace ? placeSummary(e) : null,
     isPlace ? placeHub(e, tab, overview, rerenderWorld) : overview());
   // #world/e/<id>/history (from the front page's "Recently changed"): open with the history showing.
