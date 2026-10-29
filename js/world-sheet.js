@@ -15,6 +15,7 @@ import { sortSecrets } from './secrets.js';
 import { stripMarks } from './rich.js';
 import { sayOf } from './say.js';
 import { readAloudPrint } from './world-readaloud.js';
+import { remindersPrint } from './world-reminders.js';
 import { musicFor } from './music.js';
 
 const ACTIVE_PC = (e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
@@ -58,6 +59,7 @@ export async function viewSessionSheet() {
       el('h2', {}, `${world.info?.name || 'The world'}: session ${n}`),
       el('p', {}, [cal ? todayText(cal) : '', new Date().toLocaleDateString(undefined, { dateStyle: 'medium' }), here ? `The party is in ${here.name}` : 'The party is on the road'].filter(Boolean).join(' · '))),
     el('div', { class: 'ss-grid' },
+      (() => { const r = remindersPrint(prep); return r.length ? block('📌 Remember', el('ul', { class: 'ss-steps' }, r)) : null; })(),
       block('The party', pcs.length ? el('table', { class: 'ss-table' },
         el('thead', {}, el('tr', {}, ['Character', 'Player', 'AC', 'HP', 'Notes'].map((h) => el('th', { scope: 'col' }, h)))),
         el('tbody', {}, pcs.map((c) => { const v = vitals(c); return el('tr', {}, el('td', {}, c.name, sayOf(c) ? el('span', { class: 'small' }, ` (${sayOf(c)})`) : null), el('td', {}, c.owner || c.fields?.player || ''), el('td', { class: 'num' }, v.ac ?? '—'), el('td', { class: 'num' }, v.max ? `${v.hp}/${v.max}` : '—'), el('td', { class: 'small' }, [...(v.conditions || []), v.exhaustion ? `exhaustion ${v.exhaustion}` : '', v.inspiration ? 'inspired' : ''].filter(Boolean).join(', '))); })))

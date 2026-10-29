@@ -5,6 +5,7 @@
 //   party adds a stop to prep.journey (with the in-world date); PATCH {journey_remove: at} strikes one.
 // PATCH {checklist: {add} | {remove} | {done, on} | {order}, round}   (GM) the prep checklist (prep.checklist); round
 //   is the next session's number, so ticks clear when a new session is logged
+// PATCH {reminder: {add} | {done, on} | {remove} | {clear_done}}   (GM) notes pinned to the next session (prep.reminders)
 // PATCH {not_dupe: 'idA|idB'}   (GM) two entries with alike names are different things (prep.not_dupes)
 // PATCH {tag_note: {tag, text}}   (GM) a tag's description on its page
 // PATCH {start_here: {id, on} | {order}}   (GM) the entries newcomers should read first
@@ -19,6 +20,7 @@ import { route, send, fail, sql, requireOwner, requireGm, postDiscord } from './
 import { cleanCalendar, advance, formatDate, today } from '../js/calendar.js';
 import { addStop, removeStop } from '../js/journey.js';
 import { applyChecklist } from '../js/checklist.js';
+import { applyReminder } from '../js/reminders.js';
 import { KINDS } from '../js/world-schema.js';
 import { readCustom, cleanCustomList, customKeys } from '../js/custom-fields.js';
 import { applySecret } from '../js/secrets.js';
@@ -187,6 +189,12 @@ export default route({
       if (r.error) return fail(res, 400, r.error);
       await sql`UPDATE worlds SET prep = jsonb_set(COALESCE(prep, '{}'::jsonb), '{checklist}', ${JSON.stringify(r.list)}::jsonb) WHERE id = ${req.world.id}`;
       return send(res, 200, { checklist: r.list });
+    }
+    if (req.body.reminder !== undefined) {
+      const r = applyReminder(req.world.prep?.reminders, req.body.reminder);
+      if (r.error) return fail(res, 400, r.error);
+      await sql`UPDATE worlds SET prep = jsonb_set(COALESCE(prep, '{}'::jsonb), '{reminders}', ${JSON.stringify(r.list)}::jsonb) WHERE id = ${req.world.id}`;
+      return send(res, 200, { reminders: r.list });
     }
     if (req.body.not_dupe !== undefined) {
       const key = String(req.body.not_dupe).split('|').map((x) => x.trim().slice(0, 40)).filter(Boolean).sort().join('|');
