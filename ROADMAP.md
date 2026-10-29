@@ -364,6 +364,14 @@ to the log at the bottom.
     stand out at a glance.
 169. [x] **Our next move.** Players mark the quest they mean to pursue next; GMs see the party's choice (and any
     split) in session prep.
+170. [ ] **Who has it?** One search across every character's inventory and the party treasury: "rope" finds who's
+    carrying it and how many.
+171. [ ] **Shops restock with time.** When days pass, GMs are offered a restock of the shops in towns where enough
+    time has gone by since their last delivery.
+172. [ ] **Haggle at the counter.** Buying shows the shop's haggle DC; a GM can grant the result (a discount or a
+    markup) for the next purchase there.
+173. [ ] **Stay the night.** At a tavern with a menu, the party takes rooms for the night: the price from the bill
+    of fare comes off each purse and the world's clock moves on to morning.
 
 ## Ideas parking lot
 
