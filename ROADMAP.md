@@ -296,7 +296,7 @@ to the log at the bottom.
 133. [x] **New table talk.** The sidebar's Table talk shows how many comments are new since your last visit.
 134. [x] **Pages the party writes together.** GMs can open an entry to the party: any player can edit its text
     (never its secrets or who sees it), with the usual history.
-135. [ ] **Join by QR code.** Admin shows the player invite as a QR code, so people at the table can join from
+135. [x] **Join by QR code.** Admin shows the player invite as a QR code, so people at the table can join from
     their phones by pointing the camera.
 136. [ ] **Conditions at a glance.** Tapping a condition on a character's sheet (Poisoned, Prone…) shows what it
     does, from the SRD.
@@ -441,3 +441,4 @@ to the log at the bottom.
 - Quests by status: the Quests & Plots list is grouped: In play, On offer, Rumored and No status yet (open), then Done and Failed or abandoned (folded), each with a count; bulk actions still work across the groups. js/quest-groups.js unit tested.
 - New table talk: the world load brings the times of table-talk comments others posted since your last visit (at most 50; on entries you can see; hidden ones only for GMs), and the sidebar's Table talk shows "2 new" (a folded "At the table" group gets its dot). Opening Table talk clears the count in this browser. Tested against PGlite.
 - Pages the party writes together: GMs get "✎ Open to the party?" on any entry (fields.party_edit). Once open, the page says "The whole party writes this page" with who changed it last, every player who can see it gets Edit, and their form is just the summary, the page text and tags. The server keeps everything else as the GMs set it (name, kind, fields, place, connections including secret ones, GM secret, who sees it), only GMs can open or close a page, the usual version check stops two people overwriting each other, and every save goes into the history. Tested against PGlite.
+- Join by QR code: Admin → Members has "QR code" beside each invite link. It opens a big code (always black on white, so it scans in dark mode too) with the link written underneath; pointing a phone camera at it opens the invite. The app makes the code itself (js/qr.js: byte mode, error correction M, versions 1–10, any text up to 213 bytes, no outside library). Checked by decoding with an independent reader (jsQR, test-only) at every version from 1 to 10, with UTF-8 text, and from a screenshot of the dialog; unit tests cover version choice and the fixed patterns.

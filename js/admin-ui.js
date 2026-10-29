@@ -8,6 +8,7 @@ import { openSignIn } from './signin.js';
 import { KINDS } from './world-schema.js';
 import { markInvitesSeen } from './onboarding.js';
 import { BACKUP_FORMAT, readBackup, remapIds, chunks, parentsFirst } from './backup.js';
+import { qrMatrix, qrPath } from './qr.js';
 
 let root;
 const when = (iso) => (iso ? new Date(iso).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) : 'never');
@@ -36,7 +37,8 @@ async function membersSection() {
       el('div', { class: 'entry-head' }, el('h4', {}, kind === 'gm' ? 'GM invite' : 'Player invite'), el('span', { class: 'muted small' }, blurb)),
       el('div', { class: 'code-row' }, el('code', { class: 'invite-url' }, inviteUrl(code)),
         el('button', { class: 'btn small primary', type: 'button', onclick: () => copyText(inviteUrl(code)) }, 'Copy link'),
-        el('button', { class: 'btn small', type: 'button', onclick: () => copyText(code) }, 'Copy code')),
+        el('button', { class: 'btn small', type: 'button', onclick: () => copyText(code) }, 'Copy code'),
+        el('button', { class: 'btn small', type: 'button', onclick: () => showQr(inviteUrl(code), kind) }, 'QR code')),
       el('div', { class: 'btnrow' }, confirmButton('New link', () => act(() => api('worlds', { method: 'PATCH', body: { id: wid, rotate: kind } }), 'The old link no longer works'), 'btn small ghost')));
   }
   function render(w) {
@@ -210,6 +212,27 @@ async function restoreAsNew(data, status, done) {
   // The world list catches up when the new world is opened (refreshing it here would redraw this page).
   status.textContent = `Restored as “${nw.name}”: ${n} entries, ${maps} maps, ${x.standing} standing changes, ${x.clocks} clocks, ${x.ledger} treasury lines, ${x.quotes} quotes. Members and invites start fresh.`;
   done(nw);
+}
+
+// An invite as a QR code, big enough to scan from across the table (always dark on white, whatever the theme).
+function showQr(url, kind) {
+  const m = qrMatrix(url);
+  if (!m) { toast('That link is too long for a QR code.', 'bad'); return; }
+  const { d, size } = qrPath(m);
+  const NS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(NS, 'svg');
+  svg.setAttribute('viewBox', `0 0 ${size} ${size}`); svg.setAttribute('class', 'qr-svg'); svg.setAttribute('role', 'img');
+  svg.setAttribute('aria-label', `QR code for the ${kind === 'gm' ? 'GM' : 'player'} invite link`); svg.setAttribute('shape-rendering', 'crispEdges');
+  const bg = document.createElementNS(NS, 'rect'); bg.setAttribute('width', size); bg.setAttribute('height', size); bg.setAttribute('fill', '#fff');
+  const p = document.createElementNS(NS, 'path'); p.setAttribute('d', d); p.setAttribute('fill', '#000');
+  svg.append(bg, p);
+  const dlg = el('dialog', { class: 'dialog qr-dialog', 'aria-labelledby': 'qr-title' }, el('div', { class: 'dialog-body' },
+    el('h2', { id: 'qr-title' }, kind === 'gm' ? 'Join as a GM' : 'Join the game'),
+    el('p', {}, 'Point a phone camera at this. It opens the invite, asks for a name, and adds them to the world', kind === 'gm' ? ' as a GM.' : ' as a player.'),
+    svg, el('p', { class: 'small muted qr-url' }, url),
+    el('div', { class: 'btnrow' }, el('button', { class: 'btn primary', type: 'button', onclick: () => dlg.close() }, 'Close'))));
+  dlg.addEventListener('close', () => dlg.remove());
+  document.body.append(dlg); dlg.showModal();
 }
 
 function backupSection() {

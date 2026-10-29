@@ -1536,3 +1536,8 @@ div.poll-row { cursor: default }
 details.quest-group > summary { cursor: pointer }
 details.quest-group > summary .section-title { display: inline }
 .party-page-note { margin: .1rem 0 .3rem; color: var(--accent) }
+
+/* Join by QR code */
+.qr-dialog .dialog-body { text-align: center }
+.qr-svg { width: min(78vw, 360px); height: auto; display: block; margin: 8px auto; border-radius: 6px }
+.qr-url { word-break: break-all }
