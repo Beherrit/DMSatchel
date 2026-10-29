@@ -2,7 +2,8 @@
 // Routes: #world · #world/k/<kind> · #world/e/<id> · #world/new/<kind> · #world/edit/<id> · #world/q/<search> · #world/bin
 //         #world/party · #world/zero (session zero) · #world/schedule · #world/downtime[/<character>] · #world/suggestions (GMs) · #world/mine (your characters, journals and suggestions)
 
-import { el, toast, toastUndo, confirmButton, setKids } from './dom.js';
+import { el, toast, toastUndo, confirmButton, setKids, download } from './dom.js';
+import { entriesCSV } from './csv.js';
 import { api, session, isGm, isMember, isPlayer, signedIn, onSession, setPreview } from './api.js';
 import { KINDS, KIND_ORDER, LINK_LABELS, STANDING_KINDS, PLACE_KINDS, PLAYER_KINDS, fieldApplies } from './world-schema.js';
 import { openSignIn } from './signin.js';
@@ -258,6 +259,7 @@ function viewKind(kind) {
     el('div', { class: 'panel-head row' }, el('div', {}, el('h2', {}, KINDS[kind].plural), el('p', {}, KINDS[kind].blurb)),
       el('div', { class: 'btnrow' }, bulk.button, customFieldsButton(kind, rerenderWorld, 'btn ghost'),
         kind === 'item' && list.length && isMember() ? el('a', { class: 'btn ghost', href: '#world/itemcards' }, 'Print cards') : null,
+        list.length && isMember() ? el('button', { class: 'btn ghost', type: 'button', title: 'Download these as a CSV file for a spreadsheet', onclick: () => download(`${world.info?.slug || 'world'}-${KINDS[kind].plural.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-+$/, '')}.csv`, entriesCSV(list.filter((x) => x.kind === kind), KINDS[kind].label, kindFields(kind), (id) => world.entries.get(id)?.name, { gm: isGm() }), 'text/csv') }, 'Download CSV') : null,
         kind === 'session' && isGm() ? [recapButton('btn'), el('a', { class: 'btn primary', href: '#world/new/session' }, 'New session')]
           : isGm() || (isMember() && PLAYER_KINDS.includes(kind)) ? el('a', { class: 'btn primary', href: `#world/new/${kind}` }, `New ${lower(kindLabel(kind))}`)
           : isMember() ? el('a', { class: 'btn', href: `#world/new/${kind}` }, `Suggest a ${lower(kindLabel(kind))}`) : null)),

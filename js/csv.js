@@ -65,3 +65,25 @@ export function rowsToDrafts(rows, mapping, defaultKind, source = 'spreadsheet')
     return d;
   }).filter((d) => d.name);
 }
+
+// ---- export ---------------------------------------------------------------------------------------------------
+
+// One CSV cell: quoted when it holds a comma, quote or line break; text a spreadsheet would run as a formula
+// (=, +, @, or - before a number or bracket) gets a leading apostrophe.
+const cell = (v) => {
+  let s = String(v ?? '');
+  if (/^[=+@]/.test(s) || /^-[\d.(]/.test(s)) s = `'${s}`;
+  return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+};
+export const toCSV = (rows) => rows.map((r) => r.map(cell).join(',')).join('\r\n');
+
+// Entries of one kind as a spreadsheet the importer reads back: Name, Kind, Summary, Located in, Tags, each field
+// (by its label), Description, and the GM secret (as Secret) for GMs. fields: [[key, label, type], …]; nameOf(id) → a place's
+// name. Starts with a byte-order mark so spreadsheet apps read accents right.
+export function entriesCSV(entries, kindLabel, fields, nameOf, { gm = false } = {}) {
+  const cols = fields.filter(([, , type]) => type !== 'hidden' && type !== 'image');
+  const head = ['Name', 'Kind', 'Summary', 'Located in', 'Tags', ...cols.map(([, l]) => l), 'Description', ...(gm ? ['Secret'] : [])];
+  const rows = entries.map((e) => [e.name, kindLabel, e.summary || '', e.parent_id ? nameOf(e.parent_id) || '' : '', (e.tags || []).join(', '),
+    ...cols.map(([k]) => e.fields?.[k] ?? ''), e.body || '', ...(gm ? [e.secret || ''] : [])]);
+  return `﻿${toCSV([head, ...rows])}\r\n`;
+}

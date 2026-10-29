@@ -22,3 +22,17 @@ test('rows become drafts; nameless rows are dropped; a kind column wins', () => 
   assert.deepEqual([d[0].name, d[0].kind, d[0].fields, d[0].parentName, d[0].tags, d[0].source], ['Ann', 'npc', { role: 'Smith' }, 'Brindle', ['key', 'smith'], 'spreadsheet, row 2']);
   assert.equal(d[1].kind, 'settlement');
 });
+
+test('export: quoting, formula guard, and a round trip through the importer', async () => {
+  const { toCSV, entriesCSV, parseCSV, guessMapping, rowsToDrafts } = await import('../js/csv.js');
+  assert.equal(toCSV([['a', 'b,c', 'say "hi"', 'two\nlines', '=1+1', '-5', '- a list']]), 'a,"b,c","say ""hi""","two\nlines",\'=1+1,\'-5,- a list');
+  const fields = [['role', 'Role or job'], ['status', 'Status', 'select'], ['play', 'Play', 'hidden']];
+  const csv = entriesCSV([{ name: 'Bram, the Bold', summary: 'Runs the inn.', parent_id: 't', tags: ['key', 'north'], fields: { role: 'Innkeeper', status: 'Alive', play: '{}' }, body: 'Line one\nLine two', secret: 'Spy' }],
+    'NPC', fields, (id) => (id === 't' ? 'Brindle' : ''), { gm: true });
+  assert.ok(csv.startsWith('﻿Name,Kind,Summary,Located in,Tags,Role or job,Status,Description,Secret'));
+  const rows = parseCSV(csv.replace(/^﻿/, ''));
+  const mapping = guessMapping(rows[0], fields);
+  const [d] = rowsToDrafts(rows.slice(1), mapping, 'npc');
+  assert.deepEqual([d.name, d.summary, d.parentName, d.tags, d.fields.role, d.fields.status, d.body, d.secret], ['Bram, the Bold', 'Runs the inn.', 'Brindle', ['key', 'north'], 'Innkeeper', 'Alive', 'Line one\nLine two', 'Spy']);
+  assert.ok(!entriesCSV([], 'NPC', fields, () => '').includes('Secret'));
+});
