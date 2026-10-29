@@ -7,7 +7,7 @@ import { world, worldEntries, getEntry, byName, descendantsOf, trail, notice } f
 import { worldCalendar, todayText } from './world-calendar.js';
 import { rumorsAt } from './world-rumors.js';
 import { encounterCard, partyDefaults, placeTerrains, monsterSource } from './encounter-ui.js';
-import { rollEncounter, rollWeather, seasonOf } from './encounters.js';
+import { rollEncounter } from './encounters.js';
 import { vitals } from './sheet-ui.js';
 import { towards } from './attitudes.js';
 import { readObjectives, progress } from './objectives.js';
@@ -17,6 +17,7 @@ import { sayOf } from './say.js';
 import { readAloudPrint } from './world-readaloud.js';
 import { remindersPrint } from './world-reminders.js';
 import { musicFor } from './music.js';
+import { dayWeather } from './forecast.js';
 
 const ACTIVE_PC = (e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
 const townOf = (place) => (place?.kind === 'settlement' ? place : [...trail(place)].reverse().find((p) => p.kind === 'settlement') || null);
@@ -44,7 +45,7 @@ export async function viewSessionSheet() {
   const clocks = (world.standings?.clocks || []).filter((c) => c.filled < c.size).sort((a, b) => (a.size - a.filled) - (b.size - b.filled)).slice(0, 6);
   // The same weather as session prep shows today (seeded by place and in-world date).
   const terrain = here ? placeTerrains(here) : ['road'];
-  const weather = here ? rollWeather({ terrain, season: cal ? seasonOf(cal.month, cal.months.length) : 'Summer', seed: `${here.id}:${cal ? todayText(cal) : new Date().toDateString()}` }) : null;
+  const weather = here ? dayWeather(here.id, terrain, cal) : null;
   const party = partyDefaults();
   const encBox = el('div', { class: 'ss-enc' });
   const roll = () => setKids(encBox, encounterCard(rollEncounter({ terrain, level: party.level, size: party.size, difficulty: 'Moderate', ...monsterSource() }), { title: here ? `Near ${here.name}` : 'On the road', place: here }));

@@ -12,7 +12,7 @@ import { toDays, fromDays, today, holidaysOn, formatDate } from './calendar.js';
 import { clockFace } from './world-clocks.js';
 import { rumorsAt, letRumorsSpread } from './world-rumors.js';
 import { encounterCard, partyDefaults, placeTerrains, monsterSource } from './encounter-ui.js';
-import { rollEncounter, rollWeather, seasonOf } from './encounters.js';
+import { rollEncounter } from './encounters.js';
 import { vitals } from './sheet-ui.js';
 import { secretsCard } from './world-secrets.js';
 import { readGoals, activeGoals } from './goals.js';
@@ -30,6 +30,7 @@ import { checklistCard } from './world-checklist.js';
 import { rsvpCard } from './world-schedule.js';
 import { betweenSessions } from './between.js';
 import { remindersCard } from './world-reminders.js';
+import { dayWeather, forecast } from './forecast.js';
 
 const ACTIVE_PC = (e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
 const card = (title, ...kids) => el('section', { class: 'card prep-card' }, el('h3', {}, title), ...kids);
@@ -75,10 +76,10 @@ function whereSection(prep, rerender) {
   const rumors = town ? rumorsAt(town.id) : [];
   const shops = inside.filter((e) => e.kind === 'location' && (e.fields?.type === 'Shop' || e.fields?.stock));
   const cal = worldCalendar();
-  const season = cal ? seasonOf(cal.month, cal.months.length) : 'Summer';
   const terrain = placeTerrains(here);
   // Same weather all (in-world) day: seeded by place and date, so redrawing the page doesn't change it.
-  const weather = rollWeather({ terrain, season, seed: `${here.id}:${cal ? todayText(cal) : new Date().toDateString()}` });
+  const weather = dayWeather(here.id, terrain, cal);
+  const week = forecast(here.id, terrain, cal, 7).slice(1);
   const encBox = el('div');
   const party = partyDefaults();
   return card(`Where the party is: ${here.name}`, pick, musicLine(here, 'music-line prep-music'),
@@ -93,6 +94,8 @@ function whereSection(prep, rerender) {
         rumors.length ? list(rumors.slice(0, 5), ({ r, v }) => [el('q', {}, v.text), ' ', link(r, '›')]) : empty('No rumors here.'),
         shops.length ? el('p', { class: 'small' }, `${shops.length} shop${shops.length === 1 ? '' : 's'}: `, shops.slice(0, 6).flatMap((s, i) => [i ? ', ' : '', link(s)])) : null),
       el('div', {}, el('h4', {}, 'Weather'), el('p', {}, weather.line), weather.rules.length ? el('p', { class: 'muted small' }, weather.rules[0]) : null,
+        el('details', { class: 'forecast' }, el('summary', {}, 'The week ahead'),
+          el('ul', { class: 'plain forecast-list' }, week.map((d) => el('li', {}, el('strong', {}, d.label), el('span', { class: 'small' }, d.weather.line), d.weather.rules.length ? el('span', { class: 'muted small' }, d.weather.rules[0]) : null)))),
         el('h4', {}, 'If trouble comes'),
         (() => { const saved = [here, ...inside].filter((e) => e.kind === 'encounter'); return saved.length ? el('ul', { class: 'plain prep-list' }, saved.map((x) => el('li', {}, '⚔ ', link(x), x.fields?.difficulty ? el('span', { class: 'muted small' }, ` ${x.fields.difficulty}`) : null, x.fields?.when ? el('div', { class: 'muted small' }, x.fields.when) : null))) : null; })(),
         el('div', { class: 'btnrow' }, el('button', { class: 'btn small', type: 'button', onclick: () => setKids(encBox, encounterCard(rollEncounter({ terrain, level: party.level, size: party.size, difficulty: 'Moderate', ...monsterSource() }), { title: `Near ${here.name}`, place: here })) }, 'Roll an encounter'),

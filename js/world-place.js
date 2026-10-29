@@ -5,8 +5,8 @@
 import { rumorSection, rumorsAt } from './world-rumors.js';
 import { progressBadge } from './world-objectives.js';
 import { wildsSection, placeTerrains } from './encounter-ui.js';
-import { worldCalendar, todayText } from './world-calendar.js';
-import { rollWeather, seasonOf } from './encounters.js';
+import { worldCalendar } from './world-calendar.js';
+import { dayWeather } from './forecast.js';
 import { controllers } from './control.js';
 import { glanceOf } from './glance.js';
 import { thumb } from './image-ui.js';
@@ -293,8 +293,7 @@ export function placeHub(place, tab, overview, rerender) {
 // session prep shows: seeded by place and in-world date).
 function glancePanel(place) {
   const g = glanceOf(place, descendantsOf(place.id), { holder: controllers(worldEntries()).get(place.id), named: findByName });
-  const cal = worldCalendar();
-  const weather = rollWeather({ terrain: placeTerrains(place), season: cal ? seasonOf(cal.month, cal.months.length) : 'Summer', seed: `${place.id}:${cal ? todayText(cal) : new Date().toDateString()}` });
+  const weather = dayWeather(place.id, placeTerrains(place), worldCalendar());
   return el('section', { class: 'glance', 'aria-label': `${place.name} at a glance` },
     g.facts.length ? el('dl', { class: 'glance-facts' }, g.facts.map((f) => el('div', {}, el('dt', {}, f.label),
       el('dd', {}, f.entry ? link(f.entry) : f.text, f.note ? el('span', { class: 'muted small' }, ` (${f.note})`) : null)))) : null,

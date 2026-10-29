@@ -149,6 +149,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Pin a note to the session**: one-off reminders for the next session at the top of prep and on the printable sheet.
 - **Places at a glance**: a settlement's page opens with who leads it, who holds it, its size, how many people, shops and open jobs are there, and today's weather.
 - **Recently changed for GMs**: the front page lists the last dozen changes by anyone, with who and when, each linking straight to that entry's history.
+- **A forecast for the week**: session prep shows the next six days of weather where the party is, matching what each day shows when it comes.
 - **Export to a spreadsheet**: download any kind of entry as a CSV file with its fields as columns; it imports back as it is.
 - **A new world like this one**: start a world with another's calendar, own fields, templates, session zero page and tag descriptions, but none of its entries.
 - **Set a field for many**: bulk actions set one field (a status, a type, a role) on every selected entry that has it.
