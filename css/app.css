@@ -1391,3 +1391,13 @@ div.poll-row { cursor: default }
 .ask-players li { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline }
 .ask-players li p { flex-basis: 100%; margin: 0 }
 .w-tools .count.new { color: var(--accent); font-weight: 700 }
+
+/* The quote wall */
+.quote-card { margin: 0 0 12px }
+.quote-card blockquote { margin: 0 0 6px; font-family: var(--f-flavor); font-size: 21px; line-height: 1.35 }
+.quote-card figcaption { color: var(--muted) }
+.qt-form { margin-bottom: 16px }
+.qt-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px }
+.qt-people { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px }
+.qt-people [aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent) }
+@media (max-width: 560px) { .qt-row { grid-template-columns: minmax(0, 1fr) } }

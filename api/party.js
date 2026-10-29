@@ -33,11 +33,15 @@
 // GET ?ask=1&player=id                      (GM) one player's thread (marks their messages read)
 // POST {ask: {body, player}}                write in your thread; GMs name the player
 // DELETE ?ask=id                            take back your own message
+//
+// The quote wall (members): GET ?quotes=1 every quote, newest first · POST {quote: {text, said_by, session_id}}
+// DELETE ?quote=id (whoever added it, or a GM)
 import { route, send, fail, sql, requireMember, requireGm, postDiscord } from './_lib/core.js';
 import { cleanDates, cleanVote, tally, dateText } from '../js/schedule.js';
 import { cleanPrimer, cleanAnswer, answerEmpty } from '../js/zero.js';
 import { cleanPoll, castVote } from '../js/polls.js';
 import { askUnread } from './_lib/ask.js';
+import { cleanQuote } from '../js/quotes.js';
 
 const clip = (v, n) => String(v ?? '').slice(0, n);
 // A poll as the page sees it: who voted for what (by name), and what you chose.
@@ -224,6 +228,12 @@ export default route({
   },
   async GET(req, res) {
     if (req.query?.ask) return getAsk(req, res);
+    if (req.query?.quotes) {
+      if (!requireMember(req, res)) return;
+      const quotes = await sql`SELECT q.id, q.text, q.said_by, q.session_id, q.created_at, q.gm_id, g.name AS added_by FROM table_quotes q LEFT JOIN gms g ON g.id = q.gm_id
+        WHERE q.world_id = ${req.world.id} AND NOT q.deleted ORDER BY q.created_at DESC, q.id DESC LIMIT 1000`;
+      return send(res, 200, { quotes });
+    }
     if (req.query?.schedule) return getSchedule(req, res);
     if (req.query?.zero) return getZero(req, res);
     if (req.query?.polls) {
@@ -255,6 +265,13 @@ export default route({
     if (!requireMember(req, res)) return;
     const b = req.body || {};
     if (b.ask) return postAsk(req, res, b.ask);
+    if (b.quote) {
+      const q = cleanQuote(b.quote);
+      if (q.error) return fail(res, 400, q.error);
+      const rows = await sql`INSERT INTO table_quotes (world_id, gm_id, text, said_by, session_id) VALUES (${req.world.id}, ${req.gm.id}, ${q.text}, ${q.said_by}, ${q.session_id})
+        RETURNING id, text, said_by, session_id, created_at, gm_id`;
+      return send(res, 201, { quote: { ...rows[0], added_by: req.gm.name } });
+    }
     if (b.zero_read) {
       await sql`INSERT INTO zero_answers (world_id, gm_id, read_at) VALUES (${req.world.id}, ${req.gm.id}, now())
         ON CONFLICT (world_id, gm_id) DO UPDATE SET read_at = COALESCE(zero_answers.read_at, now())`;
@@ -294,6 +311,12 @@ export default route({
   },
   async DELETE(req, res) {
     if (!requireMember(req, res)) return;
+    if (req.query?.quote) {
+      const gone = await sql`UPDATE table_quotes SET deleted = true WHERE id = ${Number(req.query.quote)} AND world_id = ${req.world.id} AND NOT deleted
+        AND (gm_id = ${req.gm.id} OR ${req.isGmHere}) RETURNING id`;
+      if (!gone.length) return fail(res, 404, 'That quote was already taken down, or isn’t yours.');
+      return send(res, 200, { ok: true });
+    }
     if (req.query?.ask) {
       const gone = await sql`DELETE FROM gm_questions WHERE id = ${Number(req.query.ask)} AND world_id = ${req.world.id} AND gm_id = ${req.gm.id} RETURNING id`;
       if (!gone.length) return fail(res, 404, 'That message was already taken back.');

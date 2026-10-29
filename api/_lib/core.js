@@ -143,6 +143,11 @@ export function ensureSchema() {
         id serial PRIMARY KEY, world_id text NOT NULL, player_id int NOT NULL, gm_id int NOT NULL, body text NOT NULL,
         from_gm boolean NOT NULL DEFAULT false, seen boolean NOT NULL DEFAULT false, created_at timestamptz NOT NULL DEFAULT now())`;
       await sql`CREATE INDEX IF NOT EXISTS gm_questions_idx ON gm_questions (world_id, player_id, created_at)`;
+      // The quote wall: memorable lines from the table.
+      await sql`CREATE TABLE IF NOT EXISTS table_quotes (
+        id serial PRIMARY KEY, world_id text NOT NULL, gm_id int NOT NULL, text text NOT NULL, said_by text NOT NULL DEFAULT '',
+        session_id text, deleted boolean NOT NULL DEFAULT false, created_at timestamptz NOT NULL DEFAULT now())`;
+      await sql`CREATE INDEX IF NOT EXISTS table_quotes_idx ON table_quotes (world_id, created_at)`;
       // Private map markers: each person's own notes on a map ("we camped here"), seen only by them.
       await sql`CREATE TABLE IF NOT EXISTS map_marks (
         id serial PRIMARY KEY, map_id text NOT NULL, gm_id int NOT NULL, x real NOT NULL, y real NOT NULL,

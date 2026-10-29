@@ -186,6 +186,8 @@ export default route({
         // Start here: only what this person can see.
         start_here: (Array.isArray(w.start_here) ? w.start_here : []).filter((id) => { const r = rows.find((x) => x.id === id); return r && !r.deleted && visibleTo(r, req); }),
         ...(req.role ? { notices: activeNotices(w.notices), ask_unread: await askUnread(req) } : {}),
+        // A line from the quote wall for the front page, a different one each load.
+        ...(req.role ? { quote: (await sql`SELECT id, text, said_by, session_id FROM table_quotes WHERE world_id = ${w.id} AND NOT deleted ORDER BY random() LIMIT 1`)[0] || null } : {}),
         ...(req.isGmHere ? { edits_open: (await sql`SELECT count(*)::int AS n FROM edit_suggestions WHERE world_id = ${w.id} AND status = 'open'`)[0].n } : {}),
         // Members' pronouns by person, to show beside their names.
         ...(req.role ? { pronouns: Object.fromEntries((await sql`SELECT gm_id, profile->>'pronouns' AS p FROM members WHERE world_id = ${w.id} AND profile->>'pronouns' <> ''`).map((r) => [r.gm_id, r.p])) } : {}),

@@ -242,6 +242,14 @@ to the log at the bottom.
     their player, and the sessions they played.
 105. [x] **Ask the GM.** A private question thread between each player and the GMs, between sessions, with a
     badge when there's an answer.
+106. [x] **Quote wall.** Memorable lines from the table ("I lick the door." Pip, session 12): any member adds one,
+    with who said it and when; a random one greets you on the world's front page.
+107. [ ] **Picture wall.** Every picture in the world on one page (portraits, places, maps, handouts), filterable by
+    kind and tag, each opening its entry.
+108. [ ] **Contents for long entries.** Entries with several "## " headings get a small table of contents at the
+    top that jumps to each part.
+109. [ ] **The world in numbers.** A page of counts and fun facts: sessions played, the most-mentioned NPCs, the
+    busiest places, who has written the most, the longest-running quest.
 
 ## Ideas parking lot
 
@@ -352,3 +360,4 @@ to the log at the bottom.
 - Roll a detail: the entry form has a small "Roll" beside fields the app has tables for: an NPC's appearance, personality (with a mannerism), voice, wants and GM secret; a settlement's ruler, known for, trouble and landmarks; and the notable features of a location or area, from its type (tavern, dungeon, ruin, lair, castle, temple, shop, forest, hills, coast, swamp, Underdark, city district), which asks for a type first. Rolling again replaces a rolled value; text someone typed is only replaced on a second click ("Replace?"). js/roll-detail.js unit tested.
 - Hall of heroes: when a character's status is Dead, Retired or Missing, their page gets a "Farewell" card where their player or a GM writes how it ended (formatting allowed), when (the in-world date is suggested) and an epitaph. The "Hall of heroes" page (linked from the farewell and the party page's former members) lists them, latest farewell first, with portrait, class and level, the farewell, the epitaph signed by their player, and the sessions they played (on the attendance list, a connection or a [[mention]] in the log: "Played 4 sessions: from Session 1 to Session 6"). Kept as character fields fate, fate_day and epitaph. js/hall.js unit tested; storage tested against PGlite.
 - Ask the GM: players get "Ask the GM" in the sidebar (and "Ask the GM about this" on entry pages, which starts "About [[Name]]: "): a private thread with the world's GMs that no other player sees. GMs get "Player questions": every player, unread ones first, with the last message, then each thread to read and answer (answering marks it read). Messages take formatting and [[links]]; anyone can take back their own. The sidebar shows how many are waiting, and the 20-second live sync brings a toast ("The GMs answered you" / "A player asked the GMs something") and refreshes an open thread. Additive gm_questions table; party API GET ?ask, POST {ask}, DELETE ?ask; ask_unread in the world load and live sync. Routes tested against PGlite.
+- Quote wall: "Quote wall" in the sidebar (members): add a line, who said it (characters, key NPCs and you are suggested) and the session (the latest is picked). The wall lists them newest first with who added them, with buttons to show one person's quotes (most quoted first); whoever added a quote, or a GM, can take it down. Each world load brings a random quote for the front page ("I lick the door." — Pip, Session 12). Additive table_quotes table; party API GET ?quotes, POST {quote}, DELETE ?quote. js/quotes.js unit tested; routes tested against PGlite.

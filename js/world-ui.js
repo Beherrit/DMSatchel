@@ -31,6 +31,7 @@ import { goalsSection } from './world-goals.js';
 import { wishesSection } from './world-wishes.js';
 import { farewellCard } from './world-hall.js';
 import { askNav, askAboutLink } from './world-ask.js';
+import { quoteCard } from './world-quotes.js';
 import { mentionsCard } from './world-mentions.js';
 import { starButton, favoritesNav, followButton, followingNav } from './world-favorites.js';
 import { rewardCard } from './world-reward.js';
@@ -81,6 +82,7 @@ const viewSay = lazyView(() => import('./world-say.js'), 'viewSay');
 const viewDupes = lazyView(() => import('./world-dupes.js'), 'viewDupes');
 const viewHall = lazyView(() => import('./world-hall.js'), 'viewHall');
 const viewAsk = lazyView(() => import('./world-ask.js'), 'viewAsk');
+const viewQuotes = lazyView(() => import('./world-quotes.js'), 'viewQuotes');
 const viewPrep = lazyView(() => import('./world-prep.js'), 'viewPrep');
 const viewPowers = lazyView(() => import('./world-powers.js'), 'viewPowers');
 const viewLibrary = lazyView(() => import('./world-library.js'), 'viewLibrary');
@@ -138,6 +140,7 @@ function renderSide() {
       el('a', { href: '#world/say', 'data-view': 'say' }, el('span', {}, 'Say it right'), el('span', { class: 'count' }, worldEntries().filter((e) => sayOf(e)).length || '')),
       el('a', { href: '#world/table', 'data-view': 'table' }, el('span', {}, 'Table talk'), el('span', { class: 'count' }, '💬')),
       askNav(),
+      isMember() ? el('a', { href: '#world/quotes', 'data-view': 'quotes' }, el('span', {}, 'Quote wall'), el('span', { class: 'count' }, '❝')) : null,
       isGm() ? el('a', { href: '#world/talk', 'data-view': 'talk' }, el('span', {}, 'GM discussions'), el('span', { class: 'count', id: 'w-talk-count' }, '')) : null),
     el('nav', { class: 'w-kinds', 'aria-label': 'Entry types' }, KIND_ORDER.map((k) => el('a', { href: `#world/k/${k}`, 'data-kind': k }, el('span', {}, KINDS[k].plural), el('span', { class: 'count' }, counts[k] || 0)))),
     isGm() ? el('div', { class: 'w-gm' }, el('a', { class: 'btn primary small', href: '#world/prep' }, 'Session prep'), el('a', { class: 'btn small', href: '#world/new/npc' }, '+ New entry'), el('a', { class: 'btn ghost small', href: '#world/bin' }, 'Bin'),
@@ -166,6 +169,7 @@ function viewHome() {
     el('div', { class: 'panel-head' }, el('h2', {}, info.name || 'The World'), info.tagline ? el('p', {}, info.tagline) : null,
       worldCalendar() ? el('p', { class: 'today-line' }, el('a', { href: '#world/calendar' }, `📅 ${todayText()}`)) : null, isMember() ? nextSessionLine() : null),
     zeroNudge(),
+    quoteCard(),
     // Open for newcomers (no earlier visit, or session zero not read yet), folded for everyone else.
     startHereCard({ fresh: !world.info?.prev_visit || world.info?.zero_read === false }),
     // The table's things side by side: notices, quick polls, time and light.
@@ -637,6 +641,7 @@ export async function showWorld(parts, { keepScroll = false } = {}) {
   else if (view === 'dupes') node = await viewDupes();
   else if (view === 'hall') node = await viewHall();
   else if (view === 'ask') node = await viewAsk(arg, parts[2]);
+  else if (view === 'quotes') node = await viewQuotes();
   else if (view === 'bin') node = await viewBin();
   else if (view === 'atlas') node = viewAtlas();
   else if (view === 'maps') node = viewMaps();
