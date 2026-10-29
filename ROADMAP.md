@@ -248,7 +248,7 @@ to the log at the bottom.
     kind and tag, each opening its entry.
 108. [x] **Contents for long entries.** Entries with several "## " headings get a small table of contents at the
     top that jumps to each part.
-109. [ ] **The world in numbers.** A page of counts and fun facts: sessions played, the most-mentioned NPCs, the
+109. [x] **The world in numbers.** A page of counts and fun facts: sessions played, the most-mentioned NPCs, the
     busiest places, who has written the most, the longest-running quest.
 
 ## Ideas parking lot
@@ -363,3 +363,4 @@ to the log at the bottom.
 - Quote wall: "Quote wall" in the sidebar (members): add a line, who said it (characters, key NPCs and you are suggested) and the session (the latest is picked). The wall lists them newest first with who added them, with buttons to show one person's quotes (most quoted first); whoever added a quote, or a GM, can take it down. Each world load brings a random quote for the front page ("I lick the door." — Pip, Session 12). Additive table_quotes table; party API GET ?quotes, POST {quote}, DELETE ?quote. js/quotes.js unit tested; routes tested against PGlite.
 - Picture wall: "Picture wall" in the sidebar shows every picture in the world as a grid of squares: each entry's main picture and its gallery (with captions), then the maps, each picture once. Filters for kind (with counts, maps included) and tag; the first 120 show, then "Show all". Each square opens its entry or map. Players see only what they can see, and never a fogged map whole (those stay under their fog on the map page). Also: the new card lists (quotes, duplicates, hall, questions) no longer show list bullets. js/picture-wall.js unit tested.
 - Contents for long entries: a description with three or more "## " headings gets a small "Contents" box (floated beside the text; full width on phones) listing the parts. Each link scrolls to its heading and moves focus there without changing the page address, so routing and the back button still work. Heading ids are readable and unique (sec-history, sec-history-2). js/contents.js unit tested.
+- The world in numbers: "In numbers" in the sidebar: tiles for entries (and how many kinds), words written, sessions played (first to last), player characters (and how many fell) and quests completed; then the most talked-about NPCs (how many other entries mention or connect to them), the busiest places (everything located inside, at any depth), who has written the most entries, and records: the most connected entry, the longest-running open quest and the most common kinds. Built from what the viewer can see, so players never count hidden things. js/world-stats.js unit tested.
