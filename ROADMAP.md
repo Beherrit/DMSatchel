@@ -348,6 +348,14 @@ to the log at the bottom.
     (from wretched to aristocratic), taken from their coin, with a line in the treasury log.
 161. [x] **The treasury over time.** A small chart on the party page of the party's coin across sessions, from the
     treasury log.
+162. [ ] **Buy from a shop.** On a stocked shop's page, players pick what they want and pay from their own coin; the
+    item lands in their inventory and the GMs see a line in the loot log.
+163. [ ] **Quest deadlines.** A quest can carry an in-world deadline; prep and the quest board count down the days
+    left, and the calendar shows it.
+164. [ ] **Quest chains.** A quest can follow another; its page shows what came before and what it leads to, and
+    finishing one offers to open the next.
+165. [ ] **Weather for the table.** Players see today's weather where the party is on the front page, the same as
+    the GMs' prep shows.
 
 ## Ideas parking lot
 
