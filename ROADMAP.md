@@ -226,6 +226,14 @@ to the log at the bottom.
     along, for a second village built like the first.
 97. [x] **Merge two entries.** When the world has two entries for the same thing, GMs merge one into the other:
     connections, places inside it and mentions move over, texts are joined, and the spare goes to the bin.
+98. [x] **Say it right.** A "Say it" pronunciation on any entry ("BRAM-well"), under the name on its page, NPC
+    cards and the session sheet, with a pronunciation guide for the whole world.
+99. [ ] **Where the party has been.** Moving the party marker keeps a log with the in-world date; the map draws the
+    route so far and the party page lists the journey.
+100. [ ] **Wish lists.** Players note what their characters hope to find or earn; GMs see every wish in session prep
+    and beside loot, and players tick a wish off when it comes true.
+101. [ ] **Read-aloud in prep.** The session prep page and printable session sheet gather the "> read-aloud" boxes
+    from the entries planned for that session, in order, ready to read.
 
 ## Ideas parking lot
 
@@ -328,3 +336,4 @@ to the log at the bottom.
 - Recently viewed: opening an entry remembers it (in this browser, per world, the last ten). The world sidebar has a folded "🕘 Recently viewed" list (leaving out the page you're on), and Ctrl+K with nothing typed shows the last six first; typing searches as before. js/recent.js unit tested (including blocked or broken storage).
 - Copy a place with what's in it: "Make a copy" on a region, area, settlement or location with things inside opens a dialog: the copy's name, "Bring what's inside" (with a count by kind) and "Hide the copies from players for now". The copies are made level by level, each inside its copied parent, in batches; connections between copied entries point at the copies (a second pass catches links to things copied later); player characters, sessions, journals, downtime and suggestions stay behind, as do play state, attitudes, goals and galleries. Copies keep their names and get the tag "copied". A place with nothing inside goes straight to the usual copy form. js/copy-place.js unit tested.
 - Merge two entries: GMs get "Merge into…" on entry pages. The dialog suggests entries with the same or a near name (typos, plurals) and offers every entry by name. The kept entry gains the spare's summary (if it had none), description and GM secret (joined), fields it lacked, tags and connections; places and people inside the spare move inside the kept one; other entries' connections and [[mentions]] point at the kept one ([[Kept|Spare]], so their text reads the same); table talk, GM discussion, edit suggestions, standing history, clocks, maps and map pins move over; the spare goes to the bin and both changes are in the history. PATCH {merge}; js/merge.js unit tested; route tested against PGlite.
+- Say it right: every entry form has "Say it" beside the name (e.g. BRAM-well; one line, up to 80 characters, stored as fields.say on any kind). It shows in italics under the name on the entry page, beside the name on NPC cards, in the session sheet's party table and "Who's around" list, and in Markdown exports. The sidebar's "Say it right" page is an A–Z pronunciation guide for everything players can see (accents folded, numbers under #). js/say.js unit tested; storage tested against PGlite.

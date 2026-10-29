@@ -5,6 +5,7 @@ import { api, isGm } from './api.js';
 import { worldEntries, getEntry, descendantsOf, byName, notice, link } from './world-store.js';
 import { towards } from './attitudes.js';
 import { stripMarks } from './rich.js';
+import { sayOf } from './say.js';
 
 const plain = (t) => stripMarks(t).replace(/\s+/g, ' ').trim();
 const cut = (t, n) => { const s = plain(t); return s.length > n ? `${s.slice(0, n - 1)}…` : s; };
@@ -18,7 +19,7 @@ export function npcCard(e, { gm = isGm(), onRemove } = {}) {
   const att = towards(worldEntries(), e.id);
   const row = (label, text, n) => (text ? el('p', {}, el('strong', {}, `${label}: `), cut(text, n)) : null);
   return el('article', { class: 'npc-card' },
-    el('header', {}, el('h3', {}, e.name), onRemove ? el('button', { class: 'btn small ghost card-x', type: 'button', 'aria-label': `Leave out ${e.name}`, onclick: onRemove }, '✕') : null),
+    el('header', {}, el('h3', {}, e.name, sayOf(e) ? el('span', { class: 'npc-card-say' }, ` (${sayOf(e)})`) : null), onRemove ? el('button', { class: 'btn small ghost card-x', type: 'button', 'aria-label': `Leave out ${e.name}`, onclick: onRemove }, '✕') : null),
     el('p', { class: 'npc-card-sub' }, [f.role, f.ancestry, f.level, getEntry(e.parent_id)?.name].filter(Boolean).join(' · ')),
     e.summary ? el('p', { class: 'npc-card-sum' }, cut(e.summary, 180)) : null,
     row('Looks', f.appearance, 120), row('Voice', f.voice, 110), row('Manner', f.personality, 130), row('Wants', f.wants, 130),

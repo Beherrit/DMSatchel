@@ -13,6 +13,7 @@ import { towards } from './attitudes.js';
 import { readObjectives, progress } from './objectives.js';
 import { sortSecrets } from './secrets.js';
 import { stripMarks } from './rich.js';
+import { sayOf } from './say.js';
 
 const ACTIVE_PC = (e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
 const townOf = (place) => (place?.kind === 'settlement' ? place : [...trail(place)].reverse().find((p) => p.kind === 'settlement') || null);
@@ -57,14 +58,14 @@ export async function viewSessionSheet() {
     el('div', { class: 'ss-grid' },
       block('The party', pcs.length ? el('table', { class: 'ss-table' },
         el('thead', {}, el('tr', {}, ['Character', 'Player', 'AC', 'HP', 'Notes'].map((h) => el('th', { scope: 'col' }, h)))),
-        el('tbody', {}, pcs.map((c) => { const v = vitals(c); return el('tr', {}, el('td', {}, c.name), el('td', {}, c.owner || c.fields?.player || ''), el('td', { class: 'num' }, v.ac ?? '—'), el('td', { class: 'num' }, v.max ? `${v.hp}/${v.max}` : '—'), el('td', { class: 'small' }, [...(v.conditions || []), v.exhaustion ? `exhaustion ${v.exhaustion}` : '', v.inspiration ? 'inspired' : ''].filter(Boolean).join(', '))); })))
+        el('tbody', {}, pcs.map((c) => { const v = vitals(c); return el('tr', {}, el('td', {}, c.name, sayOf(c) ? el('span', { class: 'small' }, ` (${sayOf(c)})`) : null), el('td', {}, c.owner || c.fields?.player || ''), el('td', { class: 'num' }, v.ac ?? '—'), el('td', { class: 'num' }, v.max ? `${v.hp}/${v.max}` : '—'), el('td', { class: 'small' }, [...(v.conditions || []), v.exhaustion ? `exhaustion ${v.exhaustion}` : '', v.inspiration ? 'inspired' : ''].filter(Boolean).join(', '))); })))
         : el('p', { class: 'muted' }, 'No active characters.')),
       here ? block(here.name, here.summary ? el('p', {}, cut(here.summary, 300)) : null,
         weather ? el('p', {}, el('strong', {}, 'Weather: '), weather.line) : null,
         shops.length ? el('p', { class: 'small' }, el('strong', {}, 'Shops: '), shops.map((s) => s.name).join(', ')) : null) : null,
       people.length ? block(`Who’s around (${people.length})`, el('ul', { class: 'ss-list' }, people.map((p) => {
         const att = towards(all, p.id);
-        return el('li', {}, el('strong', {}, p.name), p.fields?.role ? ` (${p.fields.role})` : '', p.summary ? `: ${cut(p.summary, 110)}` : '',
+        return el('li', {}, el('strong', {}, p.name), sayOf(p) ? ` [${sayOf(p)}]` : '', p.fields?.role ? ` (${p.fields.role})` : '', p.summary ? `: ${cut(p.summary, 110)}` : '',
           att.length ? el('div', { class: 'small' }, att.map((x) => `${x.character.name}: ${x.a}`).join(' · ')) : null);
       }))) : null,
       jobs.length || rumors.length ? block('Jobs and rumors',

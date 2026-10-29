@@ -6,6 +6,7 @@ import { isGm } from './api.js';
 import { world, worldEntries, byName, kindLabel, kindFields, notice, descendantsOf, getEntry } from './world-store.js';
 import { KINDS, KIND_ORDER, PLACE_KINDS } from './world-schema.js';
 import { todayText } from './world-calendar.js';
+import { sayOf } from './say.js';
 
 const SKIP_FIELDS = new Set(['forge', 'play', 'image', 'stats', 'spells', 'market', 'stock', 'encounters']);
 
@@ -55,6 +56,7 @@ export function toMarkdown({ scope = 'all', playerSafe = false } = {}) {
     const parent = e.parent_id && included.has(e.parent_id) ? getEntry(e.parent_id) : e.parent_id && !playerSafe ? getEntry(e.parent_id) : null;
     L.push(`### ${e.name}`, '');
     L.push(`*${[kindLabel(e.kind), e.fields?.type || e.fields?.size].filter(Boolean).join(' · ')}${parent ? ` · in ${parent.name}` : ''}${!playerSafe && e.visibility === 'gm' ? ' · hidden from players' : ''}*`, '');
+    if (sayOf(e)) L.push(`Say it: ${sayOf(e)}  `, '');
     if (e.summary) L.push(plain(e.summary), '');
     for (const [label, v] of fieldsOf(e, playerSafe)) L.push(String(v).includes('\n') ? `**${label}:**\n\n${plain(v)}\n` : `**${label}:** ${plain(v)}  `);
     L.push('');

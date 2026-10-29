@@ -32,6 +32,7 @@ import { cleanProposal, applyProposal } from '../js/edit-suggest.js';
 import { takeItem, giveItem } from '../js/handover.js';
 import { mergedEntry, relinkLinks, relinkText } from '../js/merge.js';
 import { fieldsWith } from '../js/custom-fields.js';
+import { cleanSay } from '../js/say.js';
 import { cleanTag, chainUp } from '../js/bulk.js';
 import { cleanPrimer, primerEmpty } from '../js/zero.js';
 import { activeNotices } from '../js/notices.js';
@@ -48,11 +49,12 @@ function clean(input, custom = {}) {
   if (!isKind(e.kind)) return { error: 'Pick what kind of entry this is.' };
   const name = clip(e.name, LIMITS.name).trim();
   if (!name) return { error: 'Give the entry a name.' };
-  const allowed = new Set([...KINDS[e.kind].fields.map(([k]) => k), ...customKeys(e.kind, custom)]);
+  const allowed = new Set([...KINDS[e.kind].fields.map(([k]) => k), ...customKeys(e.kind, custom), 'say']);
   const fields = {};
   for (const [k, v] of Object.entries(e.fields || {})) if (allowed.has(k) && v != null && String(v).trim() && (k !== 'image' || isImageRef(String(v)))) fields[k] = clip(v, ['stock', 'sheet', 'play', 'spread', 'known', 'attitudes', 'objectives', 'attendance', 'enc', 'goals', 'gallery'].includes(k) ? LIMITS.body : LIMITS.field);
   // Pictures in the gallery must be real image addresses.
   if (fields.gallery) { fields.gallery = cleanGallery(fields.gallery); if (!fields.gallery) delete fields.gallery; }
+  if (fields.say) { fields.say = cleanSay(fields.say); if (!fields.say) delete fields.say; }
   const tags = [...new Set((Array.isArray(e.tags) ? e.tags : []).map((t) => clip(t, LIMITS.tag).trim().toLowerCase()).filter(Boolean))].slice(0, LIMITS.tags);
   const links = (Array.isArray(e.links) ? e.links : []).filter((l) => l && typeof l.id === 'string').slice(0, LIMITS.links)
     .map((l) => ({ id: clip(l.id, 40), label: clip(l.label || 'related to', 60), secret: Boolean(l.secret) }));

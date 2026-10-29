@@ -1325,3 +1325,12 @@ div.poll-row { cursor: default }
 .w-follows summary { cursor: pointer; list-style: revert }
 .follow-dot { color: var(--accent); font-weight: 700 }
 .btn.follow.on { font-weight: 700 }
+
+/* Say it right */
+.say-it { margin: .1rem 0 .3rem; color: var(--muted); font-style: italic; }
+.npc-card-say { font-weight: normal; font-style: italic; font-size: .85em; color: var(--muted); }
+.say-letters { display: flex; flex-wrap: wrap; gap: .25rem .6rem; margin-bottom: .8rem; }
+.say-list { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: .3rem 1rem; margin: 0; }
+.say-list dt { font-weight: 600; }
+.say-list dd { margin: 0; font-style: italic; }
+@media (max-width: 560px) { .say-list { grid-template-columns: minmax(0, 1fr); } .say-list dd { margin-bottom: .4rem; } }

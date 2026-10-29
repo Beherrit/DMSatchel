@@ -46,6 +46,8 @@ import { viewTags, tagNote } from './world-tags.js';
 import { pushRecent, readRecent } from './recent.js';
 import { copyPlaceDialog } from './world-copyplace.js';
 import { mergeButton } from './world-merge.js';
+import { sayLine } from './world-say.js';
+import { cleanSay, sayOf } from './say.js';
 import { tableSection } from './world-tables.js';
 import { parseSearch, searchHash, searchEntries } from './search.js';
 import { saveTemplateButton, templatePicker } from './world-templates.js';
@@ -71,6 +73,7 @@ import { patchEntry, setEntryState, stateBadges, syncWorld, descendantsOf } from
 // Pages used now and then load when first opened, so world pages start faster.
 const lazyView = (load, name) => async (...args) => (await load())[name](...args);
 const viewWeb = lazyView(() => import('./world-web.js'), 'viewWeb');
+const viewSay = lazyView(() => import('./world-say.js'), 'viewSay');
 const viewPrep = lazyView(() => import('./world-prep.js'), 'viewPrep');
 const viewPowers = lazyView(() => import('./world-powers.js'), 'viewPowers');
 const viewLibrary = lazyView(() => import('./world-library.js'), 'viewLibrary');
@@ -125,6 +128,7 @@ function renderSide() {
       el('a', { href: '#world/clocks', 'data-view': 'clocks' }, el('span', {}, 'Faction clocks'), el('span', { class: 'count' }, (world.standings?.clocks || []).length)),
       el('a', { href: '#world/standings', 'data-view': 'standings' }, el('span', {}, 'Party standing'), el('span', { class: 'count' }, Object.keys(world.standings?.current || {}).length)),
       el('a', { href: '#world/tags', 'data-view': 'tags' }, el('span', {}, 'Tags'), el('span', { class: 'count' }, new Set(worldEntries().flatMap((e) => e.tags || [])).size || '')),
+      el('a', { href: '#world/say', 'data-view': 'say' }, el('span', {}, 'Say it right'), el('span', { class: 'count' }, worldEntries().filter((e) => sayOf(e)).length || '')),
       el('a', { href: '#world/table', 'data-view': 'table' }, el('span', {}, 'Table talk'), el('span', { class: 'count' }, '💬')),
       isGm() ? el('a', { href: '#world/talk', 'data-view': 'talk' }, el('span', {}, 'GM discussions'), el('span', { class: 'count', id: 'w-talk-count' }, '')) : null),
     el('nav', { class: 'w-kinds', 'aria-label': 'Entry types' }, KIND_ORDER.map((k) => el('a', { href: `#world/k/${k}`, 'data-kind': k }, el('span', {}, KINDS[k].plural), el('span', { class: 'count' }, counts[k] || 0)))),
@@ -327,7 +331,7 @@ function viewEntry(id, tab) {
   const node = el('article', { class: 'w-view entry-view' },
     crumbs.length ? el('nav', { class: 'crumbs', 'aria-label': 'Located in' }, crumbs.flatMap((c, i) => [i ? ' › ' : '', link(c)])) : null,
     el('div', { class: 'panel-head row' },
-      el('div', {}, el('div', { class: 'eyebrow' }, kindLabel(e.kind), e.fields?.type ? ` · ${e.fields.type}` : ''), el('h2', {}, e.name), stateBadges(e).length ? el('div', { class: 'badges' }, stateBadges(e)) : null),
+      el('div', {}, el('div', { class: 'eyebrow' }, kindLabel(e.kind), e.fields?.type ? ` · ${e.fields.type}` : ''), el('h2', {}, e.name), sayLine(e), stateBadges(e).length ? el('div', { class: 'badges' }, stateBadges(e)) : null),
       !isGm() ? el('div', { class: 'btnrow' }, starButton(e), followButton(e), e.can_edit ? el('a', { class: 'btn', href: `#world/edit/${e.id}` }, 'Edit') : null, suggestEditButton(e)) : null,
       isGm() ? el('div', { class: 'btnrow' }, starButton(e), followButton(e), el('a', { class: 'btn', href: `#world/edit/${e.id}` }, 'Edit'),
         showButton(e),
@@ -514,6 +518,7 @@ function viewEdit(id, kindForNew) {
       el('div', { class: 'field' }, el('label', { for: 'f-kind' }, 'Type'), kindSel),
       gm ? el('div', { class: 'field' }, el('label', { for: 'f-visibility' }, 'Who can see it'), visSel) : null,
       input('name', 'Name', e.name, { required: true, maxlength: 200 }),
+      input('say', 'Say it', e.fields.say || '', { maxlength: 80, placeholder: 'How to pronounce it, e.g. BRAM-well' }),
       input('parent', 'Located in / part of', parent?.name || '', { list: 'w-names', placeholder: 'e.g. a region or city' })),
     suggestNote,
     area('summary', 'Summary', e.summary, 2, 'One or two sentences. This shows in lists and search.'),
@@ -553,7 +558,7 @@ function viewEdit(id, kindForNew) {
     if (unknown.length) { status.textContent = `These connections don’t match any entry: ${unknown.join(', ')}.`; status.className = 'form-status error'; return; }
     const entry = {
       kind: kindSel.value, name: String(f.get('name')).trim(), summary: String(f.get('summary') || ''), body: String(f.get('body') || ''), secret: gm ? String(f.get('secret') || '') : existing?.secret || '', visibility: gm ? visSel.value : existing?.visibility || 'all',
-      fields: Object.fromEntries(Object.entries(e.fields).filter(([k, v]) => v && kindFields(kindSel.value).some(([fk]) => fk === k))),
+      fields: Object.fromEntries([...Object.entries(e.fields).filter(([k, v]) => v && k !== 'say' && kindFields(kindSel.value).some(([fk]) => fk === k)), ['say', cleanSay(f.get('say'))]].filter(([, v]) => v)),
       tags: String(f.get('tags') || '').split(',').map((t) => t.trim()).filter(Boolean), links, parent_id: parentEntry?.id || null, version: existing?.version,
     };
     status.textContent = 'Saving…'; status.className = 'form-status';
@@ -609,6 +614,7 @@ export async function showWorld(parts, { keepScroll = false } = {}) {
   else if (view === 'edit') node = viewEdit(arg);
   else if (view === 'q') node = viewSearch(arg || '');
   else if (view === 'tags') node = viewTags();
+  else if (view === 'say') node = await viewSay();
   else if (view === 'bin') node = await viewBin();
   else if (view === 'atlas') node = viewAtlas();
   else if (view === 'maps') node = viewMaps();
