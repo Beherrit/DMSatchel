@@ -34,6 +34,9 @@
 // POST {ask: {body, player}}                write in your thread; GMs name the player
 // DELETE ?ask=id                            take back your own message
 //
+// Who has read a handout: POST {read: entryId} (a player opening a handout they can see) · GET ?reads=entryId (GM)
+// → { read: [{ name, first_at, last_at }], unread: [names] } over the world's players.
+//
 // The quote wall (members): GET ?quotes=1 every quote, newest first · POST {quote: {text, said_by, session_id}}
 // DELETE ?quote=id (whoever added it, or a GM) · PATCH {quote_id, react: emoji, on} add or take back your reaction
 import { route, send, fail, sql, requireMember, requireGm, postDiscord } from './_lib/core.js';
@@ -41,6 +44,7 @@ import { cleanDates, cleanVote, tally, dateText } from '../js/schedule.js';
 import { cleanPrimer, cleanAnswer, answerEmpty } from '../js/zero.js';
 import { cleanPoll, castVote } from '../js/polls.js';
 import { askUnread } from './_lib/ask.js';
+import { sharedWith } from '../js/sharing.js';
 import { cleanQuote } from '../js/quotes.js';
 import { isReaction } from '../js/reactions.js';
 import { react } from './_lib/react.js';
@@ -237,6 +241,15 @@ export default route({
   },
   async GET(req, res) {
     if (req.query?.ask) return getAsk(req, res);
+    if (req.query?.reads) {
+      if (!requireGm(req, res)) return;
+      const id = String(req.query.reads).slice(0, 40);
+      const players = await sql`SELECT g.id, g.name FROM members m JOIN gms g ON g.id = m.gm_id WHERE m.world_id = ${req.world.id} AND m.role NOT IN ('owner', 'gm') ORDER BY g.name`;
+      const reads = await sql`SELECT r.gm_id, r.first_at, r.last_at FROM entry_reads r WHERE r.entry_id = ${id} AND r.world_id = ${req.world.id}`;
+      const by = new Map(reads.map((r) => [r.gm_id, r]));
+      return send(res, 200, { read: players.filter((p) => by.has(p.id)).map((p) => ({ name: p.name, first_at: by.get(p.id).first_at, last_at: by.get(p.id).last_at })),
+        unread: players.filter((p) => !by.has(p.id)).map((p) => p.name) });
+    }
     if (req.query?.quotes) {
       if (!requireMember(req, res)) return;
       const quotes = await sql`SELECT q.id, q.text, q.said_by, q.session_id, q.created_at, q.gm_id, q.reactions, g.name AS added_by FROM table_quotes q LEFT JOIN gms g ON g.id = q.gm_id
@@ -274,6 +287,15 @@ export default route({
     if (!requireMember(req, res)) return;
     const b = req.body || {};
     if (b.ask) return postAsk(req, res, b.ask);
+    if (b.read !== undefined) {
+      if (req.isGmHere) return send(res, 200, { ok: true }); // GMs' own reads aren't counted
+      const e = (await sql`SELECT id, kind, visibility, status, owner_id, shared_with FROM entries WHERE id = ${String(b.read).slice(0, 40)} AND world_id = ${req.world.id} AND NOT deleted`)[0];
+      const sees = e && (e.owner_id === req.gm.id || (e.status === 'live' && (e.visibility === 'all' || sharedWith(e, req.gm.id))));
+      if (!sees || e.kind !== 'handout') return send(res, 200, { ok: true });
+      await sql`INSERT INTO entry_reads (entry_id, gm_id, world_id) VALUES (${e.id}, ${req.gm.id}, ${req.world.id})
+        ON CONFLICT (entry_id, gm_id) DO UPDATE SET last_at = now()`;
+      return send(res, 200, { ok: true });
+    }
     if (b.quote) {
       const q = cleanQuote(b.quote);
       if (q.error) return fail(res, 400, q.error);

@@ -143,6 +143,10 @@ export function ensureSchema() {
         id serial PRIMARY KEY, world_id text NOT NULL, player_id int NOT NULL, gm_id int NOT NULL, body text NOT NULL,
         from_gm boolean NOT NULL DEFAULT false, seen boolean NOT NULL DEFAULT false, created_at timestamptz NOT NULL DEFAULT now())`;
       await sql`CREATE INDEX IF NOT EXISTS gm_questions_idx ON gm_questions (world_id, player_id, created_at)`;
+      // Who has read a handout: one row per player and handout, with the first and latest time they opened it.
+      await sql`CREATE TABLE IF NOT EXISTS entry_reads (
+        entry_id text NOT NULL, gm_id int NOT NULL, world_id text NOT NULL, first_at timestamptz NOT NULL DEFAULT now(), last_at timestamptz NOT NULL DEFAULT now(),
+        PRIMARY KEY (entry_id, gm_id))`;
       // The quote wall: memorable lines from the table.
       await sql`CREATE TABLE IF NOT EXISTS table_quotes (
         id serial PRIMARY KEY, world_id text NOT NULL, gm_id int NOT NULL, text text NOT NULL, said_by text NOT NULL DEFAULT '',

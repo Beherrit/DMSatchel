@@ -30,6 +30,7 @@ import { customFieldsButton } from './world-fields.js';
 import { goalsSection } from './world-goals.js';
 import { wishesSection } from './world-wishes.js';
 import { farewellCard } from './world-hall.js';
+import { noteRead, readsLine } from './world-reads.js';
 import { askNav, askAboutLink } from './world-ask.js';
 import { quoteCard } from './world-quotes.js';
 import { previouslyCard } from './world-previously.js';
@@ -310,6 +311,7 @@ function viewEntry(id, tab) {
   const e = world.entries.get(id);
   if (!e) return notice('Entry not found', 'It may have been deleted, or the link is wrong.');
   try { pushRecent(localStorage, session.worldKey, e.id); } catch { /* storage blocked */ }
+  noteRead(e);
   const all = worldEntries();
   const crumbs = []; let p = e.parent_id && world.entries.get(e.parent_id), guard = 0;
   while (p && guard++ < 10) { crumbs.unshift(p); p = p.parent_id && world.entries.get(p.parent_id); }
@@ -337,6 +339,7 @@ function viewEntry(id, tab) {
     e.kind === 'character' ? ownerLine(e) : null,
     goalsSection(e, rerenderWorld),
     farewellCard(e, rerenderWorld),
+    readsLine(e),
     wishesSection(e, rerenderWorld),
     e.kind === 'character' ? sheetSection(e, rerenderWorld) : null,
     e.kind === 'character' ? knownSection(e, rerenderWorld) : null,
