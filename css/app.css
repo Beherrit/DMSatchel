@@ -1368,3 +1368,12 @@ div.poll-row { cursor: default }
 /* Roll a detail */
 .label-row { display: flex; align-items: baseline; justify-content: space-between; gap: 8px }
 .label-row .roll-btn { padding: 1px 8px; font-size: 12px }
+
+/* Hall of heroes */
+.hall-list > li + li { margin-top: 12px }
+.hall-card h3 { margin: 0 }
+.hall-when { margin: 8px 0 4px }
+.hall-epitaph, .farewell blockquote { margin: 8px 0; padding: 6px 12px; border-left: 3px solid var(--brass); font-family: var(--f-flavor); font-size: 18px; font-style: italic }
+.hall-epitaph footer { font-family: inherit; font-style: normal; color: var(--muted); margin-top: 2px }
+.fw-form { display: grid; gap: 6px; margin-top: 6px }
+.fw-form .btn { justify-self: start }

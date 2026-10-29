@@ -29,6 +29,7 @@ import { bulkControls } from './world-bulk.js';
 import { customFieldsButton } from './world-fields.js';
 import { goalsSection } from './world-goals.js';
 import { wishesSection } from './world-wishes.js';
+import { farewellCard } from './world-hall.js';
 import { mentionsCard } from './world-mentions.js';
 import { starButton, favoritesNav, followButton, followingNav } from './world-favorites.js';
 import { rewardCard } from './world-reward.js';
@@ -77,6 +78,7 @@ const lazyView = (load, name) => async (...args) => (await load())[name](...args
 const viewWeb = lazyView(() => import('./world-web.js'), 'viewWeb');
 const viewSay = lazyView(() => import('./world-say.js'), 'viewSay');
 const viewDupes = lazyView(() => import('./world-dupes.js'), 'viewDupes');
+const viewHall = lazyView(() => import('./world-hall.js'), 'viewHall');
 const viewPrep = lazyView(() => import('./world-prep.js'), 'viewPrep');
 const viewPowers = lazyView(() => import('./world-powers.js'), 'viewPowers');
 const viewLibrary = lazyView(() => import('./world-library.js'), 'viewLibrary');
@@ -292,6 +294,7 @@ function viewEntry(id, tab) {
     e.kind === 'npc' || e.kind === 'character' ? familySection(e, rerenderWorld) : null,
     e.kind === 'character' ? ownerLine(e) : null,
     goalsSection(e, rerenderWorld),
+    farewellCard(e, rerenderWorld),
     wishesSection(e, rerenderWorld),
     e.kind === 'character' ? sheetSection(e, rerenderWorld) : null,
     e.kind === 'character' ? knownSection(e, rerenderWorld) : null,
@@ -629,6 +632,7 @@ export async function showWorld(parts, { keepScroll = false } = {}) {
   else if (view === 'tags') node = viewTags();
   else if (view === 'say') node = await viewSay();
   else if (view === 'dupes') node = await viewDupes();
+  else if (view === 'hall') node = await viewHall();
   else if (view === 'bin') node = await viewBin();
   else if (view === 'atlas') node = viewAtlas();
   else if (view === 'maps') node = viewMaps();

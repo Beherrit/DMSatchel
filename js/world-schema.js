@@ -58,7 +58,9 @@ export const KINDS = {
       // The player's goals for the character (see goals.js); secret ones only the player and the GMs see.
       ['goals', 'Goals', 'hidden'],
       // What the player hopes the character finds or earns (see wishes.js); only the player and the GMs see it.
-      ['wishes', 'Wish list', 'hidden']],
+      ['wishes', 'Wish list', 'hidden'],
+      // When a character's story ends (see hall.js): how, when (in-world) and their player's epitaph.
+      ['fate', 'How it ended', 'hidden'], ['fate_day', 'When it ended', 'hidden'], ['epitaph', 'Epitaph', 'hidden']],
   },
   deity: {
     label: 'Deity', plural: 'Deities & Powers', blurb: 'Gods, patrons, demon lords and old powers.',

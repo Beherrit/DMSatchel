@@ -33,7 +33,8 @@ function members(chars) {
     active.length ? el('ul', { class: 'people-grid' }, active.map(card))
       : el('p', { class: 'muted' }, 'No characters yet. Players add their own from “+ My character”, or roll one in the Character Forge.'),
     former.length ? el('details', { class: 'former' }, el('summary', {}, `Former members (${former.length})`),
-      el('ul', { class: 'entry-list' }, former.map((e) => el('li', {}, link(e), el('span', { class: 'kind-tag' }, e.fields.status))))) : null);
+      el('ul', { class: 'entry-list' }, former.map((e) => el('li', {}, link(e), el('span', { class: 'kind-tag' }, e.fields.status)))),
+      el('p', { class: 'small' }, el('a', { href: '#world/hall' }, 'Hall of heroes'), ': how their stories ended')) : null);
 }
 
 function treasury(state, chars, reload) {
