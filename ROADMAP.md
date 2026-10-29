@@ -284,7 +284,7 @@ to the log at the bottom.
     everyone read the letter?".
 127. [x] **Coming or not.** Once the next session is set, everyone says "I'm coming" or "Can't make it"; the front
     page and session prep show who's in.
-128. [ ] **Picture descriptions.** A short description for an entry's picture, read by screen readers and shown
+128. [x] **Picture descriptions.** A short description for an entry's picture, read by screen readers and shown
     on hover; gallery captions do the same for theirs.
 129. [ ] **Next and previous.** Arrows on an entry's page to the next and previous entry of the same kind, with
     [ and ] on the keyboard.
@@ -420,3 +420,4 @@ to the log at the bottom.
 - Roll a name: the entry form's name field has "Roll" for kinds the name tables cover: NPCs and player characters (from their ancestry or species, e.g. "Hill dwarf" gives dwarf names; otherwise a likely one), settlements, taverns and shops (a location's type), regions and areas, factions and guilds. Same rules as Roll a detail: a rolled name rolls again, a typed one is only replaced on a second click. Unit tested in tests/roll-detail.test.mjs.
 - Who has read it: when a player opens a handout they can see, their browser tells the server once per visit (GMs, and GMs previewing as a player, aren't counted). On the handout's page GMs see "👁 Read by Pip (Oct 29) · not yet: Bo". Additive entry_reads table (first and latest time per player and handout); party API POST {read}, GET ?reads (GMs only). Tested against PGlite: hidden handouts and other kinds can't be marked read.
 - Coming or not: once a next session is set, the front page asks members "Are you coming?" with "I'm coming" / "Can't make it" (press again to take it back) and shows "Coming: … · Can't make it: … · Not answered: …"; session prep has a "Who's coming" card. An answer belongs to the date it was given for, so moving the session asks everyone again. Additive members.rsvp column; party PUT {rsvp}; the summary comes with the world load. js/rsvp.js unit tested; routes tested against PGlite.
+- Picture descriptions: under an entry's picture in the form, "Describe the picture" (up to 300 characters, kept as fields.image_alt). The entry page's picture uses it as its alt text (read by screen readers) and hover title, and the picture wall uses it as the caption; gallery pictures' captions now show on hover too. Small avatars beside names stay decorative. The server keeps a description only alongside a picture. Tested in the browser (with axe) and against PGlite.

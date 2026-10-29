@@ -538,7 +538,7 @@ function viewEdit(id, kindForNew) {
     setKids(fieldsBox, ...kindFields(kindSel.value).map((fd) => {
       const [k, label, type, opts] = fd, v = e.fields[k] || '';
       if (type === 'hidden' || !fieldApplies(fd, e.fields) || ((fd[4]?.gmOnly || fd[4]?.gmSecret) && !gm)) return null;
-      if (type === 'image') return pictureField(v);
+      if (type === 'image') return pictureField(v, { alt: e.fields.image_alt || '' });
       if (type === 'select') {
         const s = el('select', { id: `ff-${k}`, 'data-field': k }, el('option', { value: '' }, '—'), opts.map((o) => el('option', { value: o }, o)));
         if (v && !opts.includes(v)) s.append(el('option', { value: v }, v));
@@ -631,7 +631,7 @@ function viewEdit(id, kindForNew) {
     if (unknown.length) { status.textContent = `These connections don’t match any entry: ${unknown.join(', ')}.`; status.className = 'form-status error'; return; }
     const entry = {
       kind: kindSel.value, name: String(f.get('name')).trim(), summary: String(f.get('summary') || ''), body: String(f.get('body') || ''), secret: gm ? String(f.get('secret') || '') : existing?.secret || '', visibility: gm ? visSel.value : existing?.visibility || 'all',
-      fields: Object.fromEntries([...Object.entries(e.fields).filter(([k, v]) => v && k !== 'say' && k !== 'music' && kindFields(kindSel.value).some(([fk]) => fk === k)), ['say', cleanSay(f.get('say'))], ['music', cleanMusic(f.get('music'))]].filter(([, v]) => v)),
+      fields: Object.fromEntries([...Object.entries(e.fields).filter(([k, v]) => v && k !== 'say' && k !== 'music' && kindFields(kindSel.value).some(([fk]) => fk === k)), ['say', cleanSay(f.get('say'))], ['music', cleanMusic(f.get('music'))], ['image_alt', e.fields.image ? String(e.fields.image_alt || '').replace(/\s+/g, ' ').trim().slice(0, 300) : '']].filter(([, v]) => v)),
       tags: String(f.get('tags') || '').split(',').map((t) => t.trim()).filter(Boolean), links, parent_id: parentEntry?.id || null, version: existing?.version,
     };
     status.textContent = 'Saving…'; status.className = 'form-status';

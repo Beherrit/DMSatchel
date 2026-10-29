@@ -49,7 +49,7 @@ export function gallerySection(e, rerender) {
     el('h3', { class: 'section-title' }, `More pictures${list.length ? ` (${list.length})` : ''}`),
     list.length ? el('ul', { class: `gal-grid${arrange ? ' arranging' : ''}` }, list.map((p, i) => el('li', { class: 'gal-item' },
       el('button', { class: 'gal-open', type: 'button', 'aria-label': `Open picture ${i + 1}${p.caption ? `: ${p.caption}` : ''}`, onclick: () => viewer(list, i, e.name) },
-        el('img', { src: p.src, alt: p.caption || `${e.name}, picture ${i + 1}`, loading: 'lazy' })),
+        el('img', { src: p.src, alt: p.caption || `${e.name}, picture ${i + 1}`, title: p.caption || null, loading: 'lazy' })),
       arrange ? el('div', { class: 'gal-edit' },
         el('input', { type: 'text', value: p.caption, maxlength: 200, placeholder: 'Caption', 'aria-label': `Caption for picture ${i + 1}`, onchange: (ev) => save(setCaption(list, i, ev.target.value)) }),
         el('div', { class: 'btnrow' },

@@ -4,8 +4,10 @@ import { api } from './api.js';
 import { isImageRef } from './world-schema.js';
 
 // A form field whose hidden input (data-field=<key>) holds the picture's address, so the form collects it like any field.
-export function pictureField(value, { id = 'ff-image', key = 'image', label = 'Picture' } = {}) {
+// alt: the picture's description (kept as fields.image_alt), typed under the picture.
+export function pictureField(value, { id = 'ff-image', key = 'image', label = 'Picture', alt = null } = {}) {
   const hidden = el('input', { type: 'hidden', 'data-field': key, value: value || '' });
+  const altBox = alt === null ? null : el('input', { type: 'text', id: `${id}-alt`, 'data-field': 'image_alt', value: alt || '', maxlength: 300, placeholder: 'What it shows, e.g. a grey-bearded dwarf in a leather apron' });
   const preview = el('div', { class: 'pic-preview' });
   const status = el('span', { class: 'muted small', role: 'status' });
   const file = el('input', { type: 'file', id, accept: 'image/*', class: 'pic-file' });
@@ -33,7 +35,8 @@ export function pictureField(value, { id = 'ff-image', key = 'image', label = 'P
   });
   show();
   return el('div', { class: 'field wide pic-field' }, el('label', { for: id }, label),
-    el('div', { class: 'pic-row' }, preview, el('div', { class: 'pic-inputs' }, file, link, status)), hidden);
+    el('div', { class: 'pic-row' }, preview, el('div', { class: 'pic-inputs' }, file, link, status,
+      altBox ? [el('label', { for: `${id}-alt`, class: 'small' }, 'Describe the picture (read aloud by screen readers)'), altBox] : null)), hidden);
 }
 
 export const pictureOf = (e) => (e?.fields?.image && isImageRef(e.fields.image) ? e.fields.image : null);
@@ -46,5 +49,6 @@ export function thumb(e, cls = 'thumb') {
 export function figure(e) {
   const src = pictureOf(e);
   if (!src) return null;
-  return el('figure', { class: `entry-pic k-${e.kind}` }, el('a', { href: src, target: '_blank', rel: 'noopener' }, el('img', { src, alt: e.name, loading: 'lazy' })));
+  const alt = String(e.fields?.image_alt || '').trim();
+  return el('figure', { class: `entry-pic k-${e.kind}` }, el('a', { href: src, target: '_blank', rel: 'noopener' }, el('img', { src, alt: alt || e.name, title: alt || null, loading: 'lazy' })));
 }

@@ -10,7 +10,7 @@ export function wallPictures(entries, maps = [], mapSrc = () => null) {
   const sorted = [...(entries || [])].sort((a, b) => a.name.localeCompare(b.name));
   for (const e of sorted) {
     const main = e.fields?.image;
-    if (main && isImageRef(main)) add({ src: main, caption: '', entry: e, kind: e.kind, tags: e.tags || [] });
+    if (main && isImageRef(main)) add({ src: main, caption: String(e.fields?.image_alt || '').trim(), entry: e, kind: e.kind, tags: e.tags || [] });
     for (const g of readGallery(e)) add({ src: g.src, caption: g.caption, entry: e, kind: e.kind, tags: e.tags || [] });
   }
   for (const m of [...(maps || [])].sort((a, b) => String(a.name).localeCompare(String(b.name)))) add({ src: mapSrc(m), caption: '', map: m, kind: 'map', tags: [] });
