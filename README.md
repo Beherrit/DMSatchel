@@ -146,6 +146,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Picture wall**: every picture in the world on one page (portraits, places, galleries, maps), by kind and tag.
 - **Text size**: an “A” button in the header makes all text larger, largest or smaller, remembered per browser.
 - **Previously on…**: the front page opens with the last session's summary and where the party left off.
+- **Prep checklist**: the GMs' own steps before each session, ticked off in session prep and cleared when the next session is logged.
 - **Repeating events**: events that come round every week, month or year (until a date, if you like) show on the calendar and in session prep.
 - **Birthdays on the calendar**: characters' and NPCs' in-world birthdays recur every year on the calendar and in session prep.
 - **Mood music**: a music or ambience link on any entry; places inherit it from the place around them, and session prep offers it for where the party is.
