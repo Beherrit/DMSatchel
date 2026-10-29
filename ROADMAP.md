@@ -257,6 +257,14 @@ to the log at the bottom.
     session prep for where the party is.
 113. [x] **Birthdays on the calendar.** Characters' and NPCs' in-world birthdays recur every year on the calendar
     and in session prep's "Coming up".
+114. [x] **Previously on…** Before the next session, the world's front page opens with the last session's summary
+    and "where we left off", so everyone arrives remembering.
+115. [ ] **Text size.** A per-browser setting for larger (or smaller) text across the app, for phones and tired
+    eyes at the end of a long session.
+116. [ ] **Repeating events.** Calendar events that come round every week, month or year (market day, the council's
+    moot, a feast), shown on the calendar and in session prep.
+117. [ ] **Prep checklist.** The GMs' own list of things to do before each session (print sheets, update the map),
+    ticked off in session prep and cleared when a new session starts.
 
 ## Ideas parking lot
 
@@ -375,3 +383,4 @@ to the log at the bottom.
 - Reactions: every table talk comment (on entry pages and in the Table talk feed) and every quote on the wall has a row of reactions: the ones people used, with counts (yours highlighted; press it again to take it back; who reacted shows on hover and to screen readers), and "☺+" to pick one of 👍 😂 😮 ❤️ 🎲. GM discussions and private notes have none. Stored per row as { emoji: { person: name } } in additive reactions columns on comments and table_quotes, changed atomically in SQL so two people reacting at once don't undo each other (comments PATCH {id, react, on}; party PATCH {quote_id, react, on}). js/reactions.js unit tested; routes tested against PGlite.
 - Mood music: every entry form has "Mood music" (an https link: YouTube, Spotify, Tabletop Audio, SoundCloud, anything). The entry page shows "♫ Mood music (YouTube)" under the name, opening in a new tab; a place without its own uses the nearest place around it that has some ("Mood music for Brindle"). Session prep's "Where the party is" card offers it, and the printable sheet prints the link. Stored as fields.music on any kind; the server keeps only https links. js/music.js unit tested.
 - Birthdays on the calendar: player characters and NPCs have a "Birthday (in-world date)" field (any date the calendar reads: "3 Thawmoon", "3 Thawmoon 1000"). Birthdays recur every year: "🎂 Ann" in the calendar's month grid, "🎂 Ann turns 40" in the day's detail (an age when a birth year was given, nothing before it), and in session prep's "Coming up" for the next two weeks, including across New Year. The dead are left out. js/birthdays.js unit tested.
+- Previously on…: the world's front page has a "Previously on… Session 12" card from the latest session the viewer can see: its summary, "Where we left off" (the session's "Next time" field, formatted) and a link to the full session with its in-world date. It's open when the next session is within a week and folded otherwise, so it never crowds the page between campaigns.

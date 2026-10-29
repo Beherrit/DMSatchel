@@ -32,6 +32,7 @@ import { wishesSection } from './world-wishes.js';
 import { farewellCard } from './world-hall.js';
 import { askNav, askAboutLink } from './world-ask.js';
 import { quoteCard } from './world-quotes.js';
+import { previouslyCard } from './world-previously.js';
 import { mentionsCard } from './world-mentions.js';
 import { starButton, favoritesNav, followButton, followingNav } from './world-favorites.js';
 import { rewardCard } from './world-reward.js';
@@ -195,6 +196,7 @@ function viewHome() {
     el('div', { class: 'panel-head' }, el('h2', {}, info.name || 'The World'), info.tagline ? el('p', {}, info.tagline) : null,
       worldCalendar() ? el('p', { class: 'today-line' }, el('a', { href: '#world/calendar' }, `📅 ${todayText()}`)) : null, isMember() ? nextSessionLine() : null),
     zeroNudge(),
+    previouslyCard(),
     quoteCard(),
     // Open for newcomers (no earlier visit, or session zero not read yet), folded for everyone else.
     startHereCard({ fresh: !world.info?.prev_visit || world.info?.zero_read === false }),

@@ -1460,3 +1460,9 @@ div.poll-row { cursor: default }
 /* Birthdays on the calendar */
 .cal-item.cal-bday { background: transparent; border: 1px dashed var(--line); color: var(--ink) }
 .birthday { margin: 4px 0 }
+
+/* Previously on… */
+.previously > summary { cursor: pointer; display: flex; align-items: baseline; gap: 6px; list-style-position: outside }
+.previously[open] > summary { margin-bottom: 6px }
+.prev-next { margin: 6px 0; padding: 6px 10px; border-left: 3px solid var(--accent); background: var(--sunk); border-radius: 0 6px 6px 0 }
+.prev-next .rich p:last-child { margin-bottom: 0 }
