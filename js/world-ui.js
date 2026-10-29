@@ -83,6 +83,7 @@ const viewDupes = lazyView(() => import('./world-dupes.js'), 'viewDupes');
 const viewHall = lazyView(() => import('./world-hall.js'), 'viewHall');
 const viewAsk = lazyView(() => import('./world-ask.js'), 'viewAsk');
 const viewQuotes = lazyView(() => import('./world-quotes.js'), 'viewQuotes');
+const viewPictures = lazyView(() => import('./world-pictures.js'), 'viewPictures');
 const viewPrep = lazyView(() => import('./world-prep.js'), 'viewPrep');
 const viewPowers = lazyView(() => import('./world-powers.js'), 'viewPowers');
 const viewLibrary = lazyView(() => import('./world-library.js'), 'viewLibrary');
@@ -131,6 +132,7 @@ function renderSide() {
       el('a', { href: '#world/calendar', 'data-view': 'calendar', title: todayText() }, el('span', {}, 'Calendar'), el('span', { class: 'count cal-count' }, worldCalendar() ? todayText().split(', ').pop().replace(/ \d+.*$/, '') : '')),
       el('a', { href: '#world/atlas', 'data-view': 'atlas' }, el('span', {}, 'Atlas'), el('span', { class: 'count' }, worldEntries().filter((e) => PLACE_KINDS.includes(e.kind)).length)),
       el('a', { href: '#world/maps', 'data-view': 'maps' }, el('span', {}, 'Maps'), el('span', { class: 'count' }, (world.maps || []).length)),
+      el('a', { href: '#world/pictures', 'data-view': 'pictures' }, el('span', {}, 'Picture wall'), el('span', { class: 'count' }, '▣')),
       el('a', { href: '#world/web', 'data-view': 'web' }, el('span', {}, 'Relationship web'), el('span', { class: 'count' }, '◎')),
       el('a', { href: '#world/library', 'data-view': 'library' }, el('span', {}, 'Your library'), el('span', { class: 'count' }, worldEntries().filter((e) => e.kind === 'creature' || e.kind === 'rule' || (e.kind === 'item' && e.fields?.source)).length)),
       el('a', { href: '#world/powers', 'data-view': 'powers' }, el('span', {}, 'Who stands where'), el('span', { class: 'count' }, '▦')),
@@ -642,6 +644,7 @@ export async function showWorld(parts, { keepScroll = false } = {}) {
   else if (view === 'hall') node = await viewHall();
   else if (view === 'ask') node = await viewAsk(arg, parts[2]);
   else if (view === 'quotes') node = await viewQuotes();
+  else if (view === 'pictures') node = await viewPictures();
   else if (view === 'bin') node = await viewBin();
   else if (view === 'atlas') node = viewAtlas();
   else if (view === 'maps') node = viewMaps();
