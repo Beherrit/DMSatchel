@@ -307,7 +307,7 @@ to the log at the bottom.
     goals reached, wishes come true, and where their journey went.
 140. [x] **Who holds what.** A map switch tints each pin by the faction that controls the place (from "Controlled
     by", "Ruled by" or a connection), with a key.
-141. [ ] **Between sessions.** Session prep gathers what players did since the last session: journals, downtime,
+141. [x] **Between sessions.** Session prep gathers what players did since the last session: journals, downtime,
     suggestions, questions and table talk, in one card.
 
 ## Ideas parking lot
@@ -454,3 +454,4 @@ to the log at the bottom.
 - Rename a tag: a tag's page has "Rename tag" for GMs: type a new name, or pick an existing tag to fold this one into it. Every entry with the tag changes in one go (no doubles when an entry already has the other tag), each change goes into the history, and the tag's description moves with it unless the other tag has its own. PATCH entries {rename_tag: {from, to}}; tested against PGlite.
 - Their story so far: a player character's page has "Their story so far": sessions played (attendance, connections or [[mentions]] in the log; "from Session 1 to Session 12"), completed quests connected to them or mentioning them, goals reached, wishes come true (only for those who can see the wish list), and the items whose holder is them. Built from what the world already records; nothing new to fill in. The party's journey is the party's, so it stays on the party page. js/story.js unit tested.
 - Who holds what: maps have a "Who holds what" switch. Each pinned place is held by a faction, guild or house when it says so itself (a connection labelled controlled / ruled / held / owned / claimed / governed / run by, or its Ruled by, Controlled by, Led by or Owner field naming one), otherwise by whoever holds the place around it. Held pins take that power's colour, their labels say "held by …", and a key above the map lists the powers with counts. Colours are the reference categorical palette in fixed order (light and dark steps), assigned by each power's place among the world's powers sorted by name, so a power keeps its colour whatever is on screen; a ninth and later share a neutral grey. js/control.js unit tested.
+- Between sessions: session prep opens (after "Last time") with "Between sessions (since Session 4)": journal entries written since the latest session was logged (with who wrote them), downtime asked for or changed (marked "to resolve" until it is), new suggestions, player questions waiting for an answer, and how much table talk there's been, each linking to where to deal with it. Quiet weeks say so. js/between.js unit tested.

@@ -28,6 +28,7 @@ import { birthdaysBetween } from './birthdays.js';
 import { repeatsBetween } from './repeats.js';
 import { checklistCard } from './world-checklist.js';
 import { rsvpCard } from './world-schedule.js';
+import { betweenSessions } from './between.js';
 
 const ACTIVE_PC = (e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
 const card = (title, ...kids) => el('section', { class: 'card prep-card' }, el('h3', {}, title), ...kids);
@@ -185,6 +186,21 @@ function spotlightSection() {
     })));
 }
 
+// Between sessions: what the players did since the last session was logged.
+function betweenSection(table) {
+  const b = betweenSessions(worldEntries(), table);
+  const asks = world.info?.ask_unread || 0;
+  const lines = [
+    b.journals.length ? ['Journal entries: ', b.journals.slice(0, 6).flatMap((e, i) => [i ? ', ' : '', link(e), el('span', { class: 'muted small' }, ` (${e.owner || e.created_by || 'someone'})`)])] : null,
+    b.downtime.length ? ['Downtime: ', b.downtime.slice(0, 6).flatMap((e, i) => [i ? ', ' : '', link(e), e.fields?.resolved ? '' : [' ', el('span', { class: 'tag' }, 'to resolve')]])] : null,
+    b.suggested.length ? [el('a', { href: '#world/suggestions' }, `${b.suggested.length} new suggestion${b.suggested.length === 1 ? '' : 's'}`), ': ', b.suggested.slice(0, 4).map((e) => e.name).join(', ')] : null,
+    asks ? [el('a', { href: '#world/ask' }, `${asks} player question${asks === 1 ? '' : 's'} waiting for an answer`)] : null,
+    b.talk.length ? [el('a', { href: '#world/table' }, `${b.talk.length} table talk comment${b.talk.length === 1 ? '' : 's'}`)] : null,
+  ].filter(Boolean);
+  return card(`Between sessions${b.last ? ` (since ${b.last.name})` : ''}`,
+    lines.length ? el('ul', { class: 'plain prep-list' }, lines.map((l) => el('li', {}, l))) : empty('Quiet: no journals, downtime, suggestions or questions since the last session.'));
+}
+
 function threadsSection(gmThreads, table) {
   const suggestions = worldEntries().filter((e) => e.status === 'suggested');
   const since = sessions()[0]?.created_at || '';
@@ -235,6 +251,6 @@ export async function viewPrep(rerender) {
       el('button', { class: 'btn small', type: 'button', onclick: async () => { await letRumorsSpread(); rerender(); } }, 'Let rumors spread'),
       el('a', { class: 'btn small', href: '#world/calendar' }, 'Move time on')),
     el('div', { class: 'prep-columns' },
-      el('div', { class: 'prep-main' }, lastTime(), whereSection(prep, rerender), card('Read-aloud', ...readAloudList(prep)), secretsCard(prep, next), turnUpSection(prep), questsSection(), scratchPad(prep)),
+      el('div', { class: 'prep-main' }, lastTime(), betweenSection(table), whereSection(prep, rerender), card('Read-aloud', ...readAloudList(prep)), secretsCard(prep, next), turnUpSection(prep), questsSection(), scratchPad(prep)),
       el('div', { class: 'prep-side' }, world.info?.rsvp ? card('Who’s coming', rsvpCard({ compact: true })) : null, checklistCard(prep, next), clockCard(), partySection(), spotlightSection(), clocksSection(), calendarSection(), threadsSection(gmThreads, table))));
 }
