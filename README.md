@@ -146,6 +146,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Picture wall**: every picture in the world on one page (portraits, places, galleries, maps), by kind and tag.
 - **Text size**: an “A” button in the header makes all text larger, largest or smaller, remembered per browser.
 - **Previously on…**: the front page opens with the last session's summary and where the party left off.
+- **Who's who**: a printable cast list of the people the party has met, with pictures, pronunciations and when they were last seen.
 - **Spell cards**: a printable card per caster with their spells and slot boxes to tick, plus full cards for spells from your world's library.
 - **Item cards**: printable poker-size cards for magic items and loot, nine to a page, from an item, a tag, every item or what the party holds.
 - **Fuller backups**: one file with entries, settings, maps and their pictures, standing, clocks, treasury and quotes, restorable as a new world without touching the original.

@@ -91,6 +91,7 @@ const viewPictures = lazyView(() => import('./world-pictures.js'), 'viewPictures
 const viewNumbers = lazyView(() => import('./world-numbers.js'), 'viewNumbers');
 const viewItemCards = lazyView(() => import('./world-playcards.js'), 'viewItemCards');
 const viewSpellCards = lazyView(() => import('./world-playcards.js'), 'viewSpellCards');
+const viewWhosWho = lazyView(() => import('./world-whoswho.js'), 'viewWhosWho');
 const viewPrep = lazyView(() => import('./world-prep.js'), 'viewPrep');
 const viewPowers = lazyView(() => import('./world-powers.js'), 'viewPowers');
 const viewLibrary = lazyView(() => import('./world-library.js'), 'viewLibrary');
@@ -169,6 +170,7 @@ function renderSide() {
       navGroup('extras', 'Extras', false, [
         el('a', { href: '#world/pictures', 'data-view': 'pictures' }, el('span', {}, 'Picture wall'), el('span', { class: 'count' }, '▣')),
         el('a', { href: '#world/numbers', 'data-view': 'numbers' }, el('span', {}, 'In numbers'), el('span', { class: 'count' }, '#')),
+        el('a', { href: '#world/whoswho', 'data-view': 'whoswho' }, el('span', {}, 'Who’s who'), el('span', { class: 'count' }, '☺')),
         el('a', { href: '#world/say', 'data-view': 'say' }, el('span', {}, 'Say it right'), el('span', { class: 'count' }, worldEntries().filter((e) => sayOf(e)).length || '')),
         el('a', { href: '#world/hall', 'data-view': 'hall' }, el('span', {}, 'Hall of heroes'), el('span', { class: 'count' }, worldEntries().filter((e) => e.kind === 'character' && ['Retired', 'Dead', 'Missing'].includes(e.fields?.status)).length || '')),
       ])),
@@ -681,6 +683,7 @@ export async function showWorld(parts, { keepScroll = false } = {}) {
   else if (view === 'numbers') node = await viewNumbers();
   else if (view === 'itemcards') node = await viewItemCards(arg || '');
   else if (view === 'spellcards') node = await viewSpellCards(arg || '');
+  else if (view === 'whoswho') node = await viewWhosWho();
   else if (view === 'bin') node = await viewBin();
   else if (view === 'atlas') node = viewAtlas();
   else if (view === 'maps') node = viewMaps();

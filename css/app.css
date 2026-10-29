@@ -1500,3 +1500,14 @@ div.poll-row { cursor: default }
 .pc-slot { display: flex; align-items: center; gap: 3px; flex-wrap: wrap }
 .pc-box { display: inline-block; width: 11px; height: 11px; border: 1.5px solid var(--ink); border-radius: 2px; margin-right: 2px }
 @media print { .pc-box { width: 3mm; height: 3mm; border-color: #000 } .pc-slots { font-size: 7.5pt } }
+
+/* Who's who */
+.cast-list { list-style: none; padding-left: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr)); gap: 10px 18px }
+.cast { display: grid; grid-template-columns: 48px minmax(0, 1fr); gap: 10px; align-items: start; break-inside: avoid; padding-bottom: 8px; border-bottom: 1px solid var(--line) }
+.cast .avatar { width: 48px; height: 48px; border-radius: 50%; object-fit: cover }
+.cast-blank { display: grid; place-items: center; background: var(--sunk); color: var(--muted); font-family: var(--f-display); font-size: calc(20px * var(--ts, 1)) }
+.cast-name { font-weight: 600 }
+.cast-say { font-weight: normal; font-style: italic; color: var(--muted) }
+.cast p { margin: 2px 0 }
+.cast.dead .cast-name a { text-decoration: line-through }
+@media print { .cast-list { grid-template-columns: 1fr 1fr; gap: 4mm 8mm } .cast { font-size: 9pt; border-color: #999 } .cast .avatar { width: 12mm; height: 12mm } }
