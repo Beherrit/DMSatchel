@@ -15,6 +15,7 @@ import { travel } from './encounters.js';
 import { worldCalendar, todayText } from './world-calendar.js';
 import { advance, formatDate, today } from './calendar.js';
 import { journeyOnMap } from './journey.js';
+import { controllers, powerSlots } from './control.js';
 import { journey, chainOf, notePartyMove } from './world-journey.js';
 
 // The party's place, then each place above it (for the party token).
@@ -312,6 +313,25 @@ export async function viewMap(id, focusPin) {
     document.body.append(d); d.showModal(); label.focus();
   }
 
+  // Who holds what: pins tinted by the faction, guild or house that controls the place, with a key.
+  let holdsOn = false, hold = new Map(), slots = new Map();
+  const holdKey = el('div', { class: 'hold-key', hidden: true, 'aria-label': 'Who holds what', role: 'group' });
+  function drawHoldKey() {
+    holdKey.hidden = !holdsOn;
+    if (!holdsOn) return;
+    const counts = new Map();
+    for (const p of pins) { const h = p.entry_id && hold.get(p.entry_id); if (h) counts.set(h.by, (counts.get(h.by) || 0) + 1); }
+    setKids(holdKey, counts.size ? [...counts].sort((a, b) => b[1] - a[1] || a[0].name.localeCompare(b[0].name)).map(([by, n]) => {
+      const slot = slots.get(by.id) ?? -1;
+      return el('span', { class: 'hold-item' }, el('span', { class: `hold-swatch hold-${slot < 0 ? 'other' : slot}`, 'aria-hidden': 'true' }), link(by), el('span', { class: 'muted small' }, ` ${n}`));
+    }) : el('span', { class: 'muted small' }, 'No pinned place says who holds it yet. Set “Ruled by”, “Controlled by”, “Led by” or “Owner” to a faction, or connect the place “controlled by” one.'));
+  }
+  const holdBtn = el('button', { class: 'btn small', type: 'button', 'aria-pressed': 'false', title: 'Tint pins by the faction that controls each place', onclick: () => {
+    holdsOn = !holdsOn; holdBtn.setAttribute('aria-pressed', String(holdsOn));
+    if (holdsOn) { const all = [...world.entries.values()].filter((e) => e.status !== 'suggested'); hold = controllers(all); slots = powerSlots(all); }
+    renderPins();
+  } }, 'Who holds what');
+
   function renderPins() {
     const q = filter.value.trim().toLowerCase();
     setKids(layer, ...partyMarks.map((m) => el('button', { class: 'pin mark party-mark', type: 'button', style: `left:${m.x * 100}%;top:${m.y * 100}%`, title: `${m.label} (${m.by})`, 'aria-label': `${m.by}’s marker: ${m.label}`,
@@ -326,10 +346,15 @@ export async function viewMap(id, focusPin) {
         'aria-label': `The party is ${at.exact ? `here, in ${place.name}` : `in ${place.name}, in ${at.pin.label}`}`, onclick: (ev) => { ev.stopPropagation(); showPin(at.pin); } },
         el('span', { class: 'glyph', 'aria-hidden': 'true' }, '⚑'), el('span', { class: 'pin-label' }, at.exact ? 'The party' : `The party (${place.name})`))];
     })(),
-    ...pins.map((p) => el('button', {
-      class: `pin pin-${p.icon || 'poi'}${p.secret ? ' secret' : ''}${p.entry_id && mapsOf(p.entry_id).some((m) => m.id !== map.id) ? ' has-map' : ''}`, type: 'button', 'data-id': p.id, style: `left:${p.x * 100}%;top:${p.y * 100}%`,
-      title: p.label, 'aria-label': p.label, onclick: (ev) => { ev.stopPropagation(); showPin(p); },
-    }, el('span', { class: 'glyph', 'aria-hidden': 'true' }, PIN_ICONS[p.icon || 'poi'][1]), el('span', { class: 'pin-label' }, p.label))));
+    ...pins.map((p) => {
+      const held = holdsOn && p.entry_id && hold.get(p.entry_id);
+      const slot = held ? slots.get(held.by.id) ?? -1 : null;
+      return el('button', {
+        class: `pin pin-${p.icon || 'poi'}${p.secret ? ' secret' : ''}${p.entry_id && mapsOf(p.entry_id).some((m) => m.id !== map.id) ? ' has-map' : ''}${held ? ` held hold-${slot < 0 ? 'other' : slot}` : ''}`, type: 'button', 'data-id': p.id, style: `left:${p.x * 100}%;top:${p.y * 100}%`,
+        title: held ? `${p.label}: held by ${held.by.name}` : p.label, 'aria-label': held ? `${p.label}, held by ${held.by.name}` : p.label, onclick: (ev) => { ev.stopPropagation(); showPin(p); },
+      }, el('span', { class: 'glyph', 'aria-hidden': 'true' }, PIN_ICONS[p.icon || 'poi'][1]), el('span', { class: 'pin-label' }, p.label));
+    }));
+    drawHoldKey();
     const shown = pins.filter((p) => !q || `${p.label} ${getEntry(p.entry_id)?.name || ''}`.toLowerCase().includes(q)).sort((a, b) => String(a.label).localeCompare(String(b.label)));
     setKids(list, ...(shown.length ? shown.map((p) => el('li', {}, el('button', { class: 'linkish', type: 'button', onclick: () => { centerOn(p); showPin(p); } },
       el('span', { class: `glyph pin-${p.icon || 'poi'}` }, PIN_ICONS[p.icon || 'poi'][1]), ' ', p.label), p.secret ? el('span', { class: 'tag' }, 'GM') : null))
@@ -485,6 +510,7 @@ export async function viewMap(id, focusPin) {
     isMember() ? markBtn : null,
     map.miles ? measureBtn : null,
     journeyBtn,
+    holdBtn,
     scaleControl());
 
   const entry = map.entry_id && getEntry(map.entry_id);
@@ -497,7 +523,7 @@ export async function viewMap(id, focusPin) {
         try { await api('maps', { method: 'DELETE', query: { id: map.id } }); world.maps = (world.maps || []).filter((m) => m.id !== map.id); toast('Map deleted'); location.hash = 'world/maps'; }
         catch (err) { toast(err.message, 'bad'); }
       }, 'btn ghost small')) : null),
-    toolbar, fogTools, measureBar, viewport, status,
+    toolbar, holdKey, fogTools, measureBar, viewport, status,
     el('div', { class: 'map-side' }, el('h3', { class: 'section-title' }, 'Pins'), filter, list, myBox),
     el('p', { class: 'muted small' }, `Last changed ${whenTime(map.updated_at)}${map.updated_by ? ` by ${map.updated_by}` : ''}. Drag to pan; scroll, pinch or use + and − to zoom.`),
     nameList());

@@ -146,6 +146,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Picture wall**: every picture in the world on one page (portraits, places, galleries, maps), by kind and tag.
 - **Text size**: an “A” button in the header makes all text larger, largest or smaller, remembered per browser.
 - **Previously on…**: the front page opens with the last session's summary and where the party left off.
+- **Who holds what**: a map switch tints each pin by the faction, guild or house that controls the place, with a key.
 - **Their story so far**: a character's page gathers sessions played, quests finished, goals reached, wishes come true and what they carry.
 - **Rename a tag**: rename a tag across every entry, or fold it into another, from its page.
 - **Travel takes time**: after moving the party on a scaled map, offer to move the calendar on by the journey's days at each pace.
