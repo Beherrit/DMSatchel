@@ -1411,3 +1411,11 @@ div.poll-row { cursor: default }
 .pw-cap .small { opacity: .9; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
 .pw-item:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px }
 .pic-wall, .qt-list, .dp-list, .hall-list, .ask-thread, .ask-players { list-style: none; padding-left: 0 }
+
+/* Contents for long entries */
+.toc { float: right; max-width: 15rem; margin: 0 0 10px 16px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--sunk); font-size: 14px }
+.toc ol { margin: 4px 0 0; padding-left: 18px }
+.toc li + li { margin-top: 2px }
+.rich-h[tabindex]:focus { outline: none }
+.rich-h:target, .rich-h:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
+@media (max-width: 640px) { .toc { float: none; max-width: none; margin: 0 0 10px } }

@@ -7,6 +7,7 @@ import { hooks } from './hooks.js';
 import { visitSince } from './whatsnew.js';
 import { fieldsWith } from './custom-fields.js';
 import { blocks, inline } from './rich.js';
+import { headingsOf, contentsOf } from './contents.js';
 import { CLASSES, BACKGROUNDS } from './rules2024.js';
 
 // A Map that drops the lookup index whenever an entry is added, changed or removed.
@@ -90,7 +91,10 @@ function inlineParts(list) {
   });
 }
 
-export function richText(text) {
+// anchors: give headings ids (from contents.js) so a table of contents can jump to them.
+export function richText(text, { anchors = false } = {}) {
+  const ids = anchors ? headingsOf(text).map((h) => h.id) : [];
+  let hi = 0;
   const parts = (list) => list.map((x) => {
     if (x.t === 'text') return x.v;
     if (x.t === 'b') return el('strong', {}, parts(x.c));
@@ -100,10 +104,19 @@ export function richText(text) {
   });
   const lines = (ls) => ls.flatMap((l, i) => (i ? [el('br'), ...parts(l)] : parts(l)));
   return el('div', { class: 'rich' }, blocks(text).map((b) => (
-    b.t === 'h' ? el('h4', { class: 'rich-h' }, parts(b.v))
+    b.t === 'h' ? el('h4', { class: 'rich-h', ...(anchors ? { id: ids[hi++], tabindex: '-1' } : {}) }, parts(b.v))
       : b.t === 'quote' ? el('aside', { class: 'readaloud' }, lines(b.lines))
         : b.t === 'ul' || b.t === 'ol' ? el(b.t, {}, b.items.map((it) => el('li', {}, parts(it))))
           : el('p', {}, lines(b.lines)))));
+}
+
+// A small table of contents for a long text (three or more "## " parts), jumping to the anchored headings.
+export function contentsNav(text) {
+  const list = contentsOf(text);
+  if (!list.length) return null;
+  const jump = (ev, id) => { ev.preventDefault(); const h = document.getElementById(id); if (h) { h.scrollIntoView({ behavior: 'smooth', block: 'start' }); h.focus({ preventScroll: true }); } };
+  return el('nav', { class: 'toc', 'aria-label': 'Contents' }, el('span', { class: 'eyebrow' }, 'Contents'),
+    el('ol', {}, list.map((h) => el('li', {}, el('a', { href: location.hash, onclick: (ev) => jump(ev, h.id) }, h.label)))));
 }
 
 export function notice(title, text, ...extra) { return el('div', { class: 'card empty-state' }, el('h3', {}, title), el('p', {}, text), ...extra); }

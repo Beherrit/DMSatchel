@@ -141,6 +141,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Wish lists**: players note what their characters hope to find or earn; GMs see them in session prep and beside matching loot.
 - **Read-aloud in prep**: session prep and the printable sheet gather the “> ” boxes from what's planned, in order, ready to read.
 - **Roll a detail**: “Roll” beside an NPC's looks, personality, voice, wants and secret, a settlement's trouble or landmarks, and a place's features fills the field from the app's tables.
+- **Contents for long entries**: three or more “## ” headings in a description give a small table of contents that jumps to each part.
 - **Picture wall**: every picture in the world on one page (portraits, places, galleries, maps), by kind and tag.
 - **Quote wall**: memorable lines from the table, with who said them and when; a random one greets you on the front page.
 - **Ask the GM**: a private thread between each player and the GMs for questions between sessions, with a badge and a toast when something new arrives.

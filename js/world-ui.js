@@ -7,7 +7,7 @@ import { api, session, isGm, isMember, isPlayer, signedIn, onSession, setPreview
 import { KINDS, KIND_ORDER, LINK_LABELS, STANDING_KINDS, PLACE_KINDS, PLAYER_KINDS, fieldApplies } from './world-schema.js';
 import { openSignIn } from './signin.js';
 import { stripMarks } from './rich.js';
-import { world, worldEntries, getEntry, loadWorld, byName, kindLabel, kindFields, richInline, link, when, findByName, mentions, richText, notice, nameList } from './world-store.js';
+import { world, worldEntries, getEntry, loadWorld, byName, kindLabel, kindFields, richInline, link, when, findByName, mentions, richText, contentsNav, notice, nameList } from './world-store.js';
 import { viewMaps, viewMap, pinsFor } from './world-maps.js';
 import { viewStandings, standingWidget } from './world-standings.js';
 import { viewTalk, talkWidget, tableWidget, viewTable } from './world-talk.js';
@@ -322,7 +322,7 @@ function viewEntry(id, tab) {
         try { await patchEntry(e, { fields: restockDraft(e, town) }); toast(town ? `Restocked at ${town.name}’s prices` : 'Restocked'); rerenderWorld(); } catch (err) { toast(err.message, 'bad'); }
       } }, e.fields?.stock ? 'Restock' : 'Stock this shop') : null),
       renderStock(e.fields?.stock) || el('p', { class: 'muted' }, 'No stock listed yet.')) : null,
-    e.body ? el('section', {}, richText(e.body)) : null,
+    e.body ? el('section', {}, contentsNav(e.body), richText(e.body, { anchors: true })) : null,
     isGm() && e.secret ? el('aside', { class: 'secret' }, el('div', { class: 'eyebrow' }, 'GM only'), richText(e.secret)) : null,
     mentionsCard(e, rerenderWorld),
     e.kind === 'npc' ? lastSeenLine(e) : null,
