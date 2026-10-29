@@ -318,7 +318,7 @@ to the log at the bottom.
     mirror of importing from a spreadsheet.
 146. [x] **Pin a note to the session.** GMs jot reminders on the next session ("give Pip the letter") that show at
     the top of session prep and on the printable sheet, ticked off when done.
-147. [ ] **Faction news.** After a faction turn, offer a ready-made notice for the players about what's visibly
+147. [x] **Faction news.** After a faction turn, offer a ready-made notice for the players about what's visibly
     changed (clocks that filled, standing that moved), for GMs to edit and post.
 148. [ ] **Places at a glance.** A settlement's page shows a small panel: who leads it, who holds it, how many
     people, shops and open jobs are there, and its mood music and weather today.
@@ -475,3 +475,4 @@ to the log at the bottom.
 - More shortcuts: on an entry's page, e opens the edit form (when you may edit it), s stars it and f follows it, like pressing the buttons; ? lists them with the others. Ignored while typing in a field.
 - Export to a spreadsheet: every kind's list has "Download CSV": Name, Kind, Summary, Located in, Tags, one column per field (by its label), Description, and for GMs the GM secret (as Secret; players' files never have it, and only hold what they can see). UTF-8 with a byte-order mark so accents survive Excel, cells quoted properly, and anything a spreadsheet would run as a formula (=, +, @, or - before a number) gets a leading apostrophe. The columns are the ones "Import from a spreadsheet" recognises, so a file goes back in as it came out (unit tested as a round trip).
 - Pin a note to the session: session prep opens with "📌 For next session": one-off notes GMs pin between sessions (a promise to a player, a clue to drop, a rule to check), ticked off when done and cleared in one go; what's still open prints at the top of the session sheet as "Remember". Unlike the prep checklist, these don't repeat. Kept in session prep (prep.reminders; PATCH settings {reminder}). js/reminders.js unit tested; route tested against PGlite.
+- Faction news: after a faction turn, a "Tell the players?" dialog offers a ready-made notice of what visibly changed ("The Silver Hand: “Takeover” has come to pass", "… draws closer"), finished plans first, kept under the notice limit. Secret clocks and clocks on hidden or suggested entries are left out, and numbers never show. GMs edit it, optionally send it to Discord, and post it, or skip. Nothing is posted unless they choose to. js/faction-news.js unit tested.

@@ -3,6 +3,7 @@
 import { el, toast, confirmButton } from './dom.js';
 import { api, isGm } from './api.js';
 import { world, getEntry, link, kindLabel, notice } from './world-store.js';
+import { factionNews } from './faction-news.js';
 
 const NS = 'http://www.w3.org/2000/svg';
 const svgEl = (tag, attrs = {}) => { const e = document.createElementNS(NS, tag); for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v); return e; };
@@ -81,6 +82,8 @@ export function viewClocks() {
       const done = r.moved.filter((c) => c.filled >= c.size);
       toast(r.moved.length ? `${r.moved.length} clock${r.moved.length === 1 ? '' : 's'} moved${done.length ? `; finished: ${done.map((c) => c.name).join(', ')}` : ''}` : 'Nothing was ticking');
       window.dispatchEvent(new Event('world:rerender'));
+      const news = factionNews(r.moved, getEntry);
+      if (news) newsDialog(news);
     } catch (err) { toast(err.message, 'bad'); }
   };
   return el('div', { class: 'w-view' },
@@ -92,3 +95,24 @@ export function viewClocks() {
       : notice('No clocks yet', isGm() ? 'Open a faction, guild, villain or town and add a clock: what they want, and how close they are to getting it.' : 'The GMs haven’t shared any clocks.'));
 }
 
+
+// After a turn: a ready-made notice for the players about what they could have noticed, to edit and post or skip.
+function newsDialog(news) {
+  const text = el('textarea', { id: 'fn-text', rows: 6, maxlength: 500 }, news);
+  const toDiscord = world.info?.discord ? el('input', { type: 'checkbox', id: 'fn-discord' }) : null;
+  const d = el('dialog', { class: 'dialog', 'aria-labelledby': 'fn-title' }, el('form', { class: 'dialog-body', method: 'dialog' },
+    el('h2', { id: 'fn-title' }, 'Tell the players?'),
+    el('p', { class: 'muted small' }, 'What changed on clocks the players can see, as a notice. Secret clocks and hidden entries are left out. Edit it, or skip it.'),
+    el('div', { class: 'field' }, el('label', { for: 'fn-text' }, 'Notice'), text),
+    toDiscord ? el('label', { class: 'check', for: 'fn-discord' }, toDiscord, ' Also post to Discord') : null,
+    el('div', { class: 'btnrow' }, el('button', { class: 'btn primary', type: 'submit' }, 'Post as a notice'), el('button', { class: 'btn', type: 'button', onclick: () => d.close() }, 'Not now'))));
+  d.querySelector('form').addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    if (!text.value.trim()) { text.focus(); return; }
+    const { send } = await import('./world-notices.js');
+    const ok = await send({ add: { text: text.value } }, toDiscord?.checked ? 'Notice posted here and to Discord' : 'Notice posted', () => window.dispatchEvent(new Event('world:rerender')), Boolean(toDiscord?.checked));
+    if (ok) d.close();
+  });
+  d.addEventListener('close', () => d.remove());
+  document.body.append(d); d.showModal(); text.focus();
+}

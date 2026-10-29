@@ -23,7 +23,7 @@ export function drawNoticeBanner() {
   document.querySelector('.w-main')?.prepend(b);
 }
 
-async function send(op, msg, rerender, discord = false) {
+export async function send(op, msg, rerender, discord = false) {
   try {
     const r = await api('settings', { method: 'PATCH', body: { notice: op, discord } });
     if (r.discord_error) toast(`Posted here, but not to Discord: ${r.discord_error}`, 'bad');
