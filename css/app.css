@@ -1541,3 +1541,10 @@ details.quest-group > summary .section-title { display: inline }
 .qr-dialog .dialog-body { text-align: center }
 .qr-svg { width: min(78vw, 360px); height: auto; display: block; margin: 8px auto; border-radius: 6px }
 .qr-url { word-break: break-all }
+
+/* Conditions at a glance */
+.cond-help { margin-top: 6px }
+.cond-help > summary, .cond-all > summary { cursor: pointer; color: var(--accent) }
+.cond-help-item { margin: 6px 0 }
+.cond-help-item ul, .cond-lines { margin: 2px 0 0; padding-left: 18px; font-size: calc(14px * var(--ts, 1)) }
+.cond-all { margin-top: 4px }

@@ -13,7 +13,8 @@ import { api } from './api.js';
 import { inventoryLines } from './handover.js';
 import { queuePlay, isOffline } from './outbox.js';
 
-export const CONDITIONS = ['Blinded', 'Charmed', 'Deafened', 'Frightened', 'Grappled', 'Incapacitated', 'Invisible', 'Paralyzed', 'Petrified', 'Poisoned', 'Prone', 'Restrained', 'Stunned', 'Unconscious'];
+import { CONDITIONS, CONDITION_TEXT, conditionLine } from './conditions.js';
+export { CONDITIONS };
 
 const parse = (s) => { try { return s ? JSON.parse(s) : null; } catch { return null; } };
 export const forgeOf = (e) => parse(e.fields?.forge);
@@ -98,6 +99,16 @@ export async function addCoins(e, cp) {
   }
 }
 
+// What the character's current conditions do (open while any apply), with every other condition a tap away.
+function conditionHelp(active) {
+  const item = (c) => el('div', { class: 'cond-help-item' }, el('strong', {}, c), el('ul', {}, CONDITION_TEXT[c].map((t) => el('li', {}, t))));
+  return el('details', { class: 'cond-help', open: active.length ? true : null },
+    el('summary', { class: 'small' }, active.length ? `What ${active.length === 1 ? 'this does' : 'these do'}` : 'What conditions do'),
+    active.length ? active.map(item) : null,
+    el('details', { class: 'cond-all' }, el('summary', { class: 'small' }, 'All conditions'), Object.keys(CONDITION_TEXT).filter((c) => !active.includes(c)).map(item)),
+    el('p', { class: 'muted small' }, 'From the System Reference Document 5.2, CC BY 4.0.'));
+}
+
 export function sheetSection(e, rerender) {
   const ch = characterOf(e);
   const box = el('section', { class: 'card pc-sheet' });
@@ -136,7 +147,7 @@ export function sheetSection(e, rerender) {
   }
 
   function conditions() {
-    const chip = (c) => el('button', { type: 'button', class: 'chip-btn small', 'aria-pressed': String(play.conditions.includes(c)), disabled: can ? null : true,
+    const chip = (c) => el('button', { type: 'button', class: 'chip-btn small', 'aria-pressed': String(play.conditions.includes(c)), disabled: can ? null : true, title: conditionLine(c),
       onclick: () => { play.conditions = play.conditions.includes(c) ? play.conditions.filter((x) => x !== c) : [...play.conditions, c]; commit(); } }, c);
     const shown = can ? CONDITIONS : play.conditions;
     return el('div', { class: 'conds' }, el('span', { class: 'eyebrow' }, 'Conditions'),
@@ -145,7 +156,8 @@ export function sheetSection(e, rerender) {
         el('span', {}, 'Exhaustion ', el('strong', {}, play.exhaustion), play.exhaustion ? el('span', { class: 'muted small' }, ` (−${play.exhaustion * 2} to d20 tests, −${play.exhaustion * 5} ft speed)`) : null),
         can ? [el('button', { class: 'btn small ghost', type: 'button', 'aria-label': 'Less exhaustion', onclick: () => { play.exhaustion = Math.max(0, play.exhaustion - 1); commit(); } }, '−'),
           el('button', { class: 'btn small ghost', type: 'button', 'aria-label': 'More exhaustion', onclick: () => { play.exhaustion = Math.min(6, play.exhaustion + 1); commit(play.exhaustion === 6 ? 'Exhaustion 6: the character dies' : ''); } }, '+')] : null,
-        el('button', { type: 'button', class: 'chip-btn small', 'aria-pressed': String(play.inspiration), disabled: can ? null : true, onclick: () => { play.inspiration = !play.inspiration; commit(); } }, 'Heroic Inspiration')));
+        el('button', { type: 'button', class: 'chip-btn small', 'aria-pressed': String(play.inspiration), disabled: can ? null : true, onclick: () => { play.inspiration = !play.inspiration; commit(); } }, 'Heroic Inspiration')),
+      conditionHelp([...play.conditions, ...(play.exhaustion ? ['Exhaustion'] : [])]));
   }
 
   function slots() {

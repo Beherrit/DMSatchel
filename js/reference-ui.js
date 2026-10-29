@@ -3,6 +3,7 @@ import { el, setKids } from './dom.js';
 import { SPECIES, CLASSES, BACKGROUNDS, ORIGIN_FEATS, GENERAL_FEATS, EPIC_BOONS, ABILITY_NAMES, FULL_SLOTS } from './rules2024.js';
 import { MAGIC_ITEMS, RARITIES, RARITY_KEYS, ITEM_TYPES, baseType, itemEntry, concrete } from './magic-items.js';
 import { SPELLS, ORD } from './spells.js';
+import { CONDITION_TEXT } from './conditions.js';
 import { isGm, session } from './api.js';
 import { makeRng } from './rng.js';
 import { world, worldEntries, loadWorld } from './world-store.js';
@@ -13,7 +14,7 @@ const libClasses = () => (world.loaded ? libraryClasses(worldEntries()).filter((
 const libSpells = () => (world.loaded ? librarySpells(worldEntries(), [...Object.keys(CLASSES), ...libClasses().map((c) => c.name)]) : []);
 const yours = (source) => el('span', { class: 'tag lib-source' }, source || 'your library');
 
-const TABS = [['classes', 'Classes'], ['species', 'Species'], ['backgrounds', 'Backgrounds'], ['feats', 'Feats'], ['spells', 'Spells'], ['items', 'Magic items'], ['slots', 'Spell slots']];
+const TABS = [['classes', 'Classes'], ['species', 'Species'], ['backgrounds', 'Backgrounds'], ['feats', 'Feats'], ['spells', 'Spells'], ['items', 'Magic items'], ['conditions', 'Conditions'], ['slots', 'Spell slots']];
 let root, body, filter;
 
 const card = (title, sub, ...kids) => el('article', { class: 'card ref-card', 'data-search': `${title} ${sub}`.toLowerCase() }, el('h3', {}, title), sub ? el('p', { class: 'card-sub' }, sub) : null, ...kids);
@@ -75,6 +76,10 @@ function spells() {
       el('span', { class: 'tag' }, x.level ? `${ORD[x.level]} level` : 'cantrip'), ' ', yours(x.source), el('p', { class: 'small' }, `${x.classes.join(', ')}${x.text ? ` · ${x.text.length > 220 ? `${x.text.slice(0, 219)}…` : x.text}` : ''}`))))) : null;
   return [libCard, ...cards].filter(Boolean);
 }
+function conditions() {
+  return Object.entries(CONDITION_TEXT).map(([name, lines]) => card(name, '', el('ul', { class: 'cond-lines' }, lines.map((t) => el('li', {}, t)))));
+}
+
 function slots() {
   const head = el('tr', {}, el('th', {}, 'Caster level'), ['1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th'].map((s) => el('th', {}, s)));
   const rows = FULL_SLOTS.slice(1).map((row, i) => el('tr', {}, el('td', { class: 'num' }, i + 1), Array.from({ length: 9 }, (_, j) => el('td', { class: 'num' }, row[j] || '—'))));
@@ -85,7 +90,7 @@ function slots() {
 export function showReference(tab = 'classes') {
   if (!TABS.some(([k]) => k === tab)) tab = 'classes';
   for (const b of root.querySelectorAll('.subtabs a')) b.setAttribute('aria-current', b.dataset.tab === tab ? 'page' : 'false');
-  setKids(body, ...{ classes, species, backgrounds, feats, spells, items, slots }[tab]());
+  setKids(body, ...{ classes, species, backgrounds, feats, spells, items, conditions, slots }[tab]());
   applyFilter();
   // Load the open world once, so its library classes and spells show here too.
   if (!world.loaded && !triedWorld && session.configured !== false && ['classes', 'spells'].includes(tab)) {

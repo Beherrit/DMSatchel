@@ -298,7 +298,7 @@ to the log at the bottom.
     (never its secrets or who sees it), with the usual history.
 135. [x] **Join by QR code.** Admin shows the player invite as a QR code, so people at the table can join from
     their phones by pointing the camera.
-136. [ ] **Conditions at a glance.** Tapping a condition on a character's sheet (Poisoned, Prone…) shows what it
+136. [x] **Conditions at a glance.** Tapping a condition on a character's sheet (Poisoned, Prone…) shows what it
     does, from the SRD.
 137. [ ] **Travel takes time.** After moving the party on a map with a scale, offer to move the calendar on by the
     travel time.
@@ -442,3 +442,4 @@ to the log at the bottom.
 - New table talk: the world load brings the times of table-talk comments others posted since your last visit (at most 50; on entries you can see; hidden ones only for GMs), and the sidebar's Table talk shows "2 new" (a folded "At the table" group gets its dot). Opening Table talk clears the count in this browser. Tested against PGlite.
 - Pages the party writes together: GMs get "✎ Open to the party?" on any entry (fields.party_edit). Once open, the page says "The whole party writes this page" with who changed it last, every player who can see it gets Edit, and their form is just the summary, the page text and tags. The server keeps everything else as the GMs set it (name, kind, fields, place, connections including secret ones, GM secret, who sees it), only GMs can open or close a page, the usual version check stops two people overwriting each other, and every save goes into the history. Tested against PGlite.
 - Join by QR code: Admin → Members has "QR code" beside each invite link. It opens a big code (always black on white, so it scans in dark mode too) with the link written underneath; pointing a phone camera at it opens the invite. The app makes the code itself (js/qr.js: byte mode, error correction M, versions 1–10, any text up to 213 bytes, no outside library). Checked by decoding with an independent reader (jsQR, test-only) at every version from 1 to 10, with UTF-8 text, and from a screenshot of the dialog; unit tests cover version choice and the fixed patterns.
+- Conditions at a glance: on a character's sheet, each condition chip says what it does on hover, and "What these do" (open while any apply) lists the effects of the character's current conditions and Exhaustion, with every other condition under "All conditions". The Reference section has a Conditions tab. Short paraphrases from the SRD 5.2 (CC BY 4.0, credited); js/conditions.js now holds the list and the texts (unit tested that every condition has one).
