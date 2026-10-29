@@ -65,6 +65,7 @@ import { rollButton } from './world-roll.js';
 import { cleanSay, sayOf } from './say.js';
 import { cleanAka, akaOf } from './aka.js';
 import { ageOf, ageText } from './birthdays.js';
+import { menuCard } from './world-menu.js';
 import { cleanMusic } from './music.js';
 import { musicLine } from './world-music.js';
 import { tableSection } from './world-tables.js';
@@ -384,6 +385,7 @@ function viewEntry(id, tab) {
     tableSection(e),
     e.kind === 'encounter' && e.fields?.enc ? (() => { try { return encounterCard(JSON.parse(e.fields.enc), { title: 'Saved encounter', save: false }); } catch { return null; } })() : null,
     attendanceSection(e, rerenderWorld),
+    e.kind === 'location' && e.fields?.type === 'Tavern' ? menuCard(e, trailTown(e), rerenderWorld) : null,
     e.fields?.stock || (e.kind === 'location' && e.fields?.type === 'Shop' && isGm()) ? el('section', { class: 'card shop-card' },
       el('div', { class: 'entry-head' }, el('h3', {}, 'For sale'), isGm() ? el('button', { class: 'btn small', type: 'button', onclick: async () => {
         const town = trailTown(e);

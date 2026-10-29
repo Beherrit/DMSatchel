@@ -1606,3 +1606,19 @@ details.quest-group > summary .section-title { display: inline }
 .aka-line { margin: 2px 0 0 }
 .rival-members { display: grid; gap: 6px; margin: 8px 0 }
 .secret-line { background: var(--secret-bg); border-left: 3px solid var(--danger); padding: 4px 8px; border-radius: 4px }
+/* Tavern menu */
+.menu-body { font-family: var(--f-flavor); display: grid; gap: 10px }
+.menu-special { margin: 0; padding: 6px 10px; background: var(--sunk); border-radius: 6px }
+.menu-sec h4 { margin: 0 0 4px; font-family: var(--f-display); letter-spacing: .04em }
+.menu-items { display: grid; gap: 2px; margin: 0; padding: 0; list-style: none }
+.menu-items li { display: flex; gap: 8px; align-items: baseline }
+.menu-items li::after { content: none }
+.menu-items li > span:first-child { flex: 1; border-bottom: 1px dotted var(--line) }
+.menu-price { font-variant-numeric: tabular-nums; white-space: nowrap; margin-left: auto }
+.menu-special .menu-price { margin-left: 0 }
+@media print {
+  body.print-menu * { visibility: hidden }
+  body.print-menu .menu-card, body.print-menu .menu-card * { visibility: visible }
+  body.print-menu .menu-card { position: absolute; inset: 0 auto auto 0; width: 100% }
+  body.print-menu .menu-card button, body.print-menu .menu-card .btnrow { display: none }
+}

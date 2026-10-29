@@ -36,6 +36,7 @@ import { mergedEntry, relinkLinks, relinkText } from '../js/merge.js';
 import { fieldsWith } from '../js/custom-fields.js';
 import { cleanSay } from '../js/say.js';
 import { cleanAka } from '../js/aka.js';
+import { readMenu } from '../js/menu.js';
 import { cleanMusic } from '../js/music.js';
 import { journeyFor } from '../js/journey.js';
 import { readingFor } from '../js/reading.js';
@@ -58,12 +59,13 @@ function clean(input, custom = {}) {
   if (!isKind(e.kind)) return { error: 'Pick what kind of entry this is.' };
   const name = clip(e.name, LIMITS.name).trim();
   if (!name) return { error: 'Give the entry a name.' };
-  const allowed = new Set([...KINDS[e.kind].fields.map(([k]) => k), ...customKeys(e.kind, custom), 'say', 'aka', 'music', 'image_alt', 'party_edit']);
+  const allowed = new Set([...KINDS[e.kind].fields.map(([k]) => k), ...customKeys(e.kind, custom), 'say', 'aka', 'music', 'image_alt', 'party_edit', 'menu']);
   const fields = {};
-  for (const [k, v] of Object.entries(e.fields || {})) if (allowed.has(k) && v != null && String(v).trim() && (k !== 'image' || isImageRef(String(v)))) fields[k] = clip(v, ['stock', 'sheet', 'play', 'spread', 'known', 'attitudes', 'objectives', 'attendance', 'enc', 'goals', 'wishes', 'gallery'].includes(k) ? LIMITS.body : LIMITS.field);
+  for (const [k, v] of Object.entries(e.fields || {})) if (allowed.has(k) && v != null && String(v).trim() && (k !== 'image' || isImageRef(String(v)))) fields[k] = clip(v, ['stock', 'sheet', 'play', 'spread', 'known', 'attitudes', 'objectives', 'attendance', 'enc', 'goals', 'wishes', 'gallery', 'menu'].includes(k) ? LIMITS.body : LIMITS.field);
   // Pictures in the gallery must be real image addresses.
   if (fields.gallery) { fields.gallery = cleanGallery(fields.gallery); if (!fields.gallery) delete fields.gallery; }
   if (fields.say) { fields.say = cleanSay(fields.say); if (!fields.say) delete fields.say; }
+  if (fields.menu) { const m = readMenu(fields.menu); if (m) fields.menu = JSON.stringify(m); else delete fields.menu; }
   if (fields.aka) { fields.aka = cleanAka(fields.aka, name); if (!fields.aka) delete fields.aka; }
   if (fields.music) { fields.music = cleanMusic(fields.music); if (!fields.music) delete fields.music; }
   if (fields.image_alt) { fields.image_alt = String(fields.image_alt).replace(/\s+/g, ' ').trim().slice(0, 300); if (!fields.image_alt || !fields.image) delete fields.image_alt; }

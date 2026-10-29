@@ -156,6 +156,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Also known as**: other names for any entry (a title, an old name), found by search, mentions and the name check.
 - **How old they are**: NPCs' and characters' ages today from their birthday and the in-world calendar, on their page and in Who's who.
 - **A rival party**: roll another adventuring company (four members, what they want and their grudge) and save it as a guild with its people.
+- **Tavern menu**: a bill of fare for any tavern (drinks, dishes, a bed for the night), priced to suit the town, to read out or print.
 - **Export to a spreadsheet**: download any kind of entry as a CSV file with its fields as columns; it imports back as it is.
 - **A new world like this one**: start a world with another's calendar, own fields, templates, session zero page and tag descriptions, but none of its entries.
 - **Set a field for many**: bulk actions set one field (a status, a type, a role) on every selected entry that has it.
