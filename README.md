@@ -147,6 +147,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Text size**: an “A” button in the header makes all text larger, largest or smaller, remembered per browser.
 - **Previously on…**: the front page opens with the last session's summary and where the party left off.
 - **Pin a note to the session**: one-off reminders for the next session at the top of prep and on the printable sheet.
+- **Places at a glance**: a settlement's page opens with who leads it, who holds it, its size, how many people, shops and open jobs are there, and today's weather.
 - **Export to a spreadsheet**: download any kind of entry as a CSV file with its fields as columns; it imports back as it is.
 - **A new world like this one**: start a world with another's calendar, own fields, templates, session zero page and tag descriptions, but none of its entries.
 - **Set a field for many**: bulk actions set one field (a status, a type, a role) on every selected entry that has it.

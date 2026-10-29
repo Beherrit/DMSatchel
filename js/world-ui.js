@@ -516,7 +516,8 @@ function statSection(e) {
 // A line of counts under a place's title.
 function placeSummary(e) {
   const c = placeCounts(e);
-  const bits = [[c.people, 'people', 'people'], [c.openQuests, 'open jobs', 'quests'], [c.places, 'places', 'places'], [c.powers, 'factions & guilds', 'powers']].filter(([n]) => n);
+  const bits = [[c.people, c.people === 1 ? 'person' : 'people', 'people'], [c.openQuests, c.openQuests === 1 ? 'open job' : 'open jobs', 'quests'], [c.places, c.places === 1 ? 'place' : 'places', 'places'], [c.powers, c.powers === 1 ? 'faction or guild' : 'factions & guilds', 'powers']]
+    .filter(([n, , tab]) => n && !(e.kind === 'settlement' && ['people', 'quests'].includes(tab))); // a settlement's glance panel counts those
   return bits.length ? el('p', { class: 'place-summary muted' }, bits.flatMap(([n, t, tab], i) => [i ? ' · ' : '', el('a', { href: `#world/e/${e.id}/${tab}` }, `${n} ${t}`)])) : null;
 }
 

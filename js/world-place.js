@@ -4,7 +4,11 @@
 
 import { rumorSection, rumorsAt } from './world-rumors.js';
 import { progressBadge } from './world-objectives.js';
-import { wildsSection } from './encounter-ui.js';
+import { wildsSection, placeTerrains } from './encounter-ui.js';
+import { worldCalendar, todayText } from './world-calendar.js';
+import { rollWeather, seasonOf } from './encounters.js';
+import { controllers } from './control.js';
+import { glanceOf } from './glance.js';
 import { thumb } from './image-ui.js';
 import { el, toast, setKids } from './dom.js';
 import { isGm } from './api.js';
@@ -279,10 +283,23 @@ export function placeHub(place, tab, overview, rerender) {
             : active === 'rumors' ? rumorSection(place, rerender)
             : active === 'wilds' ? wildsSection(place, rerender)
               : mapsSection(place);
-  return el('div', { class: 'hub' },
+  return el('div', { class: 'hub' }, place.kind === 'settlement' ? glancePanel(place) : null,
     el('nav', { class: 'hub-tabs', 'aria-label': `${place.name} sections` }, tabs.map(([k, t]) => el('a', { href: `#world/e/${place.id}${k === 'overview' ? '' : `/${k}`}`, 'aria-current': k === active ? 'page' : 'false' },
       t, k !== 'overview' && counts[k] ? el('span', { class: 'count' }, counts[k]) : null))),
     el('div', { class: 'hub-panel' }, panel));
+}
+
+// A settlement at a glance: who leads and holds it, its size, what's there, and today's weather (the same weather
+// session prep shows: seeded by place and in-world date).
+function glancePanel(place) {
+  const g = glanceOf(place, descendantsOf(place.id), { holder: controllers(worldEntries()).get(place.id), named: findByName });
+  const cal = worldCalendar();
+  const weather = rollWeather({ terrain: placeTerrains(place), season: cal ? seasonOf(cal.month, cal.months.length) : 'Summer', seed: `${place.id}:${cal ? todayText(cal) : new Date().toDateString()}` });
+  return el('section', { class: 'glance', 'aria-label': `${place.name} at a glance` },
+    g.facts.length ? el('dl', { class: 'glance-facts' }, g.facts.map((f) => el('div', {}, el('dt', {}, f.label),
+      el('dd', {}, f.entry ? link(f.entry) : f.text, f.note ? el('span', { class: 'muted small' }, ` (${f.note})`) : null)))) : null,
+    el('div', { class: 'glance-counts' }, g.counts.map((c) => el('a', { class: 'stat', href: `#world/e/${place.id}/${c.key}` }, el('span', { class: 'stat-v' }, c.n), el('span', { class: 'stat-l' }, c.label)))),
+    el('p', { class: 'glance-weather small' }, el('span', { 'aria-hidden': 'true' }, '🌤 '), el('strong', {}, 'Today: '), weather.line));
 }
 
 // Compact version for the map drawer.
