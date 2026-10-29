@@ -37,6 +37,8 @@ import { fieldsWith } from '../js/custom-fields.js';
 import { cleanSay } from '../js/say.js';
 import { cleanAka } from '../js/aka.js';
 import { readMenu } from '../js/menu.js';
+import { buyFrom } from '../js/purchase.js';
+import { coinText } from '../js/economy.js';
 import { cleanMusic } from '../js/music.js';
 import { journeyFor } from '../js/journey.js';
 import { readingFor } from '../js/reading.js';
@@ -372,6 +374,31 @@ export default route({
       await record(into.id, req.gm.id, 'merge', snapshot(await loadOne(into.id, w)));
       await record(from.id, req.gm.id, 'delete', null);
       return send(res, 200, { entry: shape(await loadOne(into.id, w), req), moved: others.length });
+    }
+    // Buy from a shop: {buy: {shop, character, item, qty, base}} — a player for their own character (or a GM for any):
+    // the coin comes off the character, the item goes into their inventory, and the shop's stock goes down.
+    if (req.body.buy) {
+      const b = req.body.buy;
+      const shop = await loadOne(String(b.shop || '').slice(0, 40), req.world.id), ch = await loadOne(String(b.character || '').slice(0, 40), req.world.id);
+      if (!shop || shop.deleted || !visibleTo(shop, req) || !shop.fields?.stock) return fail(res, 404, 'That shop isn’t open.');
+      if (!ch || ch.deleted || ch.kind !== 'character') return fail(res, 404, 'Pick a character.');
+      if (!req.isGmHere && ch.owner_id !== req.gm.id) return fail(res, 403, 'You can only buy for your own character.');
+      const r = buyFrom(shop.fields.stock, clip(b.item, 200), b.qty);
+      if (r.error) return fail(res, 400, r.error);
+      let p = {}; try { p = JSON.parse(ch.fields?.play || '{}') || {}; } catch { p = {}; }
+      if (!Number.isFinite(p.cp)) p.cp = Math.max(0, Math.round(Number(b.base?.cp) || 0));
+      if (p.inventory === undefined) p.inventory = clip(b.base?.inventory, 15000);
+      if (r.cp > p.cp) return fail(res, 400, `${ch.name} doesn’t have enough coin: that costs ${coinText(r.cp)} and they have ${coinText(p.cp)}.`);
+      // The shelf first, and only if nobody else bought from it meanwhile.
+      const sold = await sql`UPDATE entries SET fields = fields || jsonb_build_object('stock', ${r.text}::text), updated_by = ${req.gm.id}, updated_at = now(), version = version + 1
+        WHERE id = ${shop.id} AND world_id = ${req.world.id} AND version = ${shop.version} RETURNING id`;
+      if (!sold.length) return fail(res, 409, 'Someone else was buying from this shop at the same moment. Try again.');
+      p.cp -= r.cp; p.inventory = clip(giveItem(p.inventory, r.name, r.qty, shop.name), 15000);
+      await sql`UPDATE entries SET fields = fields || jsonb_build_object('play', ${JSON.stringify(p)}::text), updated_by = ${req.gm.id}, updated_at = now(), version = version + 1
+        WHERE id = ${ch.id} AND world_id = ${req.world.id}`;
+      await record(ch.id, req.gm.id, 'buy', null);
+      await record(shop.id, req.gm.id, 'sale', null);
+      return send(res, 200, { entries: [shape(await loadOne(shop.id, req.world.id), req), shape(await loadOne(ch.id, req.world.id), req)], bought: { name: r.name, qty: r.qty, cp: r.cp } });
     }
     if (req.body.give) {
       const g = req.body.give;

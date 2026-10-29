@@ -6,7 +6,7 @@ import { world, getEntry, when } from './world-store.js';
 import { diffVersions, restoreFrom, brief } from './versions.js';
 
 const ACTIONS = { create: 'created it', edit: 'edited it', import: 'imported it', reveal: 'revealed it to players', hide: 'hid it from players', approve: 'approved it',
-  unapprove: 'sent it back to suggestions', suggest: 'suggested it', delete: 'deleted it', restore: 'restored it from the bin', reject: 'turned it down', claim: 'claimed the character', unassign: 'unassigned the player' };
+  unapprove: 'sent it back to suggestions', suggest: 'suggested it', delete: 'deleted it', restore: 'restored it from the bin', reject: 'turned it down', claim: 'claimed the character', unassign: 'unassigned the player', buy: 'went shopping', sale: 'bought something here', give: 'handed something over' };
 
 export async function fillHistory(box, id, rerender) {
   setKids(box, el('p', { class: 'muted' }, 'Loading history…'));

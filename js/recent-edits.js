@@ -3,7 +3,7 @@
 // doesn't push everything else off the list. Pure, so it can be tested.
 
 export const VERBS = { create: 'created', edit: 'edited', delete: 'deleted', restore: 'restored', import: 'imported', suggest: 'suggested', approve: 'approved',
-  unapprove: 'un-approved', reject: 'turned down', reveal: 'revealed', hide: 'hid', claim: 'claimed', unassign: 'unassigned' };
+  unapprove: 'un-approved', reject: 'turned down', reveal: 'revealed', hide: 'hid', claim: 'claimed', unassign: 'unassigned', buy: 'went shopping for', sale: 'bought from' };
 
 // rows: [{ entry_id, action, at, gm, entry_name, kind }] → [{ entry_id, action, verb, at, gm, name, kind, times }]
 export function recentEdits(rows, n = 12) {

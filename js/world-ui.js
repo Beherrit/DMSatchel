@@ -66,6 +66,7 @@ import { cleanSay, sayOf } from './say.js';
 import { cleanAka, akaOf } from './aka.js';
 import { ageOf, ageText } from './birthdays.js';
 import { menuCard } from './world-menu.js';
+import { buyBox } from './world-buy.js';
 import './world-living.js';
 import { cleanMusic } from './music.js';
 import { musicLine } from './world-music.js';
@@ -392,7 +393,7 @@ function viewEntry(id, tab) {
         const town = trailTown(e);
         try { await patchEntry(e, { fields: restockDraft(e, town) }); toast(town ? `Restocked at ${town.name}’s prices` : 'Restocked'); rerenderWorld(); } catch (err) { toast(err.message, 'bad'); }
       } }, e.fields?.stock ? 'Restock' : 'Stock this shop') : null),
-      renderStock(e.fields?.stock) || el('p', { class: 'muted' }, 'No stock listed yet.')) : null,
+      renderStock(e.fields?.stock) || el('p', { class: 'muted' }, 'No stock listed yet.'), buyBox(e, rerenderWorld)) : null,
     e.body ? el('section', {}, contentsNav(e.body), richText(e.body, { anchors: true })) : null,
     isGm() && e.secret ? el('aside', { class: 'secret' }, el('div', { class: 'eyebrow' }, 'GM only'), richText(e.secret)) : null,
     mentionsCard(e, rerenderWorld),
