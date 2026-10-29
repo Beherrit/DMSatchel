@@ -26,3 +26,14 @@ test('place features need a type with a scene', () => {
 test('the same seed rolls the same', () => {
   assert.equal(rollDetail('npc', 'voice', makeRng('x')), rollDetail('npc', 'voice', makeRng('x')));
 });
+
+test('names for people (by ancestry), towns, taverns, shops, regions and groups', () => {
+  const rng = makeRng('names');
+  assert.match(rollDetail('npc', 'name', rng, { ancestry: 'Hill dwarf' }), /^\S+ \S+/);
+  assert.ok(rollDetail('settlement', 'name', rng).length > 2);
+  assert.match(rollDetail('location', 'name', rng, { type: 'Tavern' }), /^The /);
+  assert.match(rollDetail('location', 'name', rng, { type: 'Shop' }), /’s /);
+  assert.equal(rollDetail('location', 'name', rng, { type: 'Dungeon' }), null);
+  assert.ok(rollDetail('faction', 'name', rng) && rollDetail('region', 'name', rng));
+  assert.equal(canRoll('location', 'name', {}), false);
+});

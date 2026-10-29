@@ -1,6 +1,7 @@
 // Roll a detail: one field of an entry filled from the app's tables (an NPC's looks, voice, manner and wants; a
 // settlement's trouble; what a place looks and sounds like). Pure given an rng, so it can be tested.
 import { NPC, TOWN, TAVERN, ENV } from './tables.js';
+import { personName, townName, tavernName, shopName, regionName, groupName, ANCESTRY_WEIGHTS } from './names.js';
 
 const cap = (s) => (s ? String(s).charAt(0).toUpperCase() + String(s).slice(1) : '');
 // A sentence: capitalised, with a full stop unless it already ends in one.
@@ -12,9 +13,17 @@ const SCENE = { Tavern: 'Tavern', Shop: 'City street', Dungeon: 'Dungeon', Ruin:
   Forest: 'Forest', Hills: 'Mountain', Mountains: 'Mountain', Coast: 'Coast', Island: 'Coast', Swamp: 'Swamp', Underdark: 'Cave', 'City district': 'City street' };
 const scene = (rng, type) => { const env = ENV[SCENE[type]]; return env ? `${cap(rng.pick(env.see))}; ${rng.pick(env.hear)}; ${rng.pick(env.smell)}.` : null; };
 
+// A person's name from their ancestry ("Hill dwarf" → Dwarf), or a likely one.
+const person = (rng, f) => { const a = Object.keys(ANCESTRY_WEIGHTS).find((k) => new RegExp(`\\b${k}`, 'i').test(f?.ancestry || f?.species || '')); return personName(rng, a || rng.pickW(ANCESTRY_WEIGHTS)); };
+
 // kind → field → (rng, fields) → text (or null when nothing suits).
 const ROLLERS = {
+  character: { name: person },
+  region: { name: (rng) => regionName(rng) },
+  faction: { name: (rng) => groupName(rng) },
+  guild: { name: (rng) => groupName(rng) },
   npc: {
+    name: person,
     appearance: (rng) => say(rng.pick(NPC.look)),
     personality: (rng) => `${say(rng.pick(NPC.personality))} ${say(rng.pick(NPC.mannerism))}`,
     voice: (rng) => say(rng.pick(NPC.voice)),
@@ -22,15 +31,18 @@ const ROLLERS = {
     secret: (rng) => say(rng.pick(NPC.secret)),
   },
   settlement: {
+    name: (rng) => townName(rng),
     known_for: (rng) => say(rng.pick(TOWN.known)),
     trouble: (rng) => say(rng.pick(TOWN.problem)),
     ruler: (rng) => cap(rng.pick(TOWN.leader)),
     landmarks: (rng) => two(rng, TOWN.spots).map((s) => `- ${cap(s)}`).join('\n'),
   },
   location: {
+    name: (rng, f) => (f?.type === 'Tavern' ? tavernName(rng) : f?.type === 'Shop' ? shopName(rng) : null),
     features: (rng, f) => (f?.type === 'Tavern' ? `${say(rng.pick(TAVERN.vibe))} ${scene(rng, 'Tavern')}` : scene(rng, f?.type)),
   },
   area: {
+    name: (rng) => regionName(rng),
     features: (rng, f) => scene(rng, f?.type),
   },
 };
@@ -42,6 +54,7 @@ export const hasRoller = (kind, key) => Boolean(ROLLERS[kind]?.[key]);
 export const canRoll = (kind, key, fields = {}) => {
   const fn = ROLLERS[kind]?.[key];
   if (!fn) return false;
+  if (kind === 'location' && key === 'name') return ['Tavern', 'Shop'].includes(fields?.type);
   return key !== 'features' || Boolean(SCENE[fields?.type]);
 };
 

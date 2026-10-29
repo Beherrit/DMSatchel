@@ -146,6 +146,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Picture wall**: every picture in the world on one page (portraits, places, galleries, maps), by kind and tag.
 - **Text size**: an “A” button in the header makes all text larger, largest or smaller, remembered per browser.
 - **Previously on…**: the front page opens with the last session's summary and where the party left off.
+- **Roll a name**: “Roll” beside the name for NPCs and characters (by ancestry), settlements, taverns, shops, regions, areas, factions and guilds.
 - **On this day**: the front page notes in-world anniversaries, birthdays and holidays on today's date.
 - **Add to calendar**: the next session as a calendar file or a Google Calendar link, with a reminder and a link back to the world.
 - **Missing links**: “What needs writing” lists [[names]] with no entry behind them, where they're mentioned, and creates each in one click.

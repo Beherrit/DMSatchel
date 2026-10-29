@@ -591,6 +591,15 @@ function viewEdit(id, kindForNew) {
         catch (err) { status.textContent = err.message; status.className = 'form-status error'; }
       }, 'btn ghost') : null));
   renderFields();
+  // Roll a name, for kinds the name tables cover (kept in step with the type; a location needs to be a tavern or shop).
+  const nameBox = form.querySelector('#f-name');
+  if (nameBox) {
+    const label = nameBox.previousElementSibling;
+    const row = el('div', { class: 'label-row' }); label.replaceWith(row); row.append(label);
+    const fieldVal = (k) => fieldsBox.querySelector(`[data-field="${k}"]`)?.value;
+    const sync = () => { row.querySelector('.roll-btn')?.remove(); const b = rollButton(() => kindSel.value, 'name', nameBox, 'name', () => ({ type: fieldVal('type'), ancestry: fieldVal('ancestry'), species: fieldVal('species') })); if (b) row.append(b); };
+    kindSel.addEventListener('change', sync); sync();
+  }
   // An NPC's secret can be rolled too (kept in step with the type).
   const secretBox = form.querySelector('#f-secret');
   if (secretBox) {

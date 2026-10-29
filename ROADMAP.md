@@ -278,7 +278,7 @@ to the log at the bottom.
     everyone's own calendar with the world's name and a link back.
 124. [x] **On this day.** The front page notes what happened on today's in-world date in earlier years, and whose
     birthday or which holiday it is.
-125. [ ] **Roll a name.** A "Roll" beside the name field for NPCs, settlements, taverns and shops, using the app's
+125. [x] **Roll a name.** A "Roll" beside the name field for NPCs, settlements, taverns and shops, using the app's
     name tables (and an NPC's ancestry).
 
 ## Ideas parking lot
@@ -409,3 +409,4 @@ to the log at the bottom.
 - Missing links: "What needs writing" opens with "Links that lead nowhere yet": every [[name]] in any text (summaries, descriptions, GM secrets, long fields) that matches no entry, ignoring case and spacing, most mentioned first, with the entries that mention it. Pick a kind beside it and "Create" opens the new-entry form with the name filled in; once saved, every mention becomes a link. js/thin.js missingLinks unit tested.
 - Add to your calendar: beside "Next session" (front page and the Next session page), "Add to calendar" offers a calendar file (.ics: Apple Calendar, Outlook and most others) and a Google Calendar link. The event is named for the world, runs four hours from the locked date, links back to the world and has a reminder two hours before. js/ics.js unit tested (escaping, line folding, CRLF).
 - On this day: when the world has a calendar, the front page shows "On this day: 3 Thawmoon 1040" if anything falls on today's in-world date: holidays, birthdays ("Ann turns 40") and anniversaries of dated events and sessions from earlier years ("50 years ago today: Fall of Brindle"; only dates that name their year count). Quiet days show nothing. js/onthisday.js unit tested.
+- Roll a name: the entry form's name field has "Roll" for kinds the name tables cover: NPCs and player characters (from their ancestry or species, e.g. "Hill dwarf" gives dwarf names; otherwise a likely one), settlements, taverns and shops (a location's type), regions and areas, factions and guilds. Same rules as Roll a detail: a rolled name rolls again, a typed one is only replaced on a second click. Unit tested in tests/roll-detail.test.mjs.
