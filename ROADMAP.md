@@ -322,7 +322,7 @@ to the log at the bottom.
     changed (clocks that filled, standing that moved), for GMs to edit and post.
 148. [x] **Places at a glance.** A settlement's page shows a small panel: who leads it, who holds it, how many
     people, shops and open jobs are there, and its mood music and weather today.
-149. [ ] **Recently changed for GMs.** A GM-only "Recently changed" list on the front page: the last dozen edits by
+149. [x] **Recently changed for GMs.** A GM-only "Recently changed" list on the front page: the last dozen edits by
     anyone, with who and when, linking to each entry's history.
 
 ## Ideas parking lot
@@ -477,3 +477,4 @@ to the log at the bottom.
 - Pin a note to the session: session prep opens with "📌 For next session": one-off notes GMs pin between sessions (a promise to a player, a clue to drop, a rule to check), ticked off when done and cleared in one go; what's still open prints at the top of the session sheet as "Remember". Unlike the prep checklist, these don't repeat. Kept in session prep (prep.reminders; PATCH settings {reminder}). js/reminders.js unit tested; route tested against PGlite.
 - Faction news: after a faction turn, a "Tell the players?" dialog offers a ready-made notice of what visibly changed ("The Silver Hand: “Takeover” has come to pass", "… draws closer"), finished plans first, kept under the notice limit. Secret clocks and clocks on hidden or suggested entries are left out, and numbers never show. GMs edit it, optionally send it to Discord, and post it, or skip. Nothing is posted unless they choose to. js/faction-news.js unit tested.
 - Places at a glance: a settlement's page opens with a small panel: who leads it (linked when the "Led by" name is an entry), who holds it (from Who holds what, noting when it's through the land around it, shown once when the leader is that power), its size and population, tiles for people, shops and open jobs that open those tabs, and today's weather (the same seeded roll session prep shows). Mood music already sits under the title. The counts line under the title no longer repeats people and jobs for settlements, and says "1 place" instead of "1 places". js/glance.js unit tested.
+- Recently changed for GMs: for GMs, the front page's "Recently changed" now comes from the history log, so deletes, reveals, approvals and edits by anyone show, with who, the verb and the time. Back-to-back saves of the same entry by the same person fold into one line ("edited ×2"). Each line has a "History" link to #world/e/<id>/history, which opens the entry with its history already showing (GMs only; players get the plain page). Players keep the plain list by last update. The log is fetched at most every 30 seconds as the page redraws. js/recent-edits.js unit tested.

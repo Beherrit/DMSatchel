@@ -67,6 +67,7 @@ import { tableSection } from './world-tables.js';
 import { parseSearch, searchHash, searchEntries } from './search.js';
 import { saveTemplateButton, templatePicker } from './world-templates.js';
 import { fillHistory } from './world-history.js';
+import { changesCard } from './world-changes.js';
 import { viewCards, cardsButton } from './world-cards.js';
 import { encounterCard } from './encounter-ui.js';
 import { bondsSection } from './world-bonds.js';
@@ -226,7 +227,7 @@ function viewHome() {
     keyNpcs.length ? el('section', {}, el('h3', { class: 'section-title' }, 'Key NPCs'),
       el('ul', { class: 'people-grid' }, keyNpcs.map((e) => el('li', { class: 'person card key' }, el('div', { class: 'person-head' }, el('span', { class: 'key-star', 'aria-hidden': 'true' }, '★'), link(e)),
         el('span', { class: 'muted small' }, [e.fields?.role, getEntry(e.parent_id)?.name].filter(Boolean).join(' · ')), e.summary ? el('p', { class: 'small' }, e.summary) : null)))) : null,
-    recent.length ? el('section', {}, el('h3', { class: 'section-title' }, 'Recently changed'),
+    isGm() ? changesCard() : recent.length ? el('section', {}, el('h3', { class: 'section-title' }, 'Recently changed'),
       el('ul', { class: 'entry-list' }, recent.map((e) => el('li', {}, link(e), el('span', { class: 'kind-tag' }, kindLabel(e.kind)), el('span', { class: 'muted small' }, `${e.updated_by ? `${e.updated_by}, ` : ''}${when(e.updated_at)}`))))) : null);
 }
 
@@ -437,6 +438,8 @@ function viewEntry(id, tab) {
     e.visibility === 'gm' && isGm() ? el('p', { class: 'hidden-note muted small' }, 'Players can’t see this entry, or find it in search or on maps. Reveal it when they discover it.') : null,
     isPlace ? placeSummary(e) : null,
     isPlace ? placeHub(e, tab, overview, rerenderWorld) : overview());
+  // #world/e/<id>/history (from the front page's "Recently changed"): open with the history showing.
+  if (tab === 'history' && isGm()) { history.hidden = false; fillHistory(history, id, rerenderWorld); }
   return node;
 }
 
