@@ -155,6 +155,12 @@ export async function syncWorld(me) {
     world.info = { ...world.info, notices: r.notices };
     out.push({ entry: { name: 'the notices' }, change: 'notice', by: r.notices[0]?.by || null, notice: true });
   }
+  // Ask the GM: unread messages for this person; more than before means a new question or answer arrived.
+  if (r.ask_unread !== undefined && r.ask_unread !== (world.info?.ask_unread ?? 0)) {
+    const more = r.ask_unread > (world.info?.ask_unread ?? 0);
+    world.info = { ...world.info, ask_unread: r.ask_unread };
+    window.dispatchEvent(new CustomEvent('world:ask', { detail: { more } }));
+  }
   if (r.clock !== undefined && stable(r.clock) !== stable(world.info?.clock ?? null)) {
     world.info = { ...world.info, clock: r.clock };
     window.dispatchEvent(new Event('world:clock'));

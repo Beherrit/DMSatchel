@@ -30,6 +30,7 @@ import { customFieldsButton } from './world-fields.js';
 import { goalsSection } from './world-goals.js';
 import { wishesSection } from './world-wishes.js';
 import { farewellCard } from './world-hall.js';
+import { askNav, askAboutLink } from './world-ask.js';
 import { mentionsCard } from './world-mentions.js';
 import { starButton, favoritesNav, followButton, followingNav } from './world-favorites.js';
 import { rewardCard } from './world-reward.js';
@@ -79,6 +80,7 @@ const viewWeb = lazyView(() => import('./world-web.js'), 'viewWeb');
 const viewSay = lazyView(() => import('./world-say.js'), 'viewSay');
 const viewDupes = lazyView(() => import('./world-dupes.js'), 'viewDupes');
 const viewHall = lazyView(() => import('./world-hall.js'), 'viewHall');
+const viewAsk = lazyView(() => import('./world-ask.js'), 'viewAsk');
 const viewPrep = lazyView(() => import('./world-prep.js'), 'viewPrep');
 const viewPowers = lazyView(() => import('./world-powers.js'), 'viewPowers');
 const viewLibrary = lazyView(() => import('./world-library.js'), 'viewLibrary');
@@ -135,6 +137,7 @@ function renderSide() {
       el('a', { href: '#world/tags', 'data-view': 'tags' }, el('span', {}, 'Tags'), el('span', { class: 'count' }, new Set(worldEntries().flatMap((e) => e.tags || [])).size || '')),
       el('a', { href: '#world/say', 'data-view': 'say' }, el('span', {}, 'Say it right'), el('span', { class: 'count' }, worldEntries().filter((e) => sayOf(e)).length || '')),
       el('a', { href: '#world/table', 'data-view': 'table' }, el('span', {}, 'Table talk'), el('span', { class: 'count' }, '💬')),
+      askNav(),
       isGm() ? el('a', { href: '#world/talk', 'data-view': 'talk' }, el('span', {}, 'GM discussions'), el('span', { class: 'count', id: 'w-talk-count' }, '')) : null),
     el('nav', { class: 'w-kinds', 'aria-label': 'Entry types' }, KIND_ORDER.map((k) => el('a', { href: `#world/k/${k}`, 'data-kind': k }, el('span', {}, KINDS[k].plural), el('span', { class: 'count' }, counts[k] || 0)))),
     isGm() ? el('div', { class: 'w-gm' }, el('a', { class: 'btn primary small', href: '#world/prep' }, 'Session prep'), el('a', { class: 'btn small', href: '#world/new/npc' }, '+ New entry'), el('a', { class: 'btn ghost small', href: '#world/bin' }, 'Bin'),
@@ -339,7 +342,7 @@ function viewEntry(id, tab) {
     crumbs.length ? el('nav', { class: 'crumbs', 'aria-label': 'Located in' }, crumbs.flatMap((c, i) => [i ? ' › ' : '', link(c)])) : null,
     el('div', { class: 'panel-head row' },
       el('div', {}, el('div', { class: 'eyebrow' }, kindLabel(e.kind), e.fields?.type ? ` · ${e.fields.type}` : ''), el('h2', {}, e.name), sayLine(e), stateBadges(e).length ? el('div', { class: 'badges' }, stateBadges(e)) : null),
-      !isGm() ? el('div', { class: 'btnrow' }, starButton(e), followButton(e), e.can_edit ? el('a', { class: 'btn', href: `#world/edit/${e.id}` }, 'Edit') : null, suggestEditButton(e)) : null,
+      !isGm() ? el('div', { class: 'btnrow' }, starButton(e), followButton(e), e.can_edit ? el('a', { class: 'btn', href: `#world/edit/${e.id}` }, 'Edit') : null, suggestEditButton(e), askAboutLink(e)) : null,
       isGm() ? el('div', { class: 'btnrow' }, starButton(e), followButton(e), el('a', { class: 'btn', href: `#world/edit/${e.id}` }, 'Edit'),
         showButton(e),
         revealButton(e, rerenderWorld),
@@ -633,6 +636,7 @@ export async function showWorld(parts, { keepScroll = false } = {}) {
   else if (view === 'say') node = await viewSay();
   else if (view === 'dupes') node = await viewDupes();
   else if (view === 'hall') node = await viewHall();
+  else if (view === 'ask') node = await viewAsk(arg, parts[2]);
   else if (view === 'bin') node = await viewBin();
   else if (view === 'atlas') node = viewAtlas();
   else if (view === 'maps') node = viewMaps();
@@ -716,6 +720,11 @@ export function mountWorld(root) {
   document.body.append(quickNoteButton());
   initLinkSuggest();
   window.addEventListener('world:rerender', () => rerenderWorld());
+  // Ask the GM: the sidebar count follows what's waiting; something new arriving gets a toast.
+  window.addEventListener('world:ask', (ev) => {
+    renderSide();
+    if (ev.detail?.more && !location.hash.startsWith('#world/ask')) toast(isGm() ? '💬 A player asked the GMs something' : '💬 The GMs answered you');
+  });
   // Live updates: every 20 seconds while a world page is open and visible, pick up what others changed.
   const tick = async () => {
     if (document.hidden || !location.hash.startsWith('#world') || !world.loaded || syncing) return;

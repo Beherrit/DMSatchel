@@ -137,6 +137,12 @@ export function ensureSchema() {
       await sql`CREATE TABLE IF NOT EXISTS zero_answers (
         world_id text NOT NULL, gm_id int NOT NULL, answer jsonb, read_at timestamptz, updated_at timestamptz NOT NULL DEFAULT now(),
         PRIMARY KEY (world_id, gm_id))`;
+      // Ask the GM: one private thread per player with the world's GMs. seen: a player's message read by a GM, or a
+      // GM's answer read by the player.
+      await sql`CREATE TABLE IF NOT EXISTS gm_questions (
+        id serial PRIMARY KEY, world_id text NOT NULL, player_id int NOT NULL, gm_id int NOT NULL, body text NOT NULL,
+        from_gm boolean NOT NULL DEFAULT false, seen boolean NOT NULL DEFAULT false, created_at timestamptz NOT NULL DEFAULT now())`;
+      await sql`CREATE INDEX IF NOT EXISTS gm_questions_idx ON gm_questions (world_id, player_id, created_at)`;
       // Private map markers: each person's own notes on a map ("we camped here"), seen only by them.
       await sql`CREATE TABLE IF NOT EXISTS map_marks (
         id serial PRIMARY KEY, map_id text NOT NULL, gm_id int NOT NULL, x real NOT NULL, y real NOT NULL,

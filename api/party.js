@@ -26,16 +26,67 @@
 // Quick polls (members): GET ?polls=1 open ones and the last few closed · POST {poll: {question, options}, discord?} ask one
 // PATCH {poll_id, vote: i | null} vote or take it back · PATCH {poll_id, closed} (asker or GM) · DELETE ?poll=id
 // PUT {profile: {pronouns, note}}           your own profile in this world
+//
+// Ask the GM (members): a private thread between each player and the world's GMs.
+// GET ?ask=1                                players: your thread (marks the answers read); GMs: every player, with
+//                                           unread counts and the last message
+// GET ?ask=1&player=id                      (GM) one player's thread (marks their messages read)
+// POST {ask: {body, player}}                write in your thread; GMs name the player
+// DELETE ?ask=id                            take back your own message
 import { route, send, fail, sql, requireMember, requireGm, postDiscord } from './_lib/core.js';
 import { cleanDates, cleanVote, tally, dateText } from '../js/schedule.js';
 import { cleanPrimer, cleanAnswer, answerEmpty } from '../js/zero.js';
 import { cleanPoll, castVote } from '../js/polls.js';
+import { askUnread } from './_lib/ask.js';
 
 const clip = (v, n) => String(v ?? '').slice(0, n);
 // A poll as the page sees it: who voted for what (by name), and what you chose.
 const pollOut = (p, names, req) => ({ id: p.id, question: p.question, options: p.options, closed: p.closed, created_at: p.created_at, asker: p.asker, mine: p.gm_id === req.gm.id,
   votes: Object.fromEntries(Object.entries(p.votes || {}).map(([k, v]) => [k, Number(v)])), voters: Object.fromEntries(Object.keys(p.votes || {}).map((k) => [k, names[k] || 'Someone'])) });
 const cleanProfile = (p) => ({ pronouns: clip(p?.pronouns, 40).trim(), note: clip(p?.note, 600).trim() });
+
+// Ask the GM: one player's thread, oldest first.
+const askThread = (req, playerId) => sql`SELECT q.id, q.body, q.from_gm, q.seen, q.created_at, q.gm_id, g.name AS by FROM gm_questions q LEFT JOIN gms g ON g.id = q.gm_id
+  WHERE q.world_id = ${req.world.id} AND q.player_id = ${playerId} ORDER BY q.created_at, q.id LIMIT 500`;
+const isPlayerHere = async (req, id) => (await sql`SELECT 1 FROM members WHERE world_id = ${req.world.id} AND gm_id = ${id} AND role NOT IN ('owner', 'gm')`).length > 0;
+
+async function getAsk(req, res) {
+  if (!requireMember(req, res)) return;
+  if (!req.isGmHere) {
+    const messages = await askThread(req, req.gm.id);
+    await sql`UPDATE gm_questions SET seen = true WHERE world_id = ${req.world.id} AND player_id = ${req.gm.id} AND from_gm AND NOT seen`;
+    return send(res, 200, { messages, me: req.gm.id });
+  }
+  if (req.query.player) {
+    const id = Number(req.query.player);
+    if (!(await isPlayerHere(req, id))) return fail(res, 404, 'That player isn’t in this world.');
+    const messages = await askThread(req, id);
+    await sql`UPDATE gm_questions SET seen = true WHERE world_id = ${req.world.id} AND player_id = ${id} AND NOT from_gm AND NOT seen`;
+    return send(res, 200, { messages, me: req.gm.id, unread: await askUnread(req) });
+  }
+  // Every player, with their thread's unread count and last message (busiest and newest first).
+  const players = await sql`SELECT g.id, g.name,
+      (SELECT count(*)::int FROM gm_questions q WHERE q.world_id = ${req.world.id} AND q.player_id = g.id AND NOT q.from_gm AND NOT q.seen) AS unread,
+      (SELECT row_to_json(x) FROM (SELECT q.body, q.from_gm, q.created_at FROM gm_questions q WHERE q.world_id = ${req.world.id} AND q.player_id = g.id ORDER BY q.created_at DESC, q.id DESC LIMIT 1) x) AS last
+    FROM members m JOIN gms g ON g.id = m.gm_id WHERE m.world_id = ${req.world.id} AND m.role NOT IN ('owner', 'gm') ORDER BY g.name`;
+  players.sort((a, b) => b.unread - a.unread || String(b.last?.created_at || '').localeCompare(String(a.last?.created_at || '')) || a.name.localeCompare(b.name));
+  send(res, 200, { players });
+}
+
+async function postAsk(req, res, a) {
+  const body = clip(a?.body, 4000).trim();
+  if (!body) return fail(res, 400, 'Write something first.');
+  let playerId = req.gm.id;
+  if (req.isGmHere) {
+    playerId = Number(a?.player);
+    if (!(await isPlayerHere(req, playerId))) return fail(res, 400, 'Pick a player in this world.');
+  }
+  const rows = await sql`INSERT INTO gm_questions (world_id, player_id, gm_id, body, from_gm) VALUES (${req.world.id}, ${playerId}, ${req.gm.id}, ${body}, ${req.isGmHere})
+    RETURNING id, body, from_gm, seen, created_at, gm_id`;
+  // Answering a player's thread reads it.
+  if (req.isGmHere) await sql`UPDATE gm_questions SET seen = true WHERE world_id = ${req.world.id} AND player_id = ${playerId} AND NOT from_gm AND NOT seen`;
+  send(res, 201, { message: { ...rows[0], by: req.gm.name } });
+}
 
 const pollShape = (p) => ({ id: p.id, title: p.title, note: p.note, dates: p.dates, votes: p.votes, locked: p.locked, closed: p.closed, created_at: p.created_at, created_by: p.created_by });
 
@@ -172,6 +223,7 @@ export default route({
     fail(res, 400, 'Nothing to change.');
   },
   async GET(req, res) {
+    if (req.query?.ask) return getAsk(req, res);
     if (req.query?.schedule) return getSchedule(req, res);
     if (req.query?.zero) return getZero(req, res);
     if (req.query?.polls) {
@@ -202,6 +254,7 @@ export default route({
   async POST(req, res) {
     if (!requireMember(req, res)) return;
     const b = req.body || {};
+    if (b.ask) return postAsk(req, res, b.ask);
     if (b.zero_read) {
       await sql`INSERT INTO zero_answers (world_id, gm_id, read_at) VALUES (${req.world.id}, ${req.gm.id}, now())
         ON CONFLICT (world_id, gm_id) DO UPDATE SET read_at = COALESCE(zero_answers.read_at, now())`;
@@ -241,6 +294,11 @@ export default route({
   },
   async DELETE(req, res) {
     if (!requireMember(req, res)) return;
+    if (req.query?.ask) {
+      const gone = await sql`DELETE FROM gm_questions WHERE id = ${Number(req.query.ask)} AND world_id = ${req.world.id} AND gm_id = ${req.gm.id} RETURNING id`;
+      if (!gone.length) return fail(res, 404, 'That message was already taken back.');
+      return send(res, 200, { ok: true });
+    }
     if (req.query?.poll) {
       const p = (await sql`SELECT gm_id FROM table_polls WHERE id = ${Number(req.query.poll)} AND world_id = ${req.world.id} AND NOT deleted`)[0];
       if (!p) return fail(res, 404, 'That poll is gone.');

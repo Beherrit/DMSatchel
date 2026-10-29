@@ -1377,3 +1377,17 @@ div.poll-row { cursor: default }
 .hall-epitaph footer { font-family: inherit; font-style: normal; color: var(--muted); margin-top: 2px }
 .fw-form { display: grid; gap: 6px; margin-top: 6px }
 .fw-form .btn { justify-self: start }
+
+/* Ask the GM */
+.ask-thread { display: grid; gap: 10px; margin-bottom: 16px }
+.ask-msg { max-width: 46rem; padding: 10px 12px; border-radius: 10px; background: var(--sunk); border: 1px solid var(--line) }
+.ask-msg.from-gm { border-left: 4px solid var(--accent) }
+.ask-msg.mine { justify-self: end; background: var(--bg) }
+.ask-meta { color: var(--muted); margin-bottom: 4px; display: flex; flex-wrap: wrap; gap: 4px; align-items: baseline }
+.ask-body > :last-child { margin-bottom: 0 }
+.ask-msg .btn { margin-top: 6px }
+.ask-form { display: grid; gap: 6px; max-width: 46rem }
+.ask-players { display: grid; gap: 8px }
+.ask-players li { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline }
+.ask-players li p { flex-basis: 100%; margin: 0 }
+.w-tools .count.new { color: var(--accent); font-weight: 700 }

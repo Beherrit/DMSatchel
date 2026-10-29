@@ -34,6 +34,7 @@ import { mergedEntry, relinkLinks, relinkText } from '../js/merge.js';
 import { fieldsWith } from '../js/custom-fields.js';
 import { cleanSay } from '../js/say.js';
 import { journeyFor } from '../js/journey.js';
+import { askUnread } from './_lib/ask.js';
 import { cleanTag, chainUp } from '../js/bulk.js';
 import { cleanPrimer, primerEmpty } from '../js/zero.js';
 import { activeNotices } from '../js/notices.js';
@@ -142,7 +143,7 @@ export default route({
       return send(res, 200, {
         changed: rows.filter((r) => !r.deleted && visibleTo(r, req)).map((r) => shape(r, req)),
         removed: rows.filter((r) => r.deleted || !visibleTo(r, req)).map((r) => r.id), now, cal: req.world.cal || null, shown: req.world.shown || null,
-        ...(req.role ? { notices: activeNotices(req.world.notices) } : {}), clock: readClock(req.world.clock),
+        ...(req.role ? { notices: activeNotices(req.world.notices) } : {}), clock: readClock(req.world.clock), ask_unread: await askUnread(req),
       });
     }
     if (id) {
@@ -184,7 +185,7 @@ export default route({
         clock: readClock(w.clock), tag_notes: w.tag_notes || {},
         // Start here: only what this person can see.
         start_here: (Array.isArray(w.start_here) ? w.start_here : []).filter((id) => { const r = rows.find((x) => x.id === id); return r && !r.deleted && visibleTo(r, req); }),
-        ...(req.role ? { notices: activeNotices(w.notices) } : {}),
+        ...(req.role ? { notices: activeNotices(w.notices), ask_unread: await askUnread(req) } : {}),
         ...(req.isGmHere ? { edits_open: (await sql`SELECT count(*)::int AS n FROM edit_suggestions WHERE world_id = ${w.id} AND status = 'open'`)[0].n } : {}),
         // Members' pronouns by person, to show beside their names.
         ...(req.role ? { pronouns: Object.fromEntries((await sql`SELECT gm_id, profile->>'pronouns' AS p FROM members WHERE world_id = ${w.id} AND profile->>'pronouns' <> ''`).map((r) => [r.gm_id, r.p])) } : {}),
