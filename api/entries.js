@@ -223,7 +223,7 @@ export default route({
         journey: journeyFor(w.prep?.journey, (id) => { const r = byId.get(id); return r && !r.deleted && visibleTo(r, req); }),
         // Reading for next session: what this person can see of it, with who has read each (GMs) or whether they have.
         ...(req.role ? { reading: await readingOf(w, req, (id) => { const r = byId.get(id); return Boolean(r && !r.deleted && visibleTo(r, req)); }) } : {}),
-        clock: readClock(w.clock), tag_notes: w.tag_notes || {},
+        clock: readClock(w.clock), tag_notes: w.tag_notes || {}, tag_colors: w.tag_colors || {},
         // Start here: only what this person can see.
         start_here: (Array.isArray(w.start_here) ? w.start_here : []).filter((id) => { const r = rows.find((x) => x.id === id); return r && !r.deleted && visibleTo(r, req); }),
         ...(req.role ? { notices: activeNotices(w.notices), ask_unread: await askUnread(req) } : {}),

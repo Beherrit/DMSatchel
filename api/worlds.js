@@ -71,7 +71,7 @@ export default route({
       const quotes = await sql`SELECT text, said_by, session_id, created_at FROM table_quotes WHERE world_id = ${w.id} AND NOT deleted ORDER BY created_at, id`;
       return send(res, 200, {
         world: { name: w.name, tagline: w.tagline, about: w.about, calendar: w.calendar, cal: w.cal, prep: w.prep, templates: w.templates, custom_fields: w.custom_fields,
-          primer: w.primer, clock: w.clock, start_here: w.start_here, tag_notes: w.tag_notes },
+          primer: w.primer, clock: w.clock, start_here: w.start_here, tag_notes: w.tag_notes, tag_colors: w.tag_colors },
         maps, standing, clocks, ledger, quotes });
     }
     if (id) {
@@ -93,7 +93,7 @@ export default route({
         WHERE w.id = ${String(req.body.like).slice(0, 80)} AND NOT w.archived AND (m.role IN ('owner', 'gm') OR ${req.gm.role === 'admin'})`)[0];
       if (!src) return fail(res, 404, 'You can only copy the settings of a world you GM.');
       // The calendar comes along as it stands; nothing about play (prep, time of day, start here) does.
-      req.body = { name: req.body.name, tagline: req.body.tagline, liking: { calendar: src.calendar, cal: src.cal, templates: src.templates, custom_fields: src.custom_fields, primer: src.primer, tag_notes: src.tag_notes } };
+      req.body = { name: req.body.name, tagline: req.body.tagline, liking: { calendar: src.calendar, cal: src.cal, templates: src.templates, custom_fields: src.custom_fields, primer: src.primer, tag_notes: src.tag_notes, tag_colors: src.tag_colors } };
     }
     const name = String(req.body.name || '').trim().slice(0, 120);
     if (!name) return fail(res, 400, 'Give the world a name.');
@@ -110,14 +110,14 @@ export default route({
     if (lk) {
       const j = (v) => (v && typeof v === 'object' ? JSON.stringify(v) : null);
       await sql`UPDATE worlds SET calendar = ${String(lk.calendar || '').slice(0, 2000)}, cal = ${j(lk.cal)}::jsonb, templates = ${j(lk.templates)}::jsonb,
-        custom_fields = ${j(lk.custom_fields)}::jsonb, primer = ${j(lk.primer)}::jsonb, tag_notes = ${j(lk.tag_notes)}::jsonb WHERE id = ${id}`;
+        custom_fields = ${j(lk.custom_fields)}::jsonb, primer = ${j(lk.primer)}::jsonb, tag_notes = ${j(lk.tag_notes)}::jsonb, tag_colors = ${j(lk.tag_colors)}::jsonb WHERE id = ${id}`;
     }
     const r = req.body.restoring;
     if (r) {
       const j = (v) => (v && typeof v === 'object' ? JSON.stringify(v) : null);
       await sql`UPDATE worlds SET name = ${`${name} (restored)`.slice(0, 120)}, about = ${String(r.about || '').slice(0, 20000)}, calendar = ${String(r.calendar || '').slice(0, 2000)},
         cal = ${j(r.cal)}::jsonb, prep = ${j(r.prep)}::jsonb, templates = ${j(r.templates)}::jsonb, custom_fields = ${j(r.custom_fields)}::jsonb, primer = ${j(r.primer)}::jsonb,
-        clock = ${j(r.clock)}::jsonb, start_here = ${j(r.start_here)}::jsonb, tag_notes = ${j(r.tag_notes)}::jsonb WHERE id = ${id}`;
+        clock = ${j(r.clock)}::jsonb, start_here = ${j(r.start_here)}::jsonb, tag_notes = ${j(r.tag_notes)}::jsonb, tag_colors = ${j(r.tag_colors)}::jsonb WHERE id = ${id}`;
     }
     const w = (await sql`SELECT * FROM worlds WHERE id = ${id}`)[0];
     send(res, 201, { world: await detail(w), worlds: await myWorlds(req.gm) });

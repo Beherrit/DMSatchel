@@ -125,6 +125,8 @@ export function ensureSchema() {
       await sql`ALTER TABLE worlds ADD COLUMN IF NOT EXISTS start_here jsonb`;
       // Short descriptions of tags, shown on each tag's page: { tag: text }.
       await sql`ALTER TABLE worlds ADD COLUMN IF NOT EXISTS tag_notes jsonb`;
+      // Tag colours: { tag: palette slot } (see js/tag-colors.js).
+      await sql`ALTER TABLE worlds ADD COLUMN IF NOT EXISTS tag_colors jsonb`;
       // Edits players suggest to entries they can't edit themselves, waiting for a GM: { summary?, body?, fields? }.
       await sql`CREATE TABLE IF NOT EXISTS edit_suggestions (
         id serial PRIMARY KEY, world_id text NOT NULL, entry_id text NOT NULL, gm_id int NOT NULL, base_version int,

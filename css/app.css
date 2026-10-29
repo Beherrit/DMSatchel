@@ -1661,3 +1661,9 @@ details.quest-group > summary .section-title { display: inline }
 .quest-chain .chain-next::before { content: '→' }
 .weather-line { margin: 2px 0 0; color: var(--muted) }
 .hire-line { margin: 4px 0 0 } .hire-line summary { cursor: pointer; color: var(--muted) } .hire-line .controls { margin-top: 4px }
+/* Tag colours: a coloured edge (the palette of Who holds what), text stays in ink */
+.tagchip.tag-colored { border-left: 4px solid var(--hold); padding-left: 6px }
+.tag-colors { border: 0; padding: 0; margin: 8px 0 0; display: flex; flex-wrap: wrap; gap: 6px; align-items: center }
+.tag-colors legend { float: left; margin-right: 6px; color: var(--muted) }
+.swatch { width: 24px; height: 24px; border-radius: 50%; background: var(--hold); border: 2px solid var(--surface); box-shadow: 0 0 0 1px var(--line); cursor: pointer; padding: 0 }
+.swatch[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--ink) }

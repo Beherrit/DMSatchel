@@ -95,7 +95,7 @@ import { renderStats, renderSpells } from './statblock-ui.js';
 import { renderStock } from './shop-ui.js';
 import { restockDraft } from './world-place.js';
 import { npcStats, NPC_CLASS_OPTIONS } from './npc-stats.js';
-import { patchEntry, setEntryState, stateBadges, syncWorld, descendantsOf } from './world-store.js';
+import { patchEntry, setEntryState, stateBadges, syncWorld, descendantsOf, tagChip } from './world-store.js';
 
 // Pages used now and then load when first opened, so world pages start faster.
 const lazyView = (load, name) => async (...args) => (await load())[name](...args);
@@ -255,7 +255,7 @@ function viewHome() {
 
 function entryCard(e) {
   return el('li', { 'data-id': e.id, class: `entry-card${e.visibility === 'gm' ? ' is-hidden' : ''}${e.status === 'suggested' ? ' is-suggested' : ''}` }, thumb(e), el('div', { class: 'card-title' }, link(e), stateBadges(e)), e.summary ? el('p', {}, ((s) => (s.length > 180 ? `${s.slice(0, 178)}…` : s))(stripMarks(e.summary))) : null,
-    e.tags?.length ? el('div', { class: 'tags' }, e.tags.map((t) => el('a', { class: 'tagchip', href: `#world/q/${encodeURIComponent(`#${t}`)}` }, `#${t}`))) : null);
+    e.tags?.length ? el('div', { class: 'tags' }, e.tags.map((t) => tagChip(t))) : null);
 }
 
 function viewKind(kind) {
@@ -424,7 +424,7 @@ function viewEntry(id, tab) {
     !isPlace && pins.length ? el('section', {}, el('h3', { class: 'section-title' }, 'On the map'),
       el('ul', { class: 'entry-list' }, pins.map(({ map, pin }) => el('li', {}, el('a', { href: `#world/map/${map.id}/${pin.id}` }, map.name), el('span', { class: 'muted small' }, pin.label || ''))))) : null,
     otherChildren.length ? el('section', {}, el('h3', { class: 'section-title' }, `In ${e.name}`), el('ul', { class: 'entry-list' }, otherChildren.map((c) => el('li', {}, link(c), el('span', { class: 'kind-tag' }, kindLabel(c.kind)))))) : null,
-    e.tags?.length ? el('div', { class: 'tags' }, e.tags.map((t) => el('a', { class: 'tagchip', href: `#world/q/${encodeURIComponent(`#${t}`)}` }, `#${t}`))) : null,
+    e.tags?.length ? el('div', { class: 'tags' }, e.tags.map((t) => tagChip(t))) : null,
     el('p', { class: 'muted small' }, `Created${e.created_by ? ` by ${e.created_by}` : ''} ${when(e.created_at)}${e.updated_by ? ` · last edited by ${e.updated_by} ${when(e.updated_at)}` : ''} · `, el('a', { href: `#world/web/${e.id}` }, 'See connections in the web')),
     history,
     noteBox(e),

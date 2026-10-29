@@ -2,7 +2,8 @@
 // tagged search) a short description GMs can write, so "#smugglers" can say who the smugglers are.
 import { el, toast, setKids } from './dom.js';
 import { api, isGm } from './api.js';
-import { world, worldEntries, richText, notice, loadWorld } from './world-store.js';
+import { world, worldEntries, richText, notice, loadWorld, tagChip } from './world-store.js';
+import { TAG_COLORS, tagSlot } from './tag-colors.js';
 import { stripMarks } from './rich.js';
 
 const plain = (t) => stripMarks(t);
@@ -17,7 +18,7 @@ export function viewTags() {
   return el('div', { class: 'w-view' },
     el('div', { class: 'panel-head' }, el('h2', {}, 'Tags'), el('p', {}, `${list.length} tag${list.length === 1 ? '' : 's'} in this world, most used first.`)),
     el('ul', { class: 'tag-cloud' }, list.map(([t, n]) => el('li', {},
-      el('a', { class: 'tagchip', href: tagHref(t) }, `#${t}`), el('span', { class: 'muted small' }, ` ${n}`),
+      tagChip(t, tagHref(t)), el('span', { class: 'muted small' }, ` ${n}`),
       notes[t] ? el('span', { class: 'small tag-note-short' }, ` · ${plain(notes[t]).split('\n')[0].slice(0, 90)}`) : null))));
 }
 
@@ -48,6 +49,13 @@ function renameDialog(from) {
         const b = await api('settings', { method: 'PATCH', body: { tag_note: { tag: from, text: '' } } });
         world.info = { ...world.info, tag_notes: b.tag_notes || a.tag_notes };
       }
+      // So does its colour.
+      const colors = world.info?.tag_colors || {};
+      if (colors[from] !== undefined && colors[to] === undefined) {
+        await api('settings', { method: 'PATCH', body: { tag_color: { tag: to, color: colors[from] } } });
+        const c = await api('settings', { method: 'PATCH', body: { tag_color: { tag: from, color: null } } });
+        world.info = { ...world.info, tag_colors: c.tag_colors };
+      }
       await loadWorld(true);
       toast(`#${from} is now #${to} on ${r.renamed} entr${r.renamed === 1 ? 'y' : 'ies'}`);
       dlg.close(); location.hash = `world/q/${encodeURIComponent(`#${to}`)}`;
@@ -57,6 +65,18 @@ function renameDialog(from) {
   document.body.append(dlg); dlg.showModal(); input.select();
 }
 
+// GMs: the tag's colour, from the eight in the palette, or none.
+function colorPicker(t, rerender) {
+  const cur = tagSlot(world.info?.tag_colors, t);
+  const set = async (color) => {
+    try { const r = await api('settings', { method: 'PATCH', body: { tag_color: { tag: t, color } } }); world.info = { ...world.info, tag_colors: r.tag_colors }; toast(color === null ? 'Colour taken off' : `#${t} is ${TAG_COLORS[color].toLowerCase()} now`); rerender(); }
+    catch (err) { toast(err.message, 'bad'); }
+  };
+  return el('fieldset', { class: 'tag-colors' }, el('legend', { class: 'small' }, 'Colour'),
+    TAG_COLORS.map((name, i) => el('button', { class: `swatch hold-${i}`, type: 'button', 'aria-pressed': String(cur === i), 'aria-label': name, title: name, onclick: () => set(i) })),
+    el('button', { class: 'btn small ghost', type: 'button', 'aria-pressed': String(cur < 0), onclick: () => set(null) }, 'None'));
+}
+
 export function tagNote(tag, rerender) {
   const t = String(tag || '').toLowerCase();
   const text = world.info?.tag_notes?.[t] || '';
@@ -64,7 +84,8 @@ export function tagNote(tag, rerender) {
   const box = el('section', { class: 'card tag-note' });
   const show = () => setKids(box, text ? richText(text) : el('p', { class: 'muted small' }, `No description yet. Say what #${t} means in this world.`),
     isGm() ? el('div', { class: 'btnrow' }, el('button', { class: 'btn small ghost', type: 'button', onclick: edit }, text ? 'Edit description' : 'Describe this tag'),
-      el('button', { class: 'btn small ghost', type: 'button', onclick: () => renameDialog(t) }, 'Rename tag')) : null);
+      el('button', { class: 'btn small ghost', type: 'button', onclick: () => renameDialog(t) }, 'Rename tag')) : null,
+    isGm() ? colorPicker(t, rerender) : null);
   function edit() {
     const ta = el('textarea', { rows: 3, 'aria-label': `Description of #${t}`, maxlength: 2000 }, text);
     setKids(box, ta, el('p', { class: 'muted small' }, 'Everyone who can see the tag sees this. [[Links]] work.'),

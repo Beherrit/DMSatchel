@@ -1,5 +1,6 @@
 // Shared world state and small helpers used by every world view.
 import { el } from './dom.js';
+import { tagSlot } from './tag-colors.js';
 import { api } from './api.js';
 import { KINDS } from './world-schema.js';
 import { libraryItems, librarySpecies, librarySubclasses, libraryClasses, librarySpells, libraryBackgrounds, libraryFeats } from './library.js';
@@ -207,6 +208,12 @@ export async function setEntryState(entry, { visibility, status }) {
 }
 
 // Little markers for entries players can't see, or that wait for a GM.
+// A tag's chip, in its colour if the GMs gave it one (a coloured edge; see tag-colors.js).
+export function tagChip(t, href = `#world/q/${encodeURIComponent(`#${t}`)}`) {
+  const slot = tagSlot(world.info?.tag_colors, t);
+  return el('a', { class: `tagchip${slot >= 0 ? ` tag-colored hold-${slot}` : ''}`, href }, `#${t}`);
+}
+
 export function stateBadges(e) {
   return [e.shared ? el('span', { class: 'tag shared-tag', title: 'The GMs gave this to you; other players can’t see it' }, 'Just for you')
     : e.visibility === 'gm' ? el('span', { class: 'tag hidden-tag', title: 'Only GMs can see this entry' }, e.shared_with?.length ? `GMs + ${e.shared_with.length} player${e.shared_with.length === 1 ? '' : 's'}` : 'GMs only') : null,

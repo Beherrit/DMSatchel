@@ -9,6 +9,7 @@
 // PATCH {reading: [entryIds]}   (GM) what players are asked to read before the next session (prep.reading)
 // PATCH {not_dupe: 'idA|idB'}   (GM) two entries with alike names are different things (prep.not_dupes)
 // PATCH {tag_note: {tag, text}}   (GM) a tag's description on its page
+// PATCH {tag_color: {tag, color}}  (GM) a tag's colour (0–7), or null to take it off
 // PATCH {start_here: {id, on} | {order}}   (GM) the entries newcomers should read first
 // PATCH {clock: {advance} | {set} | {add_light} | {remove_light}}   (GM) time of day and lights during play
 // PATCH {notice: {add: {text, until}} | {remove: id}, discord?}   (GM) notices on the front page (and Discord)
@@ -22,6 +23,7 @@ import { cleanCalendar, advance, formatDate, today } from '../js/calendar.js';
 import { addStop, removeStop } from '../js/journey.js';
 import { applyChecklist } from '../js/checklist.js';
 import { applyReminder } from '../js/reminders.js';
+import { applyTagColor } from '../js/tag-colors.js';
 import { cleanReading } from '../js/reading.js';
 import { KINDS } from '../js/world-schema.js';
 import { readCustom, cleanCustomList, customKeys } from '../js/custom-fields.js';
@@ -138,6 +140,12 @@ export default route({
       if (Object.keys(notes).length > 300) return fail(res, 400, 'That’s a lot of tag descriptions already.');
       await sql`UPDATE worlds SET tag_notes = ${JSON.stringify(notes)}::jsonb WHERE id = ${req.world.id}`;
       return send(res, 200, { tag_notes: notes });
+    }
+    if (req.body.tag_color) {
+      const r = applyTagColor(req.world.tag_colors, req.body.tag_color.tag, req.body.tag_color.color);
+      if (r.error) return fail(res, 400, r.error);
+      await sql`UPDATE worlds SET tag_colors = ${JSON.stringify(r.map)}::jsonb WHERE id = ${req.world.id}`;
+      return send(res, 200, { tag_colors: r.map });
     }
     // Start here (GMs): {start_here: {id, on}} adds or removes an entry; {start_here: {order: [ids]}} reorders.
     if (req.body.start_here) {
