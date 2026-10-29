@@ -13,7 +13,7 @@ import { viewStandings, standingWidget } from './world-standings.js';
 import { viewTalk, talkWidget, tableWidget, viewTable } from './world-talk.js';
 import { placeHub, viewAtlas, placeCounts } from './world-place.js';
 import { viewParty } from './world-party.js';
-import { viewSchedule, nextSessionLine } from './world-schedule.js';
+import { viewSchedule, nextSessionLine, rsvpCard } from './world-schedule.js';
 import { viewDowntime, downtimeSection } from './world-downtime.js';
 import { recapButton } from './world-recap.js';
 import { showButton, checkShown } from './world-show.js';
@@ -200,7 +200,7 @@ function viewHome() {
   const keyNpcs = all.filter((e) => e.kind === 'npc' && (e.tags || []).includes('key')).sort(byName);
   return el('div', { class: 'w-view' },
     el('div', { class: 'panel-head' }, el('h2', {}, info.name || 'The World'), info.tagline ? el('p', {}, info.tagline) : null,
-      worldCalendar() ? el('p', { class: 'today-line' }, el('a', { href: '#world/calendar' }, `📅 ${todayText()}`)) : null, isMember() ? nextSessionLine() : null),
+      worldCalendar() ? el('p', { class: 'today-line' }, el('a', { href: '#world/calendar' }, `📅 ${todayText()}`)) : null, isMember() ? nextSessionLine() : null, rsvpCard()),
     zeroNudge(),
     previouslyCard(),
     onThisDayCard(),

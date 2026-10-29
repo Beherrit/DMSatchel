@@ -133,3 +133,21 @@ export async function viewSchedule(rerender) {
     el('div', { class: 'panel-head' }, el('h2', {}, 'Next session'), el('p', {}, 'Find a date that works: GMs propose a few, everyone answers, and the best one stands out.')),
     body);
 }
+
+// Coming or not: once the next session is set, answer "I'm coming" or "Can't make it" and see who else is in.
+export function rsvpCard({ compact = false } = {}) {
+  const r = world.info?.rsvp;
+  if (!r || !isMember()) return null;
+  const box = el('div', { class: `rsvp${compact ? ' compact' : ''}` });
+  const answer = async (a) => {
+    try { const res = await api('party', { method: 'PUT', body: { rsvp: r.mine === a ? null : a } }); world.info = { ...world.info, rsvp: res.rsvp }; box.replaceWith(rsvpCard({ compact })); }
+    catch (err) { toast(err.message, 'bad'); }
+  };
+  const btn = (a, label) => el('button', { class: `btn small${r.mine === a ? ' primary' : ''}`, type: 'button', 'aria-pressed': String(r.mine === a), onclick: () => answer(a) }, label);
+  const who = (label, names) => (names.length ? el('span', {}, el('strong', {}, `${label}: `), names.join(', ')) : null);
+  setKids(box,
+    compact ? null : el('span', { class: 'rsvp-q' }, 'Are you coming? '),
+    compact ? null : el('span', { class: 'btnrow rsvp-btns' }, btn('yes', 'I’m coming'), btn('no', 'Can’t make it')),
+    el('span', { class: 'small rsvp-who' }, [who('Coming', r.yes), who('Can’t make it', r.no), who('Not answered', r.waiting)].filter(Boolean).flatMap((x, i) => (i ? [' · ', x] : [x]))));
+  return box;
+}

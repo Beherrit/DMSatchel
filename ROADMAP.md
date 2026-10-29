@@ -282,7 +282,7 @@ to the log at the bottom.
     name tables (and an NPC's ancestry).
 126. [x] **Who has read it.** GMs see which players have opened a handout (and when), so nobody has to ask "did
     everyone read the letter?".
-127. [ ] **Coming or not.** Once the next session is set, everyone says "I'm coming" or "Can't make it"; the front
+127. [x] **Coming or not.** Once the next session is set, everyone says "I'm coming" or "Can't make it"; the front
     page and session prep show who's in.
 128. [ ] **Picture descriptions.** A short description for an entry's picture, read by screen readers and shown
     on hover; gallery captions do the same for theirs.
@@ -419,3 +419,4 @@ to the log at the bottom.
 - On this day: when the world has a calendar, the front page shows "On this day: 3 Thawmoon 1040" if anything falls on today's in-world date: holidays, birthdays ("Ann turns 40") and anniversaries of dated events and sessions from earlier years ("50 years ago today: Fall of Brindle"; only dates that name their year count). Quiet days show nothing. js/onthisday.js unit tested.
 - Roll a name: the entry form's name field has "Roll" for kinds the name tables cover: NPCs and player characters (from their ancestry or species, e.g. "Hill dwarf" gives dwarf names; otherwise a likely one), settlements, taverns and shops (a location's type), regions and areas, factions and guilds. Same rules as Roll a detail: a rolled name rolls again, a typed one is only replaced on a second click. Unit tested in tests/roll-detail.test.mjs.
 - Who has read it: when a player opens a handout they can see, their browser tells the server once per visit (GMs, and GMs previewing as a player, aren't counted). On the handout's page GMs see "👁 Read by Pip (Oct 29) · not yet: Bo". Additive entry_reads table (first and latest time per player and handout); party API POST {read}, GET ?reads (GMs only). Tested against PGlite: hidden handouts and other kinds can't be marked read.
+- Coming or not: once a next session is set, the front page asks members "Are you coming?" with "I'm coming" / "Can't make it" (press again to take it back) and shows "Coming: … · Can't make it: … · Not answered: …"; session prep has a "Who's coming" card. An answer belongs to the date it was given for, so moving the session asks everyone again. Additive members.rsvp column; party PUT {rsvp}; the summary comes with the world load. js/rsvp.js unit tested; routes tested against PGlite.

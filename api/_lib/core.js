@@ -113,6 +113,8 @@ export function ensureSchema() {
       await sql`ALTER TABLE members ADD COLUMN IF NOT EXISTS profile jsonb`;
       // Entries each member follows in a world (ids): changes to them come first in "since your last visit".
       await sql`ALTER TABLE members ADD COLUMN IF NOT EXISTS following jsonb`;
+      // Coming to the next session or not: { for: the session's date, answer: 'yes' | 'no' } (see js/rsvp.js).
+      await sql`ALTER TABLE members ADD COLUMN IF NOT EXISTS rsvp jsonb`;
       // Notices from the GMs on the world's front page: [{ id, text, by, at, until }], newest first.
       await sql`ALTER TABLE worlds ADD COLUMN IF NOT EXISTS notices jsonb`;
       // Hidden entries given to chosen members (ids): they can see it, nobody else but the GMs can.

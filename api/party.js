@@ -26,6 +26,7 @@
 // Quick polls (members): GET ?polls=1 open ones and the last few closed · POST {poll: {question, options}, discord?} ask one
 // PATCH {poll_id, vote: i | null} vote or take it back · PATCH {poll_id, closed} (asker or GM) · DELETE ?poll=id
 // PUT {profile: {pronouns, note}}           your own profile in this world
+// PUT {rsvp: 'yes' | 'no' | null}           coming to the next session or not (members); returns the summary
 //
 // Ask the GM (members): a private thread between each player and the world's GMs.
 // GET ?ask=1                                players: your thread (marks the answers read); GMs: every player, with
@@ -46,6 +47,7 @@ import { cleanPoll, castVote } from '../js/polls.js';
 import { askUnread } from './_lib/ask.js';
 import { sharedWith } from '../js/sharing.js';
 import { cleanQuote } from '../js/quotes.js';
+import { ANSWERS, rsvpSummary, rsvpOpen } from '../js/rsvp.js';
 import { isReaction } from '../js/reactions.js';
 import { react } from './_lib/react.js';
 
@@ -181,6 +183,16 @@ async function putZero(req, res) {
 export default route({
   async PUT(req, res) {
     if (req.body.zero !== undefined) return putZero(req, res);
+    if (req.body.rsvp !== undefined) {
+      if (!requireMember(req, res)) return;
+      const next = req.world.next_session && new Date(req.world.next_session).toISOString();
+      if (!rsvpOpen(next)) return fail(res, 400, 'There’s no next session set yet.');
+      const answer = ANSWERS.includes(req.body.rsvp) ? req.body.rsvp : null;
+      const saved = await sql`UPDATE members SET rsvp = ${answer ? JSON.stringify({ for: next, answer }) : null}::jsonb WHERE world_id = ${req.world.id} AND gm_id = ${req.gm.id} RETURNING gm_id`;
+      if (!saved.length) return fail(res, 400, 'Only members of this world can say whether they’re coming.');
+      const members = await sql`SELECT g.id, g.name, m.rsvp FROM members m JOIN gms g ON g.id = m.gm_id WHERE m.world_id = ${req.world.id}`;
+      return send(res, 200, { rsvp: rsvpSummary(members, next, req.gm.id) });
+    }
     if (req.body.profile !== undefined) {
       if (!requireMember(req, res)) return;
       const p = cleanProfile(req.body.profile);
