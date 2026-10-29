@@ -356,6 +356,14 @@ to the log at the bottom.
     finishing one offers to open the next.
 165. [x] **Weather for the table.** Players see today's weather where the party is on the front page, the same as
     the GMs' prep shows.
+166. [ ] **Sell to a shop.** On a stocked shop's page, players sell something from their inventory at the shop's
+    buy-back rate; the coin goes on their sheet and the item onto the shelf.
+167. [ ] **Hirelings.** Hire an NPC to travel with the party at a daily wage; the party page lists who's on the
+    payroll, and living costs add their wages when days pass.
+168. [ ] **Tag colours.** GMs give a tag a colour, and every chip for that tag shows it, so "villain" or "clue" can
+    stand out at a glance.
+169. [ ] **Our next move.** Players mark the quest they mean to pursue next; GMs see the party's choice (and any
+    split) in session prep.
 
 ## Ideas parking lot
 
