@@ -288,6 +288,12 @@ to the log at the bottom.
     on hover; gallery captions do the same for theirs.
 129. [x] **Next and previous.** Arrows on an entry's page to the next and previous entry of the same kind, with
     [ and ] on the keyboard.
+130. [x] **How far from the party.** A map pin's card says how far it is from the party's place and how long the
+    walk is, when the map has a scale.
+131. [ ] **Forgiving search.** A typo or two still finds things in Ctrl+K search and the world search box.
+132. [ ] **Quests by status.** The quests list grouped: in play, on offer, rumored, then done and failed folded
+    away.
+133. [ ] **New table talk.** The sidebar's Table talk shows how many comments are new since your last visit.
 
 ## Ideas parking lot
 
@@ -422,3 +428,4 @@ to the log at the bottom.
 - Coming or not: once a next session is set, the front page asks members "Are you coming?" with "I'm coming" / "Can't make it" (press again to take it back) and shows "Coming: … · Can't make it: … · Not answered: …"; session prep has a "Who's coming" card. An answer belongs to the date it was given for, so moving the session asks everyone again. Additive members.rsvp column; party PUT {rsvp}; the summary comes with the world load. js/rsvp.js unit tested; routes tested against PGlite.
 - Picture descriptions: under an entry's picture in the form, "Describe the picture" (up to 300 characters, kept as fields.image_alt). The entry page's picture uses it as its alt text (read by screen readers) and hover title, and the picture wall uses it as the caption; gallery pictures' captions now show on hover too. Small avatars beside names stay decorative. The server keeps a description only alongside a picture. Tested in the browser (with axe) and against PGlite.
 - Next and previous: the foot of every entry page has "← Ann" and "Cob →" to the neighbouring entries of the same kind (sessions in number order, everything else by name; suggestions only among suggestions), and [ and ] do the same on the keyboard (listed under ?). Hidden when printing. js/neighbors.js unit tested.
+- How far from the party: on a map with a scale, a pin's card says "⚑ From the party: 60 miles: fast 2 days, normal 2.5 days, slow 3.3 days", measured from the party's pin (the place they're in, or the nearest place around it that's pinned). Not shown on the party's own pin or maps without a scale. Also: a full accessibility (axe), phone-width and dialog sweep of the app after #97–#129: all clean.

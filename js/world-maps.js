@@ -241,6 +241,8 @@ export async function viewMap(id, focusPin) {
           isGm() ? el('button', { class: 'btn small ghost', type: 'button', onclick: () => showPin(pin, true) }, 'Edit pin') : null,
           isGm() ? el('button', { class: 'btn small ghost', type: 'button', onclick: () => startMove(pin) }, 'Move') : null,
           isGm() && entry && PLACE_KINDS.includes(entry.kind) && world.info?.party_at !== entry.id ? el('button', { class: 'btn small ghost', type: 'button', onclick: async () => { await setPartyAt(entry); renderPins(); showPin(pin); } }, '⚑ The party is here') : null),
+        // How far from the party (when the map has a scale and the party is on it somewhere else).
+        (() => { const at = map.miles && partyPin(pins, partyChain()); return at && at.pin.id !== pin.id ? el('p', { class: 'small from-party' }, el('span', { 'aria-hidden': 'true' }, '⚑ '), `From the party: ${travelText(milesBetween(at.pin, pin))}.`) : null; })(),
         map.miles && pins.length > 1 ? travelPicker(pin) : null,
         entry && PLACE_KINDS.includes(entry.kind) ? placeDrawer(entry, () => showPin(pin)) : null,
         !entry && isGm() ? el('p', { class: 'muted small' }, 'This pin isn’t linked to an entry yet. Use “Edit pin” to link one or create it.') : null);
