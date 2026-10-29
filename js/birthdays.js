@@ -1,6 +1,6 @@
 // Birthdays on the calendar: characters' and NPCs' in-world birthdays (fields.born, any date the calendar can read)
 // recur every year. Pure, so it can be tested.
-import { parseDate, toDays, fromDays } from './calendar.js';
+import { parseDate, toDays, fromDays, today } from './calendar.js';
 
 const KINDS = ['character', 'npc'];
 const gone = (e) => ['Dead', 'Undead'].includes(e.fields?.status);
@@ -27,3 +27,17 @@ export function birthdaysBetween(cal, entries, fromN, toN) {
 }
 
 export const birthdayText = (x) => `🎂 ${x.entry.name}${x.age ? ` turns ${x.age}` : '’s birthday'}`;
+
+// How old someone is today in the world (or was when they died, if the date they died is one the calendar reads):
+// → { age, died } or null when the birth year isn't known.
+export function ageOf(cal, e) {
+  if (!cal || !KINDS.includes(e?.kind)) return null;
+  const b = parseDate(cal, e.fields?.born);
+  if (!b || !yearGiven(e.fields.born, b.day)) return null;
+  let at = today(cal), died = false;
+  if (e.fields?.status === 'Dead') { const d = parseDate(cal, e.fields?.fate_day); if (!d) return null; at = d; died = true; }
+  const age = at.year - b.year - (at.month < b.month || (at.month === b.month && at.day < b.day) ? 1 : 0);
+  return age >= 0 ? { age, died } : null;
+}
+
+export const ageText = (a) => (a.died ? `died aged ${a.age}` : `${a.age} year${a.age === 1 ? '' : 's'} old`);

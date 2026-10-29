@@ -7,6 +7,8 @@ import { thumb } from './image-ui.js';
 import { sayOf } from './say.js';
 import { castList } from './cast.js';
 import { stripMarks } from './rich.js';
+import { ageOf, ageText } from './birthdays.js';
+import { worldCalendar } from './world-calendar.js';
 
 const line = (e) => { const s = stripMarks(e.summary || '').replace(/\s+/g, ' ').trim(); return s.length > 150 ? `${s.slice(0, 149)}…` : s; };
 
@@ -24,7 +26,7 @@ export function viewWhosWho() {
         thumb(e, 'avatar') || el('span', { class: 'avatar cast-blank', 'aria-hidden': 'true' }, e.name.slice(0, 1)),
         el('div', {},
           el('div', { class: 'cast-name' }, link(e), f.status === 'Dead' ? [' ', el('span', { class: 'tag' }, 'dead')] : null, sayOf(e) ? el('span', { class: 'cast-say' }, ` (${sayOf(e)})`) : null),
-          el('div', { class: 'small muted' }, [f.role, where?.name].filter(Boolean).join(' · ')),
+          el('div', { class: 'small muted' }, [f.role, ageOf(worldCalendar(), e) ? ageText(ageOf(worldCalendar(), e)) : '', where?.name].filter(Boolean).join(' · ')),
           line(e) ? el('p', { class: 'small' }, line(e)) : null,
           el('div', { class: 'small muted' }, `Met in ${count} session${count === 1 ? '' : 's'} · last in `, link(last))));
     })));

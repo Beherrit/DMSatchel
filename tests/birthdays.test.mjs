@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { birthdaysBetween, birthdayText } from '../js/birthdays.js';
+import { birthdaysBetween, birthdayText, ageOf, ageText } from '../js/birthdays.js';
 import { makeCalendar, toDays } from '../js/calendar.js';
 
 test('birthdays recur every year, with an age when the year is known', () => {
@@ -17,4 +17,20 @@ test('birthdays recur every year, with an age when the year is known', () => {
   assert.deepEqual(ny.map((x) => [x.entry.id, x.date.year]), [['Gil', 1040], ['Hal', 1041]]);
   // Not before they were born.
   assert.deepEqual(birthdaysBetween(cal, list, toDays(cal, { year: 1040, month: 0, day: 1 }), toDays(cal, { year: 1040, month: 0, day: 5 })).map((x) => x.entry.id), []);
+});
+
+test('how old they are', () => {
+  const cal = { ...makeCalendar('seasons', 1040), month: 1, day: 3 }; // 3 Thawmoon 1040
+  const P = (born, extra = {}) => ({ kind: 'npc', name: 'x', fields: { born, ...extra } });
+  assert.deepEqual(ageOf(cal, P('3 Thawmoon 1000')), { age: 40, died: false }); // birthday today
+  assert.deepEqual(ageOf(cal, P('4 Thawmoon 1000')), { age: 39, died: false }); // tomorrow
+  assert.deepEqual(ageOf(cal, P('1 Longnight 1039')), { age: 0, died: false });
+  assert.equal(ageOf(cal, P('3 Thawmoon')), null); // no year
+  assert.equal(ageOf(cal, P('3 Thawmoon 1050')), null); // not born yet
+  assert.equal(ageOf(null, P('3 Thawmoon 1000')), null);
+  assert.equal(ageOf(cal, { kind: 'faction', fields: { born: '3 Thawmoon 1000' } }), null);
+  // The dead stop ageing, if we know when; otherwise no age.
+  assert.deepEqual(ageOf(cal, { kind: 'character', fields: { born: '10 Highsun 1001', status: 'Dead', fate_day: '9 Highsun 1031' } }), { age: 29, died: true });
+  assert.equal(ageOf(cal, P('3 Thawmoon 1000', { status: 'Dead' })), null);
+  assert.equal(ageText({ age: 1, died: false }), '1 year old'); assert.equal(ageText({ age: 29, died: true }), 'died aged 29');
 });

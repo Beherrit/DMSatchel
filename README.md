@@ -154,6 +154,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Reveal on a date**: set a hidden entry to reveal itself to players on a chosen day, for a letter that arrives or a festival that's announced.
 - **Job board poster**: a town's open jobs as a printable notice-board poster, or popped up on everyone's screen.
 - **Also known as**: other names for any entry (a title, an old name), found by search, mentions and the name check.
+- **How old they are**: NPCs' and characters' ages today from their birthday and the in-world calendar, on their page and in Who's who.
 - **Export to a spreadsheet**: download any kind of entry as a CSV file with its fields as columns; it imports back as it is.
 - **A new world like this one**: start a world with another's calendar, own fields, templates, session zero page and tag descriptions, but none of its entries.
 - **Set a field for many**: bulk actions set one field (a status, a type, a role) on every selected entry that has it.
