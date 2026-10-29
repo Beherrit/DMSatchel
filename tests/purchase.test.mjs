@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { stockItems, buyFrom } from '../js/purchase.js';
+import { stockItems, buyFrom, sellTo } from '../js/purchase.js';
 import { generateShop, stockText } from '../js/economy.js';
 import { makeRng } from '../js/rng.js';
 
@@ -30,4 +30,19 @@ test('buying takes it off the shelf', () => {
   assert.ok(buyFrom(STOCK, 'Lantern', 1).text.includes('Lantern | 5 gp (usually 4 gp) | out of stock | Shortage'));
   const t = buyFrom(STOCK, 'Torch', 10); assert.equal(t.cp, 10); assert.equal(t.text, STOCK); // "available" never runs out
   assert.ok(buyFrom(STOCK, 'Tent').error); assert.ok(buyFrom(STOCK, 'Dragon').error);
+});
+
+test('selling: the buy-back rate on the usual price, and onto the shelf', () => {
+  const GOODS = [['Lantern', 5, 'Gear'], ['Shield', 10, 'Armor']];
+  const a = sellTo(STOCK, 'rope', 2, GOODS);
+  assert.deepEqual([a.name, a.qty, a.cp], ['Rope', 2, 100]); // 1 gp each at 50%
+  assert.ok(a.text.includes('Rope | 1 gp | 5 in stock'));
+  assert.equal(sellTo(STOCK, 'Lantern', 1, GOODS).cp, 200); // its usual 4 gp, not the shortage price
+  assert.ok(sellTo(STOCK, 'Tent', 1).text.includes('Tent | 2 gp | 1 in stock'));
+  const s = sellTo(STOCK, 'Shield', 1, GOODS);
+  assert.equal(s.cp, 500); assert.ok(s.text.endsWith('## Bought from adventurers\nShield | 10 gp | 1 in stock'));
+  assert.ok(sellTo(s.text, 'Shield', 1, GOODS).text.includes('Shield | 10 gp | 2 in stock'));
+  assert.ok(sellTo(STOCK, 'Mysterious idol', 1, GOODS).error);
+  assert.equal(sellTo(STOCK, 'Torch', 3).cp, 1); // never less than a copper
+  assert.equal(sellTo(STOCK.replace('50%', '80%'), 'Rope', 1).cp, 80);
 });
