@@ -8,7 +8,7 @@ import { initPalette, openPalette } from './palette.js';
 import { initWorldSwitcher, mountWorlds, showWorlds } from './worlds-ui.js';
 import { initShortcuts } from './shortcuts.js';
 import { initGate } from './gate.js';
-import { initTheme } from './theme.js';
+import { initTheme, initTextSize } from './theme.js';
 import { initOutbox } from './outbox.js';
 
 const mounted = new Set();
@@ -68,6 +68,7 @@ initWorldSwitcher();
 initShortcuts();
 initGate();
 initTheme();
+initTextSize();
 initOutbox();
 $('#search-btn').addEventListener('click', openPalette);
 if (/Mac|iPhone|iPad/.test(navigator.platform)) $('#search-btn kbd').textContent = '⌘K';

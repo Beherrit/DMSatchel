@@ -6,7 +6,7 @@
 <title>The DM's Satchel</title>
 <meta name="description" content="A Dungeon Master's toolkit and shared world builder for fifth-edition campaigns: NPCs, quests, factions, loot, 2024-rules characters with backstories, and a world wiki for many GMs.">
 <meta name="theme-color" content="#1D2332">
-<script>try { var t = localStorage.getItem('satchel-theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch (e) {}</script>
+<script>try { var t = localStorage.getItem('satchel-theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; var z = Number(localStorage.getItem('satchel-text')); if (z >= 0.8 && z <= 1.5) document.documentElement.style.setProperty('--ts', z); } catch (e) {}</script>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
@@ -23,6 +23,7 @@
       <div id="world-switch" class="world-switch" hidden></div>
       <button class="btn search-btn" id="search-btn" type="button" aria-label="Search everything"><span>Search</span><kbd>Ctrl K</kbd></button>
       <button class="btn small" id="install-btn" type="button" hidden>Install app</button>
+      <button class="btn ghost theme-btn text-btn" id="text-btn" type="button" aria-label="Change text size">A</button>
       <button class="btn ghost theme-btn" id="theme-btn" type="button" aria-label="Change theme">◐</button>
       <div id="account" class="account"></div>
     </div>

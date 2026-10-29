@@ -259,7 +259,7 @@ to the log at the bottom.
     and in session prep's "Coming up".
 114. [x] **Previously on…** Before the next session, the world's front page opens with the last session's summary
     and "where we left off", so everyone arrives remembering.
-115. [ ] **Text size.** A per-browser setting for larger (or smaller) text across the app, for phones and tired
+115. [x] **Text size.** A per-browser setting for larger (or smaller) text across the app, for phones and tired
     eyes at the end of a long session.
 116. [ ] **Repeating events.** Calendar events that come round every week, month or year (market day, the council's
     moot, a feast), shown on the calendar and in session prep.
@@ -384,3 +384,4 @@ to the log at the bottom.
 - Mood music: every entry form has "Mood music" (an https link: YouTube, Spotify, Tabletop Audio, SoundCloud, anything). The entry page shows "♫ Mood music (YouTube)" under the name, opening in a new tab; a place without its own uses the nearest place around it that has some ("Mood music for Brindle"). Session prep's "Where the party is" card offers it, and the printable sheet prints the link. Stored as fields.music on any kind; the server keeps only https links. js/music.js unit tested.
 - Birthdays on the calendar: player characters and NPCs have a "Birthday (in-world date)" field (any date the calendar reads: "3 Thawmoon", "3 Thawmoon 1000"). Birthdays recur every year: "🎂 Ann" in the calendar's month grid, "🎂 Ann turns 40" in the day's detail (an age when a birth year was given, nothing before it), and in session prep's "Coming up" for the next two weeks, including across New Year. The dead are left out. js/birthdays.js unit tested.
 - Previously on…: the world's front page has a "Previously on… Session 12" card from the latest session the viewer can see: its summary, "Where we left off" (the session's "Next time" field, formatted) and a link to the full session with its in-world date. It's open when the next session is within a week and folded otherwise, so it never crowds the page between campaigns.
+- Text size: an "A" button beside the theme switch cycles Normal → Larger (A+, 115%) → Largest (A++, 130%) → Smaller (A−, 90%), remembered per browser and applied before the page draws. Every font size in the stylesheet is multiplied by one --ts variable, so text grows while layouts, maps and pins keep their geometry (no page zoom); printing always uses the normal size. Checked on a phone at the largest size: no sideways scrolling.
