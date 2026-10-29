@@ -146,6 +146,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Picture wall**: every picture in the world on one page (portraits, places, galleries, maps), by kind and tag.
 - **Text size**: an “A” button in the header makes all text larger, largest or smaller, remembered per browser.
 - **Previously on…**: the front page opens with the last session's summary and where the party left off.
+- **Quests by status**: the quests list grouped into in play, on offer and rumored, with done and failed folded away.
 - **Forgiving search**: a typo or two in a name or tag still finds it, in Ctrl+K and the world search.
 - **How far from the party**: a map pin's card says how far it is from the party and how long the walk takes.
 - **Next and previous**: arrows at the foot of an entry to the neighbouring entries of the same kind, with [ and ] on the keyboard.

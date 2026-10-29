@@ -32,6 +32,7 @@ import { wishesSection } from './world-wishes.js';
 import { farewellCard } from './world-hall.js';
 import { noteRead, readsLine } from './world-reads.js';
 import { neighbors } from './neighbors.js';
+import { questGroups } from './quest-groups.js';
 import { askNav, askAboutLink } from './world-ask.js';
 import { quoteCard } from './world-quotes.js';
 import { previouslyCard } from './world-previously.js';
@@ -245,7 +246,7 @@ function viewKind(kind) {
   }
   else if (kind === 'session') list.sort((a, b) => (parseFloat(b.fields.number) || 0) - (parseFloat(a.fields.number) || 0) || String(b.fields.played_on || b.created_at).localeCompare(String(a.fields.played_on || a.created_at)));
   else list.sort(byName);
-  const listNode = list.length ? (kind === 'session' ? sessionList(list) : kind === 'event'
+  const listNode = list.length ? (kind === 'session' ? sessionList(list) : kind === 'quest' ? questList(list) : kind === 'event'
       ? el('ol', { class: 'timeline' }, list.map((e) => (e.kind === 'session'
         ? el('li', { class: 'tl-session', 'data-id': e.id }, el('span', { class: 'date' }, e.fields.world_date), el('div', {}, el('span', { class: 'tag' }, 'Played'), ' ', link(e), e.fields.played_on ? el('span', { class: 'muted small' }, ` at the table ${e.fields.played_on}`) : null, e.summary ? el('p', {}, e.summary) : null))
         : el('li', { 'data-id': e.id }, el('span', { class: 'date' }, e.fields.date || e.fields.sort || '—'), el('div', {}, link(e), e.summary ? el('p', {}, e.summary) : null)))))
@@ -260,6 +261,15 @@ function viewKind(kind) {
           : isMember() ? el('a', { class: 'btn', href: `#world/new/${kind}` }, `Suggest a ${lower(kindLabel(kind))}`) : null)),
     listNode ? [listNode, bulk.bar]
       : notice(`No ${KINDS[kind].plural.replace(/^(?!NPC)\w+/, (w) => w.toLowerCase())} yet`, isGm() ? 'Add the first one.' : PLAYER_KINDS.includes(kind) && isMember() ? 'Add the first one.' : 'The GMs haven’t added any yet.'));
+}
+
+// Quests grouped by status: in play, on offer and rumored open; done and failed folded away.
+function questList(list) {
+  return el('div', { class: 'quest-groups' }, questGroups(list).map((g) => {
+    const grid = el('ul', { class: 'entry-grid' }, g.entries.map(entryCard));
+    return g.open ? el('section', { class: 'quest-group' }, el('h3', { class: 'section-title' }, `${g.title} (${g.entries.length})`), grid)
+      : el('details', { class: 'quest-group' }, el('summary', {}, el('span', { class: 'section-title' }, `${g.title} (${g.entries.length})`)), grid);
+  }));
 }
 
 function sessionList(list) {

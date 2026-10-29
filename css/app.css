@@ -1530,3 +1530,8 @@ div.poll-row { cursor: default }
 .entry-nav { display: flex; justify-content: space-between; gap: 12px; margin-top: 18px; padding-top: 10px; border-top: 1px solid var(--line); font-size: calc(15px * var(--ts, 1)) }
 .entry-nav a { max-width: 48%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
 @media print { .entry-nav { display: none } }
+
+/* Quests by status */
+.quest-group + .quest-group { margin-top: 14px }
+details.quest-group > summary { cursor: pointer }
+details.quest-group > summary .section-title { display: inline }
