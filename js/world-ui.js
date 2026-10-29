@@ -33,6 +33,7 @@ import { farewellCard } from './world-hall.js';
 import { noteRead, readsLine } from './world-reads.js';
 import { neighbors } from './neighbors.js';
 import { questGroups } from './quest-groups.js';
+import { partyPageButton, partyPageNote, partyPageForm, canPartyEdit } from './world-partypage.js';
 import { askNav, askAboutLink } from './world-ask.js';
 import { quoteCard } from './world-quotes.js';
 import { previouslyCard } from './world-previously.js';
@@ -403,7 +404,7 @@ function viewEntry(id, tab) {
   const node = el('article', { class: 'w-view entry-view' },
     crumbs.length ? el('nav', { class: 'crumbs', 'aria-label': 'Located in' }, crumbs.flatMap((c, i) => [i ? ' › ' : '', link(c)])) : null,
     el('div', { class: 'panel-head row' },
-      el('div', {}, el('div', { class: 'eyebrow' }, kindLabel(e.kind), e.fields?.type ? ` · ${e.fields.type}` : ''), el('h2', {}, e.name), sayLine(e), musicLine(e), stateBadges(e).length ? el('div', { class: 'badges' }, stateBadges(e)) : null),
+      el('div', {}, el('div', { class: 'eyebrow' }, kindLabel(e.kind), e.fields?.type ? ` · ${e.fields.type}` : ''), el('h2', {}, e.name), sayLine(e), musicLine(e), partyPageNote(e), stateBadges(e).length ? el('div', { class: 'badges' }, stateBadges(e)) : null),
       !isGm() ? el('div', { class: 'btnrow' }, starButton(e), followButton(e), e.can_edit ? el('a', { class: 'btn', href: `#world/edit/${e.id}` }, 'Edit') : null, suggestEditButton(e), askAboutLink(e), itemCardButton(e), spellCardButton(e)) : null,
       isGm() ? el('div', { class: 'btnrow' }, starButton(e), followButton(e), el('a', { class: 'btn', href: `#world/edit/${e.id}` }, 'Edit'),
         showButton(e),
@@ -415,6 +416,7 @@ function viewEntry(id, tab) {
         cardsButton(e),
         itemCardButton(e),
         spellCardButton(e),
+        partyPageButton(e, rerenderWorld),
         world.info?.discord && e.visibility !== 'gm' && e.status !== 'suggested' ? confirmButton('Post to Discord', async () => {
           try { await api('settings', { method: 'POST', body: { post: e.id } }); toast(`Posted ${e.name} to Discord`); } catch (err) { toast(err.message, 'bad'); }
         }, 'btn ghost') : null,
@@ -521,6 +523,7 @@ function viewEdit(id, kindForNew) {
     signedIn() ? null : el('div', { class: 'btnrow' }, el('button', { class: 'btn primary', type: 'button', onclick: () => openSignIn() }, 'Sign in'), el('a', { class: 'btn', href: '#join' }, 'I have an invite')));
   const existing = id ? world.entries.get(id) : null;
   if (id && !existing) return notice('Entry not found', 'It may have been deleted.');
+  if (existing && existing.can_edit && canPartyEdit(existing)) return partyPageForm(existing);
   if (existing && !existing.can_edit) return notice('Not yours to edit', 'Players can edit their own characters, journals and suggestions. Ask a GM to change this one.');
   const gm = isGm();
   const e = existing ? structuredClone(existing) : { kind: KINDS[kindForNew] ? kindForNew : 'npc', name: '', summary: '', body: '', fields: {}, secret: '', tags: [], links: [], parent_id: null, ...(draft || {}) };

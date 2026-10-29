@@ -53,7 +53,7 @@ function clean(input, custom = {}) {
   if (!isKind(e.kind)) return { error: 'Pick what kind of entry this is.' };
   const name = clip(e.name, LIMITS.name).trim();
   if (!name) return { error: 'Give the entry a name.' };
-  const allowed = new Set([...KINDS[e.kind].fields.map(([k]) => k), ...customKeys(e.kind, custom), 'say', 'music', 'image_alt']);
+  const allowed = new Set([...KINDS[e.kind].fields.map(([k]) => k), ...customKeys(e.kind, custom), 'say', 'music', 'image_alt', 'party_edit']);
   const fields = {};
   for (const [k, v] of Object.entries(e.fields || {})) if (allowed.has(k) && v != null && String(v).trim() && (k !== 'image' || isImageRef(String(v)))) fields[k] = clip(v, ['stock', 'sheet', 'play', 'spread', 'known', 'attitudes', 'objectives', 'attendance', 'enc', 'goals', 'wishes', 'gallery'].includes(k) ? LIMITS.body : LIMITS.field);
   // Pictures in the gallery must be real image addresses.
@@ -78,7 +78,8 @@ function shape(row, req) {
     links: gmView ? row.links : (row.links || []).filter((l) => !l.secret), parent_id: row.parent_id,
     created_at: row.created_at, updated_at: row.updated_at, version: row.version, visibility: row.visibility, status: row.status,
     created_by: row.created_by_name || null, updated_by: row.updated_by_name || null, owner_id: row.owner_id || null, owner: row.owner_name || null,
-    can_edit: Boolean(gmView || (mine && req.role)),
+    // Players may edit their own entries, and pages the GMs opened to the party (text only; see PUT).
+    can_edit: Boolean(gmView || (req.role && (mine || row.fields?.party_edit === 'yes'))),
   };
   if (gmView) { out.secret = row.secret; out.deleted = row.deleted; out.shared_with = cleanShare(row.shared_with); }
   else if (row.visibility === 'gm' && sharedWith(row, req.gm?.id)) out.shared = true;
@@ -272,11 +273,17 @@ export default route({
     const current = id && await loadOne(id, req.world.id);
     if (!current || current.deleted) return fail(res, 404, 'That entry doesn’t exist any more.');
     const mine = current.owner_id === req.gm.id;
-    if (!req.isGmHere && !mine) return fail(res, 403, 'You can only edit your own characters, journals and suggestions.');
+    // A page the GMs opened to the party: anyone who can see it may change its text (summary, description, tags),
+    // and nothing else.
+    const partyPage = !req.isGmHere && !mine && current.fields?.party_edit === 'yes' && visibleTo(current, req);
+    if (!req.isGmHere && !mine && !partyPage) return fail(res, 403, 'You can only edit your own characters, journals and suggestions.');
     const e = clean(req.body.entry, customOf(req));
     if (e.error) return fail(res, 400, e.error);
+    if (partyPage) Object.assign(e, { kind: current.kind, name: current.name, fields: { ...(current.fields || {}) }, links: current.links || [], parent_id: current.parent_id, secret: current.secret, visibility: current.visibility });
+    // Only GMs open or close a page to the party.
+    if (!req.isGmHere) { if (current.fields?.party_edit) e.fields.party_edit = current.fields.party_edit; else delete e.fields.party_edit; }
     if (e.parent_id === id) return fail(res, 400, 'An entry can’t be inside itself.');
-    if (!req.isGmHere) {
+    if (!req.isGmHere && !partyPage) {
       if (current.status === 'live' && !PLAYER_KINDS.includes(e.kind)) return fail(res, 403, 'Players can’t change an entry into that kind.');
       e.secret = current.secret; e.links = e.links.map((l) => ({ ...l, secret: false }));
       e.visibility = e.kind === 'downtime' && current.kind === 'downtime' ? e.visibility : current.visibility;

@@ -294,6 +294,14 @@ to the log at the bottom.
 132. [x] **Quests by status.** The quests list grouped: in play, on offer, rumored, then done and failed folded
     away.
 133. [x] **New table talk.** The sidebar's Table talk shows how many comments are new since your last visit.
+134. [x] **Pages the party writes together.** GMs can open an entry to the party: any player can edit its text
+    (never its secrets or who sees it), with the usual history.
+135. [ ] **Join by QR code.** Admin shows the player invite as a QR code, so people at the table can join from
+    their phones by pointing the camera.
+136. [ ] **Conditions at a glance.** Tapping a condition on a character's sheet (Poisoned, Prone…) shows what it
+    does, from the SRD.
+137. [ ] **Travel takes time.** After moving the party on a map with a scale, offer to move the calendar on by the
+    travel time.
 
 ## Ideas parking lot
 
@@ -432,3 +440,4 @@ to the log at the bottom.
 - Forgiving search: in Ctrl+K and the world search, a word of four letters or more also matches a name or tag word a typo away (two for long words), whole or as the start of a longer word: "brimdle" finds Brindle, "silvrhand" The Silverhand, "nroth" the north tag. Near misses rank after everything that matched as typed, and descriptions still need the exact word, so results stay predictable. nearWord unit tested.
 - Quests by status: the Quests & Plots list is grouped: In play, On offer, Rumored and No status yet (open), then Done and Failed or abandoned (folded), each with a count; bulk actions still work across the groups. js/quest-groups.js unit tested.
 - New table talk: the world load brings the times of table-talk comments others posted since your last visit (at most 50; on entries you can see; hidden ones only for GMs), and the sidebar's Table talk shows "2 new" (a folded "At the table" group gets its dot). Opening Table talk clears the count in this browser. Tested against PGlite.
+- Pages the party writes together: GMs get "✎ Open to the party?" on any entry (fields.party_edit). Once open, the page says "The whole party writes this page" with who changed it last, every player who can see it gets Edit, and their form is just the summary, the page text and tags. The server keeps everything else as the GMs set it (name, kind, fields, place, connections including secret ones, GM secret, who sees it), only GMs can open or close a page, the usual version check stops two people overwriting each other, and every save goes into the history. Tested against PGlite.

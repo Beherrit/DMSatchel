@@ -1535,3 +1535,4 @@ div.poll-row { cursor: default }
 .quest-group + .quest-group { margin-top: 14px }
 details.quest-group > summary { cursor: pointer }
 details.quest-group > summary .section-title { display: inline }
+.party-page-note { margin: .1rem 0 .3rem; color: var(--accent) }

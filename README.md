@@ -146,6 +146,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Picture wall**: every picture in the world on one page (portraits, places, galleries, maps), by kind and tag.
 - **Text size**: an “A” button in the header makes all text larger, largest or smaller, remembered per browser.
 - **Previously on…**: the front page opens with the last session's summary and where the party left off.
+- **Pages the party writes together**: GMs open an entry to the party and any player can edit its text, never its secrets.
 - **New table talk**: the sidebar shows how many comments are new since your last visit.
 - **Quests by status**: the quests list grouped into in play, on offer and rumored, with done and failed folded away.
 - **Forgiving search**: a typo or two in a name or tag still finds it, in Ctrl+K and the world search.
