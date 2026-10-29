@@ -14,6 +14,7 @@ import { readObjectives, progress } from './objectives.js';
 import { sortSecrets } from './secrets.js';
 import { stripMarks } from './rich.js';
 import { sayOf } from './say.js';
+import { readAloudPrint } from './world-readaloud.js';
 
 const ACTIVE_PC = (e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
 const townOf = (place) => (place?.kind === 'settlement' ? place : [...trail(place)].reverse().find((p) => p.kind === 'settlement') || null);
@@ -78,6 +79,7 @@ export async function viewSessionSheet() {
       }))) : null,
       sortSecrets(prep.secrets).open.length ? block('Secrets and clues', el('ul', { class: 'ss-steps' }, sortSecrets(prep.secrets).open.slice(0, 12).map((s) => el('li', {}, `☐ ${plain(s.text)}`)))) : null,
       clocks.length ? block('Clocks', el('ul', { class: 'ss-list' }, clocks.map((c) => el('li', {}, el('strong', {}, c.name), ` ${c.filled}/${c.size}`, getEntry(c.entry_id) ? ` · ${getEntry(c.entry_id).name}` : '')))) : null,
+      (() => { const ra = readAloudPrint(prep); return ra.length ? block('Read-aloud', ...ra) : null; })(),
       block('If trouble comes', encBox),
       prep.notes ? block('GM notes', el('div', { class: 'ss-notes' }, plain(prep.notes))) : null));
 }

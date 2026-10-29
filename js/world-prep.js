@@ -22,6 +22,7 @@ import { clockCard } from './world-clock.js';
 import { appearances, dueBack } from './appearances.js';
 import { stripMarks } from './rich.js';
 import { notePartyMove } from './world-journey.js';
+import { readAloudList } from './world-readaloud.js';
 
 const ACTIVE_PC = (e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
 const card = (title, ...kids) => el('section', { class: 'card prep-card' }, el('h3', {}, title), ...kids);
@@ -227,6 +228,6 @@ export async function viewPrep(rerender) {
       el('button', { class: 'btn small', type: 'button', onclick: async () => { await letRumorsSpread(); rerender(); } }, 'Let rumors spread'),
       el('a', { class: 'btn small', href: '#world/calendar' }, 'Move time on')),
     el('div', { class: 'prep-columns' },
-      el('div', { class: 'prep-main' }, lastTime(), whereSection(prep, rerender), secretsCard(prep, next), turnUpSection(prep), questsSection(), scratchPad(prep)),
+      el('div', { class: 'prep-main' }, lastTime(), whereSection(prep, rerender), card('Read-aloud', ...readAloudList(prep)), secretsCard(prep, next), turnUpSection(prep), questsSection(), scratchPad(prep)),
       el('div', { class: 'prep-side' }, clockCard(), partySection(), spotlightSection(), clocksSection(), calendarSection(), threadsSection(gmThreads, table))));
 }

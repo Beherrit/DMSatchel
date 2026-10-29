@@ -1349,3 +1349,11 @@ div.poll-row { cursor: default }
 .wish-add { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: .5rem }
 .wish-add input[type=text] { flex: 1 1 14rem; min-width: 0 }
 .wished { color: var(--accent); font-weight: 600 }
+
+/* Read-aloud in prep */
+.ra-list > li + li { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line) }
+.ra-list h4 { margin: 0 0 6px }
+.ra-box + .ra-box { margin-top: 8px }
+.ra-box .eyebrow { display: block; margin-bottom: 2px }
+.ss-ra + .ss-ra { margin-top: 6px }
+.ss-ra blockquote { margin: 2px 0 4px; padding-left: 8px; border-left: 3px solid var(--ink); font-style: italic; font-size: 14px }
