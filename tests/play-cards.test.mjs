@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { cardText, itemCard, itemsNamed } from '../js/play-cards.js';
+import { cardText, itemCard, itemsNamed, spellListCard, librarySpellCard } from '../js/play-cards.js';
 
 test('cardText trims at a sentence, else a word, and drops formatting', () => {
   assert.equal(cardText('**Bold** and [[Brindle|town]].'), 'Bold and town.');
@@ -20,4 +20,12 @@ test('itemCard picks player text and a tidy subtitle', () => {
 test('itemsNamed matches treasury names to item entries', () => {
   const list = [{ kind: 'item', name: 'The Bell of Brindle' }, { kind: 'item', name: 'Rope' }, { kind: 'npc', name: 'Rope' }];
   assert.deepEqual(itemsNamed(list, ['bell of brindle', 'a rope', 'Sword']).map((e) => e.name), ['The Bell of Brindle', 'Rope']);
+});
+
+test('spell list and library spell cards', () => {
+  const c = spellListCard('Pip', { cls: 'Wizard', level: 3, dc: 13, attack: 5, slots: [4, 2], cantrips: ['Light', 'Mage Hand'], byLevel: { 2: ['Misty Step'], 1: ['Shield', 'Sleep'] } });
+  assert.deepEqual(c, { title: 'Pip: spells', sub: 'Wizard 3 · save DC 13 · spell attack +5', slots: [['1st', 4], ['2nd', 2]], text: 'Cantrips: Light, Mage Hand\n1st: Shield, Sleep\n2nd: Misty Step', foot: '' });
+  assert.deepEqual(spellListCard('Bo', { cls: 'Warlock', level: 5, dc: 14, attack: 6, pact: [2, 3], cantrips: [], byLevel: {} }).slots, [['3rd (pact)', 2]]);
+  assert.deepEqual(librarySpellCard({ name: 'Ember Ward', fields: { level: '2', class: 'Wizard, Druid', features: 'A ring of embers.' } }), { title: 'Ember Ward', sub: '2nd-level spell · Wizard, Druid', text: 'A ring of embers.', foot: '' });
+  assert.equal(librarySpellCard({ name: 'Spark', fields: { level: '0' } }).sub, 'Cantrip');
 });

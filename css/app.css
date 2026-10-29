@@ -1496,3 +1496,7 @@ div.poll-row { cursor: default }
   .pc-pic { max-height: 22mm }
   .play-card:nth-child(9n) { break-after: page }
 }
+.pc-slots { display: grid; gap: 2px; font-size: calc(12px * var(--ts, 1)) }
+.pc-slot { display: flex; align-items: center; gap: 3px; flex-wrap: wrap }
+.pc-box { display: inline-block; width: 11px; height: 11px; border: 1.5px solid var(--ink); border-radius: 2px; margin-right: 2px }
+@media print { .pc-box { width: 3mm; height: 3mm; border-color: #000 } .pc-slots { font-size: 7.5pt } }

@@ -33,7 +33,7 @@ import { farewellCard } from './world-hall.js';
 import { askNav, askAboutLink } from './world-ask.js';
 import { quoteCard } from './world-quotes.js';
 import { previouslyCard } from './world-previously.js';
-import { itemCardButton } from './world-playcards.js';
+import { itemCardButton, spellCardButton } from './world-playcards.js';
 import { mentionsCard } from './world-mentions.js';
 import { starButton, favoritesNav, followButton, followingNav } from './world-favorites.js';
 import { rewardCard } from './world-reward.js';
@@ -90,6 +90,7 @@ const viewQuotes = lazyView(() => import('./world-quotes.js'), 'viewQuotes');
 const viewPictures = lazyView(() => import('./world-pictures.js'), 'viewPictures');
 const viewNumbers = lazyView(() => import('./world-numbers.js'), 'viewNumbers');
 const viewItemCards = lazyView(() => import('./world-playcards.js'), 'viewItemCards');
+const viewSpellCards = lazyView(() => import('./world-playcards.js'), 'viewSpellCards');
 const viewPrep = lazyView(() => import('./world-prep.js'), 'viewPrep');
 const viewPowers = lazyView(() => import('./world-powers.js'), 'viewPowers');
 const viewLibrary = lazyView(() => import('./world-library.js'), 'viewLibrary');
@@ -377,7 +378,7 @@ function viewEntry(id, tab) {
     crumbs.length ? el('nav', { class: 'crumbs', 'aria-label': 'Located in' }, crumbs.flatMap((c, i) => [i ? ' › ' : '', link(c)])) : null,
     el('div', { class: 'panel-head row' },
       el('div', {}, el('div', { class: 'eyebrow' }, kindLabel(e.kind), e.fields?.type ? ` · ${e.fields.type}` : ''), el('h2', {}, e.name), sayLine(e), musicLine(e), stateBadges(e).length ? el('div', { class: 'badges' }, stateBadges(e)) : null),
-      !isGm() ? el('div', { class: 'btnrow' }, starButton(e), followButton(e), e.can_edit ? el('a', { class: 'btn', href: `#world/edit/${e.id}` }, 'Edit') : null, suggestEditButton(e), askAboutLink(e), itemCardButton(e)) : null,
+      !isGm() ? el('div', { class: 'btnrow' }, starButton(e), followButton(e), e.can_edit ? el('a', { class: 'btn', href: `#world/edit/${e.id}` }, 'Edit') : null, suggestEditButton(e), askAboutLink(e), itemCardButton(e), spellCardButton(e)) : null,
       isGm() ? el('div', { class: 'btnrow' }, starButton(e), followButton(e), el('a', { class: 'btn', href: `#world/edit/${e.id}` }, 'Edit'),
         showButton(e),
         revealButton(e, rerenderWorld),
@@ -387,6 +388,7 @@ function viewEntry(id, tab) {
         startHereButton(e),
         cardsButton(e),
         itemCardButton(e),
+        spellCardButton(e),
         world.info?.discord && e.visibility !== 'gm' && e.status !== 'suggested' ? confirmButton('Post to Discord', async () => {
           try { await api('settings', { method: 'POST', body: { post: e.id } }); toast(`Posted ${e.name} to Discord`); } catch (err) { toast(err.message, 'bad'); }
         }, 'btn ghost') : null,
@@ -678,6 +680,7 @@ export async function showWorld(parts, { keepScroll = false } = {}) {
   else if (view === 'pictures') node = await viewPictures();
   else if (view === 'numbers') node = await viewNumbers();
   else if (view === 'itemcards') node = await viewItemCards(arg || '');
+  else if (view === 'spellcards') node = await viewSpellCards(arg || '');
   else if (view === 'bin') node = await viewBin();
   else if (view === 'atlas') node = viewAtlas();
   else if (view === 'maps') node = viewMaps();

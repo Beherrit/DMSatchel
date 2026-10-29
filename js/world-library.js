@@ -137,5 +137,6 @@ export function viewLibrary(tabKey, rerender) {
     el('div', { class: 'panel-head' }, el('h2', {}, 'Your library'),
       el('p', {}, 'Short notes on monsters, items, classes, species and more from the books your group owns: enough to know what they are and what they do. Bestiary creatures turn up in encounters and dungeons; items in loot and shops; classes, subclasses and species in the Character Forge.')),
     el('nav', { class: 'subtabs', 'aria-label': 'Library sections' }, TABS.map(([k, l]) => el('a', { href: `#world/library/${k}`, 'aria-current': k === key ? 'page' : 'false' }, l, counts[k] ? el('span', { class: 'count' }, ` ${counts[k]}`) : null))),
+    key === 'spells' && list.length ? el('p', { class: 'small' }, el('a', { href: '#world/spellcards/library' }, 'Print these as spell cards')) : null,
     el('div', { class: 'lib-layout' }, el('div', { class: 'lib-list' }, search, results), isMember() ? addForm(key, t, rerender) : null));
 }

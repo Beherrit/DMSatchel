@@ -1,16 +1,21 @@
-// Cards to hand across the table, poker-card size and nine to a page: magic items (#world/itemcards/<which>) and,
-// later, spells. <which>: nothing for every item, "held" for what the party's treasury holds, i:<id> for one item,
-// t:<tag> for a tag.
+// Cards to hand across the table, poker-card size and nine to a page.
+// Magic items: #world/itemcards/<which>: nothing for every item, "held" for what the party's treasury holds, i:<id> for
+// one item, t:<tag> for a tag. Spells: #world/spellcards/<which>: c:<id> for one character (their spells with slots to
+// tick, plus cards for any of them from the world's library), "library" for the library's spells, nothing for every
+// caster in the party.
 import { el, setKids } from './dom.js';
 import { api, isMember } from './api.js';
 import { worldEntries, getEntry, byName, notice } from './world-store.js';
-import { itemCard, itemsNamed } from './play-cards.js';
+import { itemCard, itemsNamed, spellListCard, librarySpellCard } from './play-cards.js';
+import { characterOf } from './sheet-ui.js';
 
 function playCard(c, onRemove) {
   return el('article', { class: 'play-card' },
     el('header', {}, el('h3', {}, c.title), onRemove ? el('button', { class: 'btn small ghost card-x', type: 'button', 'aria-label': `Leave out ${c.title}`, onclick: onRemove }, '✕') : null),
     c.sub ? el('p', { class: 'pc-sub' }, c.sub) : null,
     c.image ? el('img', { class: 'pc-pic', src: c.image, alt: '' }) : null,
+    c.slots?.length ? el('div', { class: 'pc-slots' }, c.slots.map(([label, n]) => el('span', { class: 'pc-slot' }, `${label} `, el('span', { class: 'sr-only' }, `${n} slots`),
+      el('span', { 'aria-hidden': 'true' }, Array.from({ length: n }, () => el('span', { class: 'pc-box' })))))) : null,
     c.text ? el('div', { class: 'pc-text' }, c.text.split(/\n{2,}/).map((p) => el('p', {}, p))) : null,
     c.foot ? el('footer', { class: 'pc-foot' }, c.foot) : null);
 }
@@ -42,3 +47,24 @@ export async function viewItemCards(arg = '') {
 
 // "Print card" on an item's page, for anyone in the world.
 export const itemCardButton = (e) => (e.kind === 'item' && isMember() ? el('a', { class: 'btn small ghost', href: `#world/itemcards/i:${e.id}` }, 'Print card') : null);
+
+const librarySpells = () => worldEntries().filter((e) => e.kind === 'rule' && e.fields?.category === 'Spell');
+const casters = () => worldEntries().filter((e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status))
+  .map((e) => ({ e, sb: characterOf(e)?.stats?.spellbook })).filter((x) => x.sb);
+
+export async function viewSpellCards(arg = '') {
+  const lib = librarySpells();
+  let cards = [], title = 'Spell cards';
+  if (arg.startsWith('c:')) {
+    const e = getEntry(arg.slice(2)), sb = e && characterOf(e)?.stats?.spellbook;
+    if (!sb) return notice('No spells to print', 'This character doesn’t cast spells (or wasn’t made in the Character Forge).');
+    const known = new Set([...sb.cantrips, ...Object.values(sb.byLevel).flat()].map((n) => n.toLowerCase()));
+    cards = [spellListCard(e.name, sb), ...lib.filter((s) => known.has(s.name.toLowerCase())).sort(byName).map(librarySpellCard)];
+    title = `${e.name}: spell cards`;
+  } else if (arg === 'library') { cards = [...lib].sort(byName).map(librarySpellCard); title = 'Spell cards: your library'; }
+  else cards = casters().sort((a, b) => byName(a.e, b.e)).map(({ e, sb }) => spellListCard(e.name, sb));
+  return cardSheet(title, 'Each caster’s spells with slot boxes to tick in pencil, and full cards for spells from your world’s library. Poker-card size, nine to a page. ✕ leaves one out.', cards);
+}
+
+// "Spell cards" on a caster's page.
+export const spellCardButton = (e) => (e.kind === 'character' && isMember() && characterOf(e)?.stats?.spellbook ? el('a', { class: 'btn small ghost', href: `#world/spellcards/c:${e.id}` }, 'Spell cards') : null);
