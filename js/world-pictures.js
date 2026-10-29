@@ -1,13 +1,13 @@
 // The picture wall: every picture in the world (entries' pictures and galleries, and maps) on one page, filterable
 // by kind and tag, each opening its entry or map. Route: #world/pictures
 import { el, setKids } from './dom.js';
-import { isGm } from './api.js';
+import { isGm, mapImageUrl } from './api.js';
 import { world, worldEntries, kindLabel, notice } from './world-store.js';
 import { KINDS } from './world-schema.js';
 import { wallPictures, filterWall, wallFacets } from './picture-wall.js';
 
 const SHOW = 120;
-const mapSrc = (m) => `/api/maps?id=${encodeURIComponent(m.id)}&image=1&v=${m.version}`;
+const mapSrc = mapImageUrl;
 const kindName = (k) => (k === 'map' ? 'Maps' : KINDS[k]?.plural || kindLabel(k));
 
 export function viewPictures() {

@@ -265,6 +265,13 @@ to the log at the bottom.
     moot, a feast), shown on the calendar and in session prep.
 117. [x] **Prep checklist.** The GMs' own list of things to do before each session (print sheets, update the map),
     ticked off in session prep and cleared when a new session starts.
+118. [x] **Fuller backups.** The world backup also carries maps and their pins, the calendar, session prep, standing,
+    clocks, the treasury and the quote wall, and can be restored as a new world (never over an existing one).
+119. [ ] **Item cards.** Printable cards for magic items and loot (name, rarity, attunement, what it does) to hand
+    across the table, nine to a page.
+120. [ ] **Spell cards.** Printable cards for a character's spells from their spellbook, nine to a page.
+121. [ ] **Who's who.** A printable cast list of the people the party has met (from the session log), with
+    pictures, pronunciations and one line each, safe to hand to players.
 
 ## Ideas parking lot
 
@@ -387,3 +394,4 @@ to the log at the bottom.
 - Text size: an "A" button beside the theme switch cycles Normal → Larger (A+, 115%) → Largest (A++, 130%) → Smaller (A−, 90%), remembered per browser and applied before the page draws. Every font size in the stylesheet is multiplied by one --ts variable, so text grows while layouts, maps and pins keep their geometry (no page zoom); printing always uses the normal size. Checked on a phone at the largest size: no sideways scrolling.
 - Repeating events: events have "Repeats" (every week, every month, every year) and an optional "Repeats until" date. From their own date on, they come round again on the calendar ("↻ Market day" in the month grid; the day's detail says how often) and in session prep's "Coming up". A week is the calendar's own week length; a monthly event skips months too short for its day. js/repeats.js unit tested.
 - Prep checklist: session prep's side column starts with "Before the table (1/3)": the GMs' own steps (add, tick, move up, remove; up to 40). Ticks belong to the session being prepared (the next session's number), so they clear by themselves once a new session is logged, and the steps stay for next time. Kept in session prep (prep.checklist; PATCH settings {checklist, round}). js/checklist.js unit tested; route tested against PGlite.
+- Fuller backups: Admin → Backup's "Download backup" now saves the whole world in one file (format 2): entries with GM secrets, the world's settings (calendar, session prep with the journey and checklist, templates, own fields, session zero, time of day, start here, tag pages), every map with its picture (uploaded pictures are packed in) and pins, fog and scale, standing history, clocks, the treasury and the quote wall. The page gathers it from several smaller requests, so no single response outgrows Vercel's limit. "Restore as a new world…" makes a new world you own ("<name> (restored)") and fills it step by step with progress (settings, entries in batches with parents first, maps, then the rest); every entry gets a fresh id everywhere it's referenced, so the original world (or any other) is never touched. Older entry-only backups still import into the current world. Also fixed: map pictures now load in every world, not just your first (their address names the world). Additive only: worlds GET ?backup, POST {restore} and {restore_extras}. js/backup.js unit tested; a full back-up-and-restore round trip tested against PGlite.

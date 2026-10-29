@@ -6,6 +6,12 @@
 // PATCH {id, member, role}    change someone's role: owner, gm or player (owner)
 // DELETE ?id=&member=         remove someone from the world (owner, or yourself to leave)
 // DELETE ?id=                 archive the world (owner); nothing is deleted
+//
+// Backups (see js/backup.js; the page puts the file together, so no one response grows too big):
+// GET ?id=&backup=1           (owner) the world's settings, maps (images that are links; uploaded ones come from the
+//                             maps API), standing, clocks, treasury and quotes. Entries come from the entries API.
+// POST {restore: {world}}     a new world from a backup's settings; you own it ("<name> (restored)")
+// POST {restore_extras: {id, standing, clocks, ledger, quotes}}   (owner of that world) add a backup's rows to it
 import { route, send, fail, sql, newCode, newId, requireSignedIn, slugify, worldContext, myWorlds } from './_lib/core.js';
 
 const ROLES = ['owner', 'gm', 'player'];
@@ -16,6 +22,28 @@ async function ownerCtx(req, res, id) {
   if (!req.world || req.world.id !== id) { fail(res, 404, 'That world doesn’t exist.'); return false; }
   if (req.role !== 'owner') { fail(res, 403, 'Only this world’s owner can do that.'); return false; }
   return true;
+}
+
+// A backup's rows, added to a world you own (one statement per kind of row).
+async function restoreExtras(req, res, x) {
+  if (!(await ownerCtx(req, res, String(x?.id || '')))) return;
+  const w = req.world.id, list = (v, n = 5000) => JSON.stringify((Array.isArray(v) ? v : []).slice(0, n));
+  const counts = {};
+  counts.standing = (await sql`INSERT INTO standing_log (world_id, entry_id, value, delta, reason, session_id, secret, gm_id, at)
+    SELECT ${w}, r.entry_id, COALESCE(r.value, 0), COALESCE(r.delta, 0), COALESCE(r.reason, ''), r.session_id, COALESCE(r.secret, false), ${req.gm.id}, COALESCE(r.at, now())
+    FROM jsonb_to_recordset(${list(x.standing)}::jsonb) AS r(entry_id text, value int, delta int, reason text, session_id text, secret boolean, at timestamptz)
+    WHERE r.entry_id IN (SELECT id FROM entries WHERE world_id = ${w}) RETURNING id`).length;
+  counts.clocks = (await sql`INSERT INTO clocks (world_id, entry_id, name, size, filled, per_turn, secret, note, created_by)
+    SELECT ${w}, r.entry_id, LEFT(COALESCE(r.name, 'Clock'), 120), LEAST(GREATEST(COALESCE(r.size, 6), 2), 24), GREATEST(COALESCE(r.filled, 0), 0), COALESCE(r.per_turn, 0), COALESCE(r.secret, false), LEFT(COALESCE(r.note, ''), 2000), ${req.gm.id}
+    FROM jsonb_to_recordset(${list(x.clocks, 500)}::jsonb) AS r(entry_id text, name text, size int, filled int, per_turn int, secret boolean, note text)
+    WHERE r.entry_id IN (SELECT id FROM entries WHERE world_id = ${w}) RETURNING id`).length;
+  counts.ledger = (await sql`INSERT INTO party_ledger (world_id, at, gm_id, cp, item, qty, holder, note, session_id)
+    SELECT ${w}, COALESCE(r.at, now()), ${req.gm.id}, COALESCE(r.cp, 0), LEFT(COALESCE(r.item, ''), 200), COALESCE(r.qty, 0), LEFT(COALESCE(r.holder, ''), 120), LEFT(COALESCE(r.note, ''), 500), r.session_id
+    FROM jsonb_to_recordset(${list(x.ledger)}::jsonb) AS r(at timestamptz, cp bigint, item text, qty int, holder text, note text, session_id text) RETURNING id`).length;
+  counts.quotes = (await sql`INSERT INTO table_quotes (world_id, gm_id, text, said_by, session_id, created_at)
+    SELECT ${w}, ${req.gm.id}, LEFT(r.text, 500), LEFT(COALESCE(r.said_by, ''), 80), r.session_id, COALESCE(r.created_at, now())
+    FROM jsonb_to_recordset(${list(x.quotes, 1000)}::jsonb) AS r(text text, said_by text, session_id text, created_at timestamptz) WHERE COALESCE(r.text, '') <> '' RETURNING id`).length;
+  send(res, 200, { restored: counts });
 }
 
 async function detail(w) {
@@ -29,6 +57,21 @@ async function detail(w) {
 export default route({
   async GET(req, res) {
     const id = req.query?.id;
+    if (id && req.query.backup) {
+      if (!(await ownerCtx(req, res, id))) return;
+      const w = req.world;
+      const maps = await sql`SELECT id, name, width, height, pins, entry_id, secret, miles, fog, CASE WHEN image LIKE 'data:%' THEN NULL ELSE image END AS url
+        FROM maps WHERE world_id = ${w.id} AND NOT deleted ORDER BY created_at`;
+      const standing = await sql`SELECT s.entry_id, s.value, s.delta, s.reason, s.session_id, s.secret, s.at FROM standing_log s JOIN entries e ON e.id = s.entry_id
+        WHERE e.world_id = ${w.id} ORDER BY s.at, s.id`;
+      const clocks = await sql`SELECT entry_id, name, size, filled, per_turn, secret, note FROM clocks WHERE world_id = ${w.id} AND NOT deleted ORDER BY id`;
+      const ledger = await sql`SELECT at, cp, item, qty, holder, note, session_id FROM party_ledger WHERE world_id = ${w.id} AND NOT deleted ORDER BY at, id`;
+      const quotes = await sql`SELECT text, said_by, session_id, created_at FROM table_quotes WHERE world_id = ${w.id} AND NOT deleted ORDER BY created_at, id`;
+      return send(res, 200, {
+        world: { name: w.name, tagline: w.tagline, about: w.about, calendar: w.calendar, cal: w.cal, prep: w.prep, templates: w.templates, custom_fields: w.custom_fields,
+          primer: w.primer, clock: w.clock, start_here: w.start_here, tag_notes: w.tag_notes },
+        maps, standing, clocks, ledger, quotes });
+    }
     if (id) {
       if (!(await ownerCtx(req, res, id))) return;
       return send(res, 200, { world: await detail(req.world) });
@@ -41,6 +84,8 @@ export default route({
   },
   async POST(req, res) {
     if (!requireSignedIn(req, res)) return;
+    if (req.body.restore_extras) return restoreExtras(req, res, req.body.restore_extras);
+    if (req.body.restore) req.body = { ...req.body.restore.world, restoring: req.body.restore.world || {} };
     const name = String(req.body.name || '').trim().slice(0, 120);
     if (!name) return fail(res, 400, 'Give the world a name.');
     const count = (await sql`SELECT count(*)::int AS n FROM members WHERE gm_id = ${req.gm.id} AND role = 'owner'`)[0].n;
@@ -51,6 +96,14 @@ export default route({
     await sql`INSERT INTO worlds (id, slug, name, tagline, public, gm_invite, player_invite, created_by)
       VALUES (${id}, ${slug}, ${name}, ${String(req.body.tagline || '').slice(0, 240)}, ${Boolean(req.body.public)}, ${newCode()}, ${newCode()}, ${req.gm.id})`;
     await sql`INSERT INTO members (world_id, gm_id, role) VALUES (${id}, ${req.gm.id}, 'owner')`;
+    // Restoring a backup: its settings come along (the entries, maps and the rest follow in their own requests).
+    const r = req.body.restoring;
+    if (r) {
+      const j = (v) => (v && typeof v === 'object' ? JSON.stringify(v) : null);
+      await sql`UPDATE worlds SET name = ${`${name} (restored)`.slice(0, 120)}, about = ${String(r.about || '').slice(0, 20000)}, calendar = ${String(r.calendar || '').slice(0, 2000)},
+        cal = ${j(r.cal)}::jsonb, prep = ${j(r.prep)}::jsonb, templates = ${j(r.templates)}::jsonb, custom_fields = ${j(r.custom_fields)}::jsonb, primer = ${j(r.primer)}::jsonb,
+        clock = ${j(r.clock)}::jsonb, start_here = ${j(r.start_here)}::jsonb, tag_notes = ${j(r.tag_notes)}::jsonb WHERE id = ${id}`;
+    }
     const w = (await sql`SELECT * FROM worlds WHERE id = ${id}`)[0];
     send(res, 201, { world: await detail(w), worlds: await myWorlds(req.gm) });
   },

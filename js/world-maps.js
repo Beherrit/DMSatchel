@@ -1,7 +1,7 @@
 // World maps: upload a map, pan and zoom it, and pin entries to it.
 // Routes: #world/maps · #world/map/<id> · #world/map/<id>/<pinId>
 import { el, toast, confirmButton, setKids } from './dom.js';
-import { api, isGm, isMember } from './api.js';
+import { api, isGm, isMember, mapImageUrl } from './api.js';
 import { shrinkImage } from './dom.js';
 import { travelText } from './encounters.js';
 import { world, getEntry, findByName, link, kindLabel, notice, nameList, whenTime, createEntry, mapsOf, trail } from './world-store.js';
@@ -28,7 +28,7 @@ async function setPartyAt(entry) {
 }
 
 export const PIN_ICONS = { region: ['Region', '⬢'], area: ['Area', '◍'], city: ['City', '■'], town: ['Town', '●'], port: ['Port', '◗'], dungeon: ['Dungeon', '▼'], temple: ['Temple', '✚'], camp: ['Camp', '▲'], danger: ['Danger', '✕'], poi: ['Point of interest', '◆'] };
-const imageUrl = (m) => `/api/maps?id=${encodeURIComponent(m.id)}&image=1&v=${m.version}`;
+const imageUrl = mapImageUrl;
 
 export function pinsFor(entryId) {
   const out = [];

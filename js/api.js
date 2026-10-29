@@ -15,6 +15,8 @@ function initialWorldKey() {
 }
 session.worldKey = initialWorldKey();
 
+// A map's picture, in the world being viewed (the server can't tell which world from the map's id alone).
+export const mapImageUrl = (m) => `/api/maps?id=${encodeURIComponent(m.id)}&image=1${m.version ? `&v=${m.version}` : ''}${session.worldKey ? `&world=${encodeURIComponent(session.worldKey)}` : ''}`;
 export const currentWorld = () => session.worlds.find((w) => w.slug === session.worldKey || w.id === session.worldKey) || null;
 // Your real role in the open world: owner, gm, player, or null (a visitor to a public world).
 export const realRole = () => currentWorld()?.role || (session.gm?.role === 'admin' ? 'owner' : null);

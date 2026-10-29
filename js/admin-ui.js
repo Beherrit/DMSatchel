@@ -1,12 +1,13 @@
 // The admin page: building tools for GMs; members, invites, settings and backups for the world's owner; people for the site admin.
 import { el, toast, copyText, download, confirmButton, setKids } from './dom.js';
-import { api, isAdmin, isGm, isOwner, isMember, signedIn, session, currentWorld, refreshWorlds, setWorld } from './api.js';
+import { api, isAdmin, isGm, isOwner, isMember, signedIn, session, currentWorld, refreshWorlds, setWorld, mapImageUrl } from './api.js';
 import { loadWorld } from './world-ui.js';
 import { world } from './world-store.js';
 import { buildSection, pinsSection } from './admin-build.js';
 import { openSignIn } from './signin.js';
 import { KINDS } from './world-schema.js';
 import { markInvitesSeen } from './onboarding.js';
+import { BACKUP_FORMAT, readBackup, remapIds, chunks, parentsFirst } from './backup.js';
 
 let root;
 const when = (iso) => (iso ? new Date(iso).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) : 'never');
@@ -161,32 +162,90 @@ async function activitySection() {
   return box;
 }
 
+// A picture as a data: address, so the backup file carries it.
+const asDataUrl = (blob) => new Promise((resolve, reject) => { const r = new FileReader(); r.onload = () => resolve(r.result); r.onerror = () => reject(new Error('A map picture didn’t load.')); r.readAsDataURL(blob); });
+
+// The whole world as one file: settings, entries (GM secrets included), maps with their pictures, standing, clocks,
+// treasury and quotes. Put together here from several smaller requests, so no single one grows too big.
+async function fullBackup(status) {
+  const wid = currentWorld()?.id || world.info?.id;
+  status.textContent = 'Gathering the entries…';
+  const r = await api('entries');
+  status.textContent = 'Gathering maps, standing, clocks, treasury and quotes…';
+  const x = await api('worlds', { query: { id: wid, backup: 1 } });
+  const maps = [];
+  for (const [i, m] of x.maps.entries()) {
+    status.textContent = `Packing map ${i + 1} of ${x.maps.length}…`;
+    let image = m.url;
+    if (!image) { const res = await fetch(mapImageUrl(m), { credentials: 'same-origin' }); if (res.ok) image = await asDataUrl(await res.blob()); }
+    const { url, ...rest } = m;
+    maps.push({ ...rest, image });
+  }
+  const file = { format: BACKUP_FORMAT, exported: new Date().toISOString(), world: x.world, entries: r.entries, maps, standing: x.standing, clocks: x.clocks, ledger: x.ledger, quotes: x.quotes };
+  download(`${(world.info?.slug || 'world')}-backup-${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify(file), 'application/json');
+  status.textContent = `Saved: ${r.entries.length} entries, ${maps.length} maps, ${x.standing.length} standing changes, ${x.clocks.length} clocks, ${x.ledger.length} treasury lines, ${x.quotes.length} quotes.`;
+}
+
+// A backup restored as a brand-new world you own; every entry gets a fresh id, so nothing existing is touched.
+async function restoreAsNew(data, status, done) {
+  const read = readBackup(data);
+  if (read.error) throw new Error(read.error);
+  const { backup: b } = remapIds(read);
+  status.textContent = 'Making the new world…';
+  const nw = (await api('worlds', { method: 'POST', body: { restore: { world: { ...b.world, name: b.world.name || 'Restored world' } } } })).world;
+  const inNew = { world: nw.slug };
+  const parts = chunks(parentsFirst(b.entries), 150);
+  let n = 0;
+  for (const part of parts) { status.textContent = `Restoring entries: ${n} of ${b.entries.length}…`; n += (await api('entries', { method: 'POST', query: inNew, body: { mode: 'import', entries: part } })).imported; }
+  let maps = 0;
+  for (const m of b.maps) {
+    if (!m.image) continue;
+    status.textContent = `Restoring map ${maps + 1} of ${b.maps.length}…`;
+    const made = (await api('maps', { method: 'POST', query: inNew, body: { map: { name: m.name, image: m.image, width: m.width, height: m.height, pins: m.pins, entry_id: m.entry_id, secret: m.secret } } })).map;
+    if (m.fog || m.miles) await api('maps', { method: 'PUT', query: { ...inNew, id: made.id }, body: { map: { fog: m.fog || null, miles: m.miles || null, version: made.version } } });
+    maps++;
+  }
+  status.textContent = 'Restoring standing, clocks, treasury and quotes…';
+  const x = (await api('worlds', { method: 'POST', body: { restore_extras: { id: nw.id, standing: b.standing, clocks: b.clocks, ledger: b.ledger, quotes: b.quotes } } })).restored;
+  // The world list catches up when the new world is opened (refreshing it here would redraw this page).
+  status.textContent = `Restored as “${nw.name}”: ${n} entries, ${maps} maps, ${x.standing} standing changes, ${x.clocks} clocks, ${x.ledger} treasury lines, ${x.quotes} quotes. Members and invites start fresh.`;
+  done(nw);
+}
+
 function backupSection() {
   const status = el('p', { class: 'form-status', role: 'status' });
   const file = el('input', { type: 'file', id: 'a-import', accept: 'application/json,.json', hidden: true });
+  const restoreFile = el('input', { type: 'file', id: 'a-restore', accept: 'application/json,.json', hidden: true });
+  const openNew = el('div', { class: 'btnrow' });
   file.addEventListener('change', async () => {
     const f = file.files[0]; if (!f) return;
     try {
-      const data = JSON.parse(await f.text());
-      const entries = Array.isArray(data) ? data : data.entries;
-      if (!Array.isArray(entries)) throw new Error('That file has no entries in it.');
-      status.textContent = `Importing ${entries.length} entries…`;
-      const r = await api('entries', { method: 'POST', body: { mode: 'import', entries } });
-      if (data.world) await api('settings', { method: 'PUT', body: data.world });
+      const read = readBackup(JSON.parse(await f.text()));
+      if (read.error) throw new Error(read.error);
+      status.textContent = `Importing ${read.entries.length} entries…`; status.className = 'form-status';
+      const r = await api('entries', { method: 'POST', body: { mode: 'import', entries: read.entries } });
       status.textContent = `Imported ${r.imported} entries. Entries with the same id were replaced.`;
       loadWorld(true);
     } catch (err) { status.textContent = err.message || 'That file isn’t a world backup.'; status.className = 'form-status error'; }
     file.value = '';
   });
+  restoreFile.addEventListener('change', async () => {
+    const f = restoreFile.files[0]; if (!f) return;
+    status.className = 'form-status'; setKids(openNew);
+    try {
+      await restoreAsNew(JSON.parse(await f.text()), status, (nw) => setKids(openNew, el('button', { class: 'btn primary', type: 'button', onclick: () => { setWorld(nw.slug); location.hash = 'world'; location.reload(); } }, `Open ${nw.name}`)));
+    } catch (err) { status.textContent = `${err.message || 'That file isn’t a world backup.'} Anything restored so far is in the new world; this one is untouched.`; status.className = 'form-status error'; }
+    restoreFile.value = '';
+  });
   return el('section', { class: 'card' }, el('h3', {}, 'Backup'),
     el('p', { class: 'muted' }, el('a', { href: '#world/export' }, 'Export & print'), ' makes a readable Markdown or print copy, for GMs or players. ',
-      'Download the whole world, GM secrets included, as one JSON file. Keep a copy somewhere safe. Importing a backup adds its entries and replaces any with the same id.'),
+      'A backup is the whole world in one file: entries with GM secrets, settings, maps with their pictures, standing, clocks, the treasury and the quote wall. Keep a copy somewhere safe.'),
     el('div', { class: 'btnrow' },
-      el('button', { class: 'btn', type: 'button', onclick: async () => {
-        try { const r = await api('entries'); download(`world-backup-${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify({ exported: new Date().toISOString(), world: r.world, entries: r.entries }, null, 2), 'application/json'); }
-        catch (err) { toast(err.message, 'bad'); }
-      } }, 'Download backup'),
-      el('label', { class: 'btn', for: 'a-import' }, 'Import backup…'), file), status);
+      el('button', { class: 'btn primary', type: 'button', onclick: async () => { status.className = 'form-status'; try { await fullBackup(status); } catch (err) { status.textContent = err.message; status.className = 'form-status error'; } } }, 'Download backup'),
+      el('label', { class: 'btn', for: 'a-restore' }, 'Restore as a new world…'), restoreFile,
+      el('label', { class: 'btn ghost', for: 'a-import' }, 'Import entries into this world…'), file),
+    el('p', { class: 'muted small' }, 'Restoring makes a new world you own, with fresh ids, so this world (and any other) is never changed. Importing entries into this world adds them and replaces any with the same id.'),
+    status, openNew);
 }
 
 // Build, pins and activity are open to every GM of the world; members, settings and backups to its owner;
