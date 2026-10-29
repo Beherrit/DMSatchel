@@ -140,6 +140,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Where the party has been**: each move of the party is kept with the in-world date; maps draw the route so far and the party page lists the journey.
 - **Wish lists**: players note what their characters hope to find or earn; GMs see them in session prep and beside matching loot.
 - **Read-aloud in prep**: session prep and the printable sheet gather the “> ” boxes from what's planned, in order, ready to read.
+- **Roll a detail**: “Roll” beside an NPC's looks, personality, voice, wants and secret, a settlement's trouble or landmarks, and a place's features fills the field from the app's tables.
 - **Likely duplicates**: a GM page of entries that may be the same thing, to merge or mark as different.
 - **Merge two entries**: GMs fold a duplicate into the entry they keep; texts, tags, connections, what's inside it, mentions, talk, standing and map pins move over, and the spare goes to the bin.
 - **Many at once**: GMs tick entries on any list or search and reveal, hide, tag, untag or move them into a place together.

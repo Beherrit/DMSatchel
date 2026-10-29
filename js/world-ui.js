@@ -48,6 +48,7 @@ import { pushRecent, readRecent } from './recent.js';
 import { copyPlaceDialog } from './world-copyplace.js';
 import { mergeButton } from './world-merge.js';
 import { sayLine } from './world-say.js';
+import { rollButton } from './world-roll.js';
 import { cleanSay, sayOf } from './say.js';
 import { tableSection } from './world-tables.js';
 import { parseSearch, searchHash, searchEntries } from './search.js';
@@ -494,9 +495,10 @@ function viewEdit(id, kindForNew) {
         s.value = v;
         return el('div', { class: 'field' }, el('label', { for: `ff-${k}` }, label), s);
       }
-      return type === 'long'
-        ? el('div', { class: 'field wide' }, el('label', { for: `ff-${k}` }, label), el('textarea', { id: `ff-${k}`, 'data-field': k, rows: 3 }, v))
-        : el('div', { class: 'field' }, el('label', { for: `ff-${k}` }, label), el('input', { type: 'text', id: `ff-${k}`, 'data-field': k, value: v }));
+      const box = type === 'long' ? el('textarea', { id: `ff-${k}`, 'data-field': k, rows: 3 }, v) : el('input', { type: 'text', id: `ff-${k}`, 'data-field': k, value: v });
+      const roll = rollButton(() => kindSel.value, k, box, label, () => ({ type: fieldsBox.querySelector('[data-field="type"]')?.value }));
+      const head = roll ? el('div', { class: 'label-row' }, el('label', { for: `ff-${k}` }, label), roll) : el('label', { for: `ff-${k}` }, label);
+      return el('div', { class: `field${type === 'long' ? ' wide' : ''}` }, head, box);
     }), gm ? el('p', { class: 'field wide own-fields' }, customFieldsButton(kindSel.value, renderFields)) : null);
   }
   function collectFields() { for (const f of fieldsBox.querySelectorAll('[data-field]')) e.fields[f.dataset.field] = f.value; }
@@ -541,6 +543,14 @@ function viewEdit(id, kindForNew) {
         catch (err) { status.textContent = err.message; status.className = 'form-status error'; }
       }, 'btn ghost') : null));
   renderFields();
+  // An NPC's secret can be rolled too (kept in step with the type).
+  const secretBox = form.querySelector('#f-secret');
+  if (secretBox) {
+    const label = secretBox.previousElementSibling;
+    const row = el('div', { class: 'label-row' }); label.replaceWith(row); row.append(label);
+    const sync = () => { row.querySelector('.roll-btn')?.remove(); const b = rollButton(() => kindSel.value, 'secret', secretBox, 'secret'); if (b) row.append(b); };
+    kindSel.addEventListener('change', sync); sync();
+  }
 
   // Same or similar names already in the world, under the name field (new entries, or a renamed one).
   if (form.querySelector('#f-name')) nameCheck(form.querySelector('#f-name'), existing?.id);

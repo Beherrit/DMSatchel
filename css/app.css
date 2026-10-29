@@ -1364,3 +1364,7 @@ div.poll-row { cursor: default }
 .dp-side .kind-tag { margin-left: 6px }
 .dp-side p { margin: 4px 0 6px }
 @media (max-width: 560px) { .dp-sides { grid-template-columns: minmax(0, 1fr) } }
+
+/* Roll a detail */
+.label-row { display: flex; align-items: baseline; justify-content: space-between; gap: 8px }
+.label-row .roll-btn { padding: 1px 8px; font-size: 12px }
