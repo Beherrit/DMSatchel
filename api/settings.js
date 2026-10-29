@@ -122,7 +122,8 @@ export default route({
         await sql`UPDATE entries SET visibility = 'all', updated_by = ${req.gm.id}, updated_at = now(), version = version + 1 WHERE id = ${e.id}`;
         await sql`INSERT INTO history (entry_id, gm_id, action) VALUES (${e.id}, ${req.gm.id}, 'reveal')`;
       }
-      const shown = { entry_id: e.id, at: new Date().toISOString(), by: req.gm.name };
+      // as: 'poster' shows a place's job board (js/world-poster.js) rather than the entry itself.
+      const shown = { entry_id: e.id, at: new Date().toISOString(), by: req.gm.name, ...(req.body.as === 'poster' ? { as: 'poster' } : {}) };
       await sql`UPDATE worlds SET shown = ${JSON.stringify(shown)} WHERE id = ${req.world.id}`;
       return send(res, 200, { shown, revealed: e.visibility === 'gm' });
     }

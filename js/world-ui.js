@@ -94,6 +94,7 @@ const viewWeb = lazyView(() => import('./world-web.js'), 'viewWeb');
 const viewSay = lazyView(() => import('./world-say.js'), 'viewSay');
 const viewDupes = lazyView(() => import('./world-dupes.js'), 'viewDupes');
 const viewHall = lazyView(() => import('./world-hall.js'), 'viewHall');
+const viewPoster = lazyView(() => import('./world-poster.js'), 'viewPoster');
 const viewAsk = lazyView(() => import('./world-ask.js'), 'viewAsk');
 const viewQuotes = lazyView(() => import('./world-quotes.js'), 'viewQuotes');
 const viewPictures = lazyView(() => import('./world-pictures.js'), 'viewPictures');
@@ -732,6 +733,7 @@ export async function showWorld(parts, { keepScroll = false } = {}) {
   else if (view === 'itemcards') node = await viewItemCards(arg || '');
   else if (view === 'spellcards') node = await viewSpellCards(arg || '');
   else if (view === 'whoswho') node = await viewWhosWho();
+  else if (view === 'poster') node = await viewPoster(arg);
   else if (view === 'bin') node = await viewBin();
   else if (view === 'atlas') node = viewAtlas();
   else if (view === 'maps') node = viewMaps();

@@ -157,6 +157,7 @@ function questSection(place, rerender, compact) {
       compact ? null : el('button', { class: 'btn small', type: 'button', onclick: () => slot.prepend(previewBox(`Jobs for the ${place.name} board`, () => questDraft(place, +tierSel.value), 3, rerender)) }, 'Fill the board (3)'),
       compact ? null : tierSel,
       el('button', { class: 'btn small ghost', type: 'button', onclick: () => sendDraft({ kind: 'quest', parent_id: place.id, fields: { status: 'Available' } }) }, 'Write one')) : null,
+    compact ? null : el('p', { class: 'small' }, el('a', { href: `#world/poster/${place.id}` }, '📜 The board as a poster'), ' to print or show to the table'),
     slot, board);
 }
 

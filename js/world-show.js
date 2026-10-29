@@ -39,6 +39,19 @@ function popup(e, shown) {
   dialog.showModal();
 }
 
+// A place's job board, as a poster (built from the jobs this person can see).
+async function posterPopup(place, shown) {
+  const { posterFor, posterNode } = await import('./world-poster.js');
+  dialog?.remove();
+  dialog = el('dialog', { class: 'dialog show-dialog', 'aria-label': `${shown.by || 'The GM'} is showing you the ${place.name} job board` }, el('div', { class: 'dialog-body' },
+    el('p', { class: 'eyebrow' }, `${shown.by || 'The GM'} is showing you`),
+    posterNode(posterFor(place)),
+    el('div', { class: 'btnrow' }, el('a', { class: 'btn primary', href: `#world/poster/${place.id}`, onclick: () => dialog.close() }, 'Open the poster'), el('button', { class: 'btn', type: 'button', onclick: () => dialog.close() }, 'Close'))));
+  document.body.append(dialog);
+  dialog.addEventListener('close', () => dialog.remove());
+  dialog.showModal();
+}
+
 // After a load or sync: pop up anything newly shown that this person hasn't seen (and didn't show themselves).
 // Something shown more than two hours ago isn't news any more.
 export function checkShown() {
@@ -47,6 +60,7 @@ export function checkShown() {
   markSeen(s.at);
   const e = getEntry(s.entry_id);
   if (!e || s.by === session.gm?.name && isGm()) return;
+  if (s.as === 'poster') { posterPopup(e, s); return; }
   popup(e, s);
 }
 
@@ -54,5 +68,5 @@ export function checkShown() {
 export function lastShownLine() {
   const s = world.info?.shown, e = s && getEntry(s.entry_id);
   if (!e) return null;
-  return el('p', { class: 'last-shown' }, '🖼 Last shown at the table: ', link(e), el('span', { class: 'muted small' }, ` · ${s.by || 'a GM'}, ${whenTime(s.at)}`));
+  return el('p', { class: 'last-shown' }, '🖼 Last shown at the table: ', s.as === 'poster' ? el('a', { href: `#world/poster/${e.id}` }, `the ${e.name} job board`) : link(e), el('span', { class: 'muted small' }, ` · ${s.by || 'a GM'}, ${whenTime(s.at)}`));
 }
