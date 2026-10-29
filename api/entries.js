@@ -52,7 +52,7 @@ function clean(input, custom = {}) {
   if (!name) return { error: 'Give the entry a name.' };
   const allowed = new Set([...KINDS[e.kind].fields.map(([k]) => k), ...customKeys(e.kind, custom), 'say']);
   const fields = {};
-  for (const [k, v] of Object.entries(e.fields || {})) if (allowed.has(k) && v != null && String(v).trim() && (k !== 'image' || isImageRef(String(v)))) fields[k] = clip(v, ['stock', 'sheet', 'play', 'spread', 'known', 'attitudes', 'objectives', 'attendance', 'enc', 'goals', 'gallery'].includes(k) ? LIMITS.body : LIMITS.field);
+  for (const [k, v] of Object.entries(e.fields || {})) if (allowed.has(k) && v != null && String(v).trim() && (k !== 'image' || isImageRef(String(v)))) fields[k] = clip(v, ['stock', 'sheet', 'play', 'spread', 'known', 'attitudes', 'objectives', 'attendance', 'enc', 'goals', 'wishes', 'gallery'].includes(k) ? LIMITS.body : LIMITS.field);
   // Pictures in the gallery must be real image addresses.
   if (fields.gallery) { fields.gallery = cleanGallery(fields.gallery); if (!fields.gallery) delete fields.gallery; }
   if (fields.say) { fields.say = cleanSay(fields.say); if (!fields.say) delete fields.say; }
@@ -81,6 +81,8 @@ function shape(row, req) {
     if (row.fields?.objectives) out.fields = { ...row.fields, objectives: forPlayers(row.fields.objectives) };
     // A character's secret goals: only its player (and the GMs) see them.
     if (row.fields?.goals && !mine) out.fields = { ...out.fields, goals: goalsForOthers(row.fields.goals) };
+    // A character's wish list: only its player (and the GMs).
+    if (row.fields?.wishes && !mine) { out.fields = { ...out.fields }; delete out.fields.wishes; }
     // The world's own GM-only fields stay with the GMs, even on a player's own entries.
     const hide = secretCustomKeys(row.kind, customOf(req)).filter((k) => out.fields?.[k]);
     if (hide.length) { out.fields = { ...out.fields }; for (const k of hide) delete out.fields[k]; }

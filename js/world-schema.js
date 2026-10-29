@@ -56,7 +56,9 @@ export const KINDS = {
       // How NPCs and powers feel about this character (see attitudes.js); only GMs set it.
       ['attitudes', 'Attitudes', 'hidden', null, { gmOnly: true }],
       // The player's goals for the character (see goals.js); secret ones only the player and the GMs see.
-      ['goals', 'Goals', 'hidden']],
+      ['goals', 'Goals', 'hidden'],
+      // What the player hopes the character finds or earns (see wishes.js); only the player and the GMs see it.
+      ['wishes', 'Wish list', 'hidden']],
   },
   deity: {
     label: 'Deity', plural: 'Deities & Powers', blurb: 'Gods, patrons, demon lords and old powers.',

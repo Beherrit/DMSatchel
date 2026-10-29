@@ -28,6 +28,7 @@ import { initLinkSuggest } from './link-suggest.js';
 import { bulkControls } from './world-bulk.js';
 import { customFieldsButton } from './world-fields.js';
 import { goalsSection } from './world-goals.js';
+import { wishesSection } from './world-wishes.js';
 import { mentionsCard } from './world-mentions.js';
 import { starButton, favoritesNav, followButton, followingNav } from './world-favorites.js';
 import { rewardCard } from './world-reward.js';
@@ -289,6 +290,7 @@ function viewEntry(id, tab) {
     e.kind === 'npc' || e.kind === 'character' ? familySection(e, rerenderWorld) : null,
     e.kind === 'character' ? ownerLine(e) : null,
     goalsSection(e, rerenderWorld),
+    wishesSection(e, rerenderWorld),
     e.kind === 'character' ? sheetSection(e, rerenderWorld) : null,
     e.kind === 'character' ? knownSection(e, rerenderWorld) : null,
     e.kind === 'character' ? attitudesOfCharacter(e, rerenderWorld) : null,

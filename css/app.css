@@ -1341,3 +1341,11 @@ div.poll-row { cursor: default }
 .journey-dot { fill: var(--accent); stroke: #fff; stroke-width: 1.5 }
 .journey-list li { display: flex; flex-wrap: wrap; align-items: baseline; gap: .1rem .4rem; padding: .25rem 0; border-bottom: 1px solid var(--line) }
 .journey-list li .btn { margin-left: auto }
+
+/* Wish lists */
+.wish-list li { display: flex; align-items: baseline; gap: .5rem; padding: .25rem 0 }
+.wish-list .wish-text { flex: 1; min-width: 0 }
+.wish-list .got .wish-text { text-decoration: line-through; color: var(--muted) }
+.wish-add { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: .5rem }
+.wish-add input[type=text] { flex: 1 1 14rem; min-width: 0 }
+.wished { color: var(--accent); font-weight: 600 }
