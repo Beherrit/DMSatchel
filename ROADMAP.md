@@ -340,6 +340,14 @@ to the log at the bottom.
     they're after) and save it as a guild with its people.
 157. [x] **Tavern menu.** A tavern's page can roll a bill of fare (drinks, dishes, a bed for the night, priced to suit
     the town) to read out or print.
+158. [ ] **Price list.** A Reference "Prices" tab: gear, food, lodging and services with their prices, searchable
+    and grouped by kind, from the same price list the shops use.
+159. [ ] **Not yet visited.** The atlas marks places the party has never set foot in (from where the party has been),
+    so GMs can see what's still to explore.
+160. [ ] **Living costs.** When days pass on the calendar, offer to charge each character for their lifestyle
+    (from wretched to aristocratic), taken from their coin, with a line in the treasury log.
+161. [ ] **The treasury over time.** A small chart on the party page of the party's coin across sessions, from the
+    treasury log.
 
 ## Ideas parking lot
 
