@@ -1581,3 +1581,9 @@ details.quest-group > summary .section-title { display: inline }
 .forecast summary { cursor: pointer; font-size: calc(14px * var(--ts, 1)) }
 .forecast-list { margin: 6px 0 0; padding: 0; list-style: none; display: grid; gap: 6px }
 .forecast-list li { display: grid; gap: 0 }
+/* Reading for next session */
+.reading-list { display: grid; gap: 6px; margin: 6px 0 }
+.reading-list li { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; list-style: none }
+.reading-list li.done a { color: var(--muted) }
+.reading-tick { font-weight: 700; width: 1.2em; color: var(--good) }
+.reading-list li:not(.done) .reading-tick { color: var(--muted) }

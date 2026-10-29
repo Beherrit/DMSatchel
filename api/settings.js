@@ -6,6 +6,7 @@
 // PATCH {checklist: {add} | {remove} | {done, on} | {order}, round}   (GM) the prep checklist (prep.checklist); round
 //   is the next session's number, so ticks clear when a new session is logged
 // PATCH {reminder: {add} | {done, on} | {remove} | {clear_done}}   (GM) notes pinned to the next session (prep.reminders)
+// PATCH {reading: [entryIds]}   (GM) what players are asked to read before the next session (prep.reading)
 // PATCH {not_dupe: 'idA|idB'}   (GM) two entries with alike names are different things (prep.not_dupes)
 // PATCH {tag_note: {tag, text}}   (GM) a tag's description on its page
 // PATCH {start_here: {id, on} | {order}}   (GM) the entries newcomers should read first
@@ -21,6 +22,7 @@ import { cleanCalendar, advance, formatDate, today } from '../js/calendar.js';
 import { addStop, removeStop } from '../js/journey.js';
 import { applyChecklist } from '../js/checklist.js';
 import { applyReminder } from '../js/reminders.js';
+import { cleanReading } from '../js/reading.js';
 import { KINDS } from '../js/world-schema.js';
 import { readCustom, cleanCustomList, customKeys } from '../js/custom-fields.js';
 import { applySecret } from '../js/secrets.js';
@@ -195,6 +197,13 @@ export default route({
       if (r.error) return fail(res, 400, r.error);
       await sql`UPDATE worlds SET prep = jsonb_set(COALESCE(prep, '{}'::jsonb), '{reminders}', ${JSON.stringify(r.list)}::jsonb) WHERE id = ${req.world.id}`;
       return send(res, 200, { reminders: r.list });
+    }
+    if (req.body.reading !== undefined) {
+      const ids = cleanReading(req.body.reading);
+      const known = new Set((ids.length ? await sql`SELECT id FROM entries WHERE world_id = ${req.world.id} AND NOT deleted AND id = ANY(${ids})` : []).map((r) => r.id));
+      const list = cleanReading(ids, (id) => known.has(id));
+      await sql`UPDATE worlds SET prep = jsonb_set(COALESCE(prep, '{}'::jsonb), '{reading}', ${JSON.stringify(list)}::jsonb) WHERE id = ${req.world.id}`;
+      return send(res, 200, { reading: list });
     }
     if (req.body.not_dupe !== undefined) {
       const key = String(req.body.not_dupe).split('|').map((x) => x.trim().slice(0, 40)).filter(Boolean).sort().join('|');

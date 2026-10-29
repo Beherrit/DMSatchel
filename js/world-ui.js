@@ -32,6 +32,7 @@ import { goalsSection } from './world-goals.js';
 import { wishesSection } from './world-wishes.js';
 import { farewellCard } from './world-hall.js';
 import { noteRead, readsLine } from './world-reads.js';
+import { readingCard, noteReading } from './world-reading.js';
 import { neighbors } from './neighbors.js';
 import { questGroups } from './quest-groups.js';
 import { partyPageButton, partyPageNote, partyPageForm, canPartyEdit } from './world-partypage.js';
@@ -209,6 +210,7 @@ function viewHome() {
       worldCalendar() ? el('p', { class: 'today-line' }, el('a', { href: '#world/calendar' }, `📅 ${todayText()}`)) : null, isMember() ? nextSessionLine() : null, rsvpCard()),
     zeroNudge(),
     previouslyCard(),
+    readingCard(),
     onThisDayCard(),
     quoteCard(),
     // Open for newcomers (no earlier visit, or session zero not read yet), folded for everyone else.
@@ -336,7 +338,7 @@ function viewEntry(id, tab) {
   const e = world.entries.get(id);
   if (!e) return notice('Entry not found', 'It may have been deleted, or the link is wrong.');
   try { pushRecent(localStorage, session.worldKey, e.id); } catch { /* storage blocked */ }
-  noteRead(e);
+  noteRead(e); noteReading(e);
   const all = worldEntries();
   const crumbs = []; let p = e.parent_id && world.entries.get(e.parent_id), guard = 0;
   while (p && guard++ < 10) { crumbs.unshift(p); p = p.parent_id && world.entries.get(p.parent_id); }

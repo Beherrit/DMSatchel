@@ -303,7 +303,8 @@ export default route({
       if (req.isGmHere) return send(res, 200, { ok: true }); // GMs' own reads aren't counted
       const e = (await sql`SELECT id, kind, visibility, status, owner_id, shared_with FROM entries WHERE id = ${String(b.read).slice(0, 40)} AND world_id = ${req.world.id} AND NOT deleted`)[0];
       const sees = e && (e.owner_id === req.gm.id || (e.status === 'live' && (e.visibility === 'all' || sharedWith(e, req.gm.id))));
-      if (!sees || e.kind !== 'handout') return send(res, 200, { ok: true });
+      // Handouts, and anything on the reading list for next session.
+      if (!sees || (e.kind !== 'handout' && !(Array.isArray(req.world.prep?.reading) && req.world.prep.reading.includes(e.id)))) return send(res, 200, { ok: true });
       await sql`INSERT INTO entry_reads (entry_id, gm_id, world_id) VALUES (${e.id}, ${req.gm.id}, ${req.world.id})
         ON CONFLICT (entry_id, gm_id) DO UPDATE SET last_at = now()`;
       return send(res, 200, { ok: true });

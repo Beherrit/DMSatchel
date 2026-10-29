@@ -37,6 +37,7 @@ import { fieldsWith } from '../js/custom-fields.js';
 import { cleanSay } from '../js/say.js';
 import { cleanMusic } from '../js/music.js';
 import { journeyFor } from '../js/journey.js';
+import { readingFor } from '../js/reading.js';
 import { askUnread } from './_lib/ask.js';
 import { rsvpSummary, rsvpOpen } from '../js/rsvp.js';
 import { cleanTag, chainUp, setFieldValue } from '../js/bulk.js';
@@ -106,6 +107,21 @@ const partyAt = (w, rows, req) => {
 
 const visibleTo = (row, req) => req.isGmHere || (row.owner_id && req.gm && row.owner_id === req.gm.id) || (row.visibility === 'all' && row.status === 'live')
   || (row.status === 'live' && sharedWith(row, req.gm?.id));
+
+// The reading list for next session, as this person sees it (see js/reading.js).
+async function readingOf(w, req, sees) {
+  const ids = Array.isArray(w.prep?.reading) ? w.prep.reading.filter(sees) : [];
+  if (!ids.length) return [];
+  if (req.isGmHere) {
+    const rows = await sql`SELECT r.entry_id, g.name FROM entry_reads r JOIN gms g ON g.id = r.gm_id WHERE r.world_id = ${w.id} AND r.entry_id = ANY(${ids}) ORDER BY r.first_at`;
+    const by = new Map();
+    for (const r of rows) by.set(r.entry_id, [...(by.get(r.entry_id) || []), r.name]);
+    return readingFor(ids, sees, by);
+  }
+  if (!req.gm) return readingFor(ids, sees, new Set());
+  const mine = await sql`SELECT entry_id FROM entry_reads WHERE world_id = ${w.id} AND gm_id = ${req.gm.id} AND entry_id = ANY(${ids})`;
+  return readingFor(ids, sees, new Set(mine.map((r) => r.entry_id)));
+}
 
 async function loadOne(id, worldId) {
   const rows = await sql`SELECT e.*, c.name AS created_by_name, u.name AS updated_by_name, o.name AS owner_name FROM entries e
@@ -189,6 +205,8 @@ export default route({
         party_at: partyAt(w, rows, req),
         // Where the party has been: stops at places this person can see.
         journey: journeyFor(w.prep?.journey, (id) => { const r = byId.get(id); return r && !r.deleted && visibleTo(r, req); }),
+        // Reading for next session: what this person can see of it, with who has read each (GMs) or whether they have.
+        ...(req.role ? { reading: await readingOf(w, req, (id) => { const r = byId.get(id); return Boolean(r && !r.deleted && visibleTo(r, req)); }) } : {}),
         clock: readClock(w.clock), tag_notes: w.tag_notes || {},
         // Start here: only what this person can see.
         start_here: (Array.isArray(w.start_here) ? w.start_here : []).filter((id) => { const r = rows.find((x) => x.id === id); return r && !r.deleted && visibleTo(r, req); }),
