@@ -388,6 +388,14 @@ to the log at the bottom.
     "a potion of healing each".
 181. [x] **The party at a glance.** A compact table for GMs on the party page: each character's hit points, coin,
     days of rations, exhaustion and conditions.
+182. [ ] **A short rest.** GMs give the party a short rest from the party page: an hour on the clock, and pact
+    magic slots back for warlocks.
+183. [ ] **The journey on the calendar.** Where the party has been shows on the in-world calendar, on the days they
+    arrived ("⚑ Brindle").
+184. [ ] **Worries in prep.** Session prep warns about who's down or low on hit points, out of rations, exhausted or
+    broke, before the session starts.
+185. [ ] **Sell the loot.** GMs sell treasury items to a shop at its buy-back rate in one go; the coin goes into the
+    treasury and the items onto the shop's shelf.
 
 ## Ideas parking lot
 
