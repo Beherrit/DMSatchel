@@ -13,6 +13,7 @@ import { splitCoins } from './economy.js';
 import { coinChart } from './world-coinchart.js';
 import { payrollCard } from './world-hire.js';
 import { whoHas } from './who-has.js';
+import { campButton } from './world-camp.js';
 
 const ACTIVE = (e) => !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
 
@@ -172,7 +173,8 @@ export async function viewParty(rerender) {
   };
   setKids(treasuryBox, treasury(state, chars, reload));
   return el('div', { class: 'w-view party-view' },
-    el('div', { class: 'panel-head' }, el('h2', {}, 'The Party'), el('p', {}, 'Who’s adventuring, what they carry, what they’re chasing and what they’ve found.'), lastShownLine()),
+    el('div', { class: 'panel-head' }, el('h2', {}, 'The Party'), el('p', {}, 'Who’s adventuring, what they carry, what they’re chasing and what they’ve found.'), lastShownLine(),
+      isGm() ? el('div', { class: 'btnrow' }, campButton(rerender)) : null),
     el('div', { class: 'party-grid' },
       el('div', { class: 'party-main' }, members(chars), partyBondsSection(), advancementSection(),
         el('section', {}, el('h3', { class: 'section-title' }, 'Current quests'),
