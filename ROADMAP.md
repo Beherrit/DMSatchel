@@ -372,6 +372,14 @@ to the log at the bottom.
     markup) for the next purchase there.
 173. [x] **Stay the night.** At a tavern with a menu, the party takes rooms for the night: the price from the bill
     of fare comes off each purse and the world's clock moves on to morning.
+174. [ ] **Rations run down.** When days pass, each character's rations (or the treasury's) go down by a day's worth,
+    and the GMs are warned about anyone who's run out.
+175. [ ] **Wanted posters.** An NPC can carry a bounty; wanted NPCs go up on the job board poster alongside the
+    jobs, with the reward and who's paying.
+176. [ ] **Prices in this town.** The price list can show prices as one town's market has them (shortages,
+    surpluses, inflation), not just the usual ones.
+177. [ ] **A night's rest.** Staying the night at an inn also gives those who stayed a long rest: hit points and
+    spell slots back on their sheets.
 
 ## Ideas parking lot
 
