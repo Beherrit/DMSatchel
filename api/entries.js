@@ -37,7 +37,7 @@ import { fieldsWith } from '../js/custom-fields.js';
 import { cleanSay } from '../js/say.js';
 import { cleanAka } from '../js/aka.js';
 import { readMenu } from '../js/menu.js';
-import { buyFrom, sellTo } from '../js/purchase.js';
+import { buyFrom, sellTo, haggleFor, withHaggle, setHaggle } from '../js/purchase.js';
 import { coinText, GOODS } from '../js/economy.js';
 import { cleanMusic } from '../js/music.js';
 import { journeyFor } from '../js/journey.js';
@@ -61,7 +61,7 @@ function clean(input, custom = {}) {
   if (!isKind(e.kind)) return { error: 'Pick what kind of entry this is.' };
   const name = clip(e.name, LIMITS.name).trim();
   if (!name) return { error: 'Give the entry a name.' };
-  const allowed = new Set([...KINDS[e.kind].fields.map(([k]) => k), ...customKeys(e.kind, custom), 'say', 'aka', 'music', 'image_alt', 'party_edit', 'menu', 'hired', 'wage', 'restocked']);
+  const allowed = new Set([...KINDS[e.kind].fields.map(([k]) => k), ...customKeys(e.kind, custom), 'say', 'aka', 'music', 'image_alt', 'party_edit', 'menu', 'hired', 'wage', 'restocked', 'haggle']);
   const fields = {};
   for (const [k, v] of Object.entries(e.fields || {})) if (allowed.has(k) && v != null && String(v).trim() && (k !== 'image' || isImageRef(String(v)))) fields[k] = clip(v, ['stock', 'sheet', 'play', 'spread', 'known', 'attitudes', 'objectives', 'attendance', 'enc', 'goals', 'wishes', 'gallery', 'menu'].includes(k) ? LIMITS.body : LIMITS.field);
   // Pictures in the gallery must be real image addresses.
@@ -391,9 +391,12 @@ export default route({
       let p = {}; try { p = JSON.parse(ch.fields?.play || '{}') || {}; } catch { p = {}; }
       if (!Number.isFinite(p.cp)) p.cp = Math.max(0, Math.round(Number(b.base?.cp) || 0));
       if (p.inventory === undefined) p.inventory = clip(b.base?.inventory, 15000);
+      // A haggle a GM granted this character here changes the price, once.
+      const pct = haggleFor(shop.fields.haggle, ch.id);
+      r.cp = withHaggle(r.cp, pct);
       if (r.cp > p.cp) return fail(res, 400, `${ch.name} doesn’t have enough coin: that costs ${coinText(r.cp)} and they have ${coinText(p.cp)}.`);
       // The shelf first, and only if nobody else bought from it meanwhile.
-      const sold = await sql`UPDATE entries SET fields = fields || jsonb_build_object('stock', ${r.text}::text), updated_by = ${req.gm.id}, updated_at = now(), version = version + 1
+      const sold = await sql`UPDATE entries SET fields = fields || jsonb_build_object('stock', ${r.text}::text, 'haggle', ${setHaggle(shop.fields.haggle, ch.id, 0)}::text), updated_by = ${req.gm.id}, updated_at = now(), version = version + 1
         WHERE id = ${shop.id} AND world_id = ${req.world.id} AND version = ${shop.version} RETURNING id`;
       if (!sold.length) return fail(res, 409, 'Someone else was buying from this shop at the same moment. Try again.');
       p.cp -= r.cp; p.inventory = clip(giveItem(p.inventory, r.name, r.qty, shop.name), 15000);
@@ -401,7 +404,7 @@ export default route({
         WHERE id = ${ch.id} AND world_id = ${req.world.id}`;
       await record(ch.id, req.gm.id, 'buy', null);
       await record(shop.id, req.gm.id, 'sale', null);
-      return send(res, 200, { entries: [shape(await loadOne(shop.id, req.world.id), req), shape(await loadOne(ch.id, req.world.id), req)], bought: { name: r.name, qty: r.qty, cp: r.cp } });
+      return send(res, 200, { entries: [shape(await loadOne(shop.id, req.world.id), req), shape(await loadOne(ch.id, req.world.id), req)], bought: { name: r.name, qty: r.qty, cp: r.cp, haggle: pct } });
     }
     // Sell to a shop: {sell: {shop, character, item, qty, base}} — the item leaves the character's inventory, the shop
     // pays its buy-back rate onto their sheet, and the item goes on the shelf.

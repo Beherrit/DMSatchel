@@ -3,10 +3,10 @@
 // The server checks the coin, the inventory and the shelf.
 import { el, toast } from './dom.js';
 import { api, isGm, isMember, previewing, session } from './api.js';
-import { world, worldEntries } from './world-store.js';
+import { world, worldEntries, patchEntry } from './world-store.js';
 import { playOf } from './sheet-ui.js';
 import { coinText, GOODS } from './economy.js';
-import { stockItems, sellTo } from './purchase.js';
+import { stockItems, sellTo, HAGGLES, readHaggle, haggleFor, setHaggle, withHaggle } from './purchase.js';
 import { inventoryLines } from './handover.js';
 
 const ACTIVE = (e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
@@ -16,7 +16,25 @@ export function buyBox(shop, rerender) {
   const items = stockItems(shop.fields?.stock);
   const chars = worldEntries().filter((e) => ACTIVE(e) && (isGm() || e.owner_id === session.gm?.id)).sort((a, b) => a.name.localeCompare(b.name));
   if (!chars.length) return null;
-  return el('div', { class: 'trade' }, items.length ? buyPart(shop, items, chars, rerender) : null, sellPart(shop, chars, rerender));
+  return el('div', { class: 'trade' }, items.length ? buyPart(shop, items, chars, rerender) : null, sellPart(shop, chars, rerender), isGm() && items.length ? hagglePart(shop, chars, rerender) : null);
+}
+
+const dc = (shop) => Number((String(shop.fields?.stock || '').match(/Haggle DC (\d+)/) || [])[1]) || 0;
+
+// GMs: grant the result of a haggle at the table, for one character's next purchase here.
+function hagglePart(shop, chars, rerender) {
+  const who = el('select', { id: 'hg-who' }, chars.map((c) => el('option', { value: c.id }, c.name)));
+  const res = el('select', { id: 'hg-res' }, HAGGLES.map(([p, label]) => el('option', { value: p }, label)));
+  const save = async (charId, pct, msg) => {
+    try { const cur = world.entries.get(shop.id) || shop; await patchEntry(cur, { fields: { haggle: setHaggle(cur.fields?.haggle, charId, pct) } }); toast(msg); rerender(); } catch (err) { toast(err.message, 'bad'); }
+  };
+  const granted = Object.entries(readHaggle(shop.fields?.haggle)).map(([id, pct]) => [world.entries.get(id), pct]).filter(([c]) => c);
+  const form = el('form', { class: 'controls' }, el('label', { for: 'hg-who' }, 'Who'), who, el('label', { class: 'sr-only', for: 'hg-res' }, 'Result'), res, el('button', { class: 'btn small', type: 'submit' }, 'Grant'));
+  form.addEventListener('submit', (ev) => { ev.preventDefault(); const c = world.entries.get(who.value); save(c.id, Number(res.value), `${c.name}’s next purchase here: ${HAGGLES.find(([p]) => p === Number(res.value))[1].split(':')[0]}`); });
+  return el('details', { class: 'buy-box' }, el('summary', {}, `Haggle result${dc(shop) ? ` (DC ${dc(shop)})` : ''}`),
+    form,
+    granted.length ? el('ul', { class: 'plain small' }, granted.map(([c, pct]) => el('li', {}, `${c.name}: ${pct < 0 ? `${-pct}% off` : `${pct}% more`} on the next purchase `,
+      el('button', { class: 'btn small ghost', type: 'button', onclick: () => save(c.id, 0, 'Haggle result taken back') }, 'Take back')))) : null);
 }
 
 function buyPart(shop, items, chars, rerender) {
@@ -28,8 +46,9 @@ function buyPart(shop, items, chars, rerender) {
   const show = () => {
     const it = pick(), n = Math.max(1, Number(qty.value) || 1), c = chars.find((x) => x.id === who.value), have = playOf(world.entries.get(c.id) || c).cp || 0;
     qty.max = it.qty > 0 ? it.qty : 100;
-    total.textContent = `${n} × ${it.name} costs ${coinText(it.cp * n)}. ${c.name} has ${coinText(have)}.`;
-    total.classList.toggle('bad-line', it.cp * n > have);
+    const pct = haggleFor(shop.fields?.haggle, c.id), cost = withHaggle(it.cp * n, pct);
+    total.textContent = `${n} × ${it.name} costs ${coinText(cost)}${pct ? ` (haggled: ${pct < 0 ? `${-pct}% off` : `${pct}% more`})` : ''}. ${c.name} has ${coinText(have)}.`;
+    total.classList.toggle('bad-line', cost > have);
   };
   for (const x of [item, qty, who]) x.addEventListener('input', show);
   show();
@@ -39,14 +58,15 @@ function buyPart(shop, items, chars, rerender) {
       el('label', { class: 'sr-only', for: 'buy-qty' }, 'How many'), qty,
       chars.length > 1 || isGm() ? [el('label', { for: 'buy-who' }, 'for'), who] : null,
       el('button', { class: 'btn small primary', type: 'submit' }, 'Buy')),
-    total);
+    total,
+    dc(shop) ? el('p', { class: 'muted small' }, `Haggle DC ${dc(shop)}: roll for it at the table, and a GM can grant the result for your next purchase here.`) : null);
   form.addEventListener('submit', async (ev) => {
     ev.preventDefault();
     const c = world.entries.get(who.value), base = playOf(c);
     try {
       const r = await api('entries', { method: 'PATCH', body: { buy: { shop: shop.id, character: c.id, item: item.value, qty: Number(qty.value) || 1, base: { cp: base.cp, inventory: base.inventory } } } });
       for (const e of r.entries) world.entries.set(e.id, e);
-      toast(`${c.name} bought ${r.bought.qty > 1 ? `${r.bought.qty} × ` : ''}${r.bought.name} for ${coinText(r.bought.cp)}`);
+      toast(`${c.name} bought ${r.bought.qty > 1 ? `${r.bought.qty} × ` : ''}${r.bought.name} for ${coinText(r.bought.cp)}${r.bought.haggle ? ' (haggled)' : ''}`);
       rerender();
     } catch (err) { toast(err.message, 'bad'); }
   });

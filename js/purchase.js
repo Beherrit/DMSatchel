@@ -66,3 +66,18 @@ export function sellTo(text, item, qty = 1, goods = []) {
   }
   return { text: lines.join('\n'), name, qty: n, cp };
 }
+
+// Haggling: a GM grants a character a result at one shop (fields.haggle, JSON { characterId: percent }), used up by
+// their next purchase there: -20 (a great haggle), -10 (a good one) or +10 (it went badly).
+export const HAGGLES = [[-20, '20% off: a great haggle'], [-10, '10% off: a good haggle'], [10, '10% more: it went badly']];
+
+export function readHaggle(raw) {
+  try { const m = typeof raw === 'string' ? JSON.parse(raw) : raw; return Object.fromEntries(Object.entries(m && typeof m === 'object' ? m : {}).filter(([, v]) => HAGGLES.some(([p]) => p === v))); } catch { return {}; }
+}
+export const haggleFor = (raw, charId) => readHaggle(raw)[charId] || 0;
+export function setHaggle(raw, charId, pct) {
+  const m = readHaggle(raw);
+  if (HAGGLES.some(([p]) => p === pct)) m[charId] = pct; else delete m[charId];
+  return Object.keys(m).length ? JSON.stringify(m) : '';
+}
+export const withHaggle = (cp, pct) => (pct ? Math.max(1, Math.round(cp * (100 + pct) / 100)) : cp);

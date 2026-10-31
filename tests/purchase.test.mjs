@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { stockItems, buyFrom, sellTo } from '../js/purchase.js';
+import { stockItems, buyFrom, sellTo, setHaggle, haggleFor, readHaggle, withHaggle } from '../js/purchase.js';
 import { generateShop, stockText } from '../js/economy.js';
 import { makeRng } from '../js/rng.js';
 
@@ -45,4 +45,15 @@ test('selling: the buy-back rate on the usual price, and onto the shelf', () => 
   assert.ok(sellTo(STOCK, 'Mysterious idol', 1, GOODS).error);
   assert.equal(sellTo(STOCK, 'Torch', 3).cp, 1); // never less than a copper
   assert.equal(sellTo(STOCK.replace('50%', '80%'), 'Rope', 1).cp, 80);
+});
+
+test('haggling: granted per character, used once', () => {
+  let h = setHaggle('', 'p', -10);
+  assert.equal(haggleFor(h, 'p'), -10); assert.equal(haggleFor(h, 'b'), 0);
+  h = setHaggle(h, 'b', 10); assert.deepEqual(readHaggle(h), { p: -10, b: 10 });
+  h = setHaggle(h, 'p', 0); assert.deepEqual(readHaggle(h), { b: 10 });
+  assert.equal(setHaggle(h, 'b', null), '');
+  assert.deepEqual(readHaggle('{"x": 50, "y": -20}'), { y: -20 }); // only the allowed results
+  assert.deepEqual(readHaggle('junk'), {});
+  assert.equal(withHaggle(200, -10), 180); assert.equal(withHaggle(200, 10), 220); assert.equal(withHaggle(1, -20), 1); assert.equal(withHaggle(300, 0), 300);
 });
