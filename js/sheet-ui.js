@@ -87,17 +87,20 @@ function save(id, play) {
   run();
 }
 
-// Add (or take) coins on a character's sheet, from outside the sheet (splitting the party's loot). Retries once
-// if someone saved the sheet meanwhile.
-export async function addCoins(e, cp) {
+// Change a character's sheet from outside the sheet (splitting the party's loot, eating rations): fn(play) edits
+// it in place. Retries once if someone saved the sheet meanwhile.
+export async function changePlay(e, fn) {
   for (let attempt = 0; attempt < 2; attempt++) {
     const cur = world.entries.get(e.id) || e;
     const play = defaults(cur, characterOf(cur));
-    play.cp += cp;
+    fn(play);
     try { return await patchEntry(cur, { fields: { play: JSON.stringify(play) } }); }
     catch (err) { if (err.status === 409 && err.body?.entry && attempt === 0) { world.entries.set(e.id, err.body.entry); continue; } throw err; }
   }
 }
+
+// Add (or take) coins on a character's sheet.
+export const addCoins = (e, cp) => changePlay(e, (play) => { play.cp += cp; });
 
 // What the character's current conditions do (open while any apply), with every other condition a tap away.
 function conditionHelp(active) {

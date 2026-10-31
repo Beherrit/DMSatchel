@@ -14,7 +14,7 @@ const DATE_FIELDS = { event: ['date'], session: ['world_date'], journal: ['date'
 export const worldCalendar = () => cleanCalendar(world.info?.cal);
 
 // Days went by (the calendar moved forward): living costs and the like listen for this.
-export const daysPassed = (days) => window.dispatchEvent(new CustomEvent('world:days', { detail: { days } }));
+export const daysPassed = (days, more = {}) => window.dispatchEvent(new CustomEvent('world:days', { detail: { days, ...more } }));
 
 export function todayText(cal = worldCalendar()) {
   return cal ? formatDate(cal, today(cal), { weekday: true }) : '';

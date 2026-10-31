@@ -278,7 +278,7 @@ export async function viewMap(id, focusPin) {
         try {
           const r = await api('settings', { method: 'PATCH', body: { cal: advance(cal, days) } });
           world.info = { ...world.info, cal: r.cal };
-          toast(`${days} day${days === 1 ? '' : 's'} pass: it’s now ${formatDate(r.cal, today(r.cal))}`); dlg.close(); daysPassed(days);
+          toast(`${days} day${days === 1 ? '' : 's'} pass: it’s now ${formatDate(r.cal, today(r.cal))}`); dlg.close(); daysPassed(days, { travel: true });
         } catch (err) { toast(err.message, 'bad'); }
       } }, `${days} day${days === 1 ? '' : 's'} (${pace.toLowerCase()} pace)`)),
         el('button', { class: 'btn ghost', type: 'button', onclick: () => dlg.close() }, 'Not now'))));
