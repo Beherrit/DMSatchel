@@ -7,6 +7,7 @@ import { progressBadge } from './world-objectives.js';
 import { wildsSection, placeTerrains } from './encounter-ui.js';
 import { worldCalendar } from './world-calendar.js';
 import { dayWeather } from './forecast.js';
+import { toDays, today } from './calendar.js';
 import { deadlineOf, deadlineText } from './deadline.js';
 import { controllers } from './control.js';
 import { glanceOf } from './glance.js';
@@ -230,7 +231,9 @@ export function restockDraft(shopEntry, town) {
   const market = marketOf(town) || rollMarket(er, { size: town ? townSize(town) : 'Town', economy: 'Stable' });
   const type = shopEntry.fields?.shop_type || (shopEntry.fields?.type === 'Tavern' ? 'Tavern & inn' : 'General store');
   const sh = generateShop(er, { type, market, ownerName: shopEntry.fields?.owner?.split(',')[0], size: market.size });
-  return { shop_type: type, stock: stockText(sh) };
+  // The in-world day of this delivery, so the shop knows when it's due another (see restock.js).
+  const cal = worldCalendar();
+  return { shop_type: type, stock: stockText(sh), ...(cal ? { restocked: String(toDays(cal, today(cal))) } : {}) };
 }
 
 function marketSection(place, rerender) {

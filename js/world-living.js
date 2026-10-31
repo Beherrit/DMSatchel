@@ -68,7 +68,11 @@ export async function offerLivingCosts(days) {
     } catch (err) { toast(err.message, 'bad'); go.disabled = false; }
   });
   d.addEventListener('close', () => d.remove());
-  document.body.append(d); d.showModal();
+  // Resolves when the dialog closes, so what comes after it (the shops' deliveries) waits its turn.
+  return new Promise((resolve) => { d.addEventListener('close', resolve); document.body.append(d); d.showModal(); });
 }
 
-window.addEventListener('world:days', (ev) => offerLivingCosts(ev.detail?.days));
+window.addEventListener('world:days', async (ev) => {
+  await offerLivingCosts(ev.detail?.days);
+  if (isGm() && !previewing() && ev.detail?.days > 0) (await import('./world-restock.js')).offerRestock();
+});
