@@ -5,7 +5,9 @@ import { api, isGm, isMember, session } from './api.js';
 import { world, worldEntries, getEntry, byName, link, when, richText, setEntryState } from './world-store.js';
 import { thumb } from './image-ui.js';
 import { lastShownLine } from './world-show.js';
-import { addCoins, playOf } from './sheet-ui.js';
+import { addCoins, playOf, changePlay } from './sheet-ui.js';
+import { readHandOut, handOutTotal } from './hand-out.js';
+import { giveItem } from './handover.js';
 import { progressBadge } from './world-objectives.js';
 import { advancementSection } from './world-attendance.js';
 import { partyBondsSection } from './world-bonds.js';
@@ -58,6 +60,7 @@ function treasury(state, chars, reload) {
       : el('p', { class: 'muted small' }, 'No items in the shared stash.'));
   box.append(whoHasBox(chars, items));
   if (isGm() && active.length && cp > 0) box.append(splitForm(cp, active, reload));
+  if (isGm() && active.length) box.append(handOutForm(active, reload));
   if (isMember()) box.append(ledgerForm(chars, reload));
   box.append(el('details', { class: 'ledger', open: lines.length && lines.length <= 8 ? true : null }, el('summary', {}, `Loot log (${lines.length})`),
     lines.length ? el('ul', { class: 'plain ledger-lines' }, lines.slice(0, 200).map((l) => el('li', {},
@@ -81,6 +84,40 @@ function whoHasBox(chars, items) {
   };
   input.addEventListener('input', show);
   return el('div', { class: 'who-has' }, el('label', { for: 'who-has', class: 'eyebrow' }, 'Who has it?'), input, out);
+}
+
+// GMs: the same item and/or coin to each of several characters ("a potion of healing each"), from nowhere or from the
+// treasury (one loot-log line takes it out).
+function handOutForm(active, reload) {
+  const item = el('input', { type: 'text', id: 'ho-item', placeholder: 'e.g. Potion of healing', maxlength: 200 });
+  const qty = el('input', { type: 'number', id: 'ho-qty', min: 1, max: 100, value: 1, class: 'qty' });
+  const coin = el('input', { type: 'text', id: 'ho-coin', placeholder: 'e.g. 10 gp', class: 'num-in' });
+  const pot = el('input', { type: 'checkbox', id: 'ho-pot' });
+  const who = active.map((c) => ({ c, cb: el('input', { type: 'checkbox', id: `ho-${c.id}`, checked: true }) }));
+  const go = el('button', { class: 'btn small primary', type: 'submit' }, 'Hand it out');
+  const form = el('form', { class: 'hand-out' },
+    el('div', { class: 'controls' }, el('label', { for: 'ho-item' }, 'Item'), item, el('label', { for: 'ho-qty' }, 'each'), qty),
+    el('div', { class: 'controls' }, el('label', { for: 'ho-coin' }, 'Coin each'), coin),
+    el('fieldset', { class: 'plain-fieldset' }, el('legend', { class: 'small' }, 'To'), who.map(({ c, cb }) => el('label', { class: 'check', for: `ho-${c.id}` }, cb, ` ${c.name}`))),
+    el('label', { class: 'check', for: 'ho-pot' }, pot, ' Take it out of the treasury'),
+    el('div', { class: 'btnrow' }, go));
+  form.addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const h = readHandOut({ item: item.value, qty: qty.value, coin: coin.value });
+    if (h.error) { toast(h.error, 'bad'); item.focus(); return; }
+    const to = who.filter((w) => w.cb.checked).map((w) => w.c);
+    if (!to.length) { toast('Tick who gets it.', 'bad'); return; }
+    go.disabled = true;
+    try {
+      if (pot.checked) { const t = handOutTotal(h, to.length); await api('party', { method: 'POST', body: { cp: -t.cp, ...(h.item ? { item: h.item, qty: -t.qty } : {}), note: `Handed out to ${to.map((c) => c.name).join(', ')}` } }); }
+      const failed = [];
+      for (const c of to) { try { await changePlay(c, (play) => { if (h.item) play.inventory = giveItem(play.inventory, h.item, h.qty); play.cp += h.cp; }); } catch { failed.push(c.name); } }
+      const what = [h.item ? `${h.qty > 1 ? `${h.qty} × ` : ''}${h.item}` : '', h.cp ? coinText(h.cp) : ''].filter(Boolean).join(' and ');
+      toast(failed.length ? `Handed out, but these sheets didn’t update: ${failed.join(', ')}` : `${what} each to ${to.length} character${to.length === 1 ? '' : 's'}`, failed.length ? 'bad' : undefined);
+      reload();
+    } catch (err) { toast(err.message, 'bad'); go.disabled = false; }
+  });
+  return el('details', { class: 'split-loot' }, el('summary', {}, 'Hand out to everyone'), form);
 }
 
 // GMs: split coin from the treasury between active characters, by shares. One ledger line takes it out; each share
