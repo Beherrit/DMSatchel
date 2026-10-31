@@ -1667,3 +1667,4 @@ details.quest-group > summary .section-title { display: inline }
 .tag-colors legend { float: left; margin-right: 6px; color: var(--muted) }
 .swatch { width: 24px; height: 24px; border-radius: 50%; background: var(--hold); border: 2px solid var(--surface); box-shadow: 0 0 0 1px var(--line); cursor: pointer; padding: 0 }
 .swatch[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--ink) }
+.who-has { display: grid; gap: 4px; margin: 10px 0 } .who-has-list { display: grid; gap: 2px; margin: 4px 0 0 }

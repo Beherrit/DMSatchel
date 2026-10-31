@@ -2,16 +2,17 @@
 // Route: #world/party
 import { el, toast, confirmButton, setKids } from './dom.js';
 import { api, isGm, isMember, session } from './api.js';
-import { world, worldEntries, byName, link, when, richText, setEntryState } from './world-store.js';
+import { world, worldEntries, getEntry, byName, link, when, richText, setEntryState } from './world-store.js';
 import { thumb } from './image-ui.js';
 import { lastShownLine } from './world-show.js';
-import { addCoins } from './sheet-ui.js';
+import { addCoins, playOf } from './sheet-ui.js';
 import { progressBadge } from './world-objectives.js';
 import { advancementSection } from './world-attendance.js';
 import { partyBondsSection } from './world-bonds.js';
 import { splitCoins } from './economy.js';
 import { coinChart } from './world-coinchart.js';
 import { payrollCard } from './world-hire.js';
+import { whoHas } from './who-has.js';
 
 const ACTIVE = (e) => !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
 
@@ -54,6 +55,7 @@ function treasury(state, chars, reload) {
       el('ul', { class: 'plain item-held' }, items.map((i) => el('li', {}, i.qty > 1 ? `${i.qty} × ` : '', el('strong', {}, i.item), i.holder ? el('span', { class: 'muted small' }, ` (${i.holder})`) : null, wishedBy(i.item, active)))),
       itemsNamed(worldEntries(), items.map((i) => i.item)).length ? el('a', { class: 'small', href: '#world/itemcards/held' }, 'Print cards for these items') : null)
       : el('p', { class: 'muted small' }, 'No items in the shared stash.'));
+  box.append(whoHasBox(chars, items));
   if (isGm() && active.length && cp > 0) box.append(splitForm(cp, active, reload));
   if (isMember()) box.append(ledgerForm(chars, reload));
   box.append(el('details', { class: 'ledger', open: lines.length && lines.length <= 8 ? true : null }, el('summary', {}, `Loot log (${lines.length})`),
@@ -64,6 +66,20 @@ function treasury(state, chars, reload) {
       isGm() || l.gm_id === session.gm?.id ? confirmButton('Strike', async () => { try { await api('party', { method: 'DELETE', query: { id: l.id } }); reload(); } catch (err) { toast(err.message, 'bad'); } }, 'btn small ghost') : null)))
       : el('p', { class: 'muted small' }, 'Nothing recorded yet.')));
   return box;
+}
+
+// Who has it?: search every character's inventory and the treasury's items at once.
+function whoHasBox(chars, items) {
+  const input = el('input', { type: 'search', id: 'who-has', placeholder: 'e.g. rope, healing', autocomplete: 'off' });
+  const out = el('div', { class: 'who-has-out', role: 'status' });
+  const show = () => {
+    const q = input.value.trim();
+    const hits = whoHas(q, chars.map((c) => ({ id: c.id, name: c.name, inventory: playOf(c).inventory })), items);
+    setKids(out, !q ? null : hits.length ? el('ul', { class: 'plain who-has-list' }, hits.map((h) => el('li', {}, el('strong', {}, h.qty > 1 ? `${h.qty} × ${h.item}` : h.item), ' · ', h.id ? link(getEntry(h.id) || { id: h.id, name: h.who }) : h.who)))
+      : el('p', { class: 'muted small' }, `Nobody is carrying anything called “${q}”.`));
+  };
+  input.addEventListener('input', show);
+  return el('div', { class: 'who-has' }, el('label', { for: 'who-has', class: 'eyebrow' }, 'Who has it?'), input, out);
 }
 
 // GMs: split coin from the treasury between active characters, by shares. One ledger line takes it out; each share
