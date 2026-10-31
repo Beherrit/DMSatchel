@@ -148,20 +148,26 @@ export function parsePrice(s) {
   return t;
 }
 
-// Price and stock of one item under a market.
-function priceFor(base, category, market, shop, rng) {
-  let mult = 1 + market.inflation / 100;
+// What a town's market does to a price (inflation, shortages, surpluses, embargoes, festivals), before any one
+// shop's markup: { price, note, cond }. On a black market an embargoed thing is contraband, at a price.
+export function marketPrice(base, category, market, { black = false } = {}) {
+  let mult = 1 + (market?.inflation || 0) / 100;
   let note = '';
-  const cond = market.conditions.find((c) => c.category === category);
+  const cond = (market?.conditions || []).find((c) => c.category === category);
   if (cond?.kind === 'shortage') { mult *= cond.factor; note = 'Shortage'; }
   if (cond?.kind === 'surplus') { mult *= cond.factor; note = 'Surplus'; }
-  if (cond?.kind === 'embargo') { mult *= shop.black ? cond.factor : 1; note = shop.black ? 'Contraband' : 'Banned'; }
-  if (market.festival && /Food|Lodging/.test(category) && /Harvest/.test(market.festival)) { mult *= 1.25; note ||= 'Festival'; }
-  if (market.festival && /Mounts/.test(category) && /horse fair/.test(market.festival)) { mult *= 0.8; note ||= 'Horse fair'; }
-  if (market.festival && /Spellcasting/.test(category) && /saint/.test(market.festival)) { mult *= 0.5; note ||= 'Saint’s day'; }
-  mult *= shop.markup || 1;
-  mult *= 0.95 + rng.next() * 0.1; // a little shop-to-shop variation
+  if (cond?.kind === 'embargo') { mult *= black ? cond.factor : 1; note = black ? 'Contraband' : 'Banned'; }
+  if (market?.festival && /Food|Lodging/.test(category) && /Harvest/.test(market.festival)) { mult *= 1.25; note ||= 'Festival'; }
+  if (market?.festival && /Mounts/.test(category) && /horse fair/.test(market.festival)) { mult *= 0.8; note ||= 'Horse fair'; }
+  if (market?.festival && /Spellcasting/.test(category) && /saint/.test(market.festival)) { mult *= 0.5; note ||= 'Saint’s day'; }
   return { price: base * mult, note, cond };
+}
+
+// Price and stock of one item under a market, in one shop.
+function priceFor(base, category, market, shop, rng) {
+  const m = marketPrice(base, category, market, { black: shop.black });
+  const mult = (shop.markup || 1) * (0.95 + rng.next() * 0.1); // a little shop-to-shop variation
+  return { ...m, price: m.price * mult };
 }
 
 const ATTITUDES = [['Generous', 10, 0.6], ['Fair', 13, 0.5], ['Shrewd', 15, 0.45], ['Greedy', 18, 0.35], ['Desperate for coin', 11, 0.6]];

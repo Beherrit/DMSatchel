@@ -9,7 +9,7 @@ import { makeRng } from './rng.js';
 import { world, worldEntries, loadWorld } from './world-store.js';
 import { libraryClasses, librarySpells } from './library.js';
 import { priceGroups } from './price-list.js';
-import { fmtPrice } from './economy.js';
+import { fmtPrice, parseMarket } from './economy.js';
 
 // The open world's library: its classes and spells appear beside the SRD ones, marked as yours.
 const libClasses = () => (world.loaded ? libraryClasses(worldEntries()).filter((c) => !CLASSES[c.name]) : []);
@@ -90,11 +90,23 @@ function slots() {
 }
 
 // What things cost: the shops' price list (SRD 5.1), by kind, narrowed by the filter box row by row.
+// …or as one town's market has them (towns in the open world with market conditions set).
+let priceTown = '';
 function prices() {
-  const groups = priceGroups(filter.value);
-  if (!groups.length) return [el('p', { class: 'muted' }, 'Nothing by that name. Shops in your world can stock anything; these are the usual prices.')];
-  return groups.map(({ cat, rows }) => card(cat, `${rows.length} price${rows.length === 1 ? '' : 's'}`,
-    el('table', { class: 'price-table' }, el('caption', { class: 'sr-only' }, `${cat} prices`), el('tbody', {}, rows.map(([n, gp]) => el('tr', {}, el('td', {}, n), el('td', { class: 'num' }, fmtPrice(gp))))))));
+  const towns = world.loaded ? worldEntries().filter((e) => e.kind === 'settlement' && e.fields?.market).sort((a, b) => a.name.localeCompare(b.name)) : [];
+  const town = towns.find((t) => t.id === priceTown);
+  const market = town ? parseMarket(town.fields.market, town.fields.size || 'Town') : null;
+  const pick = towns.length ? el('div', { class: 'ref-filters card' }, el('label', { for: 'price-town' }, 'Prices '),
+    el('select', { id: 'price-town', onchange: (ev) => { priceTown = ev.target.value; setKids(body, ...prices()); } },
+      el('option', { value: '' }, 'as usual (SRD)'), towns.map((t) => el('option', { value: t.id, selected: t.id === priceTown || null }, `in ${t.name}`)))) : null;
+  const groups = priceGroups(filter.value, undefined, market);
+  if (!groups.length) return [pick, el('p', { class: 'muted' }, 'Nothing by that name. Shops in your world can stock anything; these are the usual prices.')].filter(Boolean);
+  const row = ([n, gp, note]) => el('tr', {},
+    el('td', {}, n, note ? el('span', { class: `note-pill${/Shortage|Banned|Contraband/.test(note) ? ' bad' : ''}` }, note) : null),
+    el('td', { class: 'num' }, note === 'Banned' ? 'not for sale' : fmtPrice(gp)));
+  const where = town ? ` in ${town.name}` : '';
+  return [pick, ...groups.map(({ cat, rows }) => card(cat, `${rows.length} price${rows.length === 1 ? '' : 's'}${where}`,
+    el('table', { class: 'price-table' }, el('caption', { class: 'sr-only' }, `${cat} prices${where}`), el('tbody', {}, rows.map(row)))))].filter(Boolean);
 }
 
 export function showReference(tab = 'classes') {
@@ -104,7 +116,7 @@ export function showReference(tab = 'classes') {
   setKids(body, ...{ classes, species, backgrounds, feats, spells, items, conditions, slots, prices }[tab]());
   applyFilter();
   // Load the open world once, so its library classes and spells show here too.
-  if (!world.loaded && !triedWorld && session.configured !== false && ['classes', 'spells'].includes(tab)) {
+  if (!world.loaded && !triedWorld && session.configured !== false && ['classes', 'spells', 'prices'].includes(tab)) {
     triedWorld = true;
     loadWorld().then(() => { if (world.loaded && root.querySelector('.subtabs a[aria-current=page]')?.dataset.tab === tab) showReference(tab); });
   }

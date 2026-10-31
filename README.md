@@ -157,7 +157,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **How old they are**: NPCs' and characters' ages today from their birthday and the in-world calendar, on their page and in Who's who.
 - **A rival party**: roll another adventuring company (four members, what they want and their grudge) and save it as a guild with its people.
 - **Tavern menu**: a bill of fare for any tavern (drinks, dishes, a bed for the night), priced to suit the town, to read out or print.
-- **Price list**: a Reference tab with what things cost (gear, food, lodging, services), searchable.
+- **Price list**: a Reference tab with what things cost (gear, food, lodging, services), searchable, as usual or as one town's market has them.
 - **Not yet visited**: the atlas shows GMs which places the party has never set foot in.
 - **Living costs**: when days pass, charge the party for their lifestyle, from each purse or the treasury.
 - **The treasury over time**: a small chart of the party's coin after each change in the loot log, with a table view.
