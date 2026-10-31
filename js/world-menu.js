@@ -6,14 +6,14 @@ import { world, worldEntries, patchEntry } from './world-store.js';
 import { makeRng } from './rng.js';
 import { rollMenu, readMenu } from './menu.js';
 import { coinText } from './economy.js';
-import { playOf, addCoins } from './sheet-ui.js';
+import { playOf, restOf } from './sheet-ui.js';
 import { roomsOf, nightCosts, minutesToMorning } from './inn.js';
 import { formatDate, today } from './calendar.js';
 
 const ACTIVE = (c) => c.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(c.fields?.status);
 
-// GMs: the party takes rooms for the night. Each character pays from their own coin, and the clock moves on to 8 in
-// the morning (a new day on the calendar if it passes midnight; living costs aren't asked for, the room is the cost).
+// GMs: the party takes rooms for the night. Each character pays from their own coin and gets a long rest, and the
+// clock moves on to 8 in the morning (a new day on the calendar if it passes midnight; living costs aren't asked for, the room is the cost).
 function stayDialog(inn, menu, rerender) {
   const rooms = roomsOf(menu);
   const chars = worldEntries().filter(ACTIVE).sort((a, b) => a.name.localeCompare(b.name));
@@ -31,7 +31,7 @@ function stayDialog(inn, menu, rerender) {
     el('div', { class: 'field' }, el('label', { for: 'st-room' }, 'Rooms'), room),
     el('fieldset', { class: 'plain-fieldset' }, el('legend', {}, 'Who stays'), boxes.map(({ c, cb }) => el('label', { class: 'check', for: `st-${c.id}` }, cb, ` ${c.name}`))),
     preview,
-    el('p', { class: 'muted small' }, 'The clock moves on to 8 in the morning.'),
+    el('p', { class: 'muted small' }, 'Those who stay get a long rest (hit points and spell slots back), and the clock moves on to 8 in the morning.'),
     el('div', { class: 'btnrow' }, go, el('button', { class: 'btn', type: 'button', onclick: () => d.close() }, 'Not now'))));
   d.querySelector('form').addEventListener('submit', async (ev) => {
     ev.preventDefault();
@@ -39,11 +39,12 @@ function stayDialog(inn, menu, rerender) {
     if (!p.length) { d.close(); return; }
     go.disabled = true;
     const failed = [];
-    for (const x of p) if (x.paid) { try { await addCoins(chars.find((c) => c.id === x.id), -x.paid); } catch { failed.push(x.name); } }
+    // Each pays for the room and gets a long rest, in one save of their sheet.
+    for (const x of p) { try { await restOf(chars.find((c) => c.id === x.id), (play) => { play.cp -= x.paid; }); } catch { failed.push(x.name); } }
     try {
       const r = await api('settings', { method: 'PATCH', body: { clock: { advance: minutesToMorning(world.info?.clock?.minutes ?? 480) } } });
       world.info = { ...world.info, clock: r.clock, ...(r.cal ? { cal: r.cal } : {}) };
-      const notes = [`The party slept at ${inn.name}`, r.cal && r.days ? `it’s morning on ${formatDate(r.cal, today(r.cal), { weekday: true })}` : 'it’s morning', r.out?.length ? `${r.out.join(', ')} went out` : '', failed.length ? `these sheets didn’t update: ${failed.join(', ')}` : ''].filter(Boolean);
+      const notes = [`The party slept at ${inn.name} and woke rested (hit points and spell slots back)`, r.cal && r.days ? `it’s morning on ${formatDate(r.cal, today(r.cal), { weekday: true })}` : 'it’s morning', r.out?.length ? `${r.out.join(', ')} went out` : '', failed.length ? `these sheets didn’t update: ${failed.join(', ')}` : ''].filter(Boolean);
       toast(notes.join(' · '), failed.length ? 'bad' : undefined);
     } catch (err) { toast(`Paid, but the clock didn’t move: ${err.message}`, 'bad'); }
     d.close();

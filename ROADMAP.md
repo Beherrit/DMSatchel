@@ -378,7 +378,7 @@ to the log at the bottom.
     jobs, with the reward and who's paying.
 176. [x] **Prices in this town.** The price list can show prices as one town's market has them (shortages,
     surpluses, inflation), not just the usual ones.
-177. [ ] **A night's rest.** Staying the night at an inn also gives those who stayed a long rest: hit points and
+177. [x] **A night's rest.** Staying the night at an inn also gives those who stayed a long rest: hit points and
     spell slots back on their sheets.
 
 ## Ideas parking lot
@@ -562,3 +562,4 @@ to the log at the bottom.
 - Wanted posters: NPCs have "Bounty on their head" and "Bounty offered by" fields. A town's job board poster now carries WANTED notices under the jobs, with their looks (or summary), "Reward: 100 gp" and "Offered by Lady Vex". It shows up to four wanted NPCs who are in that town, or whose bounty is offered by the town, its ruler, or anyone or anything in it. Only the living who players can see are shown, so a hidden NPC never goes up even when a GM prints it. A town with only bounties no longer says "Nothing posted". Showing the poster to the table includes them. wantedFor in js/poster.js unit tested.
 - Prices in this town: the Reference price list has a "Prices as usual (SRD) / in Brindle" choice, listing every town in the open world that has market conditions set. Picking one shows each price as that market has it: inflation, shortages and surpluses, festivals, each marked with a SHORTAGE, SURPLUS or FESTIVAL pill. Embargoed goods show BANNED and "not for sale". It uses the same market maths as the shops: marketPrice, now one shared function in js/economy.js, which shop stock adds its own markup and a little variation to. The filter still narrows row by row. Unit tested (inflation × shortage, banned, untouched kinds, usual prices without notes).
 - Fix: on phones, a shop with a long item name pushed the whole shop card wider than the screen, because the "Buy something" picker grew to fit its longest option. The trade panel's pickers and inputs now stay within the card (caught by the shop page's phone check in the browser tests).
+- A night's rest: staying the night at an inn now also gives everyone who stayed a long rest. Hit points go back to their maximum and temporary ones are gone, spell slots come back, death saves clear, half their hit dice return and one level of exhaustion goes. The room's price comes off in the same save of their sheet, and the dialog and toast say so. Those who came up short on the room still rest; the GMs see who was short. The rules live in one pure function (js/rest.js, unit tested), now used by the sheet's own "Long rest" button as well, so the two can't drift apart.

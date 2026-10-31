@@ -2,6 +2,7 @@
 // (hit points, conditions, spell slots, hit dice, coins, inventory, notes) that the player and the GMs can change.
 // The tracker is saved with the entry, so everyone at the table sees the same numbers.
 import { el, toast, confirmButton, setKids } from './dom.js';
+import { longRest } from './rest.js';
 import { generateCharacter, characterText, abilityMod, fmtMod } from './character.js';
 import { ABILITIES, ABILITY_NAMES } from './rules2024.js';
 import { ORD } from './spells.js';
@@ -99,6 +100,13 @@ export async function changePlay(e, fn) {
   }
 }
 
+// A long rest from outside the sheet (a night at an inn); also(play) makes other changes in the same save.
+export function restOf(e, also = () => {}) {
+  const ch = characterOf(world.entries.get(e.id) || e);
+  const m = /^(\d+)d/.exec(ch?.stats.hitDice || '');
+  return changePlay(e, (play) => { also(play); longRest(play, { maxhp: Number(play.maxhp) || ch?.stats.hp || 0, level: m ? +m[1] : Number(e.fields?.level) || 0 }); });
+}
+
 // Add (or take) coins on a character's sheet.
 export const addCoins = (e, cp) => changePlay(e, (play) => { play.cp += cp; });
 
@@ -184,8 +192,7 @@ export function sheetSection(e, rerender) {
       can ? el('div', { class: 'btnrow' },
         el('button', { class: 'btn small', type: 'button', onclick: () => { if (slotTable(ch)?.pact) play.slots = {}; commit(slotTable(ch)?.pact ? 'Short rest: pact slots back' : 'Short rest taken'); } }, 'Short rest'),
         confirmButton('Long rest', () => {
-          play.hp = maxhp(); play.temp = 0; play.slots = {}; play.death = { ok: 0, fail: 0 };
-          play.hd = Math.max(0, play.hd - Math.max(1, Math.floor(total / 2))); play.exhaustion = Math.max(0, play.exhaustion - 1);
+          longRest(play, { maxhp: maxhp(), level: total });
           commit('Long rest: HP and slots restored, half your hit dice back, one level of exhaustion gone');
         }, 'btn small')) : null);
   }
