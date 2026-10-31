@@ -23,7 +23,19 @@ const short = (s, n) => (s.length > n ? `${s.slice(0, n - 1).replace(/\s+\S*$/, 
 
 // place: the settlement (or any place); quests: the jobs inside it, as this person can see them; date: today's date
 // text, if any.
-export function posterOf(place, quests, { date = '' } = {}) {
+// Wanted: NPCs with a bounty (fields.bounty) who are inside this place, or whose bounty is offered (fields.bounty_by) by
+// this place, its ruler or anyone or anything in it; alive and not hidden. entries: what the viewer can see; inside:
+// the entries inside the place.
+export function wantedFor(place, entries, inside) {
+  const here = new Set((inside || []).map((e) => e.id));
+  const names = new Set([place?.name, place?.fields?.ruler, ...(inside || []).map((e) => e.name)].filter(Boolean).map((n) => String(n).toLowerCase().trim()));
+  return (entries || []).filter((e) => e.kind === 'npc' && String(e.fields?.bounty || '').trim() && e.visibility !== 'gm' && !['Dead'].includes(e.fields?.status)
+    && (here.has(e.id) || names.has(String(e.fields?.bounty_by || '').toLowerCase().trim())))
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map((e) => ({ id: e.id, headline: 'WANTED', name: e.name, text: short(stripMarks(String(e.fields?.appearance || e.summary || '')).trim(), 200), reward: String(e.fields.bounty).trim(), by: String(e.fields?.bounty_by || '').trim() }));
+}
+
+export function posterOf(place, quests, { date = '', wanted = [] } = {}) {
   const posted = (quests || []).filter((q) => q.kind === 'quest' && q.visibility !== 'gm' && q.status !== 'suggested' && (q.fields?.status || 'Available') === 'Available')
     .sort((a, b) => a.name.localeCompare(b.name));
   const ruler = String(place?.fields?.ruler || '').trim();
@@ -38,5 +50,6 @@ export function posterOf(place, quests, { date = '' } = {}) {
       ask: String(q.fields?.patron || '').trim(),
     })),
     more: Math.max(0, posted.length - MAX_ON_POSTER),
+    wanted: wanted.slice(0, 4),
   };
 }

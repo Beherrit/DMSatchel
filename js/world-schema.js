@@ -46,7 +46,7 @@ export const KINDS = {
   },
   npc: {
     label: 'NPC', plural: 'NPCs', blurb: 'People the party can meet.',
-    fields: [['ancestry', 'Ancestry'], ['role', 'Role or job'], ['status', 'Status', 'select', ['Alive', 'Dead', 'Missing', 'Unknown', 'Undead']], ['appearance', 'Appearance', 'long'], ['personality', 'Personality', 'long'], ['voice', 'Voice & mannerisms'], ['wants', 'Wants', 'long'], ['born', 'Birthday (in-world date)'], ['level', 'Class & level'], ['stats', 'Stat block', 'long'], ['spells', 'Spellcasting', 'long']],
+    fields: [['ancestry', 'Ancestry'], ['role', 'Role or job'], ['status', 'Status', 'select', ['Alive', 'Dead', 'Missing', 'Unknown', 'Undead']], ['appearance', 'Appearance', 'long'], ['personality', 'Personality', 'long'], ['voice', 'Voice & mannerisms'], ['wants', 'Wants', 'long'], ['born', 'Birthday (in-world date)'], ['bounty', 'Bounty on their head'], ['bounty_by', 'Bounty offered by'], ['level', 'Class & level'], ['stats', 'Stat block', 'long'], ['spells', 'Spellcasting', 'long']],
   },
   character: {
     label: 'Player Character', plural: 'Player Characters', blurb: 'The heroes, past and present.',

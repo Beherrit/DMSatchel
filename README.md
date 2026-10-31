@@ -152,7 +152,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **A forecast for the week**: session prep shows the next six days of weather where the party is, matching what each day shows when it comes.
 - **Reading for next session**: GMs pick a few entries for players to read beforehand; players tick them off on the front page and GMs see who has.
 - **Reveal on a date**: set a hidden entry to reveal itself to players on a chosen day, for a letter that arrives or a festival that's announced.
-- **Job board poster**: a town's open jobs as a printable notice-board poster, or popped up on everyone's screen.
+- **Job board poster**: a town's open jobs and wanted NPCs (with their bounties) as a printable notice-board poster, or popped up on everyone's screen.
 - **Also known as**: other names for any entry (a title, an old name), found by search, mentions and the name check.
 - **How old they are**: NPCs' and characters' ages today from their birthday and the in-world calendar, on their page and in Who's who.
 - **A rival party**: roll another adventuring company (four members, what they want and their grudge) and save it as a guild with its people.
