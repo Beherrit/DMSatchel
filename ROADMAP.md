@@ -388,7 +388,7 @@ to the log at the bottom.
     "a potion of healing each".
 181. [x] **The party at a glance.** A compact table for GMs on the party page: each character's hit points, coin,
     days of rations, exhaustion and conditions.
-182. [ ] **A short rest.** GMs give the party a short rest from the party page: an hour on the clock, and pact
+182. [x] **A short rest.** GMs give the party a short rest from the party page: an hour on the clock, and pact
     magic slots back for warlocks.
 183. [ ] **The journey on the calendar.** Where the party has been shows on the in-world calendar, on the days they
     arrived ("⚑ Brindle").
@@ -583,3 +583,4 @@ to the log at the bottom.
 - The session in numbers: "Draft recap" now opens its gathered sections with "## The session in numbers". Coin is split into earned and spent ("+50 gp earned, −15 gp spent", where the treasure section only gives the net), then items found. Days passed in the world are counted from the last session's in-world date to today ("6 (3 Thawmoon 1040 to 9 Thawmoon 1040)"), when both are on the calendar. Last come quests completed, named. Lines with nothing to say are left out, and so is the section when nothing changed. Only things players can see go in, as with the rest of the draft. Unit tested in tests/recap.test.mjs.
 - Hand out to everyone: the party page's treasury card has "Hand out to everyone" for GMs. Enter an item and how many each, and/or coin each, then tick who gets it (everyone active by default). Each sheet gets it in one save ("2 Potion of healing", +5 gp). Tick "Take it out of the treasury" and one loot-log line takes the whole lot out ("−10 gp, −4 Potion of healing, handed out to Ann, Bo"); otherwise it comes from nowhere, as a GM's gift. js/hand-out.js unit tested.
 - The party at a glance: GMs see a table at the top of the party page with one row per active character: hit points ("7 / 30 (low)" at a quarter or less, "0 / 12 (down)", marked in words as well as colour), coin, days of rations, exhaustion and conditions. It scrolls sideways within its card on a phone, and players don't see it. js/party-glance.js unit tested.
+- A short rest: next to "Make camp", GMs get "☕ Short rest" on the party page. It moves the clock on an hour and gives warlocks (characters from the Forge with pact magic) their pact slots back; other casters' slots stay spent. The toast says who got slots back and reminds that players spend hit dice on their own sheets, since that's their choice. It shares the sheet's own rule (shortRestOf beside restOf in js/sheet-ui.js).

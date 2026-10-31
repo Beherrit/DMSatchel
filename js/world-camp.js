@@ -4,7 +4,7 @@
 import { el, toast, setKids } from './dom.js';
 import { api, isGm, previewing } from './api.js';
 import { world, worldEntries, getEntry } from './world-store.js';
-import { restOf } from './sheet-ui.js';
+import { restOf, shortRestOf } from './sheet-ui.js';
 import { makeRng } from './rng.js';
 import { nightRoll, tableRows, CAMP_MINUTES } from './camp.js';
 import { encounterCard, partyDefaults, placeTerrains, monsterSource } from './encounter-ui.js';
@@ -21,7 +21,21 @@ function tableFor(here) {
 
 export function campButton(rerender) {
   if (!isGm() || previewing()) return null;
-  return el('button', { class: 'btn small', type: 'button', onclick: () => campDialog(rerender) }, '⛺ Make camp…');
+  return [el('button', { class: 'btn small', type: 'button', onclick: () => campDialog(rerender) }, '⛺ Make camp…'),
+    el('button', { class: 'btn small', type: 'button', title: 'An hour’s rest for the party', onclick: (ev) => { ev.target.disabled = true; shortRest(rerender); } }, '☕ Short rest')];
+}
+
+// A short rest for everyone: an hour on the clock, and pact magic back for warlocks.
+async function shortRest(rerender) {
+  const chars = worldEntries().filter(ACTIVE);
+  const pact = [], failed = [];
+  for (const c of chars) { try { if (await shortRestOf(c)) pact.push(c.name); } catch { failed.push(c.name); } }
+  try {
+    const r = await api('settings', { method: 'PATCH', body: { clock: { advance: 60 } } });
+    world.info = { ...world.info, clock: r.clock, ...(r.cal ? { cal: r.cal } : {}) };
+  } catch (err) { toast(`The clock didn’t move: ${err.message}`, 'bad'); }
+  toast(['The party rested an hour', pact.length ? `pact slots back for ${pact.join(', ')}` : '', 'players can spend hit dice on their sheets', failed.length ? `these sheets didn’t update: ${failed.join(', ')}` : ''].filter(Boolean).join(' · '), failed.length ? 'bad' : undefined);
+  rerender();
 }
 
 function campDialog(rerender) {

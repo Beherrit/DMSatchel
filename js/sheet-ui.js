@@ -107,6 +107,14 @@ export function restOf(e, also = () => {}) {
   return changePlay(e, (play) => { also(play); longRest(play, { maxhp: Number(play.maxhp) || ch?.stats.hp || 0, level: m ? +m[1] : Number(e.fields?.level) || 0 }); });
 }
 
+// A short rest from outside the sheet (the party resting an hour): warlocks get their pact slots back. Players
+// spend hit dice on their own sheets. → whether this character had pact slots to get back.
+export async function shortRestOf(e) {
+  const pact = Boolean(slotTable(characterOf(world.entries.get(e.id) || e))?.pact);
+  if (pact) await changePlay(e, (play) => { play.slots = {}; });
+  return pact;
+}
+
 // Add (or take) coins on a character's sheet.
 export const addCoins = (e, cp) => changePlay(e, (play) => { play.cp += cp; });
 
