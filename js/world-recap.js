@@ -12,7 +12,7 @@ export async function draftRecap() {
   const [act, party, standings] = await Promise.allSettled([api('activity', { query: since ? { since } : {} }), api('party'), api('standings')]);
   const r = buildRecap({
     entries: worldEntries(), activity: act.value?.activity || [], ledger: party.value?.lines || [], standings: standings.value || {},
-    labels: Object.fromEntries(Object.entries(KINDS).map(([k, v]) => [k, v.label])), today: new Date().toISOString().slice(0, 10), worldDate: worldCalendar() ? todayText() : '',
+    labels: Object.fromEntries(Object.entries(KINDS).map(([k, v]) => [k, v.label])), today: new Date().toISOString().slice(0, 10), worldDate: worldCalendar() ? todayText() : '', cal: worldCalendar(),
   });
   const { since: _s, counts, ...draft } = r;
   draft.fields.gm = session.gm?.name || '';

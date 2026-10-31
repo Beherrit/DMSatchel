@@ -91,7 +91,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Member profiles**: everyone adds their pronouns and a short note for the table, shown on the party page and beside their characters.
 - **Party bonds**: players tie their characters to each other (rivals, siblings, debts…), shown on the party page.
 - **Attendance and XP**: record who came and XP or milestones per session; the party page shows who's due a level.
-- **Session recaps**: one click drafts the next session-log entry from everything that changed since the last one.
+- **Session recaps**: one click drafts the next session-log entry from everything that changed since the last one, opening with the session in numbers (coin earned and spent, items found, days passed, quests completed).
 - **Since your last visit**: opening a world shows what others changed while you were away.
 - **Quest objectives**: a checklist of steps per quest, some secret until revealed, with progress on the boards.
 - **Your own roll tables**: write random tables (weights, dice, choices, tables inside tables) and roll them in play.

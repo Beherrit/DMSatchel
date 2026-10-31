@@ -1,5 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { makeCalendar } from '../js/calendar.js';
 import { buildRecap, lastSession } from '../js/recap.js';
 
 const E = (id, kind, name, extra = {}) => ({ id, kind, name, summary: '', fields: {}, visibility: 'all', status: 'live', created_at: '2030-01-01T00:00:00Z', updated_at: '2030-01-01T00:00:00Z', ...extra });
@@ -46,4 +47,15 @@ test('the first recap has no cutoff and still reads well', () => {
   assert.equal(r.name, 'Session 1'); assert.equal(r.since, null);
   assert.ok(r.body.startsWith('## What happened') && r.body.includes('[[Mabel]]'));
   assert.equal(buildRecap({ entries: [] }).body.split('## ').length, 2, 'only the story section when nothing changed');
+});
+
+test('the session in numbers', () => {
+  const cal = { ...makeCalendar('seasons', 1040), month: 1, day: 9 };
+  const entries = [{ ...E('s1', 'session', 'Session 1'), created_at: '2030-01-01T00:00:00Z', fields: { number: '1', world_date: '3 Thawmoon 1040' } },
+    { ...E('q1', 'quest', 'Wolves'), updated_at: '2030-02-01T00:00:00Z', fields: { status: 'Completed' } }, { ...E('q2', 'quest', 'Ring'), updated_at: '2030-02-01T00:00:00Z', fields: { status: 'Active' } }];
+  const r = buildRecap({ entries, cal, ledger: [{ at: '2030-02-01T00:00:00Z', cp: 5000 }, { at: '2030-02-01T00:00:00Z', cp: -1500 }, { at: '2030-02-01T00:00:00Z', item: 'Rope', qty: 2 }, { at: '2030-02-01T00:00:00Z', item: 'Gem', qty: -1 }] });
+  const part = r.body.split('## The session in numbers\n')[1].split('\n\n')[0];
+  assert.deepEqual(part.split('\n'), ['- Coin: +50 gp earned, −15 gp spent', '- Items found: 2', '- Days passed in the world: 6 (3 Thawmoon 1040 to 9 Thawmoon 1040)', '- Quests completed: 1 ([[Wolves]])']);
+  assert.ok(r.body.indexOf('## The session in numbers') < r.body.indexOf('## Quests'), 'first after the story');
+  assert.ok(!buildRecap({ entries: [] }).body.includes('in numbers'));
 });

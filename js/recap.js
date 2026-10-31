@@ -1,6 +1,7 @@
 // Session recap drafts: what changed since the last session, as a session-log entry the GM edits before saving.
 // Only things players can already see go in (it may be posted to Discord). Pure, so it can be tested.
 import { coinText } from './economy.js';
+import { parseDate, toDays, today as calToday, formatDate } from './calendar.js';
 
 const after = (t, since) => Boolean(t) && (!since || String(new Date(t).toISOString()) > since);
 const open = (e) => e && e.visibility !== 'gm' && (e.status || 'live') === 'live';
@@ -50,6 +51,20 @@ export function buildRecap(d) {
   const clocks = (d.standings?.clocks || []).filter((c) => !c.secret && after(c.updated_at, since) && open(byId.get(c.entry_id)));
   add('Clocks', clocks.map((c) => `- ${c.name} (${ref(byId.get(c.entry_id))}): ${c.filled} of ${c.size}${c.filled >= c.size ? ', complete' : ''}`));
 
+  // The session in numbers: coin in and out, items found, in-world days gone by, quests completed.
+  const earned = lines.reduce((t, l) => t + Math.max(0, Number(l.cp || 0)), 0), spent = lines.reduce((t, l) => t + Math.max(0, -Number(l.cp || 0)), 0);
+  const found = lines.reduce((t, l) => t + (l.item && l.qty > 0 ? l.qty : 0), 0);
+  const from = d.cal && parseDate(d.cal, last?.fields?.world_date);
+  const days = from ? toDays(d.cal, calToday(d.cal)) - toDays(d.cal, from) : null;
+  const done = quests.filter((e) => e.fields?.status === 'Completed');
+  const numbers = [
+    earned || spent ? `- Coin: ${[earned ? `+${coinText(earned)} earned` : '', spent ? `−${coinText(spent)} spent` : ''].filter(Boolean).join(', ')}` : null,
+    found ? `- Items found: ${found}` : null,
+    days > 0 ? `- Days passed in the world: ${days} (${formatDate(d.cal, from)} to ${formatDate(d.cal, calToday(d.cal))})` : null,
+    done.length ? `- Quests completed: ${done.length} (${done.map(ref).join(', ')})` : null,
+  ].filter(Boolean);
+  if (numbers.length) sections.unshift(`## The session in numbers\n${numbers.join('\n')}`);
+
   const players = entries.filter((e) => e.kind === 'character' && open(e) && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status))
     .sort((a, b) => a.name.localeCompare(b.name)).map((e) => `${e.name}${e.owner ? ` (${e.owner})` : ''}`);
 
@@ -57,6 +72,6 @@ export function buildRecap(d) {
   return {
     kind: 'session', name: `Session ${number}`, summary: '', body, visibility: 'all',
     fields: { number: String(number), played_on: d.today || '', ...(d.worldDate ? { world_date: d.worldDate } : {}), ...(players.length ? { players: players.join('\n') } : {}), ...(loot.length ? { loot: loot.map((l) => l.slice(2)).join('\n') } : {}) },
-    since, counts: { fresh: fresh.length, quests: quests.length, downtime: downtime.length, ledger: lines.length, standing: standing.length, clocks: clocks.length },
+    since, counts: { numbers: numbers.length, fresh: fresh.length, quests: quests.length, downtime: downtime.length, ledger: lines.length, standing: standing.length, clocks: clocks.length },
   };
 }
