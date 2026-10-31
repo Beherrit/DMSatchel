@@ -1670,3 +1670,4 @@ details.quest-group > summary .section-title { display: inline }
 .who-has { display: grid; gap: 4px; margin: 10px 0 } .who-has-list { display: grid; gap: 2px; margin: 4px 0 0 }
 .poster-wanted { margin-top: 16px } .poster-wanted .poster-job { border-style: solid; border-width: 2px }
 .price-table .note-pill { margin-left: 6px }
+.trade, .trade .buy-box, .trade form { min-width: 0; max-width: 100% } .trade select, .trade input { max-width: 100%; min-width: 0 } .trade .controls > * { min-width: 0 }
