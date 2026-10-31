@@ -380,6 +380,14 @@ to the log at the bottom.
     surpluses, inflation), not just the usual ones.
 177. [x] **A night's rest.** Staying the night at an inn also gives those who stayed a long rest: hit points and
     spell slots back on their sheets.
+178. [ ] **Make camp.** GMs make camp for the party anywhere: a long rest for everyone, eight hours on the clock,
+    and an optional roll on the area's encounter table for who comes in the night.
+179. [ ] **The session in numbers.** A session's recap draft gains a short tally of what changed: coin earned and
+    spent, items found, days passed, quests finished.
+180. [ ] **Hand out to everyone.** GMs give an item (or coin) to several characters at once from the party page:
+    "a potion of healing each".
+181. [ ] **The party at a glance.** A compact table for GMs on the party page: each character's hit points, coin,
+    days of rations, exhaustion and conditions.
 
 ## Ideas parking lot
 
