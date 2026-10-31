@@ -1672,3 +1672,10 @@ details.quest-group > summary .section-title { display: inline }
 .price-table .note-pill { margin-left: 6px }
 .trade, .trade .buy-box, .trade form { min-width: 0; max-width: 100% } .trade select, .trade input { max-width: 100%; min-width: 0 } .trade .controls > * { min-width: 0 }
 .hand-out { display: grid; gap: 6px; margin-top: 6px }
+/* The party at a glance (GMs) */
+.glance-table { width: 100%; border-collapse: collapse; font-size: calc(14px * var(--ts, 1)) }
+.glance-table th, .glance-table td { padding: 4px 8px; border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap }
+.glance-table thead th { font-size: calc(11px * var(--ts, 1)); text-transform: uppercase; letter-spacing: .06em; color: var(--muted) }
+.glance-table td.num { text-align: right; font-variant-numeric: tabular-nums }
+.glance-table .hp-bad { color: var(--danger); font-weight: 600 }
+.glance-table tbody th { text-transform: none; letter-spacing: normal; font-size: inherit; font-weight: 600; color: var(--ink) }

@@ -386,7 +386,7 @@ to the log at the bottom.
     spent, items found, days passed, quests finished.
 180. [x] **Hand out to everyone.** GMs give an item (or coin) to several characters at once from the party page:
     "a potion of healing each".
-181. [ ] **The party at a glance.** A compact table for GMs on the party page: each character's hit points, coin,
+181. [x] **The party at a glance.** A compact table for GMs on the party page: each character's hit points, coin,
     days of rations, exhaustion and conditions.
 
 ## Ideas parking lot
@@ -574,3 +574,4 @@ to the log at the bottom.
 - Make camp: the party page has "⛺ Make camp…" for GMs. Pick who rests and the chance of trouble in the night (no roll, 1 in 6, 1 in 3). Those who rest get the shared long rest (js/rest.js), and the clock moves on eight hours, onto the next day on the calendar if it passes midnight; living costs aren't asked for, since camping costs nothing. If trouble comes, the dialog shows "In the night…". That is a line rolled on the encounter table of where the party is, or the nearest place around it with one ("Rolled 3 on d3"), or else a full encounter for that place's terrain at the party's level, ready to run. js/camp.js unit tested (the 1-in-6 rate over 600 rolls, table lines).
 - The session in numbers: "Draft recap" now opens its gathered sections with "## The session in numbers". Coin is split into earned and spent ("+50 gp earned, −15 gp spent", where the treasure section only gives the net), then items found. Days passed in the world are counted from the last session's in-world date to today ("6 (3 Thawmoon 1040 to 9 Thawmoon 1040)"), when both are on the calendar. Last come quests completed, named. Lines with nothing to say are left out, and so is the section when nothing changed. Only things players can see go in, as with the rest of the draft. Unit tested in tests/recap.test.mjs.
 - Hand out to everyone: the party page's treasury card has "Hand out to everyone" for GMs. Enter an item and how many each, and/or coin each, then tick who gets it (everyone active by default). Each sheet gets it in one save ("2 Potion of healing", +5 gp). Tick "Take it out of the treasury" and one loot-log line takes the whole lot out ("−10 gp, −4 Potion of healing, handed out to Ann, Bo"); otherwise it comes from nowhere, as a GM's gift. js/hand-out.js unit tested.
+- The party at a glance: GMs see a table at the top of the party page with one row per active character: hit points ("7 / 30 (low)" at a quarter or less, "0 / 12 (down)", marked in words as well as colour), coin, days of rations, exhaustion and conditions. It scrolls sideways within its card on a phone, and players don't see it. js/party-glance.js unit tested.

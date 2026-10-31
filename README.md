@@ -175,6 +175,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Rations run down**: on the road, days passing eat each character's rations, and the GMs hear who's run out.
 - **Make camp**: a long rest anywhere, eight hours on the clock, and maybe something from the area's encounter table in the night.
 - **Hand out to everyone**: GMs give the same item or coin to several characters at once, from nowhere or from the treasury.
+- **The party at a glance**: a table for GMs of each character's hit points, coin, rations, exhaustion and conditions.
 - **Export to a spreadsheet**: download any kind of entry as a CSV file with its fields as columns; it imports back as it is.
 - **A new world like this one**: start a world with another's calendar, own fields, templates, session zero page and tag descriptions, but none of its entries.
 - **Set a field for many**: bulk actions set one field (a status, a type, a role) on every selected entry that has it.

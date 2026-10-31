@@ -7,6 +7,7 @@ import { thumb } from './image-ui.js';
 import { lastShownLine } from './world-show.js';
 import { addCoins, playOf, changePlay } from './sheet-ui.js';
 import { readHandOut, handOutTotal } from './hand-out.js';
+import { partyRows } from './party-glance.js';
 import { giveItem } from './handover.js';
 import { progressBadge } from './world-objectives.js';
 import { advancementSection } from './world-attendance.js';
@@ -26,6 +27,23 @@ import { tableCard } from './world-profiles.js';
 import { journeySection } from './world-journey.js';
 import { wishedBy } from './world-wishes.js';
 import { itemsNamed } from './play-cards.js';
+
+// GMs: every active character in one table: hit points (flagged in words when low or down), coin, days of rations,
+// exhaustion and conditions.
+function glanceTable(active) {
+  if (!active.length) return null;
+  const rows = partyRows(active.map((c) => ({ id: c.id, name: c.name, play: playOf(c) })));
+  return el('section', { class: 'card party-glance' }, el('h3', {}, 'The party at a glance'),
+    el('div', { class: 'table-wrap' }, el('table', { class: 'glance-table' },
+      el('thead', {}, el('tr', {}, ['Character', 'Hit points', 'Coin', 'Rations', 'Exhaustion', 'Conditions'].map((h) => el('th', { scope: 'col' }, h)))),
+      el('tbody', {}, rows.map((r) => el('tr', {},
+        el('th', { scope: 'row' }, link(getEntry(r.id) || { id: r.id, name: r.name })),
+        el('td', { class: `num${r.low || r.down ? ' hp-bad' : ''}` }, r.max ? `${r.hp} / ${r.max}` : '—', r.down ? ' (down)' : r.low ? ' (low)' : ''),
+        el('td', { class: 'num' }, coinText(r.cp)),
+        el('td', { class: `num${r.rations ? '' : ' muted'}` }, r.rations ? `${r.rations} day${r.rations === 1 ? '' : 's'}` : 'none'),
+        el('td', { class: 'num' }, r.exhaustion ? String(r.exhaustion) : '—'),
+        el('td', {}, r.conditions.length ? r.conditions.join(', ') : '—')))))));
+}
 
 function members(chars) {
   const active = chars.filter(ACTIVE), former = chars.filter((e) => !ACTIVE(e));
@@ -213,7 +231,7 @@ export async function viewParty(rerender) {
     el('div', { class: 'panel-head' }, el('h2', {}, 'The Party'), el('p', {}, 'Who’s adventuring, what they carry, what they’re chasing and what they’ve found.'), lastShownLine(),
       isGm() ? el('div', { class: 'btnrow' }, campButton(rerender)) : null),
     el('div', { class: 'party-grid' },
-      el('div', { class: 'party-main' }, members(chars), partyBondsSection(), advancementSection(),
+      el('div', { class: 'party-main' }, isGm() ? glanceTable(chars.filter(ACTIVE)) : null, members(chars), partyBondsSection(), advancementSection(),
         el('section', {}, el('h3', { class: 'section-title' }, 'Current quests'),
           quests.length ? el('ul', { class: 'entry-list' }, quests.map((q) => el('li', {}, link(q), world.info?.next_move === q.id ? el('span', { class: 'tag', title: 'Your pick for what’s next' }, '★ your pick') : null, progressBadge(q), q.fields?.reward ? el('span', { class: 'muted small' }, `Reward: ${q.fields.reward}`) : null)))
             : el('p', { class: 'muted' }, 'No active quests.'),
