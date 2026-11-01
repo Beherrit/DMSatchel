@@ -19,3 +19,17 @@ export function eatRations(inventory, days) {
   }
   return { text: lines.filter((l) => l !== null).join('\n'), had, ate: want - need, short: need };
 }
+
+// Rations from the stash: cover each character's shortfall from the treasury's rations, in order, while they last.
+// short: [{ id, name, short }]; stash: the treasury's items [{ item, qty }].
+// → { left: Map(id → days still short), used: [{ item, qty, by: [names] }] }
+export function feedFromStash(short, stash) {
+  const pots = (stash || []).filter((s) => IS_RATION.test(s.item) && s.qty > 0).map((s) => ({ item: s.item, left: s.qty, used: 0, by: new Set() }));
+  const left = new Map();
+  for (const c of short || []) {
+    let need = c.short;
+    for (const p of pots) { if (!need) break; const take = Math.min(need, p.left); if (take) { p.left -= take; p.used += take; need -= take; p.by.add(c.name); } }
+    left.set(c.id, need);
+  }
+  return { left, used: pots.filter((p) => p.used).map((p) => ({ item: p.item, qty: p.used, by: [...p.by] })) };
+}

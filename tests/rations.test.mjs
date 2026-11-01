@@ -10,3 +10,11 @@ test('a day’s rations a day', () => {
   r = eatRations('Rope', 2); assert.deepEqual([r.text, r.had, r.short], ['Rope', 0, 2]);
   assert.equal(eatRations('Rations x4', 0).text, 'Rations x4');
 });
+
+test('rations from the stash', async () => {
+  const { feedFromStash } = await import('../js/rations.js');
+  const r = feedFromStash([{ id: 'b', name: 'Bo', short: 2 }, { id: 'c', name: 'Cy', short: 3 }], [{ item: 'Rope', qty: 4 }, { item: 'Rations (1 day)', qty: 4 }]);
+  assert.deepEqual([...r.left], [['b', 0], ['c', 1]]);
+  assert.deepEqual(r.used, [{ item: 'Rations (1 day)', qty: 4, by: ['Bo', 'Cy'] }]);
+  assert.deepEqual(feedFromStash([{ id: 'b', name: 'Bo', short: 1 }], []).used, []);
+});

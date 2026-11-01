@@ -106,7 +106,8 @@ textarea { width: 100%; resize: vertical; line-height: 1.45 }
 .seg button:last-child { border-right: none }
 .seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg) }
 .check { display: inline-flex; align-items: center; gap: 4px; font-size: calc(14px * var(--ts, 1)); color: var(--muted); white-space: nowrap }
-.edit-form .check, .card > .check { white-space: normal; align-items: flex-start }
+.edit-form .check, .card > .check, .dialog-body .check { white-space: normal; align-items: flex-start }
+.dialog-body .check input { flex: 0 0 auto; width: auto; margin-top: 3px }
 
 /* cards & tool output */
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px; display: grid; gap: 12px; min-width: 0 }
