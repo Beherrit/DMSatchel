@@ -159,7 +159,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Tavern menu**: a bill of fare for any tavern (drinks, dishes, a bed for the night), priced to suit the town, to read out or print.
 - **Price list**: a Reference tab with what things cost (gear, food, lodging, services), searchable, as usual or as one town's market has them.
 - **Not yet visited**: the atlas shows GMs which places the party has never set foot in.
-- **Living costs**: when days pass, charge the party for their lifestyle, from each purse or the treasury.
+- **Living costs**: when days pass, charge the party for their lifestyle (each character's own, if they've chosen one), from each purse or the treasury.
 - **The treasury over time**: a small chart of the party's coin after each change in the loot log, with a table view.
 - **Buy from and sell to a shop**: players buy with their own coin or sell from their inventory at the shop's buy-back rate; the shelf follows.
 - **Quest deadlines**: an in-world deadline on a quest, counted down on its page, the quest board, session prep and the calendar.

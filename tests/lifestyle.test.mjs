@@ -13,6 +13,13 @@ test('living costs come out of each purse, never below nothing', () => {
 });
 
 test('or the treasury pays for everyone', () => {
-  assert.deepEqual(livingCosts([{ id: 'a' }, { id: 'b' }], 5, 'Comfortable', 10000), { each: [], total: 2000, paid: 2000, short: 0 });
-  assert.deepEqual(livingCosts([{ id: 'a' }, { id: 'b' }], 5, 'Comfortable', 1500), { each: [], total: 2000, paid: 1500, short: 500 });
+  { const r = livingCosts([{ id: 'a' }, { id: 'b' }], 5, 'Comfortable', 10000); assert.deepEqual([r.total, r.paid, r.short], [2000, 2000, 0]); }
+  { const r = livingCosts([{ id: 'a' }, { id: 'b' }], 5, 'Comfortable', 1500); assert.deepEqual([r.total, r.paid, r.short], [2000, 1500, 500]); }
+});
+
+test('each character’s own lifestyle', () => {
+  const chars = [{ id: 'n', name: 'Noble', cp: 100000, lifestyle: 'Wealthy' }, { id: 'r', name: 'Ranger', cp: 1000, lifestyle: 'Wretched' }, { id: 'x', name: 'Plain', cp: 1000 }, { id: 'y', name: 'Odd', cp: 1000, lifestyle: 'Royal' }];
+  const r = livingCosts(chars, 2, 'Modest');
+  assert.deepEqual(r.each.map((x) => [x.name, x.lifestyle, x.owed]), [['Noble', 'Wealthy', 800], ['Ranger', 'Wretched', 0], ['Plain', 'Modest', 200], ['Odd', 'Modest', 200]]);
+  assert.equal(livingCosts(chars, 2, 'Modest', 100000).total, 1200);
 });

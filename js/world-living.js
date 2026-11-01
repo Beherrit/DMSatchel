@@ -20,7 +20,7 @@ const ROAD = 'road'; // the lifestyle choice for eating rations on the road
 
 export async function offerLivingCosts(days, { travel = false } = {}) {
   if (!isGm() || previewing() || !(days > 0)) return;
-  const chars = worldEntries().filter(ACTIVE).sort((a, b) => a.name.localeCompare(b.name)).map((e) => ({ id: e.id, name: e.name, cp: playOf(e).cp || 0, e }));
+  const chars = worldEntries().filter(ACTIVE).sort((a, b) => a.name.localeCompare(b.name)).map((e) => ({ id: e.id, name: e.name, cp: playOf(e).cp || 0, lifestyle: e.fields?.lifestyle || '', e }));
   const pay = payroll(worldEntries(), days);
   if (!chars.length && !pay.list.length) return;
   let treasury = 0;
@@ -48,14 +48,15 @@ export async function offerLivingCosts(days, { travel = false } = {}) {
     const p = plan();
     preview.textContent = pot.checked
       ? `The treasury pays ${coinText(p.paid)} for ${chars.length} character${chars.length === 1 ? '' : 's'}${p.short ? `; it’s ${coinText(p.short)} short` : ''}.`
-      : p.each.map((x) => `${x.name} ${coinText(x.paid)}${x.short ? ` (${coinText(x.short)} short)` : ''}`).join(', ') + '.';
+      : p.each.map((x) => `${x.name} ${coinText(x.paid)}${x.lifestyle !== style.value ? ` (${x.lifestyle.toLowerCase()})` : ''}${x.short ? ` (${coinText(x.short)} short)` : ''}`).join(', ') + '.';
   };
   for (const x of [style, own, pot]) x.addEventListener('change', show);
   show();
   const go = el('button', { class: 'btn primary', type: 'submit' }, 'Charge it');
   const d = el('dialog', { class: 'dialog', 'aria-labelledby': 'lv-title' }, el('form', { class: 'dialog-body', method: 'dialog' },
     el('h2', { id: 'lv-title' }, `Living costs for ${days} day${days === 1 ? '' : 's'}?`),
-    el('div', { class: 'field' }, el('label', { for: 'lv-style' }, 'How the party lives'), style),
+    el('div', { class: 'field' }, el('label', { for: 'lv-style' }, chars.some((c) => c.lifestyle) ? 'How the rest of the party lives' : 'How the party lives'), style),
+    chars.some((c) => c.lifestyle) ? el('p', { class: 'muted small' }, `Living their own way: ${chars.filter((c) => c.lifestyle).map((c) => `${c.name} (${c.lifestyle.toLowerCase()})`).join(', ')}. On the road, everyone eats rations.`) : null,
     whoPays,
     preview,
     wages ? el('label', { class: 'check', for: 'lv-wages' }, wages, ` Pay ${pay.list.length === 1 ? pay.list[0].entry.name : `${pay.list.length} hirelings`} ${coinText(pay.total)} in wages from the treasury`) : null,

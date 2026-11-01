@@ -4,15 +4,16 @@
 export const LIFESTYLES = [['Wretched', 0], ['Squalid', 10], ['Poor', 20], ['Modest', 100], ['Comfortable', 200], ['Wealthy', 400], ['Aristocratic', 1000]];
 export const perDay = (name) => LIFESTYLES.find(([n]) => n === name)?.[1] ?? 100;
 
-// chars: [{ id, name, cp }] → { each: [{ id, name, owed, paid, short }], total } for paying from their own coin;
-// or, from the treasury (treasuryCp given), { each: [], total, paid, short } with one sum for the whole party.
+// chars: [{ id, name, cp, lifestyle? }] (a character's own lifestyle, if they've chosen one, beats the party's)
+// → { each: [{ id, name, lifestyle, owed, paid, short }], total } for paying from their own coin;
+// or, from the treasury (treasuryCp given), { each, total, paid, short } with one sum for the whole party.
 export function livingCosts(chars, days, lifestyle, treasuryCp = null) {
-  const d = Math.max(0, Math.round(Number(days) || 0)), rate = perDay(lifestyle);
-  const list = chars || [];
+  const d = Math.max(0, Math.round(Number(days) || 0));
+  const list = (chars || []).map((c) => { const ls = LIFESTYLES.some(([n]) => n === c.lifestyle) ? c.lifestyle : lifestyle; return { ...c, ls, owed: perDay(ls) * d }; });
   if (treasuryCp !== null) {
-    const total = rate * d * list.length, paid = Math.max(0, Math.min(total, Math.round(treasuryCp)));
-    return { each: [], total, paid, short: total - paid };
+    const total = list.reduce((t, c) => t + c.owed, 0), paid = Math.max(0, Math.min(total, Math.round(treasuryCp)));
+    return { each: list.map((c) => ({ id: c.id, name: c.name, lifestyle: c.ls, owed: c.owed })), total, paid, short: total - paid };
   }
-  const each = list.map((c) => { const owed = rate * d, paid = Math.max(0, Math.min(owed, Math.round(Number(c.cp) || 0))); return { id: c.id, name: c.name, owed, paid, short: owed - paid }; });
+  const each = list.map((c) => { const paid = Math.max(0, Math.min(c.owed, Math.round(Number(c.cp) || 0))); return { id: c.id, name: c.name, lifestyle: c.ls, owed: c.owed, paid, short: c.owed - paid }; });
   return { each, total: each.reduce((t, x) => t + x.paid, 0) };
 }
