@@ -177,6 +177,8 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Make camp and short rests**: a long rest anywhere, eight hours on the clock, and maybe something from the area's encounter table in the night; or an hour's short rest that gives warlocks their pact slots back.
 - **Hand out to everyone**: GMs give the same item or coin to several characters at once, from nowhere or from the treasury.
 - **The party at a glance**: a table for GMs of each character's hit points, coin, rations, exhaustion and conditions.
+- **A party sheet for the GM's screen**: one printable page of every character's hit points, armour class, passive Perception, coin and what they carry.
+- **Heavy packs**: each sheet weighs what it carries (SRD weights, coins fifty to the pound) against its carrying capacity.
 - **The journey on the calendar**: the days the party arrived somewhere show on the in-world calendar.
 - **Worries in prep**: session prep warns who's down, low, exhausted, out of rations or broke.
 - **Sell the loot**: GMs sell the treasury's items to a shop in one go; coin into the treasury, items onto the shelf.
@@ -186,6 +188,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Downtime moves with the calendar**: open downtime counts the days that pass and says when it's ready to resolve.
 - **A day on the road**: after travel, a party journal draft of the journey: days, pace, weather and rations.
 - **What happened to my coin?**: a history on each sheet of changes made from outside it (shares, living costs, rations, purchases, rests).
+- **You've got news**: with the world open, players hear at once when the GMs change their sheet: "📜 Ann: Handed out by the GMs: 2 × Potion of healing".
 - **Shops keep hours**: shops are shut at night by the world's clock (taverns stay open late); GMs can still trade.
 - **Treasure from a fight**: an encounter card rolls treasure for its challenge and puts it straight into the loot log.
 - **The party's wealth**: the treasury plus every character's purse, on the party page.

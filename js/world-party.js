@@ -35,7 +35,7 @@ import { itemsNamed } from './play-cards.js';
 function glanceTable(active) {
   if (!active.length) return null;
   const rows = partyRows(active.map((c) => ({ id: c.id, name: c.name, play: playOf(c) })));
-  return el('section', { class: 'card party-glance' }, el('h3', {}, 'The party at a glance'),
+  return el('section', { class: 'card party-glance' }, el('div', { class: 'entry-head' }, el('h3', {}, 'The party at a glance'), el('a', { class: 'btn small', href: '#world/screen' }, 'Party sheet for the screen')),
     el('div', { class: 'table-wrap' }, el('table', { class: 'glance-table' },
       el('thead', {}, el('tr', {}, ['Character', 'Hit points', 'Coin', 'Rations', 'Exhaustion', 'Conditions'].map((h) => el('th', { scope: 'col' }, h)))),
       el('tbody', {}, rows.map((r) => el('tr', {},

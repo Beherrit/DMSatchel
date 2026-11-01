@@ -13,3 +13,14 @@ export function addLog(play, text, by = '', at = new Date().toISOString()) {
   play.log = [...readLog(play), { at: String(at).slice(0, 40), text: t, ...(by ? { by: String(by).slice(0, 80) } : {}) }].slice(-LOG_MAX);
   return play;
 }
+
+// You've got news: the lines in a sheet's log that weren't there before (by time and text), newest last.
+export function newLines(oldPlay, newPlay) {
+  const seen = new Set(readLog(oldPlay).map((x) => `${x.at}|${x.text}`));
+  return readLog(newPlay).filter((x) => !seen.has(`${x.at}|${x.text}`));
+}
+
+// The play state stored on an entry (fields.play, JSON), or {} when there is none or it won't parse.
+export function playJson(e) {
+  try { const p = JSON.parse(e?.fields?.play || '{}'); return p && typeof p === 'object' ? p : {}; } catch { return {}; }
+}

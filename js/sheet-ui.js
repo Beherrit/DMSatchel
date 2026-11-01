@@ -14,6 +14,7 @@ import { matchItems } from './inventory-items.js';
 import { coinText, parseCoins } from './economy.js';
 import { api, session } from './api.js';
 import { inventoryLines } from './handover.js';
+import { loadOf, loadText } from './weights.js';
 import { queuePlay, isOffline } from './outbox.js';
 
 import { CONDITIONS, CONDITION_TEXT, conditionLine } from './conditions.js';
@@ -268,9 +269,13 @@ export function sheetSection(e, rerender) {
 
   // Items named in the inventory that the world, the library or the SRD knows: link them and say what they do.
   const itemsBox = el('div', { class: 'inv-items' });
+  // Heavy packs: what the inventory and purse weigh against the character's carrying capacity.
+  const loadLine = el('p', { class: 'small load-line', 'aria-live': 'polite' });
+  const drawLoad = () => { const l = loadOf(play, ch?.abilities?.scores?.Str, ch?.size); loadLine.classList.toggle('over', l.over); loadLine.textContent = loadText(l); };
   let itemTimer = null;
   function drawItems() {
     clearTimeout(itemTimer);
+    drawLoad();
     itemTimer = setTimeout(() => {
       const worldItems = worldEntries().filter((x) => x.kind === 'item').map((x) => ({ name: x.name, entry: x, rarity: x.fields?.rarity, summary: x.summary || String(x.fields?.properties || '').split('\n')[0] }));
       const known = new Set(worldItems.map((x) => x.name.toLowerCase()));
@@ -281,7 +286,7 @@ export function sheetSection(e, rerender) {
         x.summary ? el('div', { class: 'small' }, x.summary.length > 220 ? `${x.summary.slice(0, 219)}…` : x.summary) : null)))] : []);
     }, 250);
   }
-  function inventoryItems() { drawItems(); return itemsBox; }
+  function inventoryItems() { drawItems(); return [loadLine, itemsBox]; }
 
   function manual() {
     if (ch || !can) return null;

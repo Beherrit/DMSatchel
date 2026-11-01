@@ -1686,3 +1686,21 @@ details.quest-group > summary .section-title { display: inline }
 .sheet-history { margin-top: 10px } .sheet-log { display: grid; gap: 3px; margin: 6px 0 0 }
 .shop-shut { margin: 8px 0; color: var(--muted) }
 .enc-treasure { margin-top: 8px; display: grid; gap: 6px }
+/* A party sheet for the GM's screen */
+.screen-table { width: 100%; border-collapse: collapse }
+.screen-table th, .screen-table td { text-align: left; vertical-align: top; padding: 6px 8px; border-bottom: 1px solid var(--line) }
+.screen-table .num { text-align: right; white-space: nowrap }
+.screen-table tbody th { font-weight: 600; min-width: 9em; text-transform: none; letter-spacing: normal; font-size: inherit; color: var(--ink) }
+.screen-table tbody th .small { font-weight: 400 }
+.screen-carry { min-width: 14em }
+.screen-worry { color: var(--danger) }
+@media print {
+  @page { size: landscape; margin: 10mm }
+  .screen-view .table-wrap { overflow: visible }
+  .screen-table { font-size: 9.5pt }
+  .screen-table th, .screen-table td { border-bottom: 1px solid #999; padding: 3px 5px }
+  .screen-table a { color: #000; text-decoration: none; font-size: 11pt }
+  .screen-worry, .screen-table .muted { color: #000 }
+}
+.load-line { margin: 4px 0 0; color: var(--muted) }
+.load-line.over { color: var(--danger); font-weight: 600 }

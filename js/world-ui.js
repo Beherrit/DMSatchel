@@ -8,6 +8,7 @@ import { api, session, isGm, isMember, isPlayer, signedIn, onSession, setPreview
 import { KINDS, KIND_ORDER, LINK_LABELS, STANDING_KINDS, PLACE_KINDS, PLAYER_KINDS, fieldApplies } from './world-schema.js';
 import { openSignIn } from './signin.js';
 import { stripMarks } from './rich.js';
+import { newLines, playJson } from './play-log.js';
 import { world, worldEntries, getEntry, loadWorld, byName, kindLabel, kindFields, richInline, link, when, findByName, mentions, richText, contentsNav, notice, nameList } from './world-store.js';
 import { viewMaps, viewMap, pinsFor } from './world-maps.js';
 import { viewStandings, standingWidget } from './world-standings.js';
@@ -113,6 +114,7 @@ const viewNumbers = lazyView(() => import('./world-numbers.js'), 'viewNumbers');
 const viewItemCards = lazyView(() => import('./world-playcards.js'), 'viewItemCards');
 const viewSpellCards = lazyView(() => import('./world-playcards.js'), 'viewSpellCards');
 const viewWhosWho = lazyView(() => import('./world-whoswho.js'), 'viewWhosWho');
+const viewScreen = lazyView(() => import('./world-screen.js'), 'viewScreen');
 const viewPrep = lazyView(() => import('./world-prep.js'), 'viewPrep');
 const viewPowers = lazyView(() => import('./world-powers.js'), 'viewPowers');
 const viewLibrary = lazyView(() => import('./world-library.js'), 'viewLibrary');
@@ -758,6 +760,7 @@ export async function showWorld(parts, { keepScroll = false } = {}) {
   else if (view === 'itemcards') node = await viewItemCards(arg || '');
   else if (view === 'spellcards') node = await viewSpellCards(arg || '');
   else if (view === 'whoswho') node = await viewWhosWho();
+  else if (view === 'screen') node = await viewScreen();
   else if (view === 'poster') node = await viewPoster(arg);
   else if (view === 'bin') node = await viewBin();
   else if (view === 'atlas') node = viewAtlas();
@@ -858,13 +861,18 @@ export function mountWorld(root) {
       if (all.some((c) => c.shown)) checkShown();
       if (all.some((c) => c.notice)) { drawNoticeBanner(); if (location.hash === '#world' || location.hash === '#world/') rerenderWorld(); }
       const changes = all.filter((c) => !c.shown && !c.notice);
+      // You've got news: your own character's sheet changed from outside (a hand-out, a share, rations): say what.
+      const news = changes.filter((c) => c.old && c.entry.owner_id && c.entry.owner_id === session.gm?.id)
+        .map((c) => ({ c, lines: newLines(playJson(c.old), playJson(c.entry)).filter((x) => x.by !== session.gm?.name) })).filter((x) => x.lines.length);
+      for (const { c, lines } of news) toast(`📜 ${c.entry.name}: ${lines.map((x) => `${x.text}${x.by ? ` (${x.by})` : ''}`).join('; ')}`);
+      const told = new Set(news.map((x) => x.c));
       // Something you follow changed: say so on its own, by name.
       const followed = changes.filter((c) => c.change !== 'removed' && c.by && (world.info?.following || []).includes(c.entry.id));
       if (followed.length) { toast(`🔔 ${followed.map((c) => c.entry.name).join(', ')} (you follow ${followed.length === 1 ? 'it' : 'them'}) changed by ${[...new Set(followed.map((c) => c.by))].join(', ')}`); renderSide(); }
       if (changes.length) {
         const people = [...new Set(changes.map((c) => c.by).filter(Boolean))];
         const one = changes.length === 1 && changes[0];
-        if (!followed.length) toast(one ? (one.calendar ? 'The calendar changed' : one.change === 'removed' ? `${one.entry.name} was removed or hidden` : `${one.by || 'Someone'} ${one.change === 'new' ? 'added' : 'edited'} ${one.entry.name}`)
+        if (!followed.length && changes.some((c) => !told.has(c))) toast(one ? (one.calendar ? 'The calendar changed' : one.change === 'removed' ? `${one.entry.name} was removed or hidden` : `${one.by || 'Someone'} ${one.change === 'new' ? 'added' : 'edited'} ${one.entry.name}`)
           : `${changes.length} changes${people.length ? ` from ${people.join(', ')}` : ''}`);
         // Don't redraw under someone who is typing; their form keeps its input and the new data shows next time.
         const typing = /^#world\/(new|edit)\//.test(location.hash) || main.contains(document.activeElement) && ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName);

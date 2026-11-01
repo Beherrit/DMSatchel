@@ -189,7 +189,7 @@ export async function syncWorld(me) {
     const old = world.entries.get(e.id);
     if (old && old.version >= e.version) continue;
     world.entries.set(e.id, e);
-    if (e.updated_by !== me) out.push({ entry: e, change: old ? 'edit' : 'new', by: e.updated_by });
+    if (e.updated_by !== me) out.push({ entry: e, change: old ? 'edit' : 'new', by: e.updated_by, old });
   }
   for (const id of r.removed) {
     const old = world.entries.get(id);
