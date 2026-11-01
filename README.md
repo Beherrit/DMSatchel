@@ -177,6 +177,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Hand out to everyone**: GMs give the same item or coin to several characters at once, from nowhere or from the treasury.
 - **The party at a glance**: a table for GMs of each character's hit points, coin, rations, exhaustion and conditions.
 - **The journey on the calendar**: the days the party arrived somewhere show on the in-world calendar.
+- **Worries in prep**: session prep warns who's down, low, exhausted, out of rations or broke.
 - **Export to a spreadsheet**: download any kind of entry as a CSV file with its fields as columns; it imports back as it is.
 - **A new world like this one**: start a world with another's calendar, own fields, templates, session zero page and tag descriptions, but none of its entries.
 - **Set a field for many**: bulk actions set one field (a status, a type, a role) on every selected entry that has it.

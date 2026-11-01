@@ -13,7 +13,7 @@ import { clockFace } from './world-clocks.js';
 import { rumorsAt, letRumorsSpread } from './world-rumors.js';
 import { encounterCard, partyDefaults, placeTerrains, monsterSource } from './encounter-ui.js';
 import { rollEncounter } from './encounters.js';
-import { vitals } from './sheet-ui.js';
+import { vitals, playOf } from './sheet-ui.js';
 import { secretsCard } from './world-secrets.js';
 import { readGoals, activeGoals } from './goals.js';
 import { readWishes, openWishes } from './wishes.js';
@@ -32,6 +32,17 @@ import { betweenSessions } from './between.js';
 import { remindersCard } from './world-reminders.js';
 import { readingPrepCard } from './world-reading.js';
 import { nextMovesCard } from './world-nextmove.js';
+import { partyRows, worries } from './party-glance.js';
+
+// Before the session: who's hurt, hungry, exhausted or broke (from the characters' sheets).
+function worriesCard() {
+  const chars = worldEntries().filter((e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status));
+  const list = worries(partyRows(chars.map((c) => ({ id: c.id, name: c.name, play: playOf(c) }))));
+  if (!list.length) return null;
+  return el('section', { class: 'card prep-card worries' }, el('h3', {}, '⚠ Before the session'),
+    el('ul', { class: 'plain' }, list.map((w) => el('li', {}, link(getEntry(w.id)), ` ${w.text}`))),
+    el('p', { class: 'small' }, el('a', { href: '#world/party' }, 'The party at a glance')));
+}
 import { dayWeather, forecast } from './forecast.js';
 import { deadlineOf, deadlineText } from './deadline.js';
 
@@ -263,6 +274,6 @@ export async function viewPrep(rerender) {
       el('button', { class: 'btn small', type: 'button', onclick: async () => { await letRumorsSpread(); rerender(); } }, 'Let rumors spread'),
       el('a', { class: 'btn small', href: '#world/calendar' }, 'Move time on')),
     el('div', { class: 'prep-columns' },
-      el('div', { class: 'prep-main' }, remindersCard(prep), nextMovesCard(rerender), readingPrepCard(), lastTime(), betweenSection(table), whereSection(prep, rerender), card('Read-aloud', ...readAloudList(prep)), secretsCard(prep, next), turnUpSection(prep), questsSection(), scratchPad(prep)),
+      el('div', { class: 'prep-main' }, remindersCard(prep), worriesCard(), nextMovesCard(rerender), readingPrepCard(), lastTime(), betweenSection(table), whereSection(prep, rerender), card('Read-aloud', ...readAloudList(prep)), secretsCard(prep, next), turnUpSection(prep), questsSection(), scratchPad(prep)),
       el('div', { class: 'prep-side' }, world.info?.rsvp ? card('Who’s coming', rsvpCard({ compact: true })) : null, checklistCard(prep, next), clockCard(), partySection(), spotlightSection(), clocksSection(), calendarSection(), threadsSection(gmThreads, table))));
 }

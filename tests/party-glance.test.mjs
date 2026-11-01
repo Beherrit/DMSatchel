@@ -10,3 +10,15 @@ test('the party at a glance', () => {
     [['Ann', 7, 30, true, false, 1234, 7, 1, 'Poisoned'], ['Bo', 0, 12, false, true, 0, 0, 0, ''], ['Cy', 20, 20, false, false, 0, 0, 0, ''], ['Di', 0, 0, false, false, 0, 0, 0, '']]);
   assert.equal(rationsIn('Rope'), 0);
 });
+
+test('worries before the session', async () => {
+  const { worries } = await import('../js/party-glance.js');
+  const rows = partyRows([
+    { id: 'a', name: 'Ann', play: { hp: 7, maxhp: 30, cp: 5000, inventory: 'Rations x3', exhaustion: 2 } },
+    { id: 'b', name: 'Bo', play: { hp: 0, maxhp: 12, cp: 40, inventory: 'Rations x1' } },
+    { id: 'c', name: 'Cy', play: { hp: 20, maxhp: 20, cp: 900, inventory: 'Rations x9' } },
+    { id: 'd', name: 'Di', play: { hp: 10, maxhp: 10, cp: 0, inventory: '' } }]);
+  assert.deepEqual(worries(rows).map((w) => `${w.name} ${w.text}`), [
+    'Bo is down (0 hit points)', 'Ann is low on hit points (7 of 30)', 'Ann has 2 levels of exhaustion', 'Di has no rations', 'Bo has less than a gold piece', 'Di is broke']);
+  assert.deepEqual(worries([]), []);
+});

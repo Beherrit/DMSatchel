@@ -15,3 +15,17 @@ export function partyRows(chars) {
     };
   });
 }
+
+// Worries for session prep: who's down or low on hit points, out of rations, exhausted, or broke (less than a day's
+// modest living). rows from partyRows → [{ id, name, text }], the worst first.
+export function worries(rows) {
+  const out = [];
+  for (const r of rows || []) {
+    if (r.down) out.push({ id: r.id, name: r.name, rank: 0, text: 'is down (0 hit points)' });
+    else if (r.low) out.push({ id: r.id, name: r.name, rank: 1, text: `is low on hit points (${r.hp} of ${r.max})` });
+    if (r.exhaustion) out.push({ id: r.id, name: r.name, rank: 2, text: `has ${r.exhaustion} level${r.exhaustion === 1 ? '' : 's'} of exhaustion` });
+    if (!r.rations) out.push({ id: r.id, name: r.name, rank: 3, text: 'has no rations' });
+    if (r.cp < 100) out.push({ id: r.id, name: r.name, rank: 4, text: r.cp ? 'has less than a gold piece' : 'is broke' });
+  }
+  return out.sort((a, b) => a.rank - b.rank || a.name.localeCompare(b.name)).map(({ rank, ...w }) => w);
+}

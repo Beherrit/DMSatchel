@@ -392,7 +392,7 @@ to the log at the bottom.
     magic slots back for warlocks.
 183. [x] **The journey on the calendar.** Where the party has been shows on the in-world calendar, on the days they
     arrived ("⚑ Brindle").
-184. [ ] **Worries in prep.** Session prep warns about who's down or low on hit points, out of rations, exhausted or
+184. [x] **Worries in prep.** Session prep warns about who's down or low on hit points, out of rations, exhausted or
     broke, before the session starts.
 185. [ ] **Sell the loot.** GMs sell treasury items to a shop at its buy-back rate in one go; the coin goes into the
     treasury and the items onto the shop's shelf.
@@ -585,3 +585,4 @@ to the log at the bottom.
 - The party at a glance: GMs see a table at the top of the party page with one row per active character: hit points ("7 / 30 (low)" at a quarter or less, "0 / 12 (down)", marked in words as well as colour), coin, days of rations, exhaustion and conditions. It scrolls sideways within its card on a phone, and players don't see it. js/party-glance.js unit tested.
 - A short rest: next to "Make camp", GMs get "☕ Short rest" on the party page. It moves the clock on an hour and gives warlocks (characters from the Forge with pact magic) their pact slots back; other casters' slots stay spent. The toast says who got slots back and reminds that players spend hit dice on their own sheets, since that's their choice. It shares the sheet's own rule (shortRestOf beside restOf in js/sheet-ui.js).
 - The journey on the calendar: every stop in "Where the party has been" that carries an in-world date the calendar reads now shows on that day: "⚑ Brindle" in the month grid, and "⚑ The party arrived in Brindle" when the day is opened. Only places the viewer can see are shown, so a hidden lair never appears for players. journeyDays in js/journey.js unit tested (weekday-prefixed dates, undated and unreadable stops).
+- Worries in prep: session prep now has "⚠ Before the session" near the top whenever a character's sheet gives cause. It covers anyone down or low on hit points, exhausted, without rations, or broke (less than a gold piece, a day's modest living), worst first, each linked, with a link to the party-at-a-glance table. When all's well it isn't shown. worries() in js/party-glance.js unit tested.
