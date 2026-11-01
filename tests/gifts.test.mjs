@@ -12,3 +12,17 @@ test('gifts for NPCs', () => {
   let k = ''; for (let i = 0; i < 35; i++) k = addGift(k, { by: 'A', item: `I${i}` });
   assert.equal(readGifts(k).length, GIFTS_MAX);
 });
+
+test('wantsMatch: a gift they wanted', async () => {
+  const { wantsMatch, addGift, readGifts } = await import('../js/gifts.js');
+  const wants = 'A cure for her son. Wants rare herbs and an old map of the marsh; always short of money.';
+  assert.equal(wantsMatch(wants, 'Map of the Marches'), true);
+  assert.equal(wantsMatch(wants, 'The old one'), false); // only small words
+  assert.equal(wantsMatch(wants, 'Dried herbs (bundle)'), true);
+  assert.equal(wantsMatch(wants, 'Potion of healing'), false);
+  assert.equal(wantsMatch(wants, '', 500), true);
+  assert.equal(wantsMatch('A quiet life', '', 500), false);
+  assert.equal(wantsMatch('', 'Map'), false);
+  assert.equal(readGifts(addGift('', { by: 'Ann', item: 'Map', wanted: true }))[0].wanted, true);
+  assert.equal(readGifts(addGift('', { by: 'Ann', item: 'Map' }))[0].wanted, undefined);
+});

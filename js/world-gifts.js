@@ -6,7 +6,7 @@ import { world, worldEntries, link, findByName, whenTime } from './world-store.j
 import { playOf } from './sheet-ui.js';
 import { inventoryLines } from './handover.js';
 import { coinText, parseCoins } from './economy.js';
-import { readGifts, giftWhat } from './gifts.js';
+import { readGifts, giftWhat, wantsMatch } from './gifts.js';
 
 const ACTIVE = (c) => c.kind === 'character' && c.status !== 'suggested' && !['Retired', 'Dead', 'Missing'].includes(c.fields?.status);
 
@@ -18,6 +18,9 @@ function giveDialog(npc, chars, rerender) {
   const coinLabel = el('label', { for: 'gf-coin' }, 'Coin');
   const why = el('input', { type: 'text', id: 'gf-why', maxlength: 200, placeholder: 'e.g. for the map, to keep quiet' });
   const status = el('p', { class: 'form-status', role: 'status' });
+  // A gift they wanted: say so when the item (or coin) answers the NPC's Wants.
+  const wanted = el('p', { class: 'small gift-wanted', 'aria-live': 'polite' });
+  const checkWanted = () => { const hit = wantsMatch(npc.fields?.wants, item.value, coin.value.trim() ? 1 : 0); wanted.textContent = hit ? `💝 Something ${npc.name} wants.` : ''; };
   const field = (id, label, input) => el('div', { class: 'field' }, el('label', { for: id }, label), input);
   const syncQty = () => { const n = Number(item.selectedOptions[0]?.dataset.qty) || 1; qty.max = n; qty.value = Math.min(Number(qty.value) || 1, n); qty.closest('.field').hidden = !item.value || n < 2; };
   const fill = () => {
@@ -26,11 +29,11 @@ function giveDialog(npc, chars, rerender) {
     coinLabel.textContent = `Coin (${c.name} has ${coinText(p.cp)})`;
     syncQty();
   };
-  from.addEventListener('change', fill); item.addEventListener('change', syncQty);
+  from.addEventListener('change', () => { fill(); checkWanted(); }); item.addEventListener('change', () => { syncQty(); checkWanted(); }); coin.addEventListener('input', checkWanted);
   const go = el('button', { class: 'btn primary', type: 'submit' }, 'Give');
   const d = el('dialog', { class: 'dialog', 'aria-labelledby': 'gf-title' }, el('form', { class: 'dialog-body', method: 'dialog' },
     el('h2', { id: 'gf-title' }, `Give ${npc.name} something`),
-    field('gf-from', 'From', from), field('gf-item', 'Item', item), field('gf-qty', 'How many', qty), el('div', { class: 'field' }, coinLabel, coin), field('gf-why', 'What for (optional)', why),
+    field('gf-from', 'From', from), field('gf-item', 'Item', item), field('gf-qty', 'How many', qty), el('div', { class: 'field' }, coinLabel, coin), field('gf-why', 'What for (optional)', why), wanted,
     el('p', { class: 'muted small' }, `It leaves the sheet, and ${npc.name}’s page remembers who gave what.`), status,
     el('div', { class: 'btnrow' }, go, el('button', { class: 'btn', type: 'button', onclick: () => d.close() }, 'Cancel'))));
   fill();
@@ -43,7 +46,7 @@ function giveDialog(npc, chars, rerender) {
     try {
       const r = await api('entries', { method: 'PATCH', body: { gift: { from: c.id, to: npc.id, item: item.value, qty: Number(qty.value) || 1, cp, note: why.value, base: { cp: p.cp, inventory: p.inventory } } } });
       for (const x of r.entries) world.entries.set(x.id, x);
-      toast(`${c.name} gave ${giftWhat(r.gift)} to ${npc.name}`);
+      toast(`${c.name} gave ${giftWhat(r.gift)} to ${npc.name}${r.gift.wanted ? ': something they wanted' : ''}`);
       d.close(); rerender();
     } catch (err) { status.textContent = err.message; status.className = 'form-status error'; go.disabled = false; }
   });
@@ -60,6 +63,6 @@ export function giftsSection(npc, rerender) {
   return el('section', { class: 'gifts' },
     el('div', { class: 'entry-head' }, el('h3', { class: 'section-title' }, gifts.length ? `Gifts (${gifts.length})` : 'Gifts'),
       chars.length && !['Dead'].includes(npc.fields?.status) ? el('button', { class: 'btn small', type: 'button', onclick: () => giveDialog(npc, chars, rerender) }, 'Give them something…') : null),
-    gifts.length ? el('ul', { class: 'plain sheet-log' }, gifts.slice(0, 12).map((g) => el('li', {}, el('span', {}, giftWhat(g), ' from ', by(g.by), g.note ? el('span', { class: 'muted' }, ` (${g.note})`) : null), g.at ? el('span', { class: 'muted small' }, ` · ${whenTime(g.at)}`) : null)))
+    gifts.length ? el('ul', { class: 'plain sheet-log' }, gifts.slice(0, 12).map((g) => el('li', {}, el('span', {}, g.wanted ? el('span', { title: 'Something they wanted' }, '💝 ') : null, giftWhat(g), ' from ', by(g.by), g.note ? el('span', { class: 'muted' }, ` (${g.note})`) : null), g.at ? el('span', { class: 'muted small' }, ` · ${whenTime(g.at)}`) : null)))
       : el('p', { class: 'muted small' }, 'Nothing given yet.'));
 }

@@ -41,7 +41,7 @@ import { buyFrom, sellTo, haggleFor, withHaggle, setHaggle } from '../js/purchas
 import { addLog } from '../js/play-log.js';
 import { shiftDebt, balanceWith } from '../js/debts.js';
 import { addTrade } from '../js/shop-trade.js';
-import { addGift, giftWhat } from '../js/gifts.js';
+import { addGift, giftWhat, wantsMatch } from '../js/gifts.js';
 import { addAsk } from '../js/shop-asks.js';
 import { shopOpen, holidayToday } from '../js/shop-hours.js';
 import { cleanCalendar } from '../js/calendar.js';
@@ -554,7 +554,7 @@ export default route({
       }
       p.cp -= cp;
       const note = clip(g.note, 200).trim();
-      const gift = { by: from.name, item: moved?.name || '', qty: moved?.qty || 1, cp, note };
+      const gift = { by: from.name, item: moved?.name || '', qty: moved?.qty || 1, cp, note, wanted: wantsMatch(to.fields?.wants, moved?.name, cp) };
       addLog(p, `Gave ${giftWhat(gift)} to ${to.name}${note ? ` (${note})` : ''}`, req.gm.name, undefined, { cp: -cp, items: moved ? [{ name: moved.name, qty: -moved.qty }] : [] });
       await sql`UPDATE entries SET fields = fields || jsonb_build_object('gifts', ${addGift(to.fields?.gifts, gift)}::text), updated_by = ${req.gm.id}, updated_at = now(), version = version + 1
         WHERE id = ${to.id} AND world_id = ${req.world.id}`;
