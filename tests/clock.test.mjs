@@ -32,3 +32,12 @@ test('readable times', () => {
   assert.equal(leftText(90), '1 h 30 min');
   assert.equal(leftText(45), '45 min');
 });
+
+test('lights from the pack: what each light uses', async () => {
+  const { fuelFor } = await import('../js/clock.js');
+  const { takeItem } = await import('../js/handover.js');
+  assert.equal(fuelFor('Torch'), 'torch'); assert.equal(fuelFor('Lantern'), 'oil'); assert.equal(fuelFor('Light (cantrip)'), null);
+  assert.deepEqual(takeItem('Rope\n5 Torches', fuelFor('Torch')), { text: 'Rope\n4 Torches', name: 'Torches', qty: 1 });
+  assert.equal(takeItem('Rope\n2 Flasks of oil', fuelFor('Lantern')).text, 'Rope\n1 Flasks of oil');
+  assert.ok(takeItem('Rope', fuelFor('Torch')).error);
+});

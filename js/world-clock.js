@@ -3,8 +3,10 @@
 // spells; when time passes midnight the calendar moves on a day. Players see it all, updated live.
 import { el, toast, setKids } from './dom.js';
 import { api, isGm, isMember } from './api.js';
-import { world } from './world-store.js';
-import { readClock, LIGHTS, STEPS, partOfDay, hhmm, leftText } from './clock.js';
+import { world, worldEntries } from './world-store.js';
+import { readClock, LIGHTS, STEPS, partOfDay, hhmm, leftText, fuelFor } from './clock.js';
+import { changePlay } from './sheet-ui.js';
+import { takeItem } from './handover.js';
 import { formatDate, today } from './calendar.js';
 
 export function clockCard() {
@@ -32,10 +34,25 @@ export function clockCard() {
       const time = el('input', { type: 'time', id: 'clock-set', value: hhmm(c.minutes), 'aria-label': 'Set the time' });
       time.addEventListener('change', () => { const [h, m] = time.value.split(':').map(Number); if (Number.isFinite(h)) send({ set: h * 60 + (m || 0) }); });
       const pick = el('select', { 'aria-label': 'Light' }, LIGHTS.map(([n, mins]) => el('option', { value: `${mins}|${n}` }, mins ? `${n} (${leftText(mins)})` : `${n} (lasts)`)));
+      // Lights from the pack: a torch or candle (or a lantern's flask of oil) can come out of a character's inventory.
+      const chars = worldEntries().filter((e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status)).sort((a, b) => a.name.localeCompare(b.name));
+      const from = chars.length ? el('select', { 'aria-label': 'From whose pack' }, el('option', { value: '' }, 'from nobody’s pack'), chars.map((c) => el('option', { value: c.id }, `from ${c.name}’s pack`))) : null;
+      const syncFrom = () => { if (from) from.hidden = !fuelFor(pick.value.split('|').slice(1).join('|')); };
+      pick.addEventListener('change', syncFrom); syncFrom();
+      const light = async () => {
+        const [mins, ...n] = pick.value.split('|'); const name = n.join('|');
+        const fuel = fuelFor(name), who = from && !from.hidden && from.value ? world.entries.get(from.value) : null;
+        if (fuel && who) {
+          try {
+            await changePlay(who, (play) => { const t = takeItem(play.inventory, fuel); if (t.error) throw new Error(`${who.name} has no ${{ oil: 'oil for the lantern', torch: 'torches', candle: 'candles' }[fuel] || fuel}`); play.inventory = t.text; }, name === 'Lantern' ? 'Filled a lantern with a flask of oil' : `Lit a ${name.toLowerCase()}`);
+          } catch (err) { toast(err.message, 'bad'); return; }
+        }
+        send({ add_light: { name, minutes: Number(mins) } }, `${name} lit${fuel && who ? ` from ${who.name}’s pack` : ''}`);
+      };
       tools = el('div', { class: 'clock-tools' },
         el('div', { class: 'btnrow' }, STEPS.map(([m, label]) => el('button', { class: 'btn small', type: 'button', onclick: () => send({ advance: m }) }, label)),
           el('label', { class: 'check', for: 'clock-set' }, 'Time ', time)),
-        el('div', { class: 'btnrow' }, pick, el('button', { class: 'btn small', type: 'button', onclick: () => { const [mins, ...n] = pick.value.split('|'); send({ add_light: { name: n.join('|'), minutes: Number(mins) } }, `${n.join('|')} lit`); } }, 'Light it')));
+        el('div', { class: 'btnrow' }, pick, from, el('button', { class: 'btn small', type: 'button', onclick: light }, 'Light it')));
     }
     setKids(box,
       el('h3', { id: 'clock-h' }, 'Time and light'),

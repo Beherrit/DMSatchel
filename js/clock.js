@@ -41,3 +41,8 @@ const PARTS = [[0, 'the dead of night'], [300, 'dawn'], [420, 'morning'], [660, 
 export const partOfDay = (m) => [...PARTS].reverse().find(([from]) => m >= from)[1];
 export const hhmm = (m) => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
 export const leftText = (m) => (m >= 60 ? `${Math.floor(m / 60)} h${m % 60 ? ` ${m % 60} min` : ''}` : `${m} min`);
+
+// Lights from the pack: what lighting each light uses up from someone's inventory (a lantern burns a flask of oil);
+// spells use nothing. → the word to look for in the inventory, or null.
+export const FUEL = { Torch: 'torch', Candle: 'candle', Lantern: 'oil' };
+export const fuelFor = (light) => FUEL[light] || null;
