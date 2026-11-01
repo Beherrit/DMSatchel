@@ -7,7 +7,7 @@ import { thumb } from './image-ui.js';
 import { lastShownLine } from './world-show.js';
 import { addCoins, playOf, changePlay } from './sheet-ui.js';
 import { readHandOut, handOutTotal } from './hand-out.js';
-import { partyRows } from './party-glance.js';
+import { partyRows, partyWealth } from './party-glance.js';
 import { sellLoot } from './purchase.js';
 import { giveItem } from './handover.js';
 import { progressBadge } from './world-objectives.js';
@@ -72,6 +72,7 @@ function treasury(state, chars, reload) {
   box.append(
     el('div', { class: 'coin-total' }, el('span', { class: 'eyebrow' }, 'Coin'), el('strong', {}, coinText(cp)),
       share ? el('span', { class: 'muted small' }, `${coinText(share)} each if split ${active.length} ways`) : null),
+    ((w) => (w.purses ? el('p', { class: 'small party-worth' }, el('strong', {}, `The party’s worth: ${coinText(w.total)}`), el('span', { class: 'muted' }, ` (the treasury ${coinText(w.treasury)}, purses ${coinText(w.purses)})`)) : null))(partyWealth(cp, active.map((c) => ({ cp: playOf(c).cp })))),
     coinChart(lines),
     items.length ? el('div', {}, el('span', { class: 'eyebrow' }, 'Items held'),
       el('ul', { class: 'plain item-held' }, items.map((i) => el('li', {}, i.qty > 1 ? `${i.qty} × ` : '', el('strong', {}, i.item), i.holder ? el('span', { class: 'muted small' }, ` (${i.holder})`) : null, wishedBy(i.item, active)))),

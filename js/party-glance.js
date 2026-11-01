@@ -33,3 +33,10 @@ export function worries(rows) {
 // Enough food for the road: for a trip of this many days, each character's rations against what they need.
 // chars: [{ name, inventory }] → [{ name, has, short }]
 export const rationsFor = (days, chars) => (chars || []).map((c) => { const has = rationsIn(c.inventory); return { name: c.name, has, short: Math.max(0, days - has) }; });
+
+// The party's wealth: the treasury plus every character's purse, in copper. purses: [{ name, cp }]
+export function partyWealth(treasuryCp, purses) {
+  const inPurses = (purses || []).reduce((t, p) => t + Math.max(0, Math.round(Number(p.cp) || 0)), 0);
+  const treasury = Math.max(0, Math.round(Number(treasuryCp) || 0));
+  return { total: treasury + inPurses, treasury, purses: inPurses };
+}

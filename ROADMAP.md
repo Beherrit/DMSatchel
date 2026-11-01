@@ -418,7 +418,7 @@ to the log at the bottom.
     can still trade), and a tavern stays open late.
 196. [x] **Treasure from a fight.** An encounter card can roll treasure for its challenge and put it straight into
     the party's loot log.
-197. [ ] **The party's wealth.** The party page shows what the party is worth in all: the treasury plus every
+197. [x] **The party's wealth.** The party page shows what the party is worth in all: the treasury plus every
     character's purse.
 
 ## Ideas parking lot
@@ -622,3 +622,4 @@ to the log at the bottom.
 - What happened to my coin?: a character sheet now has a "History" list, newest first, of every change made to it from outside, each with who and when. It covers a share of the treasury, hand-outs, living costs (with the lifestyle and days), rations eaten on the road, a night at an inn, making camp, a short rest's pact slots, purchases and sales at shops (haggled or not) and gifts between characters ("Got Rope and 1 gp from Pip"). The client tools write it through changePlay/addCoins/restOf with a note, and the server routes write it directly. It is kept in play.log (the last 30), which the sheet's own saves never touch, thanks to #190. js/play-log.js unit tested; server lines tested against PGlite.
 - Shops keep hours: by the world's clock, shops trade from 8 in the morning to 8 at night, and taverns (and "Tavern & inn" shops) until 2 in the morning. Out of hours, players see "🌙 Smithy is shut for the night. It opens at 8 in the morning." in place of the buy and sell panels. The server refuses their purchases and sales too, so the page can't be got round. GMs see the same notice with "(GMs can still trade.)" and keep the panels. js/shop-hours.js unit tested; routes tested against PGlite.
 - Treasure from a fight: every encounter card now has "Roll treasure" for GMs. It rolls pocket loot for the creatures, or their lair's hoard if ticked, at the tier of the toughest creature's challenge (CR 0–4, 5–10, 11–16, 17+), and shows the coins, valuables, magic items and any trinket. "Put it in the loot log" adds the coins as one amount and each valuable, item and trinket as its own line ("After the fight with 8 × Orc"); "↻ Another" rolls again. The rolling itself moved out of the Table Tools page into js/loot.js, shared by both and unit tested over 50 rolls.
+- The party's wealth: the party page's treasury card now says what the party is worth in all, the treasury plus every active character's purse ("The party's worth: 117 gp 5 sp (the treasury 100 gp, purses 17 gp 5 sp)"). Retired, dead and missing characters aren't counted, and nothing shows until someone has coin of their own. partyWealth in js/party-glance.js unit tested.

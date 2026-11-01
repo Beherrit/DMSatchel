@@ -27,3 +27,9 @@ test('enough food for the road', async () => {
   const { rationsFor } = await import('../js/party-glance.js');
   assert.deepEqual(rationsFor(4, [{ name: 'Ann', inventory: 'Rations x7' }, { name: 'Bo', inventory: '1 ration' }, { name: 'Cy' }]), [{ name: 'Ann', has: 7, short: 0 }, { name: 'Bo', has: 1, short: 3 }, { name: 'Cy', has: 0, short: 4 }]);
 });
+
+test('the party’s wealth', async () => {
+  const { partyWealth } = await import('../js/party-glance.js');
+  assert.deepEqual(partyWealth(10000, [{ cp: 500 }, { cp: 1234 }, { cp: -5 }, {}]), { total: 11734, treasury: 10000, purses: 1734 });
+  assert.deepEqual(partyWealth(-200, []), { total: 0, treasury: 0, purses: 0 });
+});
