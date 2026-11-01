@@ -1,6 +1,8 @@
 // Session recap drafts: what changed since the last session, as a session-log entry the GM edits before saving.
 // Only things players can already see go in (it may be posted to Discord). Pure, so it can be tested.
 import { coinText } from './economy.js';
+import { readGifts, giftWhat } from './gifts.js';
+import { readLog } from './play-log.js';
 import { parseDate, toDays, today as calToday, formatDate } from './calendar.js';
 
 const after = (t, since) => Boolean(t) && (!since || String(new Date(t).toISOString()) > since);
@@ -50,6 +52,13 @@ export function buildRecap(d) {
 
   const clocks = (d.standings?.clocks || []).filter((c) => !c.secret && after(c.updated_at, since) && open(byId.get(c.entry_id)));
   add('Clocks', clocks.map((c) => `- ${c.name} (${ref(byId.get(c.entry_id))}): ${c.filled} of ${c.size}${c.filled >= c.size ? ', complete' : ''}`));
+
+  // Dealings: gifts given to NPCs (from the NPCs' lists) and loans between characters (from the lenders' sheets).
+  const gifts = [];
+  for (const e of entries) if (e.kind === 'npc' && open(e)) for (const g of readGifts(e.fields?.gifts)) if (after(g.at, since)) gifts.push(`- [[${g.by}]] gave ${ref(e)} ${giftWhat(g)}${g.note ? ` (${short(g.note, 80)})` : ''}`);
+  const loans = [];
+  for (const e of entries) if (e.kind === 'character' && open(e)) { let p = {}; try { p = JSON.parse(e.fields?.play || '{}') || {}; } catch { p = {}; } for (const l of readLog(p)) if (after(l.at, since) && /^Lent /.test(l.text)) loans.push(`- ${ref(e)} lent ${l.text.slice(5)}`); }
+  add('Dealings', [...gifts, ...loans]);
 
   // The session in numbers: coin in and out, items found, in-world days gone by, quests completed.
   const earned = lines.reduce((t, l) => t + Math.max(0, Number(l.cp || 0)), 0), spent = lines.reduce((t, l) => t + Math.max(0, -Number(l.cp || 0)), 0);

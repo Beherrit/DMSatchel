@@ -503,7 +503,7 @@ to the log at the bottom.
     and bounties not yet paid.
 241. [x] **Go to my character.** A keyboard shortcut (g then y) and a link in the world's side menu open the player's
     own character.
-242. [ ] **Gifts and loans in the recap.** The session recap draft notes gifts given to NPCs and loans between
+242. [x] **Gifts and loans in the recap.** The session recap draft notes gifts given to NPCs and loans between
     characters since the last session.
 243. [ ] **Shut for the holiday.** Shops close on the world's holidays, and say so ("Shut for Bridge Day").
 244. [ ] **Routines for the whole town.** A GM can roll a daily routine for every NPC in a settlement who hasn't got
@@ -759,3 +759,4 @@ to the log at the bottom.
 - Open now?: each line of a character's shopping list now names up to three shops that stock it, cheapest first, with the price. It says whether each is open at the world's hour ("open", or "shut till 8 in the morning") and, when the owner is an NPC with a routine, whether they're in: "Chandler 1 gp, open · Smithy 2 gp, open, Bramwell is in". Matching is the same as the buy panel's "wanted" mark. shopsFor in js/shopping.js unit tested.
 - Waiting on the GM: session prep now opens (after reminders) with "⏳ Waiting on you" whenever something needs a GM's hand. It lists shops that were asked for things ("Smithy was asked for Grappling hook"), hirelings owed wages, with a pointer to the party page where they're paid, and bounties on dead or captured NPCs that haven't been paid, with "Claim it…", which opens the bounty dialog. waitingOnGm in js/waiting.js unit tested.
 - Go to my character: the world's side menu now has a link to your own character, under The Party (marked ★). It's the newest active character you own; the retired, dead and missing don't count. Pressing g then y goes there from anywhere (g then m was already Maps), and the "?" list of shortcuts includes it. Without a character of your own, there's no link, and g y opens The Party.
+- Gifts and loans in the recap: the session recap draft now has a "Dealings" section for what changed hands since the last session. Gifts to NPCs are read from the NPCs' lists ("[[Ann]] gave [[Mother Ide]] 2 × Potion of healing (to win her over)"), and loans from the lenders' sheet histories ("[[Ann]] lent 10 gp to Bo (for the boat)"). As with the rest of the recap, NPCs and characters players can't see are left out. Unit tested in tests/recap.test.mjs.
