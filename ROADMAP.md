@@ -428,6 +428,14 @@ to the log at the bottom.
     where the party went since their last visit.
 201. [x] **Friends get a discount.** In a town held by a power the party stands well with, shops give 10% off; where
     the party is hated, 10% more.
+202. [ ] **Friends buy dear.** Selling to a shop follows the same standing: friends of the town's holder get 10%
+    more for their goods, the hated 10% less.
+203. [ ] **Rations from the stash.** On the road, characters who run short can eat from the treasury's rations
+    first, in one line of the loot log, before anyone goes hungry.
+204. [ ] **You've got news.** Players are told when their sheet changes from outside while they have the world open:
+    "The GMs gave you 2 potions of healing".
+205. [ ] **A party sheet for the GM's screen.** One printable page with every character's hit points, armour class,
+    passive Perception, coin and what they carry.
 
 ## Ideas parking lot
 
