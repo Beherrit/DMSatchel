@@ -12,7 +12,8 @@ import { coinText, GOODS, parseCoins } from './economy.js';
 import { stockItems, sellTo, HAGGLES, readHaggle, haggleFor, setHaggle, withHaggle } from './purchase.js';
 import { inventoryLines } from './handover.js';
 import { readList, listFirst } from './shopping.js';
-import { shopOpen } from './shop-hours.js';
+import { shopOpen, holidayToday, shutText } from './shop-hours.js';
+import { cleanCalendar } from './calendar.js';
 import { shopStanding, sellWithStanding } from './standing-price.js';
 
 const ACTIVE = (e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
@@ -77,8 +78,9 @@ export function buyBox(shop, rerender) {
   const chars = worldEntries().filter((e) => ACTIVE(e) && (isGm() || e.owner_id === session.gm?.id)).sort((a, b) => a.name.localeCompare(b.name));
   if (!chars.length) return null;
   // Shut at night by the world's clock: players see a notice; GMs can still trade (and are told).
-  const hours = shopOpen(shop, world.info?.clock?.minutes ?? 480);
-  const shut = hours.open ? null : el('p', { class: 'shop-shut small' }, el('span', { 'aria-hidden': 'true' }, '🌙 '), `${shop.name} is shut for the night. It opens ${hours.opens}.`, isGm() ? ' (GMs can still trade.)' : '');
+  // …and on the world's holidays (taverns stay open for those).
+  const hours = shopOpen(shop, world.info?.clock?.minutes ?? 480, holidayToday(cleanCalendar(world.info?.cal)));
+  const shut = hours.open ? null : el('p', { class: 'shop-shut small' }, el('span', { 'aria-hidden': 'true' }, hours.holiday ? '🎉 ' : '🌙 '), `${shop.name} is ${shutText(hours)}. It opens ${hours.opens}.`, isGm() ? ' (GMs can still trade.)' : '');
   if (shut && !isGm()) return el('div', { class: 'trade' }, shut);
   return el('div', { class: 'trade' }, shut, items.length ? buyPart(shop, items, chars, rerender) : null, sellPart(shop, chars, rerender), askPart(shop, chars, rerender), isGm() && items.length ? hagglePart(shop, chars, rerender) : null);
 }
