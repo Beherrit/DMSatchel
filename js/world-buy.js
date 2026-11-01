@@ -7,7 +7,8 @@ import { world, worldEntries, patchEntry, whenTime } from './world-store.js';
 import { readTrade, tradeText, tradeTotals } from './shop-trade.js';
 import { readAsks, dropAsk, shelfLine } from './shop-asks.js';
 import { priceIndex } from './worth.js';
-import { playOf } from './sheet-ui.js';
+import { playOf, characterOf } from './sheet-ui.js';
+import { loadAfter, lbs } from './weights.js';
 import { coinText, GOODS, parseCoins } from './economy.js';
 import { stockItems, sellTo, HAGGLES, readHaggle, haggleFor, setHaggle, withHaggle } from './purchase.js';
 import { inventoryLines } from './handover.js';
@@ -122,6 +123,7 @@ function buyPart(shop, stock, chars, rerender) {
   order();
   who.addEventListener('change', order);
   const total = el('p', { class: 'small', role: 'status' });
+  const heavy = el('p', { class: 'small bad-line buy-heavy', hidden: true });
   const pick = () => items.find((x) => x.name === item.value);
   const show = () => {
     const it = pick(), n = Math.max(1, Number(qty.value) || 1), c = chars.find((x) => x.id === who.value), have = playOf(world.entries.get(c.id) || c).cp || 0;
@@ -129,6 +131,10 @@ function buyPart(shop, stock, chars, rerender) {
     const pct = haggleFor(shop.fields?.haggle, c.id), cost = withHaggle(withHaggle(it.cp * n, stand?.pct || 0), pct);
     total.textContent = `${n} × ${it.name} costs ${coinText(cost)}${pct ? ` (haggled: ${pct < 0 ? `${-pct}% off` : `${pct}% more`})` : ''}. ${c.name} has ${coinText(have)}.`;
     total.classList.toggle('bad-line', cost > have);
+    // Too heavy to carry it: say so before they pay (for Forge characters, whose Strength is known).
+    const ch = characterOf(world.entries.get(c.id) || c), l = loadAfter(playOf(world.entries.get(c.id) || c), it.name, n, cost, ch?.abilities?.scores?.Str, ch?.size);
+    heavy.hidden = !(l.after.over && l.after.lb > l.before.lb);
+    heavy.textContent = heavy.hidden ? '' : `That would put ${c.name} over their carrying capacity: ${lbs(l.after.lb)} of ${lbs(l.after.capacity)}.`;
   };
   for (const x of [item, qty, who]) x.addEventListener('input', show);
   show();
@@ -138,7 +144,7 @@ function buyPart(shop, stock, chars, rerender) {
       el('label', { class: 'sr-only', for: 'buy-qty' }, 'How many'), qty,
       chars.length > 1 || isGm() ? [el('label', { for: 'buy-who' }, 'for'), who] : null,
       el('button', { class: 'btn small primary', type: 'submit' }, 'Buy')),
-    total,
+    total, heavy,
     stand?.pct ? el('p', { class: 'small standing-price' }, stand.pct < 0 ? `Friends of ${stand.holder.name}: 10% off here.` : `${stand.holder.name} holds this place, and the party is not welcome: 10% more.`) : null,
     dc(shop) ? el('p', { class: 'muted small' }, `Haggle DC ${dc(shop)}: roll for it at the table, and a GM can grant the result for your next purchase here.`) : null);
   form.addEventListener('submit', async (ev) => {

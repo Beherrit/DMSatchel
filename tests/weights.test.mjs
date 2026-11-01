@@ -43,3 +43,10 @@ test('overloaded: who is too heavy for the road', async () => {
   assert.equal(overloadedText(list), 'Too heavy for the road: Hand carries 345 lb (can carry 120 lb).');
   assert.equal(overloadedText([]), '');
 });
+
+test('loadAfter: would buying it make them too heavy?', async () => {
+  const { loadAfter } = await import('../js/weights.js');
+  const r = loadAfter({ inventory: 'Chain mail', cp: 0 }, 'Barrel', 3, 0, 15);
+  assert.equal(r.before.over, false); assert.equal(r.after.over, true); assert.equal(r.after.lb, 55 + 210);
+  assert.equal(loadAfter({ inventory: '' }, 'Rope', 1, 0, 15).after.over, false);
+});

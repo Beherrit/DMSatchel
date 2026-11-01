@@ -202,6 +202,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Attuned**: players tick the magic items they're attuned to; the sheet counts them against the limit of three.
 - **Tidy the pack**: one button merges duplicate inventory lines on a sheet.
 - **Heavy packs**: each sheet weighs what it carries (SRD weights, coins fifty to the pound) against its carrying capacity.
+- **Too heavy to carry it**: the buy panel warns when a purchase would put a character over their carrying capacity.
 - **What it's worth**: each sheet says what its gear would fetch at the shops, and the party sheet shows it under each character's coin.
 - **The journey on the calendar**: the days the party arrived somewhere show on the in-world calendar.
 - **Worries in prep**: session prep warns who's down, low, exhausted, out of rations or broke.

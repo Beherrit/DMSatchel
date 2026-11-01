@@ -109,3 +109,11 @@ export const overloaded = (chars) => (chars || []).map((c) => ({ name: c.name, .
 
 // "Too heavy for the road: Hand carries 345 lb (can carry 240 lb)."
 export const overloadedText = (list) => (list.length ? `Too heavy for the road: ${list.map((x) => `${x.name} carries ${lbs(x.lb)} (can carry ${lbs(x.capacity)})`).join('; ')}.` : '');
+
+// Too heavy to carry it: the load before and after taking on qty of an item (and spending cp).
+// → { before, after } from loadOf.
+export function loadAfter(play = {}, item, qty = 1, cp = 0, str = null, size = 'Medium') {
+  const inv = String(play.inventory || '').replace(/\s+$/, '');
+  const next = { ...play, inventory: `${inv}${inv ? '\n' : ''}${qty > 1 ? `${qty} ` : ''}${item}`, cp: Math.max(0, (Number(play.cp) || 0) - (Number(cp) || 0)) };
+  return { before: loadOf(play, str, size), after: loadOf(next, str, size) };
+}
