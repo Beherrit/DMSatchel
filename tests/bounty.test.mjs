@@ -24,3 +24,15 @@ test('bountyDue: only when the status has just turned', () => {
   assert.equal(bountyDue(npc('Alive'), { kind: 'npc', fields: { status: 'Dead', bounty: 'a pardon' } }), null);
   assert.equal(bountyDue(null, { kind: 'location', fields: { status: 'Dead', bounty: '5 gp' } }), null);
 });
+
+test('openBounties: the ones still to claim', async () => {
+  const { openBounties } = await import('../js/bounty.js');
+  const list = openBounties([
+    { kind: 'npc', name: 'Jory', fields: { bounty: '500 gp', bounty_by: 'the Watch' } },
+    { kind: 'npc', name: 'Fred', fields: { bounty: '50 gp' } },
+    { kind: 'npc', name: 'Pete', fields: { bounty: '80 gp', status: 'Captured' } },
+    { kind: 'npc', name: 'Paid', fields: { bounty: '80 gp', bounty_paid: 'x' } },
+    { kind: 'npc', name: 'Nobody', fields: {} },
+  ]);
+  assert.deepEqual(list.map((x) => `${x.entry.name} ${x.text} ${x.by}`), ['Jory 500 gp the Watch', 'Fred 50 gp ']);
+});

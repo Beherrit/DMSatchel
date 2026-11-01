@@ -12,6 +12,7 @@ import { sellLoot } from './purchase.js';
 import { addTrade } from './shop-trade.js';
 import { partyDebts } from './debts.js';
 import { readTab, tabTotal } from './tab.js';
+import { openBounties } from './bounty.js';
 import { shopStanding, sellWithStanding } from './standing-price.js';
 import { giveItem } from './handover.js';
 import { progressBadge } from './world-objectives.js';
@@ -315,6 +316,14 @@ function debtsCard(chars) {
     el('ul', { class: 'plain' }, list.map((d) => el('li', {}, link(getEntry(d.fromId) || { id: d.fromId, name: d.from }), ` owes `, link(getEntry(d.toId) || { id: d.toId, name: d.to }), ` ${coinText(d.cp)}`, d.note ? el('span', { class: 'muted small' }, ` (${d.note})`) : null))));
 }
 
+// Bounties on the party page: open bounties on NPCs the viewer knows of.
+function bountiesCard() {
+  const list = openBounties(worldEntries());
+  if (!list.length) return null;
+  return el('section', { class: 'card party-bounties' }, el('h3', {}, 'Wanted'),
+    el('ul', { class: 'plain' }, list.slice(0, 10).map((b) => el('li', {}, link(b.entry), `: ${b.text}`, b.by ? el('span', { class: 'muted small' }, ` (from ${b.by})`) : null))));
+}
+
 export async function viewParty(rerender) {
   const all = worldEntries();
   const chars = all.filter((e) => e.kind === 'character').sort(byName);
@@ -343,6 +352,6 @@ export async function viewParty(rerender) {
           journal.length ? el('ul', { class: 'entry-list' }, journal.slice(0, 8).map((j) => el('li', {}, link(j), el('span', { class: 'muted small' }, [j.fields?.character || j.owner || j.created_by, j.fields?.date || when(j.created_at)].filter(Boolean).join(' · ')))))
             : el('p', { class: 'muted' }, 'Nobody has written anything yet.'),
           journal.length > 8 ? el('a', { href: '#world/k/journal' }, `All ${journal.length} entries`) : null)),
-      el('aside', { class: 'party-side' }, treasuryBox, debtsCard(chars), payrollCard(), journeySection(), tableCard())));
+      el('aside', { class: 'party-side' }, treasuryBox, debtsCard(chars), bountiesCard(), payrollCard(), journeySection(), tableCard())));
 }
 

@@ -19,3 +19,10 @@ export function bountyDue(before, after) {
   const cp = bountyCp(after.fields?.bounty);
   return cp ? { cp, by: String(after.fields?.bounty_by || '').trim(), text: String(after.fields.bounty).trim() } : null;
 }
+
+// Bounties on the party page: open bounties (not yet claimed or paid) → [{ entry, text, by, cp }], the richest first.
+export function openBounties(entries) {
+  return (entries || []).filter((e) => e.kind === 'npc' && String(e.fields?.bounty || '').trim() && !CLAIMED.includes(e.fields?.status) && !e.fields?.bounty_paid && e.fields?.status !== 'Dead')
+    .map((e) => ({ entry: e, text: String(e.fields.bounty).trim(), by: String(e.fields?.bounty_by || '').trim(), cp: bountyCp(e.fields.bounty) }))
+    .sort((a, b) => b.cp - a.cp || a.entry.name.localeCompare(b.entry.name));
+}

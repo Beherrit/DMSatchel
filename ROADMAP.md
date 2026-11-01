@@ -533,7 +533,7 @@ to the log at the bottom.
 261. [x] **Routines on the printable cast list.** The printable Who's who adds where each NPC usually is by day.
 262. [x] **A tab on the party page.** The party page's treasury card lists the tabs the party is running at taverns.
 263. [x] **Who has the most coin.** The party page's at-a-glance table sorts by any column the GM clicks.
-264. [ ] **Bounties on the party page.** The party page lists open bounties on NPCs the players know of.
+264. [x] **Bounties on the party page.** The party page lists open bounties on NPCs the players know of.
 265. [ ] **A quiet night.** When the clock passes midnight, the toast says who's out and about at that hour.
 
 ## Ideas parking lot
@@ -807,3 +807,4 @@ to the log at the bottom.
 - Routines on the printable cast list: each NPC on the printable Who's who now says where they're usually found by day, from their routine ("Usually by day: the market"; the morning's place, else the afternoon's). Hirelings say "Travelling with the party". It's handy for players hunting someone down.
 - A tab on the party page: the party page's treasury card now ends with the tabs the party is running at taverns, linked: "Tabs: The Bell 2 sp".
 - Who has the most coin: the party page's at-a-glance table (GMs) now sorts by any column. Click a header to sort (coin, rations, exhaustion and conditions start with the most; names and hit points start with the least, hit points as a share of the maximum), and click again to reverse it. The sorted column says so to screen readers (aria-sort) and shows ▲ or ▼. sortRows in js/party-glance.js unit tested.
+- Bounties on the party page: the party page's side column now has a "Wanted" card of open bounties, richest first: "Black Jory: 500 gp, alive (from the Watch)". It covers only NPCs the viewer can see, and leaves out those already dead, captured or paid. openBounties in js/bounty.js unit tested.
