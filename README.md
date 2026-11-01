@@ -202,6 +202,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Divide the loot**: GMs give out the treasury's items in one go, choosing who gets each.
 - **A shop's ledger**: each shop shows the party's recent trade there: who bought and sold what, for how much.
 - **Order from the menu**: players order food and drink from a tavern's menu, paid from their sheet and noted in the tavern's ledger.
+- **A round on the house**: GMs buy the whole party a dish or drink from a tavern's menu, from the treasury.
 - **Enough food for the road?**: planning a trip on a map says who has enough rations for it and who's short.
 - **Too heavy for the road**: planning a trip warns who is over their carrying capacity.
 - **A packing list**: planning a trip puts the rations each character is short of on their shopping list.

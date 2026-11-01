@@ -3,6 +3,7 @@
 import { el, toast, setKids } from './dom.js';
 import { api, isGm, isMember, previewing, session } from './api.js';
 import { tradeLedger } from './world-buy.js';
+import { addTrade } from './shop-trade.js';
 import { world, worldEntries, patchEntry, getEntry, link } from './world-store.js';
 import { rumorsAt } from './world-rumors.js';
 import { makeRng } from './rng.js';
@@ -95,7 +96,22 @@ function orderPart(inn, m, rerender) {
       rerender();
     } catch (err) { toast(err.message, 'bad'); go.disabled = false; }
   } }, 'Order');
-  return el('div', { class: 'menu-order controls' }, el('span', { class: 'eyebrow' }, 'Order'), who, what, qty, go);
+  // A round on the house (GMs): the chosen dish or drink for every active character, from the treasury, in one line.
+  const party = worldEntries().filter((c) => c.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(c.fields?.status));
+  const round = isGm() && party.length > 1 ? el('button', { class: 'btn small ghost', type: 'button', onclick: async () => {
+    const it = items.find((x) => x.name === what.value);
+    if (!it) return;
+    const cp = it.cp * party.length;
+    round.disabled = true;
+    try {
+      await api('party', { method: 'POST', body: { cp: -cp, note: `A round on the house at ${inn.name}: ${it.name} for ${party.length}` } });
+      const cur = world.entries.get(inn.id) || inn;
+      await patchEntry(cur, { fields: { trade: addTrade(cur.fields?.trade, { who: 'The party', dir: 'buy', item: it.name, qty: party.length, cp }) } });
+      toast(`A round of ${it.name} for ${party.length}: ${coinText(cp)} from the treasury`);
+      rerender();
+    } catch (err) { toast(err.message, 'bad'); round.disabled = false; }
+  } }, `A round for all ${party.length}`) : null;
+  return el('div', { class: 'menu-order controls' }, el('span', { class: 'eyebrow' }, 'Order'), who, what, qty, go, round);
 }
 
 // town: the settlement the tavern is in (for its size and name), or null.

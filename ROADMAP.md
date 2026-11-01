@@ -484,7 +484,7 @@ to the log at the bottom.
     while the GM writes it, and flags lines it can't read.
 231. [x] **Everything the party carries.** One list (printable) of every character's gear and the treasury's,
     merged, with who has each.
-232. [ ] **A round on the house.** GMs buy everyone at the table a dish or drink from a tavern's menu, paid from the
+232. [x] **A round on the house.** GMs buy everyone at the table a dish or drink from a tavern's menu, paid from the
     treasury, in one line of the ledger.
 233. [ ] **Whose torch is it.** Lights lit from someone's pack say whose they are on the clock ("Ann's torch").
 
@@ -726,3 +726,4 @@ to the log at the bottom.
 - Divide the loot: the treasury card has a GM-only "Divide the loot" beside "Sell the loot". It lists each item the treasury holds (saying who carries it) with a choice of who gets it ("Keep it" by default) and how many. "Give them out" moves each choice onto that character's sheet through the stash route. The ledger says "Given to Ann" and the sheet's history "Given 2 × Tent from the party treasury"; only a GM can mark a take as given. One toast lists what went where and anything that couldn't go. The given flag on the stash route was tested against PGlite.
 - Routine as you type: under the Daily routine field on an NPC's form, a live line now says where the routine puts them at the world's current hour while the GM writes it: "At 15:00 (afternoon): The Bell". It adds "(not a place in the world yet)" when the name isn't an entry, and flags lines it can't read in red: "Can't read: 'Fridays: the market'". An empty field shows how to write one. unreadable in js/routine.js unit tested.
 - Everything the party carries: under the party page's "Who has it?" search, a link opens one printable list of every active character's gear and the treasury's (#world/kit). Things are merged by name, whatever the case, and one-line starting kits are split, with the total and who has how many: "Torches · 4 · Ann 2, Bo 2", "Rope · 2 · Ann, the treasury (with Bo)". everything in js/who-has.js unit tested.
+- A round on the house: on a tavern's Order row, GMs now have "A round for all 3". It buys the chosen dish or drink for every active character, paid from the treasury in one ledger line ("A round on the house at The Bell: Pale ale for 3"), and noted in the tavern's ledger as the party's. Sheets aren't touched. Players don't see the button.
