@@ -11,6 +11,7 @@ import { partyRows, partyWealth } from './party-glance.js';
 import { sellLoot } from './purchase.js';
 import { addTrade } from './shop-trade.js';
 import { partyDebts } from './debts.js';
+import { readTab, tabTotal } from './tab.js';
 import { shopStanding, sellWithStanding } from './standing-price.js';
 import { giveItem } from './handover.js';
 import { progressBadge } from './world-objectives.js';
@@ -94,6 +95,9 @@ function treasury(state, chars, reload) {
       el('span', { class: 'muted small' }, ` · ${l.by || 'someone'}, ${when(l.at)}`),
       isGm() || l.gm_id === session.gm?.id ? confirmButton('Strike', async () => { try { await api('party', { method: 'DELETE', query: { id: l.id } }); reload(); } catch (err) { toast(err.message, 'bad'); } }, 'btn small ghost') : null)))
       : el('p', { class: 'muted small' }, 'Nothing recorded yet.')));
+  // A tab on the party page: what the party is running up at taverns.
+  const tabs = worldEntries().filter((e) => e.kind === 'location' && e.fields?.tab).map((e) => ({ e, list: readTab(e.fields.tab) })).filter((x) => x.list.length);
+  if (tabs.length) box.append(el('p', { class: 'small party-tabs' }, el('strong', {}, 'Tabs: '), tabs.map((t, i) => [i ? ', ' : '', link(t.e), ` ${coinText(tabTotal(t.list))}`])));
   return box;
 }
 

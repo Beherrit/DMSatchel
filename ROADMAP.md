@@ -531,7 +531,7 @@ to the log at the bottom.
 260. [x] **Who's in the back room.** A place inside another (a back room, a cellar) shows on its parent's page in the
     "Here now" line, so the tavern says who's in its back room.
 261. [x] **Routines on the printable cast list.** The printable Who's who adds where each NPC usually is by day.
-262. [ ] **A tab on the party page.** The party page's treasury card lists the tabs the party is running at taverns.
+262. [x] **A tab on the party page.** The party page's treasury card lists the tabs the party is running at taverns.
 263. [ ] **Who has the most coin.** The party page's at-a-glance table sorts by any column the GM clicks.
 264. [ ] **Bounties on the party page.** The party page lists open bounties on NPCs the players know of.
 265. [ ] **A quiet night.** When the clock passes midnight, the toast says who's out and about at that hour.
@@ -805,3 +805,4 @@ to the log at the bottom.
 - Pay your own tab: under a tavern's tab, each of your characters with orders on it gets "Pay Ann's share (8 cp)". The server takes just that character's orders off the tab and the coin off their sheet ("Paid their share of the tab at The Bell (8 cp)" in its history). Everyone else's orders stay on the tab for the GM to settle. It's refused for someone else's character or without the coin. splitTab in js/tab.js unit tested; the route tested against PGlite.
 - Who's in the back room: a place's "Here now" line now counts people in places inside it, saying where: "🕰 Here now (20:00): Bramwell until 21:00, Cole (in Back Room)". It's the same reading the town pages use (aroundNow), so hirelings with the party show the same way.
 - Routines on the printable cast list: each NPC on the printable Who's who now says where they're usually found by day, from their routine ("Usually by day: the market"; the morning's place, else the afternoon's). Hirelings say "Travelling with the party". It's handy for players hunting someone down.
+- A tab on the party page: the party page's treasury card now ends with the tabs the party is running at taverns, linked: "Tabs: The Bell 2 sp".
