@@ -15,8 +15,8 @@ function item(d, { showChar = true, resolve = null } = {}) {
   const f = d.fields || {}, ch = getEntry(f.character);
   return el('li', { class: `card downtime-item${f.resolved ? ' is-resolved' : ' is-waiting'}${d.visibility === 'gm' ? ' is-hidden' : ''}` },
     el('div', { class: 'entry-head' }, el('div', {}, showChar && ch ? [link(ch), ' · '] : null, el('strong', {}, f.activity || 'Downtime'),
-      f.days ? el('span', { class: 'muted small' }, ` · ${f.days} day${String(f.days) === '1' ? '' : 's'}`) : null, f.cost ? el('span', { class: 'muted small' }, ` · ${f.cost}`) : null),
-      el('span', { class: `tag${f.resolved ? '' : ' waiting-tag'}` }, f.resolved ? 'Resolved' : 'Waiting for a GM')),
+      f.days ? el('span', { class: 'muted small' }, f.done && !f.resolved ? ` · ${Math.min(+f.done, +f.days || +f.done)} of ${f.days} days` : ` · ${f.days} day${String(f.days) === '1' ? '' : 's'}`) : null, f.cost ? el('span', { class: 'muted small' }, ` · ${f.cost}`) : null),
+      el('span', { class: `tag${f.resolved ? '' : ' waiting-tag'}` }, f.resolved ? 'Resolved' : +f.days > 0 && +f.done >= +f.days ? 'Ready to resolve' : 'Waiting for a GM')),
     d.summary ? el('p', {}, d.summary) : null,
     f.outcome ? el('div', { class: 'downtime-outcome' }, el('span', { class: 'label' }, 'Outcome'), richText(f.outcome)) : null,
     el('p', { class: 'muted small' }, `${d.owner || d.created_by || 'Someone'}, ${when(d.created_at)}${d.visibility === 'gm' ? ' · only the GMs and the player can see this' : ''} · `, link(d, 'Open')),

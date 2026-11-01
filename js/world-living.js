@@ -4,7 +4,8 @@
 // wages (see hirelings.js) come from the treasury too, as their own line.
 import { el, toast } from './dom.js';
 import { api, isGm, previewing, session } from './api.js';
-import { world, worldEntries } from './world-store.js';
+import { world, worldEntries, patchEntry } from './world-store.js';
+import { downtimeProgress } from './downtime-days.js';
 import { playOf, addCoins, changePlay } from './sheet-ui.js';
 import { eatRations } from './rations.js';
 import { coinText } from './economy.js';
@@ -99,7 +100,18 @@ export async function offerLivingCosts(days, { travel = false } = {}) {
   return new Promise((resolve) => { d.addEventListener('close', resolve); document.body.append(d); d.showModal(); });
 }
 
+// Open downtime counts the days that passed; say which activities are now ready to resolve.
+async function downtimeMoves(days) {
+  const moved = downtimeProgress(worldEntries(), days), failed = [];
+  for (const m of moved) { try { await patchEntry(world.entries.get(m.entry.id) || m.entry, { fields: { done: String(m.done) } }); } catch { failed.push(m.entry.name); } }
+  const ready = moved.filter((m) => m.ready).map((m) => { const ch = world.entries.get(m.entry.fields?.character); return `${ch ? `${ch.name}’s ` : ''}${String(m.entry.fields?.activity || 'downtime').toLowerCase()}`; });
+  if (ready.length || failed.length) toast([ready.length ? `Downtime ready to resolve: ${ready.join(', ')}` : '', failed.length ? `couldn’t update: ${failed.join(', ')}` : ''].filter(Boolean).join(' · '), failed.length ? 'bad' : undefined);
+}
+
 window.addEventListener('world:days', async (ev) => {
   await offerLivingCosts(ev.detail?.days, { travel: Boolean(ev.detail?.travel) });
-  if (isGm() && !previewing() && ev.detail?.days > 0) (await import('./world-restock.js')).offerRestock();
+  if (isGm() && !previewing() && ev.detail?.days > 0) {
+    await downtimeMoves(ev.detail.days);
+    (await import('./world-restock.js')).offerRestock();
+  }
 });

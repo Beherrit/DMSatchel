@@ -89,6 +89,8 @@ export const KINDS = {
     // The player writes what they do (the summary); a GM writes the outcome. GM-only fields are kept by the server
     // whatever a player sends.
     fields: [['character', 'Character', 'hidden'], ['activity', 'Activity', 'select', DOWNTIME_ACTIVITIES], ['days', 'Days spent'], ['cost', 'Cost'],
+      // Days that have passed on the calendar toward it (see downtime-days.js).
+      ['done', 'Days done', 'hidden'],
       ['outcome', 'Outcome (from the GM)', 'long', null, { gmOnly: true }], ['resolved', 'Resolved on', 'hidden', null, { gmOnly: true }]],
   },
   table: {

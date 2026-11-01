@@ -182,6 +182,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Enough food for the road?**: planning a trip on a map says who has enough rations for it and who's short.
 - **Weather slows the road**: heavy rain, snow or a strong wind where the party sets out adds travel days.
 - **A shopping list**: players note what they mean to buy; shops offer it first, and GMs see the lists in prep.
+- **Downtime moves with the calendar**: open downtime counts the days that pass and says when it's ready to resolve.
 - **Export to a spreadsheet**: download any kind of entry as a CSV file with its fields as columns; it imports back as it is.
 - **A new world like this one**: start a world with another's calendar, own fields, templates, session zero page and tag descriptions, but none of its entries.
 - **Set a field for many**: bulk actions set one field (a status, a type, a role) on every selected entry that has it.
