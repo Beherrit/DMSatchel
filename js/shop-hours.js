@@ -23,3 +23,14 @@ export function holidayToday(cal) {
 
 // What a shut shop says: "shut for Bridge Day" or "shut for the night".
 export const shutText = (o) => (o.holiday ? `shut for ${o.holiday}` : 'shut for the night');
+
+// Closing time: how long until a shop shuts (when open) or opens (when shut), in minutes of the world's clock.
+// → { open, mins } (mins null when it's shut for a holiday: it opens tomorrow).
+export function untilChange(shop, minutes, holiday = '') {
+  const o = shopOpen(shop, minutes, holiday);
+  if (o.holiday) return { open: false, mins: null };
+  const [from, to] = HOURS[kindOf(shop)];
+  const m = ((Math.round(Number(minutes) || 0) % 1440) + 1440) % 1440;
+  if (o.open) return { open: true, mins: to > 1440 && m < to - 1440 ? to - 1440 - m : to - m };
+  return { open: false, mins: m < from ? from - m : 1440 - m + from };
+}

@@ -21,3 +21,14 @@ test('shut for the holiday', async () => {
   assert.equal(holidayToday(null), '');
   assert.equal(shutText({ holiday: 'Bridge Day' }), 'shut for Bridge Day'); assert.equal(shutText({}), 'shut for the night');
 });
+
+test('closing time', async () => {
+  const { untilChange } = await import('../js/shop-hours.js');
+  const shop = { fields: { type: 'Shop' } }, inn = { fields: { type: 'Tavern' } };
+  assert.deepEqual(untilChange(shop, 16 * 60 + 40), { open: true, mins: 200 });
+  assert.deepEqual(untilChange(shop, 6 * 60), { open: false, mins: 120 });
+  assert.deepEqual(untilChange(shop, 22 * 60), { open: false, mins: 600 });
+  assert.deepEqual(untilChange(inn, 23 * 60), { open: true, mins: 180 });
+  assert.deepEqual(untilChange(inn, 60), { open: true, mins: 60 });
+  assert.deepEqual(untilChange(shop, 600, 'Bridge Day'), { open: false, mins: null });
+});

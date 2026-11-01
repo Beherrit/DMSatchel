@@ -1752,4 +1752,5 @@ details.quest-group > summary .section-title { display: inline }
   body.print-shelf .shelf-title { display: block; font-size: 18pt; font-weight: 700; margin: 0 0 4mm }
   body.print-shelf .shop-card, body.print-shelf .shop-card .stock-table { background: #fff; color: #000 }
   body.print-shelf .shop-card .shop-helpers { display: none }
+  body.print-shelf .closing-line { display: none }
 }
