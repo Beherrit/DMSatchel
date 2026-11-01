@@ -39,6 +39,7 @@ import { cleanAka } from '../js/aka.js';
 import { readMenu } from '../js/menu.js';
 import { buyFrom, sellTo, haggleFor, withHaggle, setHaggle } from '../js/purchase.js';
 import { addLog } from '../js/play-log.js';
+import { shopOpen } from '../js/shop-hours.js';
 import { coinText, GOODS } from '../js/economy.js';
 import { cleanMusic } from '../js/music.js';
 import { journeyFor } from '../js/journey.js';
@@ -385,6 +386,7 @@ export default route({
       const b = req.body.buy;
       const shop = await loadOne(String(b.shop || '').slice(0, 40), req.world.id), ch = await loadOne(String(b.character || '').slice(0, 40), req.world.id);
       if (!shop || shop.deleted || !visibleTo(shop, req) || !shop.fields?.stock) return fail(res, 404, 'That shop isn’t open.');
+      if (!req.isGmHere && !shopOpen(shop, readClock(req.world.clock).minutes).open) return fail(res, 400, `${shop.name} is shut for the night. It opens at 8 in the morning.`);
       if (!ch || ch.deleted || ch.kind !== 'character') return fail(res, 404, 'Pick a character.');
       if (!req.isGmHere && ch.owner_id !== req.gm.id) return fail(res, 403, 'You can only buy for your own character.');
       const r = buyFrom(shop.fields.stock, clip(b.item, 200), b.qty);
@@ -414,6 +416,7 @@ export default route({
       const b = req.body.sell;
       const shop = await loadOne(String(b.shop || '').slice(0, 40), req.world.id), ch = await loadOne(String(b.character || '').slice(0, 40), req.world.id);
       if (!shop || shop.deleted || !visibleTo(shop, req) || !shop.fields?.stock) return fail(res, 404, 'That shop isn’t open.');
+      if (!req.isGmHere && !shopOpen(shop, readClock(req.world.clock).minutes).open) return fail(res, 400, `${shop.name} is shut for the night. It opens at 8 in the morning.`);
       if (!ch || ch.deleted || ch.kind !== 'character') return fail(res, 404, 'Pick a character.');
       if (!req.isGmHere && ch.owner_id !== req.gm.id) return fail(res, 403, 'You can only sell your own character’s things.');
       let p = {}; try { p = JSON.parse(ch.fields?.play || '{}') || {}; } catch { p = {}; }

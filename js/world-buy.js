@@ -9,6 +9,7 @@ import { coinText, GOODS } from './economy.js';
 import { stockItems, sellTo, HAGGLES, readHaggle, haggleFor, setHaggle, withHaggle } from './purchase.js';
 import { inventoryLines } from './handover.js';
 import { readList, listFirst } from './shopping.js';
+import { shopOpen } from './shop-hours.js';
 
 const ACTIVE = (e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
 
@@ -17,7 +18,11 @@ export function buyBox(shop, rerender) {
   const items = stockItems(shop.fields?.stock);
   const chars = worldEntries().filter((e) => ACTIVE(e) && (isGm() || e.owner_id === session.gm?.id)).sort((a, b) => a.name.localeCompare(b.name));
   if (!chars.length) return null;
-  return el('div', { class: 'trade' }, items.length ? buyPart(shop, items, chars, rerender) : null, sellPart(shop, chars, rerender), isGm() && items.length ? hagglePart(shop, chars, rerender) : null);
+  // Shut at night by the world's clock: players see a notice; GMs can still trade (and are told).
+  const hours = shopOpen(shop, world.info?.clock?.minutes ?? 480);
+  const shut = hours.open ? null : el('p', { class: 'shop-shut small' }, el('span', { 'aria-hidden': 'true' }, '🌙 '), `${shop.name} is shut for the night. It opens ${hours.opens}.`, isGm() ? ' (GMs can still trade.)' : '');
+  if (shut && !isGm()) return el('div', { class: 'trade' }, shut);
+  return el('div', { class: 'trade' }, shut, items.length ? buyPart(shop, items, chars, rerender) : null, sellPart(shop, chars, rerender), isGm() && items.length ? hagglePart(shop, chars, rerender) : null);
 }
 
 const dc = (shop) => Number((String(shop.fields?.stock || '').match(/Haggle DC (\d+)/) || [])[1]) || 0;
