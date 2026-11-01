@@ -16,6 +16,7 @@ import { api, session } from './api.js';
 import { inventoryLines } from './handover.js';
 import { loadOf, loadText } from './weights.js';
 import { worthOf } from './worth.js';
+import { readDebts } from './debts.js';
 import { queuePlay, isOffline } from './outbox.js';
 
 import { CONDITIONS, CONDITION_TEXT, conditionLine } from './conditions.js';
@@ -66,6 +67,7 @@ function defaults(e, ch) {
     inventory: p.inventory ?? (ch ? `${ch.equipment.cls}\n${ch.equipment.background}` : ''), notes: p.notes || '',
     shopping: Array.isArray(p.shopping) ? p.shopping : [],
     log: Array.isArray(p.log) ? p.log : [],
+    debts: p.debts && typeof p.debts === 'object' && !Array.isArray(p.debts) ? p.debts : {},
   };
 }
 
@@ -228,6 +230,11 @@ export function sheetSection(e, rerender) {
     const item = el('select', { id: 'gv-item' }, el('option', { value: '' }, 'No item, just coin'), items.map((x) => el('option', { value: x.name, 'data-qty': x.qty }, x.qty > 1 ? `${x.name} (${x.qty})` : x.name)));
     const qty = el('input', { type: 'number', id: 'gv-qty', min: 1, value: 1 });
     const coin = el('input', { type: 'text', id: 'gv-coin', placeholder: `e.g. 10 gp (you have ${coinText(play.cp)})` });
+    // Debts between friends: coin given as a loan, which both sheets remember until it's paid back.
+    const lend = el('input', { type: 'checkbox', id: 'gv-lend' });
+    const why = el('input', { type: 'text', id: 'gv-why', maxlength: 200, placeholder: 'e.g. for the boat' });
+    const syncLend = () => { item.closest('.field').hidden = lend.checked; if (lend.checked) { item.value = ''; } why.closest('.field').hidden = !lend.checked; syncQty(); };
+    lend.addEventListener('change', syncLend);
     const syncQty = () => { const n = Number(item.selectedOptions[0]?.dataset.qty) || 1; qty.max = n; qty.value = Math.min(Number(qty.value) || 1, n); qty.closest('.field').hidden = !item.value || n < 2; };
     item.addEventListener('change', syncQty);
     const status = el('p', { class: 'form-status', role: 'status' });
@@ -235,15 +242,25 @@ export function sheetSection(e, rerender) {
     const d = el('dialog', { class: 'dialog', 'aria-labelledby': 'gv-title' }, el('form', { class: 'dialog-body', method: 'dialog' },
       el('h2', { id: 'gv-title' }, `Give from ${e.name}`),
       field('gv-to', 'To', to), field('gv-item', 'Item', item), field('gv-qty', 'How many', qty), field('gv-coin', 'Coin', coin),
+      el('label', { class: 'check', for: 'gv-lend' }, lend, ' Lend the coin: they’ll pay it back'), field('gv-why', 'What for (optional)', why),
       el('p', { class: 'muted small' }, 'Both sheets change at once; the other sheet notes who it came from.'), status,
       el('div', { class: 'btnrow' }, el('button', { class: 'btn primary', type: 'submit' }, 'Give'), el('button', { class: 'btn', type: 'button', onclick: () => d.close() }, 'Cancel'))));
-    syncQty();
+    syncQty(); syncLend();
     d.querySelector('form').addEventListener('submit', async (ev) => {
       ev.preventDefault();
       const cp = coin.value.trim() ? parseCoins(coin.value) : 0;
       if (coin.value.trim() && !cp) { status.textContent = 'Write coins like “15 gp” or “2 sp”.'; status.className = 'form-status error'; return; }
       const target = world.entries.get(to.value);
       const base = (x) => { const p = defaults(x, characterOf(x)); return { cp: p.cp, inventory: p.inventory }; };
+      if (lend.checked) {
+        if (!cp) { status.textContent = 'How much is the loan?'; status.className = 'form-status error'; return; }
+        try {
+          const r = await api('entries', { method: 'PATCH', body: { debt: { kind: 'lend', from: e.id, to: target.id, cp, note: why.value, from_base: base(world.entries.get(e.id) || e), to_base: base(target) } } });
+          for (const x of r.entries) world.entries.set(x.id, x);
+          toast(`Lent ${coinText(r.cp)} to ${target.name}`); d.close(); rerender();
+        } catch (err) { status.textContent = err.message; status.className = 'form-status error'; }
+        return;
+      }
       try {
         const r = await api('entries', { method: 'PATCH', body: { give: { from: e.id, to: target.id, item: item.value, qty: Number(qty.value) || 1, cp, from_base: base(world.entries.get(e.id) || e), to_base: base(target) } } });
         for (const x of r.entries) world.entries.set(x.id, x);
@@ -372,6 +389,37 @@ export function sheetSection(e, rerender) {
     }, 'btn small primary');
   }
 
+  // Debts between friends: who owes this character, and whom they owe, with paying back and forgiving.
+  function debtsBox() {
+    const list = readDebts(defaults(world.entries.get(e.id) || e, ch));
+    if (!list.length) return null;
+    const act = async (body, done) => {
+      const base = (x) => { const p = defaults(x, characterOf(x)); return { cp: p.cp, inventory: p.inventory }; };
+      const other = world.entries.get(body.to);
+      try {
+        const r = await api('entries', { method: 'PATCH', body: { debt: { ...body, from: e.id, from_base: base(world.entries.get(e.id) || e), to_base: other ? base(other) : undefined } } });
+        for (const x of r.entries) world.entries.set(x.id, x);
+        toast(done(r)); rerender();
+      } catch (err) { toast(err.message, 'bad'); }
+    };
+    return el('section', { class: 'debts' }, el('h4', {}, 'Debts'), el('ul', { class: 'plain debt-list' }, list.map((x) => {
+      const gone = !world.entries.get(x.id);
+      const text = x.cp > 0 ? `${x.name} owes ${e.name} ${coinText(x.cp)}` : `${e.name} owes ${x.name} ${coinText(-x.cp)}`;
+      let tools = null;
+      if (can && !gone && x.cp < 0) {
+        const amt = el('input', { type: 'text', class: 'coin-amt', 'aria-label': `Pay ${x.name} back how much`, placeholder: coinText(-x.cp) });
+        tools = el('span', { class: 'debt-tools' }, amt, el('button', { class: 'btn small', type: 'button', onclick: () => {
+          const cp = amt.value.trim() ? parseCoins(amt.value) : -x.cp;
+          if (!cp) { toast('Write coins like “15 gp” or “2 sp”'); return; }
+          act({ kind: 'repay', to: x.id, cp }, (r) => `Paid ${x.name} back ${coinText(r.cp)}`);
+        } }, 'Pay back'));
+      } else if (can && !gone && x.cp > 0) {
+        tools = confirmButton('Forgive it', () => act({ kind: 'forgive', to: x.id }, () => `Forgave ${x.name} the debt`));
+      }
+      return el('li', {}, el('span', {}, text, x.note ? el('span', { class: 'muted small' }, ` (${x.note})`) : null), tools);
+    })));
+  }
+
   // Changes made from outside the sheet (a split, living costs, rations, a purchase, a rest), newest first.
   function historyBox() {
     const log = readLog(defaults(world.entries.get(e.id) || e, ch)).slice().reverse();
@@ -394,7 +442,7 @@ export function sheetSection(e, rerender) {
       ch ? el('details', { class: 'sheet-more' }, el('summary', {}, 'Saves, skills, attacks, spells and features'), fullSheet(ch)) : null,
       el('div', { class: 'pc-cols' }, purse(), textBox('inventory', 'Inventory', 6)), inventoryItems(),
       can && !e.status?.startsWith?.('suggest') ? el('div', { class: 'btnrow' }, el('button', { class: 'btn small', type: 'button', onclick: giveDialog }, 'Give to a party member…'), el('button', { class: 'btn small', type: 'button', onclick: stashDialog }, 'The party treasury…')) : null,
-      textBox('notes', 'Notes', 4), historyBox());
+      debtsBox(), textBox('notes', 'Notes', 4), historyBox());
   }
   draw();
   return box;

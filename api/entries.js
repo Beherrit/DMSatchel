@@ -39,6 +39,7 @@ import { cleanAka } from '../js/aka.js';
 import { readMenu } from '../js/menu.js';
 import { buyFrom, sellTo, haggleFor, withHaggle, setHaggle } from '../js/purchase.js';
 import { addLog } from '../js/play-log.js';
+import { shiftDebt, balanceWith } from '../js/debts.js';
 import { shopOpen } from '../js/shop-hours.js';
 import { shopStanding, sellWithStanding } from '../js/standing-price.js';
 import { coinText, GOODS } from '../js/economy.js';
@@ -484,6 +485,55 @@ export default route({
         await record(row.id, req.gm.id, 'give', null);
       }
       return send(res, 200, { entries: [shape(await loadOne(from.id, req.world.id), req), shape(await loadOne(to.id, req.world.id), req)], moved, cp });
+    }
+    // Debts between friends: lend coin to another character, pay it back, or forgive it. Both sheets keep the
+    // balance (see debts.js) and a history line; the coin moves with it.
+    if (req.body.debt) {
+      const g = req.body.debt;
+      const from = await loadOne(String(g.from || '').slice(0, 40), req.world.id), to = await loadOne(String(g.to || '').slice(0, 40), req.world.id);
+      if (!from || from.deleted || from.kind !== 'character' || !to || to.deleted || to.kind !== 'character' || from.id === to.id) return fail(res, 404, 'Pick two characters in this world.');
+      if (!req.isGmHere && from.owner_id !== req.gm.id) return fail(res, 403, 'You can only do this for your own character.');
+      const kind = ['lend', 'repay', 'forgive'].includes(g.kind) ? g.kind : null;
+      if (!kind) return fail(res, 400, 'Lend, repay or forgive?');
+      const playOf = (row, base) => {
+        let p = {}; try { p = JSON.parse(row.fields?.play || '{}') || {}; } catch { p = {}; }
+        if (!Number.isFinite(p.cp)) p.cp = Math.max(0, Math.round(Number(base?.cp) || 0));
+        if (p.inventory === undefined) p.inventory = clip(base?.inventory, 15000);
+        return p;
+      };
+      const fp = playOf(from, g.from_base), tp = playOf(to, g.to_base);
+      const owedToFrom = balanceWith(fp, to.id); // > 0: to owes from; < 0: from owes to
+      const note = clip(g.note, 200).trim();
+      let cp = Math.max(0, Math.min(1e12, Math.round(Number(g.cp) || 0)));
+      const me = { id: from.id, name: from.name }, them = { id: to.id, name: to.name };
+      if (kind === 'lend') {
+        if (!cp) return fail(res, 400, 'How much is the loan?');
+        if (cp > fp.cp) return fail(res, 400, `${from.name} doesn’t have that much coin.`);
+        fp.cp -= cp; tp.cp += cp;
+        shiftDebt(fp, them, cp, note); shiftDebt(tp, me, -cp, note);
+        addLog(fp, `Lent ${coinText(cp)} to ${to.name}${note ? ` (${note})` : ''}`, req.gm.name, undefined, { cp: -cp });
+        addLog(tp, `Borrowed ${coinText(cp)} from ${from.name}${note ? ` (${note})` : ''}`, req.gm.name, undefined, { cp });
+      } else if (kind === 'repay') {
+        if (owedToFrom >= 0) return fail(res, 400, `${from.name} doesn’t owe ${to.name} anything.`);
+        cp = Math.min(cp || -owedToFrom, -owedToFrom);
+        if (cp > fp.cp) return fail(res, 400, `${from.name} doesn’t have that much coin.`);
+        fp.cp -= cp; tp.cp += cp;
+        shiftDebt(fp, them, cp); shiftDebt(tp, me, -cp);
+        const left = -owedToFrom - cp;
+        addLog(fp, `Paid ${to.name} back ${coinText(cp)}${left ? ` (${coinText(left)} still owed)` : ' (all square)'}`, req.gm.name, undefined, { cp: -cp });
+        addLog(tp, `${from.name} paid back ${coinText(cp)}${left ? ` (${coinText(left)} still owed)` : ' (all square)'}`, req.gm.name, undefined, { cp });
+      } else {
+        if (owedToFrom <= 0) return fail(res, 400, `${to.name} doesn’t owe ${from.name} anything.`);
+        cp = owedToFrom;
+        shiftDebt(fp, them, -cp); shiftDebt(tp, me, cp);
+        addLog(fp, `Forgave ${to.name} the ${coinText(cp)} they owed`, req.gm.name); addLog(tp, `${from.name} forgave the ${coinText(cp)} owed`, req.gm.name);
+      }
+      for (const [row, p] of [[from, fp], [to, tp]]) {
+        await sql`UPDATE entries SET fields = fields || jsonb_build_object('play', ${JSON.stringify(p)}::text), updated_by = ${req.gm.id}, updated_at = now(), version = version + 1
+          WHERE id = ${row.id} AND world_id = ${req.world.id}`;
+        await record(row.id, req.gm.id, 'debt', null);
+      }
+      return send(res, 200, { entries: [shape(await loadOne(from.id, req.world.id), req), shape(await loadOne(to.id, req.world.id), req)], kind, cp });
     }
     // Into the stash: a character puts an item or coin into the party treasury, or takes one out, with a ledger line
     // and a line in the sheet's history. A take only goes through while the treasury holds enough (checked in the insert).

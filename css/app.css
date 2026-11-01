@@ -1723,3 +1723,8 @@ details.quest-group > summary .section-title { display: inline }
   body.print-month .cal-month-list { display: block; list-style: none; padding: 0; margin-top: 6mm; font-size: 9pt; columns: 2; column-gap: 8mm }
   body.print-month .cal-month-list li { break-inside: avoid; margin-bottom: 1.5mm }
 }
+/* Debts between friends */
+.debts h4 { margin: 12px 0 4px }
+.debt-list li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px; padding: 4px 0; border-bottom: 1px solid var(--line) }
+.debt-tools { display: inline-flex; gap: 6px; align-items: center }
+.debt-tools .coin-amt { width: 8em }
