@@ -516,6 +516,10 @@ to the log at the bottom.
 248. [x] **Too heavy to carry it.** Buying something that would put a character over their carrying capacity says so
     before they pay.
 249. [x] **Print the shelf.** A shop's stock as a printable price list to hand round the table.
+250. [ ] **Attuned on the party sheet.** The GM's party sheet shows who is attuned to what.
+251. [ ] **Festival specials.** On a holiday, taverns offer a festival dish or drink at the top of their menu.
+252. [ ] **Who's been given what.** A character's page lists the gifts they've given NPCs, and to whom.
+253. [ ] **Closing time.** A shop's page says how long until it shuts (or opens), by the world's clock.
 
 ## Ideas parking lot
 
