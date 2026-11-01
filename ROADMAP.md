@@ -420,7 +420,6 @@ to the log at the bottom.
     the party's loot log.
 197. [x] **The party's wealth.** The party page shows what the party is worth in all: the treasury plus every
     character's purse.
-
 198. [ ] **Hunger takes its toll.** When someone goes without rations on the road, GMs are offered a level of
     exhaustion for them, right there in the living-costs dialog.
 199. [ ] **Weather on the map.** The party's marker on a map shows today's weather there, with the full line on
