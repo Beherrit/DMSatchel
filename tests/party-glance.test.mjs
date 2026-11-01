@@ -22,3 +22,8 @@ test('worries before the session', async () => {
     'Bo is down (0 hit points)', 'Ann is low on hit points (7 of 30)', 'Ann has 2 levels of exhaustion', 'Di has no rations', 'Bo has less than a gold piece', 'Di is broke']);
   assert.deepEqual(worries([]), []);
 });
+
+test('enough food for the road', async () => {
+  const { rationsFor } = await import('../js/party-glance.js');
+  assert.deepEqual(rationsFor(4, [{ name: 'Ann', inventory: 'Rations x7' }, { name: 'Bo', inventory: '1 ration' }, { name: 'Cy' }]), [{ name: 'Ann', has: 7, short: 0 }, { name: 'Bo', has: 1, short: 3 }, { name: 'Cy', has: 0, short: 4 }]);
+});

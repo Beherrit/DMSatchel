@@ -4,7 +4,9 @@ import { el, toast, confirmButton, setKids } from './dom.js';
 import { api, isGm, isMember, mapImageUrl } from './api.js';
 import { shrinkImage } from './dom.js';
 import { travelText } from './encounters.js';
-import { world, getEntry, findByName, link, kindLabel, notice, nameList, whenTime, createEntry, mapsOf, trail } from './world-store.js';
+import { world, worldEntries, getEntry, findByName, link, kindLabel, notice, nameList, whenTime, createEntry, mapsOf, trail } from './world-store.js';
+import { playOf } from './sheet-ui.js';
+import { rationsFor } from './party-glance.js';
 import { KINDS, PLACE_KINDS, pinIconFor } from './world-schema.js';
 import { placeDrawer } from './world-place.js';
 import { randomTownName, areaDraft } from './generators.js';
@@ -262,9 +264,19 @@ export async function viewMap(id, focusPin) {
     const diff = el('input', { type: 'checkbox' });
     const sel = el('select', { 'aria-label': `Travel from ${pin.label} to` }, el('option', { value: '' }, 'Travel to…'),
       pins.filter((p) => p.id !== pin.id).sort((a, b) => String(a.label).localeCompare(String(b.label))).map((p) => el('option', { value: p.id }, p.label)));
-    const show = () => { const to = pins.find((p) => p.id === sel.value); out.textContent = to ? `To ${to.label}: ${travelText(milesBetween(pin, to), { difficult: diff.checked })}.` : ''; };
+    const food = el('p', { class: 'small travel-food' });
+    const show = () => {
+      const to = pins.find((p) => p.id === sel.value);
+      out.textContent = to ? `To ${to.label}: ${travelText(milesBetween(pin, to), { difficult: diff.checked })}.` : '';
+      // Rations for the trip at a normal pace (a day's worth a day; trips of under a day need none).
+      const n = to ? travelDayOptions(travel(milesBetween(pin, to), { difficult: diff.checked })).find(([pace]) => pace === 'Normal')?.[1] || 0 : 0;
+      const chars = worldEntries().filter((c) => c.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(c.fields?.status));
+      const list = n && chars.length ? rationsFor(n, chars.map((c) => ({ name: c.name, inventory: playOf(c).inventory }))) : [];
+      food.textContent = list.length ? `Rations for ${n} day${n === 1 ? '' : 's'} at a normal pace: ${list.map((x) => (x.short ? `${x.name} has ${x.has}, ${x.short} short` : `${x.name} has enough (${x.has})`)).join('; ')}.` : '';
+      food.classList.toggle('bad-line', list.some((x) => x.short));
+    };
     sel.addEventListener('change', show); diff.addEventListener('change', show);
-    return el('div', { class: 'travel-pick' }, el('div', { class: 'controls' }, sel, el('label', { class: 'check' }, diff, ' Rough going')), out);
+    return el('div', { class: 'travel-pick' }, el('div', { class: 'controls' }, sel, el('label', { class: 'check' }, diff, ' Rough going')), out, food);
   }
   // Travel takes time: after the party moves on a scaled map, offer to move the calendar on by the journey.
   function offerDaysPass(a, b) {

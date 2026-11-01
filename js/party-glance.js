@@ -29,3 +29,7 @@ export function worries(rows) {
   }
   return out.sort((a, b) => a.rank - b.rank || a.name.localeCompare(b.name)).map(({ rank, ...w }) => w);
 }
+
+// Enough food for the road: for a trip of this many days, each character's rations against what they need.
+// chars: [{ name, inventory }] → [{ name, has, short }]
+export const rationsFor = (days, chars) => (chars || []).map((c) => { const has = rationsIn(c.inventory); return { name: c.name, has, short: Math.max(0, days - has) }; });

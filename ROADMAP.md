@@ -396,7 +396,7 @@ to the log at the bottom.
     broke, before the session starts.
 185. [x] **Sell the loot.** GMs sell treasury items to a shop at its buy-back rate in one go; the coin goes into the
     treasury and the items onto the shop's shelf.
-186. [ ] **Enough food for the road?** Planning a trip on a map says how many days of rations each character needs
+186. [x] **Enough food for the road?** Planning a trip on a map says how many days of rations each character needs
     for it, and who's short.
 187. [ ] **Weather slows the road.** Moving the calendar on after travel takes the weather where the party is into
     account: heavy rain, snow or a storm add days.
@@ -595,3 +595,4 @@ to the log at the bottom.
 - The journey on the calendar: every stop in "Where the party has been" that carries an in-world date the calendar reads now shows on that day: "⚑ Brindle" in the month grid, and "⚑ The party arrived in Brindle" when the day is opened. Only places the viewer can see are shown, so a hidden lair never appears for players. journeyDays in js/journey.js unit tested (weekday-prefixed dates, undated and unreadable stops).
 - Worries in prep: session prep now has "⚠ Before the session" near the top whenever a character's sheet gives cause. It covers anyone down or low on hit points, exhausted, without rations, or broke (less than a gold piece, a day's modest living), worst first, each linked, with a link to the party-at-a-glance table. When all's well it isn't shown. worries() in js/party-glance.js unit tested.
 - Sell the loot: when the treasury holds items, GMs get "Sell the loot" on the party page. Pick a stocked shop, tick items (with how many), and see the offer at the shop's buy-back rate: "They'll pay 10 gp. They won't buy Cursed idol (can't price it)". Selling puts the items on the shop's shelf first; if someone changed the shop meanwhile, nothing is sold. Then one loot-log line per item brings the coin in and takes the item out ("+10 gp, −2 Shield, sold to Smithy"). Things the shop can't price stay in the treasury. sellLoot in js/purchase.js unit tested.
+- Enough food for the road?: picking a destination in a map pin's "Travel to…" now adds a rations line under the distance and times: "Rations for 3 days at a normal pace: Ann has enough (9); Bo has 1, 2 short", in red when anyone's short. Days are counted whole, the way the calendar would move on (2.5 days needs 3 days of food); trips of under a day need none, and rough going doubles it. rationsFor in js/party-glance.js unit tested.

@@ -179,6 +179,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **The journey on the calendar**: the days the party arrived somewhere show on the in-world calendar.
 - **Worries in prep**: session prep warns who's down, low, exhausted, out of rations or broke.
 - **Sell the loot**: GMs sell the treasury's items to a shop in one go; coin into the treasury, items onto the shelf.
+- **Enough food for the road?**: planning a trip on a map says who has enough rations for it and who's short.
 - **Export to a spreadsheet**: download any kind of entry as a CSV file with its fields as columns; it imports back as it is.
 - **A new world like this one**: start a world with another's calendar, own fields, templates, session zero page and tag descriptions, but none of its entries.
 - **Set a field for many**: bulk actions set one field (a status, a type, a role) on every selected entry that has it.
