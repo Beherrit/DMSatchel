@@ -29,7 +29,7 @@ const short = (s, n) => (s.length > n ? `${s.slice(0, n - 1).replace(/\s+\S*$/, 
 export function wantedFor(place, entries, inside) {
   const here = new Set((inside || []).map((e) => e.id));
   const names = new Set([place?.name, place?.fields?.ruler, ...(inside || []).map((e) => e.name)].filter(Boolean).map((n) => String(n).toLowerCase().trim()));
-  return (entries || []).filter((e) => e.kind === 'npc' && String(e.fields?.bounty || '').trim() && e.visibility !== 'gm' && !['Dead'].includes(e.fields?.status)
+  return (entries || []).filter((e) => e.kind === 'npc' && String(e.fields?.bounty || '').trim() && e.visibility !== 'gm' && !['Dead', 'Captured'].includes(e.fields?.status) && !e.fields?.bounty_paid
     && (here.has(e.id) || names.has(String(e.fields?.bounty_by || '').toLowerCase().trim())))
     .sort((a, b) => a.name.localeCompare(b.name))
     .map((e) => ({ id: e.id, headline: 'WANTED', name: e.name, text: short(stripMarks(String(e.fields?.appearance || e.summary || '')).trim(), 200), reward: String(e.fields.bounty).trim(), by: String(e.fields?.bounty_by || '').trim() }));

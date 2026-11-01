@@ -11,6 +11,7 @@ import { stripMarks } from './rich.js';
 import { newLines, playJson } from './play-log.js';
 import { sinceLastCard } from './world-sincelast.js';
 import { routineNow, hereNow } from './world-routine.js';
+import { offerBounty } from './world-bounty.js';
 import { world, worldEntries, getEntry, loadWorld, byName, kindLabel, kindFields, richInline, link, when, findByName, mentions, richText, contentsNav, notice, nameList } from './world-store.js';
 import { viewMaps, viewMap, pinsFor } from './world-maps.js';
 import { viewStandings, standingWidget } from './world-standings.js';
@@ -710,6 +711,7 @@ function viewEdit(id, kindForNew) {
       world.entries.set(r.entry.id, r.entry);
       toast(existing ? 'Saved' : r.entry.status === 'suggested' ? 'Suggested: a GM will take a look' : 'Added to the world');
       location.hash = `world/e/${r.entry.id}`;
+      offerBounty(existing, r.entry);
     } catch (err) {
       status.textContent = err.message; status.className = 'form-status error';
       if (err.status === 409 && err.body?.entry) world.entries.set(err.body.entry.id, err.body.entry);
