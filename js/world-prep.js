@@ -34,6 +34,8 @@ import { readingPrepCard } from './world-reading.js';
 import { nextMovesCard } from './world-nextmove.js';
 import { shoppingPrepCard } from './world-shopping.js';
 import { partyRows, worries } from './party-glance.js';
+import { aroundNow } from './world-routine.js';
+import { hhmm } from './clock.js';
 
 // Before the session: who's hurt, hungry, exhausted or broke (from the characters' sheets).
 function worriesCard() {
@@ -99,7 +101,11 @@ function whereSection(prep, rerender) {
   const party = partyDefaults();
   return card(`Where the party is: ${here.name}`, pick, musicLine(here, 'music-line prep-music'),
     el('div', { class: 'prep-grid' },
-      el('div', {}, el('h4', {}, `People (${people.length})`),
+      el('div', {}, (() => {
+        // Who's around for the scene: NPCs whose daily routine puts them here (or somewhere inside) right now.
+        const a = aroundNow(here);
+        return a?.list.length ? [el('h4', {}, `Around now (${hhmm(a.m)})`), list(a.list, ({ npc, place, until }) => [link(npc.entry), place.id === here.id ? null : el('span', { class: 'small' }, [' at ', link(place)]), until !== null ? el('span', { class: 'muted small' }, ` until ${hhmm(until)}`) : null])] : null;
+      })(), el('h4', {}, `People (${people.length})`),
         people.length ? list([...key, ...people.filter((p) => !key.includes(p))].slice(0, 12), (p) => [link(p), el('span', { class: 'muted small' }, ` ${p.fields?.role || ''}`), key.includes(p) ? el('span', { class: 'tag' }, 'key') : null, attitudeLine(p) ? el('div', {}, attitudeLine(p)) : null])
           : empty('Nobody recorded here.'),
         people.length > 12 ? el('a', { class: 'small', href: `#world/e/${here.id}/people` }, `All ${people.length}`) : null),

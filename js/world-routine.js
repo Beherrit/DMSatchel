@@ -37,13 +37,20 @@ export function hereNow(place) {
 }
 
 // Who's about town: for a settlement, region or area, everyone whose routine puts them somewhere inside it now.
-function aboutTownLine(town) {
+// Everyone whose routine puts them at this place or anywhere inside it at the current hour → { m, list } (list:
+// [{ npc: { entry, … }, place, until }]), or null when the world has no clock.
+export function aroundNow(town) {
   const m = now();
   if (m === null) return null;
   const inside = (p) => { for (let x = p, i = 0; x && i < 12; x = x.parent_id && getEntry(x.parent_id), i++) if (x.id === town.id) return true; return false; };
   const npcs = worldEntries().filter((x) => x.kind === 'npc' && x.fields?.routine && !['Dead', 'Missing'].includes(x.fields?.status)).map((x) => ({ id: x.id, name: x.name, routine: x.fields.routine, entry: x }));
-  const list = aboutTown(npcs, m, placeOf, inside);
-  if (!list.length) return null;
+  return { m, list: aboutTown(npcs, m, placeOf, inside) };
+}
+
+function aboutTownLine(town) {
+  const a = aroundNow(town);
+  if (!a?.list.length) return null;
+  const { m, list } = a;
   return el('p', { class: 'routine-here small' }, `🕰 About ${town.kind === 'settlement' ? 'town' : 'here'} now (${hhmm(m)}): `,
     list.map(({ npc, place, until }, i) => [i ? '; ' : '', link(npc.entry), place.id === town.id ? '' : [' at ', link(place)], until !== null ? el('span', { class: 'muted' }, ` until ${hhmm(until)}`) : null]));
 }

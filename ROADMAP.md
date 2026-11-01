@@ -466,7 +466,7 @@ to the log at the bottom.
     character's inventory, with a line in their history.
 221. [x] **Order from the menu.** A player orders food or drink from a tavern's menu, paid from their sheet, noted in
     their history and the tavern's ledger.
-222. [ ] **Who's around for the scene.** Session prep lists the NPCs whose routine puts them where the party is right
+222. [x] **Who's around for the scene.** Session prep lists the NPCs whose routine puts them where the party is right
     now.
 223. [ ] **Coming up for you.** A player's character page lists the next week of in-world days that matter to them:
     their birthday, their quests' deadlines, festivals.
@@ -703,3 +703,4 @@ to the log at the bottom.
 - Order from the menu: a tavern's bill of fare now has an Order row: who's ordering (players: their own characters; GMs: anyone), what (the day's special first, then the drinks and dishes; beds go through "Stay the night") and how many. The server finds the item on the tavern's menu, takes the coin from the sheet (refusing if it's too dear), and notes it in the sheet's history ("Ordered 2 × Pale ale at The Bell for 8 cp"). It also adds it to the tavern's ledger, which now shows under the menu. Printing the menu leaves both out. menuItem in js/menu.js unit tested; the order route tested against PGlite (owner only, no menu, not on the menu, too dear, paid, the ledger, the menu untouched).
 - Tidy the pack: a sheet with duplicate inventory lines (often from purchases and gifts, which add "(from …)" lines) now shows a "Tidy the pack" button under the inventory. It merges lines naming the same thing, whatever their case and wherever they came from: "Rope" and "2 Rope (from the Smithy)" become "3 Rope", in the first one's place. It saves at once and hides again until there's something to merge; typing a duplicate brings it back. Headings and one-line starting kits are left alone. tidyInventory in js/handover.js unit tested.
 - Full browser sweep (241 tests) clean after #203–#221.
+- Who's around for the scene: session prep's "Where the party is" card now opens its People column with "Around now (08:00)": the NPCs whose daily routine puts them where the party is, or anywhere inside it, at the world's current hour ("Bramwell at The Forge until 11:00; Wren until 11:00"). It's the same reading as a settlement's About town, now shared as aroundNow. Nothing shows when nobody's routine puts them there.
