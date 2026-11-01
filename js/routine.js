@@ -95,3 +95,8 @@ export function regularsAt(npcs, isHere) {
   }
   return out.sort((a, b) => a.npc.name.localeCompare(b.npc.name));
 }
+
+// Routine as you type: the lines a routine can't read (no "when: where", or a "when" it doesn't know).
+export function unreadable(text) {
+  return String(text || '').split(/[;\n]+/).map((p) => p.trim()).filter(Boolean).filter((p) => !parseRoutine(p).length);
+}

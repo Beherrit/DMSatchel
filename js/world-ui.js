@@ -10,7 +10,7 @@ import { openSignIn } from './signin.js';
 import { stripMarks } from './rich.js';
 import { newLines, playJson } from './play-log.js';
 import { sinceLastCard, comingUpCard } from './world-sincelast.js';
-import { routineNow, hereNow, regularsLine } from './world-routine.js';
+import { routineNow, hereNow, regularsLine, routinePreview } from './world-routine.js';
 import { offerBounty } from './world-bounty.js';
 import { world, worldEntries, getEntry, loadWorld, byName, kindLabel, kindFields, richInline, link, when, findByName, mentions, richText, contentsNav, notice, nameList } from './world-store.js';
 import { viewMaps, viewMap, pinsFor } from './world-maps.js';
@@ -615,7 +615,7 @@ function viewEdit(id, kindForNew) {
       const box = type === 'long' ? el('textarea', { id: `ff-${k}`, 'data-field': k, rows: 3 }, v) : el('input', { type: 'text', id: `ff-${k}`, 'data-field': k, value: v });
       const roll = rollButton(() => kindSel.value, k, box, label, () => ({ type: fieldsBox.querySelector('[data-field="type"]')?.value }));
       const head = roll ? el('div', { class: 'label-row' }, el('label', { for: `ff-${k}` }, label), roll) : el('label', { for: `ff-${k}` }, label);
-      return el('div', { class: `field${type === 'long' ? ' wide' : ''}` }, head, box);
+      return el('div', { class: `field${type === 'long' ? ' wide' : ''}` }, head, box, k === 'routine' ? routinePreview(box) : null);
     }), gm ? el('p', { class: 'field wide own-fields' }, customFieldsButton(kindSel.value, renderFields)) : null);
   }
   function collectFields() { for (const f of fieldsBox.querySelectorAll('[data-field]')) e.fields[f.dataset.field] = f.value; }

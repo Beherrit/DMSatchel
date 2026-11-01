@@ -480,7 +480,7 @@ to the log at the bottom.
     and shows on the payroll until it's paid.
 229. [x] **Divide the loot.** GMs give out the treasury's items in one go, choosing who gets each; each lands on that
     sheet with a line in the ledger and the sheet's history.
-230. [ ] **Routine as you type.** On an NPC's form, the daily routine field says where it puts them right now
+230. [x] **Routine as you type.** On an NPC's form, the daily routine field says where it puts them right now
     while the GM writes it, and flags lines it can't read.
 231. [ ] **Everything the party carries.** One list (printable) of every character's gear and the treasury's,
     merged, with who has each.
@@ -724,3 +724,4 @@ to the log at the bottom.
 - Who's here, on the map: clicking a place's pin now shows who's there at the world's current hour, under its summary: "🕰 Here now (08:00): Bramwell at The Forge, Wren". A town's pin counts everyone inside it, naming the spot. It's the same routine reading as the place pages (aroundNow), and nothing shows when nobody is about.
 - Wages owed: when days pass and the treasury can't cover the hirelings' wages, the living-costs dialog says so up front ("it has 3 sp: 9 sp will be owed"). Charging it pays each hireling in turn while the coin lasts, writing one treasury line for what was paid. What's unpaid is noted on each hireling (fields.owed, added to anything already owed). The toast says who's owed what. The party page's Hirelings card shows GMs "owed 6 sp" beside the wage, with "Pay it", which writes the treasury line and clears the debt. In "the treasury pays" mode, living costs now come from what's left after wages. payWages and owedTo in js/hirelings.js unit tested.
 - Divide the loot: the treasury card has a GM-only "Divide the loot" beside "Sell the loot". It lists each item the treasury holds (saying who carries it) with a choice of who gets it ("Keep it" by default) and how many. "Give them out" moves each choice onto that character's sheet through the stash route. The ledger says "Given to Ann" and the sheet's history "Given 2 × Tent from the party treasury"; only a GM can mark a take as given. One toast lists what went where and anything that couldn't go. The given flag on the stash route was tested against PGlite.
+- Routine as you type: under the Daily routine field on an NPC's form, a live line now says where the routine puts them at the world's current hour while the GM writes it: "At 15:00 (afternoon): The Bell". It adds "(not a place in the world yet)" when the name isn't an entry, and flags lines it can't read in red: "Can't read: 'Fridays: the market'". An empty field shows how to write one. unreadable in js/routine.js unit tested.

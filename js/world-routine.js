@@ -1,8 +1,8 @@
 // Where are they now?: an NPC's page says where their daily routine puts them at the world's current hour, and a
 // place's page lists who is there now. Read from the clock the GMs move on (Time and light).
-import { el } from './dom.js';
+import { el, setKids } from './dom.js';
 import { world, worldEntries, link, findByName, getEntry } from './world-store.js';
-import { whereAt, aboutTown, regularsAt } from './routine.js';
+import { whereAt, aboutTown, regularsAt, unreadable } from './routine.js';
 import { hhmm, partOfDay } from './clock.js';
 
 const now = () => world.info?.clock?.minutes ?? null;
@@ -62,4 +62,21 @@ export function regularsLine(place) {
   const list = regularsAt(npcs, (name) => placeOf(name)?.id === place.id);
   if (!list.length) return null;
   return el('p', { class: 'routine-regulars small' }, el('strong', {}, 'Regulars: '), list.map(({ npc, when }, i) => [i ? ', ' : '', link(npc.entry), el('span', { class: 'muted' }, ` (${when.join(', ').toLowerCase()})`)]));
+}
+
+// Routine as you type: under the field on an NPC's form, where the routine puts them right now, and the lines it
+// can't read. box: the textarea.
+export function routinePreview(box) {
+  const out = el('p', { class: 'small routine-preview', 'aria-live': 'polite' });
+  const draw = () => {
+    const text = box.value, m = now() ?? 480;
+    if (!text.trim()) { out.textContent = 'Write it like “Mornings: the Forge; evenings: the Bell; nights: home”, or with hours (“8-12: the market”), and “Otherwise:” for the rest.'; out.className = 'small muted routine-preview'; return; }
+    const w = whereAt(text, m), bad = unreadable(text);
+    const p = w ? placeOf(w.place) : null;
+    setKids(out, `At ${hhmm(m)} (${partOfDay(m)}): `, w ? (p ? link(p) : el('strong', {}, w.place)) : 'nowhere it says', w && !p ? el('span', { class: 'muted' }, ' (not a place in the world yet)') : null,
+      bad.length ? el('span', { class: 'bad-line' }, ` · Can’t read: ${bad.map((x) => `“${x}”`).join(', ')}`) : null);
+    out.className = 'small routine-preview';
+  };
+  box.addEventListener('input', draw); draw();
+  return out;
 }

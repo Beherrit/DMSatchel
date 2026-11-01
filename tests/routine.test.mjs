@@ -44,3 +44,9 @@ test('regularsAt: who comes here, and when', async () => {
   assert.deepEqual(regularsAt(npcs, isBell).map((x) => `${x.npc.name}: ${x.when.join(', ')}`), ['Bram: afternoons and evenings', 'Cole: Dawn, nights']);
   assert.deepEqual(regularsAt([], isBell), []);
 });
+
+test('unreadable: the lines a routine cannot read', async () => {
+  const { unreadable } = await import('../js/routine.js');
+  assert.deepEqual(unreadable('Mornings: the forge; Fridays: the market\nsleeps a lot; 9-17: the docks; Otherwise: home'), ['Fridays: the market', 'sleeps a lot']);
+  assert.deepEqual(unreadable(''), []);
+});
