@@ -7,6 +7,8 @@ import { travelText } from './encounters.js';
 import { world, worldEntries, getEntry, findByName, link, kindLabel, notice, nameList, whenTime, createEntry, mapsOf, trail } from './world-store.js';
 import { playOf } from './sheet-ui.js';
 import { rationsFor } from './party-glance.js';
+import { dayWeather, weatherSlowdown } from './forecast.js';
+import { placeTerrains } from './encounter-ui.js';
 import { KINDS, PLACE_KINDS, pinIconFor } from './world-schema.js';
 import { placeDrawer } from './world-place.js';
 import { randomTownName, areaDraft } from './generators.js';
@@ -281,11 +283,17 @@ export async function viewMap(id, focusPin) {
   // Travel takes time: after the party moves on a scaled map, offer to move the calendar on by the journey.
   function offerDaysPass(a, b) {
     const cal = worldCalendar();
-    const miles = milesBetween(a, b), opts = travelDayOptions(travel(miles));
+    const miles = milesBetween(a, b);
+    // Today's weather where they set out can slow them (heavy rain, snow, a strong wind).
+    const from = a.entry_id && getEntry(a.entry_id);
+    const slow = from ? weatherSlowdown(dayWeather(from.id, placeTerrains(from), cal)) : { factor: 1, why: '' };
+    const slowed = Object.fromEntries(Object.entries(travel(miles)).map(([pace, t]) => [pace, { days: t.days * slow.factor, hours: t.hours * slow.factor }]));
+    const opts = travelDayOptions(slowed);
     if (!cal || !opts.length) return;
     const dlg = el('dialog', { class: 'dialog', 'aria-labelledby': 'dp-title' }, el('div', { class: 'dialog-body' },
       el('h2', { id: 'dp-title' }, 'Move the calendar on?'),
       el('p', {}, `From ${a.label} to ${b.label} is ${milesText(miles)}. Today is ${todayText(cal)}.`),
+      slow.why ? el('p', { class: 'small weather-slow' }, `🌧 There’s ${slow.why} at ${from.name} today: the journey takes longer.`) : null,
       el('div', { class: 'btnrow' }, opts.map(([pace, days]) => el('button', { class: `btn${pace === 'Normal' ? ' primary' : ''}`, type: 'button', onclick: async () => {
         try {
           const r = await api('settings', { method: 'PATCH', body: { cal: advance(cal, days) } });

@@ -25,3 +25,12 @@ export function dayWeather(placeId, terrain, cal, offset = 0, now = Date.now()) 
 export function forecast(placeId, terrain, cal, days = 7, now = Date.now()) {
   return Array.from({ length: days }, (_, i) => ({ label: dayOf(cal, i, now).label, weather: dayWeather(placeId, terrain, cal, i, now) }));
 }
+
+// Weather slows the road: how much longer travel takes in this weather (the worst of it counts), and why.
+// → { factor, why } (factor 1 and why '' when the weather's no hindrance)
+export function weatherSlowdown(w) {
+  const sky = String(w?.sky || ''), wind = String(w?.wind || '');
+  const reasons = [[/Heavy snow/i.test(sky), 2, 'heavy snow'], [/Heavy rain/i.test(sky), 1.5, 'heavy rain'], [/Light snow/i.test(sky), 1.5, 'snow'], [/Strong/i.test(wind), 1.25, 'a strong wind']];
+  const worst = reasons.filter(([on]) => on).sort((a, b) => b[1] - a[1])[0];
+  return worst ? { factor: worst[1], why: worst[2] } : { factor: 1, why: '' };
+}

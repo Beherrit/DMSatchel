@@ -20,3 +20,12 @@ test('tomorrow in the forecast is what tomorrow shows', () => {
   assert.deepEqual(real[1].weather, dayWeather('p1', ['coast'], null, 0, Date.parse('2026-03-02T12:00:00Z')));
   assert.deepEqual(real[0].weather, rollWeather({ terrain: ['coast'], season: 'Summer', seed: `p1:${new Date(now).toDateString()}` }));
 });
+
+test('weather slows the road', async () => {
+  const { weatherSlowdown } = await import('../js/forecast.js');
+  assert.deepEqual(weatherSlowdown({ sky: 'Heavy snow', wind: 'Strong' }), { factor: 2, why: 'heavy snow' });
+  assert.deepEqual(weatherSlowdown({ sky: 'Heavy rain', wind: 'Calm or light' }), { factor: 1.5, why: 'heavy rain' });
+  assert.deepEqual(weatherSlowdown({ sky: 'Clear', wind: 'Strong' }), { factor: 1.25, why: 'a strong wind' });
+  assert.deepEqual(weatherSlowdown({ sky: 'Light rain', wind: 'Moderate' }), { factor: 1, why: '' });
+  assert.deepEqual(weatherSlowdown(null), { factor: 1, why: '' });
+});
