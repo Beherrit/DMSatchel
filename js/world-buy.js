@@ -5,8 +5,10 @@ import { el, toast } from './dom.js';
 import { api, isGm, isMember, previewing, session } from './api.js';
 import { world, worldEntries, patchEntry, whenTime } from './world-store.js';
 import { readTrade, tradeText, tradeTotals } from './shop-trade.js';
+import { readAsks, dropAsk, shelfLine } from './shop-asks.js';
+import { priceIndex } from './worth.js';
 import { playOf } from './sheet-ui.js';
-import { coinText, GOODS } from './economy.js';
+import { coinText, GOODS, parseCoins } from './economy.js';
 import { stockItems, sellTo, HAGGLES, readHaggle, haggleFor, setHaggle, withHaggle } from './purchase.js';
 import { inventoryLines } from './handover.js';
 import { readList, listFirst } from './shopping.js';
@@ -27,6 +29,48 @@ export function tradeLedger(shop) {
     list.length > 12 ? el('p', { class: 'small muted' }, `And ${list.length - 12} older.`) : null);
 }
 
+// Ask the shopkeeper: ask for something that isn't on the shelf (the GMs see it on the shop's page).
+function askPart(shop, chars, rerender) {
+  const who = chars.length > 1 ? el('select', { 'aria-label': 'Who’s asking' }, chars.map((c) => el('option', { value: c.id }, c.name))) : null;
+  const what = el('input', { type: 'text', maxlength: 80, placeholder: 'e.g. a grappling hook', 'aria-label': 'What to ask for' });
+  const go = el('button', { class: 'btn small', type: 'button', onclick: async () => {
+    if (!what.value.trim()) { what.focus(); return; }
+    go.disabled = true;
+    try {
+      const r = await api('entries', { method: 'PATCH', body: { ask_shop: { shop: shop.id, item: what.value, character: who ? who.value : chars[0]?.id } } });
+      world.entries.set(r.entry.id, r.entry);
+      toast(`Asked ${shop.name} for ${r.asked.item}`); rerender();
+    } catch (err) { toast(err.message, 'bad'); go.disabled = false; }
+  } }, 'Ask');
+  return el('div', { class: 'controls trade-ask' }, el('span', { class: 'eyebrow' }, 'Not on the shelf?'), who, what, go);
+}
+
+// The GMs' side of the asks: put the thing on the shelf (at its list price, or one they choose) or let it go.
+export function asksBox(shop, rerender) {
+  if (!isGm() || previewing()) return null;
+  const asks = readAsks(shop.fields?.asks);
+  if (!asks.length) return null;
+  const price = priceIndex(GOODS);
+  return el('section', { class: 'card shop-asks' }, el('h3', {}, `Asked for here (${asks.length})`),
+    el('ul', { class: 'plain' }, asks.slice().reverse().map((a) => {
+      const p = price(a.item);
+      const cost = el('input', { type: 'text', class: 'coin-amt', value: p ? coinText(p.cp) : '', placeholder: 'price', 'aria-label': `Price for ${a.item}` });
+      const save = async (stock) => {
+        const cur = world.entries.get(shop.id) || shop;
+        try { await patchEntry(cur, { fields: { ...(stock ? { stock } : {}), asks: dropAsk(cur.fields?.asks, a.item) } }); toast(stock ? `${a.item} is on the shelf` : 'Let it go'); rerender(); }
+        catch (err) { toast(err.message, 'bad'); }
+      };
+      return el('li', { class: 'controls' }, el('span', {}, el('strong', {}, a.item), el('span', { class: 'muted small' }, ` · ${a.by}`)), cost,
+        el('button', { class: 'btn small', type: 'button', onclick: () => {
+          const cp = parseCoins(cost.value);
+          if (!cp) { toast('Give it a price, like “2 gp”'); cost.focus(); return; }
+          const cur = world.entries.get(shop.id) || shop;
+          save(`${String(cur.fields?.stock || '').replace(/\s+$/, '')}\n${shelfLine(a.item, cp, 1)}`);
+        } }, 'Put it on the shelf'),
+        el('button', { class: 'btn small ghost', type: 'button', onclick: () => save(null) }, 'Dismiss'));
+    })));
+}
+
 export function buyBox(shop, rerender) {
   if (!isMember() || previewing()) return null;
   const items = stockItems(shop.fields?.stock);
@@ -36,7 +80,7 @@ export function buyBox(shop, rerender) {
   const hours = shopOpen(shop, world.info?.clock?.minutes ?? 480);
   const shut = hours.open ? null : el('p', { class: 'shop-shut small' }, el('span', { 'aria-hidden': 'true' }, '🌙 '), `${shop.name} is shut for the night. It opens ${hours.opens}.`, isGm() ? ' (GMs can still trade.)' : '');
   if (shut && !isGm()) return el('div', { class: 'trade' }, shut);
-  return el('div', { class: 'trade' }, shut, items.length ? buyPart(shop, items, chars, rerender) : null, sellPart(shop, chars, rerender), isGm() && items.length ? hagglePart(shop, chars, rerender) : null);
+  return el('div', { class: 'trade' }, shut, items.length ? buyPart(shop, items, chars, rerender) : null, sellPart(shop, chars, rerender), askPart(shop, chars, rerender), isGm() && items.length ? hagglePart(shop, chars, rerender) : null);
 }
 
 const dc = (shop) => Number((String(shop.fields?.stock || '').match(/Haggle DC (\d+)/) || [])[1]) || 0;

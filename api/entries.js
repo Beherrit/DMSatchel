@@ -42,6 +42,7 @@ import { addLog } from '../js/play-log.js';
 import { shiftDebt, balanceWith } from '../js/debts.js';
 import { addTrade } from '../js/shop-trade.js';
 import { addGift, giftWhat } from '../js/gifts.js';
+import { addAsk } from '../js/shop-asks.js';
 import { shopOpen } from '../js/shop-hours.js';
 import { shopStanding, sellWithStanding } from '../js/standing-price.js';
 import { coinText, GOODS } from '../js/economy.js';
@@ -67,7 +68,7 @@ function clean(input, custom = {}) {
   if (!isKind(e.kind)) return { error: 'Pick what kind of entry this is.' };
   const name = clip(e.name, LIMITS.name).trim();
   if (!name) return { error: 'Give the entry a name.' };
-  const allowed = new Set([...KINDS[e.kind].fields.map(([k]) => k), ...customKeys(e.kind, custom), 'say', 'aka', 'music', 'image_alt', 'party_edit', 'menu', 'hired', 'wage', 'restocked', 'haggle', 'trade', 'bounty_paid', 'owed', 'gifts']);
+  const allowed = new Set([...KINDS[e.kind].fields.map(([k]) => k), ...customKeys(e.kind, custom), 'say', 'aka', 'music', 'image_alt', 'party_edit', 'menu', 'hired', 'wage', 'restocked', 'haggle', 'trade', 'bounty_paid', 'owed', 'gifts', 'asks']);
   const fields = {};
   for (const [k, v] of Object.entries(e.fields || {})) if (allowed.has(k) && v != null && String(v).trim() && (k !== 'image' || isImageRef(String(v)))) fields[k] = clip(v, ['stock', 'sheet', 'play', 'spread', 'known', 'attitudes', 'objectives', 'attendance', 'enc', 'goals', 'wishes', 'gallery', 'menu'].includes(k) ? LIMITS.body : LIMITS.field);
   // Pictures in the gallery must be real image addresses.
@@ -394,6 +395,21 @@ export default route({
     }
     // Buy from a shop: {buy: {shop, character, item, qty, base}} — a player for their own character (or a GM for any):
     // the coin comes off the character, the item goes into their inventory, and the shop's stock goes down.
+    // Ask the shopkeeper: a member asks a shop for something it doesn't stock; the GMs see it on the shop's page.
+    if (req.body.ask_shop) {
+      if (!requireMember(req, res)) return;
+      const b = req.body.ask_shop;
+      const shop = await loadOne(String(b.shop || '').slice(0, 40), req.world.id);
+      if (!shop || shop.deleted || !visibleTo(shop, req) || !shop.fields?.stock) return fail(res, 404, 'That shop isn’t open.');
+      const item = clip(b.item, 80).trim();
+      if (!item) return fail(res, 400, 'What are you asking for?');
+      const ch = b.character ? await loadOne(String(b.character).slice(0, 40), req.world.id) : null;
+      const by = ch && ch.kind === 'character' && (req.isGmHere || ch.owner_id === req.gm.id) ? ch.name : req.gm.name;
+      const asks = addAsk(shop.fields.asks, { by, item });
+      await sql`UPDATE entries SET fields = fields || jsonb_build_object('asks', ${asks}::text), updated_by = ${req.gm.id}, updated_at = now(), version = version + 1
+        WHERE id = ${shop.id} AND world_id = ${req.world.id}`;
+      return send(res, 200, { entry: shape(await loadOne(shop.id, req.world.id), req), asked: { by, item } });
+    }
     // Order from the menu: food or drink from a tavern's menu, paid from a character's sheet, noted in its history and
     // the tavern's ledger. (A bed for the night goes through the inn's own stay, which also rests the party.)
     if (req.body.order) {

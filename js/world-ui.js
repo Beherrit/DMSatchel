@@ -72,7 +72,7 @@ import { cleanAka, akaOf } from './aka.js';
 import { ageOf, ageText } from './birthdays.js';
 import { deadlineOf, deadlineText } from './deadline.js';
 import { menuCard } from './world-menu.js';
-import { buyBox, tradeLedger } from './world-buy.js';
+import { buyBox, tradeLedger, asksBox } from './world-buy.js';
 import { chainSection } from './world-questchain.js';
 import { hireLine } from './world-hire.js';
 import { nextMoveButton } from './world-nextmove.js';
@@ -420,7 +420,7 @@ function viewEntry(id, tab) {
         const town = trailTown(e);
         try { await patchEntry(e, { fields: restockDraft(e, town) }); toast(town ? `Restocked at ${town.name}’s prices` : 'Restocked'); rerenderWorld(); } catch (err) { toast(err.message, 'bad'); }
       } }, e.fields?.stock ? 'Restock' : 'Stock this shop') : null),
-      renderStock(e.fields?.stock) || el('p', { class: 'muted' }, 'No stock listed yet.'), buyBox(e, rerenderWorld), tradeLedger(e)) : null,
+      renderStock(e.fields?.stock) || el('p', { class: 'muted' }, 'No stock listed yet.'), buyBox(e, rerenderWorld), asksBox(e, rerenderWorld), tradeLedger(e)) : null,
     e.body ? el('section', {}, contentsNav(e.body), richText(e.body, { anchors: true })) : null,
     isGm() && e.secret ? el('aside', { class: 'secret' }, el('div', { class: 'eyebrow' }, 'GM only'), richText(e.secret)) : null,
     mentionsCard(e, rerenderWorld),
