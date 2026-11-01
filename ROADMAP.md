@@ -449,8 +449,16 @@ to the log at the bottom.
     and paying it back clears it.
 212. [x] **Too heavy for the road.** Planning a trip warns when someone is over their carrying capacity, beside the
     rations check.
-213. [ ] **A shop's ledger.** Each shop page shows the party's recent trade there (who bought and sold what, for how
+213. [x] **A shop's ledger.** Each shop page shows the party's recent trade there (who bought and sold what, for how
     much), from the buy and sell routes.
+214. [ ] **Where are they now?** NPCs can have a day's routine ("Mornings: the forge; evenings: the Bell"); their
+    page and their place's page say where they are at the world's current hour.
+215. [ ] **Bounties pay out.** When an NPC with a bounty is marked dead or captured, the GMs are offered the bounty for
+    the party treasury, noting who paid it.
+216. [ ] **Hirelings eat too.** On the road, hired NPCs eat from the treasury's rations, and the living-costs dialog
+    says when there aren't enough.
+217. [ ] **A packing list.** Planning a trip offers to add what each character is short of (rations for the days) to
+    their shopping list.
 
 ## Ideas parking lot
 
@@ -669,3 +677,5 @@ to the log at the bottom.
 - What it's worth: under the weight line, each sheet now says what its gear would fetch: "Gear worth about 39 gp 7 sp 5 cp at the shops (half of 79 gp 5 sp new); not priced: Mystery box". Half is the rate a shop buys at unless it says otherwise. Prices come from the price list the shops use, matched the way players write things ("Rope" is the cheapest rope on the list, "20 arrows" is a twentieth of "Arrows (20)" each, and a starting kit on one line counts each part). Magic "+1" gear and services aren't priced; that's left to the GMs. The GM's party sheet shows each character's gear value under their coin. The weights module's kit-splitting is now shared as carried(). js/worth.js unit tested.
 - Debts between friends: the give dialog has "Lend the coin: they'll pay it back" with an optional "What for". A loan moves the coin, and both sheets then keep the balance between the two characters in a new Debts section: "Bo owes Ann 10 gp (for the boat)". The borrower's sheet has "Pay back" (the whole debt, or an amount, never more than is owed). The lender's has "Forgive it", which asks for a second click to confirm. Each move writes history lines on both sheets ("Paid Ann back 4 gp (6 gp still owed)", "… (all square)"), with the coin carried for Since last session. At zero the debt is gone. The balance lives in each sheet's play state (play.debts), which the sheet now keeps when it saves. js/debts.js unit tested; the debt route tested against PGlite: owner only, can't lend or repay more coin than you have, nothing to repay, overpaying pays only what's owed, only the lender forgives, unknown kinds refused.
 - Too heavy for the road: planning a trip from a pin on a scaled map now adds a warning under the rations line when anyone is over their carrying capacity: "Too heavy for the road: Ann carries 503.4 lb (can carry 120 lb)." It uses the same weights and Strength × 15 as the sheets' Heavy packs line, for Forge characters, whose Strength is known. Nothing shows when everyone is within their limit. overloaded and overloadedText in js/weights.js unit tested.
+- A shop's ledger: each shop page now has "The party's trade here (3)" under its counter. It leads with what the party has spent and taken in, then lists the newest trades: "Bo sold Lute for 17 gp 5 sp", "The party sold 2 × Shield for 10 gp". Players buying and selling write to it in the same versioned update that changes the shelf, and the GMs' "Sell the loot" adds its own line. It keeps the last 30 in the shop's fields. Everyone who can see the shop sees it. js/shop-trade.js unit tested; buy and sell tested against PGlite.
+- Fixed while doing it: editing an entry in the form used to drop the fields the form doesn't show. A shop lost its menu, haggles and restock mark, a hireling its wage, and a page its "players can edit" switch, whenever a GM changed something as small as its name. The form now keeps every stored field it doesn't manage. Changing an entry's kind still drops the old kind's own fields, as before.

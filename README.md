@@ -186,6 +186,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **The journey on the calendar**: the days the party arrived somewhere show on the in-world calendar.
 - **Worries in prep**: session prep warns who's down, low, exhausted, out of rations or broke.
 - **Sell the loot**: GMs sell the treasury's items to a shop in one go; coin into the treasury, items onto the shelf.
+- **A shop's ledger**: each shop shows the party's recent trade there: who bought and sold what, for how much.
 - **Enough food for the road?**: planning a trip on a map says who has enough rations for it and who's short.
 - **Too heavy for the road**: planning a trip warns who is over their carrying capacity.
 - **Weather slows the road**: heavy rain, snow or a strong wind where the party sets out adds travel days.

@@ -40,6 +40,7 @@ import { readMenu } from '../js/menu.js';
 import { buyFrom, sellTo, haggleFor, withHaggle, setHaggle } from '../js/purchase.js';
 import { addLog } from '../js/play-log.js';
 import { shiftDebt, balanceWith } from '../js/debts.js';
+import { addTrade } from '../js/shop-trade.js';
 import { shopOpen } from '../js/shop-hours.js';
 import { shopStanding, sellWithStanding } from '../js/standing-price.js';
 import { coinText, GOODS } from '../js/economy.js';
@@ -65,7 +66,7 @@ function clean(input, custom = {}) {
   if (!isKind(e.kind)) return { error: 'Pick what kind of entry this is.' };
   const name = clip(e.name, LIMITS.name).trim();
   if (!name) return { error: 'Give the entry a name.' };
-  const allowed = new Set([...KINDS[e.kind].fields.map(([k]) => k), ...customKeys(e.kind, custom), 'say', 'aka', 'music', 'image_alt', 'party_edit', 'menu', 'hired', 'wage', 'restocked', 'haggle']);
+  const allowed = new Set([...KINDS[e.kind].fields.map(([k]) => k), ...customKeys(e.kind, custom), 'say', 'aka', 'music', 'image_alt', 'party_edit', 'menu', 'hired', 'wage', 'restocked', 'haggle', 'trade']);
   const fields = {};
   for (const [k, v] of Object.entries(e.fields || {})) if (allowed.has(k) && v != null && String(v).trim() && (k !== 'image' || isImageRef(String(v)))) fields[k] = clip(v, ['stock', 'sheet', 'play', 'spread', 'known', 'attitudes', 'objectives', 'attendance', 'enc', 'goals', 'wishes', 'gallery', 'menu'].includes(k) ? LIMITS.body : LIMITS.field);
   // Pictures in the gallery must be real image addresses.
@@ -412,7 +413,8 @@ export default route({
       r.cp = withHaggle(r.cp, pct);
       if (r.cp > p.cp) return fail(res, 400, `${ch.name} doesn’t have enough coin: that costs ${coinText(r.cp)} and they have ${coinText(p.cp)}.`);
       // The shelf first, and only if nobody else bought from it meanwhile.
-      const sold = await sql`UPDATE entries SET fields = fields || jsonb_build_object('stock', ${r.text}::text, 'haggle', ${setHaggle(shop.fields.haggle, ch.id, 0)}::text), updated_by = ${req.gm.id}, updated_at = now(), version = version + 1
+      const trade = addTrade(shop.fields.trade, { who: ch.name, dir: 'buy', item: r.name, qty: r.qty, cp: r.cp });
+      const sold = await sql`UPDATE entries SET fields = fields || jsonb_build_object('stock', ${r.text}::text, 'haggle', ${setHaggle(shop.fields.haggle, ch.id, 0)}::text, 'trade', ${trade}::text), updated_by = ${req.gm.id}, updated_at = now(), version = version + 1
         WHERE id = ${shop.id} AND world_id = ${req.world.id} AND version = ${shop.version} RETURNING id`;
       if (!sold.length) return fail(res, 409, 'Someone else was buying from this shop at the same moment. Try again.');
       p.cp -= r.cp; p.inventory = clip(giveItem(p.inventory, r.name, r.qty, shop.name), 15000);
@@ -442,7 +444,8 @@ export default route({
       // Friends buy dear: the same standing pays them 10% more (the hated 10% less).
       const stand = await standingAt(req, shop);
       if (stand?.pct) r.cp = sellWithStanding(r.cp, stand.pct);
-      const done = await sql`UPDATE entries SET fields = fields || jsonb_build_object('stock', ${clip(r.text, LIMITS.body)}::text), updated_by = ${req.gm.id}, updated_at = now(), version = version + 1
+      const trade = addTrade(shop.fields.trade, { who: ch.name, dir: 'sell', item: r.name, qty: r.qty, cp: r.cp });
+      const done = await sql`UPDATE entries SET fields = fields || jsonb_build_object('stock', ${clip(r.text, LIMITS.body)}::text, 'trade', ${trade}::text), updated_by = ${req.gm.id}, updated_at = now(), version = version + 1
         WHERE id = ${shop.id} AND world_id = ${req.world.id} AND version = ${shop.version} RETURNING id`;
       if (!done.length) return fail(res, 409, 'Someone else was at this shop’s counter at the same moment. Try again.');
       p.inventory = t.text; p.cp += r.cp;

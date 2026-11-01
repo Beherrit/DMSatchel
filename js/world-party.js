@@ -9,6 +9,7 @@ import { addCoins, playOf, changePlay } from './sheet-ui.js';
 import { readHandOut, handOutTotal } from './hand-out.js';
 import { partyRows, partyWealth } from './party-glance.js';
 import { sellLoot } from './purchase.js';
+import { addTrade } from './shop-trade.js';
 import { shopStanding, sellWithStanding } from './standing-price.js';
 import { giveItem } from './handover.js';
 import { progressBadge } from './world-objectives.js';
@@ -144,7 +145,8 @@ function sellLootForm(items, reload) {
     if (!r.sold.length) return;
     go.disabled = true;
     try {
-      await patchEntry(s, { fields: { stock: r.text } }); // the shelf first: if someone else changed the shop, nothing is sold
+      const trade = r.sold.reduce((j, x) => addTrade(j, { who: '', dir: 'sell', item: x.item, qty: x.qty, cp: x.cp }), s.fields.trade || '');
+      await patchEntry(s, { fields: { stock: r.text, trade } }); // the shelf first: if someone else changed the shop, nothing is sold
       for (const x of r.sold) await api('party', { method: 'POST', body: { cp: x.cp, item: x.item, qty: -x.qty, note: `Sold to ${s.name}` } });
       toast(`Sold to ${s.name} for ${coinText(r.sold.reduce((t, x) => t + x.cp, 0))}`);
       reload();

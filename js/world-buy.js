@@ -3,7 +3,8 @@
 // The server checks the coin, the inventory and the shelf.
 import { el, toast } from './dom.js';
 import { api, isGm, isMember, previewing, session } from './api.js';
-import { world, worldEntries, patchEntry } from './world-store.js';
+import { world, worldEntries, patchEntry, whenTime } from './world-store.js';
+import { readTrade, tradeText, tradeTotals } from './shop-trade.js';
 import { playOf } from './sheet-ui.js';
 import { coinText, GOODS } from './economy.js';
 import { stockItems, sellTo, HAGGLES, readHaggle, haggleFor, setHaggle, withHaggle } from './purchase.js';
@@ -13,6 +14,18 @@ import { shopOpen } from './shop-hours.js';
 import { shopStanding, sellWithStanding } from './standing-price.js';
 
 const ACTIVE = (e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
+
+// A shop's ledger: the party's recent trade here, newest first, with what they've spent and taken in.
+export function tradeLedger(shop) {
+  const list = readTrade(shop.fields?.trade);
+  if (!list.length) return null;
+  const t = tradeTotals(list);
+  const newest = list.slice().reverse();
+  return el('details', { class: 'shop-ledger' }, el('summary', {}, `The party’s trade here (${list.length})`),
+    el('p', { class: 'small muted' }, [t.bought ? `Spent ${coinText(t.bought)}` : '', t.sold ? `took in ${coinText(t.sold)}` : ''].filter(Boolean).join(', ').replace(/^t/, 'T') + '.'),
+    el('ul', { class: 'plain sheet-log' }, newest.slice(0, 12).map((x) => el('li', {}, el('span', {}, tradeText(x)), x.at ? el('span', { class: 'muted small' }, ` · ${whenTime(x.at)}`) : null))),
+    list.length > 12 ? el('p', { class: 'small muted' }, `And ${list.length - 12} older.`) : null);
+}
 
 export function buyBox(shop, rerender) {
   if (!isMember() || previewing()) return null;

@@ -69,7 +69,7 @@ import { cleanAka, akaOf } from './aka.js';
 import { ageOf, ageText } from './birthdays.js';
 import { deadlineOf, deadlineText } from './deadline.js';
 import { menuCard } from './world-menu.js';
-import { buyBox } from './world-buy.js';
+import { buyBox, tradeLedger } from './world-buy.js';
 import { chainSection } from './world-questchain.js';
 import { hireLine } from './world-hire.js';
 import { nextMoveButton } from './world-nextmove.js';
@@ -414,7 +414,7 @@ function viewEntry(id, tab) {
         const town = trailTown(e);
         try { await patchEntry(e, { fields: restockDraft(e, town) }); toast(town ? `Restocked at ${town.name}’s prices` : 'Restocked'); rerenderWorld(); } catch (err) { toast(err.message, 'bad'); }
       } }, e.fields?.stock ? 'Restock' : 'Stock this shop') : null),
-      renderStock(e.fields?.stock) || el('p', { class: 'muted' }, 'No stock listed yet.'), buyBox(e, rerenderWorld)) : null,
+      renderStock(e.fields?.stock) || el('p', { class: 'muted' }, 'No stock listed yet.'), buyBox(e, rerenderWorld), tradeLedger(e)) : null,
     e.body ? el('section', {}, contentsNav(e.body), richText(e.body, { anchors: true })) : null,
     isGm() && e.secret ? el('aside', { class: 'secret' }, el('div', { class: 'eyebrow' }, 'GM only'), richText(e.secret)) : null,
     mentionsCard(e, rerenderWorld),
@@ -696,7 +696,10 @@ function viewEdit(id, kindForNew) {
     if (unknown.length) { status.textContent = `These connections don’t match any entry: ${unknown.join(', ')}.`; status.className = 'form-status error'; return; }
     const entry = {
       kind: kindSel.value, name: String(f.get('name')).trim(), summary: String(f.get('summary') || ''), body: String(f.get('body') || ''), secret: gm ? String(f.get('secret') || '') : existing?.secret || '', visibility: gm ? visSel.value : existing?.visibility || 'all',
-      fields: Object.fromEntries([...Object.entries(e.fields).filter(([k, v]) => v && k !== 'say' && k !== 'aka' && k !== 'music' && kindFields(kindSel.value).some(([fk]) => fk === k)), ['say', cleanSay(f.get('say'))], ['aka', cleanAka(f.get('aka'), f.get('name'))], ['music', cleanMusic(f.get('music'))], ['image_alt', e.fields.image ? String(e.fields.image_alt || '').replace(/\s+/g, ' ').trim().slice(0, 300) : '']].filter(([, v]) => v)),
+      // Fields the form doesn't show (a shop's menu, haggles and ledger, a hireling's wage, a party page's switch) are kept
+      // as they are; the fields of a kind this entry no longer is are dropped, as before.
+      fields: Object.fromEntries([...Object.entries(existing?.fields || {}).filter(([k, v]) => v && !['say', 'aka', 'music', 'image_alt'].includes(k) && !kindFields(kindSel.value).some(([fk]) => fk === k) && !kindFields(existing.kind).some(([fk]) => fk === k)),
+        ...Object.entries(e.fields).filter(([k, v]) => v && k !== 'say' && k !== 'aka' && k !== 'music' && kindFields(kindSel.value).some(([fk]) => fk === k)), ['say', cleanSay(f.get('say'))], ['aka', cleanAka(f.get('aka'), f.get('name'))], ['music', cleanMusic(f.get('music'))], ['image_alt', e.fields.image ? String(e.fields.image_alt || '').replace(/\s+/g, ' ').trim().slice(0, 300) : '']].filter(([, v]) => v)),
       tags: String(f.get('tags') || '').split(',').map((t) => t.trim()).filter(Boolean), links, parent_id: parentEntry?.id || null, version: existing?.version,
     };
     status.textContent = 'Saving…'; status.className = 'form-status';
