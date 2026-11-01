@@ -523,7 +523,7 @@ to the log at the bottom.
 254. [x] **A tab at the tavern.** Players can put an order on the party's tab; the GM settles the tab from the
     treasury later, in one line.
 255. [x] **Late night at the tavern.** After midnight a tavern's page says it's last orders before it shuts at 2.
-256. [ ] **The NPC's day on their page.** An NPC's page shows their whole day from the routine (morning, afternoon,
+256. [x] **The NPC's day on their page.** An NPC's page shows their whole day from the routine (morning, afternoon,
     evening, night), not just where they are now.
 257. [ ] **Gifts in session prep.** Session prep notes NPCs who've been given something since the last session.
 
@@ -790,3 +790,4 @@ to the log at the bottom.
 - Full browser sweep (277 tests) clean after #222–#253.
 - A tab at the tavern: a tavern's Order row now has "On the tab" beside "Order". The order goes on the party's tab: nothing comes off the sheet now, though its history notes it ("Put 2 × Pale ale on the party's tab at The Bell (8 cp)"), and the tavern's ledger counts it. Everyone sees "The party's tab: 1 sp 2 cp" under the menu, with who had what. GMs get "Settle it from the treasury", which writes one treasury line ("Settled the tab at The Bell (3 orders)") and clears the tab. Printing the menu leaves the tab out. js/tab.js unit tested; the tab option on the order route tested against PGlite.
 - Late night at the tavern: the closing-time line now also shows on taverns that have a menu but no stock. In the last hour before closing it changes: a tavern says "🍺 Last orders: The Bell shuts in 45 min.", a shop "Closing soon: Smithy shuts in 30 min."
+- The NPC's day on their page: under "Now", an NPC's page now shows their whole day from the routine: "Their day: morning Forge · afternoon The Bell · evening The Bell · night home", with places linked. Parts of the day the routine doesn't cover are left out. dayOf in js/routine.js unit tested.

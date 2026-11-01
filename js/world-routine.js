@@ -2,7 +2,7 @@
 // place's page lists who is there now. Read from the clock the GMs move on (Time and light).
 import { el, setKids, toast } from './dom.js';
 import { world, worldEntries, link, findByName, getEntry, patchEntry } from './world-store.js';
-import { whereAt, aboutTown, regularsAt, unreadable, townByHour, rollRoutine } from './routine.js';
+import { whereAt, aboutTown, regularsAt, unreadable, townByHour, rollRoutine, dayOf } from './routine.js';
 import { makeRng, randomSeed } from './rng.js';
 import { isHired } from './hirelings.js';
 import { isGm, previewing } from './api.js';
@@ -27,9 +27,12 @@ export function routineNow(e) {
   const m = now();
   if (m === null) return null;
   const w = whereAt(e.fields.routine, m);
-  if (!w) return el('p', { class: 'routine-now small muted' }, `🕰 ${hhmm(m)}, ${partOfDay(m)}: their routine doesn’t say where they are.`);
+  // The NPC's day: where they are through the day, under where they are now.
+  const day = dayOf(e.fields.routine).filter((x) => x.place);
+  const dayLine = day.length ? el('p', { class: 'routine-day small muted' }, 'Their day: ', day.map((x, i) => { const p = placeOf(x.place); return [i ? ' · ' : '', `${x.label.toLowerCase()} `, p ? link(p) : x.place]; })) : null;
+  if (!w) return [el('p', { class: 'routine-now small muted' }, `🕰 ${hhmm(m)}, ${partOfDay(m)}: their routine doesn’t say where they are.`), dayLine];
   const p = placeOf(w.place);
-  return el('p', { class: 'routine-now small' }, `🕰 Now (${hhmm(m)}, ${partOfDay(m)}): `, p ? link(p) : el('strong', {}, w.place), w.until !== null ? el('span', { class: 'muted' }, ` until ${hhmm(w.until)}`) : null);
+  return [el('p', { class: 'routine-now small' }, `🕰 Now (${hhmm(m)}, ${partOfDay(m)}): `, p ? link(p) : el('strong', {}, w.place), w.until !== null ? el('span', { class: 'muted' }, ` until ${hhmm(w.until)}`) : null), dayLine];
 }
 
 // Who's here now: the NPCs whose routine puts them at this place at the current hour (as the viewer can see them).

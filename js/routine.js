@@ -138,3 +138,6 @@ export function townByHour(npcs, resolve, inside, hours = DAY_HOURS) {
   }
   return { hours, rows: rows.sort((a, b) => a.npc.name.localeCompare(b.npc.name)) };
 }
+
+// The NPC's day: where the routine puts them at each of the day's hours → [{ label, m, place (text, or null) }].
+export const dayOf = (routine, hours = DAY_HOURS) => hours.map((h) => ({ ...h, place: whereAt(routine, h.m)?.place || null }));

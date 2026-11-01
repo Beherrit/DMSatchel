@@ -78,3 +78,9 @@ test('townByHour: who is where through the day', async () => {
   assert.deepEqual(t.hours.map((h) => h.label), ['Morning', 'Afternoon', 'Evening', 'Night']);
   assert.deepEqual(t.rows.map((r) => [r.npc.name, r.cells.map((c) => c?.id || '-').join('')]), [['Bram', 'ffb-']]);
 });
+
+test('dayOf: an NPC’s whole day', async () => {
+  const { dayOf } = await import('../js/routine.js');
+  assert.deepEqual(dayOf('By day: the Forge; evenings and dusk: the Bell; otherwise: home').map((x) => `${x.label}:${x.place}`), ['Morning:the Forge', 'Afternoon:the Forge', 'Evening:the Bell', 'Night:home']);
+  assert.deepEqual(dayOf('Mornings: the market').map((x) => x.place), ['the market', null, null, null]);
+});
