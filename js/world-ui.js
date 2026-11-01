@@ -10,6 +10,7 @@ import { openSignIn } from './signin.js';
 import { stripMarks } from './rich.js';
 import { newLines, playJson } from './play-log.js';
 import { sinceLastCard } from './world-sincelast.js';
+import { routineNow, hereNow } from './world-routine.js';
 import { world, worldEntries, getEntry, loadWorld, byName, kindLabel, kindFields, richInline, link, when, findByName, mentions, richText, contentsNav, notice, nameList } from './world-store.js';
 import { viewMaps, viewMap, pinsFor } from './world-maps.js';
 import { viewStandings, standingWidget } from './world-standings.js';
@@ -386,6 +387,7 @@ function viewEntry(id, tab) {
       e.summary ? el('p', { class: 'lede' }, richInline(e.summary)) : null,
       fieldRows.length ? el('dl', { class: 'traits' }, fieldRows.flatMap(([l, v, type]) => [el('dt', {}, l), el('dd', {}, type === 'long' ? richText(v) : /^https:\/\/\S+$/.test(v) ? el('a', { href: v, target: '_blank', rel: 'noopener' }, /dndbeyond\.com/.test(v) ? 'Open on D&D Beyond ↗' : 'Open link ↗') : el('span', {}, v))])) : null),
     sinceLastCard(e),
+    routineNow(e), hereNow(e),
     e.kind === 'npc' || e.fields?.stats || e.fields?.spells ? statSection(e) : null,
     e.kind === 'clan' ? clanTree(e, rerenderWorld) : null,
     e.kind === 'npc' || e.kind === 'character' ? familySection(e, rerenderWorld) : null,

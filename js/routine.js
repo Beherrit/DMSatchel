@@ -1,0 +1,74 @@
+// Where are they now?: an NPC's day, written the way a GM would ("Mornings: the forge; evenings: the Bell; nights:
+// home", or hours, "8–12: the market"), read against the world's clock (minutes past midnight). The parts of the day
+// match the clock's own (clock.js). Pure.
+
+const DAY = 1440;
+const WORDS = [
+  [/^(the )?dead of night$|^late nights?$|^small hours$/, [[0, 300]]],
+  [/^dawns?$|^sunrise$|^first light$/, [[300, 420]]],
+  [/^mornings?$/, [[420, 660]]],
+  [/^middays?$|^noons?$|^lunch(time)?$/, [[660, 780]]],
+  [/^afternoons?$/, [[780, 1020]]],
+  [/^evenings?$/, [[1020, 1140]]],
+  [/^dusks?$|^sunset$/, [[1140, 1260]]],
+  [/^nights?$|^at night$|^overnight$/, [[1260, DAY], [0, 300]]],
+  [/^(by )?days?$|^daytime$|^working hours$/, [[420, 1020]]],
+  [/^all day$/, [[300, 1260]]],
+];
+const OTHER = /^(otherwise|always|else|the rest of the time|any other time|all other times|other times)$/;
+
+const hour = (h, m, ap) => {
+  let x = Number(h) % 24;
+  if (ap) { x = Number(h) % 12; if (/p/i.test(ap)) x += 12; }
+  return x * 60 + (Number(m) || 0);
+};
+
+// One "when" phrase → ranges [[from, to]] (to may pass midnight: split), or 'other', or null.
+function when(raw) {
+  const w = raw.toLowerCase().replace(/[’']/g, '').replace(/\s+/g, ' ').trim();
+  if (OTHER.test(w)) return 'other';
+  const t = /^(\d{1,2})(?::(\d\d))?\s*(am|pm)?\s*(?:-|–|—|to|till|until)\s*(\d{1,2}|noon|midnight)(?::(\d\d))?\s*(am|pm)?$/.exec(w);
+  if (t) {
+    const from = hour(t[1], t[2], t[3] || (t[6] && Number(t[1]) <= Number(t[4]) ? t[6] : ''));
+    const to = t[4] === 'noon' ? 720 : t[4] === 'midnight' ? DAY : hour(t[4], t[5], t[6]);
+    if (from === to) return [[0, DAY]];
+    return to > from ? [[from, to]] : [[from, DAY], [0, to]];
+  }
+  for (const [re, ranges] of WORDS) if (re.test(w)) return ranges;
+  return null;
+}
+
+// text → [{ label, place, ranges }] in the order written; 'otherwise' lines have ranges 'other'.
+export function parseRoutine(text) {
+  const out = [];
+  for (const part of String(text || '').split(/[;\n]+/)) {
+    const m = /^\s*(.+?)\s*:(?!\d\d)\s*(.+?)\s*\.?\s*$/.exec(part); // the colon that isn't inside a time ("13:30")
+    if (!m) continue;
+    const place = m[2].replace(/\[\[([^\]|]+)(\|[^\]]*)?\]\]/g, '$1').trim();
+    const labels = m[1].split(/\s*(?:,|\band\b|&)\s*/).filter(Boolean);
+    let ranges = [], other = false;
+    for (const l of labels) { const r = when(l); if (r === 'other') other = true; else if (r) ranges.push(...r); }
+    if (other) out.push({ label: m[1].trim(), place, ranges: 'other' });
+    else if (ranges.length && place) out.push({ label: m[1].trim(), place, ranges });
+  }
+  return out;
+}
+
+// Where they are at this minute of the day → { place, label, until } (until: minutes, when this part of the day ends,
+// or null for "otherwise"), or null when the routine doesn't say.
+export function whereAt(text, minutes) {
+  const m = ((Math.round(Number(minutes) || 0) % DAY) + DAY) % DAY;
+  const list = parseRoutine(text);
+  for (const x of list) {
+    if (x.ranges === 'other') continue;
+    const hit = x.ranges.find(([a, b]) => m >= a && m < b);
+    if (hit) {
+      // Run on through touching ranges (night: 21:00–24:00 then 00:00–05:00).
+      let end = hit[1];
+      for (let i = 0; i < 3; i++) { const next = x.ranges.find(([a]) => a === end % DAY && end % DAY !== hit[0]); if (!next) break; end = next[1] + (end >= DAY ? DAY : 0); }
+      return { place: x.place, label: x.label, until: end % DAY };
+    }
+  }
+  const other = list.find((x) => x.ranges === 'other');
+  return other ? { place: other.place, label: other.label, until: null } : null;
+}

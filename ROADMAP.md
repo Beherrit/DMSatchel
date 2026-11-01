@@ -451,7 +451,7 @@ to the log at the bottom.
     rations check.
 213. [x] **A shop's ledger.** Each shop page shows the party's recent trade there (who bought and sold what, for how
     much), from the buy and sell routes.
-214. [ ] **Where are they now?** NPCs can have a day's routine ("Mornings: the forge; evenings: the Bell"); their
+214. [x] **Where are they now?** NPCs can have a day's routine ("Mornings: the forge; evenings: the Bell"); their
     page and their place's page say where they are at the world's current hour.
 215. [ ] **Bounties pay out.** When an NPC with a bounty is marked dead or captured, the GMs are offered the bounty for
     the party treasury, noting who paid it.
@@ -679,3 +679,4 @@ to the log at the bottom.
 - Too heavy for the road: planning a trip from a pin on a scaled map now adds a warning under the rations line when anyone is over their carrying capacity: "Too heavy for the road: Ann carries 503.4 lb (can carry 120 lb)." It uses the same weights and Strength × 15 as the sheets' Heavy packs line, for Forge characters, whose Strength is known. Nothing shows when everyone is within their limit. overloaded and overloadedText in js/weights.js unit tested.
 - A shop's ledger: each shop page now has "The party's trade here (3)" under its counter. It leads with what the party has spent and taken in, then lists the newest trades: "Bo sold Lute for 17 gp 5 sp", "The party sold 2 × Shield for 10 gp". Players buying and selling write to it in the same versioned update that changes the shelf, and the GMs' "Sell the loot" adds its own line. It keeps the last 30 in the shop's fields. Everyone who can see the shop sees it. js/shop-trade.js unit tested; buy and sell tested against PGlite.
 - Fixed while doing it: editing an entry in the form used to drop the fields the form doesn't show. A shop lost its menu, haggles and restock mark, a hireling its wage, and a page its "players can edit" switch, whenever a GM changed something as small as its name. The form now keeps every stored field it doesn't manage. Changing an entry's kind still drops the old kind's own fields, as before.
+- Where are they now?: NPCs have a new "Daily routine" field, written the way a GM would: "Mornings: the Forge; afternoons and evenings: at the Bell; nights: home", or hours ("8-12", "13:30–17:00", "9pm to 2am"), with "Otherwise" for the rest. It's read against the world's clock, using the clock's own parts of the day. The NPC's page says "🕰 Now (15:00, afternoon): The Bell until 19:00", linking the place when the world has it. The place's page lists "Here now (15:00): Bramwell until 19:00, Mags until 17:00". It skips the dead and missing, and shows only NPCs the viewer can see. js/routine.js unit tested.

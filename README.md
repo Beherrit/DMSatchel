@@ -107,6 +107,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Hand it over**: give an item or coin from your character to another party member; both sheets update at once.
 - **Split the loot**: share the party treasury's coin between characters, by shares, straight onto their sheets.
 - **Time and light**: the in-world hour during play and the torches and spells burning down, moved on by the GM and seen by everyone.
+- **Where are they now?**: an NPC's daily routine, read against the world's clock: their page says where they are, and each place lists who's there now.
 - **Quick polls**: anyone asks the table a question with a few choices; everyone votes and sees the tally.
 - **Notices**: GMs post short notices ("No game this Friday") on the front page, shown as a banner until dismissed or expired.
 - **Suggest an edit**: players propose changes to entries they can't edit; GMs see the difference and accept or decline.
