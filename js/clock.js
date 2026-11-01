@@ -46,3 +46,6 @@ export const leftText = (m) => (m >= 60 ? `${Math.floor(m / 60)} h${m % 60 ? ` $
 // spells use nothing. → the word to look for in the inventory, or null.
 export const FUEL = { Torch: 'torch', Candle: 'candle', Lantern: 'oil' };
 export const fuelFor = (light) => FUEL[light] || null;
+
+// Whose torch is it: a light lit from someone's pack is named for them ("Ann’s torch").
+export const lightName = (light, who = '') => (who ? `${String(who).trim()}’s ${String(light).toLowerCase()}` : String(light));

@@ -41,3 +41,8 @@ test('lights from the pack: what each light uses', async () => {
   assert.equal(takeItem('Rope\n2 Flasks of oil', fuelFor('Lantern')).text, 'Rope\n1 Flasks of oil');
   assert.ok(takeItem('Rope', fuelFor('Torch')).error);
 });
+
+test('lightName: whose light it is', async () => {
+  const { lightName } = await import('../js/clock.js');
+  assert.equal(lightName('Torch', 'Ann'), 'Ann’s torch'); assert.equal(lightName('Lantern'), 'Lantern');
+});

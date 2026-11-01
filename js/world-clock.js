@@ -4,7 +4,7 @@
 import { el, toast, setKids } from './dom.js';
 import { api, isGm, isMember } from './api.js';
 import { world, worldEntries } from './world-store.js';
-import { readClock, LIGHTS, STEPS, partOfDay, hhmm, leftText, fuelFor } from './clock.js';
+import { readClock, LIGHTS, STEPS, partOfDay, hhmm, leftText, fuelFor, lightName } from './clock.js';
 import { changePlay } from './sheet-ui.js';
 import { takeItem } from './handover.js';
 import { formatDate, today } from './calendar.js';
@@ -47,7 +47,8 @@ export function clockCard() {
             await changePlay(who, (play) => { const t = takeItem(play.inventory, fuel); if (t.error) throw new Error(`${who.name} has no ${{ oil: 'oil for the lantern', torch: 'torches', candle: 'candles' }[fuel] || fuel}`); play.inventory = t.text; }, name === 'Lantern' ? 'Filled a lantern with a flask of oil' : `Lit a ${name.toLowerCase()}`);
           } catch (err) { toast(err.message, 'bad'); return; }
         }
-        send({ add_light: { name, minutes: Number(mins) } }, `${name} lit${fuel && who ? ` from ${who.name}’s pack` : ''}`);
+        const called = fuel && who ? lightName(name, who.name) : name;
+        send({ add_light: { name: called, minutes: Number(mins) } }, `${called} lit`);
       };
       tools = el('div', { class: 'clock-tools' },
         el('div', { class: 'btnrow' }, STEPS.map(([m, label]) => el('button', { class: 'btn small', type: 'button', onclick: () => send({ advance: m }) }, label)),
