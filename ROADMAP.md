@@ -396,6 +396,14 @@ to the log at the bottom.
     broke, before the session starts.
 185. [x] **Sell the loot.** GMs sell treasury items to a shop at its buy-back rate in one go; the coin goes into the
     treasury and the items onto the shop's shelf.
+186. [ ] **Enough food for the road?** Planning a trip on a map says how many days of rations each character needs
+    for it, and who's short.
+187. [ ] **Weather slows the road.** Moving the calendar on after travel takes the weather where the party is into
+    account: heavy rain, snow or a storm add days.
+188. [ ] **Rumours over supper.** A night at an inn brings a rumour going around that town, shown to the GM to pass
+    on (or keep).
+189. [ ] **A shopping list.** Players note what they mean to buy; when they're at a shop that stocks it, the buy
+    panel offers it first, and GMs see the lists in prep.
 
 ## Ideas parking lot
 
