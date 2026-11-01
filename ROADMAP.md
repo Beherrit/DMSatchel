@@ -475,7 +475,7 @@ to the log at the bottom.
 225. [x] **Carrying for the party.** Treasury items held by a character show on that character's sheet.
 226. [x] **The regulars.** A tavern's or shop's page lists the NPCs whose routine brings them there at some hour,
     and when.
-227. [ ] **Who's here, on the map.** A map pin's card says who is at that place right now, from their routines.
+227. [x] **Who's here, on the map.** A map pin's card says who is at that place right now, from their routines.
 228. [ ] **Wages owed.** When the treasury can't cover the hirelings' wages, what's unpaid is noted as owed to each,
     and shows on the payroll until it's paid.
 229. [ ] **Divide the loot.** GMs give out the treasury's items in one go, choosing who gets each; each lands on that
@@ -714,3 +714,4 @@ to the log at the bottom.
 - Coming up for you: a player's own character page now has a "Coming up" card for the next seven in-world days: "🎉 Bridge Day · in 2 days", "🎂 Your birthday: Ann turns 30 · in 3 days", "⏳ Deadline: Ring the Bell · in 6 days". Quests count when they're linked to the character, either way round, or all the party's active quests when none are; finished quests don't count. Only the owner sees it, and only when something's coming. comingUp in js/coming-up.js unit tested.
 - Carrying for the party: a character's sheet now shows the treasury items whose holder is that character, under the inventory: "Carrying for the party: 2 × Tent, Rope (treasury)", matched by name whatever the case. The sheet reads the treasury at most once a minute and shows nothing when there's nothing held. heldBy in js/party-glance.js unit tested.
 - The regulars: a tavern's or shop's page (any single place) now lists everyone whose routine brings them there at some hour, and when: "Regulars: Bramwell (afternoons and evenings), Mags (9-17)". It sits under "Here now", so the GM can see who might be in later as well as now. As everywhere, it shows only NPCs the viewer can see, and skips the dead and missing. regularsAt in js/routine.js unit tested.
+- Who's here, on the map: clicking a place's pin now shows who's there at the world's current hour, under its summary: "🕰 Here now (08:00): Bramwell at The Forge, Wren". A town's pin counts everyone inside it, naming the spot. It's the same routine reading as the place pages (aroundNow), and nothing shows when nobody is about.

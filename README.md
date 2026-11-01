@@ -112,6 +112,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Where are they now?**: an NPC's daily routine, read against the world's clock: their page says where they are, and each place lists who's there now.
 - **Who's about town**: a settlement's page lists the NPCs inside it right now, and where.
 - **The regulars**: a tavern's or shop's page lists who comes in at some hour, and when.
+- **Who's here, on the map**: a place's map pin says who is there right now, from their routines.
 - **Who's around for the scene**: session prep lists the NPCs whose routine puts them where the party is right now.
 - **Quick polls**: anyone asks the table a question with a few choices; everyone votes and sees the tally.
 - **Notices**: GMs post short notices ("No game this Friday") on the front page, shown as a banner until dismissed or expired.
