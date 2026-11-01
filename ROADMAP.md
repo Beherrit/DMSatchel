@@ -466,6 +466,13 @@ to the log at the bottom.
     character's inventory, with a line in their history.
 221. [x] **Order from the menu.** A player orders food or drink from a tavern's menu, paid from their sheet, noted in
     their history and the tavern's ledger.
+222. [ ] **Who's around for the scene.** Session prep lists the NPCs whose routine puts them where the party is right
+    now.
+223. [ ] **Coming up for you.** A player's character page lists the next week of in-world days that matter to them:
+    their birthday, their quests' deadlines, festivals.
+224. [ ] **Tidy the pack.** One button on a sheet merges duplicate inventory lines ("Rope" and "2 Rope (from the
+    Smithy)" become "3 Rope").
+225. [ ] **Carrying for the party.** Treasury items held by a character show on that character's sheet.
 
 ## Ideas parking lot
 
