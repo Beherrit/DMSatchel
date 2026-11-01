@@ -491,7 +491,7 @@ to the log at the bottom.
     places in their town (a smith at the forge by day and the tavern at night).
 235. [x] **Minding the shop.** A shop's page says whether its owner is behind the counter right now, or where they are
     instead.
-236. [ ] **Gifts for NPCs.** A player can give an item or coin from their sheet to an NPC; the NPC's page lists what
+236. [x] **Gifts for NPCs.** A player can give an item or coin from their sheet to an NPC; the NPC's page lists what
     they've been given, and by whom.
 237. [ ] **Ask the shopkeeper.** A player can ask a shop for something it doesn't stock; the GMs see the asks on the
     shop's page and can add the item to the shelf.
@@ -738,3 +738,4 @@ to the log at the bottom.
 - Whose torch is it: a light lit from someone's pack is now named for them on the clock, "🔥 Ann's torch", in the toast, the list of lights and the "went out" notice, so everyone can see whose light is burning down. Lights lit from nobody's pack keep their plain names. lightName in js/clock.js unit tested.
 - Roll a routine: the Daily routine field on an NPC's form has a Roll button. It writes a likely day from the role typed so far and the places in the NPC's town (or the world's, when they aren't placed in one). A smith gets "By day: Anvil & Tongs; evenings and dusk: The Bell; otherwise: home"; an innkeeper keeps their tavern from afternoon into the night; a priest goes to the temple, a guard to the castle, a farmer to the fields, and a cutpurse to the market by day and the tavern by night. Every rolled line reads back cleanly in the live preview. rollRoutine in js/routine.js unit tested against the parser.
 - Minding the shop: when a shop's or tavern's Owner field names an NPC with a daily routine, the page now says whether they're behind the counter at the world's current hour: "🛎 Bramwell is here, behind the counter until 17:00." Otherwise it says where they are instead: "🛎 Bramwell is out: The Bell until 21:00." Nothing shows when the owner isn't an NPC with a routine, or is dead or missing.
+- Gifts for NPCs: an NPC's page now has a Gifts section with "Give them something…". It's for members with a character (players: their own; GMs: anyone). It gives an item and/or coin from that character's sheet, with an optional "what for". The server checks the player can see the NPC and has the coin or item, then takes it from the sheet ("Gave 2 × Potion of healing and 5 gp to Mother Ide (to win her over)" in its history, counted for Since last session). The NPC remembers the gift: "2 × Potion of healing and 5 gp from Ann (to win her over)". The last 30 are kept, and an edit to the NPC keeps them. js/gifts.js unit tested; the gift route tested against PGlite.

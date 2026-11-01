@@ -41,6 +41,7 @@ import { buyFrom, sellTo, haggleFor, withHaggle, setHaggle } from '../js/purchas
 import { addLog } from '../js/play-log.js';
 import { shiftDebt, balanceWith } from '../js/debts.js';
 import { addTrade } from '../js/shop-trade.js';
+import { addGift, giftWhat } from '../js/gifts.js';
 import { shopOpen } from '../js/shop-hours.js';
 import { shopStanding, sellWithStanding } from '../js/standing-price.js';
 import { coinText, GOODS } from '../js/economy.js';
@@ -66,7 +67,7 @@ function clean(input, custom = {}) {
   if (!isKind(e.kind)) return { error: 'Pick what kind of entry this is.' };
   const name = clip(e.name, LIMITS.name).trim();
   if (!name) return { error: 'Give the entry a name.' };
-  const allowed = new Set([...KINDS[e.kind].fields.map(([k]) => k), ...customKeys(e.kind, custom), 'say', 'aka', 'music', 'image_alt', 'party_edit', 'menu', 'hired', 'wage', 'restocked', 'haggle', 'trade', 'bounty_paid', 'owed']);
+  const allowed = new Set([...KINDS[e.kind].fields.map(([k]) => k), ...customKeys(e.kind, custom), 'say', 'aka', 'music', 'image_alt', 'party_edit', 'menu', 'hired', 'wage', 'restocked', 'haggle', 'trade', 'bounty_paid', 'owed', 'gifts']);
   const fields = {};
   for (const [k, v] of Object.entries(e.fields || {})) if (allowed.has(k) && v != null && String(v).trim() && (k !== 'image' || isImageRef(String(v)))) fields[k] = clip(v, ['stock', 'sheet', 'play', 'spread', 'known', 'attitudes', 'objectives', 'attendance', 'enc', 'goals', 'wishes', 'gallery', 'menu'].includes(k) ? LIMITS.body : LIMITS.field);
   // Pictures in the gallery must be real image addresses.
@@ -513,6 +514,37 @@ export default route({
         await record(row.id, req.gm.id, 'give', null);
       }
       return send(res, 200, { entries: [shape(await loadOne(from.id, req.world.id), req), shape(await loadOne(to.id, req.world.id), req)], moved, cp });
+    }
+    // Gifts for NPCs: a character gives an NPC (one the player can see) an item and/or coin from their sheet. The NPC
+    // keeps a list of gifts (fields.gifts) and the sheet a line in its history.
+    if (req.body.gift) {
+      const g = req.body.gift;
+      const from = await loadOne(String(g.from || '').slice(0, 40), req.world.id), to = await loadOne(String(g.to || '').slice(0, 40), req.world.id);
+      if (!from || from.deleted || from.kind !== 'character') return fail(res, 404, 'Pick a character.');
+      if (!to || to.deleted || to.kind !== 'npc' || !visibleTo(to, req)) return fail(res, 404, 'Pick someone in this world.');
+      if (!req.isGmHere && from.owner_id !== req.gm.id) return fail(res, 403, 'You can only give from your own character.');
+      let p = {}; try { p = JSON.parse(from.fields?.play || '{}') || {}; } catch { p = {}; }
+      if (!Number.isFinite(p.cp)) p.cp = Math.max(0, Math.round(Number(g.base?.cp) || 0));
+      if (p.inventory === undefined) p.inventory = clip(g.base?.inventory, 15000);
+      const cp = Math.max(0, Math.min(1e12, Math.round(Number(g.cp) || 0)));
+      if (!cp && !String(g.item || '').trim()) return fail(res, 400, 'Choose an item or some coin to give.');
+      if (cp > p.cp) return fail(res, 400, `${from.name} doesn’t have that much coin.`);
+      let moved = null;
+      if (String(g.item || '').trim()) {
+        const t = takeItem(p.inventory, clip(g.item, 200), Number(g.qty) || 1);
+        if (t.error) return fail(res, 400, t.error);
+        p.inventory = t.text; moved = t;
+      }
+      p.cp -= cp;
+      const note = clip(g.note, 200).trim();
+      const gift = { by: from.name, item: moved?.name || '', qty: moved?.qty || 1, cp, note };
+      addLog(p, `Gave ${giftWhat(gift)} to ${to.name}${note ? ` (${note})` : ''}`, req.gm.name, undefined, { cp: -cp, items: moved ? [{ name: moved.name, qty: -moved.qty }] : [] });
+      await sql`UPDATE entries SET fields = fields || jsonb_build_object('gifts', ${addGift(to.fields?.gifts, gift)}::text), updated_by = ${req.gm.id}, updated_at = now(), version = version + 1
+        WHERE id = ${to.id} AND world_id = ${req.world.id}`;
+      await sql`UPDATE entries SET fields = fields || jsonb_build_object('play', ${JSON.stringify(p)}::text), updated_by = ${req.gm.id}, updated_at = now(), version = version + 1
+        WHERE id = ${from.id} AND world_id = ${req.world.id}`;
+      await record(to.id, req.gm.id, 'gift', null);
+      return send(res, 200, { entries: [shape(await loadOne(from.id, req.world.id), req), shape(await loadOne(to.id, req.world.id), req)], gift });
     }
     // Debts between friends: lend coin to another character, pay it back, or forgive it. Both sheets keep the
     // balance (see debts.js) and a history line; the coin moves with it.

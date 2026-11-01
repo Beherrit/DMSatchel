@@ -188,6 +188,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Into the stash**: players put items or coin from their sheet into the party treasury, or take them out, noted in the ledger and on the sheet.
 - **Carrying for the party**: treasury items a character holds show on their sheet.
 - **Everything the party carries**: one printable list of all the party's gear and the treasury's, with who has each.
+- **Gifts for NPCs**: players give an NPC an item or coin from their sheet; the NPC's page remembers who gave what.
 - **Debts between friends**: lend another character coin; both sheets show what's owed until it's paid back or forgiven.
 - **Debts at a glance**: the party page and the GM's party sheet list who owes whom.
 - **Make camp and short rests**: a long rest anywhere, eight hours on the clock, and maybe something from the area's encounter table in the night; or an hour's short rest that gives warlocks their pact slots back.
