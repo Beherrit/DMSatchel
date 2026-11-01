@@ -473,7 +473,7 @@ to the log at the bottom.
 224. [x] **Tidy the pack.** One button on a sheet merges duplicate inventory lines ("Rope" and "2 Rope (from the
     Smithy)" become "3 Rope").
 225. [x] **Carrying for the party.** Treasury items held by a character show on that character's sheet.
-226. [ ] **The regulars.** A tavern's or shop's page lists the NPCs whose routine brings them there at some hour,
+226. [x] **The regulars.** A tavern's or shop's page lists the NPCs whose routine brings them there at some hour,
     and when.
 227. [ ] **Who's here, on the map.** A map pin's card says who is at that place right now, from their routines.
 228. [ ] **Wages owed.** When the treasury can't cover the hirelings' wages, what's unpaid is noted as owed to each,
@@ -713,3 +713,4 @@ to the log at the bottom.
 - Who's around for the scene: session prep's "Where the party is" card now opens its People column with "Around now (08:00)": the NPCs whose daily routine puts them where the party is, or anywhere inside it, at the world's current hour ("Bramwell at The Forge until 11:00; Wren until 11:00"). It's the same reading as a settlement's About town, now shared as aroundNow. Nothing shows when nobody's routine puts them there.
 - Coming up for you: a player's own character page now has a "Coming up" card for the next seven in-world days: "🎉 Bridge Day · in 2 days", "🎂 Your birthday: Ann turns 30 · in 3 days", "⏳ Deadline: Ring the Bell · in 6 days". Quests count when they're linked to the character, either way round, or all the party's active quests when none are; finished quests don't count. Only the owner sees it, and only when something's coming. comingUp in js/coming-up.js unit tested.
 - Carrying for the party: a character's sheet now shows the treasury items whose holder is that character, under the inventory: "Carrying for the party: 2 × Tent, Rope (treasury)", matched by name whatever the case. The sheet reads the treasury at most once a minute and shows nothing when there's nothing held. heldBy in js/party-glance.js unit tested.
+- The regulars: a tavern's or shop's page (any single place) now lists everyone whose routine brings them there at some hour, and when: "Regulars: Bramwell (afternoons and evenings), Mags (9-17)". It sits under "Here now", so the GM can see who might be in later as well as now. As everywhere, it shows only NPCs the viewer can see, and skips the dead and missing. regularsAt in js/routine.js unit tested.

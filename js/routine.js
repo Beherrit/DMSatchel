@@ -84,3 +84,14 @@ export function aboutTown(npcs, minutes, resolve, inside) {
   }
   return out.sort((a, b) => a.npc.name.localeCompare(b.npc.name));
 }
+
+// The regulars: NPCs whose routine brings them to a place at some hour. npcs: [{ id, name, routine }];
+// isHere(name) → whether a routine's place is this one. → [{ npc, when: ['Afternoons and evenings', …] }] by name.
+export function regularsAt(npcs, isHere) {
+  const out = [];
+  for (const n of npcs || []) {
+    const when = parseRoutine(n.routine).filter((x) => isHere(x.place)).map((x) => x.label);
+    if (when.length) out.push({ npc: n, when });
+  }
+  return out.sort((a, b) => a.npc.name.localeCompare(b.npc.name));
+}

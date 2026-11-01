@@ -2,7 +2,7 @@
 // place's page lists who is there now. Read from the clock the GMs move on (Time and light).
 import { el } from './dom.js';
 import { world, worldEntries, link, findByName, getEntry } from './world-store.js';
-import { whereAt, aboutTown } from './routine.js';
+import { whereAt, aboutTown, regularsAt } from './routine.js';
 import { hhmm, partOfDay } from './clock.js';
 
 const now = () => world.info?.clock?.minutes ?? null;
@@ -53,4 +53,13 @@ function aboutTownLine(town) {
   const { m, list } = a;
   return el('p', { class: 'routine-here small' }, `🕰 About ${town.kind === 'settlement' ? 'town' : 'here'} now (${hhmm(m)}): `,
     list.map(({ npc, place, until }, i) => [i ? '; ' : '', link(npc.entry), place.id === town.id ? '' : [' at ', link(place)], until !== null ? el('span', { class: 'muted' }, ` until ${hhmm(until)}`) : null]));
+}
+
+// The regulars: for a single place (a tavern, a shop), the NPCs whose routine brings them here at some hour, and when.
+export function regularsLine(place) {
+  if (place.kind !== 'location') return null;
+  const npcs = worldEntries().filter((x) => x.kind === 'npc' && x.fields?.routine && !['Dead', 'Missing'].includes(x.fields?.status)).map((x) => ({ id: x.id, name: x.name, routine: x.fields.routine, entry: x }));
+  const list = regularsAt(npcs, (name) => placeOf(name)?.id === place.id);
+  if (!list.length) return null;
+  return el('p', { class: 'routine-regulars small' }, el('strong', {}, 'Regulars: '), list.map(({ npc, when }, i) => [i ? ', ' : '', link(npc.entry), el('span', { class: 'muted' }, ` (${when.join(', ').toLowerCase()})`)]));
 }

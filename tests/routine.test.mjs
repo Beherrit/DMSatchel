@@ -36,3 +36,11 @@ test('aboutTown: NPCs somewhere inside a town now', async () => {
   assert.deepEqual(aboutTown(npcs, 18 * 60, resolve, inside).map((x) => `${x.npc.name}@${x.place.id}`), ['Bram@b']);
   assert.deepEqual(aboutTown([], 0, resolve, inside), []);
 });
+
+test('regularsAt: who comes here, and when', async () => {
+  const { regularsAt } = await import('../js/routine.js');
+  const npcs = [{ id: 1, name: 'Bram', routine: 'Mornings: the Forge; afternoons and evenings: the Bell' }, { id: 2, name: 'Ada', routine: 'Always: the Mill' }, { id: 3, name: 'Cole', routine: 'Dawn: The Bell; nights: the Bell' }];
+  const isBell = (p) => /^(the )?bell$/i.test(p.trim());
+  assert.deepEqual(regularsAt(npcs, isBell).map((x) => `${x.npc.name}: ${x.when.join(', ')}`), ['Bram: afternoons and evenings', 'Cole: Dawn, nights']);
+  assert.deepEqual(regularsAt([], isBell), []);
+});
