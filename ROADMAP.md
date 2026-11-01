@@ -526,7 +526,7 @@ to the log at the bottom.
 256. [x] **The NPC's day on their page.** An NPC's page shows their whole day from the routine (morning, afternoon,
     evening, night), not just where they are now.
 257. [x] **Gifts in session prep.** Session prep notes NPCs who've been given something since the last session.
-258. [ ] **Tabs waiting.** Session prep's "Waiting on you" lists taverns with an unsettled party tab.
+258. [x] **Tabs waiting.** Session prep's "Waiting on you" lists taverns with an unsettled party tab.
 259. [ ] **Pay your own tab.** A player can settle their own orders on a tab from their sheet's coin.
 260. [ ] **Who's in the back room.** A place inside another (a back room, a cellar) shows on its parent's page in the
     "Here now" line, so the tavern says who's in its back room.
@@ -797,3 +797,4 @@ to the log at the bottom.
 - Late night at the tavern: the closing-time line now also shows on taverns that have a menu but no stock. In the last hour before closing it changes: a tavern says "🍺 Last orders: The Bell shuts in 45 min.", a shop "Closing soon: Smithy shuts in 30 min."
 - The NPC's day on their page: under "Now", an NPC's page now shows their whole day from the routine: "Their day: morning Forge · afternoon The Bell · evening The Bell · night home", with places linked. Parts of the day the routine doesn't cover are left out. dayOf in js/routine.js unit tested.
 - Gifts in session prep: session prep now has "💝 Gifts since Session 4", listing NPCs given something since the last session was logged: "Mother Ide was given Map by Ann (for the marsh) · something they wanted". It's a reminder for how they'll greet the party next. giftsSince in js/gifts.js unit tested.
+- Tabs waiting: session prep's "Waiting on you" now lists taverns where the party has an unsettled tab: "The party's tab at The Bell stands at 8 cp (1 order): settle it on its page". waitingOnGm in js/waiting.js unit tested.

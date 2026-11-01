@@ -16,5 +16,7 @@ test('waitingOnGm: asks, wages owed, unpaid bounties', () => {
   assert.deepEqual(w.owed.map((x) => `${x.entry.name} ${x.cp}`), ['Gil 60']);
   assert.deepEqual(w.bounties.map((x) => `${x.entry.name} ${x.cp}`), ['Black Jory 50000']);
   assert.equal(w.count, 3);
+  const t = waitingOnGm([{ kind: 'location', name: 'The Bell', fields: { tab: JSON.stringify([{ who: 'Ann', item: 'Ale', qty: 2, cp: 8 }, { who: 'Bo', item: 'Pie', cp: 12 }]) } }]);
+  assert.deepEqual(t.tabs.map((x) => `${x.shop.name} ${x.cp} ${x.orders}`), ['The Bell 20 2']); assert.equal(t.count, 1);
   assert.equal(waitingOnGm([]).count, 0);
 });

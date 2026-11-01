@@ -59,6 +59,7 @@ function waitingCard(rerender) {
   return el('section', { class: 'card prep-card waiting' }, el('h3', {}, '⏳ Waiting on you'),
     el('ul', { class: 'plain' },
       w.asks.map((a) => el('li', {}, link(a.shop), ` was asked for ${a.items.join(', ')}`)),
+      w.tabs.map((t) => el('li', {}, 'The party’s tab at ', link(t.shop), ` stands at ${coinText(t.cp)} (${t.orders} order${t.orders === 1 ? '' : 's'}): settle it on its page`)),
       w.owed.map((o) => el('li', {}, link(o.entry), ` is owed ${coinText(o.cp)} in wages `, el('a', { class: 'small', href: '#world/party' }, '(pay it on the party page)'))),
       w.bounties.map((b) => el('li', {}, `The bounty on `, link(b.entry), ` (${coinText(b.cp)}) hasn’t been paid `, el('button', { class: 'btn small', type: 'button', onclick: () => offerBounty({ fields: {} }, world.entries.get(b.entry.id) || b.entry) }, 'Claim it…')))));
 }
