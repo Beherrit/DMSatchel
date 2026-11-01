@@ -33,3 +33,10 @@ test('givenBy: the gifts a character has given', async () => {
   const list = givenBy('Ann', [{ entry: ide, gifts: addGift(addGift('', { by: 'Ann', item: 'Map', at: 't1' }), { by: 'Bo', item: 'Rope', at: 't2' }) }, { entry: jory, gifts: addGift('', { by: 'ann', cp: 500, at: 't3' }) }]);
   assert.deepEqual(list.map((x) => `${x.npc.name}:${x.item || x.cp}`), ['Jory:500', 'Ide:Map']);
 });
+
+test('giftsSince: gifts given since the last session', async () => {
+  const { giftsSince, addGift } = await import('../js/gifts.js');
+  const ide = { name: 'Ide' };
+  const list = giftsSince([{ entry: ide, gifts: addGift(addGift('', { by: 'Ann', item: 'Map', at: '2026-01-01T00:00:00Z' }), { by: 'Bo', item: 'Rope', at: '2026-03-01T00:00:00Z' }) }], '2026-02-01T00:00:00Z');
+  assert.deepEqual(list.map((x) => `${x.by}:${x.item}`), ['Bo:Rope']);
+});

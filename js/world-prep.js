@@ -36,11 +36,22 @@ import { shoppingPrepCard } from './world-shopping.js';
 import { partyRows, worries } from './party-glance.js';
 import { aroundNow } from './world-routine.js';
 import { waitingOnGm } from './waiting.js';
+import { giftsSince, giftWhat } from './gifts.js';
+import { lastSession } from './recap.js';
 import { coinText } from './economy.js';
 import { offerBounty } from './world-bounty.js';
 import { hhmm } from './clock.js';
 
 // Before the session: who's hurt, hungry, exhausted or broke (from the characters' sheets).
+// Gifts in session prep: NPCs who've been given something since the last session (they may remember it).
+function giftsCard() {
+  const last = lastSession(worldEntries());
+  const list = giftsSince(worldEntries().filter((x) => x.kind === 'npc' && x.fields?.gifts).map((x) => ({ entry: x, gifts: x.fields.gifts })), last?.created_at ? new Date(last.created_at).toISOString() : null);
+  if (!list.length) return null;
+  return el('section', { class: 'card prep-card prep-gifts' }, el('h3', {}, `💝 Gifts since ${last ? last.name : 'the start'}`),
+    el('ul', { class: 'plain' }, list.slice(0, 10).map((g) => el('li', {}, link(g.npc), ` was given ${giftWhat(g)} by ${g.by}`, g.note ? el('span', { class: 'muted' }, ` (${g.note})`) : null, g.wanted ? el('span', { class: 'small' }, ' · something they wanted') : null))));
+}
+
 // Waiting on the GM: asks in shops, wages owed, unpaid bounties on the dead or captured.
 function waitingCard(rerender) {
   const w = waitingOnGm(worldEntries());
@@ -295,6 +306,6 @@ export async function viewPrep(rerender) {
       el('button', { class: 'btn small', type: 'button', onclick: async () => { await letRumorsSpread(); rerender(); } }, 'Let rumors spread'),
       el('a', { class: 'btn small', href: '#world/calendar' }, 'Move time on')),
     el('div', { class: 'prep-columns' },
-      el('div', { class: 'prep-main' }, remindersCard(prep), waitingCard(rerender), worriesCard(), nextMovesCard(rerender), shoppingPrepCard(), readingPrepCard(), lastTime(), betweenSection(table), whereSection(prep, rerender), card('Read-aloud', ...readAloudList(prep)), secretsCard(prep, next), turnUpSection(prep), questsSection(), scratchPad(prep)),
+      el('div', { class: 'prep-main' }, remindersCard(prep), waitingCard(rerender), worriesCard(), giftsCard(), nextMovesCard(rerender), shoppingPrepCard(), readingPrepCard(), lastTime(), betweenSection(table), whereSection(prep, rerender), card('Read-aloud', ...readAloudList(prep)), secretsCard(prep, next), turnUpSection(prep), questsSection(), scratchPad(prep)),
       el('div', { class: 'prep-side' }, world.info?.rsvp ? card('Who’s coming', rsvpCard({ compact: true })) : null, checklistCard(prep, next), clockCard(), partySection(), spotlightSection(), clocksSection(), calendarSection(), threadsSection(gmThreads, table))));
 }

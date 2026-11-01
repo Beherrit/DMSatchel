@@ -525,7 +525,7 @@ to the log at the bottom.
 255. [x] **Late night at the tavern.** After midnight a tavern's page says it's last orders before it shuts at 2.
 256. [x] **The NPC's day on their page.** An NPC's page shows their whole day from the routine (morning, afternoon,
     evening, night), not just where they are now.
-257. [ ] **Gifts in session prep.** Session prep notes NPCs who've been given something since the last session.
+257. [x] **Gifts in session prep.** Session prep notes NPCs who've been given something since the last session.
 
 ## Ideas parking lot
 
@@ -791,3 +791,4 @@ to the log at the bottom.
 - A tab at the tavern: a tavern's Order row now has "On the tab" beside "Order". The order goes on the party's tab: nothing comes off the sheet now, though its history notes it ("Put 2 × Pale ale on the party's tab at The Bell (8 cp)"), and the tavern's ledger counts it. Everyone sees "The party's tab: 1 sp 2 cp" under the menu, with who had what. GMs get "Settle it from the treasury", which writes one treasury line ("Settled the tab at The Bell (3 orders)") and clears the tab. Printing the menu leaves the tab out. js/tab.js unit tested; the tab option on the order route tested against PGlite.
 - Late night at the tavern: the closing-time line now also shows on taverns that have a menu but no stock. In the last hour before closing it changes: a tavern says "🍺 Last orders: The Bell shuts in 45 min.", a shop "Closing soon: Smithy shuts in 30 min."
 - The NPC's day on their page: under "Now", an NPC's page now shows their whole day from the routine: "Their day: morning Forge · afternoon The Bell · evening The Bell · night home", with places linked. Parts of the day the routine doesn't cover are left out. dayOf in js/routine.js unit tested.
+- Gifts in session prep: session prep now has "💝 Gifts since Session 4", listing NPCs given something since the last session was logged: "Mother Ide was given Map by Ann (for the marsh) · something they wanted". It's a reminder for how they'll greet the party next. giftsSince in js/gifts.js unit tested.

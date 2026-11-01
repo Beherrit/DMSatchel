@@ -36,3 +36,11 @@ export function givenBy(name, npcs) {
   for (const n of npcs || []) for (const g of readGifts(n.gifts)) if (g.by.trim().toLowerCase() === key) out.push({ npc: n.entry, ...g });
   return out.sort((a, b) => String(b.at).localeCompare(String(a.at)));
 }
+
+// Gifts in session prep: gifts given to NPCs after a time (ISO). npcs: [{ entry, gifts json }] → [{ npc, …gift }],
+// newest first.
+export function giftsSince(npcs, since) {
+  const out = [];
+  for (const n of npcs || []) for (const g of readGifts(n.gifts)) if (!since || String(g.at) > String(since)) out.push({ npc: n.entry, ...g });
+  return out.sort((a, b) => String(b.at).localeCompare(String(a.at)));
+}
