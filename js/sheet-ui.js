@@ -253,6 +253,56 @@ export function sheetSection(e, rerender) {
     document.body.append(d); d.showModal();
   }
 
+  // Into the stash: put an item or coin from this sheet into the party treasury, or take one out (server does both sides).
+  async function stashDialog() {
+    let treasury = { cp: 0, items: [] };
+    try { const t = await api('party'); treasury = { cp: t.cp || 0, items: t.items || [] }; } catch (err) { toast(err.message, 'bad'); return; }
+    const put = el('input', { type: 'radio', name: 'st-dir', id: 'st-in', value: 'in', checked: true });
+    const take = el('input', { type: 'radio', name: 'st-dir', id: 'st-out', value: 'out' });
+    const item = el('select', { id: 'st-item' });
+    const qty = el('input', { type: 'number', id: 'st-qty', min: 1, value: 1 });
+    const coin = el('input', { type: 'text', id: 'st-coin', placeholder: 'e.g. 10 gp' });
+    const coinLabel = el('label', { for: 'st-coin' }, 'Coin');
+    const status = el('p', { class: 'form-status', role: 'status' });
+    const go = el('button', { class: 'btn primary', type: 'submit' }, 'Put it in');
+    const field = (id, label, input) => el('div', { class: 'field' }, el('label', { for: id }, label), input);
+    const syncQty = () => { const n = Number(item.selectedOptions[0]?.dataset.qty) || 1; qty.max = n; qty.value = Math.min(Number(qty.value) || 1, n); qty.closest('.field').hidden = !item.value || n < 2; };
+    const fill = () => {
+      const list = take.checked ? treasury.items.map((x) => ({ name: x.item, qty: x.qty })) : inventoryLines(play.inventory);
+      setKids(item, el('option', { value: '' }, 'No item, just coin'), list.map((x) => el('option', { value: x.name, 'data-qty': x.qty }, x.qty > 1 ? `${x.name} (${x.qty})` : x.name)));
+      coinLabel.textContent = take.checked ? `Coin (the treasury has ${coinText(treasury.cp)})` : `Coin (you have ${coinText(play.cp)})`;
+      go.textContent = take.checked ? 'Take it out' : 'Put it in';
+      syncQty();
+    };
+    item.addEventListener('change', syncQty);
+    for (const r of [put, take]) r.addEventListener('change', fill);
+    const d = el('dialog', { class: 'dialog', 'aria-labelledby': 'st-title' }, el('form', { class: 'dialog-body', method: 'dialog' },
+      el('h2', { id: 'st-title' }, `${e.name} and the party treasury`),
+      el('fieldset', { class: 'plain-fieldset' }, el('legend', {}, 'Which way'),
+        el('label', { class: 'check', for: 'st-in' }, put, ' Put something in'),
+        el('label', { class: 'check', for: 'st-out' }, take, ' Take something out')),
+      field('st-item', 'Item', item), field('st-qty', 'How many', qty), el('div', { class: 'field' }, coinLabel, coin),
+      el('p', { class: 'muted small' }, 'The treasury’s ledger and this sheet’s history both note it.'), status,
+      el('div', { class: 'btnrow' }, go, el('button', { class: 'btn', type: 'button', onclick: () => d.close() }, 'Cancel'))));
+    fill();
+    d.querySelector('form').addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      const cp = coin.value.trim() ? parseCoins(coin.value) : 0;
+      if (coin.value.trim() && !cp) { status.textContent = 'Write coins like “15 gp” or “2 sp”.'; status.className = 'form-status error'; return; }
+      const cur = defaults(world.entries.get(e.id) || e, ch);
+      go.disabled = true;
+      try {
+        const r = await api('entries', { method: 'PATCH', body: { stash: { id: e.id, dir: take.checked ? 'out' : 'in', item: item.value, qty: Number(qty.value) || 1, cp, base: { cp: cur.cp, inventory: cur.inventory } } } });
+        world.entries.set(r.entry.id, r.entry);
+        const what = [r.item ? `${r.qty > 1 ? `${r.qty} ` : ''}${r.item}` : '', r.cp ? coinText(r.cp) : ''].filter(Boolean).join(' and ');
+        toast(r.dir === 'out' ? `Took ${what} from the treasury` : `Put ${what} in the treasury`);
+        d.close(); rerender();
+      } catch (err) { status.textContent = err.message; status.className = 'form-status error'; go.disabled = false; }
+    });
+    d.addEventListener('close', () => d.remove());
+    document.body.append(d); d.showModal();
+  }
+
   function purse() {
     const amt = el('input', { type: 'text', class: 'coin-amt', placeholder: 'e.g. 15 gp', 'aria-label': 'Coins' });
     const move = (sign) => { const cp = parseCoins(amt.value); if (!cp) { toast('Write coins like “15 gp” or “2 sp”'); return; } play.cp += sign * cp; commit(); };
@@ -334,7 +384,7 @@ export function sheetSection(e, rerender) {
         el('span', { class: 'ab-name' }, k), el('span', { class: 'ab-mod' }, fmtMod(abilityMod(ch.abilities.scores[k]))), el('span', { class: 'ab-score' }, ch.abilities.scores[k])))) : null,
       ch ? el('details', { class: 'sheet-more' }, el('summary', {}, 'Saves, skills, attacks, spells and features'), fullSheet(ch)) : null,
       el('div', { class: 'pc-cols' }, purse(), textBox('inventory', 'Inventory', 6)), inventoryItems(),
-      can && !e.status?.startsWith?.('suggest') ? el('div', { class: 'btnrow' }, el('button', { class: 'btn small', type: 'button', onclick: giveDialog }, 'Give to a party member…')) : null,
+      can && !e.status?.startsWith?.('suggest') ? el('div', { class: 'btnrow' }, el('button', { class: 'btn small', type: 'button', onclick: giveDialog }, 'Give to a party member…'), el('button', { class: 'btn small', type: 'button', onclick: stashDialog }, 'The party treasury…')) : null,
       textBox('notes', 'Notes', 4), historyBox());
   }
   draw();

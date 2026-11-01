@@ -483,6 +483,56 @@ export default route({
       }
       return send(res, 200, { entries: [shape(await loadOne(from.id, req.world.id), req), shape(await loadOne(to.id, req.world.id), req)], moved, cp });
     }
+    // Into the stash: a character puts an item or coin into the party treasury, or takes one out, with a ledger line
+    // and a line in the sheet's history. A take only goes through while the treasury holds enough (checked in the insert).
+    if (req.body.stash) {
+      const g = req.body.stash;
+      const row = await loadOne(String(g.id || '').slice(0, 40), req.world.id);
+      if (!row || row.deleted || row.kind !== 'character') return fail(res, 404, 'Pick a character in this world.');
+      if (!req.isGmHere && row.owner_id !== req.gm.id) return fail(res, 403, 'You can only use the stash for your own character.');
+      let p = {}; try { p = JSON.parse(row.fields?.play || '{}') || {}; } catch { p = {}; }
+      if (!Number.isFinite(p.cp)) p.cp = Math.max(0, Math.round(Number(g.base?.cp) || 0));
+      if (p.inventory === undefined) p.inventory = clip(g.base?.inventory, 15000);
+      const out = g.dir === 'out';
+      const cp = Math.max(0, Math.min(1e12, Math.round(Number(g.cp) || 0)));
+      const item = clip(g.item, 200).trim(), qty = Math.max(1, Math.min(1e6, Math.round(Number(g.qty) || 1)));
+      if (!cp && !item) return fail(res, 400, out ? 'Choose an item or some coin to take.' : 'Choose an item or some coin to put in.');
+      let name = '', n = 0;
+      if (out) {
+        let want = '';
+        if (item) {
+          const have = (await sql`SELECT item, SUM(qty)::int AS qty FROM party_ledger WHERE world_id = ${req.world.id} AND NOT deleted AND lower(trim(item)) = ${item.toLowerCase()} GROUP BY item ORDER BY MAX(at) DESC`);
+          const total = have.reduce((t, x) => t + x.qty, 0);
+          if (!have.length || total <= 0) return fail(res, 400, `There’s no “${item}” in the treasury.`);
+          if (qty > total) return fail(res, 400, `The treasury only has ${total} of ${have[0].item.trim()}.`);
+          name = have[0].item.trim(); n = qty; want = name.toLowerCase();
+        }
+        const ok = await sql`INSERT INTO party_ledger (world_id, gm_id, cp, item, qty, note)
+          SELECT ${req.world.id}, ${req.gm.id}, ${-cp}, ${name}, ${name ? -n : 0}, ${clip(`Taken by ${row.name}`, 500)}
+          WHERE (SELECT COALESCE(SUM(cp), 0) FROM party_ledger WHERE world_id = ${req.world.id} AND NOT deleted) >= ${cp}
+            AND (${!name} OR (SELECT COALESCE(SUM(qty), 0) FROM party_ledger WHERE world_id = ${req.world.id} AND NOT deleted AND lower(trim(item)) = ${want}) >= ${n})
+          RETURNING id`;
+        if (!ok.length) return fail(res, 400, cp ? 'The treasury doesn’t have that much coin.' : 'The treasury doesn’t have that many.');
+        if (name) p.inventory = clip(giveItem(p.inventory, name, n, ''), 15000);
+        p.cp += cp;
+      } else {
+        if (cp > p.cp) return fail(res, 400, `${row.name} doesn’t have that much coin.`);
+        if (item) {
+          const t = takeItem(p.inventory, item, qty);
+          if (t.error) return fail(res, 400, t.error);
+          p.inventory = t.text; name = t.name.replace(/\s*\(from [^)]*\)\s*$/i, '').trim() || t.name; n = t.qty;
+        }
+        p.cp -= cp;
+        await sql`INSERT INTO party_ledger (world_id, gm_id, cp, item, qty, note)
+          VALUES (${req.world.id}, ${req.gm.id}, ${cp}, ${name}, ${name ? n : 0}, ${clip(`Put in by ${row.name}`, 500)})`;
+      }
+      const what = [name ? `${n > 1 ? `${n} × ` : ''}${name}` : '', cp ? coinText(cp) : ''].filter(Boolean).join(' and ');
+      addLog(p, out ? `Took ${what} from the party treasury` : `Put ${what} in the party treasury`, req.gm.name);
+      await sql`UPDATE entries SET fields = fields || jsonb_build_object('play', ${JSON.stringify(p)}::text), updated_by = ${req.gm.id}, updated_at = now(), version = version + 1
+        WHERE id = ${row.id} AND world_id = ${req.world.id}`;
+      await record(row.id, req.gm.id, 'stash', null);
+      return send(res, 200, { entry: shape(await loadOne(row.id, req.world.id), req), item: name, qty: n, cp, dir: out ? 'out' : 'in' });
+    }
     if (req.body.edit_id !== undefined) {
       if (!requireGm(req, res)) return;
       const s = (await sql`SELECT * FROM edit_suggestions WHERE id = ${Number(req.body.edit_id)} AND world_id = ${req.world.id}`)[0];
