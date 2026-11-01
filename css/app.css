@@ -1704,3 +1704,4 @@ details.quest-group > summary .section-title { display: inline }
 }
 .load-line { margin: 4px 0 0; color: var(--muted) }
 .load-line.over { color: var(--danger); font-weight: 600 }
+.since-last .since-facts { display: grid; gap: 2px; margin: 6px 0 8px }

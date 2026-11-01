@@ -190,6 +190,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **A day on the road**: after travel, a party journal draft of the journey: days, pace, weather and rations.
 - **What happened to my coin?**: a history on each sheet of changes made from outside it (shares, living costs, rations, purchases, rests).
 - **You've got news**: with the world open, players hear at once when the GMs change their sheet: "📜 Ann: Handed out by the GMs: 2 × Potion of healing".
+- **Since last session, for you**: a player's character page opens with their coin up or down and items in and out since the last session.
 - **Shops keep hours**: shops are shut at night by the world's clock (taverns stay open late); GMs can still trade.
 - **Treasure from a fight**: an encounter card rolls treasure for its challenge and puts it straight into the loot log.
 - **The party's wealth**: the treasury plus every character's purse, on the party page.

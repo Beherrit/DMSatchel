@@ -4,7 +4,7 @@
 import { el, toast, confirmButton, setKids } from './dom.js';
 import { longRest } from './rest.js';
 import { mergePlay } from './play-merge.js';
-import { addLog, readLog } from './play-log.js';
+import { addLog, readLog, changeOf, snapshot } from './play-log.js';
 import { generateCharacter, characterText, abilityMod, fmtMod } from './character.js';
 import { ABILITIES, ABILITY_NAMES } from './rules2024.js';
 import { ORD } from './spells.js';
@@ -103,8 +103,9 @@ export async function changePlay(e, fn, note = '') {
   for (let attempt = 0; attempt < 2; attempt++) {
     const cur = world.entries.get(e.id) || e;
     const play = defaults(cur, characterOf(cur));
+    const before = snapshot(play);
     fn(play);
-    if (note) addLog(play, note, session.gm?.name || '');
+    if (note) addLog(play, note, session.gm?.name || '', undefined, changeOf(before, play));
     try { return await patchEntry(cur, { fields: { play: JSON.stringify(play) } }); }
     catch (err) { if (err.status === 409 && err.body?.entry && attempt === 0) { world.entries.set(e.id, err.body.entry); continue; } throw err; }
   }

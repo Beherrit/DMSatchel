@@ -24,3 +24,25 @@ test('newLines: only the lines that are new since the old copy', async () => {
   assert.deepEqual(playJson({ fields: { play: 'nope' } }), {});
   assert.deepEqual(playJson(null), {});
 });
+
+test('changeOf, addLog with a change, and logSince', async () => {
+  const { changeOf, logSince, snapshot } = await import('../js/play-log.js');
+  const c = changeOf({ cp: 1000, inventory: 'Rope\n3 potions of healing\nLute' }, { cp: 600, inventory: 'Rope\n1 Potions of healing\n2 Torch' });
+  assert.equal(c.cp, -400);
+  assert.deepEqual(c.items, [{ name: 'Potions of healing', qty: -2 }, { name: 'Lute', qty: -1 }, { name: 'Torch', qty: 2 }]);
+  assert.deepEqual(changeOf({}, {}), { cp: 0, items: [] });
+  assert.deepEqual(snapshot({ cp: 5, inventory: 'x', hp: 3 }), { cp: 5, inventory: 'x' });
+  const play = {};
+  addLog(play, 'Bought rope', 'Ann', '2026-01-01T00:00:00Z', { cp: -100, items: [{ name: 'Rope', qty: 1 }] });
+  addLog(play, 'A rest', 'Ann', '2026-01-05T00:00:00Z', { cp: 0, items: [] });
+  addLog(play, 'Handed out by the GMs: 50 gp, 2 × Potion of healing', 'Morgan', '2026-01-06T00:00:00Z', { cp: 5000, items: [{ name: 'Potion of healing', qty: 2 }] });
+  addLog(play, 'Sold rope', 'Ann', '2026-01-07T00:00:00Z', { cp: 50, items: [{ name: 'rope', qty: -1 }, { name: 'Lute', qty: -1 }] });
+  assert.equal(play.log[1].cp, undefined); assert.equal(play.log[1].items, undefined);
+  const s = logSince(play, '2026-01-04T00:00:00Z');
+  assert.deepEqual(s.lines.map((x) => x.text), ['Sold rope', 'Handed out by the GMs: 50 gp, 2 × Potion of healing', 'A rest']);
+  assert.equal(s.cp, 5050);
+  assert.deepEqual(s.gained, [{ name: 'Potion of healing', qty: 2 }]);
+  assert.deepEqual(s.lost, [{ name: 'rope', qty: 1 }, { name: 'Lute', qty: 1 }]);
+  assert.equal(logSince(play, null).lines.length, 4);
+  assert.equal(logSince(play, null).lost.length, 1); // the rope bought and sold cancels out
+});

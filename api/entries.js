@@ -415,7 +415,7 @@ export default route({
         WHERE id = ${shop.id} AND world_id = ${req.world.id} AND version = ${shop.version} RETURNING id`;
       if (!sold.length) return fail(res, 409, 'Someone else was buying from this shop at the same moment. Try again.');
       p.cp -= r.cp; p.inventory = clip(giveItem(p.inventory, r.name, r.qty, shop.name), 15000);
-      addLog(p, `Bought ${r.qty > 1 ? `${r.qty} × ` : ''}${r.name} at ${shop.name} for ${coinText(r.cp)}${pct ? ' (haggled)' : ''}`, req.gm.name);
+      addLog(p, `Bought ${r.qty > 1 ? `${r.qty} × ` : ''}${r.name} at ${shop.name} for ${coinText(r.cp)}${pct ? ' (haggled)' : ''}`, req.gm.name, undefined, { cp: -r.cp, items: [{ name: r.name, qty: r.qty }] });
       await sql`UPDATE entries SET fields = fields || jsonb_build_object('play', ${JSON.stringify(p)}::text), updated_by = ${req.gm.id}, updated_at = now(), version = version + 1
         WHERE id = ${ch.id} AND world_id = ${req.world.id}`;
       await record(ch.id, req.gm.id, 'buy', null);
@@ -445,7 +445,7 @@ export default route({
         WHERE id = ${shop.id} AND world_id = ${req.world.id} AND version = ${shop.version} RETURNING id`;
       if (!done.length) return fail(res, 409, 'Someone else was at this shop’s counter at the same moment. Try again.');
       p.inventory = t.text; p.cp += r.cp;
-      addLog(p, `Sold ${r.qty > 1 ? `${r.qty} × ` : ''}${r.name} to ${shop.name} for ${coinText(r.cp)}`, req.gm.name);
+      addLog(p, `Sold ${r.qty > 1 ? `${r.qty} × ` : ''}${r.name} to ${shop.name} for ${coinText(r.cp)}`, req.gm.name, undefined, { cp: r.cp, items: [{ name: r.name, qty: -r.qty }] });
       await sql`UPDATE entries SET fields = fields || jsonb_build_object('play', ${JSON.stringify(p)}::text), updated_by = ${req.gm.id}, updated_at = now(), version = version + 1
         WHERE id = ${ch.id} AND world_id = ${req.world.id}`;
       await record(ch.id, req.gm.id, 'sell', null);
@@ -475,7 +475,9 @@ export default route({
       }
       fp.cp -= cp; tp.cp += cp;
       const what = [moved ? `${moved.qty > 1 ? `${moved.qty} × ` : ''}${moved.name}` : '', cp ? coinText(cp) : ''].filter(Boolean).join(' and ');
-      addLog(fp, `Gave ${what} to ${to.name}`, req.gm.name); addLog(tp, `Got ${what} from ${from.name}`, req.gm.name);
+      const gone = moved ? [{ name: moved.name, qty: moved.qty }] : [];
+      addLog(fp, `Gave ${what} to ${to.name}`, req.gm.name, undefined, { cp: -cp, items: gone.map((x) => ({ ...x, qty: -x.qty })) });
+      addLog(tp, `Got ${what} from ${from.name}`, req.gm.name, undefined, { cp, items: gone });
       for (const [row, p] of [[from, fp], [to, tp]]) {
         await sql`UPDATE entries SET fields = fields || jsonb_build_object('play', ${JSON.stringify(p)}::text), updated_by = ${req.gm.id}, updated_at = now(), version = version + 1
           WHERE id = ${row.id} AND world_id = ${req.world.id}`;
@@ -527,7 +529,7 @@ export default route({
           VALUES (${req.world.id}, ${req.gm.id}, ${cp}, ${name}, ${name ? n : 0}, ${clip(`Put in by ${row.name}`, 500)})`;
       }
       const what = [name ? `${n > 1 ? `${n} × ` : ''}${name}` : '', cp ? coinText(cp) : ''].filter(Boolean).join(' and ');
-      addLog(p, out ? `Took ${what} from the party treasury` : `Put ${what} in the party treasury`, req.gm.name);
+      addLog(p, out ? `Took ${what} from the party treasury` : `Put ${what} in the party treasury`, req.gm.name, undefined, { cp: out ? cp : -cp, items: name ? [{ name, qty: out ? n : -n }] : [] });
       await sql`UPDATE entries SET fields = fields || jsonb_build_object('play', ${JSON.stringify(p)}::text), updated_by = ${req.gm.id}, updated_at = now(), version = version + 1
         WHERE id = ${row.id} AND world_id = ${req.world.id}`;
       await record(row.id, req.gm.id, 'stash', null);
