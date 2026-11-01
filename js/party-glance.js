@@ -43,3 +43,10 @@ export function partyWealth(treasuryCp, purses) {
 
 // Carrying for the party: the treasury's items held by this character (by name, whatever the case).
 export const heldBy = (items, name) => (items || []).filter((i) => i.qty > 0 && String(i.holder || '').trim().toLowerCase() === String(name || '').trim().toLowerCase());
+
+// Sort the party at a glance by a column: name, hp (as a share of the maximum), cp, rations, exhaustion, conditions
+// (how many). dir: 1 ascending, -1 descending; ties go by name.
+export function sortRows(rows, key = 'name', dir = 1) {
+  const val = { name: (r) => r.name.toLowerCase(), hp: (r) => (r.max ? r.hp / r.max : Infinity), cp: (r) => r.cp, rations: (r) => r.rations, exhaustion: (r) => r.exhaustion, conditions: (r) => r.conditions.length }[key] || ((r) => r.name.toLowerCase());
+  return [...(rows || [])].sort((a, b) => { const x = val(a), y = val(b); return (x < y ? -1 : x > y ? 1 : 0) * dir || a.name.localeCompare(b.name); });
+}

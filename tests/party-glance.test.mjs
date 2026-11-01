@@ -40,3 +40,12 @@ test('heldBy: treasury items a character holds', async () => {
   assert.deepEqual(heldBy(items, 'Ann').map((i) => i.item), ['Tent', 'Rope']);
   assert.deepEqual(heldBy(items, 'Cy'), []); assert.deepEqual(heldBy(null, 'Ann'), []);
 });
+
+test('sortRows: the party at a glance by any column', async () => {
+  const { partyRows, sortRows } = await import('../js/party-glance.js');
+  const rows = partyRows([{ id: 'a', name: 'Ann', play: { hp: 5, maxhp: 20, cp: 300 } }, { id: 'b', name: 'Bo', play: { hp: 18, maxhp: 20, cp: 9000, exhaustion: 2 } }, { id: 'c', name: 'Cy', play: { hp: 10, maxhp: 10, cp: 300 } }]);
+  assert.deepEqual(sortRows(rows, 'cp', -1).map((r) => r.name), ['Bo', 'Ann', 'Cy']);
+  assert.deepEqual(sortRows(rows, 'hp', 1).map((r) => r.name), ['Ann', 'Bo', 'Cy']);
+  assert.deepEqual(sortRows(rows, 'exhaustion', -1).map((r) => r.name), ['Bo', 'Ann', 'Cy']);
+  assert.deepEqual(sortRows(rows).map((r) => r.name), ['Ann', 'Bo', 'Cy']);
+});

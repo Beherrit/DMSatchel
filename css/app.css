@@ -1754,3 +1754,5 @@ details.quest-group > summary .section-title { display: inline }
   body.print-shelf .shop-card .shop-helpers { display: none }
   body.print-shelf .closing-line { display: none }
 }
+.sort-btn { background: none; border: 0; padding: 0; font: inherit; color: inherit; text-transform: inherit; letter-spacing: inherit; cursor: pointer }
+.sort-btn:hover { text-decoration: underline }

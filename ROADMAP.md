@@ -532,7 +532,7 @@ to the log at the bottom.
     "Here now" line, so the tavern says who's in its back room.
 261. [x] **Routines on the printable cast list.** The printable Who's who adds where each NPC usually is by day.
 262. [x] **A tab on the party page.** The party page's treasury card lists the tabs the party is running at taverns.
-263. [ ] **Who has the most coin.** The party page's at-a-glance table sorts by any column the GM clicks.
+263. [x] **Who has the most coin.** The party page's at-a-glance table sorts by any column the GM clicks.
 264. [ ] **Bounties on the party page.** The party page lists open bounties on NPCs the players know of.
 265. [ ] **A quiet night.** When the clock passes midnight, the toast says who's out and about at that hour.
 
@@ -806,3 +806,4 @@ to the log at the bottom.
 - Who's in the back room: a place's "Here now" line now counts people in places inside it, saying where: "🕰 Here now (20:00): Bramwell until 21:00, Cole (in Back Room)". It's the same reading the town pages use (aroundNow), so hirelings with the party show the same way.
 - Routines on the printable cast list: each NPC on the printable Who's who now says where they're usually found by day, from their routine ("Usually by day: the market"; the morning's place, else the afternoon's). Hirelings say "Travelling with the party". It's handy for players hunting someone down.
 - A tab on the party page: the party page's treasury card now ends with the tabs the party is running at taverns, linked: "Tabs: The Bell 2 sp".
+- Who has the most coin: the party page's at-a-glance table (GMs) now sorts by any column. Click a header to sort (coin, rations, exhaustion and conditions start with the most; names and hit points start with the least, hit points as a share of the maximum), and click again to reverse it. The sorted column says so to screen readers (aria-sort) and shows ▲ or ▼. sortRows in js/party-glance.js unit tested.

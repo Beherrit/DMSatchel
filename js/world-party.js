@@ -7,7 +7,7 @@ import { thumb } from './image-ui.js';
 import { lastShownLine } from './world-show.js';
 import { addCoins, playOf, changePlay } from './sheet-ui.js';
 import { readHandOut, handOutTotal } from './hand-out.js';
-import { partyRows, partyWealth } from './party-glance.js';
+import { partyRows, partyWealth, sortRows } from './party-glance.js';
 import { sellLoot } from './purchase.js';
 import { addTrade } from './shop-trade.js';
 import { partyDebts } from './debts.js';
@@ -38,16 +38,24 @@ import { itemsNamed } from './play-cards.js';
 function glanceTable(active) {
   if (!active.length) return null;
   const rows = partyRows(active.map((c) => ({ id: c.id, name: c.name, play: playOf(c) })));
+  // Who has the most coin: each column header sorts the table (again to reverse it).
+  const COLS = [['name', 'Character'], ['hp', 'Hit points'], ['cp', 'Coin'], ['rations', 'Rations'], ['exhaustion', 'Exhaustion'], ['conditions', 'Conditions']];
+  let key = 'name', dir = 1;
+  const head = el('tr'), body = el('tbody');
+  const draw = () => {
+    setKids(head, COLS.map(([k, label]) => el('th', { scope: 'col', 'aria-sort': k === key ? (dir > 0 ? 'ascending' : 'descending') : 'none' },
+      el('button', { class: 'sort-btn', type: 'button', onclick: () => { if (key === k) dir = -dir; else { key = k; dir = ['cp', 'rations', 'exhaustion', 'conditions'].includes(k) ? -1 : 1; } draw(); } }, label, k === key ? (dir > 0 ? ' ▲' : ' ▼') : ''))));
+    setKids(body, sortRows(rows, key, dir).map((r) => el('tr', {},
+      el('th', { scope: 'row' }, link(getEntry(r.id) || { id: r.id, name: r.name })),
+      el('td', { class: `num${r.low || r.down ? ' hp-bad' : ''}` }, r.max ? `${r.hp} / ${r.max}` : '—', r.down ? ' (down)' : r.low ? ' (low)' : ''),
+      el('td', { class: 'num' }, coinText(r.cp)),
+      el('td', { class: `num${r.rations ? '' : ' muted'}` }, r.rations ? `${r.rations} day${r.rations === 1 ? '' : 's'}` : 'none'),
+      el('td', { class: 'num' }, r.exhaustion ? String(r.exhaustion) : '—'),
+      el('td', {}, r.conditions.length ? r.conditions.join(', ') : '—'))));
+  };
+  draw();
   return el('section', { class: 'card party-glance' }, el('div', { class: 'entry-head' }, el('h3', {}, 'The party at a glance'), el('a', { class: 'btn small', href: '#world/screen' }, 'Party sheet for the screen')),
-    el('div', { class: 'table-wrap' }, el('table', { class: 'glance-table' },
-      el('thead', {}, el('tr', {}, ['Character', 'Hit points', 'Coin', 'Rations', 'Exhaustion', 'Conditions'].map((h) => el('th', { scope: 'col' }, h)))),
-      el('tbody', {}, rows.map((r) => el('tr', {},
-        el('th', { scope: 'row' }, link(getEntry(r.id) || { id: r.id, name: r.name })),
-        el('td', { class: `num${r.low || r.down ? ' hp-bad' : ''}` }, r.max ? `${r.hp} / ${r.max}` : '—', r.down ? ' (down)' : r.low ? ' (low)' : ''),
-        el('td', { class: 'num' }, coinText(r.cp)),
-        el('td', { class: `num${r.rations ? '' : ' muted'}` }, r.rations ? `${r.rations} day${r.rations === 1 ? '' : 's'}` : 'none'),
-        el('td', { class: 'num' }, r.exhaustion ? String(r.exhaustion) : '—'),
-        el('td', {}, r.conditions.length ? r.conditions.join(', ') : '—')))))));
+    el('div', { class: 'table-wrap' }, el('table', { class: 'glance-table' }, el('thead', {}, head), body)));
 }
 
 function members(chars) {
