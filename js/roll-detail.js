@@ -1,6 +1,7 @@
 // Roll a detail: one field of an entry filled from the app's tables (an NPC's looks, voice, manner and wants; a
 // settlement's trouble; what a place looks and sounds like). Pure given an rng, so it can be tested.
 import { NPC, TOWN, TAVERN, ENV } from './tables.js';
+import { rollRoutine } from './routine.js';
 import { personName, townName, tavernName, shopName, regionName, groupName, ANCESTRY_WEIGHTS } from './names.js';
 
 const cap = (s) => (s ? String(s).charAt(0).toUpperCase() + String(s).slice(1) : '');
@@ -29,6 +30,8 @@ const ROLLERS = {
     voice: (rng) => say(rng.pick(NPC.voice)),
     wants: (rng) => say(rng.pick(NPC.want)),
     secret: (rng) => say(rng.pick(NPC.secret)),
+    // Roll a routine: from the role typed so far and the places about (passed in by the form).
+    routine: (rng, f) => rollRoutine(rng, f?.role || '', f?.places || []),
   },
   settlement: {
     name: (rng) => townName(rng),

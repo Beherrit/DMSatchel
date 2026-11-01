@@ -110,6 +110,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Time and light**: the in-world hour during play and the torches and spells burning down, moved on by the GM and seen by everyone.
 - **Lights from the pack**: lighting a torch or lantern on the clock can take it, or a flask of oil, from a character's inventory.
 - **Where are they now?**: an NPC's daily routine, read against the world's clock: their page says where they are, and each place lists who's there now.
+- **Roll a routine**: a roll button writes a likely day for an NPC from their role and the places in their town.
 - **Who's about town**: a settlement's page lists the NPCs inside it right now, and where.
 - **The regulars**: a tavern's or shop's page lists who comes in at some hour, and when.
 - **Who's here, on the map**: a place's map pin says who is there right now, from their routines.

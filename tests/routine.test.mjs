@@ -50,3 +50,20 @@ test('unreadable: the lines a routine cannot read', async () => {
   assert.deepEqual(unreadable('Mornings: the forge; Fridays: the market\nsleeps a lot; 9-17: the docks; Otherwise: home'), ['Fridays: the market', 'sleeps a lot']);
   assert.deepEqual(unreadable(''), []);
 });
+
+test('rollRoutine: a likely day from the role and the places about', async () => {
+  const { rollRoutine, whereAt, unreadable } = await import('../js/routine.js');
+  const { makeRng } = await import('../js/rng.js');
+  const places = [{ name: 'The Bell', type: 'Tavern' }, { name: 'Anvil & Tongs', type: 'Shop' }, { name: 'Shrine of Dawn', type: 'Temple' }, { name: 'Pickle Stall', type: 'Shop' }];
+  for (let i = 0; i < 20; i++) {
+    const smith = rollRoutine(makeRng(`s${i}`), 'Blacksmith', places);
+    assert.equal(whereAt(smith, 9 * 60).place, 'Anvil & Tongs', smith);
+    assert.equal(whereAt(smith, 2 * 60).place, 'home');
+    assert.deepEqual(unreadable(smith), []);
+    const keep = rollRoutine(makeRng(`k${i}`), 'Innkeeper', places);
+    assert.equal(whereAt(keep, 20 * 60).place, 'The Bell', keep);
+    assert.equal(whereAt(rollRoutine(makeRng(`p${i}`), 'Village priest', places), 10 * 60).place, 'Shrine of Dawn');
+    assert.equal(whereAt(rollRoutine(makeRng(`f${i}`), 'Farmer', places), 10 * 60).place, 'the fields');
+    assert.deepEqual(unreadable(rollRoutine(makeRng(`x${i}`), '', [])), []);
+  }
+});

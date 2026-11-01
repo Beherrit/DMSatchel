@@ -563,6 +563,14 @@ function placeSummary(e) {
 
 // ---- editing -----------------------------------------------------------------------------------
 
+// The places about an entry, for rolling an NPC's routine: those in its town (by where it's placed), else the world's.
+function placesAbout(e) {
+  let town = null;
+  for (let p = e.parent_id && getEntry(e.parent_id), i = 0; p && i < 12; p = p.parent_id && getEntry(p.parent_id), i++) if (p.kind === 'settlement') { town = p; break; }
+  const inTown = (x) => { for (let p = x, i = 0; p && i < 12; p = p.parent_id && getEntry(p.parent_id), i++) if (p.id === town.id) return true; return false; };
+  return worldEntries().filter((x) => x.kind === 'location' && (!town || inTown(x))).slice(0, 60).map((x) => ({ name: x.name, type: x.fields?.type || '' }));
+}
+
 function viewEdit(id, kindForNew) {
   if (!isMember()) return notice(signedIn() ? 'Members only' : 'Sign in to add things', signedIn() ? 'You’re visiting this world. Ask its owner for an invite to add characters, journals and suggestions.' : 'Sign in with your personal code, or open the invite link your GM sent you.',
     signedIn() ? null : el('div', { class: 'btnrow' }, el('button', { class: 'btn primary', type: 'button', onclick: () => openSignIn() }, 'Sign in'), el('a', { class: 'btn', href: '#join' }, 'I have an invite')));
@@ -614,7 +622,7 @@ function viewEdit(id, kindForNew) {
         return el('div', { class: 'field' }, el('label', { for: `ff-${k}` }, label), s);
       }
       const box = type === 'long' ? el('textarea', { id: `ff-${k}`, 'data-field': k, rows: 3 }, v) : el('input', { type: 'text', id: `ff-${k}`, 'data-field': k, value: v });
-      const roll = rollButton(() => kindSel.value, k, box, label, () => ({ type: fieldsBox.querySelector('[data-field="type"]')?.value }));
+      const roll = rollButton(() => kindSel.value, k, box, label, () => ({ type: fieldsBox.querySelector('[data-field="type"]')?.value, role: fieldsBox.querySelector('[data-field="role"]')?.value || '', places: k === 'routine' ? placesAbout(e) : [] }));
       const head = roll ? el('div', { class: 'label-row' }, el('label', { for: `ff-${k}` }, label), roll) : el('label', { for: `ff-${k}` }, label);
       return el('div', { class: `field${type === 'long' ? ' wide' : ''}` }, head, box, k === 'routine' ? routinePreview(box) : null);
     }), gm ? el('p', { class: 'field wide own-fields' }, customFieldsButton(kindSel.value, renderFields)) : null);

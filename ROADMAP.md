@@ -487,7 +487,7 @@ to the log at the bottom.
 232. [x] **A round on the house.** GMs buy everyone at the table a dish or drink from a tavern's menu, paid from the
     treasury, in one line of the ledger.
 233. [x] **Whose torch is it.** Lights lit from someone's pack say whose they are on the clock ("Ann's torch").
-234. [ ] **Roll a routine.** A roll button on an NPC's daily routine writes a likely day from their role and the
+234. [x] **Roll a routine.** A roll button on an NPC's daily routine writes a likely day from their role and the
     places in their town (a smith at the forge by day and the tavern at night).
 235. [ ] **Minding the shop.** A shop's page says whether its owner is behind the counter right now, or where they are
     instead.
@@ -736,3 +736,4 @@ to the log at the bottom.
 - Everything the party carries: under the party page's "Who has it?" search, a link opens one printable list of every active character's gear and the treasury's (#world/kit). Things are merged by name, whatever the case, and one-line starting kits are split, with the total and who has how many: "Torches · 4 · Ann 2, Bo 2", "Rope · 2 · Ann, the treasury (with Bo)". everything in js/who-has.js unit tested.
 - A round on the house: on a tavern's Order row, GMs now have "A round for all 3". It buys the chosen dish or drink for every active character, paid from the treasury in one ledger line ("A round on the house at The Bell: Pale ale for 3"), and noted in the tavern's ledger as the party's. Sheets aren't touched. Players don't see the button.
 - Whose torch is it: a light lit from someone's pack is now named for them on the clock, "🔥 Ann's torch", in the toast, the list of lights and the "went out" notice, so everyone can see whose light is burning down. Lights lit from nobody's pack keep their plain names. lightName in js/clock.js unit tested.
+- Roll a routine: the Daily routine field on an NPC's form has a Roll button. It writes a likely day from the role typed so far and the places in the NPC's town (or the world's, when they aren't placed in one). A smith gets "By day: Anvil & Tongs; evenings and dusk: The Bell; otherwise: home"; an innkeeper keeps their tavern from afternoon into the night; a priest goes to the temple, a guard to the castle, a farmer to the fields, and a cutpurse to the market by day and the tavern by night. Every rolled line reads back cleanly in the live preview. rollRoutine in js/routine.js unit tested against the parser.

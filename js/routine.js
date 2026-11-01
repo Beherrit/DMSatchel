@@ -100,3 +100,28 @@ export function regularsAt(npcs, isHere) {
 export function unreadable(text) {
   return String(text || '').split(/[;\n]+/).map((p) => p.trim()).filter(Boolean).filter((p) => !parseRoutine(p).length);
 }
+
+// Roll a routine: a likely day for an NPC from their role and the places about (places: [{ name, type }], type as a
+// location's: Tavern, Shop, Temple, Castle, Landmark…). rng from rng.js. → routine text.
+const WORK = [
+  [/smith|farrier|armou?rer|weaponsmith/i, (p) => p.find((x) => x.type === 'Shop' && /forge|smith|anvil|hammer/i.test(x.name)) || p.find((x) => x.type === 'Shop')],
+  [/inn|tavern|barkeep|barmaid|brewer|cook|landlord|landlady|server/i, (p) => p.find((x) => x.type === 'Tavern')],
+  [/priest|cleric|acolyte|monk|nun|abbot|oracle/i, (p) => p.find((x) => x.type === 'Temple')],
+  [/guard|watch|soldier|captain|knight|sergeant|lord|lady|steward/i, (p) => p.find((x) => x.type === 'Castle') || p.find((x) => x.type === 'Landmark')],
+  [/merchant|trader|shop|clerk|baker|butcher|tailor|cobbler|jewel|chandler|apothecary|alchemist|herbalist/i, (p) => p.find((x) => x.type === 'Shop')],
+];
+const OUTDOORS = [[/farm|herd|shepherd|plough/i, 'the fields'], [/hunt|woodcut|forester|ranger|trapper/i, 'the woods'], [/fisher|sailor|boat|dock/i, 'the docks'], [/thief|cutpurse|smuggler|beggar|urchin/i, 'the market']];
+
+export function rollRoutine(rng, role = '', places = []) {
+  const list = (places || []).filter((x) => x && x.name);
+  const shuffled = list.map((x) => [rng.next ? rng.next() : Math.random(), x]).sort((a, b) => a[0] - b[0]).map(([, x]) => x);
+  let work = null;
+  for (const [re, find] of WORK) if (re.test(role)) { work = find(shuffled)?.name || null; break; }
+  if (!work) for (const [re, spot] of OUTDOORS) if (re.test(role)) { work = spot; break; }
+  if (!work) work = rng.pick(['about town', 'the market', ...(shuffled.filter((x) => x.type === 'Shop').slice(0, 2).map((x) => x.name))]);
+  const tavern = shuffled.find((x) => x.type === 'Tavern')?.name;
+  const evening = tavern && tavern !== work ? (rng.pick([true, true, false]) ? tavern : 'home') : 'home';
+  if (tavern && tavern === work) return `Mornings: the market; afternoons, evenings, dusk and nights: ${work}; otherwise: home`;
+  if (/thief|cutpurse|smuggler/i.test(role) && tavern) return `By day: ${work}; evenings, dusk and nights: ${tavern}; otherwise: home`;
+  return `By day: ${work}; ${evening === 'home' ? 'otherwise: home' : `evenings and dusk: ${evening}; otherwise: home`}`;
+}
