@@ -574,6 +574,8 @@ export default route({
       if (!Number.isFinite(p.cp)) p.cp = Math.max(0, Math.round(Number(g.base?.cp) || 0));
       if (p.inventory === undefined) p.inventory = clip(g.base?.inventory, 15000);
       const out = g.dir === 'out';
+      // Divide the loot: a GM handing the treasury's things out (the ledger says "Given to", not "Taken by").
+      const given = out && req.isGmHere && Boolean(g.given);
       const cp = Math.max(0, Math.min(1e12, Math.round(Number(g.cp) || 0)));
       const item = clip(g.item, 200).trim(), qty = Math.max(1, Math.min(1e6, Math.round(Number(g.qty) || 1)));
       if (!cp && !item) return fail(res, 400, out ? 'Choose an item or some coin to take.' : 'Choose an item or some coin to put in.');
@@ -588,7 +590,7 @@ export default route({
           name = have[0].item.trim(); n = qty; want = name.toLowerCase();
         }
         const ok = await sql`INSERT INTO party_ledger (world_id, gm_id, cp, item, qty, note)
-          SELECT ${req.world.id}, ${req.gm.id}, ${-cp}, ${name}, ${name ? -n : 0}, ${clip(`Taken by ${row.name}`, 500)}
+          SELECT ${req.world.id}, ${req.gm.id}, ${-cp}, ${name}, ${name ? -n : 0}, ${clip(given ? `Given to ${row.name}` : `Taken by ${row.name}`, 500)}
           WHERE (SELECT COALESCE(SUM(cp), 0) FROM party_ledger WHERE world_id = ${req.world.id} AND NOT deleted) >= ${cp}
             AND (${!name} OR (SELECT COALESCE(SUM(qty), 0) FROM party_ledger WHERE world_id = ${req.world.id} AND NOT deleted AND lower(trim(item)) = ${want}) >= ${n})
           RETURNING id`;
@@ -607,7 +609,7 @@ export default route({
           VALUES (${req.world.id}, ${req.gm.id}, ${cp}, ${name}, ${name ? n : 0}, ${clip(`Put in by ${row.name}`, 500)})`;
       }
       const what = [name ? `${n > 1 ? `${n} × ` : ''}${name}` : '', cp ? coinText(cp) : ''].filter(Boolean).join(' and ');
-      addLog(p, out ? `Took ${what} from the party treasury` : `Put ${what} in the party treasury`, req.gm.name, undefined, { cp: out ? cp : -cp, items: name ? [{ name, qty: out ? n : -n }] : [] });
+      addLog(p, given ? `Given ${what} from the party treasury` : out ? `Took ${what} from the party treasury` : `Put ${what} in the party treasury`, req.gm.name, undefined, { cp: out ? cp : -cp, items: name ? [{ name, qty: out ? n : -n }] : [] });
       await sql`UPDATE entries SET fields = fields || jsonb_build_object('play', ${JSON.stringify(p)}::text), updated_by = ${req.gm.id}, updated_at = now(), version = version + 1
         WHERE id = ${row.id} AND world_id = ${req.world.id}`;
       await record(row.id, req.gm.id, 'stash', null);

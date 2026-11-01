@@ -85,6 +85,7 @@ function treasury(state, chars, reload) {
   if (isGm() && active.length && cp > 0) box.append(splitForm(cp, active, reload));
   if (isGm() && active.length) box.append(handOutForm(active, reload));
   if (isGm() && items.some((i) => i.qty > 0)) box.append(sellLootForm(items.filter((i) => i.qty > 0), reload));
+  if (isGm() && active.length && items.some((i) => i.qty > 0)) box.append(divideLootForm(items.filter((i) => i.qty > 0), active, reload));
   if (isMember()) box.append(ledgerForm(chars, reload));
   box.append(el('details', { class: 'ledger', open: lines.length && lines.length <= 8 ? true : null }, el('summary', {}, `Loot log (${lines.length})`),
     lines.length ? el('ul', { class: 'plain ledger-lines' }, lines.slice(0, 200).map((l) => el('li', {},
@@ -112,6 +113,35 @@ function whoHasBox(chars, items) {
 
 // GMs: sell the treasury's loot to a stocked shop at its buy-back rate: the coin comes into the treasury and the
 // items go onto the shop's shelf. Things the shop can't price stay in the treasury.
+// Divide the loot (GMs): give the treasury's items out in one go, choosing who gets each and how many. Each goes
+// through the stash route, so the ledger says "Given to …" and the sheet's history notes it.
+function divideLootForm(items, active, reload) {
+  const rows = items.map((i, n) => ({ i,
+    who: el('select', { id: `dv-${n}`, 'aria-label': `Who gets ${i.item}` }, el('option', { value: '' }, 'Keep it'), active.map((c) => el('option', { value: c.id }, c.name))),
+    qty: el('input', { type: 'number', min: 1, max: i.qty, value: i.qty, class: 'qty', 'aria-label': `How many ${i.item}` }) }));
+  const go = el('button', { class: 'btn small primary', type: 'submit' }, 'Give them out');
+  const form = el('form', { class: 'hand-out' },
+    el('ul', { class: 'plain' }, rows.map((r, n) => el('li', { class: 'controls' }, el('label', { for: `dv-${n}` }, `${r.i.item}${r.i.holder ? ` (with ${r.i.holder})` : ''}`), r.who, r.qty, el('span', { class: 'muted small' }, `of ${r.i.qty}`)))),
+    el('div', { class: 'btnrow' }, go));
+  form.addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const picks = rows.filter((r) => r.who.value);
+    if (!picks.length) { toast('Choose who gets something'); return; }
+    go.disabled = true;
+    const done = [], failed = [];
+    for (const r of picks) {
+      const c = world.entries.get(r.who.value), qty = Math.min(r.i.qty, Math.max(1, Number(r.qty.value) || 1)), base = playOf(c);
+      try {
+        const x = await api('entries', { method: 'PATCH', body: { stash: { id: c.id, dir: 'out', item: r.i.item, qty, given: true, base: { cp: base.cp, inventory: base.inventory } } } });
+        world.entries.set(x.entry.id, x.entry); done.push(`${qty > 1 ? `${qty} × ` : ''}${r.i.item} to ${c.name}`);
+      } catch (err) { failed.push(`${r.i.item} (${err.message})`); }
+    }
+    toast([done.length ? `Given out: ${done.join(', ')}` : '', failed.length ? `not given: ${failed.join(', ')}` : ''].filter(Boolean).join(' · '), failed.length ? 'bad' : undefined);
+    reload();
+  });
+  return el('details', { class: 'split-loot divide-loot' }, el('summary', {}, 'Divide the loot'), form);
+}
+
 function sellLootForm(items, reload) {
   const shops = worldEntries().filter((e) => e.kind === 'location' && e.fields?.stock).sort((a, b) => a.name.localeCompare(b.name));
   if (!shops.length) return el('p', { class: 'muted small' }, 'Stock a shop to sell the loot to it.');
