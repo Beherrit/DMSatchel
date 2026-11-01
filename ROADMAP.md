@@ -501,7 +501,7 @@ to the log at the bottom.
     open at the world's hour and who's minding it.
 240. [x] **Waiting on the GM.** Session prep gathers what's waiting for a GM: things asked for in shops, wages owed,
     and bounties not yet paid.
-241. [ ] **Go to my character.** A keyboard shortcut (g then m) and a link in the world's side menu open the player's
+241. [x] **Go to my character.** A keyboard shortcut (g then y) and a link in the world's side menu open the player's
     own character.
 
 ## Ideas parking lot
@@ -751,3 +751,4 @@ to the log at the bottom.
 - The town by the hour: a settlement's page (and a region's or area's) now has a folded "The town by the hour" table. It lists everyone whose routine brings them somewhere in the town, against morning (09:00), afternoon (15:00), evening (18:00) and night (23:00): "Bramwell · The Forge · The Forge · The Bell · —". It's for planning a day in town without stepping the clock. On a phone the table scrolls inside its box. townByHour in js/routine.js unit tested.
 - Open now?: each line of a character's shopping list now names up to three shops that stock it, cheapest first, with the price. It says whether each is open at the world's hour ("open", or "shut till 8 in the morning") and, when the owner is an NPC with a routine, whether they're in: "Chandler 1 gp, open · Smithy 2 gp, open, Bramwell is in". Matching is the same as the buy panel's "wanted" mark. shopsFor in js/shopping.js unit tested.
 - Waiting on the GM: session prep now opens (after reminders) with "⏳ Waiting on you" whenever something needs a GM's hand. It lists shops that were asked for things ("Smithy was asked for Grappling hook"), hirelings owed wages, with a pointer to the party page where they're paid, and bounties on dead or captured NPCs that haven't been paid, with "Claim it…", which opens the bounty dialog. waitingOnGm in js/waiting.js unit tested.
+- Go to my character: the world's side menu now has a link to your own character, under The Party (marked ★). It's the newest active character you own; the retired, dead and missing don't count. Pressing g then y goes there from anywhere (g then m was already Maps), and the "?" list of shortcuts includes it. Without a character of your own, there's no link, and g y opens The Party.

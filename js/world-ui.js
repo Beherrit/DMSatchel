@@ -176,6 +176,8 @@ function renderSide() {
     el('nav', { class: 'w-kinds w-tools', 'aria-label': 'World views' },
       navGroup('table', 'At the table', true, [
         el('a', { href: '#world/party', 'data-view': 'party' }, el('span', {}, 'The Party'), el('span', { class: 'count' }, worldEntries().filter((e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status)).length)),
+        // Go to my character: the player's own (active) character, straight from the side menu.
+        (() => { const mine = myCharacter(); return mine ? el('a', { href: `#world/e/${mine.id}`, 'data-view': 'mine' }, el('span', {}, mine.name), el('span', { class: 'count', 'aria-hidden': 'true' }, '★')) : null; })(),
         isMember() && (world.info?.primer || isGm()) ? el('a', { href: '#world/zero', 'data-view': 'zero' }, el('span', {}, 'Session zero'), el('span', { class: 'count' }, world.info?.zero_read === false ? 'new' : '')) : null,
         isMember() ? el('a', { href: '#world/schedule', 'data-view': 'schedule' }, el('span', {}, 'Next session'), el('span', { class: 'count' }, world.info?.next_session && Date.parse(world.info.next_session) > Date.now() - 86400000 ? new Date(world.info.next_session).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '')) : null,
         isMember() ? el('a', { href: '#world/downtime', 'data-view': 'downtime' }, el('span', {}, 'Downtime'), el('span', { class: 'count' }, isGm() ? (worldEntries().filter((d) => d.kind === 'downtime' && !d.fields?.resolved).length || '') : '')) : null,
@@ -859,6 +861,13 @@ export function acceptDraft(d = {}) {
   draft = { ...d, fields: { ...(d.fields || {}) } };
   // Already on that form (say, picking a template): redraw it with the draft.
   if (location.hash === `#world/new/${d.kind}`) rerenderWorld(); else location.hash = `world/new/${d.kind}`;
+}
+
+// The signed-in person's own character: the first active one they own (newest first if there are several).
+export function myCharacter() {
+  if (!session.gm) return null;
+  return worldEntries().filter((e) => e.kind === 'character' && e.owner_id === session.gm.id && e.status !== 'suggested' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status))
+    .sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)))[0] || null;
 }
 
 export function mountWorld(root) {

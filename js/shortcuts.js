@@ -17,7 +17,7 @@ function help() {
           row(['j'], 'Quick note: a journal entry about the page you’re on'),
           row(['['], 'Previous entry of the same kind'), row([']'], 'Next entry of the same kind'),
           row(['e'], 'Edit the entry you’re on'), row(['s'], 'Star it (your favorites)'), row(['f'], 'Follow it (hear about changes)'),
-          Object.entries(GO).map(([k, [, label]]) => row(['g', k], `Go to ${label}`)),
+          Object.entries(GO).map(([k, [, label]]) => row(['g', k], `Go to ${label}`)), row(['g', 'y'], 'Go to your own character'),
           row(['Esc'], 'Close a dialog or a map pin'))),
         el('div', { class: 'btnrow' }, el('button', { class: 'btn primary', type: 'button', onclick: () => dialog.close() }, 'Close'))));
     document.body.append(dialog);
@@ -31,6 +31,8 @@ export function initShortcuts() {
     if (ev.ctrlKey || ev.metaKey || ev.altKey) return;
     const a = document.activeElement;
     if (/^(INPUT|TEXTAREA|SELECT)$/.test(a?.tagName) || a?.isContentEditable || document.querySelector('dialog[open]')) return;
+    // g then y: your own character (worked out from the world, so it's looked up when asked).
+    if (pendingG && Date.now() - pendingG < 1200 && ev.key === 'y') { pendingG = 0; ev.preventDefault(); import('./world-ui.js').then((m) => { const c = m.myCharacter(); location.hash = c ? `world/e/${c.id}` : 'world/party'; }); return; }
     if (pendingG && Date.now() - pendingG < 1200 && GO[ev.key]) { location.hash = GO[ev.key][0].slice(1); pendingG = 0; ev.preventDefault(); return; }
     pendingG = 0;
     if (ev.key === 'g') { pendingG = Date.now(); return; }
