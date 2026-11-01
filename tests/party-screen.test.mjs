@@ -8,11 +8,18 @@ test('screenRows: play state first, built stats behind it', () => {
     { id: 'b', name: 'Bo', play: {}, stats: { hp: 9, ac: 16, passive: 11 } },
     { id: 'c', name: 'Cy', play: { hp: 0, inventory: '' } },
   ]);
-  const { load, goods, ...rest } = a;
+  const { load, goods, attuned, ...rest } = a;
+  assert.deepEqual(attuned, []);
   assert.equal(goods, 50 + 175 + 1750); // rope, 7 rations and a lute, at half price
   assert.deepEqual(rest, { id: 'a', name: 'Ann', about: 'Elf wizard 3', hp: 12, max: 20, temp: 3, ac: 15, passive: 13, cp: 1234, carry: 'Rope, 7 × Rations (1 day), Lute', exhaustion: 1, conditions: ['Poisoned'] });
   assert.equal(load.lb, 21.4); assert.equal(load.capacity, null);
   assert.equal(b.hp, 9); assert.equal(b.max, 9); assert.equal(b.ac, 16); assert.equal(b.passive, 11); assert.equal(b.carry, '');
   assert.equal(c.hp, 0); assert.equal(c.max, null); assert.equal(c.ac, null); assert.equal(c.passive, null);
   assert.deepEqual(screenRows(null), []);
+});
+
+test('screenRows: attuned items still carried', async () => {
+  const { screenRows } = await import('../js/party-screen.js');
+  const [r] = screenRows([{ id: 'a', name: 'Ann', play: { inventory: 'Amulet of Health\nRope', attuned: ['Amulet of Health', 'Cloak of Protection'] } }]);
+  assert.deepEqual(r.attuned, ['Amulet of Health']);
 });

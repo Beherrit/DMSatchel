@@ -4,6 +4,7 @@
 import { inventoryLines } from './handover.js';
 import { loadOf } from './weights.js';
 import { worthOf } from './worth.js';
+import { readAttuned } from './attunement.js';
 import { GOODS } from './economy.js';
 
 // chars: [{ id, name, about, play, stats, str, size }] →
@@ -26,6 +27,8 @@ export function screenRows(chars) {
       conditions: Array.isArray(play.conditions) ? play.conditions.filter(Boolean) : [],
       load: loadOf(play, str, size),
       goods: worthOf(play.inventory, GOODS).cp,
+      // Attuned: the items ticked on the sheet that are still in the inventory.
+      attuned: readAttuned(play).filter((n) => String(play.inventory || '').toLowerCase().includes(n.toLowerCase())),
     };
   });
 }

@@ -36,6 +36,6 @@ export function viewScreen() {
         el('td', { class: 'num' }, r.passive ?? '—'),
         el('td', { class: 'num' }, coinText(r.cp), r.goods ? el('div', { class: 'small muted' }, `+ ${coinText(r.goods)} in gear`) : null),
         el('td', { class: `num${r.load.over ? ' screen-worry' : ''}` }, r.load.capacity ? `${lbs(r.load.lb)} / ${lbs(r.load.capacity)}` : lbs(r.load.lb), r.load.over ? el('div', { class: 'small' }, 'over capacity') : null),
-        el('td', { class: 'screen-carry small' }, r.carry || '—')))))),
+        el('td', { class: 'screen-carry small' }, r.carry || '—', r.attuned.length ? el('div', { class: 'screen-attuned' }, el('strong', {}, 'Attuned: '), r.attuned.join(', ')) : null)))))),
     debts.length ? el('p', { class: 'small screen-debts' }, el('strong', {}, 'Who owes whom: '), debts.map((d) => `${d.from} owes ${d.to} ${coinText(d.cp)}${d.note ? ` (${d.note})` : ''}`).join('; '), '.') : null);
 }
