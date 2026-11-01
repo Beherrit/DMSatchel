@@ -511,7 +511,7 @@ to the log at the bottom.
 245. [x] **Hirelings go with the party.** A hired NPC is where the party is, whatever their routine says, on their page
     and in the "who's here" lists.
 246. [x] **A gift they wanted.** Giving an NPC something says when it matches what they want (their Wants field).
-247. [ ] **Attuned.** Players mark which magic items on their sheet they're attuned to; the sheet counts them against
+247. [x] **Attuned.** Players mark which magic items on their sheet they're attuned to; the sheet counts them against
     the limit of three.
 248. [ ] **Too heavy to carry it.** Buying something that would put a character over their carrying capacity says so
     before they pay.
@@ -770,3 +770,4 @@ to the log at the bottom.
 - Routines for the whole town: a settlement's page now offers GMs "Roll routines for 2 NPCs here without one". It counts everyone placed in the town (or in a place inside it) who hasn't got a routine, leaving out the dead and missing. A dialog rolls each one from their role and the town's places, with each routine editable and a tick to leave any out. "Save these" saves the ones kept, and the town's About town line picks them up at once. Routines already written are never touched.
 - Hirelings go with the party: a hired NPC is now wherever the party is (session prep's "where the party is"), whatever their routine says. Their page reads "🕰 With the party: Sedge.", or "With the party, on the road." when the party is between places. The "Here now", "About town", map-pin and session-prep lists put them with the party. The regulars and the town by the hour leave them out while they're away. Their routine is kept for when they're let go.
 - A gift they wanted: when giving an NPC something, the dialog now says "💝 Something Mother Ide wants." as soon as the chosen item answers their Wants field (any word of three letters or more in its name, singular or plural, not counting small words like "the" and "old"). Coin counts when they want money, gold, coin or payment. The server records the match with the gift, the toast adds "something they wanted", and the NPC's gift list marks it 💝. wantsMatch in js/gifts.js unit tested.
+- Attuned: in a sheet's "Items on this sheet" list, each magic item that needs attunement (from the SRD, or a world item whose attunement field says so) now has an "attuned" tick. Above the list, "Attuned to 2 of 3" counts them, in red with "one too many" past the limit of three. Ticks are kept in the sheet's play state (play.attuned), which the sheet keeps when it saves; an item that leaves the inventory stops counting. js/attunement.js unit tested.

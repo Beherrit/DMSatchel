@@ -199,6 +199,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **The party at a glance**: a table for GMs of each character's hit points, coin, rations, exhaustion and conditions.
 - **A printable month**: the calendar's month on one page, with sessions, holidays, moons, deadlines and birthdays, day by day.
 - **A party sheet for the GM's screen**: one printable page of every character's hit points, armour class, passive Perception, coin and what they carry.
+- **Attuned**: players tick the magic items they're attuned to; the sheet counts them against the limit of three.
 - **Tidy the pack**: one button merges duplicate inventory lines on a sheet.
 - **Heavy packs**: each sheet weighs what it carries (SRD weights, coins fifty to the pound) against its carrying capacity.
 - **What it's worth**: each sheet says what its gear would fetch at the shops, and the party sheet shows it under each character's coin.

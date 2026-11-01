@@ -18,6 +18,7 @@ import { loadOf, loadText } from './weights.js';
 import { worthOf } from './worth.js';
 import { readDebts } from './debts.js';
 import { heldBy } from './party-glance.js';
+import { readAttuned, setAttuned, attunedOf, attunedText, ATTUNE_MAX } from './attunement.js';
 import { queuePlay, isOffline } from './outbox.js';
 
 import { CONDITIONS, CONDITION_TEXT, conditionLine } from './conditions.js';
@@ -69,6 +70,7 @@ function defaults(e, ch) {
     shopping: Array.isArray(p.shopping) ? p.shopping : [],
     log: Array.isArray(p.log) ? p.log : [],
     debts: p.debts && typeof p.debts === 'object' && !Array.isArray(p.debts) ? p.debts : {},
+    attuned: Array.isArray(p.attuned) ? p.attuned : [],
   };
 }
 
@@ -368,12 +370,23 @@ export function sheetSection(e, rerender) {
     clearTimeout(itemTimer);
     drawLoad();
     itemTimer = setTimeout(() => {
-      const worldItems = worldEntries().filter((x) => x.kind === 'item').map((x) => ({ name: x.name, entry: x, rarity: x.fields?.rarity, summary: x.summary || String(x.fields?.properties || '').split('\n')[0] }));
+      const worldItems = worldEntries().filter((x) => x.kind === 'item').map((x) => ({ name: x.name, entry: x, rarity: x.fields?.rarity, attunement: /^(yes|required|requires)/i.test(String(x.fields?.attunement || '')) || /requires attunement/i.test(String(x.fields?.properties || '')), summary: x.summary || String(x.fields?.properties || '').split('\n')[0] }));
       const known = new Set(worldItems.map((x) => x.name.toLowerCase()));
       const srd = MAGIC_ITEMS.filter((m) => !/,\s*\+\d/.test(m.name) && !known.has(m.name.toLowerCase())).map((m) => ({ name: m.name, rarity: RARITIES[m.rarity], summary: m.summary, attunement: m.attunement }));
       const found = matchItems(play.inventory, [...worldItems, ...srd]);
-      setKids(itemsBox, found.length ? [el('span', { class: 'eyebrow' }, 'Items on this sheet'), el('ul', { class: 'plain inv-list' }, found.map((x) => el('li', {},
-        x.entry ? link(x.entry) : el('strong', {}, x.name), x.rarity ? el('span', { class: 'muted small' }, ` ${x.rarity}${x.attunement ? ', attunement' : ''}`) : null,
+      // Attuned: a tick for each item that needs attunement, counted against the limit of three.
+      const needs = found.filter((x) => x.attunement).map((x) => x.name);
+      const attuned = attunedOf(readAttuned(play), needs);
+      const tick = (x) => {
+        if (!x.attunement) return null;
+        const cb = el('input', { type: 'checkbox', checked: attuned.some((a) => a.toLowerCase() === x.name.toLowerCase()) || null, disabled: can ? null : true, 'aria-label': `Attuned to ${x.name}` });
+        cb.addEventListener('change', () => { play.attuned = setAttuned(readAttuned(play), x.name, cb.checked); commit(); });
+        return el('label', { class: 'check attune' }, cb, ' attuned');
+      };
+      setKids(itemsBox, found.length ? [el('span', { class: 'eyebrow' }, 'Items on this sheet'),
+        needs.length ? el('p', { class: `small attuned-count${attuned.length > ATTUNE_MAX ? ' bad-line' : ''}` }, attunedText(attuned.length)) : null,
+        el('ul', { class: 'plain inv-list' }, found.map((x) => el('li', {},
+        x.entry ? link(x.entry) : el('strong', {}, x.name), x.rarity ? el('span', { class: 'muted small' }, ` ${x.rarity}${x.attunement ? ', attunement' : ''}`) : null, tick(x),
         x.summary ? el('div', { class: 'small' }, x.summary.length > 220 ? `${x.summary.slice(0, 219)}…` : x.summary) : null)))] : []);
     }, 250);
   }
