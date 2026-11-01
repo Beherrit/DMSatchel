@@ -9,11 +9,12 @@ import { shopsDue, RESTOCK_EVERY } from './restock.js';
 
 const townOf = (e) => { let p = getEntry(e.parent_id), guard = 0; while (p && guard++ < 12) { if (p.kind === 'settlement') return p; p = getEntry(p.parent_id); } return null; };
 
+// Resolves when the dialog closes (or at once if there's nothing to offer).
 export function offerRestock() {
   const cal = worldCalendar();
-  if (!cal) return;
+  if (!cal) return Promise.resolve();
   const due = shopsDue(worldEntries().filter((e) => e.kind === 'location'), toDays(cal, today(cal)));
-  if (!due.length) return;
+  if (!due.length) return Promise.resolve();
   const boxes = due.map((s) => ({ s, cb: el('input', { type: 'checkbox', id: `rs-${s.id}`, checked: true }) }));
   const status = el('p', { class: 'form-status', role: 'status' });
   const go = el('button', { class: 'btn primary', type: 'submit' }, 'Restock them');
@@ -37,6 +38,5 @@ export function offerRestock() {
     d.close();
     window.dispatchEvent(new Event('world:rerender'));
   });
-  d.addEventListener('close', () => d.remove());
-  document.body.append(d); d.showModal();
+  return new Promise((resolve) => { d.addEventListener('close', () => { d.remove(); resolve(); }); document.body.append(d); d.showModal(); });
 }

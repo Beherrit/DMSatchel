@@ -6,6 +6,7 @@ import { el, toast } from './dom.js';
 import { api, isGm, previewing, session } from './api.js';
 import { world, worldEntries, patchEntry } from './world-store.js';
 import { downtimeProgress } from './downtime-days.js';
+import { roadJournal } from './road-journal.js';
 import { playOf, addCoins, changePlay } from './sheet-ui.js';
 import { eatRations } from './rations.js';
 import { coinText } from './economy.js';
@@ -18,6 +19,7 @@ const remembered = () => { try { return localStorage.getItem(keyOf()) || 'Modest
 const remember = (v) => { try { localStorage.setItem(keyOf(), v); } catch { /* private window */ } };
 
 const ROAD = 'road'; // the lifestyle choice for eating rations on the road
+let ateOnRoad = 0; // days of rations each ate after the last days passed (for the road journal)
 
 export async function offerLivingCosts(days, { travel = false } = {}) {
   if (!isGm() || previewing() || !(days > 0)) return;
@@ -88,6 +90,7 @@ export async function offerLivingCosts(days, { travel = false } = {}) {
   async function eatOnTheRoad() {
     go.disabled = true;
     const list = eating(), failed = [];
+    ateOnRoad = days;
     if (wages?.checked && pay.total) { try { await api('party', { method: 'POST', body: { cp: -pay.total, note: `Wages: ${days} day${days === 1 ? '' : 's'} for ${pay.list.map((x) => x.entry.name).join(', ')}` } }); } catch (err) { toast(err.message, 'bad'); } }
     for (const x of list) if (x.ate) { try { await changePlay(x.e, (play) => { play.inventory = eatRations(play.inventory, days).text; }); } catch { failed.push(x.name); } }
     const hungry = list.filter((x) => x.short).map((x) => x.name);
@@ -100,6 +103,18 @@ export async function offerLivingCosts(days, { travel = false } = {}) {
   return new Promise((resolve) => { d.addEventListener('close', resolve); document.body.append(d); d.showModal(); });
 }
 
+// A day on the road: offer the journey as a party journal draft.
+function offerRoadJournal(trip, ate) {
+  const d = el('dialog', { class: 'dialog', 'aria-labelledby': 'rj-title' }, el('div', { class: 'dialog-body' },
+    el('h2', { id: 'rj-title' }, 'Write up the journey?'),
+    el('p', {}, `A party journal entry for the road from ${trip.from} to ${trip.to}, with the days, the weather and the rations, ready to add to.`),
+    el('div', { class: 'btnrow' },
+      el('button', { class: 'btn primary', type: 'button', onclick: () => { d.close(); window.dispatchEvent(new CustomEvent('world:draft', { detail: roadJournal(trip, ate) })); } }, 'Draft it'),
+      el('button', { class: 'btn', type: 'button', onclick: () => d.close() }, 'Not now'))));
+  d.addEventListener('close', () => d.remove());
+  document.body.append(d); d.showModal();
+}
+
 // Open downtime counts the days that passed; say which activities are now ready to resolve.
 async function downtimeMoves(days) {
   const moved = downtimeProgress(worldEntries(), days), failed = [];
@@ -109,9 +124,11 @@ async function downtimeMoves(days) {
 }
 
 window.addEventListener('world:days', async (ev) => {
+  ateOnRoad = 0;
   await offerLivingCosts(ev.detail?.days, { travel: Boolean(ev.detail?.travel) });
   if (isGm() && !previewing() && ev.detail?.days > 0) {
     await downtimeMoves(ev.detail.days);
-    (await import('./world-restock.js')).offerRestock();
+    await (await import('./world-restock.js')).offerRestock();
+    if (ev.detail.trip) offerRoadJournal(ev.detail.trip, ateOnRoad);
   }
 });

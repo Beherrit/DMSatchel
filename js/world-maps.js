@@ -286,7 +286,8 @@ export async function viewMap(id, focusPin) {
     const miles = milesBetween(a, b);
     // Today's weather where they set out can slow them (heavy rain, snow, a strong wind).
     const from = a.entry_id && getEntry(a.entry_id);
-    const slow = from ? weatherSlowdown(dayWeather(from.id, placeTerrains(from), cal)) : { factor: 1, why: '' };
+    const setOut = from ? dayWeather(from.id, placeTerrains(from), cal) : null;
+    const slow = setOut ? weatherSlowdown(setOut) : { factor: 1, why: '' };
     const slowed = Object.fromEntries(Object.entries(travel(miles)).map(([pace, t]) => [pace, { days: t.days * slow.factor, hours: t.hours * slow.factor }]));
     const opts = travelDayOptions(slowed);
     if (!cal || !opts.length) return;
@@ -298,7 +299,7 @@ export async function viewMap(id, focusPin) {
         try {
           const r = await api('settings', { method: 'PATCH', body: { cal: advance(cal, days) } });
           world.info = { ...world.info, cal: r.cal };
-          toast(`${days} day${days === 1 ? '' : 's'} pass: it’s now ${formatDate(r.cal, today(r.cal))}`); dlg.close(); daysPassed(days, { travel: true });
+          toast(`${days} day${days === 1 ? '' : 's'} pass: it’s now ${formatDate(r.cal, today(r.cal))}`); dlg.close(); daysPassed(days, { travel: true, trip: { from: a.label, to: b.label, miles, days, pace, weather: setOut?.line || '', slowed: slow.why, arrived: formatDate(r.cal, today(r.cal)) } });
         } catch (err) { toast(err.message, 'bad'); }
       } }, `${days} day${days === 1 ? '' : 's'} (${pace.toLowerCase()} pace)`)),
         el('button', { class: 'btn ghost', type: 'button', onclick: () => dlg.close() }, 'Not now'))));
