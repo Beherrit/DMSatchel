@@ -67,3 +67,14 @@ test('rollRoutine: a likely day from the role and the places about', async () =>
     assert.deepEqual(unreadable(rollRoutine(makeRng(`x${i}`), '', [])), []);
   }
 });
+
+test('townByHour: who is where through the day', async () => {
+  const { townByHour } = await import('../js/routine.js');
+  const places = { 'the forge': { id: 'f', name: 'The Forge', parent: 't' }, 'the bell': { id: 'b', name: 'The Bell', parent: 't' }, 'the mill': { id: 'm', name: 'The Mill', parent: 'x' } };
+  const resolve = (n) => places[n.toLowerCase()] || null;
+  const inside = (p) => p.parent === 't';
+  const npcs = [{ id: 1, name: 'Bram', routine: 'By day: the Forge; evenings and dusk: the Bell; otherwise: home' }, { id: 2, name: 'Ada', routine: 'Always: the Mill' }];
+  const t = townByHour(npcs, resolve, inside);
+  assert.deepEqual(t.hours.map((h) => h.label), ['Morning', 'Afternoon', 'Evening', 'Night']);
+  assert.deepEqual(t.rows.map((r) => [r.npc.name, r.cells.map((c) => c?.id || '-').join('')]), [['Bram', 'ffb-']]);
+});

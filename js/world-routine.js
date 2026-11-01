@@ -2,7 +2,7 @@
 // place's page lists who is there now. Read from the clock the GMs move on (Time and light).
 import { el, setKids } from './dom.js';
 import { world, worldEntries, link, findByName, getEntry } from './world-store.js';
-import { whereAt, aboutTown, regularsAt, unreadable } from './routine.js';
+import { whereAt, aboutTown, regularsAt, unreadable, townByHour } from './routine.js';
 import { hhmm, partOfDay } from './clock.js';
 
 const now = () => world.info?.clock?.minutes ?? null;
@@ -94,4 +94,17 @@ export function mindingLine(place) {
   const at = placeOf(w.place);
   if (at?.id === place.id) return el('p', { class: 'routine-minding small' }, '🛎 ', link(owner), ' is here, behind the counter', w.until !== null ? el('span', { class: 'muted' }, ` until ${hhmm(w.until)}`) : null, '.');
   return el('p', { class: 'routine-minding small' }, '🛎 ', link(owner), ' is out: ', at ? link(at) : w.place, w.until !== null ? el('span', { class: 'muted' }, ` until ${hhmm(w.until)}`) : null, '.');
+}
+
+// The town by the hour: for a settlement (or region or area), a table of who is where through the day, from routines.
+export function townHoursBox(town) {
+  if (!['region', 'area', 'settlement'].includes(town.kind)) return null;
+  const inside = (p) => { for (let x = p, i = 0; x && i < 12; x = x.parent_id && getEntry(x.parent_id), i++) if (x.id === town.id) return true; return false; };
+  const npcs = worldEntries().filter((x) => x.kind === 'npc' && x.fields?.routine && !['Dead', 'Missing'].includes(x.fields?.status)).map((x) => ({ id: x.id, name: x.name, routine: x.fields.routine, entry: x }));
+  const t = townByHour(npcs, placeOf, inside);
+  if (!t.rows.length) return null;
+  return el('details', { class: 'town-hours' }, el('summary', {}, `The ${town.kind === 'settlement' ? 'town' : 'place'} by the hour (${t.rows.length})`),
+    el('div', { class: 'table-wrap' }, el('table', { class: 'glance-table town-hours-table' },
+      el('thead', {}, el('tr', {}, el('th', { scope: 'col' }, 'Who'), t.hours.map((h) => el('th', { scope: 'col' }, `${h.label} (${hhmm(h.m)})`)))),
+      el('tbody', {}, t.rows.map((r) => el('tr', {}, el('th', { scope: 'row' }, link(r.npc.entry)), r.cells.map((c) => el('td', {}, c ? (c.id === town.id ? 'about town' : link(c)) : el('span', { class: 'muted' }, '—')))))))));
 }

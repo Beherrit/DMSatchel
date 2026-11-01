@@ -125,3 +125,16 @@ export function rollRoutine(rng, role = '', places = []) {
   if (/thief|cutpurse|smuggler/i.test(role) && tavern) return `By day: ${work}; evenings, dusk and nights: ${tavern}; otherwise: home`;
   return `By day: ${work}; ${evening === 'home' ? 'otherwise: home' : `evenings and dusk: ${evening}; otherwise: home`}`;
 }
+
+// The town by the hour: where each NPC is at a few hours of the day, inside a town. npcs: [{ id, name, routine }];
+// resolve(name) → a place or null; inside(place) → bool. → { hours: [{ label, m }], rows: [{ npc, cells: [place|null] }] }
+// (only NPCs who are somewhere in the town at least once), by name.
+export const DAY_HOURS = [{ label: 'Morning', m: 9 * 60 }, { label: 'Afternoon', m: 15 * 60 }, { label: 'Evening', m: 18 * 60 }, { label: 'Night', m: 23 * 60 }];
+export function townByHour(npcs, resolve, inside, hours = DAY_HOURS) {
+  const rows = [];
+  for (const n of npcs || []) {
+    const cells = hours.map((h) => { const w = whereAt(n.routine, h.m); const p = w && resolve(w.place); return p && inside(p) ? p : null; });
+    if (cells.some(Boolean)) rows.push({ npc: n, cells });
+  }
+  return { hours, rows: rows.sort((a, b) => a.npc.name.localeCompare(b.npc.name)) };
+}

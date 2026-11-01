@@ -1736,3 +1736,7 @@ details.quest-group > summary .section-title { display: inline }
 .kit-table tbody th { font-weight: 600; text-transform: none; letter-spacing: normal; font-size: inherit; color: var(--ink) }
 .kit-table .num { text-align: right; width: 5em }
 @media print { .kit-table { font-size: 9.5pt } .kit-table a { color: #000; text-decoration: none } .kit-view .table-wrap { overflow: visible } }
+/* The town by the hour: the table scrolls inside its box on a phone instead of widening the page */
+.town-hours { min-width: 0; max-width: 100%; margin: 6px 0 }
+.town-hours .table-wrap { max-width: 100% }
+.town-hours-table td, .town-hours-table th { white-space: nowrap }

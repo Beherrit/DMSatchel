@@ -112,6 +112,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Where are they now?**: an NPC's daily routine, read against the world's clock: their page says where they are, and each place lists who's there now.
 - **Roll a routine**: a roll button writes a likely day for an NPC from their role and the places in their town.
 - **Who's about town**: a settlement's page lists the NPCs inside it right now, and where.
+- **The town by the hour**: a settlement's page shows who is where through the day, from their routines.
 - **The regulars**: a tavern's or shop's page lists who comes in at some hour, and when.
 - **Minding the shop**: a shop's page says whether its owner is behind the counter right now, or where they are.
 - **Who's here, on the map**: a place's map pin says who is there right now, from their routines.
