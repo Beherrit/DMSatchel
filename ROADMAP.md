@@ -495,6 +495,14 @@ to the log at the bottom.
     they've been given, and by whom.
 237. [x] **Ask the shopkeeper.** A player can ask a shop for something it doesn't stock; the GMs see the asks on the
     shop's page and can add the item to the shelf.
+238. [ ] **The town by the hour.** A settlement's page can show who is where across the town through the day
+    (morning, afternoon, evening, night), from the routines.
+239. [ ] **Open now?** A character's shopping list says, for each shop that stocks something on it, whether it's
+    open at the world's hour and who's minding it.
+240. [ ] **Waiting on the GM.** Session prep gathers what's waiting for a GM: things asked for in shops, wages owed,
+    and bounties not yet paid.
+241. [ ] **Go to my character.** A keyboard shortcut (g then m) and a link in the world's side menu open the player's
+    own character.
 
 ## Ideas parking lot
 
