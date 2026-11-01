@@ -412,6 +412,14 @@ to the log at the bottom.
     are told which ones are ready to resolve.
 193. [x] **A day on the road.** After travel on a map, a party journal draft is offered: from where to where, how
     many days, the weather, and rations eaten.
+194. [ ] **What happened to my coin?** Changes made to a character's sheet from outside (a split, a hand-out, living
+    costs, rations, a purchase, a rest) leave a short line in a history on the sheet, so players can see why.
+195. [ ] **Shops keep hours.** Shops are shut at night by the world's clock: the buy and sell panels say so (GMs
+    can still trade), and a tavern stays open late.
+196. [ ] **Treasure from a fight.** An encounter card can roll treasure for its challenge and put it straight into
+    the party's loot log.
+197. [ ] **The party's wealth.** The party page shows what the party is worth in all: the treasury plus every
+    character's purse.
 
 ## Ideas parking lot
 
