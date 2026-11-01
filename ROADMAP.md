@@ -470,7 +470,7 @@ to the log at the bottom.
     now.
 223. [ ] **Coming up for you.** A player's character page lists the next week of in-world days that matter to them:
     their birthday, their quests' deadlines, festivals.
-224. [ ] **Tidy the pack.** One button on a sheet merges duplicate inventory lines ("Rope" and "2 Rope (from the
+224. [x] **Tidy the pack.** One button on a sheet merges duplicate inventory lines ("Rope" and "2 Rope (from the
     Smithy)" become "3 Rope").
 225. [ ] **Carrying for the party.** Treasury items held by a character show on that character's sheet.
 
@@ -701,3 +701,5 @@ to the log at the bottom.
 - Who's about town: a settlement's page (and a region's or area's) now lists everyone whose routine puts them somewhere inside it right now, and where: "🕰 About town now (08:00): Bramwell at The Forge until 11:00; Cole at Back Room; Wren until 11:00". Places inside places count (a back room in a forge in the town). A shop or tavern keeps its own "Here now". aboutTown in js/routine.js unit tested.
 - Lights from the pack: lighting a torch, candle or lantern on the clock now has a "from whose pack" choice beside it (hidden for spells, which burn nothing). Picking a character takes one torch or candle from their inventory, or a flask of oil for a lantern. Their sheet's history notes it ("Lit a torch", "Filled a lantern with a flask of oil"), and the item counts toward Since last session. If they have none, it says so ("Bo has no torches") and nothing is lit. fuelFor in js/clock.js unit tested with takeItem.
 - Order from the menu: a tavern's bill of fare now has an Order row: who's ordering (players: their own characters; GMs: anyone), what (the day's special first, then the drinks and dishes; beds go through "Stay the night") and how many. The server finds the item on the tavern's menu, takes the coin from the sheet (refusing if it's too dear), and notes it in the sheet's history ("Ordered 2 × Pale ale at The Bell for 8 cp"). It also adds it to the tavern's ledger, which now shows under the menu. Printing the menu leaves both out. menuItem in js/menu.js unit tested; the order route tested against PGlite (owner only, no menu, not on the menu, too dear, paid, the ledger, the menu untouched).
+- Tidy the pack: a sheet with duplicate inventory lines (often from purchases and gifts, which add "(from …)" lines) now shows a "Tidy the pack" button under the inventory. It merges lines naming the same thing, whatever their case and wherever they came from: "Rope" and "2 Rope (from the Smithy)" become "3 Rope", in the first one's place. It saves at once and hides again until there's something to merge; typing a duplicate brings it back. Headings and one-line starting kits are left alone. tidyInventory in js/handover.js unit tested.
+- Full browser sweep (241 tests) clean after #203–#221.

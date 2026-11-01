@@ -23,3 +23,11 @@ test('gives with a note of who it came from', () => {
   assert.equal(giveItem('Dagger\n', 'potions of healing', 2, 'Pip'), 'Dagger\n2 potions of healing (from Pip)');
   assert.equal(giveItem('', 'Rope', 1), 'Rope');
 });
+
+test('tidyInventory merges duplicate lines', async () => {
+  const { tidyInventory } = await import('../js/handover.js');
+  assert.deepEqual(tidyInventory('Rope\nLongsword\n2 Rope (from the Smithy)\n## Worn\nrope x3'), { text: 'Rope x6'.replace('Rope x6', '6 Rope') + '\nLongsword\n## Worn', merged: 2 });
+  assert.deepEqual(tidyInventory('Rope\nLute'), { text: 'Rope\nLute', merged: 0 });
+  assert.deepEqual(tidyInventory('Chain mail, greatsword\nChain mail, greatsword'), { text: 'Chain mail, greatsword\nChain mail, greatsword', merged: 0 });
+  assert.deepEqual(tidyInventory(''), { text: '', merged: 0 });
+});

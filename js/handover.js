@@ -33,3 +33,20 @@ export function giveItem(text, name, qty, from) {
   const t = String(text || '').replace(/\s+$/, '');
   return t ? `${t}\n${line}` : line;
 }
+
+// Tidy the pack: merge inventory lines naming the same thing ("Rope" and "2 Rope (from the Smithy)" → "3 Rope"),
+// keeping the first one's place and spelling. Lines that aren't items, and kits written on one line with commas, stay.
+// → { text, merged } (merged: how many lines were folded in).
+export function tidyInventory(text) {
+  const lines = String(text || '').split('\n'), keep = [], at = new Map();
+  let merged = 0;
+  for (const line of lines) {
+    const x = readLine(line);
+    if (!x.name || x.name.includes(',')) { keep.push({ raw: line }); continue; }
+    const k = norm(x.name);
+    if (at.has(k)) { keep[at.get(k)].qty += x.qty; merged++; continue; }
+    at.set(k, keep.length); keep.push({ name: x.name, qty: x.qty, raw: line });
+  }
+  if (!merged) return { text: String(text || ''), merged: 0 };
+  return { text: keep.map((x) => (x.name ? `${x.qty > 1 ? `${x.qty} ` : ''}${x.name}` : x.raw)).join('\n'), merged };
+}
