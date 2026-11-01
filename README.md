@@ -202,6 +202,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **What it's worth**: each sheet says what its gear would fetch at the shops, and the party sheet shows it under each character's coin.
 - **The journey on the calendar**: the days the party arrived somewhere show on the in-world calendar.
 - **Worries in prep**: session prep warns who's down, low, exhausted, out of rations or broke.
+- **Waiting on you**: session prep gathers what needs a GM: things asked for in shops, wages owed, bounties not yet paid.
 - **Sell the loot**: GMs sell the treasury's items to a shop in one go; coin into the treasury, items onto the shelf.
 - **Divide the loot**: GMs give out the treasury's items in one go, choosing who gets each.
 - **A shop's ledger**: each shop shows the party's recent trade there: who bought and sold what, for how much.
