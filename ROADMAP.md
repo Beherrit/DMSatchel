@@ -506,7 +506,7 @@ to the log at the bottom.
 242. [x] **Gifts and loans in the recap.** The session recap draft notes gifts given to NPCs and loans between
     characters since the last session.
 243. [x] **Shut for the holiday.** Shops close on the world's holidays, and say so ("Shut for Bridge Day").
-244. [ ] **Routines for the whole town.** A GM can roll a daily routine for every NPC in a settlement who hasn't got
+244. [x] **Routines for the whole town.** A GM can roll a daily routine for every NPC in a settlement who hasn't got
     one, in one go, and check them before saving.
 245. [ ] **Hirelings go with the party.** A hired NPC is where the party is, whatever their routine says, on their page
     and in the "who's here" lists.
@@ -761,3 +761,4 @@ to the log at the bottom.
 - Go to my character: the world's side menu now has a link to your own character, under The Party (marked ★). It's the newest active character you own; the retired, dead and missing don't count. Pressing g then y goes there from anywhere (g then m was already Maps), and the "?" list of shortcuts includes it. Without a character of your own, there's no link, and g y opens The Party.
 - Gifts and loans in the recap: the session recap draft now has a "Dealings" section for what changed hands since the last session. Gifts to NPCs are read from the NPCs' lists ("[[Ann]] gave [[Mother Ide]] 2 × Potion of healing (to win her over)"), and loans from the lenders' sheet histories ("[[Ann]] lent 10 gp to Bo (for the boat)"). As with the rest of the recap, NPCs and characters players can't see are left out. Unit tested in tests/recap.test.mjs.
 - Shut for the holiday: on one of the world calendar's holidays, shops now stay shut all day. The trade panel says "🎉 Smithy is shut for Bridge Day. It opens tomorrow.", the shopping list says "shut for Bridge Day", and the server refuses a player's purchase or sale with the same words. Taverns stay open, since it's a festival, and GMs can still trade. shopOpen takes the day's holiday; holidayToday and shutText are new in js/shop-hours.js (unit tested). The server check was tested against PGlite.
+- Routines for the whole town: a settlement's page now offers GMs "Roll routines for 2 NPCs here without one". It counts everyone placed in the town (or in a place inside it) who hasn't got a routine, leaving out the dead and missing. A dialog rolls each one from their role and the town's places, with each routine editable and a tick to leave any out. "Save these" saves the ones kept, and the town's About town line picks them up at once. Routines already written are never touched.

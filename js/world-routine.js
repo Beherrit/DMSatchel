@@ -1,8 +1,10 @@
 // Where are they now?: an NPC's page says where their daily routine puts them at the world's current hour, and a
 // place's page lists who is there now. Read from the clock the GMs move on (Time and light).
-import { el, setKids } from './dom.js';
-import { world, worldEntries, link, findByName, getEntry } from './world-store.js';
-import { whereAt, aboutTown, regularsAt, unreadable, townByHour } from './routine.js';
+import { el, setKids, toast } from './dom.js';
+import { world, worldEntries, link, findByName, getEntry, patchEntry } from './world-store.js';
+import { whereAt, aboutTown, regularsAt, unreadable, townByHour, rollRoutine } from './routine.js';
+import { makeRng, randomSeed } from './rng.js';
+import { isGm, previewing } from './api.js';
 import { hhmm, partOfDay } from './clock.js';
 
 const now = () => world.info?.clock?.minutes ?? null;
@@ -117,4 +119,36 @@ export function ownerIn(place) {
   if (!owner || owner.kind !== 'npc' || !owner.fields?.routine || ['Dead', 'Missing'].includes(owner.fields?.status)) return null;
   const w = whereAt(owner.fields.routine, m);
   return w ? { owner, here: placeOf(w.place)?.id === place.id } : null;
+}
+
+// Routines for the whole town (GMs): roll a daily routine for every NPC in a settlement who hasn't one, check them in
+// a dialog (each editable, each can be left out), and save the ones kept.
+export function rollTownButton(town, rerender) {
+  if (town.kind !== 'settlement' || !isGm() || previewing()) return null;
+  const inside = (p) => { for (let x = p, i = 0; x && i < 12; x = x.parent_id && getEntry(x.parent_id), i++) if (x.id === town.id) return true; return false; };
+  const npcs = worldEntries().filter((x) => x.kind === 'npc' && !String(x.fields?.routine || '').trim() && !['Dead', 'Missing'].includes(x.fields?.status) && x.parent_id && inside(getEntry(x.parent_id))).sort((a, b) => a.name.localeCompare(b.name));
+  if (!npcs.length) return null;
+  const open = () => {
+    const places = worldEntries().filter((x) => x.kind === 'location' && inside(x)).map((x) => ({ name: x.name, type: x.fields?.type || '' }));
+    const rng = makeRng(randomSeed());
+    const rows = npcs.map((n) => ({ n, keep: el('input', { type: 'checkbox', id: `rt-${n.id}`, checked: true }), text: el('textarea', { rows: 2, 'aria-label': `Routine for ${n.name}` }, rollRoutine(rng, n.fields?.role || '', places)) }));
+    const go = el('button', { class: 'btn primary', type: 'submit' }, 'Save these');
+    const d = el('dialog', { class: 'dialog', 'aria-labelledby': 'rt-title' }, el('form', { class: 'dialog-body', method: 'dialog' },
+      el('h2', { id: 'rt-title' }, `Routines for ${town.name}`),
+      el('p', { class: 'muted small' }, 'A likely day for each, from their role and the places in town. Change any, or untick one to leave it out.'),
+      el('ul', { class: 'plain routine-rolls' }, rows.map((r) => el('li', {}, el('label', { class: 'check', for: `rt-${r.n.id}` }, r.keep, ` ${r.n.name}${r.n.fields?.role ? ` (${r.n.fields.role})` : ''}`), r.text))),
+      el('div', { class: 'btnrow' }, go, el('button', { class: 'btn', type: 'button', onclick: () => d.close() }, 'Cancel'))));
+    d.querySelector('form').addEventListener('submit', async (ev) => {
+      ev.preventDefault(); go.disabled = true;
+      let saved = 0; const failed = [];
+      for (const r of rows.filter((x) => x.keep.checked && x.text.value.trim())) {
+        try { await patchEntry(world.entries.get(r.n.id) || r.n, { fields: { routine: r.text.value.trim().slice(0, 2000) } }); saved++; } catch { failed.push(r.n.name); }
+      }
+      toast([saved ? `${saved} routine${saved === 1 ? '' : 's'} saved` : '', failed.length ? `not saved: ${failed.join(', ')}` : ''].filter(Boolean).join(' · ') || 'Nothing saved', failed.length ? 'bad' : undefined);
+      d.close(); rerender();
+    });
+    d.addEventListener('close', () => d.remove());
+    document.body.append(d); d.showModal();
+  };
+  return el('p', { class: 'small' }, el('button', { class: 'btn small ghost', type: 'button', onclick: open }, `Roll routines for ${npcs.length} NPC${npcs.length === 1 ? '' : 's'} here without one`));
 }

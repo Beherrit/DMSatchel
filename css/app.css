@@ -1740,3 +1740,5 @@ details.quest-group > summary .section-title { display: inline }
 .town-hours { min-width: 0; max-width: 100%; margin: 6px 0 }
 .town-hours .table-wrap { max-width: 100% }
 .town-hours-table td, .town-hours-table th { white-space: nowrap }
+.routine-rolls { display: grid; gap: 10px; max-height: 60vh; overflow: auto }
+.routine-rolls li { display: grid; gap: 4px } .routine-rolls textarea { width: 100%; box-sizing: border-box }
