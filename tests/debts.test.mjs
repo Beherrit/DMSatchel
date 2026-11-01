@@ -15,3 +15,13 @@ test('debts: lend, pay back, clear', () => {
   const many = {}; for (let i = 1; i <= 45; i++) shiftDebt(many, { id: `c${i}`, name: `C${i}` }, i * 100);
   assert.equal(readDebts(many).length, 40); assert.equal(balanceWith(many, 'c1'), 0); assert.equal(balanceWith(many, 'c45'), 4500);
 });
+
+test('partyDebts: each debt once, from the lender', () => {
+  const ann = {}, bo = {}, cy = {};
+  shiftDebt(ann, { id: 'b', name: 'Bo' }, 1000, 'boat'); shiftDebt(bo, { id: 'a', name: 'Ann' }, -1000, 'boat');
+  shiftDebt(cy, { id: 'b', name: 'Bo' }, 300); shiftDebt(bo, { id: 'c', name: 'Cy' }, -300);
+  return import('../js/debts.js').then(({ partyDebts }) => {
+    assert.deepEqual(partyDebts([{ id: 'a', name: 'Ann', play: ann }, { id: 'b', name: 'Bo', play: bo }, { id: 'c', name: 'Cy', play: cy }]).map((x) => `${x.from}>${x.to}:${x.cp}:${x.note}`), ['Bo>Ann:1000:boat', 'Bo>Cy:300:']);
+    assert.deepEqual(partyDebts([]), []);
+  });
+});

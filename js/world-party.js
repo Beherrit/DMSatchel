@@ -10,6 +10,7 @@ import { readHandOut, handOutTotal } from './hand-out.js';
 import { partyRows, partyWealth } from './party-glance.js';
 import { sellLoot } from './purchase.js';
 import { addTrade } from './shop-trade.js';
+import { partyDebts } from './debts.js';
 import { shopStanding, sellWithStanding } from './standing-price.js';
 import { giveItem } from './handover.js';
 import { progressBadge } from './world-objectives.js';
@@ -264,6 +265,14 @@ function handouts(list, rerender) {
       : el('p', { class: 'muted' }, isGm() ? 'Write a letter, a map note or a clue as a handout. Keep it hidden until the party finds it, then press “Hand out”.' : 'No handouts yet.'));
 }
 
+// Debts at a glance: who owes whom in the party, from the sheets (each debt read from the lender's side).
+function debtsCard(chars) {
+  const list = partyDebts(chars.filter(ACTIVE).map((c) => ({ id: c.id, name: c.name, play: playOf(c) })));
+  if (!list.length) return null;
+  return el('section', { class: 'card party-debts' }, el('h3', {}, 'Who owes whom'),
+    el('ul', { class: 'plain' }, list.map((d) => el('li', {}, link(getEntry(d.fromId) || { id: d.fromId, name: d.from }), ` owes `, link(getEntry(d.toId) || { id: d.toId, name: d.to }), ` ${coinText(d.cp)}`, d.note ? el('span', { class: 'muted small' }, ` (${d.note})`) : null))));
+}
+
 export async function viewParty(rerender) {
   const all = worldEntries();
   const chars = all.filter((e) => e.kind === 'character').sort(byName);
@@ -292,6 +301,6 @@ export async function viewParty(rerender) {
           journal.length ? el('ul', { class: 'entry-list' }, journal.slice(0, 8).map((j) => el('li', {}, link(j), el('span', { class: 'muted small' }, [j.fields?.character || j.owner || j.created_by, j.fields?.date || when(j.created_at)].filter(Boolean).join(' · ')))))
             : el('p', { class: 'muted' }, 'Nobody has written anything yet.'),
           journal.length > 8 ? el('a', { href: '#world/k/journal' }, `All ${journal.length} entries`) : null)),
-      el('aside', { class: 'party-side' }, treasuryBox, payrollCard(), journeySection(), tableCard())));
+      el('aside', { class: 'party-side' }, treasuryBox, debtsCard(chars), payrollCard(), journeySection(), tableCard())));
 }
 

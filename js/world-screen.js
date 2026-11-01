@@ -8,6 +8,7 @@ import { playOf, characterOf } from './sheet-ui.js';
 import { coinText } from './economy.js';
 import { screenRows } from './party-screen.js';
 import { lbs } from './weights.js';
+import { partyDebts } from './debts.js';
 
 const ACTIVE = (e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
 
@@ -23,6 +24,7 @@ export function viewScreen() {
     return { id: e.id, name: e.name, about: [f.species, f.class, f.level && `level ${f.level}`, f.player && `(${f.player})`].filter(Boolean).join(' '), play: playOf(e), stats: ch?.stats || null, str: ch?.abilities?.scores?.Str ?? null, size: ch?.size || 'Medium' };
   }));
   const byId = new Map(chars.map((e) => [e.id, e]));
+  const debts = partyDebts(chars.map((e) => ({ id: e.id, name: e.name, play: playOf(e) })));
   return el('div', { class: 'w-view screen-view' }, head,
     el('div', { class: 'table-wrap' }, el('table', { class: 'screen-table' },
       el('thead', {}, el('tr', {}, ['Character', 'HP', 'AC', 'Passive Perception', 'Coin', 'Load', 'Carrying'].map((h, i) => el('th', { scope: 'col', class: i && i < 6 ? 'num' : null }, h)))),
@@ -34,5 +36,6 @@ export function viewScreen() {
         el('td', { class: 'num' }, r.passive ?? '—'),
         el('td', { class: 'num' }, coinText(r.cp), r.goods ? el('div', { class: 'small muted' }, `+ ${coinText(r.goods)} in gear`) : null),
         el('td', { class: `num${r.load.over ? ' screen-worry' : ''}` }, r.load.capacity ? `${lbs(r.load.lb)} / ${lbs(r.load.capacity)}` : lbs(r.load.lb), r.load.over ? el('div', { class: 'small' }, 'over capacity') : null),
-        el('td', { class: 'screen-carry small' }, r.carry || '—')))))));
+        el('td', { class: 'screen-carry small' }, r.carry || '—')))))),
+    debts.length ? el('p', { class: 'small screen-debts' }, el('strong', {}, 'Who owes whom: '), debts.map((d) => `${d.from} owes ${d.to} ${coinText(d.cp)}${d.note ? ` (${d.note})` : ''}`).join('; '), '.') : null);
 }

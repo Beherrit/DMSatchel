@@ -27,3 +27,11 @@ export function shiftDebt(play, other, cp, note = '', at = new Date().toISOStrin
 
 // What this character is owed by, or owes, another (cp > 0: owed to them).
 export const balanceWith = (play, id) => readDebts(play).find((x) => x.id === id)?.cp || 0;
+
+// Debts at a glance: who owes whom across the party, read from each lender's sheet (so each debt counts once).
+// chars: [{ id, name, play }] → [{ from (who owes), fromId, to (who's owed), toId, cp, note }], the biggest first.
+export function partyDebts(chars) {
+  const out = [];
+  for (const c of chars || []) for (const d of readDebts(c.play)) if (d.cp > 0) out.push({ from: d.name, fromId: d.id, to: c.name, toId: c.id, cp: d.cp, note: d.note });
+  return out.sort((a, b) => b.cp - a.cp || a.from.localeCompare(b.from));
+}

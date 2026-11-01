@@ -179,6 +179,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Hirelings eat too**: on the road, hired NPCs eat from the treasury's rations first, with a warning when there aren't enough.
 - **Into the stash**: players put items or coin from their sheet into the party treasury, or take them out, noted in the ledger and on the sheet.
 - **Debts between friends**: lend another character coin; both sheets show what's owed until it's paid back or forgiven.
+- **Debts at a glance**: the party page and the GM's party sheet list who owes whom.
 - **Make camp and short rests**: a long rest anywhere, eight hours on the clock, and maybe something from the area's encounter table in the night; or an hour's short rest that gives warlocks their pact slots back.
 - **Hand out to everyone**: GMs give the same item or coin to several characters at once, from nowhere or from the treasury.
 - **The party at a glance**: a table for GMs of each character's hit points, coin, rations, exhaustion and conditions.
