@@ -11,3 +11,12 @@ test('who has it', () => {
   assert.deepEqual(whoHas('idol', chars, stash), []); // none left in the treasury
   assert.deepEqual(whoHas('  ', chars, stash), []);
 });
+
+test('everything: the party’s gear merged, with who has it', async () => {
+  const { everything } = await import('../js/who-has.js');
+  const list = everything([{ id: 'a', name: 'Ann', inventory: 'Rope\n2 Torches\nrope' }, { id: 'b', name: 'Bo', inventory: 'Chain mail, longsword, 2 torches' }], [{ item: 'Rope', qty: 1, holder: 'Bo' }, { item: 'Tent', qty: 0 }]);
+  assert.deepEqual(list.map((x) => `${x.item}=${x.total}: ${x.holders.map((h) => `${h.who} ${h.qty}`).join(', ')}`), [
+    'Chain mail=1: Bo 1', 'longsword=1: Bo 1', 'Rope=3: Ann 2, the treasury (with Bo) 1', 'Torches=4: Ann 2, Bo 2',
+  ]);
+  assert.deepEqual(everything([], []), []);
+});

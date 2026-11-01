@@ -185,6 +185,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Wages owed**: when the treasury can't cover the hirelings' wages, what's unpaid is owed to each until a GM pays it.
 - **Into the stash**: players put items or coin from their sheet into the party treasury, or take them out, noted in the ledger and on the sheet.
 - **Carrying for the party**: treasury items a character holds show on their sheet.
+- **Everything the party carries**: one printable list of all the party's gear and the treasury's, with who has each.
 - **Debts between friends**: lend another character coin; both sheets show what's owed until it's paid back or forgiven.
 - **Debts at a glance**: the party page and the GM's party sheet list who owes whom.
 - **Make camp and short rests**: a long rest anywhere, eight hours on the clock, and maybe something from the area's encounter table in the night; or an hour's short rest that gives warlocks their pact slots back.

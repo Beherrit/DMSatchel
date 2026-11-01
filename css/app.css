@@ -1730,3 +1730,9 @@ details.quest-group > summary .section-title { display: inline }
 .debt-tools .coin-amt { width: 8em }
 .menu-order { margin-top: 10px; flex-wrap: wrap }
 @media print { body.print-menu .menu-order, body.print-menu .shop-ledger { display: none } }
+/* Everything the party carries */
+.kit-table { width: 100%; border-collapse: collapse }
+.kit-table th, .kit-table td { text-align: left; padding: 5px 8px; border-bottom: 1px solid var(--line); vertical-align: top }
+.kit-table tbody th { font-weight: 600; text-transform: none; letter-spacing: normal; font-size: inherit; color: var(--ink) }
+.kit-table .num { text-align: right; width: 5em }
+@media print { .kit-table { font-size: 9.5pt } .kit-table a { color: #000; text-decoration: none } .kit-view .table-wrap { overflow: visible } }

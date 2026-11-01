@@ -108,7 +108,7 @@ function whoHasBox(chars, items) {
       : el('p', { class: 'muted small' }, `Nobody is carrying anything called “${q}”.`));
   };
   input.addEventListener('input', show);
-  return el('div', { class: 'who-has' }, el('label', { for: 'who-has', class: 'eyebrow' }, 'Who has it?'), input, out);
+  return el('div', { class: 'who-has' }, el('label', { for: 'who-has', class: 'eyebrow' }, 'Who has it?'), input, out, el('p', { class: 'small' }, el('a', { href: '#world/kit' }, 'Everything the party carries')));
 }
 
 // GMs: sell the treasury's loot to a stocked shop at its buy-back rate: the coin comes into the treasury and the

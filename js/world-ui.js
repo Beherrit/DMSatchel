@@ -118,6 +118,7 @@ const viewItemCards = lazyView(() => import('./world-playcards.js'), 'viewItemCa
 const viewSpellCards = lazyView(() => import('./world-playcards.js'), 'viewSpellCards');
 const viewWhosWho = lazyView(() => import('./world-whoswho.js'), 'viewWhosWho');
 const viewScreen = lazyView(() => import('./world-screen.js'), 'viewScreen');
+const viewKit = lazyView(() => import('./world-kit.js'), 'viewKit');
 const viewPrep = lazyView(() => import('./world-prep.js'), 'viewPrep');
 const viewPowers = lazyView(() => import('./world-powers.js'), 'viewPowers');
 const viewLibrary = lazyView(() => import('./world-library.js'), 'viewLibrary');
@@ -770,6 +771,7 @@ export async function showWorld(parts, { keepScroll = false } = {}) {
   else if (view === 'spellcards') node = await viewSpellCards(arg || '');
   else if (view === 'whoswho') node = await viewWhosWho();
   else if (view === 'screen') node = await viewScreen();
+  else if (view === 'kit') node = await viewKit();
   else if (view === 'poster') node = await viewPoster(arg);
   else if (view === 'bin') node = await viewBin();
   else if (view === 'atlas') node = viewAtlas();
