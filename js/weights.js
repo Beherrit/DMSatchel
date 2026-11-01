@@ -70,19 +70,25 @@ const round = (x) => Math.round(x * 10) / 10;
 
 // play: the sheet's play state (inventory, cp); str, size: from the character. →
 // { lb, items, coins, unknown: [names], capacity, over }
+// What an inventory holds, item by item: { items: [{ name, qty }], loose } (loose: coins written into the text, such as a
+// Forge starting kit's "4 GP"). A kit on one line ("Chain mail, greatsword, 8 javelins, 4 GP") counts each part.
+export function carried(inventory) {
+  const items = []; let loose = 0;
+  for (const x of inventoryLines(inventory)) {
+    const parts = x.name.includes(',') ? x.line.replace(/^\s*[-*•]\s*/, '').split(',').map((p) => p.trim()).filter(Boolean).map((p) => { const m = /^(\d+)\s*[x×]?\s+(.+)$/i.exec(p); return m ? { name: m[2], qty: Number(m[1]) } : { name: p, qty: 1 }; }) : [{ name: x.name, qty: x.qty }];
+    for (const y of parts) { if (/^(gp|sp|cp|pp|ep)$/i.test(y.name.trim())) loose += y.qty; else items.push(y); }
+  }
+  return { items, loose };
+}
+
 export function loadOf(play = {}, str = null, size = 'Medium') {
   let items = 0; const unknown = [];
-  let loose = 0;
-  for (const x of inventoryLines(play.inventory)) {
-    // A starting kit on one line ("Chain mail, greatsword, 8 javelins, 4 GP"): each part on its own.
-    const parts = x.name.includes(',') ? x.line.replace(/^\s*[-*•]\s*/, '').split(',').map((p) => p.trim()).filter(Boolean).map((p) => { const m = /^(\d+)\s*[x×]?\s+(.+)$/i.exec(p); return m ? { name: m[2], qty: Number(m[1]) } : { name: p, qty: 1 }; }) : [x];
-    for (const y of parts) {
-      if (/^(gp|sp|cp|pp|ep)$/i.test(y.name.trim())) { loose += y.qty; continue; }
-      const w = weightOf(y.name);
-      if (w === null) unknown.push(y.name); else items += w * y.qty;
-    }
+  const c = carried(play.inventory);
+  for (const y of c.items) {
+    const w = weightOf(y.name);
+    if (w === null) unknown.push(y.name); else items += w * y.qty;
   }
-  const coins = coinWeight(play.cp).lb + loose / 50;
+  const coins = coinWeight(play.cp).lb + c.loose / 50;
   const lb = round(items + coins), capacity = capacityOf(str, size);
   return { lb, items: round(items), coins: round(coins), unknown, capacity, over: capacity !== null && lb > capacity };
 }

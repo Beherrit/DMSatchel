@@ -3,9 +3,12 @@
 // built stats (from the Character Forge, when there are any).
 import { inventoryLines } from './handover.js';
 import { loadOf } from './weights.js';
+import { worthOf } from './worth.js';
+import { GOODS } from './economy.js';
 
 // chars: [{ id, name, about, play, stats, str, size }] →
-//   [{ id, name, about, hp, max, temp, ac, passive, cp, carry, exhaustion, conditions, load }] (load: from loadOf)
+//   [{ id, name, about, hp, max, temp, ac, passive, cp, carry, exhaustion, conditions, load, goods }]
+//   (load: from loadOf; goods: what the gear would fetch at the shops, in copper)
 // carry is one line ("Rope, 7 × Rations (1 day), Lute"); numbers missing from both play and stats come back null.
 export function screenRows(chars) {
   const num = (v) => (Number.isFinite(Number(v)) && v !== null && v !== '' ? Number(v) : null);
@@ -22,6 +25,7 @@ export function screenRows(chars) {
       exhaustion: Math.max(0, num(play.exhaustion) || 0),
       conditions: Array.isArray(play.conditions) ? play.conditions.filter(Boolean) : [],
       load: loadOf(play, str, size),
+      goods: worthOf(play.inventory, GOODS).cp,
     };
   });
 }

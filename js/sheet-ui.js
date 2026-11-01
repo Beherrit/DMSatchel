@@ -11,10 +11,11 @@ import { ORD } from './spells.js';
 import { world, patchEntry, worldEntries, link, whenTime } from './world-store.js';
 import { MAGIC_ITEMS, RARITIES } from './magic-items.js';
 import { matchItems } from './inventory-items.js';
-import { coinText, parseCoins } from './economy.js';
+import { coinText, parseCoins, GOODS } from './economy.js';
 import { api, session } from './api.js';
 import { inventoryLines } from './handover.js';
 import { loadOf, loadText } from './weights.js';
+import { worthOf } from './worth.js';
 import { queuePlay, isOffline } from './outbox.js';
 
 import { CONDITIONS, CONDITION_TEXT, conditionLine } from './conditions.js';
@@ -322,7 +323,14 @@ export function sheetSection(e, rerender) {
   const itemsBox = el('div', { class: 'inv-items' });
   // Heavy packs: what the inventory and purse weigh against the character's carrying capacity.
   const loadLine = el('p', { class: 'small load-line', 'aria-live': 'polite' });
-  const drawLoad = () => { const l = loadOf(play, ch?.abilities?.scores?.Str, ch?.size); loadLine.classList.toggle('over', l.over); loadLine.textContent = loadText(l); };
+  // What it's worth: what the gear would fetch at the shops (half the list price).
+  const worthLine = el('p', { class: 'small muted worth-line' });
+  const drawLoad = () => {
+    const l = loadOf(play, ch?.abilities?.scores?.Str, ch?.size); loadLine.classList.toggle('over', l.over); loadLine.textContent = loadText(l);
+    const w = worthOf(play.inventory, GOODS);
+    worthLine.hidden = !w.list;
+    worthLine.textContent = w.list ? `Gear worth about ${coinText(w.cp)} at the shops (half of ${coinText(w.list)} new)${w.unknown.length ? `; not priced: ${w.unknown.slice(0, 3).join(', ')}${w.unknown.length > 3 ? ` and ${w.unknown.length - 3} more` : ''}` : ''}` : '';
+  };
   let itemTimer = null;
   function drawItems() {
     clearTimeout(itemTimer);
@@ -337,7 +345,7 @@ export function sheetSection(e, rerender) {
         x.summary ? el('div', { class: 'small' }, x.summary.length > 220 ? `${x.summary.slice(0, 219)}…` : x.summary) : null)))] : []);
     }, 250);
   }
-  function inventoryItems() { drawItems(); return [loadLine, itemsBox]; }
+  function inventoryItems() { drawItems(); return [loadLine, worthLine, itemsBox]; }
 
   function manual() {
     if (ch || !can) return null;

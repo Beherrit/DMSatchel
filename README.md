@@ -181,6 +181,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **A printable month**: the calendar's month on one page, with sessions, holidays, moons, deadlines and birthdays, day by day.
 - **A party sheet for the GM's screen**: one printable page of every character's hit points, armour class, passive Perception, coin and what they carry.
 - **Heavy packs**: each sheet weighs what it carries (SRD weights, coins fifty to the pound) against its carrying capacity.
+- **What it's worth**: each sheet says what its gear would fetch at the shops, and the party sheet shows it under each character's coin.
 - **The journey on the calendar**: the days the party arrived somewhere show on the in-world calendar.
 - **Worries in prep**: session prep warns who's down, low, exhausted, out of rations or broke.
 - **Sell the loot**: GMs sell the treasury's items to a shop in one go; coin into the treasury, items onto the shelf.
