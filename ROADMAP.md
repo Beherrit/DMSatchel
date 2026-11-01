@@ -480,6 +480,13 @@ to the log at the bottom.
     and shows on the payroll until it's paid.
 229. [x] **Divide the loot.** GMs give out the treasury's items in one go, choosing who gets each; each lands on that
     sheet with a line in the ledger and the sheet's history.
+230. [ ] **Routine as you type.** On an NPC's form, the daily routine field says where it puts them right now
+    while the GM writes it, and flags lines it can't read.
+231. [ ] **Everything the party carries.** One list (printable) of every character's gear and the treasury's,
+    merged, with who has each.
+232. [ ] **A round on the house.** GMs buy everyone at the table a dish or drink from a tavern's menu, paid from the
+    treasury, in one line of the ledger.
+233. [ ] **Whose torch is it.** Lights lit from someone's pack say whose they are on the clock ("Ann's torch").
 
 ## Ideas parking lot
 
