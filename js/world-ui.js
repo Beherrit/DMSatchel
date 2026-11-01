@@ -418,6 +418,7 @@ function viewEntry(id, tab) {
     tableSection(e),
     e.kind === 'encounter' && e.fields?.enc ? (() => { try { return encounterCard(JSON.parse(e.fields.enc), { title: 'Saved encounter', save: false }); } catch { return null; } })() : null,
     attendanceSection(e, rerenderWorld),
+    e.kind === 'location' && e.fields?.type === 'Tavern' && e.fields?.menu && !e.fields?.stock ? closingLine(e) : null,
     e.kind === 'location' && e.fields?.type === 'Tavern' ? menuCard(e, trailTown(e), rerenderWorld) : null,
     e.fields?.stock || (e.kind === 'location' && e.fields?.type === 'Shop' && isGm()) ? el('section', { class: 'card shop-card' },
       el('p', { class: 'shelf-title' }, e.name),
@@ -576,9 +577,11 @@ function placeSummary(e) {
 
 // Closing time: how long until a shop shuts, or opens, by the world's clock (and today's holiday).
 function closingLine(shop) {
-  if (!shop.fields?.stock || world.info?.clock?.minutes === undefined) return null;
+  if (!(shop.fields?.stock || shop.fields?.menu) || world.info?.clock?.minutes === undefined) return null;
   const u = untilChange(shop, world.info.clock.minutes, holidayToday(cleanCalendar(world.info?.cal)));
-  return el('p', { class: 'small muted closing-line' }, '🕰 ', u.open ? `Open for another ${leftText(u.mins)}.` : u.mins === null ? 'Shut today; it opens tomorrow.' : `Shut; it opens in ${leftText(u.mins)}.`);
+  // Late night at the tavern: in the last hour, it's last orders.
+  const last = u.open && u.mins <= 60;
+  return el('p', { class: `small closing-line${last ? ' last-orders' : ' muted'}` }, last ? '🍺 ' : '🕰 ', last ? `${shop.fields?.type === 'Tavern' ? 'Last orders' : 'Closing soon'}: ${shop.name} shuts in ${leftText(u.mins)}.` : u.open ? `Open for another ${leftText(u.mins)}.` : u.mins === null ? 'Shut today; it opens tomorrow.' : `Shut; it opens in ${leftText(u.mins)}.`);
 }
 
 // The places about an entry, for rolling an NPC's routine: those in its town (by where it's placed), else the world's.

@@ -522,7 +522,7 @@ to the log at the bottom.
 253. [x] **Closing time.** A shop's page says how long until it shuts (or opens), by the world's clock.
 254. [x] **A tab at the tavern.** Players can put an order on the party's tab; the GM settles the tab from the
     treasury later, in one line.
-255. [ ] **Late night at the tavern.** After midnight a tavern's page says it's last orders before it shuts at 2.
+255. [x] **Late night at the tavern.** After midnight a tavern's page says it's last orders before it shuts at 2.
 256. [ ] **The NPC's day on their page.** An NPC's page shows their whole day from the routine (morning, afternoon,
     evening, night), not just where they are now.
 257. [ ] **Gifts in session prep.** Session prep notes NPCs who've been given something since the last session.
@@ -789,3 +789,4 @@ to the log at the bottom.
 - Closing time: a stocked shop's page now says how long it has by the world's clock: "🕰 Open for another 3 h 20 min.", "Shut; it opens in 10 h.", or on a holiday, "Shut today; it opens tomorrow." Taverns count to their 2 in the morning close. It's left off the printed shelf. untilChange in js/shop-hours.js unit tested.
 - Full browser sweep (277 tests) clean after #222–#253.
 - A tab at the tavern: a tavern's Order row now has "On the tab" beside "Order". The order goes on the party's tab: nothing comes off the sheet now, though its history notes it ("Put 2 × Pale ale on the party's tab at The Bell (8 cp)"), and the tavern's ledger counts it. Everyone sees "The party's tab: 1 sp 2 cp" under the menu, with who had what. GMs get "Settle it from the treasury", which writes one treasury line ("Settled the tab at The Bell (3 orders)") and clears the tab. Printing the menu leaves the tab out. js/tab.js unit tested; the tab option on the order route tested against PGlite.
+- Late night at the tavern: the closing-time line now also shows on taverns that have a menu but no stock. In the last hour before closing it changes: a tavern says "🍺 Last orders: The Bell shuts in 45 min.", a shop "Closing soon: Smithy shuts in 30 min."
