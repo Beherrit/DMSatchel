@@ -443,6 +443,14 @@ to the log at the bottom.
 208. [x] **Since last session, for you.** A player's character page opens with what changed for them since the last
     session: coin up or down, items in and out, from the sheet's history.
 209. [x] **A printable month.** The calendar's month on one page, with sessions, festivals, deadlines and birthdays.
+210. [ ] **What it's worth.** Each sheet says what its gear would fetch at the shops (half the list price, as the
+    sell route pays), and the party sheet totals each character's goods.
+211. [ ] **Debts between friends.** One character can lend another coin with a note; both sheets show what's owed,
+    and paying it back clears it.
+212. [ ] **Too heavy for the road.** Planning a trip warns when someone is over their carrying capacity, beside the
+    rations check.
+213. [ ] **A shop's ledger.** Each shop page shows the party's recent trade there (who bought and sold what, for how
+    much), from the buy and sell routes.
 
 ## Ideas parking lot
 
