@@ -510,6 +510,12 @@ to the log at the bottom.
     one, in one go, and check them before saving.
 245. [x] **Hirelings go with the party.** A hired NPC is where the party is, whatever their routine says, on their page
     and in the "who's here" lists.
+246. [ ] **A gift they wanted.** Giving an NPC something says when it matches what they want (their Wants field).
+247. [ ] **Attuned.** Players mark which magic items on their sheet they're attuned to; the sheet counts them against
+    the limit of three.
+248. [ ] **Too heavy to carry it.** Buying something that would put a character over their carrying capacity says so
+    before they pay.
+249. [ ] **Print the shelf.** A shop's stock as a printable price list to hand round the table.
 
 ## Ideas parking lot
 
