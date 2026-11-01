@@ -176,6 +176,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Stay the night**: at a tavern with a menu, the party takes rooms, pays from their purses, gets a long rest, hears a rumour over supper, and the clock moves to morning.
 - **Rations run down**: on the road, days passing eat each character's rations; the GMs hear who's run out and may give them a level of exhaustion.
 - **Rations from the stash**: on the road, those who run short eat from the party treasury's rations first, in one line of its ledger.
+- **Hirelings eat too**: on the road, hired NPCs eat from the treasury's rations first, with a warning when there aren't enough.
 - **Into the stash**: players put items or coin from their sheet into the party treasury, or take them out, noted in the ledger and on the sheet.
 - **Debts between friends**: lend another character coin; both sheets show what's owed until it's paid back or forgiven.
 - **Make camp and short rests**: a long rest anywhere, eight hours on the clock, and maybe something from the area's encounter table in the night; or an hour's short rest that gives warlocks their pact slots back.

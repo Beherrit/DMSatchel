@@ -18,3 +18,17 @@ test('rations from the stash', async () => {
   assert.deepEqual(r.used, [{ item: 'Rations (1 day)', qty: 4, by: ['Bo', 'Cy'] }]);
   assert.deepEqual(feedFromStash([{ id: 'b', name: 'Bo', short: 1 }], []).used, []);
 });
+
+test('hirelings eat from the stash first', async () => {
+  const { feedHirelings, stashAfter, feedFromStash } = await import('../js/rations.js');
+  const stash = [{ item: 'Rations (1 day)', qty: 7 }, { item: 'Rope', qty: 2 }];
+  const h = feedHirelings([{ id: 'g', name: 'Gil' }, { id: 'm', name: 'Mags' }], 3, stash);
+  assert.deepEqual(h.fed.used, [{ item: 'Rations (1 day)', qty: 6, by: ['Gil', 'Mags'] }]);
+  assert.deepEqual(h.short, []);
+  const rest = stashAfter(stash, h.fed.used);
+  assert.deepEqual(rest, [{ item: 'Rations (1 day)', qty: 1 }, { item: 'Rope', qty: 2 }]);
+  assert.equal(feedFromStash([{ id: 'a', name: 'Ann', short: 2 }], rest).left.get('a'), 1);
+  const lean = feedHirelings([{ id: 'g', name: 'Gil' }, { id: 'm', name: 'Mags' }], 3, [{ item: 'Rations', qty: 4 }]);
+  assert.deepEqual(lean.short, [{ name: 'Mags', days: 2 }]);
+  assert.deepEqual(feedHirelings([], 3, stash).short, []);
+});

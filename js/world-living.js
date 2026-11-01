@@ -8,7 +8,7 @@ import { world, worldEntries, patchEntry } from './world-store.js';
 import { downtimeProgress } from './downtime-days.js';
 import { roadJournal } from './road-journal.js';
 import { playOf, addCoins, changePlay } from './sheet-ui.js';
-import { eatRations, feedFromStash } from './rations.js';
+import { eatRations, feedFromStash, feedHirelings, stashAfter } from './rations.js';
 import { coinText } from './economy.js';
 import { LIFESTYLES, livingCosts } from './lifestyle.js';
 import { payroll } from './hirelings.js';
@@ -43,11 +43,23 @@ export async function offerLivingCosts(days, { travel = false } = {}) {
   const whoPays = el('fieldset', { class: 'plain-fieldset' }, el('legend', {}, 'Who pays'),
       el('label', { class: 'check', for: 'lv-own' }, own, ' Each character, from their own coin'),
       el('label', { class: 'check', for: 'lv-pot' }, pot, ` The party treasury (${coinText(treasury)})`));
+  // Hirelings eat too: on the road, hired NPCs eat from the treasury's rations, before any character's shortfall.
+  const hires = pay.list.map((x) => ({ id: x.entry.id, name: x.entry.name }));
+  const hireFeed = hires.length ? feedHirelings(hires, days, stash) : null;
+  const hireLine = hires.length ? el('p', { class: 'small hire-food', hidden: true }) : null;
+  if (hireLine) {
+    const ate = hireFeed.fed.used.reduce((t, u) => t + u.qty, 0);
+    hireLine.textContent = ate
+      ? `${hires.length === 1 ? hires[0].name : 'The hirelings'} eat${hires.length === 1 ? 's' : ''} ${ate} of the treasury’s rations${hireFeed.short.length ? `; not enough: ${hireFeed.short.map((x) => `${x.name} goes ${x.days} day${x.days === 1 ? '' : 's'} short`).join(', ')}` : ''}.`
+      : `The treasury has no rations for ${hires.length === 1 ? hires[0].name : 'the hirelings'}: ${hireFeed.short.map((x) => `${x.name} goes ${x.days} day${x.days === 1 ? '' : 's'} short`).join(', ')}.`;
+    hireLine.classList.toggle('bad-line', hireFeed.short.length > 0);
+  }
+  const stashLeft = hireFeed ? stashAfter(stash, hireFeed.fed.used) : stash;
   // Rations from the stash: shortfalls are covered from the treasury's rations first (ticked, when there are any).
-  const stashRations = stash.filter((s) => /\bration/i.test(s.item) && s.qty > 0).reduce((t, s) => t + s.qty, 0);
+  const stashRations = stashLeft.filter((s) => /\bration/i.test(s.item) && s.qty > 0).reduce((t, s) => t + s.qty, 0);
   const fromStash = stashRations ? el('input', { type: 'checkbox', id: 'lv-stash', checked: true }) : null;
   const stashLine = fromStash ? el('label', { class: 'check stash-line', for: 'lv-stash', hidden: true }, fromStash, el('span', {})) : null;
-  const fed = (list) => (fromStash?.checked ? feedFromStash(list.filter((x) => x.short).map((x) => ({ id: x.id, name: x.name, short: x.short })), stash) : null);
+  const fed = (list) => (fromStash?.checked ? feedFromStash(list.filter((x) => x.short).map((x) => ({ id: x.id, name: x.name, short: x.short })), stashLeft) : null);
   const stillShort = (list) => { const f = fed(list); return list.map((x) => ({ ...x, fromStash: f ? x.short - (f.left.get(x.id) ?? x.short) : 0, short: f ? (f.left.get(x.id) ?? x.short) : x.short })); };
   // Who went short of food on the road: the GM may give them a level of exhaustion (unticked: it's their call).
   const tired = new Set();
@@ -64,6 +76,7 @@ export async function offerLivingCosts(days, { travel = false } = {}) {
   const show = () => {
     whoPays.hidden = road();
     if (!road()) hunger.hidden = true;
+    if (hireLine) hireLine.hidden = !road();
     if (stashLine) {
       const anyShort = road() && eating().some((x) => x.short);
       stashLine.hidden = !anyShort;
@@ -88,6 +101,7 @@ export async function offerLivingCosts(days, { travel = false } = {}) {
     chars.some((c) => c.lifestyle) ? el('p', { class: 'muted small' }, `Living their own way: ${chars.filter((c) => c.lifestyle).map((c) => `${c.name} (${c.lifestyle.toLowerCase()})`).join(', ')}. On the road, everyone eats rations.`) : null,
     whoPays,
     preview,
+    hireLine,
     stashLine,
     hunger,
     wages ? el('label', { class: 'check', for: 'lv-wages' }, wages, ` Pay ${pay.list.length === 1 ? pay.list[0].entry.name : `${pay.list.length} hirelings`} ${coinText(pay.total)} in wages from the treasury`) : null,
@@ -119,6 +133,7 @@ export async function offerLivingCosts(days, { travel = false } = {}) {
     go.disabled = true;
     const raw = eating(), f = fed(raw), list = stillShort(raw), failed = [];
     ateOnRoad = days;
+    if (hireFeed) for (const u of hireFeed.fed.used) { try { await api('party', { method: 'POST', body: { item: u.item, qty: -u.qty, note: `Eaten on the road by ${u.by.join(', ')} (hired)` } }); } catch (err) { toast(err.message, 'bad'); } }
     if (f) for (const u of f.used) { try { await api('party', { method: 'POST', body: { item: u.item, qty: -u.qty, note: `Eaten on the road by ${u.by.join(', ')}` } }); } catch (err) { toast(err.message, 'bad'); } }
     if (wages?.checked && pay.total) { try { await api('party', { method: 'POST', body: { cp: -pay.total, note: `Wages: ${days} day${days === 1 ? '' : 's'} for ${pay.list.map((x) => x.entry.name).join(', ')}` } }); } catch (err) { toast(err.message, 'bad'); } }
     for (const x of list) {
@@ -127,7 +142,7 @@ export async function offerLivingCosts(days, { travel = false } = {}) {
       const note = [x.ate ? `Ate ${x.ate} day${x.ate === 1 ? '' : 's'} of rations on the road${x.short ? ` (${x.short} short)` : ''}` : x.short ? `${x.short} day${x.short === 1 ? '' : 's'} on the road without food` : '', x.fromStash ? `${x.fromStash} day${x.fromStash === 1 ? '' : 's'} from the treasury’s rations` : '', worn ? 'a level of exhaustion from hunger' : ''].filter(Boolean).join('; ');
       try { await changePlay(x.e, (play) => { play.inventory = eatRations(play.inventory, days).text; if (worn) play.exhaustion = Math.min(6, (Number(play.exhaustion) || 0) + 1); }, note); } catch { failed.push(x.name); }
     }
-    const hungry = list.filter((x) => x.short).map((x) => x.name);
+    const hungry = [...list.filter((x) => x.short).map((x) => x.name), ...(hireFeed?.short || []).map((x) => x.name)];
     toast([`${days} day${days === 1 ? '' : 's'} of rations eaten`, hungry.length ? `out of food: ${hungry.join(', ')}` : '', failed.length ? `these sheets didn’t update: ${failed.join(', ')}` : ''].filter(Boolean).join(' · '), hungry.length || failed.length ? 'bad' : undefined);
     d.close();
     window.dispatchEvent(new Event('world:rerender'));

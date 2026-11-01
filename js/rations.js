@@ -33,3 +33,16 @@ export function feedFromStash(short, stash) {
   }
   return { left, used: pots.filter((p) => p.used).map((p) => ({ item: p.item, qty: p.used, by: [...p.by] })) };
 }
+
+// The stash after some of it was eaten (used: from feedFromStash).
+export function stashAfter(stash, used) {
+  const left = new Map((used || []).map((u) => [u.item, u.qty]));
+  return (stash || []).map((s) => ({ ...s, qty: s.qty - (left.get(s.item) || 0) })).filter((s) => s.qty > 0);
+}
+
+// Hirelings eat too: each hired NPC eats a day's rations a day from the stash, before the characters' shortfall.
+// hires: [{ id, name }] → { fed: feedFromStash's result, short: [{ name, days }] }
+export function feedHirelings(hires, days, stash) {
+  const fed = feedFromStash((hires || []).map((h) => ({ id: h.id, name: h.name, short: days })), stash);
+  return { fed, short: (hires || []).map((h) => ({ name: h.name, days: fed.left.get(h.id) || 0 })).filter((x) => x.days) };
+}
