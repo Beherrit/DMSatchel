@@ -39,13 +39,11 @@ export function routineNow(e) {
 export function hereNow(place) {
   if (['region', 'area', 'settlement'].includes(place.kind)) return aboutTownLine(place);
   if (['npc', 'character', 'session', 'quest', 'item', 'journal', 'event'].includes(place.kind)) return null;
-  const m = now();
-  if (m === null) return null;
-  const here = worldEntries().filter((x) => x.kind === 'npc' && nowRoutine(x) && !['Dead', 'Missing'].includes(x.fields?.status))
-    .map((x) => ({ x, w: whereAt(nowRoutine(x), m) })).filter(({ w }) => w && placeOf(w.place)?.id === place.id)
-    .sort((a, b) => a.x.name.localeCompare(b.x.name));
-  if (!here.length) return null;
-  return el('p', { class: 'routine-here small' }, `🕰 Here now (${hhmm(m)}): `, here.map(({ x, w }, i) => [i ? ', ' : '', link(x), w.until !== null ? el('span', { class: 'muted' }, ` until ${hhmm(w.until)}`) : null]));
+  // Who's in the back room: people in places inside this one (a back room, a cellar) count too, saying where.
+  const a = aroundNow(place);
+  if (!a?.list.length) return null;
+  const { m, list } = a;
+  return el('p', { class: 'routine-here small' }, `🕰 Here now (${hhmm(m)}): `, list.map(({ npc, place: at, until }, i) => [i ? ', ' : '', link(npc.entry), at.id === place.id ? null : [' (in ', link(at), ')'], until !== null ? el('span', { class: 'muted' }, ` until ${hhmm(until)}`) : null]));
 }
 
 // Who's about town: for a settlement, region or area, everyone whose routine puts them somewhere inside it now.
