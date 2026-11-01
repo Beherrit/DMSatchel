@@ -526,6 +526,11 @@ to the log at the bottom.
 256. [x] **The NPC's day on their page.** An NPC's page shows their whole day from the routine (morning, afternoon,
     evening, night), not just where they are now.
 257. [x] **Gifts in session prep.** Session prep notes NPCs who've been given something since the last session.
+258. [ ] **Tabs waiting.** Session prep's "Waiting on you" lists taverns with an unsettled party tab.
+259. [ ] **Pay your own tab.** A player can settle their own orders on a tab from their sheet's coin.
+260. [ ] **Who's in the back room.** A place inside another (a back room, a cellar) shows on its parent's page in the
+    "Here now" line, so the tavern says who's in its back room.
+261. [ ] **Routines on the printable cast list.** The printable Who's who adds where each NPC usually is by day.
 
 ## Ideas parking lot
 
