@@ -473,6 +473,13 @@ to the log at the bottom.
 224. [x] **Tidy the pack.** One button on a sheet merges duplicate inventory lines ("Rope" and "2 Rope (from the
     Smithy)" become "3 Rope").
 225. [x] **Carrying for the party.** Treasury items held by a character show on that character's sheet.
+226. [ ] **The regulars.** A tavern's or shop's page lists the NPCs whose routine brings them there at some hour,
+    and when.
+227. [ ] **Who's here, on the map.** A map pin's card says who is at that place right now, from their routines.
+228. [ ] **Wages owed.** When the treasury can't cover the hirelings' wages, what's unpaid is noted as owed to each,
+    and shows on the payroll until it's paid.
+229. [ ] **Divide the loot.** GMs give out the treasury's items in one go, choosing who gets each; each lands on that
+    sheet with a line in the ledger and the sheet's history.
 
 ## Ideas parking lot
 
