@@ -520,6 +520,12 @@ to the log at the bottom.
 251. [x] **Festival specials.** On a holiday, taverns offer a festival dish or drink at the top of their menu.
 252. [x] **Who's been given what.** A character's page lists the gifts they've given NPCs, and to whom.
 253. [x] **Closing time.** A shop's page says how long until it shuts (or opens), by the world's clock.
+254. [ ] **A tab at the tavern.** Players can put an order on the party's tab; the GM settles the tab from the
+    treasury later, in one line.
+255. [ ] **Late night at the tavern.** After midnight a tavern's page says it's last orders before it shuts at 2.
+256. [ ] **The NPC's day on their page.** An NPC's page shows their whole day from the routine (morning, afternoon,
+    evening, night), not just where they are now.
+257. [ ] **Gifts in session prep.** Session prep notes NPCs who've been given something since the last session.
 
 ## Ideas parking lot
 
