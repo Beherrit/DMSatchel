@@ -193,6 +193,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Worries in prep**: session prep warns who's down, low, exhausted, out of rations or broke.
 - **Sell the loot**: GMs sell the treasury's items to a shop in one go; coin into the treasury, items onto the shelf.
 - **A shop's ledger**: each shop shows the party's recent trade there: who bought and sold what, for how much.
+- **Order from the menu**: players order food and drink from a tavern's menu, paid from their sheet and noted in the tavern's ledger.
 - **Enough food for the road?**: planning a trip on a map says who has enough rations for it and who's short.
 - **Too heavy for the road**: planning a trip warns who is over their carrying capacity.
 - **A packing list**: planning a trip puts the rations each character is short of on their shopping list.

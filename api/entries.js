@@ -36,7 +36,7 @@ import { mergedEntry, relinkLinks, relinkText } from '../js/merge.js';
 import { fieldsWith } from '../js/custom-fields.js';
 import { cleanSay } from '../js/say.js';
 import { cleanAka } from '../js/aka.js';
-import { readMenu } from '../js/menu.js';
+import { readMenu, menuItem } from '../js/menu.js';
 import { buyFrom, sellTo, haggleFor, withHaggle, setHaggle } from '../js/purchase.js';
 import { addLog } from '../js/play-log.js';
 import { shiftDebt, balanceWith } from '../js/debts.js';
@@ -393,6 +393,31 @@ export default route({
     }
     // Buy from a shop: {buy: {shop, character, item, qty, base}} — a player for their own character (or a GM for any):
     // the coin comes off the character, the item goes into their inventory, and the shop's stock goes down.
+    // Order from the menu: food or drink from a tavern's menu, paid from a character's sheet, noted in its history and
+    // the tavern's ledger. (A bed for the night goes through the inn's own stay, which also rests the party.)
+    if (req.body.order) {
+      const b = req.body.order;
+      const inn = await loadOne(String(b.tavern || '').slice(0, 40), req.world.id), ch = await loadOne(String(b.character || '').slice(0, 40), req.world.id);
+      if (!inn || inn.deleted || !visibleTo(inn, req) || !readMenu(inn.fields?.menu)) return fail(res, 404, 'That menu isn’t up.');
+      if (!ch || ch.deleted || ch.kind !== 'character') return fail(res, 404, 'Pick a character.');
+      if (!req.isGmHere && ch.owner_id !== req.gm.id) return fail(res, 403, 'You can only order for your own character.');
+      const item = menuItem(inn.fields.menu, clip(b.item, 120));
+      if (!item) return fail(res, 400, 'That isn’t on the menu.');
+      const qty = Math.max(1, Math.min(20, Math.round(Number(b.qty) || 1))), cp = item.cp * qty;
+      let p = {}; try { p = JSON.parse(ch.fields?.play || '{}') || {}; } catch { p = {}; }
+      if (!Number.isFinite(p.cp)) p.cp = Math.max(0, Math.round(Number(b.base?.cp) || 0));
+      if (p.inventory === undefined) p.inventory = clip(b.base?.inventory, 15000);
+      if (cp > p.cp) return fail(res, 400, `${ch.name} doesn’t have enough coin: that’s ${coinText(cp)} and they have ${coinText(p.cp)}.`);
+      p.cp -= cp;
+      addLog(p, `Ordered ${qty > 1 ? `${qty} × ` : ''}${item.name} at ${inn.name} for ${coinText(cp)}`, req.gm.name, undefined, { cp: -cp });
+      const trade = addTrade(inn.fields.trade, { who: ch.name, dir: 'buy', item: item.name, qty, cp });
+      await sql`UPDATE entries SET fields = fields || jsonb_build_object('trade', ${trade}::text), updated_by = ${req.gm.id}, updated_at = now(), version = version + 1
+        WHERE id = ${inn.id} AND world_id = ${req.world.id}`;
+      await sql`UPDATE entries SET fields = fields || jsonb_build_object('play', ${JSON.stringify(p)}::text), updated_by = ${req.gm.id}, updated_at = now(), version = version + 1
+        WHERE id = ${ch.id} AND world_id = ${req.world.id}`;
+      await record(ch.id, req.gm.id, 'order', null);
+      return send(res, 200, { entries: [shape(await loadOne(inn.id, req.world.id), req), shape(await loadOne(ch.id, req.world.id), req)], ordered: { name: item.name, qty, cp } });
+    }
     if (req.body.buy) {
       const b = req.body.buy;
       const shop = await loadOne(String(b.shop || '').slice(0, 40), req.world.id), ch = await loadOne(String(b.character || '').slice(0, 40), req.world.id);

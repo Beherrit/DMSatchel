@@ -1728,3 +1728,5 @@ details.quest-group > summary .section-title { display: inline }
 .debt-list li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px; padding: 4px 0; border-bottom: 1px solid var(--line) }
 .debt-tools { display: inline-flex; gap: 6px; align-items: center }
 .debt-tools .coin-amt { width: 8em }
+.menu-order { margin-top: 10px; flex-wrap: wrap }
+@media print { body.print-menu .menu-order, body.print-menu .shop-ledger { display: none } }

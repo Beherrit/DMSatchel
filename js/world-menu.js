@@ -1,7 +1,8 @@
 // Tavern menu: on a tavern's page, its bill of fare (if it has one) for everyone; GMs roll one priced to suit the
 // town, roll again, keep it, or take it down. Print gives just the menu, to put on the table.
 import { el, toast, setKids } from './dom.js';
-import { api, isGm, previewing } from './api.js';
+import { api, isGm, isMember, previewing, session } from './api.js';
+import { tradeLedger } from './world-buy.js';
 import { world, worldEntries, patchEntry, getEntry, link } from './world-store.js';
 import { rumorsAt } from './world-rumors.js';
 import { makeRng } from './rng.js';
@@ -73,6 +74,30 @@ function menuBody(m) {
       el('ul', { class: 'plain menu-items' }, s.items.map((x) => el('li', {}, el('span', {}, x.name), el('span', { class: 'menu-price' }, coinText(x.cp))))))));
 }
 
+// Order from the menu: food or drink for a character (players: their own), paid from their sheet by the server.
+function orderPart(inn, m, rerender) {
+  if (!isMember() || previewing()) return null;
+  const chars = worldEntries().filter((c) => c.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(c.fields?.status) && (isGm() || c.owner_id === session.gm?.id)).sort((a, b) => a.name.localeCompare(b.name));
+  const nights = new Set(roomsOf(m).map((x) => x.name));
+  const items = [...(m.special ? [m.special] : []), ...m.sections.filter((s) => !/night/i.test(s.title)).flatMap((s) => s.items)].filter((x) => x.cp > 0 && !nights.has(x.name));
+  if (!chars.length || !items.length) return null;
+  const who = el('select', { 'aria-label': 'Who’s ordering' }, chars.map((c) => el('option', { value: c.id }, c.name)));
+  const what = el('select', { 'aria-label': 'What to order' }, items.map((x) => el('option', { value: x.name }, `${x.name} (${coinText(x.cp)})`)));
+  const qty = el('input', { type: 'number', min: 1, max: 20, value: 1, class: 'qty', 'aria-label': 'How many' });
+  const go = el('button', { class: 'btn small', type: 'button', onclick: async () => {
+    const c = world.entries.get(who.value);
+    const base = playOf(c);
+    go.disabled = true;
+    try {
+      const r = await api('entries', { method: 'PATCH', body: { order: { tavern: inn.id, character: c.id, item: what.value, qty: Number(qty.value) || 1, base: { cp: base.cp, inventory: base.inventory } } } });
+      for (const x of r.entries) world.entries.set(x.id, x);
+      toast(`${c.name}: ${r.ordered.qty > 1 ? `${r.ordered.qty} × ` : ''}${r.ordered.name}, ${coinText(r.ordered.cp)}`);
+      rerender();
+    } catch (err) { toast(err.message, 'bad'); go.disabled = false; }
+  } }, 'Order');
+  return el('div', { class: 'menu-order controls' }, el('span', { class: 'eyebrow' }, 'Order'), who, what, qty, go);
+}
+
 // town: the settlement the tavern is in (for its size and name), or null.
 export function menuCard(e, town, rerender) {
   const saved = readMenu(e.fields?.menu);
@@ -94,6 +119,8 @@ export function menuCard(e, town, rerender) {
         m && !draft ? el('div', { class: 'btnrow' }, gm && roomsOf(m).length ? el('button', { class: 'btn small', type: 'button', onclick: () => stayDialog(e, m, rerender) }, 'Stay the night…') : null,
           el('button', { class: 'btn small ghost', type: 'button', onclick: print }, 'Print')) : null),
       m ? menuBody(m) : el('p', { class: 'muted small' }, `What’s on the board tonight: drinks, dishes and a bed, priced for ${town ? town.name : 'a town this size'}.`),
+      m && !draft ? orderPart(e, m, rerender) : null,
+      m && !draft && !e.fields?.stock ? tradeLedger(e) : null,
       gm ? el('div', { class: 'btnrow' },
         draft ? [el('button', { class: 'btn small primary', type: 'button', onclick: () => keep(draft) }, 'Keep this menu'),
           el('button', { class: 'btn small', type: 'button', onclick: () => { draft = roll(); draw(); } }, '↻ Another'),

@@ -32,3 +32,12 @@ test('prices are chalked up tidily', () => {
     for (const x of rollMenu(makeRng(`t${s}`), { size }).sections[1].items) assert.ok(x.cp < 10 || (x.cp < 20 ? x.cp % 5 === 0 : x.cp % 10 === 0), `${x.cp}`);
   }
 });
+
+test('menuItem: find a dish or drink to order', async () => {
+  const { menuItem } = await import('../js/menu.js');
+  const menu = JSON.stringify({ quality: 'modest', sections: [{ title: 'Drink', items: [{ name: 'Pale ale', cp: 4 }] }, { title: 'Beds', items: [{ name: 'Common room', cp: 10 }] }], special: { name: 'Rabbit pie', cp: 12, note: 'while it lasts' } });
+  assert.deepEqual(menuItem(menu, 'pale ale'), { name: 'Pale ale', cp: 4 });
+  assert.deepEqual(menuItem(menu, 'Rabbit pie'), { name: 'Rabbit pie', cp: 12 });
+  assert.equal(menuItem(menu, 'Venison'), null);
+  assert.equal(menuItem('', 'Pale ale'), null);
+});

@@ -464,7 +464,7 @@ to the log at the bottom.
     now, and where.
 220. [x] **Lights from the pack.** Lighting a torch or lantern on the clock can take it (or a flask of oil) from a
     character's inventory, with a line in their history.
-221. [ ] **Order from the menu.** A player orders food or drink from a tavern's menu, paid from their sheet, noted in
+221. [x] **Order from the menu.** A player orders food or drink from a tavern's menu, paid from their sheet, noted in
     their history and the tavern's ledger.
 
 ## Ideas parking lot
@@ -693,3 +693,4 @@ to the log at the bottom.
 - Debts at a glance: the party page's side column now has "Who owes whom" ("Bo owes Ann 10 gp (for the boat)", both names linked), and the GM's party sheet prints the same under its table. Each debt is read once, from the lender's sheet. Nothing shows while everyone is square. partyDebts in js/debts.js unit tested.
 - Who's about town: a settlement's page (and a region's or area's) now lists everyone whose routine puts them somewhere inside it right now, and where: "🕰 About town now (08:00): Bramwell at The Forge until 11:00; Cole at Back Room; Wren until 11:00". Places inside places count (a back room in a forge in the town). A shop or tavern keeps its own "Here now". aboutTown in js/routine.js unit tested.
 - Lights from the pack: lighting a torch, candle or lantern on the clock now has a "from whose pack" choice beside it (hidden for spells, which burn nothing). Picking a character takes one torch or candle from their inventory, or a flask of oil for a lantern. Their sheet's history notes it ("Lit a torch", "Filled a lantern with a flask of oil"), and the item counts toward Since last session. If they have none, it says so ("Bo has no torches") and nothing is lit. fuelFor in js/clock.js unit tested with takeItem.
+- Order from the menu: a tavern's bill of fare now has an Order row: who's ordering (players: their own characters; GMs: anyone), what (the day's special first, then the drinks and dishes; beds go through "Stay the night") and how many. The server finds the item on the tavern's menu, takes the coin from the sheet (refusing if it's too dear), and notes it in the sheet's history ("Ordered 2 × Pale ale at The Bell for 8 cp"). It also adds it to the tavern's ledger, which now shows under the menu. Printing the menu leaves both out. menuItem in js/menu.js unit tested; the order route tested against PGlite (owner only, no menu, not on the menu, too dear, paid, the ledger, the menu untouched).

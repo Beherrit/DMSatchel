@@ -67,3 +67,13 @@ export function menuText(m, coins) {
   for (const s of m.sections) { lines.push('', s.title); for (const x of s.items) lines.push(`${x.name}, ${coins(x.cp)}`); }
   return lines.join('\n');
 }
+
+// Order from the menu: the dish or drink of this name on a menu (the special too), or null.
+export function menuItem(menu, name) {
+  const m = readMenu(menu);
+  if (!m) return null;
+  const want = String(name || '').trim().toLowerCase();
+  const all = [...m.sections.flatMap((s) => s.items), ...(m.special ? [m.special] : [])];
+  const hit = all.find((x) => x.name.toLowerCase() === want);
+  return hit && hit.cp > 0 ? { name: hit.name, cp: hit.cp } : null;
+}
