@@ -160,3 +160,10 @@ export function rollTownButton(town, rerender) {
   };
   return el('p', { class: 'small' }, el('button', { class: 'btn small ghost', type: 'button', onclick: open }, `Roll routines for ${npcs.length} NPC${npcs.length === 1 ? '' : 's'} here without one`));
 }
+
+// A quiet night: who's out at a place in the world at this minute (not "home"), for the clock's midnight toast.
+export function outAndAbout(m) {
+  return worldEntries().filter((x) => x.kind === 'npc' && nowRoutine(x) && !['Dead', 'Missing'].includes(x.fields?.status))
+    .map((x) => { const w = whereAt(nowRoutine(x), m); const p = w && placeOf(w.place); return p ? { npc: x, place: p } : null; })
+    .filter(Boolean).sort((a, b) => a.npc.name.localeCompare(b.npc.name));
+}

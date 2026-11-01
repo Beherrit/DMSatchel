@@ -7,6 +7,7 @@ import { world, worldEntries } from './world-store.js';
 import { readClock, LIGHTS, STEPS, partOfDay, hhmm, leftText, fuelFor, lightName } from './clock.js';
 import { changePlay } from './sheet-ui.js';
 import { takeItem } from './handover.js';
+import { outAndAbout } from './world-routine.js';
 import { formatDate, today } from './calendar.js';
 
 export function clockCard() {
@@ -16,7 +17,10 @@ export function clockCard() {
     try {
       const r = await api('settings', { method: 'PATCH', body: { clock } });
       world.info = { ...world.info, clock: r.clock, ...(r.cal ? { cal: r.cal } : {}) };
-      const notes = [msg, r.out?.length ? `${r.out.join(', ')} went out` : '', r.days && r.cal ? `a new day: ${formatDate(r.cal, today(r.cal), { weekday: true })}` : ''].filter(Boolean);
+      // A quiet night: past midnight, say who's still out and about at this hour.
+      const late = r.days && r.clock ? outAndAbout(r.clock.minutes) : [];
+      const notes = [msg, r.out?.length ? `${r.out.join(', ')} went out` : '', r.days && r.cal ? `a new day: ${formatDate(r.cal, today(r.cal), { weekday: true })}` : '',
+        r.days ? (late.length ? `out at this hour: ${late.slice(0, 4).map((x) => `${x.npc.name} (${x.place.name})`).join(', ')}${late.length > 4 ? ` and ${late.length - 4} more` : ''}` : 'a quiet night: nobody is about') : ''].filter(Boolean);
       if (notes.length) toast(notes.join(' · '));
       draw();
       if (r.days) window.dispatchEvent(new Event('world:rerender'));
