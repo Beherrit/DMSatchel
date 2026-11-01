@@ -2,7 +2,8 @@
 // town, roll again, keep it, or take it down. Print gives just the menu, to put on the table.
 import { el, toast, setKids } from './dom.js';
 import { api, isGm, previewing } from './api.js';
-import { world, worldEntries, patchEntry } from './world-store.js';
+import { world, worldEntries, patchEntry, getEntry, link } from './world-store.js';
+import { rumorsAt } from './world-rumors.js';
 import { makeRng } from './rng.js';
 import { rollMenu, readMenu } from './menu.js';
 import { coinText } from './economy.js';
@@ -47,12 +48,21 @@ function stayDialog(inn, menu, rerender) {
       const notes = [`The party slept at ${inn.name} and woke rested (hit points and spell slots back)`, r.cal && r.days ? `it’s morning on ${formatDate(r.cal, today(r.cal), { weekday: true })}` : 'it’s morning', r.out?.length ? `${r.out.join(', ')} went out` : '', failed.length ? `these sheets didn’t update: ${failed.join(', ')}` : ''].filter(Boolean);
       toast(notes.join(' · '), failed.length ? 'bad' : undefined);
     } catch (err) { toast(`Paid, but the clock didn’t move: ${err.message}`, 'bad'); }
-    d.close();
     rerender();
+    // Over supper: a rumour going around this town, for the GM to pass on (or keep to themselves).
+    const town = townOf(inn), heard = town ? rumorsAt(town.id) : [];
+    if (!heard.length) { d.close(); return; }
+    const { r, v } = heard[Math.floor(Math.random() * heard.length)];
+    setKids(d.querySelector('form'), el('h2', { id: 'st-title' }, 'Over supper…'),
+      el('p', {}, `Talk in the common room of ${inn.name}:`), el('blockquote', { class: 'rumor-heard' }, el('q', {}, v.text)),
+      el('p', { class: 'muted small' }, 'Pass it on to the players, or keep it for later. ', link(r, 'The rumour’s page')),
+      el('div', { class: 'btnrow' }, el('button', { class: 'btn primary', type: 'button', onclick: () => d.close() }, 'Done')));
   });
   d.addEventListener('close', () => d.remove());
   document.body.append(d); d.showModal();
 }
+
+const townOf = (e) => { let p = getEntry(e.parent_id), guard = 0; while (p && guard++ < 12) { if (p.kind === 'settlement') return p; p = getEntry(p.parent_id); } return null; };
 
 const QUALITY = { poor: 'A poor alehouse', modest: 'A modest inn', comfortable: 'A comfortable inn', wealthy: 'A fine inn', aristocratic: 'A grand inn' };
 

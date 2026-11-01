@@ -400,7 +400,7 @@ to the log at the bottom.
     for it, and who's short.
 187. [x] **Weather slows the road.** Moving the calendar on after travel takes the weather where the party is into
     account: heavy rain, snow or a storm add days.
-188. [ ] **Rumours over supper.** A night at an inn brings a rumour going around that town, shown to the GM to pass
+188. [x] **Rumours over supper.** A night at an inn brings a rumour going around that town, shown to the GM to pass
     on (or keep).
 189. [ ] **A shopping list.** Players note what they mean to buy; when they're at a shop that stocks it, the buy
     panel offers it first, and GMs see the lists in prep.
@@ -597,3 +597,4 @@ to the log at the bottom.
 - Sell the loot: when the treasury holds items, GMs get "Sell the loot" on the party page. Pick a stocked shop, tick items (with how many), and see the offer at the shop's buy-back rate: "They'll pay 10 gp. They won't buy Cursed idol (can't price it)". Selling puts the items on the shop's shelf first; if someone changed the shop meanwhile, nothing is sold. Then one loot-log line per item brings the coin in and takes the item out ("+10 gp, −2 Shield, sold to Smithy"). Things the shop can't price stay in the treasury. sellLoot in js/purchase.js unit tested.
 - Enough food for the road?: picking a destination in a map pin's "Travel to…" now adds a rations line under the distance and times: "Rations for 3 days at a normal pace: Ann has enough (9); Bo has 1, 2 short", in red when anyone's short. Days are counted whole, the way the calendar would move on (2.5 days needs 3 days of food); trips of under a day need none, and rough going doubles it. rationsFor in js/party-glance.js unit tested.
 - Weather slows the road: after the party moves on a scaled map, "Move the calendar on?" uses today's weather where they set out, the same seeded roll prep and the front page show. Heavy snow doubles the journey, heavy rain or snow makes it half as long again, and a strong wind a quarter longer, with the worst one counting. The factor applies to the actual travel time before rounding (60 miles in heavy rain: 4 days at a normal pace instead of 3), and the dialog says why: "🌧 There's heavy rain at Start today: the journey takes longer." weatherSlowdown in js/forecast.js unit tested.
+- Rumours over supper: after the party stays the night at an inn, if any rumours are going around its town (started there or spread there, in the version told in that town), the dialog turns to "Over supper…". It shows one, picked at random, as talk in the common room, with a link to the rumour's page and a reminder to pass it on or keep it for later. Nothing is revealed to the players automatically. With no rumours in town, the dialog just closes as before.

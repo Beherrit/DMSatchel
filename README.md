@@ -171,7 +171,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Who has it?**: one search across every character's inventory and the treasury.
 - **Shops restock with time**: when days pass, GMs are offered fresh stock for shops whose last delivery is a week old.
 - **Haggle at the counter**: the shop's haggle DC on the buy panel; GMs grant the result for a character's next purchase.
-- **Stay the night**: at a tavern with a menu, the party takes rooms, pays from their purses, gets a long rest, and the clock moves to morning.
+- **Stay the night**: at a tavern with a menu, the party takes rooms, pays from their purses, gets a long rest, hears a rumour over supper, and the clock moves to morning.
 - **Rations run down**: on the road, days passing eat each character's rations, and the GMs hear who's run out.
 - **Make camp and short rests**: a long rest anywhere, eight hours on the clock, and maybe something from the area's encounter table in the night; or an hour's short rest that gives warlocks their pact slots back.
 - **Hand out to everyone**: GMs give the same item or coin to several characters at once, from nowhere or from the treasury.
