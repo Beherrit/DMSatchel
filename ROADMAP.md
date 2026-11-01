@@ -390,7 +390,7 @@ to the log at the bottom.
     days of rations, exhaustion and conditions.
 182. [x] **A short rest.** GMs give the party a short rest from the party page: an hour on the clock, and pact
     magic slots back for warlocks.
-183. [ ] **The journey on the calendar.** Where the party has been shows on the in-world calendar, on the days they
+183. [x] **The journey on the calendar.** Where the party has been shows on the in-world calendar, on the days they
     arrived ("⚑ Brindle").
 184. [ ] **Worries in prep.** Session prep warns about who's down or low on hit points, out of rations, exhausted or
     broke, before the session starts.
@@ -584,3 +584,4 @@ to the log at the bottom.
 - Hand out to everyone: the party page's treasury card has "Hand out to everyone" for GMs. Enter an item and how many each, and/or coin each, then tick who gets it (everyone active by default). Each sheet gets it in one save ("2 Potion of healing", +5 gp). Tick "Take it out of the treasury" and one loot-log line takes the whole lot out ("−10 gp, −4 Potion of healing, handed out to Ann, Bo"); otherwise it comes from nowhere, as a GM's gift. js/hand-out.js unit tested.
 - The party at a glance: GMs see a table at the top of the party page with one row per active character: hit points ("7 / 30 (low)" at a quarter or less, "0 / 12 (down)", marked in words as well as colour), coin, days of rations, exhaustion and conditions. It scrolls sideways within its card on a phone, and players don't see it. js/party-glance.js unit tested.
 - A short rest: next to "Make camp", GMs get "☕ Short rest" on the party page. It moves the clock on an hour and gives warlocks (characters from the Forge with pact magic) their pact slots back; other casters' slots stay spent. The toast says who got slots back and reminds that players spend hit dice on their own sheets, since that's their choice. It shares the sheet's own rule (shortRestOf beside restOf in js/sheet-ui.js).
+- The journey on the calendar: every stop in "Where the party has been" that carries an in-world date the calendar reads now shows on that day: "⚑ Brindle" in the month grid, and "⚑ The party arrived in Brindle" when the day is opened. Only places the viewer can see are shown, so a hidden lair never appears for players. journeyDays in js/journey.js unit tested (weekday-prefixed dates, undated and unreadable stops).

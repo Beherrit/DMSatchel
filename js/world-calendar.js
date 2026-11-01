@@ -2,10 +2,11 @@
 // and a calendar editor. Route: #world/calendar[/<year>/<month>]
 import { el, toast, setKids } from './dom.js';
 import { api, isGm } from './api.js';
-import { world, worldEntries, link, kindLabel, notice } from './world-store.js';
+import { world, worldEntries, getEntry, link, kindLabel, notice } from './world-store.js';
 import { birthdaysBetween, birthdayText } from './birthdays.js';
 import { repeatsBetween } from './repeats.js';
 import { onThisDay, yearsAgoText } from './onthisday.js';
+import { journeyDays } from './journey.js';
 import { PRESETS, makeCalendar, cleanCalendar, toDays, fromDays, advance, today, formatDate, parseDate, moonPhase, moonEvent, holidaysOn } from './calendar.js';
 
 // Fields that hold an in-world date, by kind.
@@ -105,6 +106,8 @@ export function viewCalendar(arg, sub, rerender) {
   // Dated entries, plus repeating events coming round again this month (marked ↻).
   const dated = [...datedEntries(cal), ...repeatsBetween(cal, worldEntries(), first, first + cal.months[shown.month].days - 1).map((x) => ({ ...x, repeat: true }))];
   const births = birthdaysBetween(cal, worldEntries(), first, first + cal.months[shown.month].days - 1);
+  // Where the party arrived, on the day it arrived (stops at places this person can see).
+  const arrivals = journeyDays(world.info?.journey, (t) => parseDate(cal, t), (d) => toDays(cal, d)).filter((x) => getEntry(x.id));
   const offset = ((first % cal.weekdays.length) + cal.weekdays.length) % cal.weekdays.length;
   const nowN = toDays(cal, now);
   const detail = el('div', { class: 'cal-detail' });
@@ -117,6 +120,7 @@ export function viewCalendar(arg, sub, rerender) {
       cal.moons.length ? el('p', { class: 'small' }, cal.moons.map((m) => { const p = moonPhase(cal, m, d); return `${p.icon} ${m.name}: ${p.name.toLowerCase()}`; }).join(' · ')) : null,
       holidaysOn(cal, d).map((h) => el('p', { class: 'holiday' }, `🎉 ${h.name}`)),
       births.filter((x) => x.n === n).map((x) => el('p', { class: 'birthday' }, '🎂 ', link(x.entry), x.age ? ` turns ${x.age}` : '’s birthday')),
+      arrivals.filter((x) => x.n === n).map((x) => el('p', { class: 'arrival' }, '⚑ The party arrived in ', link(getEntry(x.id)))),
       items.length ? el('ul', { class: 'entry-list' }, items.map((x) => el('li', {}, x.repeat ? '↻ ' : '', link(x.entry), el('span', { class: 'kind-tag' }, x.repeat ? x.entry.fields.repeats.toLowerCase() : kindLabel(x.entry.kind))))) : el('p', { class: 'muted small' }, 'Nothing recorded on this day.'),
       isGm() ? el('div', { class: 'btnrow' },
         n !== nowN ? el('button', { class: 'btn small', type: 'button', onclick: async () => { if (await saveCal({ ...cal, ...d }, `Today is now ${formatDate(cal, d)}`)) rerender(); } }, 'Make this today') : null,
@@ -137,6 +141,7 @@ export function viewCalendar(arg, sub, rerender) {
       el('span', { class: 'cal-day' }, day, full.length ? el('span', { class: 'cal-moon' }, full.join('')) : null),
       hol.map((h) => el('span', { class: 'cal-hol' }, h.name)),
       births.filter((x) => x.n === n).map((x) => el('span', { class: 'cal-item cal-bday', title: birthdayText(x) }, `🎂 ${x.entry.name}`)),
+      arrivals.filter((x) => x.n === n).map((x) => el('span', { class: 'cal-item cal-journey', title: `The party arrived in ${getEntry(x.id).name}` }, `⚑ ${getEntry(x.id).name}`)),
       items.slice(0, 3).map((x) => el('span', { class: `cal-item k-${x.entry.kind}`, title: x.entry.kind === 'session' ? `Played: ${x.entry.name}` : x.entry.name }, x.entry.kind === 'session' ? `▶ ${x.entry.name}` : x.entry.kind === 'quest' ? `⏳ ${x.entry.name}` : x.repeat ? `↻ ${x.entry.name}` : x.entry.name)),
       items.length > 3 ? el('span', { class: 'cal-more' }, `+${items.length - 3} more`) : null));
   }

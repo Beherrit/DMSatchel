@@ -27,3 +27,12 @@ test('journeyOnMap uses the nearest pinned place and merges stays at one pin', (
   const pts = journeyOnMap([{ id: 'town', at: '1' }, { id: 'inn', at: '2' }, { id: 'far', at: '3' }, { id: 'cave', at: '4' }], pins, chainOf);
   assert.deepEqual(pts.map((p) => [p.x, p.y, p.stops.map((s) => s.at)]), [[0.1, 0.2, ['1', '2']], [0.5, 0.6, ['4']]]);
 });
+
+test('the journey on the calendar', async () => {
+  const { journeyDays } = await import('../js/journey.js');
+  const { makeCalendar, parseDate, toDays } = await import('../js/calendar.js');
+  const cal = makeCalendar('seasons', 1040);
+  const days = journeyDays([{ id: 'a', day: '3 Thawmoon 1040', at: 't1' }, { id: 'b', at: 't2' }, { id: 'c', day: 'nonsense', at: 't3' }, { id: 'd', day: 'Toilday, 5 Thawmoon 1040', at: 't4' }],
+    (t) => parseDate(cal, t), (d) => toDays(cal, d));
+  assert.deepEqual(days.map((x) => [x.id, x.n - days[0].n]), [['a', 0], ['d', 2]]);
+});

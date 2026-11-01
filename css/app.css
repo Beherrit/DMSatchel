@@ -1679,3 +1679,4 @@ details.quest-group > summary .section-title { display: inline }
 .glance-table td.num { text-align: right; font-variant-numeric: tabular-nums }
 .glance-table .hp-bad { color: var(--danger); font-weight: 600 }
 .glance-table tbody th { text-transform: none; letter-spacing: normal; font-size: inherit; font-weight: 600; color: var(--ink) }
+.cal-item.cal-journey { background: transparent; border: 1px solid var(--accent); color: var(--ink) } .arrival { margin: 4px 0 }

@@ -42,3 +42,9 @@ export function journeyOnMap(list, pins, chainOf) {
   }
   return points;
 }
+
+// The journey on the calendar: each stop whose in-world date the calendar reads, as { n (day number), id, at }.
+// parse(text) → { year, month, day } or null; toN(date) → its day number.
+export function journeyDays(list, parse, toN) {
+  return (Array.isArray(list) ? list : []).map((s) => { const d = s?.day && parse(s.day); return d ? { n: toN(d), id: s.id, at: s.at } : null; }).filter(Boolean);
+}
