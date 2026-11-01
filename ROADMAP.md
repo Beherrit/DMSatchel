@@ -487,6 +487,14 @@ to the log at the bottom.
 232. [x] **A round on the house.** GMs buy everyone at the table a dish or drink from a tavern's menu, paid from the
     treasury, in one line of the ledger.
 233. [x] **Whose torch is it.** Lights lit from someone's pack say whose they are on the clock ("Ann's torch").
+234. [ ] **Roll a routine.** A roll button on an NPC's daily routine writes a likely day from their role and the
+    places in their town (a smith at the forge by day and the tavern at night).
+235. [ ] **Minding the shop.** A shop's page says whether its owner is behind the counter right now, or where they are
+    instead.
+236. [ ] **Gifts for NPCs.** A player can give an item or coin from their sheet to an NPC; the NPC's page lists what
+    they've been given, and by whom.
+237. [ ] **Ask the shopkeeper.** A player can ask a shop for something it doesn't stock; the GMs see the asks on the
+    shop's page and can add the item to the shelf.
 
 ## Ideas parking lot
 
