@@ -80,7 +80,7 @@ export async function offerLivingCosts(days, { travel = false } = {}) {
         toast(`The treasury paid ${coinText(p.paid)} in living costs${p.short ? ` (${coinText(p.short)} short)` : ''}${wagesNote}`);
       } else {
         const failed = [];
-        for (const x of p.each) if (x.paid) { try { await addCoins(chars.find((c) => c.id === x.id).e, -x.paid); } catch { failed.push(x.name); } }
+        for (const x of p.each) if (x.paid) { try { await addCoins(chars.find((c) => c.id === x.id).e, -x.paid, `−${coinText(x.paid)} living costs (${x.lifestyle.toLowerCase()}, ${days} day${days === 1 ? '' : 's'})`); } catch { failed.push(x.name); } }
         toast(failed.length ? `Charged, but these sheets didn’t update: ${failed.join(', ')}` : `Living costs paid: ${coinText(p.total)} in all${wagesNote}`, failed.length ? 'bad' : undefined);
       }
       d.close();
@@ -92,7 +92,7 @@ export async function offerLivingCosts(days, { travel = false } = {}) {
     const list = eating(), failed = [];
     ateOnRoad = days;
     if (wages?.checked && pay.total) { try { await api('party', { method: 'POST', body: { cp: -pay.total, note: `Wages: ${days} day${days === 1 ? '' : 's'} for ${pay.list.map((x) => x.entry.name).join(', ')}` } }); } catch (err) { toast(err.message, 'bad'); } }
-    for (const x of list) if (x.ate) { try { await changePlay(x.e, (play) => { play.inventory = eatRations(play.inventory, days).text; }); } catch { failed.push(x.name); } }
+    for (const x of list) if (x.ate) { try { await changePlay(x.e, (play) => { play.inventory = eatRations(play.inventory, days).text; }, `Ate ${x.ate} day${x.ate === 1 ? '' : 's'} of rations on the road${x.short ? ` (${x.short} short)` : ''}`); } catch { failed.push(x.name); } }
     const hungry = list.filter((x) => x.short).map((x) => x.name);
     toast([`${days} day${days === 1 ? '' : 's'} of rations eaten`, hungry.length ? `out of food: ${hungry.join(', ')}` : '', failed.length ? `these sheets didn’t update: ${failed.join(', ')}` : ''].filter(Boolean).join(' · '), hungry.length || failed.length ? 'bad' : undefined);
     d.close();

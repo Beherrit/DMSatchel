@@ -1682,3 +1682,4 @@ details.quest-group > summary .section-title { display: inline }
 .cal-item.cal-journey { background: transparent; border: 1px solid var(--accent); color: var(--ink) } .arrival { margin: 4px 0 }
 .rumor-heard { margin: 8px 0; padding: 8px 12px; border-left: 3px solid var(--brass); font-family: var(--f-flavor) }
 .shopping .ck-list li { display: flex; justify-content: space-between; align-items: center; gap: 8px }
+.sheet-history { margin-top: 10px } .sheet-log { display: grid; gap: 3px; margin: 6px 0 0 }

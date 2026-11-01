@@ -59,7 +59,7 @@ function campDialog(rerender) {
     ev.preventDefault();
     go.disabled = true;
     const failed = [];
-    for (const { c, cb } of boxes) if (cb.checked) { try { await restOf(c); } catch { failed.push(c.name); } }
+    for (const { c, cb } of boxes) if (cb.checked) { try { await restOf(c, undefined, `Made camp${here ? ` near ${here.name}` : ''}: long rest`); } catch { failed.push(c.name); } }
     let woke = '';
     try {
       const r = await api('settings', { method: 'PATCH', body: { clock: { advance: CAMP_MINUTES } } });

@@ -168,7 +168,7 @@ function handOutForm(active, reload) {
     try {
       if (pot.checked) { const t = handOutTotal(h, to.length); await api('party', { method: 'POST', body: { cp: -t.cp, ...(h.item ? { item: h.item, qty: -t.qty } : {}), note: `Handed out to ${to.map((c) => c.name).join(', ')}` } }); }
       const failed = [];
-      for (const c of to) { try { await changePlay(c, (play) => { if (h.item) play.inventory = giveItem(play.inventory, h.item, h.qty); play.cp += h.cp; }); } catch { failed.push(c.name); } }
+      for (const c of to) { try { await changePlay(c, (play) => { if (h.item) play.inventory = giveItem(play.inventory, h.item, h.qty); play.cp += h.cp; }, `Handed out by the GMs: ${[h.item ? `${h.qty > 1 ? `${h.qty} × ` : ''}${h.item}` : '', h.cp ? `+${coinText(h.cp)}` : ''].filter(Boolean).join(', ')}${pot.checked ? ' (from the treasury)' : ''}`); } catch { failed.push(c.name); } }
       const what = [h.item ? `${h.qty > 1 ? `${h.qty} × ` : ''}${h.item}` : '', h.cp ? coinText(h.cp) : ''].filter(Boolean).join(' and ');
       toast(failed.length ? `Handed out, but these sheets didn’t update: ${failed.join(', ')}` : `${what} each to ${to.length} character${to.length === 1 ? '' : 's'}`, failed.length ? 'bad' : undefined);
       reload();
@@ -199,7 +199,7 @@ function splitForm(cp, active, reload) {
     try {
       await api('party', { method: 'POST', body: { cp: -p.given, note: `Split between ${p.each.map((x) => names.get(x.id)).join(', ')}` } });
       const failed = [];
-      for (const x of p.each) { try { await addCoins(active.find((c) => c.id === x.id), x.cp); } catch { failed.push(names.get(x.id)); } }
+      for (const x of p.each) { try { await addCoins(active.find((c) => c.id === x.id), x.cp, `+${coinText(x.cp)}, a share of the treasury`); } catch { failed.push(names.get(x.id)); } }
       toast(failed.length ? `Split recorded, but these sheets didn’t update: ${failed.join(', ')}. Add their share by hand.` : `Split ${coinText(p.given)} between ${p.each.length} character${p.each.length === 1 ? '' : 's'}`, failed.length ? 'bad' : undefined);
       reload();
     } catch (err) { toast(err.message, 'bad'); go.disabled = false; }

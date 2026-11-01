@@ -4,14 +4,15 @@
 import { el, toast, confirmButton, setKids } from './dom.js';
 import { longRest } from './rest.js';
 import { mergePlay } from './play-merge.js';
+import { addLog, readLog } from './play-log.js';
 import { generateCharacter, characterText, abilityMod, fmtMod } from './character.js';
 import { ABILITIES, ABILITY_NAMES } from './rules2024.js';
 import { ORD } from './spells.js';
-import { world, patchEntry, worldEntries, link } from './world-store.js';
+import { world, patchEntry, worldEntries, link, whenTime } from './world-store.js';
 import { MAGIC_ITEMS, RARITIES } from './magic-items.js';
 import { matchItems } from './inventory-items.js';
 import { coinText, parseCoins } from './economy.js';
-import { api } from './api.js';
+import { api, session } from './api.js';
 import { inventoryLines } from './handover.js';
 import { queuePlay, isOffline } from './outbox.js';
 
@@ -62,6 +63,7 @@ function defaults(e, ch) {
     slots: p.slots || {}, hd: p.hd || 0, death: p.death || { ok: 0, fail: 0 }, cp: Number.isFinite(p.cp) ? p.cp : startingCoins(ch),
     inventory: p.inventory ?? (ch ? `${ch.equipment.cls}\n${ch.equipment.background}` : ''), notes: p.notes || '',
     shopping: Array.isArray(p.shopping) ? p.shopping : [],
+    log: Array.isArray(p.log) ? p.log : [],
   };
 }
 
@@ -96,33 +98,34 @@ function save(id, play, base) {
 
 // Change a character's sheet from outside the sheet (splitting the party's loot, eating rations): fn(play) edits
 // it in place. Retries once if someone saved the sheet meanwhile.
-export async function changePlay(e, fn) {
+export async function changePlay(e, fn, note = '') {
   for (let attempt = 0; attempt < 2; attempt++) {
     const cur = world.entries.get(e.id) || e;
     const play = defaults(cur, characterOf(cur));
     fn(play);
+    if (note) addLog(play, note, session.gm?.name || '');
     try { return await patchEntry(cur, { fields: { play: JSON.stringify(play) } }); }
     catch (err) { if (err.status === 409 && err.body?.entry && attempt === 0) { world.entries.set(e.id, err.body.entry); continue; } throw err; }
   }
 }
 
 // A long rest from outside the sheet (a night at an inn); also(play) makes other changes in the same save.
-export function restOf(e, also = () => {}) {
+export function restOf(e, also = () => {}, note = 'Long rest') {
   const ch = characterOf(world.entries.get(e.id) || e);
   const m = /^(\d+)d/.exec(ch?.stats.hitDice || '');
-  return changePlay(e, (play) => { also(play); longRest(play, { maxhp: Number(play.maxhp) || ch?.stats.hp || 0, level: m ? +m[1] : Number(e.fields?.level) || 0 }); });
+  return changePlay(e, (play) => { also(play); longRest(play, { maxhp: Number(play.maxhp) || ch?.stats.hp || 0, level: m ? +m[1] : Number(e.fields?.level) || 0 }); }, note);
 }
 
 // A short rest from outside the sheet (the party resting an hour): warlocks get their pact slots back. Players
 // spend hit dice on their own sheets. → whether this character had pact slots to get back.
 export async function shortRestOf(e) {
   const pact = Boolean(slotTable(characterOf(world.entries.get(e.id) || e))?.pact);
-  if (pact) await changePlay(e, (play) => { play.slots = {}; });
+  if (pact) await changePlay(e, (play) => { play.slots = {}; }, 'Short rest: pact slots back');
   return pact;
 }
 
 // Add (or take) coins on a character's sheet.
-export const addCoins = (e, cp) => changePlay(e, (play) => { play.cp += cp; });
+export const addCoins = (e, cp, note = '') => changePlay(e, (play) => { play.cp += cp; }, note);
 
 // What the character's current conditions do (open while any apply), with every other condition a tap away.
 function conditionHelp(active) {
@@ -305,6 +308,14 @@ export function sheetSection(e, rerender) {
     }, 'btn small primary');
   }
 
+  // Changes made from outside the sheet (a split, living costs, rations, a purchase, a rest), newest first.
+  function historyBox() {
+    const log = readLog(defaults(world.entries.get(e.id) || e, ch)).slice().reverse();
+    if (!log.length) return null;
+    return el('details', { class: 'sheet-history' }, el('summary', {}, `History (${log.length})`),
+      el('ul', { class: 'plain sheet-log' }, log.map((l) => el('li', {}, el('span', {}, l.text), el('span', { class: 'muted small' }, ` · ${l.by ? `${l.by}, ` : ''}${whenTime(l.at)}`)))));
+  }
+
   function draw() {
     const s = ch?.stats;
     setKids(box,
@@ -319,7 +330,7 @@ export function sheetSection(e, rerender) {
       ch ? el('details', { class: 'sheet-more' }, el('summary', {}, 'Saves, skills, attacks, spells and features'), fullSheet(ch)) : null,
       el('div', { class: 'pc-cols' }, purse(), textBox('inventory', 'Inventory', 6)), inventoryItems(),
       can && !e.status?.startsWith?.('suggest') ? el('div', { class: 'btnrow' }, el('button', { class: 'btn small', type: 'button', onclick: giveDialog }, 'Give to a party member…')) : null,
-      textBox('notes', 'Notes', 4));
+      textBox('notes', 'Notes', 4), historyBox());
   }
   draw();
   return box;

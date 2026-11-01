@@ -38,6 +38,7 @@ import { cleanSay } from '../js/say.js';
 import { cleanAka } from '../js/aka.js';
 import { readMenu } from '../js/menu.js';
 import { buyFrom, sellTo, haggleFor, withHaggle, setHaggle } from '../js/purchase.js';
+import { addLog } from '../js/play-log.js';
 import { coinText, GOODS } from '../js/economy.js';
 import { cleanMusic } from '../js/music.js';
 import { journeyFor } from '../js/journey.js';
@@ -400,6 +401,7 @@ export default route({
         WHERE id = ${shop.id} AND world_id = ${req.world.id} AND version = ${shop.version} RETURNING id`;
       if (!sold.length) return fail(res, 409, 'Someone else was buying from this shop at the same moment. Try again.');
       p.cp -= r.cp; p.inventory = clip(giveItem(p.inventory, r.name, r.qty, shop.name), 15000);
+      addLog(p, `Bought ${r.qty > 1 ? `${r.qty} × ` : ''}${r.name} at ${shop.name} for ${coinText(r.cp)}${pct ? ' (haggled)' : ''}`, req.gm.name);
       await sql`UPDATE entries SET fields = fields || jsonb_build_object('play', ${JSON.stringify(p)}::text), updated_by = ${req.gm.id}, updated_at = now(), version = version + 1
         WHERE id = ${ch.id} AND world_id = ${req.world.id}`;
       await record(ch.id, req.gm.id, 'buy', null);
@@ -425,6 +427,7 @@ export default route({
         WHERE id = ${shop.id} AND world_id = ${req.world.id} AND version = ${shop.version} RETURNING id`;
       if (!done.length) return fail(res, 409, 'Someone else was at this shop’s counter at the same moment. Try again.');
       p.inventory = t.text; p.cp += r.cp;
+      addLog(p, `Sold ${r.qty > 1 ? `${r.qty} × ` : ''}${r.name} to ${shop.name} for ${coinText(r.cp)}`, req.gm.name);
       await sql`UPDATE entries SET fields = fields || jsonb_build_object('play', ${JSON.stringify(p)}::text), updated_by = ${req.gm.id}, updated_at = now(), version = version + 1
         WHERE id = ${ch.id} AND world_id = ${req.world.id}`;
       await record(ch.id, req.gm.id, 'sell', null);
@@ -453,6 +456,8 @@ export default route({
         fp.inventory = t.text; tp.inventory = clip(giveItem(tp.inventory, t.name, t.qty, from.name), 15000); moved = t;
       }
       fp.cp -= cp; tp.cp += cp;
+      const what = [moved ? `${moved.qty > 1 ? `${moved.qty} × ` : ''}${moved.name}` : '', cp ? coinText(cp) : ''].filter(Boolean).join(' and ');
+      addLog(fp, `Gave ${what} to ${to.name}`, req.gm.name); addLog(tp, `Got ${what} from ${from.name}`, req.gm.name);
       for (const [row, p] of [[from, fp], [to, tp]]) {
         await sql`UPDATE entries SET fields = fields || jsonb_build_object('play', ${JSON.stringify(p)}::text), updated_by = ${req.gm.id}, updated_at = now(), version = version + 1
           WHERE id = ${row.id} AND world_id = ${req.world.id}`;

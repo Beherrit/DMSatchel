@@ -41,7 +41,7 @@ function stayDialog(inn, menu, rerender) {
     go.disabled = true;
     const failed = [];
     // Each pays for the room and gets a long rest, in one save of their sheet.
-    for (const x of p) { try { await restOf(chars.find((c) => c.id === x.id), (play) => { play.cp -= x.paid; }); } catch { failed.push(x.name); } }
+    for (const x of p) { try { await restOf(chars.find((c) => c.id === x.id), (play) => { play.cp -= x.paid; }, `A night at ${inn.name}: −${coinText(x.paid)} for ${rooms[Number(room.value)].name.toLowerCase()}, long rest`); } catch { failed.push(x.name); } }
     try {
       const r = await api('settings', { method: 'PATCH', body: { clock: { advance: minutesToMorning(world.info?.clock?.minutes ?? 480) } } });
       world.info = { ...world.info, clock: r.clock, ...(r.cal ? { cal: r.cal } : {}) };
