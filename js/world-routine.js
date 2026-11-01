@@ -80,3 +80,18 @@ export function routinePreview(box) {
   box.addEventListener('input', draw); draw();
   return out;
 }
+
+// Minding the shop: whether a place's owner (its Owner field naming an NPC with a routine) is there right now.
+export function mindingLine(place) {
+  if (place.kind !== 'location' || !place.fields?.owner) return null;
+  const m = now();
+  if (m === null) return null;
+  const name = String(place.fields.owner).replace(/\[\[([^\]|]+)(\|[^\]]*)?\]\]/g, '$1').trim();
+  const owner = findByName(name);
+  if (!owner || owner.kind !== 'npc' || !owner.fields?.routine || ['Dead', 'Missing'].includes(owner.fields?.status)) return null;
+  const w = whereAt(owner.fields.routine, m);
+  if (!w) return null;
+  const at = placeOf(w.place);
+  if (at?.id === place.id) return el('p', { class: 'routine-minding small' }, '🛎 ', link(owner), ' is here, behind the counter', w.until !== null ? el('span', { class: 'muted' }, ` until ${hhmm(w.until)}`) : null, '.');
+  return el('p', { class: 'routine-minding small' }, '🛎 ', link(owner), ' is out: ', at ? link(at) : w.place, w.until !== null ? el('span', { class: 'muted' }, ` until ${hhmm(w.until)}`) : null, '.');
+}
