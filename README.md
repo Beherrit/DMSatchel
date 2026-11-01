@@ -187,6 +187,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Rations from the stash**: on the road, those who run short eat from the party treasury's rations first, in one line of its ledger.
 - **Hirelings eat too**: on the road, hired NPCs eat from the treasury's rations first, with a warning when there aren't enough.
 - **Wages owed**: when the treasury can't cover the hirelings' wages, what's unpaid is owed to each until a GM pays it.
+- **Hirelings go with the party**: a hired NPC is wherever the party is, whatever their routine says.
 - **Into the stash**: players put items or coin from their sheet into the party treasury, or take them out, noted in the ledger and on the sheet.
 - **Carrying for the party**: treasury items a character holds show on their sheet.
 - **Everything the party carries**: one printable list of all the party's gear and the treasury's, with who has each.

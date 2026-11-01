@@ -4,6 +4,7 @@ import { el, setKids, toast } from './dom.js';
 import { world, worldEntries, link, findByName, getEntry, patchEntry } from './world-store.js';
 import { whereAt, aboutTown, regularsAt, unreadable, townByHour, rollRoutine } from './routine.js';
 import { makeRng, randomSeed } from './rng.js';
+import { isHired } from './hirelings.js';
 import { isGm, previewing } from './api.js';
 import { hhmm, partOfDay } from './clock.js';
 
@@ -15,7 +16,13 @@ const placeOf = (name) => {
   return null;
 };
 
+// Hirelings go with the party: a hired NPC is wherever the party is (session prep's "where the party is"), whatever
+// their routine says; on the road, nowhere in particular.
+const partyPlace = () => (world.info?.party_at ? getEntry(world.info.party_at) : null);
+const nowRoutine = (x) => (isHired(x) ? (partyPlace() ? `Always: ${partyPlace().name}` : '') : String(x.fields?.routine || ''));
+
 export function routineNow(e) {
+  if (e.kind === 'npc' && isHired(e)) { const p = partyPlace(); return el('p', { class: 'routine-now small' }, '🕰 With the party', p ? [': ', link(p)] : ', on the road', '.'); }
   if (e.kind !== 'npc' || !e.fields?.routine || ['Dead', 'Missing'].includes(e.fields?.status)) return null;
   const m = now();
   if (m === null) return null;
@@ -31,8 +38,8 @@ export function hereNow(place) {
   if (['npc', 'character', 'session', 'quest', 'item', 'journal', 'event'].includes(place.kind)) return null;
   const m = now();
   if (m === null) return null;
-  const here = worldEntries().filter((x) => x.kind === 'npc' && x.fields?.routine && !['Dead', 'Missing'].includes(x.fields?.status))
-    .map((x) => ({ x, w: whereAt(x.fields.routine, m) })).filter(({ w }) => w && placeOf(w.place)?.id === place.id)
+  const here = worldEntries().filter((x) => x.kind === 'npc' && nowRoutine(x) && !['Dead', 'Missing'].includes(x.fields?.status))
+    .map((x) => ({ x, w: whereAt(nowRoutine(x), m) })).filter(({ w }) => w && placeOf(w.place)?.id === place.id)
     .sort((a, b) => a.x.name.localeCompare(b.x.name));
   if (!here.length) return null;
   return el('p', { class: 'routine-here small' }, `🕰 Here now (${hhmm(m)}): `, here.map(({ x, w }, i) => [i ? ', ' : '', link(x), w.until !== null ? el('span', { class: 'muted' }, ` until ${hhmm(w.until)}`) : null]));
@@ -45,7 +52,7 @@ export function aroundNow(town) {
   const m = now();
   if (m === null) return null;
   const inside = (p) => { for (let x = p, i = 0; x && i < 12; x = x.parent_id && getEntry(x.parent_id), i++) if (x.id === town.id) return true; return false; };
-  const npcs = worldEntries().filter((x) => x.kind === 'npc' && x.fields?.routine && !['Dead', 'Missing'].includes(x.fields?.status)).map((x) => ({ id: x.id, name: x.name, routine: x.fields.routine, entry: x }));
+  const npcs = worldEntries().filter((x) => x.kind === 'npc' && nowRoutine(x) && !['Dead', 'Missing'].includes(x.fields?.status)).map((x) => ({ id: x.id, name: x.name, routine: nowRoutine(x), entry: x }));
   return { m, list: aboutTown(npcs, m, placeOf, inside) };
 }
 
@@ -60,7 +67,7 @@ function aboutTownLine(town) {
 // The regulars: for a single place (a tavern, a shop), the NPCs whose routine brings them here at some hour, and when.
 export function regularsLine(place) {
   if (place.kind !== 'location') return null;
-  const npcs = worldEntries().filter((x) => x.kind === 'npc' && x.fields?.routine && !['Dead', 'Missing'].includes(x.fields?.status)).map((x) => ({ id: x.id, name: x.name, routine: x.fields.routine, entry: x }));
+  const npcs = worldEntries().filter((x) => x.kind === 'npc' && x.fields?.routine && !isHired(x) && !['Dead', 'Missing'].includes(x.fields?.status)).map((x) => ({ id: x.id, name: x.name, routine: x.fields.routine, entry: x }));
   const list = regularsAt(npcs, (name) => placeOf(name)?.id === place.id);
   if (!list.length) return null;
   return el('p', { class: 'routine-regulars small' }, el('strong', {}, 'Regulars: '), list.map(({ npc, when }, i) => [i ? ', ' : '', link(npc.entry), el('span', { class: 'muted' }, ` (${when.join(', ').toLowerCase()})`)]));
@@ -102,7 +109,7 @@ export function mindingLine(place) {
 export function townHoursBox(town) {
   if (!['region', 'area', 'settlement'].includes(town.kind)) return null;
   const inside = (p) => { for (let x = p, i = 0; x && i < 12; x = x.parent_id && getEntry(x.parent_id), i++) if (x.id === town.id) return true; return false; };
-  const npcs = worldEntries().filter((x) => x.kind === 'npc' && x.fields?.routine && !['Dead', 'Missing'].includes(x.fields?.status)).map((x) => ({ id: x.id, name: x.name, routine: x.fields.routine, entry: x }));
+  const npcs = worldEntries().filter((x) => x.kind === 'npc' && x.fields?.routine && !isHired(x) && !['Dead', 'Missing'].includes(x.fields?.status)).map((x) => ({ id: x.id, name: x.name, routine: x.fields.routine, entry: x }));
   const t = townByHour(npcs, placeOf, inside);
   if (!t.rows.length) return null;
   return el('details', { class: 'town-hours' }, el('summary', {}, `The ${town.kind === 'settlement' ? 'town' : 'place'} by the hour (${t.rows.length})`),
