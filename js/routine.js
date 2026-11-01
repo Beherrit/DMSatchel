@@ -72,3 +72,15 @@ export function whereAt(text, minutes) {
   const other = list.find((x) => x.ranges === 'other');
   return other ? { place: other.place, label: other.label, until: null } : null;
 }
+
+// Who's about town: the NPCs whose routine puts them inside a place right now. npcs: [{ id, name, routine }];
+// resolve(name) → a place or null; inside(place) → whether it's in (or is) the town. → [{ npc, place, until }] by name.
+export function aboutTown(npcs, minutes, resolve, inside) {
+  const out = [];
+  for (const n of npcs || []) {
+    const w = whereAt(n.routine, minutes);
+    const p = w && resolve(w.place);
+    if (p && inside(p)) out.push({ npc: n, place: p, until: w.until });
+  }
+  return out.sort((a, b) => a.npc.name.localeCompare(b.npc.name));
+}

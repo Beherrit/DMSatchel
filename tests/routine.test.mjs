@@ -25,3 +25,14 @@ test('whereAt: hours, otherwise, and nonsense', () => {
   assert.equal(whereAt('By day: the walls; dead of night: the crypt', h(3)).place, 'the crypt');
   assert.deepEqual(parseRoutine('just a sentence; Fridays: the market; morning:'), []);
 });
+
+test('aboutTown: NPCs somewhere inside a town now', async () => {
+  const { aboutTown } = await import('../js/routine.js');
+  const places = { 'the forge': { id: 'f', parent: 't' }, 'the bell': { id: 'b', parent: 't' }, 'the mill': { id: 'm', parent: 'x' } };
+  const resolve = (n) => places[n.toLowerCase()] || null;
+  const inside = (p) => p.parent === 't';
+  const npcs = [{ id: 1, name: 'Bram', routine: 'Mornings: the Forge; evenings: the Bell' }, { id: 2, name: 'Ada', routine: 'Always: the Mill' }, { id: 3, name: 'Cole', routine: 'Mornings: the Bell' }];
+  assert.deepEqual(aboutTown(npcs, 8 * 60, resolve, inside).map((x) => `${x.npc.name}@${x.place.id}`), ['Bram@f', 'Cole@b']);
+  assert.deepEqual(aboutTown(npcs, 18 * 60, resolve, inside).map((x) => `${x.npc.name}@${x.place.id}`), ['Bram@b']);
+  assert.deepEqual(aboutTown([], 0, resolve, inside), []);
+});

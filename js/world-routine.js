@@ -1,8 +1,8 @@
 // Where are they now?: an NPC's page says where their daily routine puts them at the world's current hour, and a
 // place's page lists who is there now. Read from the clock the GMs move on (Time and light).
 import { el } from './dom.js';
-import { world, worldEntries, link, findByName } from './world-store.js';
-import { whereAt } from './routine.js';
+import { world, worldEntries, link, findByName, getEntry } from './world-store.js';
+import { whereAt, aboutTown } from './routine.js';
 import { hhmm, partOfDay } from './clock.js';
 
 const now = () => world.info?.clock?.minutes ?? null;
@@ -25,6 +25,7 @@ export function routineNow(e) {
 
 // Who's here now: the NPCs whose routine puts them at this place at the current hour (as the viewer can see them).
 export function hereNow(place) {
+  if (['region', 'area', 'settlement'].includes(place.kind)) return aboutTownLine(place);
   if (['npc', 'character', 'session', 'quest', 'item', 'journal', 'event'].includes(place.kind)) return null;
   const m = now();
   if (m === null) return null;
@@ -33,4 +34,16 @@ export function hereNow(place) {
     .sort((a, b) => a.x.name.localeCompare(b.x.name));
   if (!here.length) return null;
   return el('p', { class: 'routine-here small' }, `🕰 Here now (${hhmm(m)}): `, here.map(({ x, w }, i) => [i ? ', ' : '', link(x), w.until !== null ? el('span', { class: 'muted' }, ` until ${hhmm(w.until)}`) : null]));
+}
+
+// Who's about town: for a settlement, region or area, everyone whose routine puts them somewhere inside it now.
+function aboutTownLine(town) {
+  const m = now();
+  if (m === null) return null;
+  const inside = (p) => { for (let x = p, i = 0; x && i < 12; x = x.parent_id && getEntry(x.parent_id), i++) if (x.id === town.id) return true; return false; };
+  const npcs = worldEntries().filter((x) => x.kind === 'npc' && x.fields?.routine && !['Dead', 'Missing'].includes(x.fields?.status)).map((x) => ({ id: x.id, name: x.name, routine: x.fields.routine, entry: x }));
+  const list = aboutTown(npcs, m, placeOf, inside);
+  if (!list.length) return null;
+  return el('p', { class: 'routine-here small' }, `🕰 About ${town.kind === 'settlement' ? 'town' : 'here'} now (${hhmm(m)}): `,
+    list.map(({ npc, place, until }, i) => [i ? '; ' : '', link(npc.entry), place.id === town.id ? '' : [' at ', link(place)], until !== null ? el('span', { class: 'muted' }, ` until ${hhmm(until)}`) : null]));
 }

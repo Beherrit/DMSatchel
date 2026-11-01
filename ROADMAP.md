@@ -460,7 +460,7 @@ to the log at the bottom.
 217. [x] **A packing list.** Planning a trip offers to add what each character is short of (rations for the days) to
     their shopping list.
 218. [x] **Debts at a glance.** The party page and the GM's party sheet list who owes whom, from the sheets' debts.
-219. [ ] **Who's about town.** A settlement's page lists the NPCs whose routine puts them somewhere inside it right
+219. [x] **Who's about town.** A settlement's page lists the NPCs whose routine puts them somewhere inside it right
     now, and where.
 220. [ ] **Lights from the pack.** Lighting a torch or lantern on the clock can take it (or a flask of oil) from a
     character's inventory, with a line in their history.
@@ -691,3 +691,4 @@ to the log at the bottom.
 - Hirelings eat too: on the road, the living-costs dialog now feeds hired NPCs a day's ration a day from the treasury, before any character's shortfall: "The hirelings eat 6 of the treasury's rations." When there aren't enough it says so in red ("not enough: Mags goes 2 days short"), or "The treasury has no rations for the hirelings". Characters who run short are then fed from what's left. Charging it writes one ledger line for the hirelings ("Eaten on the road by Gil, Mags (hired)") beside the characters' line, and the toast names anyone out of food. feedHirelings and stashAfter in js/rations.js unit tested.
 - A packing list: when planning a trip shows someone short of rations, a button now offers "Add the rations to their shopping lists". Each short character's list gets "Rations × 2" for what they lack, replacing any rations line already there. The shops' buy panels then offer rations first. A GM packs for everyone; a player only for the characters they can edit. Shopping-list matching now ignores bare numbers, so "Rations × 3" finds "Rations (1 day)". withRations in js/shopping.js unit tested.
 - Debts at a glance: the party page's side column now has "Who owes whom" ("Bo owes Ann 10 gp (for the boat)", both names linked), and the GM's party sheet prints the same under its table. Each debt is read once, from the lender's sheet. Nothing shows while everyone is square. partyDebts in js/debts.js unit tested.
+- Who's about town: a settlement's page (and a region's or area's) now lists everyone whose routine puts them somewhere inside it right now, and where: "🕰 About town now (08:00): Bramwell at The Forge until 11:00; Cole at Back Room; Wren until 11:00". Places inside places count (a back room in a forge in the town). A shop or tavern keeps its own "Here now". aboutTown in js/routine.js unit tested.
