@@ -14,3 +14,9 @@ export function addTab(json, line) {
 export const tabTotal = (list) => (list || []).reduce((t, x) => t + x.cp, 0);
 // "Ann: 2 × Pale ale (8 cp)"
 export const tabLine = (x) => `${x.who}: ${x.qty > 1 ? `${x.qty} × ` : ''}${x.item} (${coinText(x.cp)})`;
+
+// Pay your own tab: one character's orders on the tab, and the rest. → { mine, rest }
+export function splitTab(list, who) {
+  const k = String(who || '').trim().toLowerCase();
+  return { mine: (list || []).filter((x) => x.who.trim().toLowerCase() === k), rest: (list || []).filter((x) => x.who.trim().toLowerCase() !== k) };
+}

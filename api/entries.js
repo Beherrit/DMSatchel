@@ -43,7 +43,7 @@ import { shiftDebt, balanceWith } from '../js/debts.js';
 import { addTrade } from '../js/shop-trade.js';
 import { addGift, giftWhat, wantsMatch } from '../js/gifts.js';
 import { addAsk } from '../js/shop-asks.js';
-import { addTab } from '../js/tab.js';
+import { addTab, readTab, tabTotal, splitTab } from '../js/tab.js';
 import { shopOpen, holidayToday } from '../js/shop-hours.js';
 import { cleanCalendar } from '../js/calendar.js';
 import { shopStanding, sellWithStanding } from '../js/standing-price.js';
@@ -411,6 +411,28 @@ export default route({
       await sql`UPDATE entries SET fields = fields || jsonb_build_object('asks', ${asks}::text), updated_by = ${req.gm.id}, updated_at = now(), version = version + 1
         WHERE id = ${shop.id} AND world_id = ${req.world.id}`;
       return send(res, 200, { entry: shape(await loadOne(shop.id, req.world.id), req), asked: { by, item } });
+    }
+    // Pay your own tab: a character pays their own orders on a tavern's tab from their sheet; the rest stays on it.
+    if (req.body.settle_tab) {
+      const b = req.body.settle_tab;
+      const inn = await loadOne(String(b.tavern || '').slice(0, 40), req.world.id), ch = await loadOne(String(b.character || '').slice(0, 40), req.world.id);
+      if (!inn || inn.deleted || !visibleTo(inn, req)) return fail(res, 404, 'That tavern isn’t here.');
+      if (!ch || ch.deleted || ch.kind !== 'character') return fail(res, 404, 'Pick a character.');
+      if (!req.isGmHere && ch.owner_id !== req.gm.id) return fail(res, 403, 'You can only pay for your own character.');
+      const { mine, rest } = splitTab(readTab(inn.fields?.tab), ch.name);
+      if (!mine.length) return fail(res, 400, `${ch.name} has nothing on the tab here.`);
+      const cp = tabTotal(mine);
+      let p = {}; try { p = JSON.parse(ch.fields?.play || '{}') || {}; } catch { p = {}; }
+      if (!Number.isFinite(p.cp)) p.cp = Math.max(0, Math.round(Number(b.base?.cp) || 0));
+      if (p.inventory === undefined) p.inventory = clip(b.base?.inventory, 15000);
+      if (cp > p.cp) return fail(res, 400, `${ch.name} doesn’t have enough coin: their share is ${coinText(cp)} and they have ${coinText(p.cp)}.`);
+      p.cp -= cp;
+      addLog(p, `Paid their share of the tab at ${inn.name} (${coinText(cp)})`, req.gm.name, undefined, { cp: -cp });
+      await sql`UPDATE entries SET fields = fields || jsonb_build_object('tab', ${rest.length ? JSON.stringify(rest) : ''}::text), updated_by = ${req.gm.id}, updated_at = now(), version = version + 1
+        WHERE id = ${inn.id} AND world_id = ${req.world.id}`;
+      await sql`UPDATE entries SET fields = fields || jsonb_build_object('play', ${JSON.stringify(p)}::text), updated_by = ${req.gm.id}, updated_at = now(), version = version + 1
+        WHERE id = ${ch.id} AND world_id = ${req.world.id}`;
+      return send(res, 200, { entries: [shape(await loadOne(inn.id, req.world.id), req), shape(await loadOne(ch.id, req.world.id), req)], paid: cp });
     }
     // Order from the menu: food or drink from a tavern's menu, paid from a character's sheet, noted in its history and
     // the tavern's ledger. (A bed for the night goes through the inn's own stay, which also rests the party.)

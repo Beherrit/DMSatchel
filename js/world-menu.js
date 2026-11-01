@@ -4,7 +4,7 @@ import { el, toast, setKids } from './dom.js';
 import { api, isGm, isMember, previewing, session } from './api.js';
 import { tradeLedger } from './world-buy.js';
 import { addTrade } from './shop-trade.js';
-import { readTab, tabTotal, tabLine } from './tab.js';
+import { readTab, tabTotal, tabLine, splitTab } from './tab.js';
 import { world, worldEntries, patchEntry, getEntry, link } from './world-store.js';
 import { rumorsAt } from './world-rumors.js';
 import { makeRng } from './rng.js';
@@ -136,8 +136,18 @@ function tabPart(inn, rerender) {
       toast(`The tab at ${inn.name} is settled: ${coinText(total)} from the treasury`); rerender();
     } catch (err) { toast(err.message, 'bad'); settle.disabled = false; }
   } }, `Settle it from the treasury`) : null;
+  // Pay your own tab: each of your characters with orders on it can pay their share from their sheet.
+  const mine = isMember() && !previewing() ? worldEntries().filter((c) => c.kind === 'character' && (isGm() || c.owner_id === session.gm?.id)).map((c) => ({ c, share: tabTotal(splitTab(list, c.name).mine) })).filter((x) => x.share) : [];
+  const payShare = ({ c, share }) => { const b = el('button', { class: 'btn small ghost', type: 'button', onclick: async () => {
+    b.disabled = true; const base = playOf(c);
+    try {
+      const r = await api('entries', { method: 'PATCH', body: { settle_tab: { tavern: inn.id, character: c.id, base: { cp: base.cp, inventory: base.inventory } } } });
+      for (const x of r.entries) world.entries.set(x.id, x);
+      toast(`${c.name} paid their share: ${coinText(r.paid)}`); rerender();
+    } catch (err) { toast(err.message, 'bad'); b.disabled = false; }
+  } }, `Pay ${c.name}’s share (${coinText(share)})`); return b; };
   return el('details', { class: 'menu-tab' }, el('summary', {}, `The party’s tab: ${coinText(total)}`),
-    el('ul', { class: 'plain sheet-log' }, list.slice().reverse().map((x) => el('li', {}, tabLine(x)))), settle);
+    el('ul', { class: 'plain sheet-log' }, list.slice().reverse().map((x) => el('li', {}, tabLine(x)))), el('div', { class: 'btnrow' }, mine.map(payShare), settle));
 }
 
 // town: the settlement the tavern is in (for its size and name), or null.

@@ -10,3 +10,10 @@ test('a tab at the tavern', () => {
   assert.equal(tabLine(list[0]), 'Ann: 2 × Pale ale (8 cp)');
   assert.deepEqual(readTab('nope'), []);
 });
+
+test('splitTab: one character’s share', async () => {
+  const { splitTab, readTab, addTab } = await import('../js/tab.js');
+  const list = readTab(addTab(addTab(addTab('', { who: 'Ann', item: 'Ale', cp: 4 }), { who: 'Bo', item: 'Pie', cp: 12 }), { who: 'ann', item: 'Wine', cp: 20 }));
+  const s = splitTab(list, 'Ann');
+  assert.deepEqual(s.mine.map((x) => x.item), ['Ale', 'Wine']); assert.deepEqual(s.rest.map((x) => x.item), ['Pie']);
+});
