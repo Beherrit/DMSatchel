@@ -404,6 +404,14 @@ to the log at the bottom.
     on (or keep).
 189. [x] **A shopping list.** Players note what they mean to buy; when they're at a shop that stocks it, the buy
     panel offers it first, and GMs see the lists in prep.
+190. [ ] **Sheets keep outside changes.** An open character sheet no longer overwrites changes made from elsewhere
+    meanwhile (coin from a split, rations eaten, a rest at an inn): its save keeps what it didn't change itself.
+191. [ ] **Each character's own lifestyle.** A character can set how they live; living costs use it, so the
+    noble pays for a fine inn while the ranger sleeps rough.
+192. [ ] **Downtime moves with the calendar.** When days pass, open downtime activities gain those days, and GMs
+    are told which ones are ready to resolve.
+193. [ ] **A day on the road.** After travel on a map, a party journal draft is offered: from where to where, how
+    many days, the weather, and rations eaten.
 
 ## Ideas parking lot
 
