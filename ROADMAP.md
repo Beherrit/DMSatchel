@@ -531,6 +531,10 @@ to the log at the bottom.
 260. [x] **Who's in the back room.** A place inside another (a back room, a cellar) shows on its parent's page in the
     "Here now" line, so the tavern says who's in its back room.
 261. [x] **Routines on the printable cast list.** The printable Who's who adds where each NPC usually is by day.
+262. [ ] **A tab on the party page.** The party page's treasury card lists the tabs the party is running at taverns.
+263. [ ] **Who has the most coin.** The party page's at-a-glance table sorts by any column the GM clicks.
+264. [ ] **Bounties on the party page.** The party page lists open bounties on NPCs the players know of.
+265. [ ] **A quiet night.** When the clock passes midnight, the toast says who's out and about at that hour.
 
 ## Ideas parking lot
 
