@@ -81,3 +81,16 @@ export function setHaggle(raw, charId, pct) {
   return Object.keys(m).length ? JSON.stringify(m) : '';
 }
 export const withHaggle = (cp, pct) => (pct ? Math.max(1, Math.round(cp * (100 + pct) / 100)) : cp);
+
+// Sell several things (the party treasury's loot) to one shop: each at the buy-back rate, onto the shelf, one after
+// another. picks: [{ item, qty }] → { text (the stock after), sold: [{ item, qty, cp }], skipped: [{ item, why }] }
+export function sellLoot(text, picks, goods = []) {
+  let stock = String(text || '');
+  const sold = [], skipped = [];
+  for (const p of picks || []) {
+    const r = sellTo(stock, p.item, p.qty, goods);
+    if (r.error) { skipped.push({ item: p.item, why: r.error }); continue; }
+    stock = r.text; sold.push({ item: r.name, qty: r.qty, cp: r.cp });
+  }
+  return { text: stock, sold, skipped };
+}

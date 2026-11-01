@@ -2,12 +2,13 @@
 // Route: #world/party
 import { el, toast, confirmButton, setKids } from './dom.js';
 import { api, isGm, isMember, session } from './api.js';
-import { world, worldEntries, getEntry, byName, link, when, richText, setEntryState } from './world-store.js';
+import { world, worldEntries, getEntry, byName, link, when, richText, setEntryState, patchEntry } from './world-store.js';
 import { thumb } from './image-ui.js';
 import { lastShownLine } from './world-show.js';
 import { addCoins, playOf, changePlay } from './sheet-ui.js';
 import { readHandOut, handOutTotal } from './hand-out.js';
 import { partyRows } from './party-glance.js';
+import { sellLoot } from './purchase.js';
 import { giveItem } from './handover.js';
 import { progressBadge } from './world-objectives.js';
 import { advancementSection } from './world-attendance.js';
@@ -22,7 +23,7 @@ const ACTIVE = (e) => !['Retired', 'Dead', 'Missing'].includes(e.fields?.status)
 
 // Coin text and parsing live in economy.js (pure, so recaps and tests can use them too).
 export { coinText, parseCoins } from './economy.js';
-import { coinText, parseCoins } from './economy.js';
+import { coinText, parseCoins, GOODS } from './economy.js';
 import { tableCard } from './world-profiles.js';
 import { journeySection } from './world-journey.js';
 import { wishedBy } from './world-wishes.js';
@@ -79,6 +80,7 @@ function treasury(state, chars, reload) {
   box.append(whoHasBox(chars, items));
   if (isGm() && active.length && cp > 0) box.append(splitForm(cp, active, reload));
   if (isGm() && active.length) box.append(handOutForm(active, reload));
+  if (isGm() && items.some((i) => i.qty > 0)) box.append(sellLootForm(items.filter((i) => i.qty > 0), reload));
   if (isMember()) box.append(ledgerForm(chars, reload));
   box.append(el('details', { class: 'ledger', open: lines.length && lines.length <= 8 ? true : null }, el('summary', {}, `Loot log (${lines.length})`),
     lines.length ? el('ul', { class: 'plain ledger-lines' }, lines.slice(0, 200).map((l) => el('li', {},
@@ -102,6 +104,43 @@ function whoHasBox(chars, items) {
   };
   input.addEventListener('input', show);
   return el('div', { class: 'who-has' }, el('label', { for: 'who-has', class: 'eyebrow' }, 'Who has it?'), input, out);
+}
+
+// GMs: sell the treasury's loot to a stocked shop at its buy-back rate: the coin comes into the treasury and the
+// items go onto the shop's shelf. Things the shop can't price stay in the treasury.
+function sellLootForm(items, reload) {
+  const shops = worldEntries().filter((e) => e.kind === 'location' && e.fields?.stock).sort((a, b) => a.name.localeCompare(b.name));
+  if (!shops.length) return el('p', { class: 'muted small' }, 'Stock a shop to sell the loot to it.');
+  const shop = el('select', { id: 'sl-shop' }, shops.map((s) => el('option', { value: s.id }, s.name)));
+  const picks = items.map((i, n) => ({ i, cb: el('input', { type: 'checkbox', id: `sl-${n}` }), qty: el('input', { type: 'number', min: 1, max: i.qty, value: i.qty, class: 'qty', 'aria-label': `How many ${i.item}` }) }));
+  const offer = el('p', { class: 'small', role: 'status' });
+  const go = el('button', { class: 'btn small primary', type: 'submit' }, 'Sell');
+  const plan = () => { const s = world.entries.get(shop.value); return { s, r: sellLoot(s.fields.stock, picks.filter((p) => p.cb.checked).map((p) => ({ item: p.i.item, qty: Math.min(p.i.qty, Math.max(1, Number(p.qty.value) || 1)) })), GOODS) }; };
+  const show = () => {
+    const { r } = plan();
+    const paid = r.sold.reduce((t, x) => t + x.cp, 0);
+    offer.textContent = !r.sold.length && !r.skipped.length ? 'Tick what to sell.' : [paid ? `They’ll pay ${coinText(paid)}.` : '', r.skipped.length ? `They won’t buy ${r.skipped.map((x) => x.item).join(', ')} (can’t price it).` : ''].filter(Boolean).join(' ');
+    go.disabled = !r.sold.length;
+  };
+  for (const x of [shop, ...picks.flatMap((p) => [p.cb, p.qty])]) x.addEventListener('input', show);
+  show();
+  const form = el('form', { class: 'hand-out' },
+    el('div', { class: 'controls' }, el('label', { for: 'sl-shop' }, 'To'), shop),
+    el('ul', { class: 'plain' }, picks.map((p, n) => el('li', { class: 'controls' }, el('label', { class: 'check', for: `sl-${n}` }, p.cb, ` ${p.i.item}`), p.qty, el('span', { class: 'muted small' }, `of ${p.i.qty}`)))),
+    offer, el('div', { class: 'btnrow' }, go));
+  form.addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const { s, r } = plan();
+    if (!r.sold.length) return;
+    go.disabled = true;
+    try {
+      await patchEntry(s, { fields: { stock: r.text } }); // the shelf first: if someone else changed the shop, nothing is sold
+      for (const x of r.sold) await api('party', { method: 'POST', body: { cp: x.cp, item: x.item, qty: -x.qty, note: `Sold to ${s.name}` } });
+      toast(`Sold to ${s.name} for ${coinText(r.sold.reduce((t, x) => t + x.cp, 0))}`);
+      reload();
+    } catch (err) { toast(err.message, 'bad'); go.disabled = false; }
+  });
+  return el('details', { class: 'split-loot' }, el('summary', {}, 'Sell the loot'), form);
 }
 
 // GMs: the same item and/or coin to each of several characters ("a potion of healing each"), from nowhere or from the

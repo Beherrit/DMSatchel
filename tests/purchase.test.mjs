@@ -57,3 +57,11 @@ test('haggling: granted per character, used once', () => {
   assert.deepEqual(readHaggle('junk'), {});
   assert.equal(withHaggle(200, -10), 180); assert.equal(withHaggle(200, 10), 220); assert.equal(withHaggle(1, -20), 1); assert.equal(withHaggle(300, 0), 300);
 });
+
+test('selling the party’s loot in one go', async () => {
+  const { sellLoot } = await import('../js/purchase.js');
+  const r = sellLoot(STOCK, [{ item: 'Rope', qty: 2 }, { item: 'Shield', qty: 1 }, { item: 'Cursed idol', qty: 1 }], [['Shield', 10, 'Armor']]);
+  assert.deepEqual(r.sold, [{ item: 'Rope', qty: 2, cp: 100 }, { item: 'Shield', qty: 1, cp: 500 }]);
+  assert.deepEqual(r.skipped.map((s) => s.item), ['Cursed idol']);
+  assert.ok(r.text.includes('Rope | 1 gp | 5 in stock') && r.text.includes('Shield | 10 gp | 1 in stock'));
+});
