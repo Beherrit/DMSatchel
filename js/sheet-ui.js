@@ -3,6 +3,7 @@
 // The tracker is saved with the entry, so everyone at the table sees the same numbers.
 import { el, toast, confirmButton, setKids } from './dom.js';
 import { longRest } from './rest.js';
+import { mergePlay } from './play-merge.js';
 import { generateCharacter, characterText, abilityMod, fmtMod } from './character.js';
 import { ABILITIES, ABILITY_NAMES } from './rules2024.js';
 import { ORD } from './spells.js';
@@ -66,18 +67,19 @@ function defaults(e, ch) {
 
 // Saves are queued so quick clicks don't trip over each other; if someone else saved meanwhile, take their entry and retry.
 const queue = new Map();
-function save(id, play) {
+// base: the sheet's play as it was drawn or last saved. Only what changed since then is saved, on top of what's stored
+// now (see play-merge.js), so changes made elsewhere meanwhile (a coin split, rations, a rest) are kept.
+function save(id, play, base) {
   const q = queue.get(id) || { busy: false, next: null };
-  q.next = play; queue.set(id, q);
+  q.next = { play: JSON.parse(JSON.stringify(play)), base: q.next?.base ?? base }; queue.set(id, q);
   if (q.busy) return;
   const run = async () => {
     q.busy = true;
     while (q.next) {
-      const p = q.next; q.next = null;
+      const { play: mine, base: was } = q.next; q.next = null;
       for (let attempt = 0; attempt < 2; attempt++) {
-        // The shopping list is kept from outside the sheet (world-shopping.js): always save the stored one.
-        const stored = parse(world.entries.get(id)?.fields?.play);
-        if (Array.isArray(stored?.shopping)) p.shopping = stored.shopping;
+        const cur = world.entries.get(id);
+        const p = was ? mergePlay(was, mine, defaults(cur, characterOf(cur))) : mine;
         try { await patchEntry(world.entries.get(id), { fields: { play: JSON.stringify(p) } }); break; }
         catch (err) {
           if (err.status === 409 && err.body?.entry && attempt === 0) { world.entries.set(id, err.body.entry); continue; }
@@ -137,8 +139,10 @@ export function sheetSection(e, rerender) {
   const box = el('section', { class: 'card pc-sheet' });
   const can = Boolean(e.can_edit);
   let play = defaults(e, ch);
+  let base = JSON.parse(JSON.stringify(play)); // what this sheet last saw stored: its saves send only what it changed
+  const send = () => { save(e.id, play, base); base = JSON.parse(JSON.stringify(play)); };
   const maxhp = () => Number(play.maxhp) || ch?.stats.hp || 0;
-  const commit = (msg) => { save(e.id, play); draw(); if (msg) toast(msg); };
+  const commit = (msg) => { send(); draw(); if (msg) toast(msg); };
 
   function hpBlock() {
     const max = maxhp();
@@ -255,7 +259,7 @@ export function sheetSection(e, rerender) {
   function textBox(key, label, rows) {
     const t = el('textarea', { rows, 'aria-label': label, readonly: can ? null : true }, play[key] || '');
     if (key === 'inventory') t.addEventListener('input', () => { play.inventory = t.value; drawItems(); });
-    t.addEventListener('change', () => { play[key] = t.value.slice(0, 15000); save(e.id, play); toast(`${label} saved`); });
+    t.addEventListener('change', () => { play[key] = t.value.slice(0, 15000); send(); toast(`${label} saved`); });
     return el('div', { class: 'field wide' }, el('label', {}, label), t);
   }
 
