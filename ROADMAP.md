@@ -422,7 +422,7 @@ to the log at the bottom.
     character's purse.
 198. [x] **Hunger takes its toll.** When someone goes without rations on the road, GMs are offered a level of
     exhaustion for them, right there in the living-costs dialog.
-199. [ ] **Weather on the map.** The party's marker on a map shows today's weather there, with the full line on
+199. [x] **Weather on the map.** The party's marker on a map shows today's weather there, with the full line on
     hover.
 200. [ ] **Since you were last here: the road.** Players' "what's new" says how many days passed in the world and
     where the party went since their last visit.
@@ -632,3 +632,4 @@ to the log at the bottom.
 - Treasure from a fight: every encounter card now has "Roll treasure" for GMs. It rolls pocket loot for the creatures, or their lair's hoard if ticked, at the tier of the toughest creature's challenge (CR 0–4, 5–10, 11–16, 17+), and shows the coins, valuables, magic items and any trinket. "Put it in the loot log" adds the coins as one amount and each valuable, item and trinket as its own line ("After the fight with 8 × Orc"); "↻ Another" rolls again. The rolling itself moved out of the Table Tools page into js/loot.js, shared by both and unit tested over 50 rolls.
 - The party's wealth: the party page's treasury card now says what the party is worth in all, the treasury plus every active character's purse ("The party's worth: 117 gp 5 sp (the treasury 100 gp, purses 17 gp 5 sp)"). Retired, dead and missing characters aren't counted, and nothing shows until someone has coin of their own. partyWealth in js/party-glance.js unit tested.
 - Hunger takes its toll: when "On the road: eat rations" leaves anyone short, the living-costs dialog adds "Hunger takes its toll" with an unticked box for each of them ("A level of exhaustion for Bo (2 days without food)"). It is the GM's call, and nothing is given by default. Ticked characters get the level in the same save as their rations, to a maximum of 6, and it shows in their sheet's history ("Ate 1 day of rations on the road (2 short); a level of exhaustion from hunger"). Someone with no rations at all is written to only if ticked.
+- Weather on the map: the party's marker on a map now carries a small picture of today's sky where they are (☀ ⛅ ☁ 🌫 🌧 🌨, none underground). Its hover title and spoken label give the full line ("Today: Light rain, 18°C (64°F), wind moderate."). It is the same seeded weather as prep, the front page and the travel offer. skyIcon in js/forecast.js unit tested.

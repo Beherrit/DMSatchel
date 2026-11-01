@@ -29,3 +29,8 @@ test('weather slows the road', async () => {
   assert.deepEqual(weatherSlowdown({ sky: 'Light rain', wind: 'Moderate' }), { factor: 1, why: '' });
   assert.deepEqual(weatherSlowdown(null), { factor: 1, why: '' });
 });
+
+test('a sky as a picture', async () => {
+  const { skyIcon } = await import('../js/forecast.js');
+  assert.deepEqual(['Clear', 'Scattered clouds', 'Overcast', 'Fog', 'Hazy', 'Light rain', 'Heavy snow', 'No sky'].map((sky) => skyIcon({ sky })), ['☀', '⛅', '☁', '🌫', '🌫', '🌧', '🌨', '']);
+});

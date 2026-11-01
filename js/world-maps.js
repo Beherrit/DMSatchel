@@ -7,7 +7,7 @@ import { travelText } from './encounters.js';
 import { world, worldEntries, getEntry, findByName, link, kindLabel, notice, nameList, whenTime, createEntry, mapsOf, trail } from './world-store.js';
 import { playOf } from './sheet-ui.js';
 import { rationsFor } from './party-glance.js';
-import { dayWeather, weatherSlowdown } from './forecast.js';
+import { dayWeather, weatherSlowdown, skyIcon } from './forecast.js';
 import { placeTerrains } from './encounter-ui.js';
 import { KINDS, PLACE_KINDS, pinIconFor } from './world-schema.js';
 import { placeDrawer } from './world-place.js';
@@ -363,9 +363,12 @@ export async function viewMap(id, focusPin) {
       const at = partyPin(pins, partyChain());
       if (!at) return [];
       const place = getEntry(world.info.party_at);
-      return [el('button', { class: 'pin party-token', type: 'button', style: `left:${at.pin.x * 100}%;top:${at.pin.y * 100}%`, title: `The party is ${at.exact ? 'here' : `in ${place.name}`}`,
-        'aria-label': `The party is ${at.exact ? `here, in ${place.name}` : `in ${place.name}, in ${at.pin.label}`}`, onclick: (ev) => { ev.stopPropagation(); showPin(at.pin); } },
-        el('span', { class: 'glyph', 'aria-hidden': 'true' }, '⚑'), el('span', { class: 'pin-label' }, at.exact ? 'The party' : `The party (${place.name})`))];
+      // Today's weather where the party is (the same seeded roll as prep and the front page).
+      const w = dayWeather(place.id, placeTerrains(place), worldCalendar());
+      const sky = skyIcon(w), said = `Today: ${w.line}`;
+      return [el('button', { class: 'pin party-token', type: 'button', style: `left:${at.pin.x * 100}%;top:${at.pin.y * 100}%`, title: `The party is ${at.exact ? 'here' : `in ${place.name}`}. ${said}`,
+        'aria-label': `The party is ${at.exact ? `here, in ${place.name}` : `in ${place.name}, in ${at.pin.label}`}. ${said}`, onclick: (ev) => { ev.stopPropagation(); showPin(at.pin); } },
+        el('span', { class: 'glyph', 'aria-hidden': 'true' }, '⚑'), el('span', { class: 'pin-label' }, at.exact ? 'The party' : `The party (${place.name})`, sky ? el('span', { class: 'party-weather', 'aria-hidden': 'true' }, ` ${sky}`) : null))];
     })(),
     ...pins.map((p) => {
       const held = holdsOn && p.entry_id && hold.get(p.entry_id);

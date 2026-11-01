@@ -34,3 +34,10 @@ export function weatherSlowdown(w) {
   const worst = reasons.filter(([on]) => on).sort((a, b) => b[1] - a[1])[0];
   return worst ? { factor: worst[1], why: worst[2] } : { factor: 1, why: '' };
 }
+
+// A sky as one small picture for a map marker ('' underground).
+export function skyIcon(w) {
+  const sky = String(w?.sky || '');
+  if (/No sky/i.test(sky)) return '';
+  return /snow/i.test(sky) ? '🌨' : /rain/i.test(sky) ? '🌧' : /Fog|Hazy/i.test(sky) ? '🌫' : /Overcast/i.test(sky) ? '☁' : /cloud/i.test(sky) ? '⛅' : '☀';
+}
