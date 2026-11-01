@@ -23,3 +23,10 @@ test('a packing list: rations for the trip', async () => {
   assert.deepEqual(withRations([], 2), ['Rations × 2']);
   assert.deepEqual(withRations(['Rations × 2'], 0), []);
 });
+
+test('shopsFor: the shops that stock it, cheapest first', async () => {
+  const { shopsFor } = await import('../js/shopping.js');
+  const shops = [{ id: 'a', name: 'Smithy', stock: 'Rope | 2 gp | 3 in stock\nLantern | 5 gp | 1 in stock' }, { id: 'b', name: 'Chandler', stock: 'Hempen rope (50 ft) | 1 gp | available' }, { id: 'c', name: 'Baker', stock: 'Bread | 2 cp | available' }];
+  assert.deepEqual(shopsFor('rope', shops).map((x) => `${x.shop.name}:${x.item}:${x.cp}`), ['Chandler:Hempen rope (50 ft):100', 'Smithy:Rope:200']);
+  assert.deepEqual(shopsFor('Rations × 2', shops), []);
+});

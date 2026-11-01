@@ -4,7 +4,24 @@ import { el, toast, setKids } from './dom.js';
 import { isGm } from './api.js';
 import { world, worldEntries, getEntry, link } from './world-store.js';
 import { playOf, changePlay } from './sheet-ui.js';
-import { readList, addToList, removeFromList } from './shopping.js';
+import { readList, addToList, removeFromList, shopsFor } from './shopping.js';
+import { shopOpen } from './shop-hours.js';
+import { ownerIn } from './world-routine.js';
+import { coinText } from './economy.js';
+
+// Open now?: under a line on the list, the shops that stock it (cheapest first), whether they're open at the world's
+// hour, and whether the owner is behind the counter.
+function whereToBuy(line) {
+  const shops = worldEntries().filter((s) => s.kind === 'location' && s.fields?.stock).map((s) => ({ ...s, stock: s.fields.stock }));
+  const found = shopsFor(line, shops).slice(0, 3);
+  if (!found.length) return null;
+  const m = world.info?.clock?.minutes ?? 480;
+  return el('div', { class: 'small muted where-to-buy' }, found.map((f, i) => {
+    const open = shopOpen(f.shop, m), who = ownerIn(f.shop);
+    return [i ? ' · ' : '', link(getEntry(f.shop.id) || f.shop), ` ${coinText(f.cp)}, `, open.open ? el('span', { class: 'open-now' }, 'open') : `shut till ${open.opens.replace(/^at /, '')}`,
+      who && open.open ? (who.here ? `, ${who.owner.name} is in` : `, ${who.owner.name} is out`) : ''];
+  }));
+}
 
 export function shoppingCard(e, rerender) {
   if (e.kind !== 'character' || !e.can_edit) return null;
@@ -16,7 +33,7 @@ export function shoppingCard(e, rerender) {
   function draw() {
     const list = readList(playOf(world.entries.get(e.id) || e));
     setKids(box, el('h3', {}, '🛒 Shopping list'),
-      list.length ? el('ul', { class: 'plain ck-list' }, list.map((t, i) => el('li', {}, el('span', {}, t),
+      list.length ? el('ul', { class: 'plain ck-list' }, list.map((t, i) => el('li', {}, el('span', {}, t, whereToBuy(t)),
         el('button', { class: 'btn small ghost', type: 'button', 'aria-label': `Take ${t} off the list`, onclick: () => save((l) => removeFromList(l, i)) }, '✕'))))
         : el('p', { class: 'muted small' }, 'What you mean to buy next time you’re in town. Shops that stock it will offer it first.'),
       form);

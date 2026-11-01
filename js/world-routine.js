@@ -108,3 +108,13 @@ export function townHoursBox(town) {
       el('thead', {}, el('tr', {}, el('th', { scope: 'col' }, 'Who'), t.hours.map((h) => el('th', { scope: 'col' }, `${h.label} (${hhmm(h.m)})`)))),
       el('tbody', {}, t.rows.map((r) => el('tr', {}, el('th', { scope: 'row' }, link(r.npc.entry)), r.cells.map((c) => el('td', {}, c ? (c.id === town.id ? 'about town' : link(c)) : el('span', { class: 'muted' }, '—')))))))));
 }
+
+// Is a place's owner (its Owner field naming an NPC with a routine) there right now? → { owner, here } or null.
+export function ownerIn(place) {
+  const m = now();
+  if (m === null || !place.fields?.owner) return null;
+  const owner = findByName(String(place.fields.owner).replace(/\[\[([^\]|]+)(\|[^\]]*)?\]\]/g, '$1').trim());
+  if (!owner || owner.kind !== 'npc' || !owner.fields?.routine || ['Dead', 'Missing'].includes(owner.fields?.status)) return null;
+  const w = whereAt(owner.fields.routine, m);
+  return w ? { owner, here: placeOf(w.place)?.id === place.id } : null;
+}
