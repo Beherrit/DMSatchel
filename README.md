@@ -192,6 +192,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **A shop's ledger**: each shop shows the party's recent trade there: who bought and sold what, for how much.
 - **Enough food for the road?**: planning a trip on a map says who has enough rations for it and who's short.
 - **Too heavy for the road**: planning a trip warns who is over their carrying capacity.
+- **A packing list**: planning a trip puts the rations each character is short of on their shopping list.
 - **Weather slows the road**: heavy rain, snow or a strong wind where the party sets out adds travel days.
 - **A shopping list**: players note what they mean to buy; shops offer it first, and GMs see the lists in prep.
 - **Downtime moves with the calendar**: open downtime counts the days that pass and says when it's ready to resolve.

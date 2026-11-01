@@ -15,10 +15,17 @@ export const removeFromList = (list, i) => list.filter((_, n) => n !== i);
 
 // Does a stocked item answer a line on the list? Every word on the line starts a word of the item's name
 // ("rope" finds "Hempen rope", "healing potion" finds "Potion of healing").
-export const answers = (line, itemName) => { const want = words(line), have = words(itemName); return want.length > 0 && want.every((w) => have.some((h) => h.startsWith(w))); };
+// Bare numbers on the line ("Rations × 3") are how many, not part of the name.
+export const answers = (line, itemName) => { const want = words(line).filter((w) => !/^\d+$/.test(w)), have = words(itemName); return want.length > 0 && want.every((w) => have.some((h) => h.startsWith(w))); };
 
 // The stock's items with the ones on the list first, each marked: items [{ name, … }] → [{ …item, wanted }]
 export function listFirst(items, list) {
   const marked = (items || []).map((it) => ({ ...it, wanted: list.some((l) => answers(l, it.name)) }));
   return [...marked.filter((x) => x.wanted), ...marked.filter((x) => !x.wanted)];
+}
+
+// A packing list: put "Rations × n" on the list for a trip, in place of any rations line already there.
+export function withRations(list, n) {
+  const rest = (list || []).filter((l) => !answers(l, 'Rations (1 day)'));
+  return n > 0 ? addToList(rest, `Rations × ${n}`) : rest;
 }

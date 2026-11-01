@@ -13,3 +13,13 @@ test('a shopping list', () => {
   assert.deepEqual(listFirst(items, l).map((x) => `${x.name}${x.wanted ? '*' : ''}`), ['Potion of healing*', 'Hempen rope*', 'Lantern']);
   assert.deepEqual(readList({ shopping: ['A', '', 3] }), ['A', '3']);
 });
+
+test('a packing list: rations for the trip', async () => {
+  const { withRations, answers } = await import('../js/shopping.js');
+  assert.ok(answers('Rations × 3', 'Rations (1 day)'));
+  assert.ok(answers('2 rope', 'Hempen rope (50 feet)'));
+  assert.deepEqual(withRations(['Rope', 'rations'], 3), ['Rope', 'Rations × 3']);
+  assert.deepEqual(withRations(['Rope', 'Rations × 1'], 4), ['Rope', 'Rations × 4']);
+  assert.deepEqual(withRations([], 2), ['Rations × 2']);
+  assert.deepEqual(withRations(['Rations × 2'], 0), []);
+});
