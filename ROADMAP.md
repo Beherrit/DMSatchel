@@ -459,6 +459,13 @@ to the log at the bottom.
     says when there aren't enough.
 217. [x] **A packing list.** Planning a trip offers to add what each character is short of (rations for the days) to
     their shopping list.
+218. [ ] **Debts at a glance.** The party page and the GM's party sheet list who owes whom, from the sheets' debts.
+219. [ ] **Who's about town.** A settlement's page lists the NPCs whose routine puts them somewhere inside it right
+    now, and where.
+220. [ ] **Lights from the pack.** Lighting a torch or lantern on the clock can take it (or a flask of oil) from a
+    character's inventory, with a line in their history.
+221. [ ] **Order from the menu.** A player orders food or drink from a tavern's menu, paid from their sheet, noted in
+    their history and the tavern's ledger.
 
 ## Ideas parking lot
 
