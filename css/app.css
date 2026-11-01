@@ -1742,3 +1742,14 @@ details.quest-group > summary .section-title { display: inline }
 .town-hours-table td, .town-hours-table th { white-space: nowrap }
 .routine-rolls { display: grid; gap: 10px; max-height: 60vh; overflow: auto }
 .routine-rolls li { display: grid; gap: 4px } .routine-rolls textarea { width: 100%; box-sizing: border-box }
+/* Print the shelf */
+.shelf-title { display: none }
+@media print {
+  body.print-shelf * { visibility: hidden }
+  body.print-shelf .shop-card, body.print-shelf .shop-card * { visibility: visible }
+  body.print-shelf .shop-card { position: absolute; inset: 0 auto auto 0; width: 100%; border: 0 }
+  body.print-shelf .shop-card button, body.print-shelf .shop-card .trade, body.print-shelf .shop-card .shop-asks, body.print-shelf .shop-card .shop-ledger { display: none }
+  body.print-shelf .shelf-title { display: block; font-size: 18pt; font-weight: 700; margin: 0 0 4mm }
+  body.print-shelf .shop-card, body.print-shelf .shop-card .stock-table { background: #fff; color: #000 }
+  body.print-shelf .shop-card .shop-helpers { display: none }
+}

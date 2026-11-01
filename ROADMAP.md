@@ -515,7 +515,7 @@ to the log at the bottom.
     the limit of three.
 248. [x] **Too heavy to carry it.** Buying something that would put a character over their carrying capacity says so
     before they pay.
-249. [ ] **Print the shelf.** A shop's stock as a printable price list to hand round the table.
+249. [x] **Print the shelf.** A shop's stock as a printable price list to hand round the table.
 
 ## Ideas parking lot
 
@@ -772,3 +772,4 @@ to the log at the bottom.
 - A gift they wanted: when giving an NPC something, the dialog now says "💝 Something Mother Ide wants." as soon as the chosen item answers their Wants field (any word of three letters or more in its name, singular or plural, not counting small words like "the" and "old"). Coin counts when they want money, gold, coin or payment. The server records the match with the gift, the toast adds "something they wanted", and the NPC's gift list marks it 💝. wantsMatch in js/gifts.js unit tested.
 - Attuned: in a sheet's "Items on this sheet" list, each magic item that needs attunement (from the SRD, or a world item whose attunement field says so) now has an "attuned" tick. Above the list, "Attuned to 2 of 3" counts them, in red with "one too many" past the limit of three. Ticks are kept in the sheet's play state (play.attuned), which the sheet keeps when it saves; an item that leaves the inventory stops counting. js/attunement.js unit tested.
 - Too heavy to carry it: a shop's buy panel now works out the buyer's load after the purchase as they choose, coin spent included. When it would take them over their carrying capacity it says so in red before they pay: "That would put Ann over their carrying capacity: 266.9 lb of 120 lb." It's a warning, not a block; the GM decides. It's for Forge characters, whose Strength is known. loadAfter in js/weights.js unit tested.
+- Print the shelf: a stocked shop's "For sale" heading now has "Print the shelf". It prints just the shop's name, its shopkeeper line and the stock tables, black on white, to hand round the table. The trade panel, the haggle and sell helpers, the asks and the ledger are left out.

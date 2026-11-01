@@ -418,7 +418,11 @@ function viewEntry(id, tab) {
     attendanceSection(e, rerenderWorld),
     e.kind === 'location' && e.fields?.type === 'Tavern' ? menuCard(e, trailTown(e), rerenderWorld) : null,
     e.fields?.stock || (e.kind === 'location' && e.fields?.type === 'Shop' && isGm()) ? el('section', { class: 'card shop-card' },
-      el('div', { class: 'entry-head' }, el('h3', {}, 'For sale'), isGm() ? el('button', { class: 'btn small', type: 'button', onclick: async () => {
+      el('p', { class: 'shelf-title' }, e.name),
+      el('div', { class: 'entry-head' }, el('h3', {}, 'For sale'),
+        // Print the shelf: just the shop's prices, to hand round the table.
+        e.fields?.stock ? el('button', { class: 'btn small ghost', type: 'button', onclick: () => { document.body.classList.add('print-shelf'); window.print(); setTimeout(() => document.body.classList.remove('print-shelf'), 500); } }, 'Print the shelf') : null,
+        isGm() ? el('button', { class: 'btn small', type: 'button', onclick: async () => {
         const town = trailTown(e);
         try { await patchEntry(e, { fields: restockDraft(e, town) }); toast(town ? `Restocked at ${town.name}’s prices` : 'Restocked'); rerenderWorld(); } catch (err) { toast(err.message, 'bad'); }
       } }, e.fields?.stock ? 'Restock' : 'Stock this shop') : null),
