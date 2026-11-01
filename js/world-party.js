@@ -9,6 +9,7 @@ import { addCoins, playOf, changePlay } from './sheet-ui.js';
 import { readHandOut, handOutTotal } from './hand-out.js';
 import { partyRows, partyWealth } from './party-glance.js';
 import { sellLoot } from './purchase.js';
+import { shopStanding, sellWithStanding } from './standing-price.js';
 import { giveItem } from './handover.js';
 import { progressBadge } from './world-objectives.js';
 import { advancementSection } from './world-attendance.js';
@@ -116,7 +117,15 @@ function sellLootForm(items, reload) {
   const picks = items.map((i, n) => ({ i, cb: el('input', { type: 'checkbox', id: `sl-${n}` }), qty: el('input', { type: 'number', min: 1, max: i.qty, value: i.qty, class: 'qty', 'aria-label': `How many ${i.item}` }) }));
   const offer = el('p', { class: 'small', role: 'status' });
   const go = el('button', { class: 'btn small primary', type: 'submit' }, 'Sell');
-  const plan = () => { const s = world.entries.get(shop.value); return { s, r: sellLoot(s.fields.stock, picks.filter((p) => p.cb.checked).map((p) => ({ item: p.i.item, qty: Math.min(p.i.qty, Math.max(1, Number(p.qty.value) || 1)) })), GOODS) }; };
+  const plan = () => {
+    const s = world.entries.get(shop.value);
+    const r = sellLoot(s.fields.stock, picks.filter((p) => p.cb.checked).map((p) => ({ item: p.i.item, qty: Math.min(p.i.qty, Math.max(1, Number(p.qty.value) || 1)) })), GOODS);
+    // Friends buy dear: the party's standing with whoever holds the shop's place (only powers players know of).
+    const found = shopStanding(s, worldEntries(), world.standings?.log);
+    const pct = found && found.holder.visibility !== 'gm' ? found.pct : 0;
+    if (pct) r.sold = r.sold.map((x) => ({ ...x, cp: sellWithStanding(x.cp, pct) }));
+    return { s, r };
+  };
   const show = () => {
     const { r } = plan();
     const paid = r.sold.reduce((t, x) => t + x.cp, 0);

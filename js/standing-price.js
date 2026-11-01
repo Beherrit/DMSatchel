@@ -5,6 +5,9 @@ import { controllers } from './control.js';
 
 export const standingPct = (v) => (v >= 3 ? -10 : v <= -3 ? 10 : 0);
 
+// Friends buy dear: what a shop pays for goods, the other way round (10% more for friends, 10% less for the hated).
+export const sellWithStanding = (cp, pct) => (pct ? Math.max(1, Math.round(cp * (100 - pct) / 100)) : cp);
+
 // log: standing changes, newest first. → the latest open value for this entry (0 if none).
 export const openStanding = (log, entryId) => (log || []).find((r) => r.entry_id === entryId && !r.secret)?.value ?? 0;
 

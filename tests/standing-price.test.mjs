@@ -10,3 +10,8 @@ test('friends get a discount', () => {
   assert.deepEqual((({ holder, value, pct }) => [holder.id, value, pct])(shopStanding(entries[2], entries, log)), ['g', 3, -10]);
   assert.equal(shopStanding(entries[3], entries, log), null);
 });
+
+test('friends buy dear', async () => {
+  const { sellWithStanding } = await import('../js/standing-price.js');
+  assert.equal(sellWithStanding(100, -10), 110); assert.equal(sellWithStanding(100, 10), 90); assert.equal(sellWithStanding(100, 0), 100); assert.equal(sellWithStanding(1, 10), 1);
+});

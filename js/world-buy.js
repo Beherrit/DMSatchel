@@ -10,7 +10,7 @@ import { stockItems, sellTo, HAGGLES, readHaggle, haggleFor, setHaggle, withHagg
 import { inventoryLines } from './handover.js';
 import { readList, listFirst } from './shopping.js';
 import { shopOpen } from './shop-hours.js';
-import { shopStanding } from './standing-price.js';
+import { shopStanding, sellWithStanding } from './standing-price.js';
 
 const ACTIVE = (e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
 
@@ -96,6 +96,8 @@ function buyPart(shop, stock, chars, rerender) {
 }
 
 function sellPart(shop, chars, rerender) {
+  const found = shopStanding(shop, worldEntries(), world.standings?.log);
+  const stand = found && found.holder.visibility !== 'gm' && found.holder.status !== 'suggested' ? found : null;
   const who = el('select', { id: 'sell-who' }, chars.map((c) => el('option', { value: c.id }, c.name)));
   const item = el('select', { id: 'sell-item' });
   const qty = el('input', { type: 'number', id: 'sell-qty', min: 1, max: 100, value: 1, class: 'qty' });
@@ -109,7 +111,7 @@ function sellPart(shop, chars, rerender) {
     qty.max = it.qty;
     const r = sellTo(shop.fields?.stock, it.name, Math.min(it.qty, Math.max(1, Number(qty.value) || 1)), GOODS);
     go.disabled = Boolean(r.error);
-    offer.textContent = r.error || `They’ll pay ${coinText(r.cp)}.`;
+    offer.textContent = r.error || `They’ll pay ${coinText(sellWithStanding(r.cp, stand?.pct || 0))}${stand?.pct ? (stand.pct < 0 ? ` (friends of ${stand.holder.name} get 10% more)` : ` (${stand.holder.name}’s people pay 10% less)`) : ''}.`;
   };
   who.addEventListener('change', fill); item.addEventListener('change', show); qty.addEventListener('input', show);
   fill();

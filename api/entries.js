@@ -40,7 +40,7 @@ import { readMenu } from '../js/menu.js';
 import { buyFrom, sellTo, haggleFor, withHaggle, setHaggle } from '../js/purchase.js';
 import { addLog } from '../js/play-log.js';
 import { shopOpen } from '../js/shop-hours.js';
-import { shopStanding } from '../js/standing-price.js';
+import { shopStanding, sellWithStanding } from '../js/standing-price.js';
 import { coinText, GOODS } from '../js/economy.js';
 import { cleanMusic } from '../js/music.js';
 import { journeyFor } from '../js/journey.js';
@@ -153,6 +153,14 @@ async function revealDue(worldId) {
   const rows = await sql`UPDATE entries SET visibility = 'all', reveal_at = NULL, updated_at = now(), version = version + 1
     WHERE world_id = ${worldId} AND reveal_at IS NOT NULL AND reveal_at <= now() AND NOT deleted RETURNING id`;
   for (const r of rows) await record(r.id, null, 'reveal', null);
+}
+
+// The party's open standing with whoever holds this shop's place, if players know of that power (see standing-price.js).
+async function standingAt(req, shop) {
+  const all = await sql`SELECT id, kind, name, parent_id, links, fields, visibility, status FROM entries WHERE world_id = ${req.world.id} AND NOT deleted`;
+  const log = await sql`SELECT entry_id, value, secret FROM standing_log WHERE world_id = ${req.world.id} AND NOT secret ORDER BY at DESC LIMIT 2000`;
+  const found = shopStanding(shop, all, log);
+  return found && found.holder.visibility === 'all' && found.holder.status === 'live' ? found : null;
 }
 
 async function insert(e, req, { owner = null, status = 'live', id = newId() } = {}) {
@@ -396,10 +404,7 @@ export default route({
       if (!Number.isFinite(p.cp)) p.cp = Math.max(0, Math.round(Number(b.base?.cp) || 0));
       if (p.inventory === undefined) p.inventory = clip(b.base?.inventory, 15000);
       // Friends get a discount: the party's open standing with whoever holds this place (see standing-price.js).
-      const all = await sql`SELECT id, kind, name, parent_id, links, fields, visibility, status FROM entries WHERE world_id = ${req.world.id} AND NOT deleted`;
-      const log = await sql`SELECT entry_id, value, secret FROM standing_log WHERE world_id = ${req.world.id} AND NOT secret ORDER BY at DESC LIMIT 2000`;
-      const found = shopStanding(shop, all, log);
-      const stand = found && found.holder.visibility === 'all' && found.holder.status === 'live' ? found : null; // only a power players know of
+      const stand = await standingAt(req, shop);
       if (stand?.pct) r.cp = withHaggle(r.cp, stand.pct);
       // A haggle a GM granted this character here changes the price, once.
       const pct = haggleFor(shop.fields.haggle, ch.id);
@@ -433,6 +438,9 @@ export default route({
       if (t.error) return fail(res, 400, t.error);
       const r = sellTo(shop.fields.stock, t.name, t.qty, GOODS);
       if (r.error) return fail(res, 400, r.error);
+      // Friends buy dear: the same standing pays them 10% more (the hated 10% less).
+      const stand = await standingAt(req, shop);
+      if (stand?.pct) r.cp = sellWithStanding(r.cp, stand.pct);
       const done = await sql`UPDATE entries SET fields = fields || jsonb_build_object('stock', ${clip(r.text, LIMITS.body)}::text), updated_by = ${req.gm.id}, updated_at = now(), version = version + 1
         WHERE id = ${shop.id} AND world_id = ${req.world.id} AND version = ${shop.version} RETURNING id`;
       if (!done.length) return fail(res, 409, 'Someone else was at this shop’s counter at the same moment. Try again.');
@@ -442,7 +450,7 @@ export default route({
         WHERE id = ${ch.id} AND world_id = ${req.world.id}`;
       await record(ch.id, req.gm.id, 'sell', null);
       await record(shop.id, req.gm.id, 'bought', null);
-      return send(res, 200, { entries: [shape(await loadOne(shop.id, req.world.id), req), shape(await loadOne(ch.id, req.world.id), req)], sold: { name: r.name, qty: r.qty, cp: r.cp } });
+      return send(res, 200, { entries: [shape(await loadOne(shop.id, req.world.id), req), shape(await loadOne(ch.id, req.world.id), req)], sold: { name: r.name, qty: r.qty, cp: r.cp, standing: stand?.pct || 0 } });
     }
     if (req.body.give) {
       const g = req.body.give;
