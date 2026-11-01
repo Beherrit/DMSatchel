@@ -1729,7 +1729,7 @@ details.quest-group > summary .section-title { display: inline }
 .debt-tools { display: inline-flex; gap: 6px; align-items: center }
 .debt-tools .coin-amt { width: 8em }
 .menu-order { margin-top: 10px; flex-wrap: wrap }
-@media print { body.print-menu .menu-order, body.print-menu .shop-ledger { display: none } }
+@media print { body.print-menu .menu-order, body.print-menu .shop-ledger, body.print-menu .menu-tab { display: none } }
 /* Everything the party carries */
 .kit-table { width: 100%; border-collapse: collapse }
 .kit-table th, .kit-table td { text-align: left; padding: 5px 8px; border-bottom: 1px solid var(--line); vertical-align: top }

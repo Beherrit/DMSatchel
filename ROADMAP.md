@@ -520,7 +520,7 @@ to the log at the bottom.
 251. [x] **Festival specials.** On a holiday, taverns offer a festival dish or drink at the top of their menu.
 252. [x] **Who's been given what.** A character's page lists the gifts they've given NPCs, and to whom.
 253. [x] **Closing time.** A shop's page says how long until it shuts (or opens), by the world's clock.
-254. [ ] **A tab at the tavern.** Players can put an order on the party's tab; the GM settles the tab from the
+254. [x] **A tab at the tavern.** Players can put an order on the party's tab; the GM settles the tab from the
     treasury later, in one line.
 255. [ ] **Late night at the tavern.** After midnight a tavern's page says it's last orders before it shuts at 2.
 256. [ ] **The NPC's day on their page.** An NPC's page shows their whole day from the routine (morning, afternoon,
@@ -787,3 +787,5 @@ to the log at the bottom.
 - Festival specials: on one of the world calendar's holidays, a tavern's bill of fare now opens with a festival dish or drink: "🎉 Festival: Mulled wine for Bridge Day, 6 cp". It's chosen from the tavern and the holiday, so the page and the server agree, and priced a little above the tavern's usual fare. It heads the Order list and can be ordered and paid for like anything else. The next day it's gone. festivalSpecial in js/menu.js unit tested; ordering it tested against PGlite.
 - Who's been given what: a character's page now lists the gifts they've given NPCs, newest first: "💝 Map to Mother Ide (for the marsh)". It's read from the NPCs' gift lists, so a player sees only gifts to NPCs they can see, while the GM sees them all. givenBy in js/gifts.js unit tested.
 - Closing time: a stocked shop's page now says how long it has by the world's clock: "🕰 Open for another 3 h 20 min.", "Shut; it opens in 10 h.", or on a holiday, "Shut today; it opens tomorrow." Taverns count to their 2 in the morning close. It's left off the printed shelf. untilChange in js/shop-hours.js unit tested.
+- Full browser sweep (277 tests) clean after #222–#253.
+- A tab at the tavern: a tavern's Order row now has "On the tab" beside "Order". The order goes on the party's tab: nothing comes off the sheet now, though its history notes it ("Put 2 × Pale ale on the party's tab at The Bell (8 cp)"), and the tavern's ledger counts it. Everyone sees "The party's tab: 1 sp 2 cp" under the menu, with who had what. GMs get "Settle it from the treasury", which writes one treasury line ("Settled the tab at The Bell (3 orders)") and clears the tab. Printing the menu leaves the tab out. js/tab.js unit tested; the tab option on the order route tested against PGlite.

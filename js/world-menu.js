@@ -4,6 +4,7 @@ import { el, toast, setKids } from './dom.js';
 import { api, isGm, isMember, previewing, session } from './api.js';
 import { tradeLedger } from './world-buy.js';
 import { addTrade } from './shop-trade.js';
+import { readTab, tabTotal, tabLine } from './tab.js';
 import { world, worldEntries, patchEntry, getEntry, link } from './world-store.js';
 import { rumorsAt } from './world-rumors.js';
 import { makeRng } from './rng.js';
@@ -90,17 +91,20 @@ function orderPart(inn, m, rerender) {
   const who = el('select', { 'aria-label': 'Who’s ordering' }, chars.map((c) => el('option', { value: c.id }, c.name)));
   const what = el('select', { 'aria-label': 'What to order' }, items.map((x) => el('option', { value: x.name }, `${x.name} (${coinText(x.cp)})`)));
   const qty = el('input', { type: 'number', min: 1, max: 20, value: 1, class: 'qty', 'aria-label': 'How many' });
-  const go = el('button', { class: 'btn small', type: 'button', onclick: async () => {
+  const order = async (btn, tab) => {
     const c = world.entries.get(who.value);
     const base = playOf(c);
-    go.disabled = true;
+    btn.disabled = true;
     try {
-      const r = await api('entries', { method: 'PATCH', body: { order: { tavern: inn.id, character: c.id, item: what.value, qty: Number(qty.value) || 1, base: { cp: base.cp, inventory: base.inventory } } } });
+      const r = await api('entries', { method: 'PATCH', body: { order: { tavern: inn.id, character: c.id, item: what.value, qty: Number(qty.value) || 1, tab, base: { cp: base.cp, inventory: base.inventory } } } });
       for (const x of r.entries) world.entries.set(x.id, x);
-      toast(`${c.name}: ${r.ordered.qty > 1 ? `${r.ordered.qty} × ` : ''}${r.ordered.name}, ${coinText(r.ordered.cp)}`);
+      toast(`${c.name}: ${r.ordered.qty > 1 ? `${r.ordered.qty} × ` : ''}${r.ordered.name}, ${coinText(r.ordered.cp)}${r.ordered.tab ? ' on the party’s tab' : ''}`);
       rerender();
-    } catch (err) { toast(err.message, 'bad'); go.disabled = false; }
-  } }, 'Order');
+    } catch (err) { toast(err.message, 'bad'); btn.disabled = false; }
+  };
+  const go = el('button', { class: 'btn small', type: 'button', onclick: () => order(go, false) }, 'Order');
+  // A tab at the tavern: put it on the party's tab, to be settled from the treasury later.
+  const onTab = el('button', { class: 'btn small ghost', type: 'button', onclick: () => order(onTab, true) }, 'On the tab');
   // A round on the house (GMs): the chosen dish or drink for every active character, from the treasury, in one line.
   const party = worldEntries().filter((c) => c.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(c.fields?.status));
   const round = isGm() && party.length > 1 ? el('button', { class: 'btn small ghost', type: 'button', onclick: async () => {
@@ -116,7 +120,24 @@ function orderPart(inn, m, rerender) {
       rerender();
     } catch (err) { toast(err.message, 'bad'); round.disabled = false; }
   } }, `A round for all ${party.length}`) : null;
-  return el('div', { class: 'menu-order controls' }, el('span', { class: 'eyebrow' }, 'Order'), who, what, qty, go, round);
+  return el('div', { class: 'menu-order controls' }, el('span', { class: 'eyebrow' }, 'Order'), who, what, qty, go, onTab, round);
+}
+
+// The party's tab here: what's on it, and (GMs) settling it from the treasury in one line.
+function tabPart(inn, rerender) {
+  const list = readTab(inn.fields?.tab);
+  if (!list.length) return null;
+  const total = tabTotal(list);
+  const settle = isGm() && !previewing() ? el('button', { class: 'btn small', type: 'button', onclick: async () => {
+    settle.disabled = true;
+    try {
+      await api('party', { method: 'POST', body: { cp: -total, note: `Settled the tab at ${inn.name} (${list.length} order${list.length === 1 ? '' : 's'})` } });
+      await patchEntry(world.entries.get(inn.id) || inn, { fields: { tab: '' } });
+      toast(`The tab at ${inn.name} is settled: ${coinText(total)} from the treasury`); rerender();
+    } catch (err) { toast(err.message, 'bad'); settle.disabled = false; }
+  } }, `Settle it from the treasury`) : null;
+  return el('details', { class: 'menu-tab' }, el('summary', {}, `The party’s tab: ${coinText(total)}`),
+    el('ul', { class: 'plain sheet-log' }, list.slice().reverse().map((x) => el('li', {}, tabLine(x)))), settle);
 }
 
 // town: the settlement the tavern is in (for its size and name), or null.
@@ -141,6 +162,7 @@ export function menuCard(e, town, rerender) {
           el('button', { class: 'btn small ghost', type: 'button', onclick: print }, 'Print')) : null),
       m ? menuBody(m, draft ? null : festivalOf(e)) : el('p', { class: 'muted small' }, `What’s on the board tonight: drinks, dishes and a bed, priced for ${town ? town.name : 'a town this size'}.`),
       m && !draft ? orderPart(e, m, rerender) : null,
+      m && !draft ? tabPart(e, rerender) : null,
       m && !draft && !e.fields?.stock ? tradeLedger(e) : null,
       gm ? el('div', { class: 'btnrow' },
         draft ? [el('button', { class: 'btn small primary', type: 'button', onclick: () => keep(draft) }, 'Keep this menu'),

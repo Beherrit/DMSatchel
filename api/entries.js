@@ -43,6 +43,7 @@ import { shiftDebt, balanceWith } from '../js/debts.js';
 import { addTrade } from '../js/shop-trade.js';
 import { addGift, giftWhat, wantsMatch } from '../js/gifts.js';
 import { addAsk } from '../js/shop-asks.js';
+import { addTab } from '../js/tab.js';
 import { shopOpen, holidayToday } from '../js/shop-hours.js';
 import { cleanCalendar } from '../js/calendar.js';
 import { shopStanding, sellWithStanding } from '../js/standing-price.js';
@@ -69,7 +70,7 @@ function clean(input, custom = {}) {
   if (!isKind(e.kind)) return { error: 'Pick what kind of entry this is.' };
   const name = clip(e.name, LIMITS.name).trim();
   if (!name) return { error: 'Give the entry a name.' };
-  const allowed = new Set([...KINDS[e.kind].fields.map(([k]) => k), ...customKeys(e.kind, custom), 'say', 'aka', 'music', 'image_alt', 'party_edit', 'menu', 'hired', 'wage', 'restocked', 'haggle', 'trade', 'bounty_paid', 'owed', 'gifts', 'asks']);
+  const allowed = new Set([...KINDS[e.kind].fields.map(([k]) => k), ...customKeys(e.kind, custom), 'say', 'aka', 'music', 'image_alt', 'party_edit', 'menu', 'hired', 'wage', 'restocked', 'haggle', 'trade', 'bounty_paid', 'owed', 'gifts', 'asks', 'tab']);
   const fields = {};
   for (const [k, v] of Object.entries(e.fields || {})) if (allowed.has(k) && v != null && String(v).trim() && (k !== 'image' || isImageRef(String(v)))) fields[k] = clip(v, ['stock', 'sheet', 'play', 'spread', 'known', 'attitudes', 'objectives', 'attendance', 'enc', 'goals', 'wishes', 'gallery', 'menu'].includes(k) ? LIMITS.body : LIMITS.field);
   // Pictures in the gallery must be real image addresses.
@@ -425,16 +426,19 @@ export default route({
       let p = {}; try { p = JSON.parse(ch.fields?.play || '{}') || {}; } catch { p = {}; }
       if (!Number.isFinite(p.cp)) p.cp = Math.max(0, Math.round(Number(b.base?.cp) || 0));
       if (p.inventory === undefined) p.inventory = clip(b.base?.inventory, 15000);
-      if (cp > p.cp) return fail(res, 400, `${ch.name} doesn’t have enough coin: that’s ${coinText(cp)} and they have ${coinText(p.cp)}.`);
-      p.cp -= cp;
-      addLog(p, `Ordered ${qty > 1 ? `${qty} × ` : ''}${item.name} at ${inn.name} for ${coinText(cp)}`, req.gm.name, undefined, { cp: -cp });
+      // A tab at the tavern: on the party's tab, nothing comes off the sheet now; a GM settles it from the treasury.
+      const onTab = Boolean(b.tab);
+      if (!onTab && cp > p.cp) return fail(res, 400, `${ch.name} doesn’t have enough coin: that’s ${coinText(cp)} and they have ${coinText(p.cp)}.`);
+      if (!onTab) p.cp -= cp;
+      addLog(p, onTab ? `Put ${qty > 1 ? `${qty} × ` : ''}${item.name} on the party’s tab at ${inn.name} (${coinText(cp)})` : `Ordered ${qty > 1 ? `${qty} × ` : ''}${item.name} at ${inn.name} for ${coinText(cp)}`, req.gm.name, undefined, { cp: onTab ? 0 : -cp });
       const trade = addTrade(inn.fields.trade, { who: ch.name, dir: 'buy', item: item.name, qty, cp });
-      await sql`UPDATE entries SET fields = fields || jsonb_build_object('trade', ${trade}::text), updated_by = ${req.gm.id}, updated_at = now(), version = version + 1
+      const tab = onTab ? addTab(inn.fields.tab, { who: ch.name, item: item.name, qty, cp }) : (inn.fields.tab || '');
+      await sql`UPDATE entries SET fields = fields || jsonb_build_object('trade', ${trade}::text, 'tab', ${tab}::text), updated_by = ${req.gm.id}, updated_at = now(), version = version + 1
         WHERE id = ${inn.id} AND world_id = ${req.world.id}`;
       await sql`UPDATE entries SET fields = fields || jsonb_build_object('play', ${JSON.stringify(p)}::text), updated_by = ${req.gm.id}, updated_at = now(), version = version + 1
         WHERE id = ${ch.id} AND world_id = ${req.world.id}`;
       await record(ch.id, req.gm.id, 'order', null);
-      return send(res, 200, { entries: [shape(await loadOne(inn.id, req.world.id), req), shape(await loadOne(ch.id, req.world.id), req)], ordered: { name: item.name, qty, cp } });
+      return send(res, 200, { entries: [shape(await loadOne(inn.id, req.world.id), req), shape(await loadOne(ch.id, req.world.id), req)], ordered: { name: item.name, qty, cp, tab: onTab } });
     }
     if (req.body.buy) {
       const b = req.body.buy;
