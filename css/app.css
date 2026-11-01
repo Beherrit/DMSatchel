@@ -1705,3 +1705,21 @@ details.quest-group > summary .section-title { display: inline }
 .load-line { margin: 4px 0 0; color: var(--muted) }
 .load-line.over { color: var(--danger); font-weight: 600 }
 .since-last .since-facts { display: grid; gap: 2px; margin: 6px 0 8px }
+/* A printable month */
+.cal-extra, .cal-month-list { display: none }
+@media print {
+  @page { margin: 10mm }
+  body.print-month * { visibility: hidden }
+  body.print-month .cal-month, body.print-month .cal-month * { visibility: visible }
+  body.print-month .cal-month { position: absolute; inset: 0 auto auto 0; width: 100% }
+  body.print-month .cal-nav button { display: none }
+  body.print-month .cal-nav { justify-content: center }
+  body.print-month .cal-grid { gap: 0; border-top: 1px solid #999; border-left: 1px solid #999 }
+  body.print-month .cal-cell { min-height: 22mm; border: 0; border-right: 1px solid #999; border-bottom: 1px solid #999; border-radius: 0; background: #fff; color: #000; padding: 1mm }
+  body.print-month .cal-cell.today { border-right-width: 1px; outline: 2px solid #000; outline-offset: -2px }
+  body.print-month .cal-item, body.print-month .cal-hol { display: block; white-space: normal; font-size: 7.5pt; border-left-color: #000; color: #000 }
+  body.print-month .cal-extra { display: block }
+  body.print-month .cal-more, body.print-month .cal-cell::after { display: none }
+  body.print-month .cal-month-list { display: block; list-style: none; padding: 0; margin-top: 6mm; font-size: 9pt; columns: 2; column-gap: 8mm }
+  body.print-month .cal-month-list li { break-inside: avoid; margin-bottom: 1.5mm }
+}

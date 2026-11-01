@@ -4,6 +4,7 @@ import { el, toast, setKids } from './dom.js';
 import { api, isGm } from './api.js';
 import { world, worldEntries, getEntry, link, kindLabel, notice } from './world-store.js';
 import { birthdaysBetween, birthdayText } from './birthdays.js';
+import { monthLines } from './calendar-month.js';
 import { repeatsBetween } from './repeats.js';
 import { onThisDay, yearsAgoText } from './onthisday.js';
 import { journeyDays } from './journey.js';
@@ -142,9 +143,15 @@ export function viewCalendar(arg, sub, rerender) {
       hol.map((h) => el('span', { class: 'cal-hol' }, h.name)),
       births.filter((x) => x.n === n).map((x) => el('span', { class: 'cal-item cal-bday', title: birthdayText(x) }, `🎂 ${x.entry.name}`)),
       arrivals.filter((x) => x.n === n).map((x) => el('span', { class: 'cal-item cal-journey', title: `The party arrived in ${getEntry(x.id).name}` }, `⚑ ${getEntry(x.id).name}`)),
-      items.slice(0, 3).map((x) => el('span', { class: `cal-item k-${x.entry.kind}`, title: x.entry.kind === 'session' ? `Played: ${x.entry.name}` : x.entry.name }, x.entry.kind === 'session' ? `▶ ${x.entry.name}` : x.entry.kind === 'quest' ? `⏳ ${x.entry.name}` : x.repeat ? `↻ ${x.entry.name}` : x.entry.name)),
+      items.map((x, i) => el('span', { class: `cal-item k-${x.entry.kind}${i >= 3 ? ' cal-extra' : ''}`, title: x.entry.kind === 'session' ? `Played: ${x.entry.name}` : x.entry.name }, x.entry.kind === 'session' ? `▶ ${x.entry.name}` : x.entry.kind === 'quest' ? `⏳ ${x.entry.name}` : x.repeat ? `↻ ${x.entry.name}` : x.entry.name)),
       items.length > 3 ? el('span', { class: 'cal-more' }, `+${items.length - 3} more`) : null));
   }
+
+  // A printable month: the grid with everything in it, and the same day by day underneath (shown only in print).
+  const lines = monthLines(cal, shown, { dated, births, arrivals: arrivals.map((x) => ({ n: x.n, name: getEntry(x.id).name })) });
+  const monthList = lines.length ? el('ol', { class: 'plain cal-month-list' }, lines.map((l) => el('li', {},
+    el('strong', {}, `${cal.weekdays[((l.n % cal.weekdays.length) + cal.weekdays.length) % cal.weekdays.length]}, ${l.day} ${cal.months[shown.month].name}`), ' ', l.things.map((t, i) => [i ? ' · ' : '', `${t.icon ? `${t.icon} ` : ''}${t.text}`])))) : null;
+  const printMonth = () => { document.body.classList.add('print-month'); window.print(); setTimeout(() => document.body.classList.remove('print-month'), 500); };
 
   const pass = (days, label) => el('button', { class: 'btn small', type: 'button', onclick: async () => {
     const c2 = advance(cal, days);
@@ -169,13 +176,16 @@ export function viewCalendar(arg, sub, rerender) {
           const c2 = advance(cal, n);
           if (await saveCal(c2, `${Math.abs(n)} days ${n > 0 ? 'pass' : 'rewound'}: ${formatDate(c2, today(c2))}`)) { location.hash = `world/calendar/${c2.year}/${c2.month}`; rerender(); if (n > 0) daysPassed(n); }
         } }, 'Go')) : null),
+    el('section', { class: 'cal-month', 'aria-label': `${cal.months[shown.month].name} ${shown.year}` },
     el('div', { class: 'cal-nav' },
       el('button', { class: 'btn small', type: 'button', 'aria-label': 'Previous month', onclick: () => go(...prev) }, '‹'),
       el('h3', {}, `${cal.months[shown.month].name} ${shown.year}${cal.era ? ` ${cal.era}` : ''}`),
       el('button', { class: 'btn small', type: 'button', 'aria-label': 'Next month', onclick: () => go(...next) }, '›'),
-      shown.year !== now.year || shown.month !== now.month ? el('button', { class: 'btn small ghost', type: 'button', onclick: () => go(now.year, now.month) }, 'Today') : null),
+      shown.year !== now.year || shown.month !== now.month ? el('button', { class: 'btn small ghost', type: 'button', onclick: () => go(now.year, now.month) }, 'Today') : null,
+      el('button', { class: 'btn small ghost cal-print', type: 'button', onclick: printMonth }, 'Print this month')),
     el('div', { class: 'cal-grid', style: `--cols:${cal.weekdays.length}` },
       cal.weekdays.map((w) => el('div', { class: 'cal-wd' }, w.slice(0, 3))), cells),
+    monthList),
     detail,
     soon.length ? el('section', {}, el('h3', { class: 'section-title' }, 'Coming up'), el('ul', { class: 'entry-list' }, soon.slice(0, 12).map((s) => el('li', {},
       el('span', { class: 'date' }, `${s.d.day} ${cal.months[s.d.month].name}`), s.entry ? link(s.entry) : el('span', { class: 'holiday' }, `🎉 ${s.label}`), el('span', { class: 'muted small' }, `in ${s.n - nowN} day${s.n - nowN === 1 ? '' : 's'}`))))) : null,

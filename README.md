@@ -178,6 +178,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Make camp and short rests**: a long rest anywhere, eight hours on the clock, and maybe something from the area's encounter table in the night; or an hour's short rest that gives warlocks their pact slots back.
 - **Hand out to everyone**: GMs give the same item or coin to several characters at once, from nowhere or from the treasury.
 - **The party at a glance**: a table for GMs of each character's hit points, coin, rations, exhaustion and conditions.
+- **A printable month**: the calendar's month on one page, with sessions, holidays, moons, deadlines and birthdays, day by day.
 - **A party sheet for the GM's screen**: one printable page of every character's hit points, armour class, passive Perception, coin and what they carry.
 - **Heavy packs**: each sheet weighs what it carries (SRD weights, coins fifty to the pound) against its carrying capacity.
 - **The journey on the calendar**: the days the party arrived somewhere show on the in-world calendar.
