@@ -535,6 +535,11 @@ to the log at the bottom.
 263. [x] **Who has the most coin.** The party page's at-a-glance table sorts by any column the GM clicks.
 264. [x] **Bounties on the party page.** The party page lists open bounties on NPCs the players know of.
 265. [x] **A quiet night.** When the clock passes midnight, the toast says who's out and about at that hour.
+266. [ ] **Wanted posters link the bounty.** A wanted poster's reward line links to the party page's Wanted card
+    and says if the bounty has been claimed.
+267. [ ] **Sort the party sheet.** The GM's party sheet can be sorted by name, hit points or load before printing.
+268. [ ] **A night out.** The tavern's page lists who's due in later tonight, from the regulars' routines.
+269. [ ] **Gifts in the NPC's card.** The printable NPC card notes the last gift the party gave them.
 
 ## Ideas parking lot
 
