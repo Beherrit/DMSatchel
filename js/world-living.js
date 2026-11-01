@@ -2,7 +2,7 @@
 // party for living: a lifestyle (SRD 5.1, per day), paid by each character from their own coin, or by the treasury
 // in one line of the loot log. Nobody's purse goes below nothing; the dialog says who came up short. Hirelings'
 // wages (see hirelings.js) come from the treasury too, as their own line.
-import { el, toast } from './dom.js';
+import { el, toast, setKids } from './dom.js';
 import { api, isGm, previewing, session } from './api.js';
 import { world, worldEntries, patchEntry } from './world-store.js';
 import { downtimeProgress } from './downtime-days.js';
@@ -42,9 +42,23 @@ export async function offerLivingCosts(days, { travel = false } = {}) {
   const whoPays = el('fieldset', { class: 'plain-fieldset' }, el('legend', {}, 'Who pays'),
       el('label', { class: 'check', for: 'lv-own' }, own, ' Each character, from their own coin'),
       el('label', { class: 'check', for: 'lv-pot' }, pot, ` The party treasury (${coinText(treasury)})`));
+  // Who went short of food on the road: the GM may give them a level of exhaustion (unticked: it's their call).
+  const tired = new Set();
+  const hunger = el('fieldset', { class: 'plain-fieldset hunger', hidden: true });
+  const showHunger = (list) => {
+    const hungry = list.filter((x) => x.short);
+    hunger.hidden = !hungry.length;
+    setKids(hunger, el('legend', {}, 'Hunger takes its toll'), hungry.map((x) => {
+      const cb = el('input', { type: 'checkbox', id: `hg-${x.id}`, checked: tired.has(x.id) || null });
+      cb.addEventListener('change', () => { if (cb.checked) tired.add(x.id); else tired.delete(x.id); });
+      return el('label', { class: 'check', for: `hg-${x.id}` }, cb, ` A level of exhaustion for ${x.name} (${x.short} day${x.short === 1 ? '' : 's'} without food)`);
+    }));
+  };
   const show = () => {
     whoPays.hidden = road();
+    if (!road()) hunger.hidden = true;
     if (road()) {
+      showHunger(eating());
       preview.textContent = eating().map((x) => (x.had ? `${x.name} eats ${x.ate} (${x.had - x.ate} left)${x.short ? `, ${x.short} day${x.short === 1 ? '' : 's'} short` : ''}` : `${x.name} has no rations`)).join('; ') + '.';
       return;
     }
@@ -62,6 +76,7 @@ export async function offerLivingCosts(days, { travel = false } = {}) {
     chars.some((c) => c.lifestyle) ? el('p', { class: 'muted small' }, `Living their own way: ${chars.filter((c) => c.lifestyle).map((c) => `${c.name} (${c.lifestyle.toLowerCase()})`).join(', ')}. On the road, everyone eats rations.`) : null,
     whoPays,
     preview,
+    hunger,
     wages ? el('label', { class: 'check', for: 'lv-wages' }, wages, ` Pay ${pay.list.length === 1 ? pay.list[0].entry.name : `${pay.list.length} hirelings`} ${coinText(pay.total)} in wages from the treasury`) : null,
     el('div', { class: 'btnrow' }, go, el('button', { class: 'btn', type: 'button', onclick: () => d.close() }, 'Not now'))));
   d.querySelector('form').addEventListener('submit', async (ev) => {
@@ -92,7 +107,12 @@ export async function offerLivingCosts(days, { travel = false } = {}) {
     const list = eating(), failed = [];
     ateOnRoad = days;
     if (wages?.checked && pay.total) { try { await api('party', { method: 'POST', body: { cp: -pay.total, note: `Wages: ${days} day${days === 1 ? '' : 's'} for ${pay.list.map((x) => x.entry.name).join(', ')}` } }); } catch (err) { toast(err.message, 'bad'); } }
-    for (const x of list) if (x.ate) { try { await changePlay(x.e, (play) => { play.inventory = eatRations(play.inventory, days).text; }, `Ate ${x.ate} day${x.ate === 1 ? '' : 's'} of rations on the road${x.short ? ` (${x.short} short)` : ''}`); } catch { failed.push(x.name); } }
+    for (const x of list) {
+      const worn = x.short && tired.has(x.id);
+      if (!x.ate && !worn) continue;
+      const note = [x.ate ? `Ate ${x.ate} day${x.ate === 1 ? '' : 's'} of rations on the road${x.short ? ` (${x.short} short)` : ''}` : `${x.short} day${x.short === 1 ? '' : 's'} on the road without food`, worn ? 'a level of exhaustion from hunger' : ''].filter(Boolean).join('; ');
+      try { await changePlay(x.e, (play) => { play.inventory = eatRations(play.inventory, days).text; if (worn) play.exhaustion = Math.min(6, (Number(play.exhaustion) || 0) + 1); }, note); } catch { failed.push(x.name); }
+    }
     const hungry = list.filter((x) => x.short).map((x) => x.name);
     toast([`${days} day${days === 1 ? '' : 's'} of rations eaten`, hungry.length ? `out of food: ${hungry.join(', ')}` : '', failed.length ? `these sheets didn’t update: ${failed.join(', ')}` : ''].filter(Boolean).join(' · '), hungry.length || failed.length ? 'bad' : undefined);
     d.close();
