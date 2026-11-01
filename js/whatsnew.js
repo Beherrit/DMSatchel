@@ -45,3 +45,19 @@ export function localVisit(store, key, now = Date.now()) {
   try { store.setItem(key, JSON.stringify({ seen: now, prev })); } catch { /* private window */ }
   return prev ? new Date(prev).toISOString() : null;
 }
+
+// Since your last visit, on the road: the places the party arrived at after `since` (journey stops, oldest first).
+export const roadSince = (stops, since) => (Array.isArray(stops) ? stops : []).filter((s) => s?.id && (!since || String(s.at) > String(since))).map((s) => s.id);
+
+// Days passed in the world since your last visit: this browser remembers the in-world day it last saw in your previous
+// sitting. since: your last visit's mark (changes when a new sitting starts); today: today's day number.
+// → days passed, or null when it can't tell yet (first visit on this browser, or no calendar).
+export function worldDaysSince(store, key, today, since) {
+  if (!Number.isFinite(today)) return null;
+  let v = {};
+  try { v = JSON.parse(store.getItem(key) || '{}') || {}; } catch { v = {}; }
+  const fresh = v.since !== (since || null);
+  const prevDay = fresh ? (Number.isFinite(v.day) ? v.day : null) : (Number.isFinite(v.prevDay) ? v.prevDay : null);
+  try { store.setItem(key, JSON.stringify({ since: since || null, prevDay, day: today })); } catch { /* private window */ }
+  return prevDay === null ? null : Math.max(0, today - prevDay);
+}

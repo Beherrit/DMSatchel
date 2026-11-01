@@ -48,3 +48,16 @@ test('what you follow comes first and is not repeated', () => {
   assert.equal(r.changed.length, 0);
   assert.equal(r.total, 2);
 });
+
+test('since your last visit, on the road', async () => {
+  const { roadSince, worldDaysSince } = await import('../js/whatsnew.js');
+  assert.deepEqual(roadSince([{ id: 'a', at: '2030-01-01' }, { id: 'b', at: '2030-01-05' }, { id: 'c', at: '2030-01-06' }], '2030-01-02'), ['b', 'c']);
+  assert.deepEqual(roadSince(null, 'x'), []);
+  const mem = new Map(), store = { getItem: (k) => mem.get(k) ?? null, setItem: (k, v) => mem.set(k, v) };
+  assert.equal(worldDaysSince(store, 'k', 100, null), null); // first visit: nothing to compare
+  assert.equal(worldDaysSince(store, 'k', 101, null), null); // same sitting
+  assert.equal(worldDaysSince(store, 'k', 107, 'visit-1'), 6); // a new sitting: last seen day 101 → 107
+  assert.equal(worldDaysSince(store, 'k', 109, 'visit-1'), 8); // days moved on during this sitting: still from 101
+  assert.equal(worldDaysSince(store, 'k', 109, 'visit-2'), 0);
+  assert.equal(worldDaysSince(store, 'k', NaN, 'visit-3'), null);
+});
