@@ -11,7 +11,7 @@ import { playOf, addCoins, changePlay } from './sheet-ui.js';
 import { eatRations, feedFromStash, feedHirelings, stashAfter } from './rations.js';
 import { coinText } from './economy.js';
 import { LIFESTYLES, livingCosts } from './lifestyle.js';
-import { payroll } from './hirelings.js';
+import { payroll, payWages as wagesFrom, owedTo } from './hirelings.js';
 
 const ACTIVE = (e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
 const keyOf = () => `satchel-lifestyle-${session.worldKey || 'default'}`;
@@ -39,7 +39,10 @@ export async function offerLivingCosts(days, { travel = false } = {}) {
   const pot = el('input', { type: 'radio', name: 'lv-who', id: 'lv-pot', value: 'pot' });
   const preview = el('p', { class: 'small', role: 'status' });
   const wages = pay.list.length ? el('input', { type: 'checkbox', id: 'lv-wages', checked: true }) : null;
-  const plan = () => (pot.checked ? livingCosts(chars, days, style.value, treasury) : livingCosts(chars, days, style.value));
+  // Wages owed: the treasury pays each hireling in turn while its coin lasts; the rest is noted as owed to them.
+  const wagePlan = wagesFrom(pay.list, days, treasury);
+  const wagesPaid = () => (wages?.checked ? wagePlan.total : 0);
+  const plan = () => (pot.checked ? livingCosts(chars, days, style.value, Math.max(0, treasury - wagesPaid())) : livingCosts(chars, days, style.value));
   const whoPays = el('fieldset', { class: 'plain-fieldset' }, el('legend', {}, 'Who pays'),
       el('label', { class: 'check', for: 'lv-own' }, own, ' Each character, from their own coin'),
       el('label', { class: 'check', for: 'lv-pot' }, pot, ` The party treasury (${coinText(treasury)})`));
@@ -104,7 +107,7 @@ export async function offerLivingCosts(days, { travel = false } = {}) {
     hireLine,
     stashLine,
     hunger,
-    wages ? el('label', { class: 'check', for: 'lv-wages' }, wages, ` Pay ${pay.list.length === 1 ? pay.list[0].entry.name : `${pay.list.length} hirelings`} ${coinText(pay.total)} in wages from the treasury`) : null,
+    wages ? el('label', { class: 'check', for: 'lv-wages' }, wages, ` Pay ${pay.list.length === 1 ? pay.list[0].entry.name : `${pay.list.length} hirelings`} ${coinText(pay.total)} in wages from the treasury${wagePlan.short ? ` (it has ${coinText(Math.max(0, treasury))}: ${coinText(wagePlan.short)} will be owed)` : ''}`) : null,
     el('div', { class: 'btnrow' }, go, el('button', { class: 'btn', type: 'button', onclick: () => d.close() }, 'Not now'))));
   d.querySelector('form').addEventListener('submit', async (ev) => {
     ev.preventDefault();
@@ -115,8 +118,7 @@ export async function offerLivingCosts(days, { travel = false } = {}) {
     if (!(pot.checked ? p.paid : p.total) && !payWages) { d.close(); toast('Nothing to pay'); return; }
     go.disabled = true;
     try {
-      if (payWages) await api('party', { method: 'POST', body: { cp: -pay.total, note: `Wages: ${days} day${days === 1 ? '' : 's'} for ${pay.list.map((x) => x.entry.name).join(', ')}` } });
-      const wagesNote = payWages ? `; wages ${coinText(pay.total)} from the treasury` : '';
+      const wagesNote = payWages ? await settleWages() : '';
       if (pot.checked) {
         if (p.paid) await api('party', { method: 'POST', body: { cp: -p.paid, note: `Living costs: ${days} day${days === 1 ? '' : 's'}, ${style.value.toLowerCase()}, ${chars.length} character${chars.length === 1 ? '' : 's'}` } });
         toast(`The treasury paid ${coinText(p.paid)} in living costs${p.short ? ` (${coinText(p.short)} short)` : ''}${wagesNote}`);
@@ -129,13 +131,19 @@ export async function offerLivingCosts(days, { travel = false } = {}) {
       window.dispatchEvent(new Event('world:rerender'));
     } catch (err) { toast(err.message, 'bad'); go.disabled = false; }
   });
+  // Pays what the treasury can cover and notes the rest on each hireling (fields.owed); → a note for the toast.
+  async function settleWages() {
+    if (wagePlan.total) await api('party', { method: 'POST', body: { cp: -wagePlan.total, note: `Wages: ${days} day${days === 1 ? '' : 's'} for ${wagePlan.paid.map((x) => x.entry.name).join(', ')}` } });
+    for (const o of wagePlan.owed) { const cur = world.entries.get(o.entry.id) || o.entry; try { await patchEntry(cur, { fields: { owed: String(owedTo(cur) + o.cp) } }); } catch (err) { toast(err.message, 'bad'); } }
+    return `; wages ${coinText(wagePlan.total)} from the treasury${wagePlan.short ? `, ${coinText(wagePlan.short)} owed to ${wagePlan.owed.map((x) => x.entry.name).join(', ')}` : ''}`;
+  }
   async function eatOnTheRoad() {
     go.disabled = true;
     const raw = eating(), f = fed(raw), list = stillShort(raw), failed = [];
     ateOnRoad = days;
     if (hireFeed) for (const u of hireFeed.fed.used) { try { await api('party', { method: 'POST', body: { item: u.item, qty: -u.qty, note: `Eaten on the road by ${u.by.join(', ')} (hired)` } }); } catch (err) { toast(err.message, 'bad'); } }
     if (f) for (const u of f.used) { try { await api('party', { method: 'POST', body: { item: u.item, qty: -u.qty, note: `Eaten on the road by ${u.by.join(', ')}` } }); } catch (err) { toast(err.message, 'bad'); } }
-    if (wages?.checked && pay.total) { try { await api('party', { method: 'POST', body: { cp: -pay.total, note: `Wages: ${days} day${days === 1 ? '' : 's'} for ${pay.list.map((x) => x.entry.name).join(', ')}` } }); } catch (err) { toast(err.message, 'bad'); } }
+    if (wages?.checked && pay.total) { try { await settleWages(); } catch (err) { toast(err.message, 'bad'); } }
     for (const x of list) {
       const worn = x.short && tired.has(x.id);
       if (!x.ate && !worn && !x.fromStash) continue;

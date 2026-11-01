@@ -1,10 +1,10 @@
 // Hirelings on the page: GMs hire an NPC for the party at a daily wage (or let them go), and the party page lists
 // who's on the payroll. Wages are paid from the treasury when days pass (see world-living.js).
 import { el, toast } from './dom.js';
-import { isGm, previewing } from './api.js';
-import { worldEntries, link, patchEntry } from './world-store.js';
+import { api, isGm, previewing } from './api.js';
+import { world, worldEntries, link, patchEntry } from './world-store.js';
 import { coinText, parseCoins } from './economy.js';
-import { WAGES, isHired, wageOf, payroll } from './hirelings.js';
+import { WAGES, isHired, wageOf, payroll, owedTo } from './hirelings.js';
 
 export function hireLine(e, rerender) {
   if (e.kind !== 'npc' || !isGm() || previewing() || ['Dead', 'Missing'].includes(e.fields?.status)) return null;
@@ -27,10 +27,27 @@ export function hireLine(e, rerender) {
 }
 
 // On the party page: who's on the payroll, for everyone; the daily total for GMs.
+// Wages owed: pay a hireling what the treasury couldn't cover before (a treasury line, and the debt cleared).
+function payOwedButton(entry) {
+  const b = el('button', { class: 'btn small', type: 'button', onclick: async () => {
+    const cur = world.entries.get(entry.id) || entry, cp = owedTo(cur);
+    if (!cp) return;
+    b.disabled = true;
+    try {
+      await api('party', { method: 'POST', body: { cp: -cp, note: `Wages owed to ${cur.name}` } });
+      await patchEntry(cur, { fields: { owed: '' } });
+      toast(`Paid ${cur.name} the ${coinText(cp)} owed`);
+      window.dispatchEvent(new Event('world:rerender'));
+    } catch (err) { toast(err.message, 'bad'); b.disabled = false; }
+  } }, 'Pay it');
+  return b;
+}
+
 export function payrollCard() {
   const p = payroll(worldEntries());
   if (!p.list.length) return null;
   return el('section', { class: 'card payroll' }, el('h3', {}, 'Hirelings'),
-    el('ul', { class: 'plain entry-list' }, p.list.map(({ entry, wage }) => el('li', {}, link(entry), entry.fields?.role ? el('span', { class: 'muted small' }, entry.fields.role) : null, isGm() ? el('span', { class: 'muted small' }, `${coinText(wage)} a day`) : null))),
+    el('ul', { class: 'plain entry-list' }, p.list.map(({ entry, wage }) => el('li', {}, link(entry), entry.fields?.role ? el('span', { class: 'muted small' }, entry.fields.role) : null, isGm() ? el('span', { class: 'muted small' }, `${coinText(wage)} a day`) : null,
+      isGm() && owedTo(entry) ? el('span', { class: 'owed' }, el('span', { class: 'small bad-line' }, ` owed ${coinText(owedTo(entry))}`), ' ', payOwedButton(entry)) : null))),
     isGm() ? el('p', { class: 'small' }, `Wages: ${coinText(p.perDay)} a day in all, paid from the treasury as days pass.`) : null);
 }

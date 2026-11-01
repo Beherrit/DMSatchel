@@ -13,3 +13,20 @@ export function payroll(entries, days = 1) {
   const perDay = list.reduce((t, x) => t + x.wage, 0);
   return { list, perDay, total: perDay * Math.max(0, Math.round(Number(days) || 0)) };
 }
+
+// What's owed to a hireling from wages the treasury couldn't cover (fields.owed, copper as text).
+export const owedTo = (e) => Math.max(0, Math.round(Number(e?.fields?.owed) || 0));
+
+// Wages owed: pay each hireling's wages for these days in turn while the coin lasts. list: from payroll(); available:
+// the treasury's coin. → { paid: [{ entry, cp }], owed: [{ entry, cp }], total (paid), short (owed in all) }
+export function payWages(list, days, available) {
+  let left = Math.max(0, Math.round(Number(available) || 0));
+  const n = Math.max(0, Math.round(Number(days) || 0)), paid = [], owed = [];
+  for (const { entry, wage } of list || []) {
+    const due = wage * n, give = Math.min(due, left);
+    left -= give;
+    if (give) paid.push({ entry, cp: give });
+    if (due > give) owed.push({ entry, cp: due - give });
+  }
+  return { paid, owed, total: paid.reduce((t, x) => t + x.cp, 0), short: owed.reduce((t, x) => t + x.cp, 0) };
+}

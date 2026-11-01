@@ -12,3 +12,14 @@ test('the payroll', () => {
   assert.equal(wageOf(N('x', { wage: 'nonsense' })), 0);
   assert.equal(isHired(N('x', { hired: 'no' })), false);
 });
+
+test('payWages: what the treasury can cover, and what is owed', async () => {
+  const { payWages, owedTo } = await import('../js/hirelings.js');
+  const gil = { name: 'Gil' }, mags = { name: 'Mags' };
+  const list = [{ entry: gil, wage: 20 }, { entry: mags, wage: 200 }];
+  assert.deepEqual(payWages(list, 3, 10000), { paid: [{ entry: gil, cp: 60 }, { entry: mags, cp: 600 }], owed: [], total: 660, short: 0 });
+  const lean = payWages(list, 3, 300);
+  assert.deepEqual(lean.paid, [{ entry: gil, cp: 60 }, { entry: mags, cp: 240 }]); assert.deepEqual(lean.owed, [{ entry: mags, cp: 360 }]); assert.equal(lean.short, 360);
+  assert.deepEqual(payWages(list, 2, -50).owed.map((x) => x.cp), [40, 400]);
+  assert.equal(owedTo({ fields: { owed: '360' } }), 360); assert.equal(owedTo({ fields: {} }), 0);
+});
