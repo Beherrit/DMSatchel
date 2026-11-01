@@ -12,7 +12,7 @@ import { newLines, playJson } from './play-log.js';
 import { sinceLastCard, comingUpCard } from './world-sincelast.js';
 import { routineNow, hereNow, regularsLine, routinePreview, mindingLine, townHoursBox, rollTownButton } from './world-routine.js';
 import { offerBounty } from './world-bounty.js';
-import { giftsSection } from './world-gifts.js';
+import { giftsSection, givenSection } from './world-gifts.js';
 import { world, worldEntries, getEntry, loadWorld, byName, kindLabel, kindFields, richInline, link, when, findByName, mentions, richText, contentsNav, notice, nameList } from './world-store.js';
 import { viewMaps, viewMap, pinsFor } from './world-maps.js';
 import { viewStandings, standingWidget } from './world-standings.js';
@@ -407,7 +407,7 @@ function viewEntry(id, tab) {
     e.kind === 'character' ? knownSection(e, rerenderWorld) : null,
     e.kind === 'character' ? attitudesOfCharacter(e, rerenderWorld) : null,
     bondsSection(e, rerenderWorld),
-    giftsSection(e, rerenderWorld),
+    giftsSection(e, rerenderWorld), givenSection(e),
     e.kind === 'character' ? downtimeSection(e) : null,
     attitudesToward(e, rerenderWorld),
     rewardCard(e, rerenderWorld),

@@ -26,3 +26,10 @@ test('wantsMatch: a gift they wanted', async () => {
   assert.equal(readGifts(addGift('', { by: 'Ann', item: 'Map', wanted: true }))[0].wanted, true);
   assert.equal(readGifts(addGift('', { by: 'Ann', item: 'Map' }))[0].wanted, undefined);
 });
+
+test('givenBy: the gifts a character has given', async () => {
+  const { givenBy, addGift } = await import('../js/gifts.js');
+  const ide = { name: 'Ide' }, jory = { name: 'Jory' };
+  const list = givenBy('Ann', [{ entry: ide, gifts: addGift(addGift('', { by: 'Ann', item: 'Map', at: 't1' }), { by: 'Bo', item: 'Rope', at: 't2' }) }, { entry: jory, gifts: addGift('', { by: 'ann', cp: 500, at: 't3' }) }]);
+  assert.deepEqual(list.map((x) => `${x.npc.name}:${x.item || x.cp}`), ['Jory:500', 'Ide:Map']);
+});

@@ -6,7 +6,7 @@ import { world, worldEntries, link, findByName, whenTime } from './world-store.j
 import { playOf } from './sheet-ui.js';
 import { inventoryLines } from './handover.js';
 import { coinText, parseCoins } from './economy.js';
-import { readGifts, giftWhat, wantsMatch } from './gifts.js';
+import { readGifts, giftWhat, wantsMatch, givenBy } from './gifts.js';
 
 const ACTIVE = (c) => c.kind === 'character' && c.status !== 'suggested' && !['Retired', 'Dead', 'Missing'].includes(c.fields?.status);
 
@@ -65,4 +65,13 @@ export function giftsSection(npc, rerender) {
       chars.length && !['Dead'].includes(npc.fields?.status) ? el('button', { class: 'btn small', type: 'button', onclick: () => giveDialog(npc, chars, rerender) }, 'Give them something…') : null),
     gifts.length ? el('ul', { class: 'plain sheet-log' }, gifts.slice(0, 12).map((g) => el('li', {}, el('span', {}, g.wanted ? el('span', { title: 'Something they wanted' }, '💝 ') : null, giftWhat(g), ' from ', by(g.by), g.note ? el('span', { class: 'muted' }, ` (${g.note})`) : null), g.at ? el('span', { class: 'muted small' }, ` · ${whenTime(g.at)}`) : null)))
       : el('p', { class: 'muted small' }, 'Nothing given yet.'));
+}
+
+// Who's been given what: on a character's page, the gifts they've given NPCs (as the viewer can see them).
+export function givenSection(char) {
+  if (char.kind !== 'character') return null;
+  const list = givenBy(char.name, worldEntries().filter((x) => x.kind === 'npc' && x.fields?.gifts).map((x) => ({ entry: x, gifts: x.fields.gifts })));
+  if (!list.length) return null;
+  return el('section', { class: 'gifts-given' }, el('h3', { class: 'section-title' }, `Gifts given (${list.length})`),
+    el('ul', { class: 'plain sheet-log' }, list.slice(0, 12).map((g) => el('li', {}, el('span', {}, g.wanted ? el('span', { title: 'Something they wanted' }, '💝 ') : null, giftWhat(g), ' to ', link(g.npc), g.note ? el('span', { class: 'muted' }, ` (${g.note})`) : null), g.at ? el('span', { class: 'muted small' }, ` · ${whenTime(g.at)}`) : null))));
 }

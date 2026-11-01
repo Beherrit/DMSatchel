@@ -518,7 +518,7 @@ to the log at the bottom.
 249. [x] **Print the shelf.** A shop's stock as a printable price list to hand round the table.
 250. [x] **Attuned on the party sheet.** The GM's party sheet shows who is attuned to what.
 251. [x] **Festival specials.** On a holiday, taverns offer a festival dish or drink at the top of their menu.
-252. [ ] **Who's been given what.** A character's page lists the gifts they've given NPCs, and to whom.
+252. [x] **Who's been given what.** A character's page lists the gifts they've given NPCs, and to whom.
 253. [ ] **Closing time.** A shop's page says how long until it shuts (or opens), by the world's clock.
 
 ## Ideas parking lot
@@ -779,3 +779,4 @@ to the log at the bottom.
 - Print the shelf: a stocked shop's "For sale" heading now has "Print the shelf". It prints just the shop's name, its shopkeeper line and the stock tables, black on white, to hand round the table. The trade panel, the haggle and sell helpers, the asks and the ledger are left out.
 - Attuned on the party sheet: the GM's party sheet now adds "Attuned: Amulet of Health" under each character's gear, from the attunement ticks on their sheet. An item that's no longer in their inventory drops off. Unit tested in tests/party-screen.test.mjs.
 - Festival specials: on one of the world calendar's holidays, a tavern's bill of fare now opens with a festival dish or drink: "🎉 Festival: Mulled wine for Bridge Day, 6 cp". It's chosen from the tavern and the holiday, so the page and the server agree, and priced a little above the tavern's usual fare. It heads the Order list and can be ordered and paid for like anything else. The next day it's gone. festivalSpecial in js/menu.js unit tested; ordering it tested against PGlite.
+- Who's been given what: a character's page now lists the gifts they've given NPCs, newest first: "💝 Map to Mother Ide (for the marsh)". It's read from the NPCs' gift lists, so a player sees only gifts to NPCs they can see, while the GM sees them all. givenBy in js/gifts.js unit tested.

@@ -28,3 +28,11 @@ export function wantsMatch(wants, item, cp = 0) {
   const words = String(item || '').toLowerCase().replace(/\([^)]*\)/g, ' ').split(/[^a-z']+/).filter((x) => x.length >= 3 && !STOP.has(x));
   return words.some((x) => { const stem = x.replace(/(es|s)$/, ''); return new RegExp(`\\b${stem}(s|es)?\\b`).test(w); });
 }
+
+// Who's been given what: the gifts one character has given, across the NPCs (as the viewer sees them), newest first.
+// npcs: [{ entry, gifts json }] → [{ npc (entry), …gift }]
+export function givenBy(name, npcs) {
+  const key = String(name || '').trim().toLowerCase(), out = [];
+  for (const n of npcs || []) for (const g of readGifts(n.gifts)) if (g.by.trim().toLowerCase() === key) out.push({ npc: n.entry, ...g });
+  return out.sort((a, b) => String(b.at).localeCompare(String(a.at)));
+}
