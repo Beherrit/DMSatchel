@@ -5,7 +5,8 @@ import { api, isGm, isMember, mapImageUrl } from './api.js';
 import { shrinkImage } from './dom.js';
 import { travelText } from './encounters.js';
 import { world, worldEntries, getEntry, findByName, link, kindLabel, notice, nameList, whenTime, createEntry, mapsOf, trail } from './world-store.js';
-import { playOf } from './sheet-ui.js';
+import { playOf, characterOf } from './sheet-ui.js';
+import { overloaded, overloadedText } from './weights.js';
 import { rationsFor } from './party-glance.js';
 import { dayWeather, weatherSlowdown, skyIcon } from './forecast.js';
 import { placeTerrains } from './encounter-ui.js';
@@ -267,6 +268,7 @@ export async function viewMap(id, focusPin) {
     const sel = el('select', { 'aria-label': `Travel from ${pin.label} to` }, el('option', { value: '' }, 'Travel to…'),
       pins.filter((p) => p.id !== pin.id).sort((a, b) => String(a.label).localeCompare(String(b.label))).map((p) => el('option', { value: p.id }, p.label)));
     const food = el('p', { class: 'small travel-food' });
+    const heavy = el('p', { class: 'small travel-heavy bad-line' });
     const show = () => {
       const to = pins.find((p) => p.id === sel.value);
       out.textContent = to ? `To ${to.label}: ${travelText(milesBetween(pin, to), { difficult: diff.checked })}.` : '';
@@ -276,9 +278,12 @@ export async function viewMap(id, focusPin) {
       const list = n && chars.length ? rationsFor(n, chars.map((c) => ({ name: c.name, inventory: playOf(c).inventory }))) : [];
       food.textContent = list.length ? `Rations for ${n} day${n === 1 ? '' : 's'} at a normal pace: ${list.map((x) => (x.short ? `${x.name} has ${x.has}, ${x.short} short` : `${x.name} has enough (${x.has})`)).join('; ')}.` : '';
       food.classList.toggle('bad-line', list.some((x) => x.short));
+      // Too heavy for the road: anyone over their carrying capacity (Forge characters, whose Strength is known).
+      heavy.textContent = to ? overloadedText(overloaded(chars.map((c) => { const ch = characterOf(c); return { name: c.name, play: playOf(c), str: ch?.abilities?.scores?.Str, size: ch?.size }; }))) : '';
+      heavy.hidden = !heavy.textContent;
     };
     sel.addEventListener('change', show); diff.addEventListener('change', show);
-    return el('div', { class: 'travel-pick' }, el('div', { class: 'controls' }, sel, el('label', { class: 'check' }, diff, ' Rough going')), out, food);
+    return el('div', { class: 'travel-pick' }, el('div', { class: 'controls' }, sel, el('label', { class: 'check' }, diff, ' Rough going')), out, food, heavy);
   }
   // Travel takes time: after the party moves on a scaled map, offer to move the calendar on by the journey.
   function offerDaysPass(a, b) {

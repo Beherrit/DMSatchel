@@ -187,6 +187,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **Worries in prep**: session prep warns who's down, low, exhausted, out of rations or broke.
 - **Sell the loot**: GMs sell the treasury's items to a shop in one go; coin into the treasury, items onto the shelf.
 - **Enough food for the road?**: planning a trip on a map says who has enough rations for it and who's short.
+- **Too heavy for the road**: planning a trip warns who is over their carrying capacity.
 - **Weather slows the road**: heavy rain, snow or a strong wind where the party sets out adds travel days.
 - **A shopping list**: players note what they mean to buy; shops offer it first, and GMs see the lists in prep.
 - **Downtime moves with the calendar**: open downtime counts the days that pass and says when it's ready to resolve.

@@ -35,3 +35,11 @@ test('loadText', async () => {
   assert.equal(loadText({ lb: 290, capacity: 225, unknown: [], over: true }), 'Over carrying capacity: 290 lb of 225 lb');
   assert.equal(loadText({ lb: 12, capacity: null, unknown: ['a', 'b', 'c', 'd', 'e', 'f'], over: false }), 'Carrying 12 lb (not counted: a, b, c, d and 2 more)');
 });
+
+test('overloaded: who is too heavy for the road', async () => {
+  const { overloaded, overloadedText } = await import('../js/weights.js');
+  const list = overloaded([{ name: 'Hand', play: { inventory: 'Plate armor\n4 Barrel' }, str: 8 }, { name: 'Vex', play: { inventory: 'Rope' }, str: 15 }, { name: 'Odd', play: { inventory: 'Plate armor\n9 Barrel' } }]);
+  assert.deepEqual(list, [{ name: 'Hand', lb: 345, capacity: 120 }]);
+  assert.equal(overloadedText(list), 'Too heavy for the road: Hand carries 345 lb (can carry 120 lb).');
+  assert.equal(overloadedText([]), '');
+});

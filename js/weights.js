@@ -101,3 +101,11 @@ export function loadText(l) {
   if (l.over) return `Over carrying capacity: ${lbs(l.lb)} of ${lbs(l.capacity)}${skip}`;
   return `Carrying ${lbs(l.lb)}${l.capacity !== null ? ` of ${lbs(l.capacity)}` : ''}${skip}`;
 }
+
+// Too heavy for the road: who is over their carrying capacity. chars: [{ name, play, str, size }] →
+// [{ name, lb, capacity }] (only those over; characters without a known Strength are left out).
+export const overloaded = (chars) => (chars || []).map((c) => ({ name: c.name, ...loadOf(c.play || {}, c.str, c.size || 'Medium') }))
+  .filter((x) => x.over).map((x) => ({ name: x.name, lb: x.lb, capacity: x.capacity }));
+
+// "Too heavy for the road: Hand carries 345 lb (can carry 240 lb)."
+export const overloadedText = (list) => (list.length ? `Too heavy for the road: ${list.map((x) => `${x.name} carries ${lbs(x.lb)} (can carry ${lbs(x.capacity)})`).join('; ')}.` : '');
