@@ -40,6 +40,7 @@ import { readMenu } from '../js/menu.js';
 import { buyFrom, sellTo, haggleFor, withHaggle, setHaggle } from '../js/purchase.js';
 import { addLog } from '../js/play-log.js';
 import { shopOpen } from '../js/shop-hours.js';
+import { shopStanding } from '../js/standing-price.js';
 import { coinText, GOODS } from '../js/economy.js';
 import { cleanMusic } from '../js/music.js';
 import { journeyFor } from '../js/journey.js';
@@ -394,6 +395,12 @@ export default route({
       let p = {}; try { p = JSON.parse(ch.fields?.play || '{}') || {}; } catch { p = {}; }
       if (!Number.isFinite(p.cp)) p.cp = Math.max(0, Math.round(Number(b.base?.cp) || 0));
       if (p.inventory === undefined) p.inventory = clip(b.base?.inventory, 15000);
+      // Friends get a discount: the party's open standing with whoever holds this place (see standing-price.js).
+      const all = await sql`SELECT id, kind, name, parent_id, links, fields, visibility, status FROM entries WHERE world_id = ${req.world.id} AND NOT deleted`;
+      const log = await sql`SELECT entry_id, value, secret FROM standing_log WHERE world_id = ${req.world.id} AND NOT secret ORDER BY at DESC LIMIT 2000`;
+      const found = shopStanding(shop, all, log);
+      const stand = found && found.holder.visibility === 'all' && found.holder.status === 'live' ? found : null; // only a power players know of
+      if (stand?.pct) r.cp = withHaggle(r.cp, stand.pct);
       // A haggle a GM granted this character here changes the price, once.
       const pct = haggleFor(shop.fields.haggle, ch.id);
       r.cp = withHaggle(r.cp, pct);
@@ -408,7 +415,7 @@ export default route({
         WHERE id = ${ch.id} AND world_id = ${req.world.id}`;
       await record(ch.id, req.gm.id, 'buy', null);
       await record(shop.id, req.gm.id, 'sale', null);
-      return send(res, 200, { entries: [shape(await loadOne(shop.id, req.world.id), req), shape(await loadOne(ch.id, req.world.id), req)], bought: { name: r.name, qty: r.qty, cp: r.cp, haggle: pct } });
+      return send(res, 200, { entries: [shape(await loadOne(shop.id, req.world.id), req), shape(await loadOne(ch.id, req.world.id), req)], bought: { name: r.name, qty: r.qty, cp: r.cp, haggle: pct, standing: stand?.pct || 0 } });
     }
     // Sell to a shop: {sell: {shop, character, item, qty, base}} — the item leaves the character's inventory, the shop
     // pays its buy-back rate onto their sheet, and the item goes on the shelf.

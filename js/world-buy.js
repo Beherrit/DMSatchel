@@ -10,6 +10,7 @@ import { stockItems, sellTo, HAGGLES, readHaggle, haggleFor, setHaggle, withHagg
 import { inventoryLines } from './handover.js';
 import { readList, listFirst } from './shopping.js';
 import { shopOpen } from './shop-hours.js';
+import { shopStanding } from './standing-price.js';
 
 const ACTIVE = (e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
 
@@ -44,6 +45,9 @@ function hagglePart(shop, chars, rerender) {
 }
 
 function buyPart(shop, stock, chars, rerender) {
+  // Friends get a discount (or enemies pay more): the party's open standing with whoever holds this place.
+  const found = shopStanding(shop, worldEntries(), world.standings?.log);
+  const stand = found && found.holder.visibility !== 'gm' && found.holder.status !== 'suggested' ? found : null;
   // What's on the buyer's shopping list comes first, starred.
   let items = stock;
   const item = el('select', { id: 'buy-item' });
@@ -63,7 +67,7 @@ function buyPart(shop, stock, chars, rerender) {
   const show = () => {
     const it = pick(), n = Math.max(1, Number(qty.value) || 1), c = chars.find((x) => x.id === who.value), have = playOf(world.entries.get(c.id) || c).cp || 0;
     qty.max = it.qty > 0 ? it.qty : 100;
-    const pct = haggleFor(shop.fields?.haggle, c.id), cost = withHaggle(it.cp * n, pct);
+    const pct = haggleFor(shop.fields?.haggle, c.id), cost = withHaggle(withHaggle(it.cp * n, stand?.pct || 0), pct);
     total.textContent = `${n} × ${it.name} costs ${coinText(cost)}${pct ? ` (haggled: ${pct < 0 ? `${-pct}% off` : `${pct}% more`})` : ''}. ${c.name} has ${coinText(have)}.`;
     total.classList.toggle('bad-line', cost > have);
   };
@@ -76,6 +80,7 @@ function buyPart(shop, stock, chars, rerender) {
       chars.length > 1 || isGm() ? [el('label', { for: 'buy-who' }, 'for'), who] : null,
       el('button', { class: 'btn small primary', type: 'submit' }, 'Buy')),
     total,
+    stand?.pct ? el('p', { class: 'small standing-price' }, stand.pct < 0 ? `Friends of ${stand.holder.name}: 10% off here.` : `${stand.holder.name} holds this place, and the party is not welcome: 10% more.`) : null,
     dc(shop) ? el('p', { class: 'muted small' }, `Haggle DC ${dc(shop)}: roll for it at the table, and a GM can grant the result for your next purchase here.`) : null);
   form.addEventListener('submit', async (ev) => {
     ev.preventDefault();

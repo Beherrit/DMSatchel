@@ -190,6 +190,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **The party's wealth**: the treasury plus every character's purse, on the party page.
 - **Weather on the map**: the party's map marker shows today's sky there.
 - **Since you were last here: the road**: "what's new" says how many days passed in the world and where the party went.
+- **Friends get a discount**: shops give 10% off where the party stands well with whoever holds the town, and charge 10% more where it's hated.
 - **Export to a spreadsheet**: download any kind of entry as a CSV file with its fields as columns; it imports back as it is.
 - **A new world like this one**: start a world with another's calendar, own fields, templates, session zero page and tag descriptions, but none of its entries.
 - **Set a field for many**: bulk actions set one field (a status, a type, a role) on every selected entry that has it.
