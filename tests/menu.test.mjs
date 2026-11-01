@@ -41,3 +41,14 @@ test('menuItem: find a dish or drink to order', async () => {
   assert.equal(menuItem(menu, 'Venison'), null);
   assert.equal(menuItem('', 'Pale ale'), null);
 });
+
+test('festivalSpecial: a holiday dish or drink, the same on page and server', async () => {
+  const { festivalSpecial, menuItem } = await import('../js/menu.js');
+  const menu = JSON.stringify({ quality: 'modest', sections: [{ title: 'Drink', items: [{ name: 'Pale ale', cp: 4 }] }], special: null });
+  const f = festivalSpecial(menu, 'Bridge Day', 'bell');
+  assert.ok(f && /Bridge Day/.test(f.name) && f.cp > 0 && f.note === 'for Bridge Day');
+  assert.deepEqual(festivalSpecial(menu, 'Bridge Day', 'bell'), f);
+  assert.equal(festivalSpecial(menu, '', 'bell'), null);
+  assert.deepEqual(menuItem(menu, f.name.toUpperCase(), f), { name: f.name, cp: f.cp });
+  assert.equal(menuItem(menu, f.name), null);
+});

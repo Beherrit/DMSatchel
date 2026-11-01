@@ -7,11 +7,12 @@ import { addTrade } from './shop-trade.js';
 import { world, worldEntries, patchEntry, getEntry, link } from './world-store.js';
 import { rumorsAt } from './world-rumors.js';
 import { makeRng } from './rng.js';
-import { rollMenu, readMenu } from './menu.js';
+import { rollMenu, readMenu, festivalSpecial } from './menu.js';
+import { holidayToday } from './shop-hours.js';
 import { coinText } from './economy.js';
 import { playOf, restOf } from './sheet-ui.js';
 import { roomsOf, nightCosts, minutesToMorning } from './inn.js';
-import { formatDate, today } from './calendar.js';
+import { formatDate, today, cleanCalendar } from './calendar.js';
 
 const ACTIVE = (c) => c.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(c.fields?.status);
 
@@ -68,19 +69,23 @@ const townOf = (e) => { let p = getEntry(e.parent_id), guard = 0; while (p && gu
 
 const QUALITY = { poor: 'A poor alehouse', modest: 'A modest inn', comfortable: 'A comfortable inn', wealthy: 'A fine inn', aristocratic: 'A grand inn' };
 
-function menuBody(m) {
+function menuBody(m, festival = null) {
   return el('div', { class: 'menu-body' },
+    festival ? el('p', { class: 'menu-special menu-festival' }, el('strong', {}, '🎉 Festival: '), festival.name, ', ', el('span', { class: 'menu-price' }, coinText(festival.cp))) : null,
     m.special ? el('p', { class: 'menu-special' }, el('strong', {}, 'Today: '), m.special.name, m.special.note ? el('em', {}, ` (${m.special.note})`) : null, ', ', el('span', { class: 'menu-price' }, coinText(m.special.cp))) : null,
     m.sections.map((s) => el('div', { class: 'menu-sec' }, el('h4', {}, s.title),
       el('ul', { class: 'plain menu-items' }, s.items.map((x) => el('li', {}, el('span', {}, x.name), el('span', { class: 'menu-price' }, coinText(x.cp))))))));
 }
 
 // Order from the menu: food or drink for a character (players: their own), paid from their sheet by the server.
+// Festival specials: today's holiday dish or drink at this tavern, if today is a holiday.
+const festivalOf = (inn) => festivalSpecial(inn.fields?.menu, holidayToday(cleanCalendar(world.info?.cal)), inn.id);
+
 function orderPart(inn, m, rerender) {
   if (!isMember() || previewing()) return null;
   const chars = worldEntries().filter((c) => c.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(c.fields?.status) && (isGm() || c.owner_id === session.gm?.id)).sort((a, b) => a.name.localeCompare(b.name));
   const nights = new Set(roomsOf(m).map((x) => x.name));
-  const items = [...(m.special ? [m.special] : []), ...m.sections.filter((s) => !/night/i.test(s.title)).flatMap((s) => s.items)].filter((x) => x.cp > 0 && !nights.has(x.name));
+  const items = [...(festivalOf(inn) ? [festivalOf(inn)] : []), ...(m.special ? [m.special] : []), ...m.sections.filter((s) => !/night/i.test(s.title)).flatMap((s) => s.items)].filter((x) => x.cp > 0 && !nights.has(x.name));
   if (!chars.length || !items.length) return null;
   const who = el('select', { 'aria-label': 'Who’s ordering' }, chars.map((c) => el('option', { value: c.id }, c.name)));
   const what = el('select', { 'aria-label': 'What to order' }, items.map((x) => el('option', { value: x.name }, `${x.name} (${coinText(x.cp)})`)));
@@ -134,7 +139,7 @@ export function menuCard(e, town, rerender) {
       el('div', { class: 'entry-head' }, el('h3', { id: `mn-${e.id}` }, `Bill of fare${m ? `: ${QUALITY[m.quality]}` : ''}`),
         m && !draft ? el('div', { class: 'btnrow' }, gm && roomsOf(m).length ? el('button', { class: 'btn small', type: 'button', onclick: () => stayDialog(e, m, rerender) }, 'Stay the night…') : null,
           el('button', { class: 'btn small ghost', type: 'button', onclick: print }, 'Print')) : null),
-      m ? menuBody(m) : el('p', { class: 'muted small' }, `What’s on the board tonight: drinks, dishes and a bed, priced for ${town ? town.name : 'a town this size'}.`),
+      m ? menuBody(m, draft ? null : festivalOf(e)) : el('p', { class: 'muted small' }, `What’s on the board tonight: drinks, dishes and a bed, priced for ${town ? town.name : 'a town this size'}.`),
       m && !draft ? orderPart(e, m, rerender) : null,
       m && !draft && !e.fields?.stock ? tradeLedger(e) : null,
       gm ? el('div', { class: 'btnrow' },

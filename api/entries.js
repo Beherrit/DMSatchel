@@ -36,7 +36,7 @@ import { mergedEntry, relinkLinks, relinkText } from '../js/merge.js';
 import { fieldsWith } from '../js/custom-fields.js';
 import { cleanSay } from '../js/say.js';
 import { cleanAka } from '../js/aka.js';
-import { readMenu, menuItem } from '../js/menu.js';
+import { readMenu, menuItem, festivalSpecial } from '../js/menu.js';
 import { buyFrom, sellTo, haggleFor, withHaggle, setHaggle } from '../js/purchase.js';
 import { addLog } from '../js/play-log.js';
 import { shiftDebt, balanceWith } from '../js/debts.js';
@@ -419,7 +419,7 @@ export default route({
       if (!inn || inn.deleted || !visibleTo(inn, req) || !readMenu(inn.fields?.menu)) return fail(res, 404, 'That menu isn’t up.');
       if (!ch || ch.deleted || ch.kind !== 'character') return fail(res, 404, 'Pick a character.');
       if (!req.isGmHere && ch.owner_id !== req.gm.id) return fail(res, 403, 'You can only order for your own character.');
-      const item = menuItem(inn.fields.menu, clip(b.item, 120));
+      const item = menuItem(inn.fields.menu, clip(b.item, 120), festivalSpecial(inn.fields.menu, holidayToday(cleanCalendar(req.world.cal)), inn.id));
       if (!item) return fail(res, 400, 'That isn’t on the menu.');
       const qty = Math.max(1, Math.min(20, Math.round(Number(b.qty) || 1))), cp = item.cp * qty;
       let p = {}; try { p = JSON.parse(ch.fields?.play || '{}') || {}; } catch { p = {}; }

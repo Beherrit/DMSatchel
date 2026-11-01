@@ -69,11 +69,25 @@ export function menuText(m, coins) {
 }
 
 // Order from the menu: the dish or drink of this name on a menu (the special too), or null.
-export function menuItem(menu, name) {
+// festival: today's festival special (from festivalSpecial), when there is one.
+export function menuItem(menu, name, festival = null) {
   const m = readMenu(menu);
   if (!m) return null;
   const want = String(name || '').trim().toLowerCase();
-  const all = [...m.sections.flatMap((s) => s.items), ...(m.special ? [m.special] : [])];
+  const all = [...m.sections.flatMap((s) => s.items), ...(m.special ? [m.special] : []), ...(festival ? [festival] : [])];
   const hit = all.find((x) => x.name.toLowerCase() === want);
   return hit && hit.cp > 0 ? { name: hit.name, cp: hit.cp } : null;
+}
+
+// Festival specials: on one of the world's holidays a tavern puts a festival dish or drink at the top of its menu,
+// chosen from the tavern and the holiday (so the page and the server agree), priced a little above its usual dishes.
+const FESTIVE = [['{h} cake', 'dish'], ['Spiced {h} punch', 'drink'], ['Honey-roast ham for {h}', 'dish'], ['{h} ale, brewed for the day', 'drink'], ['Sweet buns for {h}', 'dish'], ['Mulled wine for {h}', 'drink']];
+export function festivalSpecial(menu, holiday, seed = '') {
+  const m = readMenu(menu);
+  if (!m || !holiday) return null;
+  let h = 2166136261; for (const ch of `${seed}|${holiday}`) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619) >>> 0; }
+  const [pattern, sort] = FESTIVE[h % FESTIVE.length];
+  const p = PRICE[m.quality];
+  const cp = Math.max(1, Math.round((sort === 'dish' ? p.dish : p.ale) * 1.5));
+  return { name: pattern.replace('{h}', holiday), cp, note: `for ${holiday}` };
 }

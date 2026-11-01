@@ -219,6 +219,7 @@ A toolkit for running fifth-edition tabletop games, plus a shared world wiki tha
 - **A packing list**: planning a trip puts the rations each character is short of on their shopping list.
 - **Open now?**: a shopping list names the shops that stock each thing, their price, and whether they're open right now.
 - **Shut for the holiday**: shops close on the world's holidays; taverns stay open.
+- **Festival specials**: on a holiday, taverns put a festival dish or drink at the top of their menu.
 - **Weather slows the road**: heavy rain, snow or a strong wind where the party sets out adds travel days.
 - **A shopping list**: players note what they mean to buy; shops offer it first, and GMs see the lists in prep.
 - **Downtime moves with the calendar**: open downtime counts the days that pass and says when it's ready to resolve.

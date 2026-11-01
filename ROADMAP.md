@@ -517,7 +517,7 @@ to the log at the bottom.
     before they pay.
 249. [x] **Print the shelf.** A shop's stock as a printable price list to hand round the table.
 250. [x] **Attuned on the party sheet.** The GM's party sheet shows who is attuned to what.
-251. [ ] **Festival specials.** On a holiday, taverns offer a festival dish or drink at the top of their menu.
+251. [x] **Festival specials.** On a holiday, taverns offer a festival dish or drink at the top of their menu.
 252. [ ] **Who's been given what.** A character's page lists the gifts they've given NPCs, and to whom.
 253. [ ] **Closing time.** A shop's page says how long until it shuts (or opens), by the world's clock.
 
@@ -778,3 +778,4 @@ to the log at the bottom.
 - Too heavy to carry it: a shop's buy panel now works out the buyer's load after the purchase as they choose, coin spent included. When it would take them over their carrying capacity it says so in red before they pay: "That would put Ann over their carrying capacity: 266.9 lb of 120 lb." It's a warning, not a block; the GM decides. It's for Forge characters, whose Strength is known. loadAfter in js/weights.js unit tested.
 - Print the shelf: a stocked shop's "For sale" heading now has "Print the shelf". It prints just the shop's name, its shopkeeper line and the stock tables, black on white, to hand round the table. The trade panel, the haggle and sell helpers, the asks and the ledger are left out.
 - Attuned on the party sheet: the GM's party sheet now adds "Attuned: Amulet of Health" under each character's gear, from the attunement ticks on their sheet. An item that's no longer in their inventory drops off. Unit tested in tests/party-screen.test.mjs.
+- Festival specials: on one of the world calendar's holidays, a tavern's bill of fare now opens with a festival dish or drink: "🎉 Festival: Mulled wine for Bridge Day, 6 cp". It's chosen from the tavern and the holiday, so the page and the server agree, and priced a little above the tavern's usual fare. It heads the Order list and can be ordered and paid for like anything else. The next day it's gone. festivalSpecial in js/menu.js unit tested; ordering it tested against PGlite.
