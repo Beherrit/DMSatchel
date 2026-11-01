@@ -33,3 +33,10 @@ test('the party’s wealth', async () => {
   assert.deepEqual(partyWealth(10000, [{ cp: 500 }, { cp: 1234 }, { cp: -5 }, {}]), { total: 11734, treasury: 10000, purses: 1734 });
   assert.deepEqual(partyWealth(-200, []), { total: 0, treasury: 0, purses: 0 });
 });
+
+test('heldBy: treasury items a character holds', async () => {
+  const { heldBy } = await import('../js/party-glance.js');
+  const items = [{ item: 'Tent', qty: 2, holder: 'Ann' }, { item: 'Rope', qty: 1, holder: ' ann ' }, { item: 'Lute', qty: 1, holder: 'Bo' }, { item: 'Gone', qty: 0, holder: 'Ann' }];
+  assert.deepEqual(heldBy(items, 'Ann').map((i) => i.item), ['Tent', 'Rope']);
+  assert.deepEqual(heldBy(items, 'Cy'), []); assert.deepEqual(heldBy(null, 'Ann'), []);
+});

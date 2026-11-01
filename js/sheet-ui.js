@@ -17,6 +17,7 @@ import { inventoryLines, tidyInventory } from './handover.js';
 import { loadOf, loadText } from './weights.js';
 import { worthOf } from './worth.js';
 import { readDebts } from './debts.js';
+import { heldBy } from './party-glance.js';
 import { queuePlay, isOffline } from './outbox.js';
 
 import { CONDITIONS, CONDITION_TEXT, conditionLine } from './conditions.js';
@@ -140,6 +141,13 @@ function conditionHelp(active) {
     active.length ? active.map(item) : null,
     el('details', { class: 'cond-all' }, el('summary', { class: 'small' }, 'All conditions'), Object.keys(CONDITION_TEXT).filter((c) => !active.includes(c)).map(item)),
     el('p', { class: 'muted small' }, 'From the System Reference Document 5.2, CC BY 4.0.'));
+}
+
+// Carrying for the party: the treasury's items whose holder is this character (fetched once a minute at most).
+let treasuryCache = { at: 0, data: null };
+async function treasuryNow() {
+  if (treasuryCache.data && Date.now() - treasuryCache.at < 60000) return treasuryCache.data;
+  const t = await api('party'); treasuryCache = { at: Date.now(), data: t }; return t;
 }
 
 export function sheetSection(e, rerender) {
@@ -369,7 +377,14 @@ export function sheetSection(e, rerender) {
         x.summary ? el('div', { class: 'small' }, x.summary.length > 220 ? `${x.summary.slice(0, 219)}…` : x.summary) : null)))] : []);
     }, 250);
   }
-  function inventoryItems() { drawItems(); return [loadLine, worthLine, tidyBtn, itemsBox]; }
+  const heldLine = el('p', { class: 'small held-line', hidden: true });
+  treasuryNow().then((t) => {
+    const mine = heldBy(t.items, e.name);
+    if (!mine.length) return;
+    heldLine.hidden = false;
+    setKids(heldLine, el('strong', {}, 'Carrying for the party: '), mine.map((i) => (i.qty > 1 ? `${i.qty} × ${i.item}` : i.item)).join(', '), ' ', el('a', { href: '#world/party', class: 'muted' }, '(treasury)'));
+  }).catch(() => { /* no treasury to show (not a member, or offline) */ });
+  function inventoryItems() { drawItems(); return [loadLine, worthLine, tidyBtn, heldLine, itemsBox]; }
 
   function manual() {
     if (ch || !can) return null;

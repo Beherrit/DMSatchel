@@ -40,3 +40,6 @@ export function partyWealth(treasuryCp, purses) {
   const treasury = Math.max(0, Math.round(Number(treasuryCp) || 0));
   return { total: treasury + inPurses, treasury, purses: inPurses };
 }
+
+// Carrying for the party: the treasury's items held by this character (by name, whatever the case).
+export const heldBy = (items, name) => (items || []).filter((i) => i.qty > 0 && String(i.holder || '').trim().toLowerCase() === String(name || '').trim().toLowerCase());
