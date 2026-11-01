@@ -530,7 +530,7 @@ to the log at the bottom.
 259. [x] **Pay your own tab.** A player can settle their own orders on a tab from their sheet's coin.
 260. [x] **Who's in the back room.** A place inside another (a back room, a cellar) shows on its parent's page in the
     "Here now" line, so the tavern says who's in its back room.
-261. [ ] **Routines on the printable cast list.** The printable Who's who adds where each NPC usually is by day.
+261. [x] **Routines on the printable cast list.** The printable Who's who adds where each NPC usually is by day.
 
 ## Ideas parking lot
 
@@ -800,3 +800,4 @@ to the log at the bottom.
 - Tabs waiting: session prep's "Waiting on you" now lists taverns where the party has an unsettled tab: "The party's tab at The Bell stands at 8 cp (1 order): settle it on its page". waitingOnGm in js/waiting.js unit tested.
 - Pay your own tab: under a tavern's tab, each of your characters with orders on it gets "Pay Ann's share (8 cp)". The server takes just that character's orders off the tab and the coin off their sheet ("Paid their share of the tab at The Bell (8 cp)" in its history). Everyone else's orders stay on the tab for the GM to settle. It's refused for someone else's character or without the coin. splitTab in js/tab.js unit tested; the route tested against PGlite.
 - Who's in the back room: a place's "Here now" line now counts people in places inside it, saying where: "🕰 Here now (20:00): Bramwell until 21:00, Cole (in Back Room)". It's the same reading the town pages use (aroundNow), so hirelings with the party show the same way.
+- Routines on the printable cast list: each NPC on the printable Who's who now says where they're usually found by day, from their routine ("Usually by day: the market"; the morning's place, else the afternoon's). Hirelings say "Travelling with the party". It's handy for players hunting someone down.
