@@ -503,6 +503,13 @@ to the log at the bottom.
     and bounties not yet paid.
 241. [x] **Go to my character.** A keyboard shortcut (g then y) and a link in the world's side menu open the player's
     own character.
+242. [ ] **Gifts and loans in the recap.** The session recap draft notes gifts given to NPCs and loans between
+    characters since the last session.
+243. [ ] **Shut for the holiday.** Shops close on the world's holidays, and say so ("Shut for Bridge Day").
+244. [ ] **Routines for the whole town.** A GM can roll a daily routine for every NPC in a settlement who hasn't got
+    one, in one go, and check them before saving.
+245. [ ] **Hirelings go with the party.** A hired NPC is where the party is, whatever their routine says, on their page
+    and in the "who's here" lists.
 
 ## Ideas parking lot
 
