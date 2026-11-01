@@ -6,6 +6,7 @@ import { mountTables } from './world-tables.js';
 import { TOOL_LIST } from './tool-list.js';
 import { mountEncounters } from './encounter-ui.js';
 import { makeRng } from './rng.js';
+import { rollLoot, magicItem as lootItem } from './loot.js';
 import { $, el, cap, fmt, copyText, fresh, traitList, setKids, toast } from './dom.js';
 import { personName, ANCESTRY_WEIGHTS, ANCESTRIES, townName, tavernName, shopName, shipName, groupName, lastName } from './names.js';
 import * as D from './tables.js';
@@ -93,13 +94,7 @@ function mountNpc(root) {
 // ---- Quests ------------------------------------------------------------------------------------
 
 const Q_LABELS = { patron: 'Patron', goal: 'The job', antagonist: 'Opposition', complication: 'Complication', twist: 'Twist', reward: 'Reward' };
-const RARITY_CODE = { common: 'c', uncommon: 'u', rare: 'r', veryrare: 'v', legendary: 'l' };
-// A catalog item for a loot tier; now and then a cursed one sneaks in.
-function magicItem(tier) {
-  const rr = pickW(D.RARITY_W[tier]);
-  const it = (r.chance(0.06) && randomItem(r, { cursed: true })) || randomItem(r, { rarity: RARITY_CODE[rr], cursed: false });
-  return { r: RARITY_KEYS[it.rarity], name: it.name, item: it };
-}
+const magicItem = (tier) => lootItem(r, tier);
 function mountQuest(root) {
   let q;
   const card = el('article', { class: 'card fresh' });
@@ -339,22 +334,7 @@ function mountLoot(root) {
       el('button', { class: 'btn primary', type: 'button', onclick: () => roll() }, 'Roll loot')), card);
   const tierLabel = () => $('#l-tier').selectedOptions[0].text;
   function roll() {
-    const tier = +$('#l-tier').value, hoard = mode === 'hoard';
-    const coins = [];
-    for (const [c, n, s, m, ch] of D.COINS[mode][tier]) if (r.chance(ch)) coins.push([c, d(n, s) * m]);
-    if (!coins.length) { const [c, n, s, m] = D.COINS[mode][tier][0]; coins.push([c, d(n, s) * m]); }
-    const vals = [];
-    if (hoard && r.chance(tier === 0 ? 0.6 : 0.85)) {
-      const [table, values, [n, s]] = pick(D.VALUABLES[tier]); const v = pick(values); const count = d(n, s);
-      const tally = {}; for (let i = 0; i < count; i++) { const nm = pick(table[v]); tally[nm] = (tally[nm] || 0) + 1; }
-      for (const [nm, q] of Object.entries(tally)) vals.push({ name: (q > 1 ? `${q} × ` : '') + nm, each: v, value: v * q, kind: table === D.GEMS ? 'gem' : 'art' });
-    }
-    const items = [];
-    const nItems = hoard ? [Math.max(0, d(1, 4) - 2), d(1, 3), d(1, 4), d(1, 4) + 1][tier] : (r.chance(0.12) ? 1 : 0);
-    for (let i = 0; i < nItems; i++) items.push(magicItem(hoard ? tier : 0));
-    const extra = r.chance(hoard ? 0.5 : 0.35) ? pick(D.TABLES.trinket.items) : null;
-    const total = coins.reduce((a, [c, q]) => a + q * D.GP[c], 0) + vals.reduce((a, v) => a + v.value, 0);
-    loot = { tier, hoard, coins, vals, items, extra, where: pick(D.CONTAINERS), total };
+    loot = rollLoot(r, { tier: +$('#l-tier').value, hoard: mode === 'hoard' });
     render(true);
   }
   const text = () => {

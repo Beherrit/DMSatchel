@@ -4,7 +4,9 @@ import { TERRAINS, TERRAIN_LABEL, DIFFICULTIES, SEASONS, rollEncounter, encounte
 import { saveNote } from './notebook.js';
 import { world, worldEntries, patchEntry, loadWorld } from './world-store.js';
 import { worldCalendar } from './world-calendar.js';
-import { isGm, session } from './api.js';
+import { api, isGm, session } from './api.js';
+import { makeRng } from './rng.js';
+import { rollLoot, lootLog, tierForCR } from './loot.js';
 import { libraryCreatures } from './library.js';
 
 // The party's size and average level, from active player characters (or 4 at level 3).
@@ -28,7 +30,7 @@ const ddb = (name) => `https://www.dndbeyond.com/monsters?filter-search=${encode
 export function saveEncounterButton(enc, place) {
   if (!enc || !isGm() || session.configured === false) return null;
   return el('div', { class: 'btnrow' }, el('button', { class: 'btn small ghost', type: 'button', onclick: () => window.dispatchEvent(new CustomEvent('world:draft', { detail: {
-    kind: 'encounter', name: enc.groups.map((g) => (g.count > 1 ? `${g.count} ${g.name}` : g.name)).join(' and '), parent_id: place?.id || null, visibility: 'gm',
+    kind: 'encounter', name: enc.groups.map((g) => (g.count > 1 ? `${g.count} × ${g.name}` : g.name)).join(' and '), parent_id: place?.id || null, visibility: 'gm',
     summary: `They’re ${enc.activity}.`, body: encText(enc), fields: { difficulty: enc.difficulty, enc: JSON.stringify(enc) },
   } })) }, 'Save encounter'));
 }
@@ -48,7 +50,29 @@ export function encounterCard(enc, { title = 'Encounter', place = null, save = t
     el('p', { class: 'muted small' }, `Before the party sees them: ${enc.sign}.`),
     el('div', { class: 'xp-bar', title: `${pct}% of the budget` }, el('span', { style: `width:${Math.min(100, pct)}%` })),
     el('p', { class: 'muted small' }, `${enc.xp.toLocaleString('en-US')} XP of a ${enc.budget.toLocaleString('en-US')} XP budget.`),
-    save ? saveEncounterButton(enc, place) : null);
+    save ? saveEncounterButton(enc, place) : null,
+    isGm() ? treasureBox(enc) : null);
+}
+
+// Treasure from a fight (GMs): pocket loot for the creatures (or their lair's hoard), by the toughest one's
+// challenge, and into the party's loot log in one go.
+function treasureBox(enc) {
+  const tier = tierForCR(Math.max(0, ...enc.groups.map((g) => Number(g.cr) || 0)));
+  const hoard = el('input', { type: 'checkbox' });
+  const out = el('div', { class: 'enc-loot' });
+  const fmtCoins = (l) => l.coins.map(([c, q]) => `${q.toLocaleString('en-US')} ${c}`).join(', ');
+  const roll = () => {
+    const l = rollLoot(makeRng(`${Date.now()}-${Math.random()}`), { tier, hoard: hoard.checked });
+    const note = `After the fight${enc.groups[0] ? ` with ${enc.groups.map((g) => (g.count > 1 ? `${g.count} × ${g.name}` : g.name)).join(' and ')}` : ''}`;
+    setKids(out, el('p', { class: 'small' }, el('strong', {}, `${l.hoard ? 'Hoard' : 'Pocket loot'}: `), fmtCoins(l),
+      [...l.vals.map((v) => v.name), ...l.items.map((it) => it.name), l.extra || ''].filter(Boolean).map((t) => `; ${t}`).join('')),
+    el('div', { class: 'btnrow' }, el('button', { class: 'btn small primary', type: 'button', onclick: async (ev) => {
+      ev.target.disabled = true;
+      try { for (const line of lootLog(l, note)) await api('party', { method: 'POST', body: line }); toast('Treasure added to the loot log'); setKids(out, el('p', { class: 'small' }, '✓ In the loot log. ', el('a', { href: '#world/party' }, 'The party'))); }
+      catch (err) { toast(err.message, 'bad'); ev.target.disabled = false; }
+    } }, 'Put it in the loot log'), el('button', { class: 'btn small ghost', type: 'button', onclick: roll }, '↻ Another')));
+  };
+  return el('div', { class: 'enc-treasure' }, el('div', { class: 'controls' }, el('button', { class: 'btn small', type: 'button', onclick: roll }, 'Roll treasure'), el('label', { class: 'check' }, hoard, ' Their lair’s hoard')), out);
 }
 
 const encText = (enc) => [`${enc.difficulty} encounter (${enc.xp} XP of ${enc.budget})`, ...enc.groups.map((g) => `${g.count > 1 ? `${g.count} × ` : ''}${g.name} (CR ${crText(g.cr)})`), `They’re ${enc.activity}.`, `Signs: ${enc.sign}.`].join('\n');
