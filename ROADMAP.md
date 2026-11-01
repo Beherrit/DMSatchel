@@ -402,7 +402,7 @@ to the log at the bottom.
     account: heavy rain, snow or a storm add days.
 188. [x] **Rumours over supper.** A night at an inn brings a rumour going around that town, shown to the GM to pass
     on (or keep).
-189. [ ] **A shopping list.** Players note what they mean to buy; when they're at a shop that stocks it, the buy
+189. [x] **A shopping list.** Players note what they mean to buy; when they're at a shop that stocks it, the buy
     panel offers it first, and GMs see the lists in prep.
 
 ## Ideas parking lot
@@ -598,3 +598,4 @@ to the log at the bottom.
 - Enough food for the road?: picking a destination in a map pin's "Travel to…" now adds a rations line under the distance and times: "Rations for 3 days at a normal pace: Ann has enough (9); Bo has 1, 2 short", in red when anyone's short. Days are counted whole, the way the calendar would move on (2.5 days needs 3 days of food); trips of under a day need none, and rough going doubles it. rationsFor in js/party-glance.js unit tested.
 - Weather slows the road: after the party moves on a scaled map, "Move the calendar on?" uses today's weather where they set out, the same seeded roll prep and the front page show. Heavy snow doubles the journey, heavy rain or snow makes it half as long again, and a strong wind a quarter longer, with the worst one counting. The factor applies to the actual travel time before rounding (60 miles in heavy rain: 4 days at a normal pace instead of 3), and the dialog says why: "🌧 There's heavy rain at Start today: the journey takes longer." weatherSlowdown in js/forecast.js unit tested.
 - Rumours over supper: after the party stays the night at an inn, if any rumours are going around its town (started there or spread there, in the version told in that town), the dialog turns to "Over supper…". It shows one, picked at random, as talk in the common room, with a link to the rumour's page and a reminder to pass it on or keep it for later. Nothing is revealed to the players automatically. With no rumours in town, the dialog just closes as before.
+- A shopping list: a character's page has "🛒 Shopping list" for its player and the GMs (add a line, take one off; up to 20). At a shop, the buy panel puts what answers the buyer's list first, starred ("★ Potion of healing" for "Healing potion": every word on the line must start a word of the item's name). Session prep shows GMs "🛒 Shopping lists" for everyone. It is kept in the sheet's play state (play.shopping); the sheet now knows that key, and its own saves always keep the stored list. Without that, any sheet change by someone with the page open would have wiped a list added since. js/shopping.js unit tested.

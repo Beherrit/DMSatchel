@@ -8,6 +8,7 @@ import { playOf } from './sheet-ui.js';
 import { coinText, GOODS } from './economy.js';
 import { stockItems, sellTo, HAGGLES, readHaggle, haggleFor, setHaggle, withHaggle } from './purchase.js';
 import { inventoryLines } from './handover.js';
+import { readList, listFirst } from './shopping.js';
 
 const ACTIVE = (e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
 
@@ -37,10 +38,21 @@ function hagglePart(shop, chars, rerender) {
       el('button', { class: 'btn small ghost', type: 'button', onclick: () => save(c.id, 0, 'Haggle result taken back') }, 'Take back')))) : null);
 }
 
-function buyPart(shop, items, chars, rerender) {
-  const item = el('select', { id: 'buy-item' }, items.map((x) => el('option', { value: x.name }, `${x.name} (${coinText(x.cp)})`)));
+function buyPart(shop, stock, chars, rerender) {
+  // What's on the buyer's shopping list comes first, starred.
+  let items = stock;
+  const item = el('select', { id: 'buy-item' });
+  const order = () => {
+    const c = world.entries.get(who.value);
+    items = listFirst(stock, readList(playOf(c)));
+    const keep = item.value;
+    item.replaceChildren(...items.map((x) => el('option', { value: x.name }, `${x.wanted ? '★ ' : ''}${x.name} (${coinText(x.cp)})`)));
+    if (items.some((x) => x.name === keep)) item.value = keep;
+  };
   const qty = el('input', { type: 'number', id: 'buy-qty', min: 1, max: 100, value: 1, class: 'qty' });
   const who = el('select', { id: 'buy-who' }, chars.map((c) => el('option', { value: c.id }, c.name)));
+  order();
+  who.addEventListener('change', order);
   const total = el('p', { class: 'small', role: 'status' });
   const pick = () => items.find((x) => x.name === item.value);
   const show = () => {

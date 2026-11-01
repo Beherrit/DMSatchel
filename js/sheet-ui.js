@@ -60,6 +60,7 @@ function defaults(e, ch) {
     conditions: Array.isArray(p.conditions) ? p.conditions : [], exhaustion: p.exhaustion || 0, inspiration: Boolean(p.inspiration),
     slots: p.slots || {}, hd: p.hd || 0, death: p.death || { ok: 0, fail: 0 }, cp: Number.isFinite(p.cp) ? p.cp : startingCoins(ch),
     inventory: p.inventory ?? (ch ? `${ch.equipment.cls}\n${ch.equipment.background}` : ''), notes: p.notes || '',
+    shopping: Array.isArray(p.shopping) ? p.shopping : [],
   };
 }
 
@@ -74,6 +75,9 @@ function save(id, play) {
     while (q.next) {
       const p = q.next; q.next = null;
       for (let attempt = 0; attempt < 2; attempt++) {
+        // The shopping list is kept from outside the sheet (world-shopping.js): always save the stored one.
+        const stored = parse(world.entries.get(id)?.fields?.play);
+        if (Array.isArray(stored?.shopping)) p.shopping = stored.shopping;
         try { await patchEntry(world.entries.get(id), { fields: { play: JSON.stringify(p) } }); break; }
         catch (err) {
           if (err.status === 409 && err.body?.entry && attempt === 0) { world.entries.set(id, err.body.entry); continue; }

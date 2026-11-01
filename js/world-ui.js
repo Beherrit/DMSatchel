@@ -71,6 +71,7 @@ import { buyBox } from './world-buy.js';
 import { chainSection } from './world-questchain.js';
 import { hireLine } from './world-hire.js';
 import { nextMoveButton } from './world-nextmove.js';
+import { shoppingCard } from './world-shopping.js';
 import { dayWeather } from './forecast.js';
 import './world-living.js';
 import { cleanMusic } from './music.js';
@@ -391,6 +392,7 @@ function viewEntry(id, tab) {
     readsLine(e),
     wishesSection(e, rerenderWorld),
     e.kind === 'character' ? sheetSection(e, rerenderWorld) : null,
+    shoppingCard(e, rerenderWorld),
     e.kind === 'character' ? knownSection(e, rerenderWorld) : null,
     e.kind === 'character' ? attitudesOfCharacter(e, rerenderWorld) : null,
     bondsSection(e, rerenderWorld),
