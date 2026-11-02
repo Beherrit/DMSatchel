@@ -183,7 +183,9 @@ export function laterLine(place) {
 export function aroundPartyCard() {
   const at = partyPlace();
   const a = at ? aroundNow(at) : null;
-  if (!a?.list.length) return null;
+  // Due in later, on the front page: at a tavern, who's coming in later tonight too.
+  const later = at ? laterLine(at) : null;
+  if (!a?.list.length && !later) return null;
   return el('section', { class: 'card around-party' }, el('h3', {}, `Around the party in ${at.name} (${hhmm(a.m)})`),
-    el('p', { class: 'small' }, a.list.slice(0, 8).map(({ npc, place, until }, i) => [i ? ', ' : '', link(npc.entry), place.id === at.id ? null : el('span', { class: 'muted' }, ` at ${place.name}`), until !== null ? el('span', { class: 'muted' }, ` until ${hhmm(until)}`) : null]), a.list.length > 8 ? ` and ${a.list.length - 8} more` : ''));
+    a.list.length ? el('p', { class: 'small' }, a.list.slice(0, 8).map(({ npc, place, until }, i) => [i ? ', ' : '', link(npc.entry), place.id === at.id ? null : el('span', { class: 'muted' }, ` at ${place.name}`), until !== null ? el('span', { class: 'muted' }, ` until ${hhmm(until)}`) : null]), a.list.length > 8 ? ` and ${a.list.length - 8} more` : '') : el('p', { class: 'small muted' }, 'Nobody about just now.'), later);
 }
