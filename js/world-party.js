@@ -17,7 +17,7 @@ import { dayOf } from './routine.js';
 import { giftCounts } from './gifts.js';
 import { owedTo } from './hirelings.js';
 import { shopStanding, sellWithStanding } from './standing-price.js';
-import { giveItem } from './handover.js';
+import { giveItem, tidyInventory } from './handover.js';
 import { progressBadge } from './world-objectives.js';
 import { advancementSection } from './world-attendance.js';
 import { partyBondsSection } from './world-bonds.js';
@@ -58,7 +58,15 @@ function glanceTable(active) {
       el('td', {}, r.conditions.length ? r.conditions.join(', ') : '—'))));
   };
   draw();
-  return el('section', { class: 'card party-glance' }, el('div', { class: 'entry-head' }, el('h3', {}, 'The party at a glance'), el('a', { class: 'btn small', href: '#world/screen' }, 'Party sheet for the screen')),
+  // A tidy for the party: merge duplicate inventory lines on every sheet that has some, in one go.
+  const messy = active.filter((c) => tidyInventory(playOf(c).inventory).merged);
+  const tidyAll = messy.length ? el('button', { class: 'btn small ghost', type: 'button', onclick: async () => {
+    tidyAll.disabled = true; let lines = 0; const failed = [];
+    for (const c of messy) { try { await changePlay(world.entries.get(c.id) || c, (play) => { const t = tidyInventory(play.inventory); lines += t.merged; play.inventory = t.text; }); } catch { failed.push(c.name); } }
+    toast([`Tidied ${messy.length - failed.length} pack${messy.length - failed.length === 1 ? '' : 's'} (${lines} line${lines === 1 ? '' : 's'} merged)`, failed.length ? `not ${failed.join(', ')}` : ''].filter(Boolean).join(' · '), failed.length ? 'bad' : undefined);
+    window.dispatchEvent(new Event('world:rerender'));
+  } }, `Tidy ${messy.length === 1 ? `${messy[0].name}’s pack` : `${messy.length} packs`}`) : null;
+  return el('section', { class: 'card party-glance' }, el('div', { class: 'entry-head' }, el('h3', {}, 'The party at a glance'), el('div', { class: 'btnrow' }, tidyAll, el('a', { class: 'btn small', href: '#world/screen' }, 'Party sheet for the screen'))),
     el('div', { class: 'table-wrap' }, el('table', { class: 'glance-table' }, el('thead', {}, head), body)),
     // Who's owed wages, at a glance: hirelings the treasury couldn't pay in full.
     (() => { const owed = worldEntries().filter((e) => e.kind === 'npc' && owedTo(e)); return owed.length ? el('p', { class: 'small bad-line glance-owed' }, 'Owed wages: ', owed.map((e, i) => [i ? ', ' : '', link(e), ` ${coinText(owedTo(e))}`])) : null; })());
