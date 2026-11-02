@@ -563,7 +563,7 @@ to the log at the bottom.
     tonight when the party is at a tavern.
 287. [x] **Routine in the cast list's search.** Ctrl+K finds NPCs by where their routine puts them ("the Forge").
 288. [x] **Holiday prices.** Taverns charge a little more on holidays, said on the menu.
-289. [ ] **A full sweep.** Run the whole browser suite after #276–#288 and note it.
+289. [x] **A full sweep.** Run the whole browser suite after #276–#288 and note it.
 
 ## Ideas parking lot
 
@@ -861,3 +861,4 @@ to the log at the bottom.
 - Due in later, on the front page: when the party is at a tavern, the front page's "Around the party" card now adds who's due in later tonight ("🌙 Due in later: Bramwell (about 17:00)"). If nobody's there yet, it says "Nobody about just now."
 - Routine in the search: Ctrl+K already searched every field, so typing "forge" finds NPCs whose routine mentions the Forge. It now also shows why: an NPC without a summary shows their routine as the hint ("Bramwell · Routine: By day: the Forge; otherwise: home").
 - Holiday prices: on a holiday, taverns charge a fifth more, rounded up to the copper. The menu says so ("🎉 Holiday prices today: a fifth more than the board says"), the Order list shows the day's prices, and the server charges the same for orders, tabs and the round on the house. The festival special keeps its own price. holidayPrice in js/menu.js unit tested; the server's price tested against PGlite.
+- A full sweep: the whole browser suite (307 tests) is clean after #276–#288, with the same harmless flags as the last sweep and no crashes.
