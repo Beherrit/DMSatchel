@@ -3,6 +3,7 @@
 import { coinText } from './economy.js';
 import { readGifts, giftWhat } from './gifts.js';
 import { readLog } from './play-log.js';
+import { readTab, tabTotal } from './tab.js';
 import { parseDate, toDays, today as calToday, formatDate } from './calendar.js';
 
 const after = (t, since) => Boolean(t) && (!since || String(new Date(t).toISOString()) > since);
@@ -58,7 +59,11 @@ export function buildRecap(d) {
   for (const e of entries) if (e.kind === 'npc' && open(e)) for (const g of readGifts(e.fields?.gifts)) if (after(g.at, since)) gifts.push(`- ${/^the party$/i.test(g.by.trim()) ? 'The party' : `[[${g.by}]]`} gave ${ref(e)} ${giftWhat(g)}${g.note ? ` (${short(g.note, 80)})` : ''}`);
   const loans = [];
   for (const e of entries) if (e.kind === 'character' && open(e)) { let p = {}; try { p = JSON.parse(e.fields?.play || '{}') || {}; } catch { p = {}; } for (const l of readLog(p)) if (after(l.at, since) && /^Lent /.test(l.text)) loans.push(`- ${ref(e)} lent ${l.text.slice(5)}`); }
-  add('Dealings', [...gifts, ...loans]);
+  // Tabs: what's been put on a tavern tab since, and tabs settled from the treasury since.
+  const tabs = [];
+  for (const e of entries) if (e.kind === 'location' && open(e)) { const fresh = readTab(e.fields?.tab).filter((x) => after(x.at, since)); if (fresh.length) tabs.push(`- On the tab at ${ref(e)}: ${coinText(tabTotal(fresh))} (${[...new Set(fresh.map((x) => x.who))].join(', ')})`); }
+  for (const l of lines) if (/^Settled the tab at /.test(l.note || '')) tabs.push(`- ${l.note}: ${coinText(-Number(l.cp || 0))} from the treasury`);
+  add('Dealings', [...gifts, ...loans, ...tabs]);
 
   // The session in numbers: coin in and out, items found, in-world days gone by, quests completed.
   const earned = lines.reduce((t, l) => t + Math.max(0, Number(l.cp || 0)), 0), spent = lines.reduce((t, l) => t + Math.max(0, -Number(l.cp || 0)), 0);

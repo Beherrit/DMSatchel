@@ -73,3 +73,16 @@ test('recap: gifts and loans since the last session', async () => {
   const sec = r.body.split('## Dealings\n')[1]?.split('\n## ')[0] || '';
   assert.equal(sec.trim(), '- [[Ann]] gave [[Mother Ide]] 2 × Potion of healing (to win her over)\n- The party gave [[Mother Ide]] 5 gp\n- [[Ann]] lent 10 gp to Bo (for the boat)');
 });
+
+test('recap: tabs run up and settled since the last session', async () => {
+  const { buildRecap } = await import('../js/recap.js');
+  const old = '2026-01-01T00:00:00.000Z', fresh = '2026-03-01T00:00:00.000Z';
+  const entries = [
+    { id: 's1', kind: 'session', name: 'Session 1', fields: { number: '1' }, created_at: '2026-02-01T00:00:00.000Z' },
+    { id: 'b', kind: 'location', name: 'The Bell', created_at: old, fields: { tab: JSON.stringify([{ at: old, who: 'Ann', item: 'Ale', cp: 4 }, { at: fresh, who: 'Bo', item: 'Pie', cp: 12 }, { at: fresh, who: 'Ann', item: 'Wine', cp: 20 }]) } },
+  ];
+  const ledger = [{ at: fresh, cp: -32, note: 'Settled the tab at The Crow (2 orders)' }];
+  const r = buildRecap({ entries, activity: [], ledger, standings: { log: [], clocks: [] } });
+  const sec = r.body.split('## Dealings\n')[1]?.split('\n## ')[0] || '';
+  assert.equal(sec.trim(), '- On the tab at [[The Bell]]: 3 sp 2 cp (Bo, Ann)\n- Settled the tab at The Crow (2 orders): 3 sp 2 cp from the treasury');
+});
