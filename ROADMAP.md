@@ -535,7 +535,7 @@ to the log at the bottom.
 263. [x] **Who has the most coin.** The party page's at-a-glance table sorts by any column the GM clicks.
 264. [x] **Bounties on the party page.** The party page lists open bounties on NPCs the players know of.
 265. [x] **A quiet night.** When the clock passes midnight, the toast says who's out and about at that hour.
-266. [ ] **Wanted posters link the bounty.** A wanted poster's reward line links to the party page's Wanted card
+266. [x] **Wanted posters link the bounty.** A wanted poster's reward line links to the party page's Wanted card
     and says if the bounty has been claimed.
 267. [ ] **Sort the party sheet.** The GM's party sheet can be sorted by name, hit points or load before printing.
 268. [ ] **A night out.** The tavern's page lists who's due in later tonight, from the regulars' routines.
@@ -814,3 +814,4 @@ to the log at the bottom.
 - Who has the most coin: the party page's at-a-glance table (GMs) now sorts by any column. Click a header to sort (coin, rations, exhaustion and conditions start with the most; names and hit points start with the least, hit points as a share of the maximum), and click again to reverse it. The sorted column says so to screen readers (aria-sort) and shows ▲ or ▼. sortRows in js/party-glance.js unit tested.
 - Bounties on the party page: the party page's side column now has a "Wanted" card of open bounties, richest first: "Black Jory: 500 gp, alive (from the Watch)". It covers only NPCs the viewer can see, and leaves out those already dead, captured or paid. openBounties in js/bounty.js unit tested.
 - A quiet night: when the GM moves the clock past midnight, the toast now adds who's still out at that hour, from their routines: "out at this hour: Cole (The Bell)" (up to four, then "and 2 more"). If everyone's routine puts them at home, it says "a quiet night: nobody is about". Hirelings count as wherever the party is.
+- Wanted posters link the bounty: on a town's job-board poster, an open bounty's reward now links to the party page, where the Wanted card is. Claimed bounties (captured, or dead and paid) stay on the poster for a while, stamped "CLAIMED", with the reward struck through and "(claimed)". wantedFor in js/poster.js takes a claimed option (unit tested); the party page's Wanted card and other callers still show only open bounties.

@@ -6,7 +6,7 @@ import { world, worldEntries, getEntry, descendantsOf, notice } from './world-st
 import { worldCalendar, todayText } from './world-calendar.js';
 import { posterOf, wantedFor } from './poster.js';
 
-export const posterFor = (place) => posterOf(place, descendantsOf(place.id, ['quest']), { date: worldCalendar() ? todayText() : '', wanted: wantedFor(place, worldEntries(), descendantsOf(place.id)) });
+export const posterFor = (place) => posterOf(place, descendantsOf(place.id, ['quest']), { date: worldCalendar() ? todayText() : '', wanted: wantedFor(place, worldEntries(), descendantsOf(place.id), { claimed: true }) });
 
 export function posterNode(p) {
   return el('article', { class: 'poster', 'aria-label': p.title },
@@ -18,11 +18,12 @@ export function posterNode(p) {
       j.reward ? el('p', { class: 'poster-reward' }, `Reward: ${j.reward}`) : null,
       j.ask ? el('p', { class: 'poster-ask' }, `Ask for ${j.ask}`) : null)))
       : p.wanted.length ? null : el('p', { class: 'poster-empty' }, 'Nothing posted. Come back on market day.'),
-    p.wanted.length ? el('ul', { class: 'poster-jobs poster-wanted', 'aria-label': 'Wanted' }, p.wanted.map((w) => el('li', { class: 'poster-job' },
-      el('p', { class: 'poster-headline' }, 'WANTED'),
+    p.wanted.length ? el('ul', { class: 'poster-jobs poster-wanted', 'aria-label': 'Wanted' }, p.wanted.map((w) => el('li', { class: `poster-job${w.claimed ? ' claimed' : ''}` },
+      el('p', { class: 'poster-headline' }, w.claimed ? 'CLAIMED' : 'WANTED'),
       el('h3', {}, w.name),
       w.text ? el('p', {}, w.text) : null,
-      el('p', { class: 'poster-reward' }, `Reward: ${w.reward}`),
+      // Wanted posters link the bounty: to the party page's Wanted card (and it's crossed out once claimed).
+      el('p', { class: 'poster-reward' }, 'Reward: ', w.claimed ? el('s', {}, w.reward) : el('a', { href: '#world/party' }, w.reward), w.claimed ? ' (claimed)' : ''),
       w.by ? el('p', { class: 'poster-ask' }, `Offered by ${w.by}`) : null))) : null,
     p.more ? el('p', { class: 'poster-more' }, `…and ${p.more} more on the board.`) : null);
 }

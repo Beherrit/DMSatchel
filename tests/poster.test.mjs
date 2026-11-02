@@ -42,3 +42,11 @@ test('wanted posters', () => {
   assert.equal(posterOf(town, [], { wanted: w }).wanted.length, 3);
   assert.deepEqual(posterOf(town, []).wanted, []);
 });
+
+test('wantedFor with claimed bounties', async () => {
+  const { wantedFor } = await import('../js/poster.js');
+  const town = { id: 't', name: 'Brindle' };
+  const all = [{ id: 'j', kind: 'npc', name: 'Jory', fields: { bounty: '500 gp', bounty_by: 'Brindle' } }, { id: 'p', kind: 'npc', name: 'Pete', fields: { bounty: '50 gp', bounty_by: 'Brindle', status: 'Captured' } }, { id: 'd', kind: 'npc', name: 'Dan', fields: { bounty: '50 gp', bounty_by: 'Brindle', status: 'Dead' } }];
+  assert.deepEqual(wantedFor(town, all, []).map((w) => w.name), ['Jory']);
+  assert.deepEqual(wantedFor(town, all, [], { claimed: true }).map((w) => `${w.name}${w.claimed ? '*' : ''}`), ['Jory', 'Pete*']);
+});
