@@ -8,7 +8,7 @@ import { world, worldEntries, getEntry, findByName, link, kindLabel, notice, nam
 import { playOf, characterOf, changePlay } from './sheet-ui.js';
 import { readList, withRations } from './shopping.js';
 import { overloaded, overloadedText } from './weights.js';
-import { aroundNow, laterLine } from './world-routine.js';
+import { aroundNow, laterLine, busiestLine } from './world-routine.js';
 import { hhmm } from './clock.js';
 import { rationsFor } from './party-glance.js';
 import { dayWeather, weatherSlowdown, skyIcon } from './forecast.js';
@@ -250,6 +250,8 @@ export async function viewMap(id, focusPin) {
         // Who's here, on the map: NPCs whose routine puts them at this place (or inside it) right now.
         // Who's due in, on the map: a tavern's pin also says who's coming in later tonight.
         entry ? laterLine(entry) : null,
+        // Busy taverns on the map: when it's fullest.
+        entry ? busiestLine(entry) : null,
         (() => { const a = entry && PLACE_KINDS.includes(entry.kind) ? aroundNow(entry) : null; return a?.list.length ? el('p', { class: 'small pin-here' }, `🕰 Here now (${hhmm(a.m)}): `, a.list.map(({ npc, place }, i) => [i ? ', ' : '', link(npc.entry), place.id === entry.id ? '' : el('span', { class: 'muted' }, ` at ${place.name}`)])) : null; })(),
         el('div', { class: 'btnrow' },
           entry ? el('a', { class: 'btn small primary', href: `#world/e/${entry.id}` }, 'Open page') : null,
