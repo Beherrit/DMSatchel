@@ -564,6 +564,13 @@ to the log at the bottom.
 287. [x] **Routine in the cast list's search.** Ctrl+K finds NPCs by where their routine puts them ("the Forge").
 288. [x] **Holiday prices.** Taverns charge a little more on holidays, said on the menu.
 289. [x] **A full sweep.** Run the whole browser suite after #276–#288 and note it.
+290. [ ] **Holiday prices on the shelf.** Shops that open on a holiday eve mark up festive goods (candles, ale, sweets)
+    on the day before a holiday.
+291. [ ] **A tavern's busiest hour.** A tavern's page says when it's busiest, from the regulars' routines.
+292. [ ] **Who knows whom.** An NPC's page lists the other NPCs whose routines put them in the same places at the
+    same times, as likely acquaintances.
+293. [ ] **Last seen.** An NPC's page says where they were last seen by the party: the last session log that
+    mentioned them, and the place it was set in.
 
 ## Ideas parking lot
 
