@@ -544,7 +544,7 @@ to the log at the bottom.
 271. [x] **Bounty hunters' board.** The party page's Wanted card says where each wanted NPC is usually found by day.
 272. [x] **Settle every tab.** Session prep can settle all the party's tavern tabs from the treasury in one go.
 273. [x] **A gift from the party.** GMs can give an NPC something from the treasury, noted as from the party.
-274. [ ] **Gifts from the party in the recap.** The recap's Dealings section includes gifts given from the treasury.
+274. [x] **Gifts from the party in the recap.** The recap's Dealings section includes gifts given from the treasury.
 275. [ ] **A full sweep and tidy.** Run the whole browser suite, fix anything it turns up, and note it in the log.
 276. [ ] **Who gave the most.** The party page lists each character's gifts to NPCs as a count, for the table's
     amusement.
@@ -831,3 +831,4 @@ to the log at the bottom.
 - Bounty hunters' board: each name on the party page's Wanted card now says where they're usually found by day, from their routine: "Usually by day: the docks".
 - Settle every tab: when the party has tabs running, session prep's "Waiting on you" card now offers "Settle all 2 tabs from the treasury (4 sp)". It writes one treasury line per tavern ("Settled the tab at The Crow (2 orders)") and clears each tab, and the toast says what was settled and anything that wasn't.
 - A gift from the party: GMs now have "Give from the treasury…" on an NPC's gifts. It gives an item the treasury holds and/or coin, with what it's for. The treasury's ledger notes it ("Given to Mother Ide (for her help)"), and the NPC remembers it as "from The party", marked 💝 when it's something they wanted. It can't give more than the treasury holds. It shows the section even before any gift has been given.
+- Gifts from the party in the recap: the recap's Dealings section already picked up gifts given from the treasury, since they're kept on the NPC like any other; it now writes them as "The party gave [[Mother Ide]] 5 gp" instead of a broken link to an entry called "The party". Unit tested.

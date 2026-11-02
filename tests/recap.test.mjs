@@ -65,11 +65,11 @@ test('recap: gifts and loans since the last session', async () => {
   const old = '2026-01-01T00:00:00.000Z', fresh = '2026-03-01T00:00:00.000Z';
   const entries = [
     { id: 's1', kind: 'session', name: 'Session 1', fields: { number: '1' }, created_at: '2026-02-01T00:00:00.000Z' },
-    { id: 'n', kind: 'npc', name: 'Mother Ide', created_at: old, fields: { gifts: JSON.stringify([{ at: old, by: 'Ann', item: 'Rope', qty: 1 }, { at: fresh, by: 'Ann', item: 'Potion of healing', qty: 2, note: 'to win her over' }]) } },
+    { id: 'n', kind: 'npc', name: 'Mother Ide', created_at: old, fields: { gifts: JSON.stringify([{ at: old, by: 'Ann', item: 'Rope', qty: 1 }, { at: fresh, by: 'Ann', item: 'Potion of healing', qty: 2, note: 'to win her over' }, { at: fresh, by: 'The party', cp: 500 }]) } },
     { id: 'h', kind: 'npc', name: 'Hidden', visibility: 'gm', created_at: old, fields: { gifts: JSON.stringify([{ at: fresh, by: 'Bo', cp: 500 }]) } },
     { id: 'a', kind: 'character', name: 'Ann', created_at: old, fields: { play: JSON.stringify({ log: [{ at: fresh, text: 'Lent 10 gp to Bo (for the boat)' }, { at: old, text: 'Lent 1 gp to Cy' }, { at: fresh, text: 'Bought rope' }] }) } },
   ];
   const r = buildRecap({ entries, activity: [], ledger: [], standings: { log: [], clocks: [] } });
   const sec = r.body.split('## Dealings\n')[1]?.split('\n## ')[0] || '';
-  assert.equal(sec.trim(), '- [[Ann]] gave [[Mother Ide]] 2 × Potion of healing (to win her over)\n- [[Ann]] lent 10 gp to Bo (for the boat)');
+  assert.equal(sec.trim(), '- [[Ann]] gave [[Mother Ide]] 2 × Potion of healing (to win her over)\n- The party gave [[Mother Ide]] 5 gp\n- [[Ann]] lent 10 gp to Bo (for the boat)');
 });

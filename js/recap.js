@@ -55,7 +55,7 @@ export function buildRecap(d) {
 
   // Dealings: gifts given to NPCs (from the NPCs' lists) and loans between characters (from the lenders' sheets).
   const gifts = [];
-  for (const e of entries) if (e.kind === 'npc' && open(e)) for (const g of readGifts(e.fields?.gifts)) if (after(g.at, since)) gifts.push(`- [[${g.by}]] gave ${ref(e)} ${giftWhat(g)}${g.note ? ` (${short(g.note, 80)})` : ''}`);
+  for (const e of entries) if (e.kind === 'npc' && open(e)) for (const g of readGifts(e.fields?.gifts)) if (after(g.at, since)) gifts.push(`- ${/^the party$/i.test(g.by.trim()) ? 'The party' : `[[${g.by}]]`} gave ${ref(e)} ${giftWhat(g)}${g.note ? ` (${short(g.note, 80)})` : ''}`);
   const loans = [];
   for (const e of entries) if (e.kind === 'character' && open(e)) { let p = {}; try { p = JSON.parse(e.fields?.play || '{}') || {}; } catch { p = {}; } for (const l of readLog(p)) if (after(l.at, since) && /^Lent /.test(l.text)) loans.push(`- ${ref(e)} lent ${l.text.slice(5)}`); }
   add('Dealings', [...gifts, ...loans]);
