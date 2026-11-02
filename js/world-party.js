@@ -13,6 +13,7 @@ import { addTrade } from './shop-trade.js';
 import { partyDebts } from './debts.js';
 import { readTab, tabTotal } from './tab.js';
 import { openBounties } from './bounty.js';
+import { dayOf } from './routine.js';
 import { shopStanding, sellWithStanding } from './standing-price.js';
 import { giveItem } from './handover.js';
 import { progressBadge } from './world-objectives.js';
@@ -321,7 +322,11 @@ function bountiesCard() {
   const list = openBounties(worldEntries());
   if (!list.length) return null;
   return el('section', { class: 'card party-bounties' }, el('h3', {}, 'Wanted'),
-    el('ul', { class: 'plain' }, list.slice(0, 10).map((b) => el('li', {}, link(b.entry), `: ${b.text}`, b.by ? el('span', { class: 'muted small' }, ` (from ${b.by})`) : null))));
+    el('ul', { class: 'plain' }, list.slice(0, 10).map((b) => {
+      // Bounty hunters' board: where they're usually found by day, from their routine.
+      const d = b.entry.fields?.routine ? dayOf(b.entry.fields.routine) : [], by = d[0]?.place || d[1]?.place;
+      return el('li', {}, link(b.entry), `: ${b.text}`, b.by ? el('span', { class: 'muted small' }, ` (from ${b.by})`) : null, by ? el('div', { class: 'small' }, `Usually by day: ${by}`) : null);
+    })));
 }
 
 export async function viewParty(rerender) {
