@@ -553,7 +553,7 @@ to the log at the bottom.
 279. [x] **Who's owed wages, at a glance.** The party page's at-a-glance table notes hirelings owed wages under it.
 280. [x] **Gifts given, on the party sheet.** The GM's party sheet notes each character's gift count.
 281. [x] **Tabs in the recap.** The recap's Dealings section notes tabs run up and settled since the last session.
-282. [ ] **Coming up: holidays shut the shops.** A player's "Coming up" card notes that the shops will be shut on
+282. [x] **Coming up: holidays shut the shops.** A player's "Coming up" card notes that the shops will be shut on
     an upcoming holiday.
 283. [ ] **Wages in the recap.** The recap's Dealings section notes wages paid and owed since the last session.
 284. [ ] **Who's around on the front page.** For players, the world's front page notes who's about where the party
@@ -849,3 +849,4 @@ to the log at the bottom.
 - Who's owed wages, at a glance: under the party page's at-a-glance table, GMs now see "Owed wages: Gil 3 sp" when the treasury couldn't pay a hireling in full, with each hireling linked.
 - Gifts given, on the party sheet: the GM's party sheet now notes how many gifts each character has given NPCs, under their name: "Gifts given: 2".
 - Tabs in the recap: the recap's Dealings section now notes what went on a tavern tab since the last session ("On the tab at [[The Bell]]: 3 sp 2 cp (Bo, Ann)") and tabs settled from the treasury since ("Settled the tab at The Crow (2 orders): 3 sp 2 cp from the treasury"). Unit tested.
+- Coming up: holidays shut the shops: a player's "Coming up" card now says "🎉 Bridge Day (the shops are shut) · in 2 days", so they can shop beforehand.
