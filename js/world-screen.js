@@ -9,6 +9,7 @@ import { coinText } from './economy.js';
 import { screenRows } from './party-screen.js';
 import { lbs } from './weights.js';
 import { partyDebts } from './debts.js';
+import { giftCounts } from './gifts.js';
 
 const ACTIVE = (e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
 
@@ -24,6 +25,8 @@ export function viewScreen() {
     return { id: e.id, name: e.name, about: [f.species, f.class, f.level && `level ${f.level}`, f.player && `(${f.player})`].filter(Boolean).join(' '), play: playOf(e), stats: ch?.stats || null, str: ch?.abilities?.scores?.Str ?? null, size: ch?.size || 'Medium' };
   }));
   const byId = new Map(chars.map((e) => [e.id, e]));
+  // Gifts given, on the party sheet: how many gifts each character has given NPCs.
+  const gifts = new Map(giftCounts(worldEntries().filter((x) => x.kind === 'npc' && x.fields?.gifts).map((x) => ({ entry: x, gifts: x.fields.gifts }))).map((g) => [g.by.toLowerCase(), g.count]));
   const debts = partyDebts(chars.map((e) => ({ id: e.id, name: e.name, play: playOf(e) })));
   // Sort the party sheet: by name, hit points (as a share of the maximum, the lowest first) or load (the heaviest first).
   const sortBy = el('select', { id: 'screen-sort', 'aria-label': 'Sort by' }, [['name', 'name'], ['hp', 'hit points (lowest first)'], ['load', 'load (heaviest first)']].map(([v, l]) => el('option', { value: v }, l)));
@@ -40,6 +43,7 @@ export function viewScreen() {
     debtsLine);
   function rowOf(r) { return el('tr', {},
         el('th', { scope: 'row' }, link(byId.get(r.id)), r.about ? el('div', { class: 'small muted' }, r.about) : null,
+          gifts.get(r.name.toLowerCase()) ? el('div', { class: 'small muted' }, `Gifts given: ${gifts.get(r.name.toLowerCase())}`) : null,
           r.exhaustion || r.conditions.length ? el('div', { class: 'small screen-worry' }, [r.exhaustion ? `Exhaustion ${r.exhaustion}` : '', ...r.conditions].filter(Boolean).join(', ')) : null),
         el('td', { class: 'num' }, r.max ? `${r.hp} / ${r.max}` : r.hp || '—', r.temp ? el('div', { class: 'small muted' }, `+${r.temp} temp`) : null),
         el('td', { class: 'num' }, r.ac ?? '—'),
