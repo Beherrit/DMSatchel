@@ -544,6 +544,11 @@ to the log at the bottom.
 271. [x] **Bounty hunters' board.** The party page's Wanted card says where each wanted NPC is usually found by day.
 272. [x] **Settle every tab.** Session prep can settle all the party's tavern tabs from the treasury in one go.
 273. [x] **A gift from the party.** GMs can give an NPC something from the treasury, noted as from the party.
+274. [ ] **Gifts from the party in the recap.** The recap's Dealings section includes gifts given from the treasury.
+275. [ ] **A full sweep and tidy.** Run the whole browser suite, fix anything it turns up, and note it in the log.
+276. [ ] **Who gave the most.** The party page lists each character's gifts to NPCs as a count, for the table's
+    amusement.
+277. [ ] **Last orders on the clock.** The world clock card notes when the taverns call last orders (half past one).
 
 ## Ideas parking lot
 
