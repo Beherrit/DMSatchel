@@ -13,7 +13,7 @@ import { coinText, GOODS, parseCoins } from './economy.js';
 import { stockItems, sellTo, HAGGLES, readHaggle, haggleFor, setHaggle, withHaggle } from './purchase.js';
 import { inventoryLines } from './handover.js';
 import { readList, listFirst } from './shopping.js';
-import { shopOpen, holidayToday, shutText } from './shop-hours.js';
+import { shopOpen, holidayToday, shutText, holidayTomorrow, evePrice, isFestive } from './shop-hours.js';
 import { cleanCalendar } from './calendar.js';
 import { shopStanding, sellWithStanding } from './standing-price.js';
 
@@ -105,6 +105,8 @@ function hagglePart(shop, chars, rerender) {
 }
 
 function buyPart(shop, stock, chars, rerender) {
+  // Holiday prices on the shelf: the day before a holiday, festive goods cost a quarter more.
+  const eve = holidayTomorrow(cleanCalendar(world.info?.cal));
   // Friends get a discount (or enemies pay more): the party's open standing with whoever holds this place.
   const found = shopStanding(shop, worldEntries(), world.standings?.log);
   const stand = found && found.holder.visibility !== 'gm' && found.holder.status !== 'suggested' ? found : null;
@@ -128,7 +130,7 @@ function buyPart(shop, stock, chars, rerender) {
   const show = () => {
     const it = pick(), n = Math.max(1, Number(qty.value) || 1), c = chars.find((x) => x.id === who.value), have = playOf(world.entries.get(c.id) || c).cp || 0;
     qty.max = it.qty > 0 ? it.qty : 100;
-    const pct = haggleFor(shop.fields?.haggle, c.id), cost = withHaggle(withHaggle(it.cp * n, stand?.pct || 0), pct);
+    const pct = haggleFor(shop.fields?.haggle, c.id), cost = withHaggle(withHaggle(evePrice(it.cp * n, it.name, eve), stand?.pct || 0), pct);
     total.textContent = `${n} × ${it.name} costs ${coinText(cost)}${pct ? ` (haggled: ${pct < 0 ? `${-pct}% off` : `${pct}% more`})` : ''}. ${c.name} has ${coinText(have)}.`;
     total.classList.toggle('bad-line', cost > have);
     // Too heavy to carry it: say so before they pay (for Forge characters, whose Strength is known).
@@ -145,6 +147,7 @@ function buyPart(shop, stock, chars, rerender) {
       chars.length > 1 || isGm() ? [el('label', { for: 'buy-who' }, 'for'), who] : null,
       el('button', { class: 'btn small primary', type: 'submit' }, 'Buy')),
     total, heavy,
+    eve && stock.some((x) => isFestive(x.name)) ? el('p', { class: 'small eve-prices' }, `🎉 ${eve} tomorrow: candles, drink and sweets cost a quarter more today.`) : null,
     stand?.pct ? el('p', { class: 'small standing-price' }, stand.pct < 0 ? `Friends of ${stand.holder.name}: 10% off here.` : `${stand.holder.name} holds this place, and the party is not welcome: 10% more.`) : null,
     dc(shop) ? el('p', { class: 'muted small' }, `Haggle DC ${dc(shop)}: roll for it at the table, and a GM can grant the result for your next purchase here.`) : null);
   form.addEventListener('submit', async (ev) => {

@@ -32,3 +32,12 @@ test('closing time', async () => {
   assert.deepEqual(untilChange(inn, 60), { open: true, mins: 60 });
   assert.deepEqual(untilChange(shop, 600, 'Bridge Day'), { open: false, mins: null });
 });
+
+test('holiday prices on the shelf: the eve of a holiday', async () => {
+  const { holidayTomorrow, evePrice, isFestive } = await import('../js/shop-hours.js');
+  const { makeCalendar } = await import('../js/calendar.js');
+  const cal = { ...makeCalendar('seasons', 1040), month: 1, day: 4, holidays: [{ name: 'Bridge Day', month: 1, day: 5 }] };
+  assert.equal(holidayTomorrow(cal), 'Bridge Day'); assert.equal(holidayTomorrow({ ...cal, day: 5 }), ''); assert.equal(holidayTomorrow(null), '');
+  assert.ok(isFestive('Candle')); assert.ok(isFestive('Wine, common (pitcher)')); assert.ok(!isFestive('Rope'));
+  assert.equal(evePrice(100, 'Candle', 'Bridge Day'), 125); assert.equal(evePrice(100, 'Rope', 'Bridge Day'), 100); assert.equal(evePrice(100, 'Candle', ''), 100);
+});

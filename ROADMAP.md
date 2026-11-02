@@ -564,7 +564,7 @@ to the log at the bottom.
 287. [x] **Routine in the cast list's search.** Ctrl+K finds NPCs by where their routine puts them ("the Forge").
 288. [x] **Holiday prices.** Taverns charge a little more on holidays, said on the menu.
 289. [x] **A full sweep.** Run the whole browser suite after #276–#288 and note it.
-290. [ ] **Holiday prices on the shelf.** Shops that open on a holiday eve mark up festive goods (candles, ale, sweets)
+290. [x] **Holiday prices on the shelf.** Shops that open on a holiday eve mark up festive goods (candles, ale, sweets)
     on the day before a holiday.
 291. [ ] **A tavern's busiest hour.** A tavern's page says when it's busiest, from the regulars' routines.
 292. [ ] **Who knows whom.** An NPC's page lists the other NPCs whose routines put them in the same places at the
@@ -869,3 +869,4 @@ to the log at the bottom.
 - Routine in the search: Ctrl+K already searched every field, so typing "forge" finds NPCs whose routine mentions the Forge. It now also shows why: an NPC without a summary shows their routine as the hint ("Bramwell · Routine: By day: the Forge; otherwise: home").
 - Holiday prices: on a holiday, taverns charge a fifth more, rounded up to the copper. The menu says so ("🎉 Holiday prices today: a fifth more than the board says"), the Order list shows the day's prices, and the server charges the same for orders, tabs and the round on the house. The festival special keeps its own price. holidayPrice in js/menu.js unit tested; the server's price tested against PGlite.
 - A full sweep: the whole browser suite (307 tests) is clean after #276–#288, with the same harmless flags as the last sweep and no crashes.
+- Holiday prices on the shelf: the day before one of the world's holidays, shops charge a quarter more for festive goods (candles, ale, wine, mead, sweets, cakes, ribbons, flowers, lanterns, fine clothes…), rounded up to the copper. A shop that stocks any says so in its trade panel ("🎉 Bridge Day tomorrow: candles, drink and sweets cost a quarter more today."), the buy panel's price shows it, and the server charges the same. On the holiday itself the shops are shut, as before. holidayTomorrow, isFestive and evePrice in js/shop-hours.js unit tested; the server's price tested against PGlite.

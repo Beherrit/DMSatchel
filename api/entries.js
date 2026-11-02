@@ -44,7 +44,7 @@ import { addTrade } from '../js/shop-trade.js';
 import { addGift, giftWhat, wantsMatch } from '../js/gifts.js';
 import { addAsk } from '../js/shop-asks.js';
 import { addTab, readTab, tabTotal, splitTab } from '../js/tab.js';
-import { shopOpen, holidayToday } from '../js/shop-hours.js';
+import { shopOpen, holidayToday, holidayTomorrow, evePrice } from '../js/shop-hours.js';
 import { cleanCalendar } from '../js/calendar.js';
 import { shopStanding, sellWithStanding } from '../js/standing-price.js';
 import { coinText, GOODS } from '../js/economy.js';
@@ -474,6 +474,8 @@ export default route({
       if (!req.isGmHere && ch.owner_id !== req.gm.id) return fail(res, 403, 'You can only buy for your own character.');
       const r = buyFrom(shop.fields.stock, clip(b.item, 200), b.qty);
       if (r.error) return fail(res, 400, r.error);
+      // Holiday prices on the shelf: the day before a holiday, festive goods cost a quarter more.
+      r.cp = evePrice(r.cp, r.name, holidayTomorrow(cleanCalendar(req.world.cal)));
       let p = {}; try { p = JSON.parse(ch.fields?.play || '{}') || {}; } catch { p = {}; }
       if (!Number.isFinite(p.cp)) p.cp = Math.max(0, Math.round(Number(b.base?.cp) || 0));
       if (p.inventory === undefined) p.inventory = clip(b.base?.inventory, 15000);

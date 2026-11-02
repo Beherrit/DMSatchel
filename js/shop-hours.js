@@ -1,3 +1,4 @@
+import { toDays, fromDays } from './calendar.js';
 // Shops keep hours: by the world's clock (minutes after midnight), shops trade from 8 in the morning to 8 at night,
 // and taverns until 2 in the morning. Pure, so the page and the server share it.
 
@@ -34,3 +35,14 @@ export function untilChange(shop, minutes, holiday = '') {
   if (o.open) return { open: true, mins: to > 1440 && m < to - 1440 ? to - 1440 - m : to - m };
   return { open: false, mins: m < from ? from - m : 1440 - m + from };
 }
+
+// Holiday prices on the shelf: tomorrow's holiday (the day before it, festive goods cost more), or ''.
+export function holidayTomorrow(cal) {
+  if (!cal || !Array.isArray(cal.holidays) || !cal.holidays.length || !Array.isArray(cal.months)) return '';
+  try { const t = fromDays(cal, toDays(cal, { year: cal.year, month: cal.month, day: cal.day }) + 1); return cal.holidays.find((h) => h.month === t.month && h.day === t.day)?.name || ''; } catch { return ''; }
+}
+export const EVE_MARKUP = 25;
+const FESTIVE = /\b(candles?|ale|wine|mead|beer|cider|brandy|spirits?|sweets?|cakes?|honey|ribbons?|flowers?|garlands?|lanterns?|fireworks?|incense|perfume|fine clothes|costumes?)\b/i;
+export const isFestive = (name) => FESTIVE.test(String(name || ''));
+// The price of one thing on the eve of a holiday (a quarter more for festive goods), or as it was.
+export const evePrice = (cp, name, eve) => (eve && isFestive(name) ? Math.ceil((Number(cp) || 0) * (100 + EVE_MARKUP) / 100) : Number(cp) || 0);
