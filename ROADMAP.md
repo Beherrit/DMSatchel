@@ -571,7 +571,7 @@ to the log at the bottom.
     same times, as likely acquaintances.
 293. [x] **Last seen.** An NPC's page says where they were last seen by the party: the last session log that
     mentioned them, and the place it was set in.
-294. [ ] **Last seen on the cast list.** The printable Who's who says where each NPC was last seen, not just when.
+294. [x] **Last seen on the cast list.** The printable Who's who says where each NPC was last seen, not just when.
 295. [ ] **Acquaintances in the relationship web.** The relationship web can show likely acquaintances (from routines)
     as faint dotted lines, toggled on.
 296. [ ] **Busy taverns on the map.** A tavern's map pin notes its busiest hour.
@@ -879,3 +879,4 @@ to the log at the bottom.
 - A tavern's busiest hour: a tavern's page now says when it's fullest, from the regulars' routines over its opening hours: "🍺 Busiest around 17:00 (2 regulars in)." The earliest hour wins a tie, and nothing shows for fewer than two regulars. busiestHour in js/routine.js unit tested.
 - Who knows whom: an NPC's page now lists the others whose routines put them in the same place at the same hours, two hours a day or more, as likely acquaintances: "Often crosses paths with: Tom (at The Forge, 10 h a day), Mags (at The Bell, 2 h a day)". Only places the world knows count (not "home"), and it shows only NPCs the viewer can see. crossPaths in js/routine.js unit tested.
 - Last seen: an NPC's page already said which session the party last met them in; it now says where too: "👁 Last seen in Session 2 (the latest session), at The Bell". The place comes from that session's log: of the places it mentions or links, the NPC's own place (then the places around it, nearest first), else the first one named. sceneOf in js/appearances.js unit tested.
+- Last seen on the cast list: the printable Who's who now says where each NPC was last seen, not just when: "Met in 1 session · last in Session 1, at The Bell". It's read from that session's log, the same way as on the NPC's page.

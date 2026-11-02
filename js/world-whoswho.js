@@ -11,6 +11,8 @@ import { ageOf, ageText } from './birthdays.js';
 import { worldCalendar } from './world-calendar.js';
 import { dayOf } from './routine.js';
 import { isHired } from './hirelings.js';
+import { sceneOf } from './appearances.js';
+import { PLACE_KINDS } from './world-schema.js';
 
 // Routines on the cast list: where they're usually found by day (morning, else afternoon), from their routine.
 const usually = (e) => { if (isHired(e)) return 'Travelling with the party'; const d = e.fields?.routine ? dayOf(e.fields.routine) : []; const by = d[0]?.place || d[1]?.place; return by ? `Usually by day: ${by}` : ''; };
@@ -33,6 +35,6 @@ export function viewWhosWho() {
           el('div', { class: 'small muted' }, [f.role, ageOf(worldCalendar(), e) ? ageText(ageOf(worldCalendar(), e)) : '', where?.name].filter(Boolean).join(' · ')),
           usually(e) ? el('div', { class: 'small cast-where' }, usually(e)) : null,
           line(e) ? el('p', { class: 'small' }, line(e)) : null,
-          el('div', { class: 'small muted' }, `Met in ${count} session${count === 1 ? '' : 's'} · last in `, link(last))));
+          el('div', { class: 'small muted' }, `Met in ${count} session${count === 1 ? '' : 's'} · last in `, link(last), (() => { const at = sceneOf(last, mentions, getEntry, PLACE_KINDS, e); return at ? [', at ', link(at)] : null; })())));
     })));
 }
