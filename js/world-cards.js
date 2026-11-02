@@ -6,6 +6,7 @@ import { worldEntries, getEntry, descendantsOf, byName, notice, link } from './w
 import { towards } from './attitudes.js';
 import { stripMarks } from './rich.js';
 import { sayOf } from './say.js';
+import { readGifts, giftWhat } from './gifts.js';
 
 const plain = (t) => stripMarks(t).replace(/\s+/g, ' ').trim();
 const cut = (t, n) => { const s = plain(t); return s.length > n ? `${s.slice(0, n - 1)}…` : s; };
@@ -25,6 +26,8 @@ export function npcCard(e, { gm = isGm(), onRemove } = {}) {
     row('Looks', f.appearance, 120), row('Voice', f.voice, 110), row('Manner', f.personality, 130), row('Wants', f.wants, 130),
     statLine(e) ? el('p', { class: 'npc-card-stats' }, cut(statLine(e), 140)) : null,
     att.length ? el('p', { class: 'small' }, el('strong', {}, 'Feels about: '), att.map((x) => `${x.character.name} ${x.a.toLowerCase()}`).join(', ')) : null,
+    // Gifts in the NPC's card: the last thing the party gave them (they'll remember it).
+    (() => { const g = readGifts(f.gifts).at(-1); return g ? el('p', { class: 'small npc-card-gift' }, el('strong', {}, 'Last gift: '), `${giftWhat(g)} from ${g.by}`, g.wanted ? ' (something they wanted)' : '') : null; })(),
     gm && e.secret ? el('p', { class: 'npc-card-secret' }, el('strong', {}, 'Secret: '), cut(e.secret, 160)) : null);
 }
 
