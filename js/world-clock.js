@@ -8,7 +8,8 @@ import { readClock, LIGHTS, STEPS, partOfDay, hhmm, leftText, fuelFor, lightName
 import { changePlay } from './sheet-ui.js';
 import { takeItem } from './handover.js';
 import { outAndAbout } from './world-routine.js';
-import { formatDate, today } from './calendar.js';
+import { formatDate, today, cleanCalendar } from './calendar.js';
+import { holidayToday } from './shop-hours.js';
 
 export function clockCard() {
   if (!isMember()) return null;
@@ -62,6 +63,8 @@ export function clockCard() {
     setKids(box,
       el('h3', { id: 'clock-h' }, 'Time and light'),
       el('p', { class: 'clock-now' }, el('strong', {}, hhmm(c.minutes)), ` · ${partOfDay(c.minutes)}`),
+      // Holidays on the clock: a holiday shuts the shops (the taverns stay open).
+      (() => { const h = holidayToday(cleanCalendar(world.info?.cal)); return h ? el('p', { class: 'small clock-holiday' }, `🎉 ${h}: the shops are shut today; the taverns are open.`) : null; })(),
       // Last orders on the clock: late at night, when the world's taverns call last orders and shut.
       (() => {
         const m = c.minutes % 1440, taverns = worldEntries().some((e) => e.kind === 'location' && e.fields?.type === 'Tavern');
