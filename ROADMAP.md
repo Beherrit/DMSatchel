@@ -571,6 +571,12 @@ to the log at the bottom.
     same times, as likely acquaintances.
 293. [x] **Last seen.** An NPC's page says where they were last seen by the party: the last session log that
     mentioned them, and the place it was set in.
+294. [ ] **Last seen on the cast list.** The printable Who's who says where each NPC was last seen, not just when.
+295. [ ] **Acquaintances in the relationship web.** The relationship web can show likely acquaintances (from routines)
+    as faint dotted lines, toggled on.
+296. [ ] **Busy taverns on the map.** A tavern's map pin notes its busiest hour.
+297. [ ] **Eve of a holiday on the clock.** The day before a holiday, the clock card says so and that festive goods
+    cost more today.
 
 ## Ideas parking lot
 
