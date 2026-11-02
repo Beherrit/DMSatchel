@@ -62,6 +62,12 @@ export function clockCard() {
     setKids(box,
       el('h3', { id: 'clock-h' }, 'Time and light'),
       el('p', { class: 'clock-now' }, el('strong', {}, hhmm(c.minutes)), ` · ${partOfDay(c.minutes)}`),
+      // Last orders on the clock: late at night, when the world's taverns call last orders and shut.
+      (() => {
+        const m = c.minutes % 1440, taverns = worldEntries().some((e) => e.kind === 'location' && e.fields?.type === 'Tavern');
+        if (!taverns || !(m >= 22 * 60 || m < 120)) return null;
+        return el('p', { class: 'small clock-last' }, '🍺 ', m >= 60 && m < 120 ? `Last orders at the taverns: they shut in ${leftText(120 - m)}.` : 'The taverns call last orders at 01:00 and shut at 02:00.');
+      })(),
       c.lights.length ? lights : el('p', { class: 'muted small' }, gm ? 'No lights burning. Light a torch when the party goes somewhere dark.' : 'No lights burning.'),
       tools);
   }

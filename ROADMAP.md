@@ -548,7 +548,7 @@ to the log at the bottom.
 275. [x] **A full sweep and tidy.** Run the whole browser suite, fix anything it turns up, and note it in the log.
 276. [x] **Who gave the most.** The party page lists each character's gifts to NPCs as a count, for the table's
     amusement.
-277. [ ] **Last orders on the clock.** The world clock card notes when the taverns call last orders (half past one).
+277. [x] **Last orders on the clock.** The world clock card notes when the taverns call last orders (half past one).
 
 ## Ideas parking lot
 
@@ -834,3 +834,4 @@ to the log at the bottom.
 - Gifts from the party in the recap: the recap's Dealings section already picked up gifts given from the treasury, since they're kept on the NPC like any other; it now writes them as "The party gave [[Mother Ide]] 5 gp" instead of a broken link to an entry called "The party". Unit tested.
 - A full sweep and tidy: the whole browser suite (297 tests) is clean after #254–#274, with the same harmless flags as the last sweep (deliberate error-path checks) and no crashes, so there was nothing to fix.
 - Who gave the most: the party page's side column now has "💝 Most generous", counting gifts to NPCs by giver ("Ann: 2 gifts · Bo: 1 gift · The party: 1 gift"), with characters linked. It counts only NPCs the viewer can see. giftCounts in js/gifts.js unit tested.
+- Last orders on the clock: late at night (from 22:00), when the world has taverns, the world clock card notes "🍺 The taverns call last orders at 01:00 and shut at 02:00." In the last hour it changes to "Last orders at the taverns: they shut in 40 min." That's 01:00 rather than the half past one first planned, to match the tavern pages' last orders.
