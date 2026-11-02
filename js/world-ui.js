@@ -10,7 +10,7 @@ import { openSignIn } from './signin.js';
 import { stripMarks } from './rich.js';
 import { newLines, playJson } from './play-log.js';
 import { sinceLastCard, comingUpCard } from './world-sincelast.js';
-import { routineNow, hereNow, regularsLine, routinePreview, mindingLine, townHoursBox, rollTownButton, laterLine } from './world-routine.js';
+import { routineNow, hereNow, regularsLine, routinePreview, mindingLine, townHoursBox, rollTownButton, laterLine, aroundPartyCard } from './world-routine.js';
 import { offerBounty } from './world-bounty.js';
 import { untilChange, holidayToday } from './shop-hours.js';
 import { leftText } from './clock.js';
@@ -245,6 +245,7 @@ function viewHome() {
     previouslyCard(),
     readingCard(),
     onThisDayCard(),
+    aroundPartyCard(),
     quoteCard(),
     // Open for newcomers (no earlier visit, or session zero not read yet), folded for everyone else.
     startHereCard({ fresh: !world.info?.prev_visit || world.info?.zero_read === false }),

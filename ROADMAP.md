@@ -556,7 +556,7 @@ to the log at the bottom.
 282. [x] **Coming up: holidays shut the shops.** A player's "Coming up" card notes that the shops will be shut on
     an upcoming holiday.
 283. [x] **Wages in the recap.** The recap's Dealings section notes wages paid and owed since the last session.
-284. [ ] **Who's around on the front page.** For players, the world's front page notes who's about where the party
+284. [x] **Who's around on the front page.** For players, the world's front page notes who's about where the party
     is right now.
 285. [ ] **A tidy for the party.** GMs can tidy every character's pack (merge duplicate lines) in one go.
 
@@ -851,3 +851,4 @@ to the log at the bottom.
 - Tabs in the recap: the recap's Dealings section now notes what went on a tavern tab since the last session ("On the tab at [[The Bell]]: 3 sp 2 cp (Bo, Ann)") and tabs settled from the treasury since ("Settled the tab at The Crow (2 orders): 3 sp 2 cp from the treasury"). Unit tested.
 - Coming up: holidays shut the shops: a player's "Coming up" card now says "🎉 Bridge Day (the shops are shut) · in 2 days", so they can shop beforehand.
 - Wages in the recap: the recap's Dealings section now notes wages paid from the treasury since the last session ("Wages: 3 days for Gil: 6 sp from the treasury", and owed wages paid off) and what's still owed now ("Still owed in wages: [[Gil]] 3 sp"). Unit tested.
+- Who's around on the front page: the world's front page now has "Around the party in Brindle (10:00)", listing who's about where the party is right now: "Bramwell at The Forge until 17:00". It shows only NPCs the viewer can see, and nothing while the party is on the road.

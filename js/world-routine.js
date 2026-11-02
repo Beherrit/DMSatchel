@@ -178,3 +178,12 @@ export function laterLine(place) {
   if (!list.length) return null;
   return el('p', { class: 'routine-later small' }, '🌙 Due in later: ', list.map(({ npc, at }, i) => [i ? ', ' : '', link(npc.entry), el('span', { class: 'muted' }, ` (about ${hhmm(at)})`)]));
 }
+
+// Who's around on the front page: who's about where the party is right now (as the viewer can see them).
+export function aroundPartyCard() {
+  const at = partyPlace();
+  const a = at ? aroundNow(at) : null;
+  if (!a?.list.length) return null;
+  return el('section', { class: 'card around-party' }, el('h3', {}, `Around the party in ${at.name} (${hhmm(a.m)})`),
+    el('p', { class: 'small' }, a.list.slice(0, 8).map(({ npc, place, until }, i) => [i ? ', ' : '', link(npc.entry), place.id === at.id ? null : el('span', { class: 'muted' }, ` at ${place.name}`), until !== null ? el('span', { class: 'muted' }, ` until ${hhmm(until)}`) : null]), a.list.length > 8 ? ` and ${a.list.length - 8} more` : ''));
+}
