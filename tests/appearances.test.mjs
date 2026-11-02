@@ -16,3 +16,13 @@ test('who could turn up again', () => {
   const people = [{ id: 'ann' }, { id: 'bo' }, { id: 'cy' }, { id: 'dee', tags: ['key'] }, { id: 'eve' }];
   assert.deepEqual(dueBack(people, seen).map((p) => p.id), ['ann', 'bo', 'dee']);
 });
+
+test('sceneOf: where a session was set', async () => {
+  const { sceneOf } = await import('../js/appearances.js');
+  const all = { t: { id: 't', kind: 'settlement', name: 'Brindle' }, b: { id: 'b', kind: 'location', name: 'The Bell', parent_id: 't' }, m: { id: 'm', kind: 'location', name: 'The Mill' }, n: { id: 'n', kind: 'npc', name: 'Ide', parent_id: 'b' } };
+  const idsIn = (text) => [...text.matchAll(/\[\[([^\]]+)\]\]/g)].map((x) => Object.values(all).find((e) => e.name === x[1])?.id).filter(Boolean);
+  const s = { body: 'At [[The Mill]] and [[Brindle]], then [[The Bell]] where [[Ide]] waited.' };
+  assert.equal(sceneOf(s, idsIn, (id) => all[id], ['settlement', 'location'], all.n).name, 'The Bell');
+  assert.equal(sceneOf(s, idsIn, (id) => all[id], ['settlement', 'location']).name, 'The Mill');
+  assert.equal(sceneOf({ body: 'Nowhere.' }, idsIn, (id) => all[id], ['location']), null);
+});

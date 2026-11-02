@@ -25,3 +25,15 @@ export function dueBack(people, seen, quiet = 2) {
   const unseen = people.filter((p) => !seen.has(p.id) && (p.tags || []).includes('key'));
   return [...back, ...unseen];
 }
+
+// Last seen: the place a session was set in, as far as its log says: of the places it mentions or links, the one the
+// NPC lives in (or inside) first, else the first one. idsIn(text) → ids; byId: id → entry; places: kinds that count.
+export function sceneOf(session, idsIn, byId, places, npc = null) {
+  if (!session) return null;
+  const ids = [...new Set([...idsIn([session.summary, session.body, ...Object.values(session.fields || {})].join('\n')), ...(session.links || []).map((l) => l.id)])];
+  const found = ids.map((id) => byId(id)).filter((e) => e && places.includes(e.kind));
+  if (!found.length) return null;
+  // Their own place first, then the places around it, nearest first.
+  for (let p = npc?.parent_id && byId(npc.parent_id), i = 0; p && i < 12; p = p.parent_id && byId(p.parent_id), i++) { const hit = found.find((f) => f.id === p.id); if (hit) return hit; }
+  return found[0];
+}

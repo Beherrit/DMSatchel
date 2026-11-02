@@ -569,7 +569,7 @@ to the log at the bottom.
 291. [x] **A tavern's busiest hour.** A tavern's page says when it's busiest, from the regulars' routines.
 292. [x] **Who knows whom.** An NPC's page lists the other NPCs whose routines put them in the same places at the
     same times, as likely acquaintances.
-293. [ ] **Last seen.** An NPC's page says where they were last seen by the party: the last session log that
+293. [x] **Last seen.** An NPC's page says where they were last seen by the party: the last session log that
     mentioned them, and the place it was set in.
 
 ## Ideas parking lot
@@ -872,3 +872,4 @@ to the log at the bottom.
 - Holiday prices on the shelf: the day before one of the world's holidays, shops charge a quarter more for festive goods (candles, ale, wine, mead, sweets, cakes, ribbons, flowers, lanterns, fine clothes…), rounded up to the copper. A shop that stocks any says so in its trade panel ("🎉 Bridge Day tomorrow: candles, drink and sweets cost a quarter more today."), the buy panel's price shows it, and the server charges the same. On the holiday itself the shops are shut, as before. holidayTomorrow, isFestive and evePrice in js/shop-hours.js unit tested; the server's price tested against PGlite.
 - A tavern's busiest hour: a tavern's page now says when it's fullest, from the regulars' routines over its opening hours: "🍺 Busiest around 17:00 (2 regulars in)." The earliest hour wins a tie, and nothing shows for fewer than two regulars. busiestHour in js/routine.js unit tested.
 - Who knows whom: an NPC's page now lists the others whose routines put them in the same place at the same hours, two hours a day or more, as likely acquaintances: "Often crosses paths with: Tom (at The Forge, 10 h a day), Mags (at The Bell, 2 h a day)". Only places the world knows count (not "home"), and it shows only NPCs the viewer can see. crossPaths in js/routine.js unit tested.
+- Last seen: an NPC's page already said which session the party last met them in; it now says where too: "👁 Last seen in Session 2 (the latest session), at The Bell". The place comes from that session's log: of the places it mentions or links, the NPC's own place (then the places around it, nearest first), else the first one named. sceneOf in js/appearances.js unit tested.

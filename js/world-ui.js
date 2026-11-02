@@ -52,7 +52,7 @@ import { itemCardButton, spellCardButton } from './world-playcards.js';
 import { mentionsCard } from './world-mentions.js';
 import { starButton, favoritesNav, followButton, followingNav } from './world-favorites.js';
 import { rewardCard } from './world-reward.js';
-import { appearances } from './appearances.js';
+import { appearances, sceneOf } from './appearances.js';
 import { withPronouns } from './world-profiles.js';
 import { noticesCard, drawNoticeBanner } from './world-notices.js';
 import { gallerySection } from './world-gallery.js';
@@ -858,8 +858,10 @@ function copyButton(e) {
 function lastSeenLine(e) {
   const seen = appearances(worldEntries(), mentions).get(e.id);
   if (!seen) return null;
+  // …and where: the place that session's log mentions (their own home first).
+  const at = sceneOf(seen.last, mentions, getEntry, PLACE_KINDS, e);
   return el('p', { class: 'muted small last-seen' }, '👁 Last seen in ', link(seen.last), seen.ago ? ` (${seen.ago} session${seen.ago === 1 ? '' : 's'} ago)` : ' (the latest session)',
-    seen.count > 1 ? ` · in ${seen.count} sessions` : '');
+    at ? [', at ', link(at)] : '', seen.count > 1 ? ` · in ${seen.count} sessions` : '');
 }
 
 // Undo a move to the bin: bring the entry back, then open it (or just redraw where we are).
