@@ -553,6 +553,12 @@ to the log at the bottom.
 279. [x] **Who's owed wages, at a glance.** The party page's at-a-glance table notes hirelings owed wages under it.
 280. [x] **Gifts given, on the party sheet.** The GM's party sheet notes each character's gift count.
 281. [x] **Tabs in the recap.** The recap's Dealings section notes tabs run up and settled since the last session.
+282. [ ] **Coming up: holidays shut the shops.** A player's "Coming up" card notes that the shops will be shut on
+    an upcoming holiday.
+283. [ ] **Wages in the recap.** The recap's Dealings section notes wages paid and owed since the last session.
+284. [ ] **Who's around on the front page.** For players, the world's front page notes who's about where the party
+    is right now.
+285. [ ] **A tidy for the party.** GMs can tidy every character's pack (merge duplicate lines) in one go.
 
 ## Ideas parking lot
 
