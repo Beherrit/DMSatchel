@@ -15,6 +15,7 @@ import { readTab, tabTotal } from './tab.js';
 import { openBounties } from './bounty.js';
 import { dayOf } from './routine.js';
 import { giftCounts } from './gifts.js';
+import { owedTo } from './hirelings.js';
 import { shopStanding, sellWithStanding } from './standing-price.js';
 import { giveItem } from './handover.js';
 import { progressBadge } from './world-objectives.js';
@@ -58,7 +59,9 @@ function glanceTable(active) {
   };
   draw();
   return el('section', { class: 'card party-glance' }, el('div', { class: 'entry-head' }, el('h3', {}, 'The party at a glance'), el('a', { class: 'btn small', href: '#world/screen' }, 'Party sheet for the screen')),
-    el('div', { class: 'table-wrap' }, el('table', { class: 'glance-table' }, el('thead', {}, head), body)));
+    el('div', { class: 'table-wrap' }, el('table', { class: 'glance-table' }, el('thead', {}, head), body)),
+    // Who's owed wages, at a glance: hirelings the treasury couldn't pay in full.
+    (() => { const owed = worldEntries().filter((e) => e.kind === 'npc' && owedTo(e)); return owed.length ? el('p', { class: 'small bad-line glance-owed' }, 'Owed wages: ', owed.map((e, i) => [i ? ', ' : '', link(e), ` ${coinText(owedTo(e))}`])) : null; })());
 }
 
 function members(chars) {

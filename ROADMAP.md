@@ -550,7 +550,7 @@ to the log at the bottom.
     amusement.
 277. [x] **Last orders on the clock.** The world clock card notes when the taverns call last orders (half past one).
 278. [x] **Holidays on the clock.** On a holiday, the world clock card says so, and that the shops are shut.
-279. [ ] **Who's owed wages, at a glance.** The party page's at-a-glance table notes hirelings owed wages under it.
+279. [x] **Who's owed wages, at a glance.** The party page's at-a-glance table notes hirelings owed wages under it.
 280. [ ] **Gifts given, on the party sheet.** The GM's party sheet notes each character's gift count.
 281. [ ] **Tabs in the recap.** The recap's Dealings section notes tabs run up and settled since the last session.
 
@@ -840,3 +840,4 @@ to the log at the bottom.
 - Who gave the most: the party page's side column now has "💝 Most generous", counting gifts to NPCs by giver ("Ann: 2 gifts · Bo: 1 gift · The party: 1 gift"), with characters linked. It counts only NPCs the viewer can see. giftCounts in js/gifts.js unit tested.
 - Last orders on the clock: late at night (from 22:00), when the world has taverns, the world clock card notes "🍺 The taverns call last orders at 01:00 and shut at 02:00." In the last hour it changes to "Last orders at the taverns: they shut in 40 min." That's 01:00 rather than the half past one first planned, to match the tavern pages' last orders.
 - Holidays on the clock: on one of the world calendar's holidays, the world clock card now says "🎉 Bridge Day: the shops are shut today; the taverns are open.", so everyone knows before trying to buy anything.
+- Who's owed wages, at a glance: under the party page's at-a-glance table, GMs now see "Owed wages: Gil 3 sp" when the treasury couldn't pay a hireling in full, with each hireling linked.
