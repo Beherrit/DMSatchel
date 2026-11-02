@@ -63,7 +63,11 @@ export function buildRecap(d) {
   const tabs = [];
   for (const e of entries) if (e.kind === 'location' && open(e)) { const fresh = readTab(e.fields?.tab).filter((x) => after(x.at, since)); if (fresh.length) tabs.push(`- On the tab at ${ref(e)}: ${coinText(tabTotal(fresh))} (${[...new Set(fresh.map((x) => x.who))].join(', ')})`); }
   for (const l of lines) if (/^Settled the tab at /.test(l.note || '')) tabs.push(`- ${l.note}: ${coinText(-Number(l.cp || 0))} from the treasury`);
-  add('Dealings', [...gifts, ...loans, ...tabs]);
+  // Wages: paid from the treasury since, and still owed to hirelings now.
+  const wages = lines.filter((l) => /^Wages(:| owed to )/.test(l.note || '')).map((l) => `- ${l.note}: ${coinText(-Number(l.cp || 0))} from the treasury`);
+  const stillOwed = entries.filter((e) => e.kind === 'npc' && open(e) && Number(e.fields?.owed) > 0);
+  if (stillOwed.length) wages.push(`- Still owed in wages: ${stillOwed.map((e) => `${ref(e)} ${coinText(Number(e.fields.owed))}`).join(', ')}`);
+  add('Dealings', [...gifts, ...loans, ...tabs, ...wages]);
 
   // The session in numbers: coin in and out, items found, in-world days gone by, quests completed.
   const earned = lines.reduce((t, l) => t + Math.max(0, Number(l.cp || 0)), 0), spent = lines.reduce((t, l) => t + Math.max(0, -Number(l.cp || 0)), 0);

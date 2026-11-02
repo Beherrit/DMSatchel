@@ -86,3 +86,13 @@ test('recap: tabs run up and settled since the last session', async () => {
   const sec = r.body.split('## Dealings\n')[1]?.split('\n## ')[0] || '';
   assert.equal(sec.trim(), '- On the tab at [[The Bell]]: 3 sp 2 cp (Bo, Ann)\n- Settled the tab at The Crow (2 orders): 3 sp 2 cp from the treasury');
 });
+
+test('recap: wages paid since, and still owed', async () => {
+  const { buildRecap } = await import('../js/recap.js');
+  const fresh = '2026-03-01T00:00:00.000Z';
+  const entries = [{ id: 's1', kind: 'session', name: 'Session 1', fields: { number: '1' }, created_at: '2026-02-01T00:00:00.000Z' }, { id: 'g', kind: 'npc', name: 'Gil', created_at: fresh, fields: { hired: 'yes', owed: '30' } }];
+  const ledger = [{ at: fresh, cp: -60, note: 'Wages: 3 days for Gil' }, { at: fresh, cp: -60, note: 'Wages owed to Mags' }];
+  const r = buildRecap({ entries, activity: [], ledger, standings: { log: [], clocks: [] } });
+  const sec = r.body.split('## Dealings\n')[1]?.split('\n## ')[0] || '';
+  assert.equal(sec.trim(), '- Wages: 3 days for Gil: 6 sp from the treasury\n- Wages owed to Mags: 6 sp from the treasury\n- Still owed in wages: [[Gil]] 3 sp');
+});
