@@ -3,12 +3,14 @@
 import { el, setKids } from './dom.js';
 import { KINDS, KIND_ORDER } from './world-schema.js';
 import { worldEntries, getEntry, link, kindLabel, mentions, notice } from './world-store.js';
+import { crossPaths } from './routine.js';
+import { routinePlace } from './world-routine.js';
 
 const NS = 'http://www.w3.org/2000/svg';
 const svgEl = (tag, attrs = {}) => { const e = document.createElementNS(NS, tag); for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v); return e; };
 const DEFAULT_KINDS = new Set(['region', 'settlement', 'location', 'faction', 'guild', 'clan', 'npc', 'character', 'deity', 'item', 'quest']);
 let shownKinds = new Set(DEFAULT_KINDS);
-let useMentions = false, useParents = true;
+let useMentions = false, useParents = true, useAcquaint = false;
 const MAX_NODES = 250;
 let truncated = 0;
 
@@ -27,6 +29,11 @@ function buildGraph(focusId, depth) {
     for (const l of e.links || []) add(e.id, l.id, l.label, l.secret ? 'secret' : 'link');
     if (useParents && e.parent_id) add(e.id, e.parent_id, 'in', 'parent');
     if (useMentions) for (const m of mentions(`${e.body}\n${e.summary}`)) add(e.id, m, 'mentions', 'mention');
+  }
+  // Acquaintances in the web: NPCs whose routines cross paths (faint dotted lines, each pair once).
+  if (useAcquaint) {
+    const npcs = all.filter((e) => e.kind === 'npc' && e.fields?.routine).map((e) => ({ id: e.id, name: e.name, routine: e.fields.routine }));
+    for (const n of npcs) for (const x of crossPaths(n, npcs, routinePlace)) if (n.id < x.other.id) add(n.id, x.other.id, `crosses paths at ${x.place.name}`, 'acquaint');
   }
   let keep = ids;
   if (focusId && ids.has(focusId)) {
@@ -176,7 +183,7 @@ export function viewWeb(focusId) {
     el('div', { class: 'panel-head row' }, el('div', {}, el('h2', {}, focus ? `${focus.name}’s web` : 'Relationship web'),
       el('p', {}, focus ? 'Everything connected to this entry. Click any name to see its connections.' : 'Who is allied with whom, who serves whom, and what sits where. Lines come from each entry’s connections.')),
       el('div', { class: 'btnrow' }, focus ? depthSel : null, focus ? el('a', { class: 'btn small', href: '#world/web' }, 'Whole world') : null, el('button', { class: 'btn small', type: 'button', onclick: () => fitView() }, 'Fit'))),
-    el('div', { class: 'controls web-opts' }, opt('“Located in” lines', () => useParents, (v) => { useParents = v; }), opt('[[Mentions]] in text', () => useMentions, (v) => { useMentions = v; })),
+    el('div', { class: 'controls web-opts' }, opt('“Located in” lines', () => useParents, (v) => { useParents = v; }), opt('[[Mentions]] in text', () => useMentions, (v) => { useMentions = v; }), opt('Acquaintances (from routines)', () => useAcquaint, (v) => { useAcquaint = v; })),
     legend, wrap, counts);
   if (!worldEntries().length) return notice('The web is empty', 'Add entries and connect them, and they’ll appear here.');
   requestAnimationFrame(rebuild);

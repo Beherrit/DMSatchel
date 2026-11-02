@@ -1758,3 +1758,4 @@ details.quest-group > summary .section-title { display: inline }
 .sort-btn:hover { text-decoration: underline }
 .poster-job.claimed { opacity: .65 } .poster-job.claimed .poster-headline { transform: rotate(-4deg); display: inline-block; border: 2px solid currentColor; padding: 0 6px }
 @media print { .screen-sort { display: none !important } }
+.edge.acquaint { stroke-dasharray: 2 4; opacity: .55 }

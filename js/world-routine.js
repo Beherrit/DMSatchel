@@ -206,3 +206,6 @@ export function crossPathsLine(npc) {
   if (!list.length) return null;
   return el('p', { class: 'small routine-cross' }, 'Often crosses paths with: ', list.map((x, i) => [i ? ', ' : '', link(x.other.entry), el('span', { class: 'muted' }, ` (at ${x.place.name}, ${x.hours} h a day)`)]));
 }
+
+// The place a routine names, for other views (the relationship web).
+export const routinePlace = (name) => placeOf(name);
