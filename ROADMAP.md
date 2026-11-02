@@ -542,7 +542,7 @@ to the log at the bottom.
 269. [x] **Gifts in the NPC's card.** The printable NPC card notes the last gift the party gave them.
 270. [x] **Who's due in, on the map.** A tavern's map pin notes who's due in later tonight.
 271. [x] **Bounty hunters' board.** The party page's Wanted card says where each wanted NPC is usually found by day.
-272. [ ] **Settle every tab.** Session prep can settle all the party's tavern tabs from the treasury in one go.
+272. [x] **Settle every tab.** Session prep can settle all the party's tavern tabs from the treasury in one go.
 273. [ ] **A gift from the party.** GMs can give an NPC something from the treasury, noted as from the party.
 
 ## Ideas parking lot
@@ -824,3 +824,4 @@ to the log at the bottom.
 - Gifts in the NPC's card: the printable NPC card now notes the last gift the party gave them, so the GM has it at hand when they turn up: "Last gift: Map from Ann (something they wanted)".
 - Who's due in, on the map: clicking a tavern's map pin now also says who's due in later tonight, the same line as on its page: "🌙 Due in later: Bramwell (about 17:00)".
 - Bounty hunters' board: each name on the party page's Wanted card now says where they're usually found by day, from their routine: "Usually by day: the docks".
+- Settle every tab: when the party has tabs running, session prep's "Waiting on you" card now offers "Settle all 2 tabs from the treasury (4 sp)". It writes one treasury line per tavern ("Settled the tab at The Crow (2 orders)") and clears each tab, and the toast says what was settled and anything that wasn't.

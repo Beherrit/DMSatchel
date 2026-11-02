@@ -5,7 +5,7 @@ import { el, toast, setKids } from './dom.js';
 import { recapButton } from './world-recap.js';
 import { attitudeLine } from './world-attitudes.js';
 import { api, isGm, session } from './api.js';
-import { world, worldEntries, getEntry, link, kindLabel, byName, descendantsOf, trail, whenTime, notice, richText, mentions } from './world-store.js';
+import { world, worldEntries, getEntry, link, kindLabel, byName, descendantsOf, trail, whenTime, notice, richText, mentions, patchEntry } from './world-store.js';
 import { PLACE_KINDS } from './world-schema.js';
 import { worldCalendar, todayText, datedEntries } from './world-calendar.js';
 import { toDays, fromDays, today, holidaysOn, formatDate } from './calendar.js';
@@ -56,12 +56,25 @@ function giftsCard() {
 function waitingCard(rerender) {
   const w = waitingOnGm(worldEntries());
   if (!w.count) return null;
+  // Settle every tab: all the party's tavern tabs from the treasury, a line each.
+  const settleAll = w.tabs.length ? el('button', { class: 'btn small', type: 'button', onclick: async () => {
+    settleAll.disabled = true; const done = [], failed = [];
+    for (const t of w.tabs) {
+      try {
+        await api('party', { method: 'POST', body: { cp: -t.cp, note: `Settled the tab at ${t.shop.name} (${t.orders} order${t.orders === 1 ? '' : 's'})` } });
+        await patchEntry(world.entries.get(t.shop.id) || t.shop, { fields: { tab: '' } }); done.push(t.shop.name);
+      } catch { failed.push(t.shop.name); }
+    }
+    toast([done.length ? `Settled: ${done.join(', ')} (${coinText(w.tabs.filter((t) => done.includes(t.shop.name)).reduce((s, t) => s + t.cp, 0))})` : '', failed.length ? `not settled: ${failed.join(', ')}` : ''].filter(Boolean).join(' · '), failed.length ? 'bad' : undefined);
+    rerender();
+  } }, `Settle ${w.tabs.length === 1 ? 'the tab' : `all ${w.tabs.length} tabs`} from the treasury (${coinText(w.tabs.reduce((s, t) => s + t.cp, 0))})`) : null;
   return el('section', { class: 'card prep-card waiting' }, el('h3', {}, '⏳ Waiting on you'),
     el('ul', { class: 'plain' },
       w.asks.map((a) => el('li', {}, link(a.shop), ` was asked for ${a.items.join(', ')}`)),
-      w.tabs.map((t) => el('li', {}, 'The party’s tab at ', link(t.shop), ` stands at ${coinText(t.cp)} (${t.orders} order${t.orders === 1 ? '' : 's'}): settle it on its page`)),
+      w.tabs.map((t) => el('li', {}, 'The party’s tab at ', link(t.shop), ` stands at ${coinText(t.cp)} (${t.orders} order${t.orders === 1 ? '' : 's'})`)),
       w.owed.map((o) => el('li', {}, link(o.entry), ` is owed ${coinText(o.cp)} in wages `, el('a', { class: 'small', href: '#world/party' }, '(pay it on the party page)'))),
-      w.bounties.map((b) => el('li', {}, `The bounty on `, link(b.entry), ` (${coinText(b.cp)}) hasn’t been paid `, el('button', { class: 'btn small', type: 'button', onclick: () => offerBounty({ fields: {} }, world.entries.get(b.entry.id) || b.entry) }, 'Claim it…')))));
+      w.bounties.map((b) => el('li', {}, `The bounty on `, link(b.entry), ` (${coinText(b.cp)}) hasn’t been paid `, el('button', { class: 'btn small', type: 'button', onclick: () => offerBounty({ fields: {} }, world.entries.get(b.entry.id) || b.entry) }, 'Claim it…')))),
+    settleAll ? el('div', { class: 'btnrow' }, settleAll) : null);
 }
 
 function worriesCard() {
