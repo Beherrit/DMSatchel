@@ -537,7 +537,7 @@ to the log at the bottom.
 265. [x] **A quiet night.** When the clock passes midnight, the toast says who's out and about at that hour.
 266. [x] **Wanted posters link the bounty.** A wanted poster's reward line links to the party page's Wanted card
     and says if the bounty has been claimed.
-267. [ ] **Sort the party sheet.** The GM's party sheet can be sorted by name, hit points or load before printing.
+267. [x] **Sort the party sheet.** The GM's party sheet can be sorted by name, hit points or load before printing.
 268. [ ] **A night out.** The tavern's page lists who's due in later tonight, from the regulars' routines.
 269. [ ] **Gifts in the NPC's card.** The printable NPC card notes the last gift the party gave them.
 
@@ -815,3 +815,4 @@ to the log at the bottom.
 - Bounties on the party page: the party page's side column now has a "Wanted" card of open bounties, richest first: "Black Jory: 500 gp, alive (from the Watch)". It covers only NPCs the viewer can see, and leaves out those already dead, captured or paid. openBounties in js/bounty.js unit tested.
 - A quiet night: when the GM moves the clock past midnight, the toast now adds who's still out at that hour, from their routines: "out at this hour: Cole (The Bell)" (up to four, then "and 2 more"). If everyone's routine puts them at home, it says "a quiet night: nobody is about". Hirelings count as wherever the party is.
 - Wanted posters link the bounty: on a town's job-board poster, an open bounty's reward now links to the party page, where the Wanted card is. Claimed bounties (captured, or dead and paid) stay on the poster for a while, stamped "CLAIMED", with the reward struck through and "(claimed)". wantedFor in js/poster.js takes a claimed option (unit tested); the party page's Wanted card and other callers still show only open bounties.
+- Sort the party sheet: the GM's party sheet now has "Sort by" above the table: name, hit points (the most hurt first, as a share of the maximum) or load (the heaviest first). It's left out of the printout, which prints in the chosen order.

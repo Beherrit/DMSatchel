@@ -1757,3 +1757,4 @@ details.quest-group > summary .section-title { display: inline }
 .sort-btn { background: none; border: 0; padding: 0; font: inherit; color: inherit; text-transform: inherit; letter-spacing: inherit; cursor: pointer }
 .sort-btn:hover { text-decoration: underline }
 .poster-job.claimed { opacity: .65 } .poster-job.claimed .poster-headline { transform: rotate(-4deg); display: inline-block; border: 2px solid currentColor; padding: 0 6px }
+@media print { .screen-sort { display: none !important } }
