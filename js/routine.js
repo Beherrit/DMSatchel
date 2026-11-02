@@ -141,3 +141,19 @@ export function townByHour(npcs, resolve, inside, hours = DAY_HOURS) {
 
 // The NPC's day: where the routine puts them at each of the day's hours → [{ label, m, place (text, or null) }].
 export const dayOf = (routine, hours = DAY_HOURS) => hours.map((h) => ({ ...h, place: whereAt(routine, h.m)?.place || null }));
+
+// A night out: who isn't here now but whose routine brings them here before `until` (minutes, may pass midnight),
+// checked every half hour. isHere(placeText) → bool. → [{ npc, at (minutes, when they arrive) }] by arrival.
+export function dueLater(npcs, isHere, from, until) {
+  const out = [];
+  const end = until > from ? until : until + 1440;
+  for (const n of npcs || []) {
+    const now = whereAt(n.routine, from);
+    if (now && isHere(now.place)) continue;
+    for (let t = Math.ceil((from + 1) / 30) * 30; t <= end; t += 30) {
+      const w = whereAt(n.routine, t % 1440);
+      if (w && isHere(w.place)) { out.push({ npc: n, at: t % 1440 }); break; }
+    }
+  }
+  return out.sort((a, b) => ((a.at - from + 1440) % 1440) - ((b.at - from + 1440) % 1440) || a.npc.name.localeCompare(b.npc.name));
+}

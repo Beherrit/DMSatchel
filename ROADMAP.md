@@ -538,7 +538,7 @@ to the log at the bottom.
 266. [x] **Wanted posters link the bounty.** A wanted poster's reward line links to the party page's Wanted card
     and says if the bounty has been claimed.
 267. [x] **Sort the party sheet.** The GM's party sheet can be sorted by name, hit points or load before printing.
-268. [ ] **A night out.** The tavern's page lists who's due in later tonight, from the regulars' routines.
+268. [x] **A night out.** The tavern's page lists who's due in later tonight, from the regulars' routines.
 269. [ ] **Gifts in the NPC's card.** The printable NPC card notes the last gift the party gave them.
 
 ## Ideas parking lot
@@ -816,3 +816,4 @@ to the log at the bottom.
 - A quiet night: when the GM moves the clock past midnight, the toast now adds who's still out at that hour, from their routines: "out at this hour: Cole (The Bell)" (up to four, then "and 2 more"). If everyone's routine puts them at home, it says "a quiet night: nobody is about". Hirelings count as wherever the party is.
 - Wanted posters link the bounty: on a town's job-board poster, an open bounty's reward now links to the party page, where the Wanted card is. Claimed bounties (captured, or dead and paid) stay on the poster for a while, stamped "CLAIMED", with the reward struck through and "(claimed)". wantedFor in js/poster.js takes a claimed option (unit tested); the party page's Wanted card and other callers still show only open bounties.
 - Sort the party sheet: the GM's party sheet now has "Sort by" above the table: name, hit points (the most hurt first, as a share of the maximum) or load (the heaviest first). It's left out of the printout, which prints in the chosen order.
+- A night out: a tavern's page now says who's due in later tonight, from the routines: "🌙 Due in later: Bramwell (about 17:00), Cole (about 21:00)". That's anyone not there now whose routine brings them in before it shuts at 2. Nothing shows while the tavern is shut, and hirelings, who are with the party, are left out. dueLater in js/routine.js unit tested.

@@ -84,3 +84,11 @@ test('dayOf: an NPC’s whole day', async () => {
   assert.deepEqual(dayOf('By day: the Forge; evenings and dusk: the Bell; otherwise: home').map((x) => `${x.label}:${x.place}`), ['Morning:the Forge', 'Afternoon:the Forge', 'Evening:the Bell', 'Night:home']);
   assert.deepEqual(dayOf('Mornings: the market').map((x) => x.place), ['the market', null, null, null]);
 });
+
+test('dueLater: who comes in later tonight', async () => {
+  const { dueLater } = await import('../js/routine.js');
+  const isBell = (p) => /bell/i.test(p);
+  const npcs = [{ id: 1, name: 'Bram', routine: 'By day: the Forge; evenings and dusk: the Bell; otherwise: home' }, { id: 2, name: 'Cole', routine: 'Nights: the Bell; otherwise: home' }, { id: 3, name: 'Here', routine: 'Always: the Bell' }, { id: 4, name: 'Ada', routine: 'Always: the Mill' }];
+  assert.deepEqual(dueLater(npcs, isBell, 15 * 60, 2 * 60).map((x) => `${x.npc.name}@${x.at}`), ['Bram@1020', 'Cole@1260']);
+  assert.deepEqual(dueLater(npcs, isBell, 22 * 60, 2 * 60).map((x) => x.npc.name), []);
+});

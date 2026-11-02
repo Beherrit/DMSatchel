@@ -2,7 +2,7 @@
 // place's page lists who is there now. Read from the clock the GMs move on (Time and light).
 import { el, setKids, toast } from './dom.js';
 import { world, worldEntries, link, findByName, getEntry, patchEntry } from './world-store.js';
-import { whereAt, aboutTown, regularsAt, unreadable, townByHour, rollRoutine, dayOf } from './routine.js';
+import { whereAt, aboutTown, regularsAt, unreadable, townByHour, rollRoutine, dayOf, dueLater } from './routine.js';
 import { makeRng, randomSeed } from './rng.js';
 import { isHired } from './hirelings.js';
 import { isGm, previewing } from './api.js';
@@ -166,4 +166,15 @@ export function outAndAbout(m) {
   return worldEntries().filter((x) => x.kind === 'npc' && nowRoutine(x) && !['Dead', 'Missing'].includes(x.fields?.status))
     .map((x) => { const w = whereAt(nowRoutine(x), m); const p = w && placeOf(w.place); return p ? { npc: x, place: p } : null; })
     .filter(Boolean).sort((a, b) => a.npc.name.localeCompare(b.npc.name));
+}
+
+// A night out: on a tavern's page, who's due in later tonight (before it shuts at 2), from their routines.
+export function laterLine(place) {
+  if (place.kind !== 'location' || place.fields?.type !== 'Tavern') return null;
+  const m = now();
+  if (m === null || (m >= 120 && m < 480)) return null; // shut: nobody's coming in
+  const npcs = worldEntries().filter((x) => x.kind === 'npc' && x.fields?.routine && !isHired(x) && !['Dead', 'Missing'].includes(x.fields?.status)).map((x) => ({ id: x.id, name: x.name, routine: x.fields.routine, entry: x }));
+  const list = dueLater(npcs, (name) => placeOf(name)?.id === place.id, m, 120);
+  if (!list.length) return null;
+  return el('p', { class: 'routine-later small' }, '🌙 Due in later: ', list.map(({ npc, at }, i) => [i ? ', ' : '', link(npc.entry), el('span', { class: 'muted' }, ` (about ${hhmm(at)})`)]));
 }
