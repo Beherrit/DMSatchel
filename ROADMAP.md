@@ -559,6 +559,11 @@ to the log at the bottom.
 284. [x] **Who's around on the front page.** For players, the world's front page notes who's about where the party
     is right now.
 285. [x] **A tidy for the party.** GMs can tidy every character's pack (merge duplicate lines) in one go.
+286. [ ] **Due in later, on the front page.** The front page's "Around the party" card notes who's due in later
+    tonight when the party is at a tavern.
+287. [ ] **Routine in the cast list's search.** Ctrl+K finds NPCs by where their routine puts them ("the Forge").
+288. [ ] **Holiday prices.** Taverns charge a little more on holidays, said on the menu.
+289. [ ] **A full sweep.** Run the whole browser suite after #276–#288 and note it.
 
 ## Ideas parking lot
 
