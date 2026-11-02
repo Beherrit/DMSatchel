@@ -577,6 +577,12 @@ to the log at the bottom.
 296. [x] **Busy taverns on the map.** A tavern's map pin notes its busiest hour.
 297. [x] **Eve of a holiday on the clock.** The day before a holiday, the clock card says so and that festive goods
     cost more today.
+298. [ ] **A full sweep.** Run the whole browser suite after #290–#297 and note it.
+299. [ ] **Who's in town for the festival.** On a holiday, a settlement's page notes it's a festival day and who's at
+    the taverns now.
+300. [ ] **The 300th: a changelog page.** A "What's new in the Satchel" page built from the README's feature list
+    (newest first), linked from the footer.
+301. [ ] **Last seen in session prep.** Session prep's "Who might turn up" says where each was last seen.
 
 ## Ideas parking lot
 
