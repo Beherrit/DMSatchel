@@ -92,3 +92,11 @@ test('dueLater: who comes in later tonight', async () => {
   assert.deepEqual(dueLater(npcs, isBell, 15 * 60, 2 * 60).map((x) => `${x.npc.name}@${x.at}`), ['Bram@1020', 'Cole@1260']);
   assert.deepEqual(dueLater(npcs, isBell, 22 * 60, 2 * 60).map((x) => x.npc.name), []);
 });
+
+test('busiestHour: when a tavern is fullest', async () => {
+  const { busiestHour } = await import('../js/routine.js');
+  const isBell = (p) => /bell/i.test(p);
+  const npcs = [{ routine: 'Evenings and dusk: the Bell' }, { routine: 'Evenings: the Bell; nights: home' }, { routine: 'Nights: the Bell' }, { routine: 'Always: the Mill' }];
+  assert.deepEqual(busiestHour(npcs, isBell), { m: 17 * 60, count: 2 });
+  assert.equal(busiestHour([{ routine: 'Always: the Mill' }], isBell), null);
+});

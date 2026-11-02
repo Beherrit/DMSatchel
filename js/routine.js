@@ -157,3 +157,14 @@ export function dueLater(npcs, isHere, from, until) {
   }
   return out.sort((a, b) => ((a.at - from + 1440) % 1440) - ((b.at - from + 1440) % 1440) || a.npc.name.localeCompare(b.npc.name));
 }
+
+// A tavern's busiest hour: of the hours it's open (8 in the morning to 2 at night), the one when most people's
+// routines put them here. → { m, count } or null when nobody comes.
+export function busiestHour(npcs, isHere, from = 8 * 60, to = 26 * 60) {
+  let best = null;
+  for (let t = from; t < to; t += 60) {
+    const m = t % 1440, count = (npcs || []).filter((n) => { const w = whereAt(n.routine, m); return w && isHere(w.place); }).length;
+    if (count && (!best || count > best.count)) best = { m, count };
+  }
+  return best;
+}

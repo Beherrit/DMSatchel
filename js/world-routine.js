@@ -2,7 +2,7 @@
 // place's page lists who is there now. Read from the clock the GMs move on (Time and light).
 import { el, setKids, toast } from './dom.js';
 import { world, worldEntries, link, findByName, getEntry, patchEntry } from './world-store.js';
-import { whereAt, aboutTown, regularsAt, unreadable, townByHour, rollRoutine, dayOf, dueLater } from './routine.js';
+import { whereAt, aboutTown, regularsAt, unreadable, townByHour, rollRoutine, dayOf, dueLater, busiestHour } from './routine.js';
 import { makeRng, randomSeed } from './rng.js';
 import { isHired } from './hirelings.js';
 import { isGm, previewing } from './api.js';
@@ -188,4 +188,12 @@ export function aroundPartyCard() {
   if (!a?.list.length && !later) return null;
   return el('section', { class: 'card around-party' }, el('h3', {}, `Around the party in ${at.name} (${hhmm(a.m)})`),
     a.list.length ? el('p', { class: 'small' }, a.list.slice(0, 8).map(({ npc, place, until }, i) => [i ? ', ' : '', link(npc.entry), place.id === at.id ? null : el('span', { class: 'muted' }, ` at ${place.name}`), until !== null ? el('span', { class: 'muted' }, ` until ${hhmm(until)}`) : null]), a.list.length > 8 ? ` and ${a.list.length - 8} more` : '') : el('p', { class: 'small muted' }, 'Nobody about just now.'), later);
+}
+
+// A tavern's busiest hour, from the regulars' routines (not hirelings, who are off with the party).
+export function busiestLine(place) {
+  if (place.kind !== 'location' || place.fields?.type !== 'Tavern') return null;
+  const npcs = worldEntries().filter((x) => x.kind === 'npc' && x.fields?.routine && !isHired(x) && !['Dead', 'Missing'].includes(x.fields?.status)).map((x) => ({ routine: x.fields.routine }));
+  const b = busiestHour(npcs, (name) => placeOf(name)?.id === place.id);
+  return b && b.count > 1 ? el('p', { class: 'small muted routine-busiest' }, `🍺 Busiest around ${hhmm(b.m)} (${b.count} regulars in).`) : null;
 }
