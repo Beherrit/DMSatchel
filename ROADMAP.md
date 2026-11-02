@@ -549,6 +549,10 @@ to the log at the bottom.
 276. [x] **Who gave the most.** The party page lists each character's gifts to NPCs as a count, for the table's
     amusement.
 277. [x] **Last orders on the clock.** The world clock card notes when the taverns call last orders (half past one).
+278. [ ] **Holidays on the clock.** On a holiday, the world clock card says so, and that the shops are shut.
+279. [ ] **Who's owed wages, at a glance.** The party page's at-a-glance table notes hirelings owed wages under it.
+280. [ ] **Gifts given, on the party sheet.** The GM's party sheet notes each character's gift count.
+281. [ ] **Tabs in the recap.** The recap's Dealings section notes tabs run up and settled since the last session.
 
 ## Ideas parking lot
 
