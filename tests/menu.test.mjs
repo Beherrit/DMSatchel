@@ -52,3 +52,8 @@ test('festivalSpecial: a holiday dish or drink, the same on page and server', as
   assert.deepEqual(menuItem(menu, f.name.toUpperCase(), f), { name: f.name, cp: f.cp });
   assert.equal(menuItem(menu, f.name), null);
 });
+
+test('holidayPrice: a fifth more on a holiday', async () => {
+  const { holidayPrice } = await import('../js/menu.js');
+  assert.equal(holidayPrice(4, 'Bridge Day'), 5); assert.equal(holidayPrice(10, 'Bridge Day'), 12); assert.equal(holidayPrice(4, ''), 4);
+});

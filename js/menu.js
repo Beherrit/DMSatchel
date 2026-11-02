@@ -91,3 +91,8 @@ export function festivalSpecial(menu, holiday, seed = '') {
   const cp = Math.max(1, Math.round((sort === 'dish' ? p.dish : p.ale) * 1.5));
   return { name: pattern.replace('{h}', holiday), cp, note: `for ${holiday}` };
 }
+
+// Holiday prices: on a holiday a tavern charges a fifth more (rounded up to the copper); the festival special is
+// already priced for the day.
+export const HOLIDAY_MARKUP = 20;
+export const holidayPrice = (cp, holiday) => (holiday ? Math.ceil((Number(cp) || 0) * (100 + HOLIDAY_MARKUP) / 100) : Math.round(Number(cp) || 0));

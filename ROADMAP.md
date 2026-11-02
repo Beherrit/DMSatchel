@@ -562,7 +562,7 @@ to the log at the bottom.
 286. [x] **Due in later, on the front page.** The front page's "Around the party" card notes who's due in later
     tonight when the party is at a tavern.
 287. [x] **Routine in the cast list's search.** Ctrl+K finds NPCs by where their routine puts them ("the Forge").
-288. [ ] **Holiday prices.** Taverns charge a little more on holidays, said on the menu.
+288. [x] **Holiday prices.** Taverns charge a little more on holidays, said on the menu.
 289. [ ] **A full sweep.** Run the whole browser suite after #276–#288 and note it.
 
 ## Ideas parking lot
@@ -860,3 +860,4 @@ to the log at the bottom.
 - A tidy for the party: when any character's pack has duplicate lines, the GM's at-a-glance card offers "Tidy 2 packs". It merges the duplicates on each of those sheets in one go, the same way the sheet's own "Tidy the pack" does, and says how many lines it merged.
 - Due in later, on the front page: when the party is at a tavern, the front page's "Around the party" card now adds who's due in later tonight ("🌙 Due in later: Bramwell (about 17:00)"). If nobody's there yet, it says "Nobody about just now."
 - Routine in the search: Ctrl+K already searched every field, so typing "forge" finds NPCs whose routine mentions the Forge. It now also shows why: an NPC without a summary shows their routine as the hint ("Bramwell · Routine: By day: the Forge; otherwise: home").
+- Holiday prices: on a holiday, taverns charge a fifth more, rounded up to the copper. The menu says so ("🎉 Holiday prices today: a fifth more than the board says"), the Order list shows the day's prices, and the server charges the same for orders, tabs and the round on the house. The festival special keeps its own price. holidayPrice in js/menu.js unit tested; the server's price tested against PGlite.
