@@ -44,3 +44,10 @@ export function giftsSince(npcs, since) {
   for (const n of npcs || []) for (const g of readGifts(n.gifts)) if (!since || String(g.at) > String(since)) out.push({ npc: n.entry, ...g });
   return out.sort((a, b) => String(b.at).localeCompare(String(a.at)));
 }
+
+// Who gave the most: gifts to NPCs counted by giver, most first. npcs: [{ entry, gifts json }] → [{ by, count }]
+export function giftCounts(npcs) {
+  const m = new Map();
+  for (const n of npcs || []) for (const g of readGifts(n.gifts)) { const k = g.by.trim(); if (k) m.set(k, (m.get(k) || 0) + 1); }
+  return [...m].map(([by, count]) => ({ by, count })).sort((a, b) => b.count - a.count || a.by.localeCompare(b.by));
+}

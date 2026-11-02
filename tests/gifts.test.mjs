@@ -40,3 +40,9 @@ test('giftsSince: gifts given since the last session', async () => {
   const list = giftsSince([{ entry: ide, gifts: addGift(addGift('', { by: 'Ann', item: 'Map', at: '2026-01-01T00:00:00Z' }), { by: 'Bo', item: 'Rope', at: '2026-03-01T00:00:00Z' }) }], '2026-02-01T00:00:00Z');
   assert.deepEqual(list.map((x) => `${x.by}:${x.item}`), ['Bo:Rope']);
 });
+
+test('giftCounts: who gave the most', async () => {
+  const { giftCounts, addGift } = await import('../js/gifts.js');
+  let j = ''; for (const by of ['Ann', 'Bo', 'Ann', 'The party']) j = addGift(j, { by, item: 'x' });
+  assert.deepEqual(giftCounts([{ entry: {}, gifts: j }, { entry: {}, gifts: addGift('', { by: 'Bo', cp: 5 }) }]), [{ by: 'Ann', count: 2 }, { by: 'Bo', count: 2 }, { by: 'The party', count: 1 }]);
+});
