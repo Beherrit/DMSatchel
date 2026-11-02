@@ -540,6 +540,10 @@ to the log at the bottom.
 267. [x] **Sort the party sheet.** The GM's party sheet can be sorted by name, hit points or load before printing.
 268. [x] **A night out.** The tavern's page lists who's due in later tonight, from the regulars' routines.
 269. [x] **Gifts in the NPC's card.** The printable NPC card notes the last gift the party gave them.
+270. [ ] **Who's due in, on the map.** A tavern's map pin notes who's due in later tonight.
+271. [ ] **Bounty hunters' board.** The party page's Wanted card says where each wanted NPC is usually found by day.
+272. [ ] **Settle every tab.** Session prep can settle all the party's tavern tabs from the treasury in one go.
+273. [ ] **A gift from the party.** GMs can give an NPC something from the treasury, noted as from the party.
 
 ## Ideas parking lot
 
