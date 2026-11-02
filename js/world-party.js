@@ -14,6 +14,7 @@ import { partyDebts } from './debts.js';
 import { readTab, tabTotal } from './tab.js';
 import { openBounties } from './bounty.js';
 import { dayOf } from './routine.js';
+import { giftCounts } from './gifts.js';
 import { shopStanding, sellWithStanding } from './standing-price.js';
 import { giveItem } from './handover.js';
 import { progressBadge } from './world-objectives.js';
@@ -329,6 +330,14 @@ function bountiesCard() {
     })));
 }
 
+// Who gave the most: gifts to NPCs counted by giver, for the table's amusement.
+function giftsTally() {
+  const list = giftCounts(worldEntries().filter((x) => x.kind === 'npc' && x.fields?.gifts).map((x) => ({ entry: x, gifts: x.fields.gifts })));
+  if (!list.length) return null;
+  return el('section', { class: 'card party-gifts' }, el('h3', {}, '💝 Most generous'),
+    el('ol', { class: 'plain' }, list.slice(0, 6).map((x) => { const c = worldEntries().find((e) => e.kind === 'character' && e.name.toLowerCase() === x.by.toLowerCase()); return el('li', {}, c ? link(c) : x.by, `: ${x.count} gift${x.count === 1 ? '' : 's'}`); })));
+}
+
 export async function viewParty(rerender) {
   const all = worldEntries();
   const chars = all.filter((e) => e.kind === 'character').sort(byName);
@@ -357,6 +366,6 @@ export async function viewParty(rerender) {
           journal.length ? el('ul', { class: 'entry-list' }, journal.slice(0, 8).map((j) => el('li', {}, link(j), el('span', { class: 'muted small' }, [j.fields?.character || j.owner || j.created_by, j.fields?.date || when(j.created_at)].filter(Boolean).join(' · ')))))
             : el('p', { class: 'muted' }, 'Nobody has written anything yet.'),
           journal.length > 8 ? el('a', { href: '#world/k/journal' }, `All ${journal.length} entries`) : null)),
-      el('aside', { class: 'party-side' }, treasuryBox, debtsCard(chars), bountiesCard(), payrollCard(), journeySection(), tableCard())));
+      el('aside', { class: 'party-side' }, treasuryBox, debtsCard(chars), bountiesCard(), giftsTally(), payrollCard(), journeySection(), tableCard())));
 }
 

@@ -545,8 +545,8 @@ to the log at the bottom.
 272. [x] **Settle every tab.** Session prep can settle all the party's tavern tabs from the treasury in one go.
 273. [x] **A gift from the party.** GMs can give an NPC something from the treasury, noted as from the party.
 274. [x] **Gifts from the party in the recap.** The recap's Dealings section includes gifts given from the treasury.
-275. [ ] **A full sweep and tidy.** Run the whole browser suite, fix anything it turns up, and note it in the log.
-276. [ ] **Who gave the most.** The party page lists each character's gifts to NPCs as a count, for the table's
+275. [x] **A full sweep and tidy.** Run the whole browser suite, fix anything it turns up, and note it in the log.
+276. [x] **Who gave the most.** The party page lists each character's gifts to NPCs as a count, for the table's
     amusement.
 277. [ ] **Last orders on the clock.** The world clock card notes when the taverns call last orders (half past one).
 
@@ -832,3 +832,5 @@ to the log at the bottom.
 - Settle every tab: when the party has tabs running, session prep's "Waiting on you" card now offers "Settle all 2 tabs from the treasury (4 sp)". It writes one treasury line per tavern ("Settled the tab at The Crow (2 orders)") and clears each tab, and the toast says what was settled and anything that wasn't.
 - A gift from the party: GMs now have "Give from the treasury…" on an NPC's gifts. It gives an item the treasury holds and/or coin, with what it's for. The treasury's ledger notes it ("Given to Mother Ide (for her help)"), and the NPC remembers it as "from The party", marked 💝 when it's something they wanted. It can't give more than the treasury holds. It shows the section even before any gift has been given.
 - Gifts from the party in the recap: the recap's Dealings section already picked up gifts given from the treasury, since they're kept on the NPC like any other; it now writes them as "The party gave [[Mother Ide]] 5 gp" instead of a broken link to an entry called "The party". Unit tested.
+- A full sweep and tidy: the whole browser suite (297 tests) is clean after #254–#274, with the same harmless flags as the last sweep (deliberate error-path checks) and no crashes, so there was nothing to fix.
+- Who gave the most: the party page's side column now has "💝 Most generous", counting gifts to NPCs by giver ("Ann: 2 gifts · Bo: 1 gift · The party: 1 gift"), with characters linked. It counts only NPCs the viewer can see. giftCounts in js/gifts.js unit tested.
