@@ -575,7 +575,7 @@ to the log at the bottom.
 295. [x] **Acquaintances in the relationship web.** The relationship web can show likely acquaintances (from routines)
     as faint dotted lines, toggled on.
 296. [x] **Busy taverns on the map.** A tavern's map pin notes its busiest hour.
-297. [ ] **Eve of a holiday on the clock.** The day before a holiday, the clock card says so and that festive goods
+297. [x] **Eve of a holiday on the clock.** The day before a holiday, the clock card says so and that festive goods
     cost more today.
 
 ## Ideas parking lot
@@ -882,3 +882,4 @@ to the log at the bottom.
 - Last seen on the cast list: the printable Who's who now says where each NPC was last seen, not just when: "Met in 1 session · last in Session 1, at The Bell". It's read from that session's log, the same way as on the NPC's page.
 - Acquaintances in the relationship web: the web has a new "Acquaintances (from routines)" option, off by default. Ticked, it draws a faint dotted line between NPCs whose routines put them in the same place at the same hours, two hours a day or more. Hovering a line shows "Bramwell — crosses paths at The Forge — Tom". It uses the same reading as the NPC pages' "Often crosses paths with".
 - Busy taverns on the map: a tavern's map pin now also says when it's busiest, the same line as its page: "🍺 Busiest around 17:00 (2 regulars in)."
+- Eve of a holiday on the clock: the day before one of the world's holidays, the clock card now says "🎉 Bridge Day tomorrow: festive goods cost a quarter more today, and the shops will be shut."

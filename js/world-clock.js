@@ -9,7 +9,7 @@ import { changePlay } from './sheet-ui.js';
 import { takeItem } from './handover.js';
 import { outAndAbout } from './world-routine.js';
 import { formatDate, today, cleanCalendar } from './calendar.js';
-import { holidayToday } from './shop-hours.js';
+import { holidayToday, holidayTomorrow } from './shop-hours.js';
 
 export function clockCard() {
   if (!isMember()) return null;
@@ -65,6 +65,8 @@ export function clockCard() {
       el('p', { class: 'clock-now' }, el('strong', {}, hhmm(c.minutes)), ` · ${partOfDay(c.minutes)}`),
       // Holidays on the clock: a holiday shuts the shops (the taverns stay open).
       (() => { const h = holidayToday(cleanCalendar(world.info?.cal)); return h ? el('p', { class: 'small clock-holiday' }, `🎉 ${h}: the shops are shut today; the taverns are open.`) : null; })(),
+      // Eve of a holiday on the clock: festive goods cost more today, and the shops shut tomorrow.
+      (() => { const h = holidayTomorrow(cleanCalendar(world.info?.cal)); return h ? el('p', { class: 'small clock-eve' }, `🎉 ${h} tomorrow: festive goods cost a quarter more today, and the shops will be shut.`) : null; })(),
       // Last orders on the clock: late at night, when the world's taverns call last orders and shut.
       (() => {
         const m = c.minutes % 1440, taverns = worldEntries().some((e) => e.kind === 'location' && e.fields?.type === 'Tavern');
