@@ -540,7 +540,7 @@ to the log at the bottom.
 267. [x] **Sort the party sheet.** The GM's party sheet can be sorted by name, hit points or load before printing.
 268. [x] **A night out.** The tavern's page lists who's due in later tonight, from the regulars' routines.
 269. [x] **Gifts in the NPC's card.** The printable NPC card notes the last gift the party gave them.
-270. [ ] **Who's due in, on the map.** A tavern's map pin notes who's due in later tonight.
+270. [x] **Who's due in, on the map.** A tavern's map pin notes who's due in later tonight.
 271. [ ] **Bounty hunters' board.** The party page's Wanted card says where each wanted NPC is usually found by day.
 272. [ ] **Settle every tab.** Session prep can settle all the party's tavern tabs from the treasury in one go.
 273. [ ] **A gift from the party.** GMs can give an NPC something from the treasury, noted as from the party.
@@ -822,3 +822,4 @@ to the log at the bottom.
 - Sort the party sheet: the GM's party sheet now has "Sort by" above the table: name, hit points (the most hurt first, as a share of the maximum) or load (the heaviest first). It's left out of the printout, which prints in the chosen order.
 - A night out: a tavern's page now says who's due in later tonight, from the routines: "🌙 Due in later: Bramwell (about 17:00), Cole (about 21:00)". That's anyone not there now whose routine brings them in before it shuts at 2. Nothing shows while the tavern is shut, and hirelings, who are with the party, are left out. dueLater in js/routine.js unit tested.
 - Gifts in the NPC's card: the printable NPC card now notes the last gift the party gave them, so the GM has it at hand when they turn up: "Last gift: Map from Ann (something they wanted)".
+- Who's due in, on the map: clicking a tavern's map pin now also says who's due in later tonight, the same line as on its page: "🌙 Due in later: Bramwell (about 17:00)".
