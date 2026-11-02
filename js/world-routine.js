@@ -2,7 +2,7 @@
 // place's page lists who is there now. Read from the clock the GMs move on (Time and light).
 import { el, setKids, toast } from './dom.js';
 import { world, worldEntries, link, findByName, getEntry, patchEntry } from './world-store.js';
-import { whereAt, aboutTown, regularsAt, unreadable, townByHour, rollRoutine, dayOf, dueLater, busiestHour } from './routine.js';
+import { whereAt, aboutTown, regularsAt, unreadable, townByHour, rollRoutine, dayOf, dueLater, busiestHour, crossPaths } from './routine.js';
 import { makeRng, randomSeed } from './rng.js';
 import { isHired } from './hirelings.js';
 import { isGm, previewing } from './api.js';
@@ -196,4 +196,13 @@ export function busiestLine(place) {
   const npcs = worldEntries().filter((x) => x.kind === 'npc' && x.fields?.routine && !isHired(x) && !['Dead', 'Missing'].includes(x.fields?.status)).map((x) => ({ routine: x.fields.routine }));
   const b = busiestHour(npcs, (name) => placeOf(name)?.id === place.id);
   return b && b.count > 1 ? el('p', { class: 'small muted routine-busiest' }, `🍺 Busiest around ${hhmm(b.m)} (${b.count} regulars in).`) : null;
+}
+
+// Who knows whom: on an NPC's page, the others whose routines put them in the same places at the same hours.
+export function crossPathsLine(npc) {
+  if (npc.kind !== 'npc' || !npc.fields?.routine || isHired(npc)) return null;
+  const others = worldEntries().filter((x) => x.kind === 'npc' && x.fields?.routine && !isHired(x) && !['Dead', 'Missing'].includes(x.fields?.status)).map((x) => ({ id: x.id, name: x.name, routine: x.fields.routine, entry: x }));
+  const list = crossPaths({ id: npc.id, name: npc.name, routine: npc.fields.routine }, others, placeOf).slice(0, 6);
+  if (!list.length) return null;
+  return el('p', { class: 'small routine-cross' }, 'Often crosses paths with: ', list.map((x, i) => [i ? ', ' : '', link(x.other.entry), el('span', { class: 'muted' }, ` (at ${x.place.name}, ${x.hours} h a day)`)]));
 }

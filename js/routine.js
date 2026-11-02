@@ -168,3 +168,23 @@ export function busiestHour(npcs, isHere, from = 8 * 60, to = 26 * 60) {
   }
   return best;
 }
+
+// Who knows whom: other NPCs whose routines put them in the same place (one the world knows, so not "home") at the
+// same hours, checked hour by hour. resolve(placeText) → a place { id, name } or null.
+// → [{ other, place, hours }] for two hours a day or more, the most first.
+export function crossPaths(npc, others, resolve) {
+  const mine = Array.from({ length: 24 }, (_, h) => { const w = whereAt(npc.routine, h * 60); return w ? resolve(w.place) : null; });
+  const out = [];
+  for (const o of others || []) {
+    if (o.id === npc.id) continue;
+    const at = new Map();
+    for (let h = 0; h < 24; h++) {
+      const p = mine[h]; if (!p) continue;
+      const w = whereAt(o.routine, h * 60), q = w ? resolve(w.place) : null;
+      if (q && q.id === p.id) at.set(p.id, { place: p, hours: (at.get(p.id)?.hours || 0) + 1 });
+    }
+    const best = [...at.values()].sort((a, b) => b.hours - a.hours)[0];
+    if (best && best.hours >= 2) out.push({ other: o, place: best.place, hours: best.hours });
+  }
+  return out.sort((a, b) => b.hours - a.hours || a.other.name.localeCompare(b.other.name));
+}

@@ -100,3 +100,12 @@ test('busiestHour: when a tavern is fullest', async () => {
   assert.deepEqual(busiestHour(npcs, isBell), { m: 17 * 60, count: 2 });
   assert.equal(busiestHour([{ routine: 'Always: the Mill' }], isBell), null);
 });
+
+test('crossPaths: who knows whom', async () => {
+  const { crossPaths } = await import('../js/routine.js');
+  const places = { 'the bell': { id: 'b', name: 'The Bell' }, 'the forge': { id: 'f', name: 'The Forge' } };
+  const resolve = (n) => places[n.toLowerCase()] || null;
+  const bram = { id: 1, name: 'Bram', routine: 'By day: the Forge; evenings and dusk: the Bell; otherwise: home' };
+  const others = [bram, { id: 2, name: 'Mags', routine: 'Evenings: the Bell; otherwise: home' }, { id: 3, name: 'Tom', routine: 'By day: the Forge' }, { id: 4, name: 'Homebody', routine: 'Always: home' }];
+  assert.deepEqual(crossPaths(bram, others, resolve).map((x) => `${x.other.name}@${x.place.name}:${x.hours}`), ['Tom@The Forge:10', 'Mags@The Bell:2']);
+});
