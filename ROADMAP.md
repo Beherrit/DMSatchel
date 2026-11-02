@@ -561,7 +561,7 @@ to the log at the bottom.
 285. [x] **A tidy for the party.** GMs can tidy every character's pack (merge duplicate lines) in one go.
 286. [x] **Due in later, on the front page.** The front page's "Around the party" card notes who's due in later
     tonight when the party is at a tavern.
-287. [ ] **Routine in the cast list's search.** Ctrl+K finds NPCs by where their routine puts them ("the Forge").
+287. [x] **Routine in the cast list's search.** Ctrl+K finds NPCs by where their routine puts them ("the Forge").
 288. [ ] **Holiday prices.** Taverns charge a little more on holidays, said on the menu.
 289. [ ] **A full sweep.** Run the whole browser suite after #276–#288 and note it.
 
@@ -859,3 +859,4 @@ to the log at the bottom.
 - Who's around on the front page: the world's front page now has "Around the party in Brindle (10:00)", listing who's about where the party is right now: "Bramwell at The Forge until 17:00". It shows only NPCs the viewer can see, and nothing while the party is on the road.
 - A tidy for the party: when any character's pack has duplicate lines, the GM's at-a-glance card offers "Tidy 2 packs". It merges the duplicates on each of those sheets in one go, the same way the sheet's own "Tidy the pack" does, and says how many lines it merged.
 - Due in later, on the front page: when the party is at a tavern, the front page's "Around the party" card now adds who's due in later tonight ("🌙 Due in later: Bramwell (about 17:00)"). If nobody's there yet, it says "Nobody about just now."
+- Routine in the search: Ctrl+K already searched every field, so typing "forge" finds NPCs whose routine mentions the Forge. It now also shows why: an NPC without a summary shows their routine as the hint ("Bramwell · Routine: By day: the Forge; otherwise: home").

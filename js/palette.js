@@ -53,7 +53,7 @@ function baseItems() {
 }
 
 function entryItems() {
-  return M.store.worldEntries().map((e) => ({ label: e.name, group: M.store.kindLabel(e.kind), href: `#world/e/${e.id}`, hint: e.summary, haystack: `${e.name} ${(e.tags || []).join(' ')} ${Object.values(e.fields || {}).join(' ')}` }));
+  return M.store.worldEntries().map((e) => ({ label: e.name, group: M.store.kindLabel(e.kind), href: `#world/e/${e.id}`, hint: e.summary || (e.fields?.routine ? `Routine: ${String(e.fields.routine).slice(0, 90)}` : ''), haystack: `${e.name} ${(e.tags || []).join(' ')} ${Object.values(e.fields || {}).join(' ')}` }));
 }
 
 function score(item, q) {
