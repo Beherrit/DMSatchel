@@ -18,6 +18,7 @@ import { readAloudPrint } from './world-readaloud.js';
 import { remindersPrint } from './world-reminders.js';
 import { musicFor } from './music.js';
 import { dayWeather } from './forecast.js';
+import { holidayToday, holidayTomorrow, EVE_MARKUP } from './shop-hours.js';
 
 const ACTIVE_PC = (e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
 const townOf = (place) => (place?.kind === 'settlement' ? place : [...trail(place)].reverse().find((p) => p.kind === 'settlement') || null);
@@ -58,7 +59,8 @@ export async function viewSessionSheet() {
       el('a', { class: 'btn ghost', href: '#world/prep' }, 'Back to prep')),
     el('header', { class: 'ss-head' },
       el('h2', {}, `${world.info?.name || 'The world'}: session ${n}`),
-      el('p', {}, [cal ? todayText(cal) : '', new Date().toLocaleDateString(undefined, { dateStyle: 'medium' }), here ? `The party is in ${here.name}` : 'The party is on the road'].filter(Boolean).join(' · '))),
+      el('p', {}, [cal ? todayText(cal) : '', new Date().toLocaleDateString(undefined, { dateStyle: 'medium' }), here ? `The party is in ${here.name}` : 'The party is on the road'].filter(Boolean).join(' · ')),
+      holidayNote(cal)),
     el('div', { class: 'ss-grid' },
       (() => { const r = remindersPrint(prep); return r.length ? block('📌 Remember', el('ul', { class: 'ss-steps' }, r)) : null; })(),
       block('The party', pcs.length ? el('table', { class: 'ss-table' },
@@ -87,4 +89,13 @@ export async function viewSessionSheet() {
       (() => { const ra = readAloudPrint(prep); return ra.length ? block('Read-aloud', ...ra) : null; })(),
       block('If trouble comes', encBox),
       prep.notes ? block('GM notes', el('div', { class: 'ss-notes' }, plain(prep.notes))) : null));
+}
+
+// Holidays on the sheet: today's holiday (shops shut, taverns open) or tomorrow's (festive goods cost more today).
+function holidayNote(cal) {
+  if (!cal) return null;
+  const today = holidayToday(cal), tomorrow = !today && holidayTomorrow(cal);
+  if (today) return el('p', { class: 'ss-holiday' }, el('strong', {}, `🎉 ${today} today: `), 'the shops are shut; the taverns are open.');
+  if (tomorrow) return el('p', { class: 'ss-holiday' }, el('strong', {}, `🎉 ${tomorrow} tomorrow: `), `festive goods cost ${EVE_MARKUP}% more today, and the shops shut tomorrow.`);
+  return null;
 }
