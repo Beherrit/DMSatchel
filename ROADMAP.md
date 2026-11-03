@@ -708,7 +708,7 @@ to the log at the bottom.
     weather, the light, and any festival ("Evening in Brindle: heavy rain, the Bell's lamps lit for Bridge Day").
 377. [x] **Night in the encounter roll.** An encounter rolled in prep at night notes the light (moonlit, or dark).
 378. [x] **The scene on the session sheet.** The printable session sheet opens with the scene-setter line.
-379. [ ] **Where we are, for players.** The party page tells everyone where the party is in a line: the time, the
+379. [x] **Where we are, for players.** The party page tells everyone where the party is in a line: the time, the
     weather and the light.
 380. [ ] **Who can see in the dark.** At night, the GM's party sheet says each character's darkvision (from their
     species), and who'll need a light.
@@ -1099,3 +1099,4 @@ to the log at the bottom.
 - Set the scene: under "Where the party is", session prep offers one line to read out, with a Copy button: "🎬 Night in Brindle: overcast, 14°C (57°F), wind moderate. Waxing crescent behind the clouds (overcast): no moon to see by, so bring a light. The party's torch is burning. It's Bridge Day: the shops are shut and the taverns are full." Pure in scene.js.
 - Night in the encounter roll: an encounter rolled in session prep at night (20:00–05:00) notes what the light means: moonlit dim light (lightly obscured) or, with no moon or under cloud, darkness (heavily obscured), and any lights the party has burning.
 - The scene on the session sheet: the printable session sheet now opens, under the date, with the same scene-setter line as prep ("🎬 Night in Brindle: overcast…"); the line is built in one place (world-scene.js) for both.
+- Where we are, for players: the party page now says where the party is, for everyone, in the same scene-setting line: "📍 Afternoon in Brindle: heavy rain, 18°C (64°F), wind moderate." (with the moon, lights and any festival when they apply; nothing when the party's on the road).
