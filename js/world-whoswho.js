@@ -12,6 +12,7 @@ import { worldCalendar } from './world-calendar.js';
 import { dayOf } from './routine.js';
 import { isHired } from './hirelings.js';
 import { sceneOf } from './appearances.js';
+import { openBounties } from './bounty.js';
 import { PLACE_KINDS } from './world-schema.js';
 
 // Routines on the cast list: where they're usually found by day (morning, else afternoon), from their routine.
@@ -24,6 +25,8 @@ export function viewWhosWho() {
     el('div', {}, el('h2', {}, 'Who’s who'), el('p', {}, 'Everyone the party has met, from the session log: who they are, how to say their name, and when they were last seen.')),
     cast.length ? el('div', { class: 'btnrow' }, el('button', { class: 'btn primary', type: 'button', onclick: () => window.print() }, 'Print')) : null);
   if (!cast.length) return el('div', { class: 'w-view' }, head, notice('Nobody yet', 'When a session’s log links an NPC ([[Name]]) or connects to them, they join the cast here.'));
+  // Wanted on the cast list: open bounties, by who's wanted.
+  const wanted = new Map(openBounties(worldEntries()).map((b) => [b.entry.id, b]));
   return el('div', { class: 'w-view whoswho-view' }, head,
     el('ul', { class: 'plain cast-list' }, cast.map(({ entry: e, count, last }) => {
       const f = e.fields || {};
@@ -31,7 +34,8 @@ export function viewWhosWho() {
       return el('li', { class: `cast${f.status === 'Dead' ? ' dead' : ''}` },
         thumb(e, 'avatar') || el('span', { class: 'avatar cast-blank', 'aria-hidden': 'true' }, e.name.slice(0, 1)),
         el('div', {},
-          el('div', { class: 'cast-name' }, link(e), f.status === 'Dead' ? [' ', el('span', { class: 'tag' }, 'dead')] : null, sayOf(e) ? el('span', { class: 'cast-say' }, ` (${sayOf(e)})`) : null),
+          el('div', { class: 'cast-name' }, link(e), f.status === 'Dead' ? [' ', el('span', { class: 'tag' }, 'dead')] : null,
+            wanted.has(e.id) ? [' ', el('span', { class: 'tag cast-wanted' }, `🎯 wanted: ${wanted.get(e.id).text}`)] : null, sayOf(e) ? el('span', { class: 'cast-say' }, ` (${sayOf(e)})`) : null),
           el('div', { class: 'small muted' }, [f.role, ageOf(worldCalendar(), e) ? ageText(ageOf(worldCalendar(), e)) : '', where?.name].filter(Boolean).join(' · ')),
           usually(e) ? el('div', { class: 'small cast-where' }, usually(e)) : null,
           line(e) ? el('p', { class: 'small' }, line(e)) : null,
