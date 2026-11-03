@@ -11,7 +11,10 @@ let M = null;
 async function loadData() {
   if (!M) {
     const [rules, items, store] = await Promise.all([import('./rules2024.js'), import('./magic-items.js'), import('./world-store.js')]);
-    M = { ...rules, MAGIC_ITEMS: items.MAGIC_ITEMS, store };
+    M = { ...rules, MAGIC_ITEMS: items.MAGIC_ITEMS, store, changes: [] };
+    // Shipped changes (What's new), fetched alongside without holding the box up.
+    Promise.all([import('./changelog.js'), fetch('/ROADMAP.md').then((r) => (r.ok ? r.text() : ''))])
+      .then(([c, md]) => { M.changes = c.changelog(md); if (dialog?.open) render(); }).catch(() => {});
   }
   return M;
 }
@@ -49,6 +52,8 @@ function baseItems() {
   if (isGm()) out.push({ label: 'Import notes', group: 'World', href: '#world/import', hint: 'Markdown files, an Obsidian folder, or pasted text' }, { label: 'Suggestions from players', group: 'World', href: '#world/suggestions' }, { label: 'Session prep', group: 'World', href: '#world/prep', hint: 'Everything for next session on one page' });
   if (isOwner() || isAdmin()) out.push({ label: 'Admin', group: 'Pages', href: '#admin' }, { label: 'Members & invites', group: 'Admin', href: '#admin/members' });
   out.push({ label: 'Worlds', group: 'Pages', href: '#worlds', hint: 'Switch, create or join a world' });
+  out.push({ label: 'What’s new', group: 'Pages', href: '#news', hint: 'Everything added to the Satchel, newest first' });
+  out.push(...(M.changes || []).map((c) => ({ label: `What’s new: ${c.title}`, group: `Change #${c.n}`, href: `#news/${c.n}`, hint: c.text, haystack: c.text, minor: true })));
   return out;
 }
 
@@ -56,7 +61,13 @@ function entryItems() {
   return M.store.worldEntries().map((e) => ({ label: e.name, group: M.store.kindLabel(e.kind), href: `#world/e/${e.id}`, hint: e.summary || (e.fields?.routine ? `Routine: ${String(e.fields.routine).slice(0, 90)}` : ''), haystack: `${e.name} ${(e.tags || []).join(' ')} ${Object.values(e.fields || {}).join(' ')}` }));
 }
 
+// Shipped changes rank under every page and entry that matches at all (but above typos).
 function score(item, q) {
+  const s = scoreOf(item, q);
+  return item.minor ? s * 0.12 : s;
+}
+
+function scoreOf(item, q) {
   const name = item.label.toLowerCase();
   if (!q) return item.group === 'Table tools' || item.group === 'Pages' ? 1 : 0;
   if (name === q) return 100;

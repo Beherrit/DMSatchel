@@ -600,7 +600,7 @@ to the log at the bottom.
 309. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 310. [x] **Links to a change.** Each change on the What's new page has its own link (#news/305) that opens the page
     scrolled to it, with a copy-link button.
-311. [ ] **Search finds changes.** Ctrl K finds shipped changes by name ("What's new: Festival day card") and opens
+311. [x] **Search finds changes.** Ctrl K finds shipped changes by name ("What's new: Festival day card") and opens
     them on the What's new page.
 312. [ ] **When the owner's in.** A shop's page says when its owner is usually behind the counter, from their
     routine ("Bramwell is in by day; evenings at the Bell").
@@ -924,3 +924,4 @@ to the log at the bottom.
 - Holidays on the session sheet: under the date, the printable session sheet says "🎉 Bridge Day today: the shops are shut; the taverns are open." on a holiday, and on the eve that festive goods cost 25% more today and the shops shut tomorrow.
 - Shut shops on the shopping list: the list already said whether each shop is open; now it gives exact times ("open till 20:00", "shut till 08:00", "shut for Bridge Day"), and session prep's shopping lists show the same where-to-buy line under each item.
 - Links to a change: every change on What's new links to itself (#news/305 opens the page scrolled to it and outlined, showing as many as it takes to reach an old one), with a "Copy link" button; an unknown number says so.
+- Search finds changes: Ctrl K now lists the What's new page and every shipped change ("What's new: Festival specials", group "Change #251"), opening it on the What's new page. The list is fetched in the background when the box first opens, and changes rank below any page or entry that matches.
