@@ -87,9 +87,8 @@ function worriesCard() {
 }
 import { dayWeather, forecast } from './forecast.js';
 import { deadlineOf, deadlineText } from './deadline.js';
-import { holidayToday } from './shop-hours.js';
 import { moonlight, nightLight } from './moonlight.js';
-import { sceneLine } from './scene.js';
+import { sceneFor } from './world-scene.js';
 
 const ACTIVE_PC = (e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
 const card = (title, ...kids) => el('section', { class: 'card prep-card' }, el('h3', {}, title), ...kids);
@@ -142,12 +141,7 @@ function whereSection(prep, rerender) {
   const encBox = el('div');
   const party = partyDefaults();
   // Set the scene: one line to read out, from the time, the weather, the light and any festival.
-  const sceneText = (() => {
-    const m = world.info?.clock?.minutes, c = cleanCalendar(world.info?.cal), night = m !== undefined && (m % 1440 >= 20 * 60 || m % 1440 < 5 * 60);
-    const ml = night && c ? moonlight(c, today(c), weather?.sky || '') : null;
-    return sceneLine({ place: (here.kind === 'settlement' ? here : town || here).name, part: m === undefined ? '' : partOfDay(m), weather: weather?.line || '', moon: ml?.text || '',
-      holiday: c ? holidayToday(c) : '', lights: readClock(world.info?.clock).lights.map((l) => l.name) });
-  })();
+  const sceneText = sceneFor(here);
   // Night in the encounter roll: what the light means, at night (moonlit dim light, or darkness; lights noted).
   const lightNote = () => {
     const m = world.info?.clock?.minutes, c = cleanCalendar(world.info?.cal);

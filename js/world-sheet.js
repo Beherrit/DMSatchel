@@ -27,6 +27,7 @@ import { hhmm, readClock, leftText, partOfDay } from './clock.js';
 import { dayFor } from './world-hours.js';
 import { moonlight } from './moonlight.js';
 import { today } from './calendar.js';
+import { sceneFor } from './world-scene.js';
 
 const ACTIVE_PC = (e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
 const townOf = (place) => (place?.kind === 'settlement' ? place : [...trail(place)].reverse().find((p) => p.kind === 'settlement') || null);
@@ -70,7 +71,9 @@ export async function viewSessionSheet() {
     el('header', { class: 'ss-head' },
       el('h2', {}, `${world.info?.name || 'The world'}: session ${n}`),
       el('p', {}, [cal ? todayText(cal) : '', new Date().toLocaleDateString(undefined, { dateStyle: 'medium' }), here ? `The party is in ${here.name}` : 'The party is on the road'].filter(Boolean).join(' · ')),
-      holidayNote(cal)),
+      holidayNote(cal),
+      // The scene on the sheet: the scene-setter line to read out.
+      (() => { const t = here ? sceneFor(here) : ''; return t ? el('p', { class: 'ss-scene' }, `🎬 ${t}`) : null; })()),
     el('div', { class: 'ss-grid' },
       (() => { const r = remindersPrint(prep); return r.length ? block('📌 Remember', el('ul', { class: 'ss-steps' }, r)) : null; })(),
       // Lights on the sheet: the time, and what's burning and for how long.
