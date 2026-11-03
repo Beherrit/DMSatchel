@@ -655,6 +655,11 @@ to the log at the bottom.
 340. [x] **Holiday deadlines coming up.** "Coming up for you" says when one of your quest deadlines falls on a
     holiday.
 341. [x] **Open now in search.** Ctrl K shows whether a shop or tavern is open now beside its name.
+342. [ ] **A shop's own hours.** A shop or tavern can keep its own hours (a new Hours field, "10–18" or "6pm–2am",
+    an additive field); everywhere that says open or shut, including what the server allows, follows them.
+343. [ ] **A day off.** A shop can shut on one weekday of the world's calendar ("Shut on Restday"), like a holiday.
+344. [ ] **Open or shut on the session sheet.** The session sheet's shop list says which are open now.
+345. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 
 ## Ideas parking lot
 
