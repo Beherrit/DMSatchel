@@ -12,3 +12,12 @@ export function changelog(md) {
   const plain = (t) => t.replace(/\*\*(.+?)\*\*/g, '$1').replace(/`([^`]+)`/g, '$1').replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
   return out.map((i) => ({ ...i, title: plain(i.title), text: plain(i.text) })).sort((a, b) => b.n - a.n);
 }
+
+// What's new since you looked: the changes numbered above `seen` (the newest number this browser had seen), or
+// none when it has never looked (nothing to compare against).
+export function newSince(items, seen) {
+  const n = Number(seen);
+  if (!Number.isFinite(n) || n <= 0) return [];
+  return items.filter((i) => i.n > n);
+}
+export const newest = (items) => items.reduce((m, i) => Math.max(m, i.n), 0);

@@ -86,6 +86,8 @@ loadSession();
 // still work offline even if they were never opened.
 const warm = () => { for (const load of Object.values(sections)) load().catch(() => {}); };
 addEventListener('load', () => setTimeout(() => (window.requestIdleCallback || setTimeout)(warm), 2500), { once: true });
+// What's new since you looked: the footer link counts changes shipped since this browser last opened that page.
+addEventListener('load', () => setTimeout(() => sections.news().then((m) => m.newsBadge($('footer a[href="#news"]'))).catch(() => {}), 3000), { once: true });
 
 // Offline and install: the tools keep working without a connection; the shared world needs one.
 if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('/sw.js').catch(() => { /* fine without it */ });

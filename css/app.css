@@ -1775,3 +1775,6 @@ details.quest-group > summary .section-title { display: inline }
 .pin.shut { opacity: .55; filter: grayscale(.7) }
 .pin.shut:hover, .pin.shut:focus-visible { opacity: 1; filter: none }
 .pin-hours.shut { color: var(--muted) }
+/* What's new since you looked (#304) */
+.news-item.fresh h3 { color: var(--accent, inherit) }
+.news-new { margin-left: 6px; font-size: calc(11px * var(--ts, 1)); vertical-align: middle }

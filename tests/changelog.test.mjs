@@ -16,3 +16,14 @@ test('changelog strips inline markdown', () => {
   assert.equal(i.title, 'A b c');
   assert.equal(i.text, 'Uses bold, code and a link.');
 });
+
+test('newSince counts changes past the last one seen', async () => {
+  const { newSince, newest } = await import('../js/changelog.js');
+  const items = [{ n: 7 }, { n: 5 }, { n: 3 }];
+  assert.deepEqual(newSince(items, 5).map((i) => i.n), [7]);
+  assert.deepEqual(newSince(items, '3').map((i) => i.n), [7, 5]);
+  assert.deepEqual(newSince(items, null), []);
+  assert.deepEqual(newSince(items, 'x'), []);
+  assert.equal(newest(items), 7);
+  assert.equal(newest([]), 0);
+});
