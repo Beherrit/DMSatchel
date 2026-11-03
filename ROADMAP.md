@@ -577,7 +577,7 @@ to the log at the bottom.
 296. [x] **Busy taverns on the map.** A tavern's map pin notes its busiest hour.
 297. [x] **Eve of a holiday on the clock.** The day before a holiday, the clock card says so and that festive goods
     cost more today.
-298. [ ] **A full sweep.** Run the whole browser suite after #290–#297 and note it.
+298. [x] **A full sweep.** Run the whole browser suite after #290–#297 and note it.
 299. [x] **Who's in town for the festival.** On a holiday, a settlement's page notes it's a festival day and who's at
     the taverns now.
 300. [x] **The 300th: a changelog page.** A "What's new in the Satchel" page built from the README's feature list
@@ -902,3 +902,4 @@ to the log at the bottom.
 - Last seen in session prep: "Who might turn up" now links the session each person was last seen in and says where, from that session's log (their own place first): "Last seen in Session 2, at Inn, 3 sessions ago · met 2 times."
 - Open or shut on the map: a shop's or tavern's map pin now says its hours by the world's clock in its tooltip ("Smithy (shut till 08:00)") and popup ("🔒 Shut for Bridge Day."), and shut shops' pins are dimmed until hovered. Taverns stay open on holidays.
 - The next festival: on other days, a settlement's page says when the next holiday is, within a month ("🎉 Bridge Day in 4 days."), and on the eve that festive goods cost a quarter more today and the shops will be shut.
+- A full sweep: all 315 browser tests rerun; no crashes or page errors, and the same flagged files as the last sweep (the deliberate error-path 400s).
