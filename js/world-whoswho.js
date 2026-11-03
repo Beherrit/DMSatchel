@@ -9,14 +9,14 @@ import { castList } from './cast.js';
 import { stripMarks } from './rich.js';
 import { ageOf, ageText } from './birthdays.js';
 import { worldCalendar } from './world-calendar.js';
-import { dayOf } from './routine.js';
+import { dayLine } from './routine.js';
 import { isHired } from './hirelings.js';
 import { sceneOf } from './appearances.js';
 import { openBounties } from './bounty.js';
 import { PLACE_KINDS } from './world-schema.js';
 
 // Routines on the cast list: where they're usually found by day (morning, else afternoon), from their routine.
-const usually = (e) => { if (isHired(e)) return 'Travelling with the party'; const d = e.fields?.routine ? dayOf(e.fields.routine) : []; const by = d[0]?.place || d[1]?.place; return by ? `Usually by day: ${by}` : ''; };
+const usually = (e) => { if (isHired(e)) return 'Travelling with the party'; const d = dayLine(e.fields?.routine); return d ? `Usually ${d}` : ''; };
 const line = (e) => { const s = stripMarks(e.summary || '').replace(/\s+/g, ' ').trim(); return s.length > 150 ? `${s.slice(0, 149)}…` : s; };
 
 export function viewWhosWho() {
