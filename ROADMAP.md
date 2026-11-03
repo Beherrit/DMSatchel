@@ -679,7 +679,7 @@ to the log at the bottom.
 355. [x] **Where they are, on their pin.** An NPC's map pin popup says where their routine has them now and their
     usual day.
 356. [x] **Hours in the Shops tool.** The Shops table tool shows the hours a rolled shop keeps.
-357. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
+357. [x] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 358. [x] **When the session began.** A session log started from prep notes the in-world date and time it began.
 359. [x] **Due in later, on the session sheet.** The printable session sheet says who's due in later where the
     party is, and about when.
@@ -1078,3 +1078,4 @@ to the log at the bottom.
 - Where to ask, on the job poster: the printable job board now says where to find each patron, from the first part of their day their routine names (home aside): "Ask for Bramwell, by day at The Forge", "Ask for Mags, evenings at the Bell". Also fixed: a patron written as a [[link]] no longer shows its brackets on the poster.
 - Lights on the session sheet: the printable session sheet has a "🔥 Time and light" block: the world's time and part of the day, and each light burning with how long it has left ("Torch (1 h left)", "Continual flame (until put out)").
 - Where they are now, on the cast list: Who's who now says, under each person's usual day, where they are at the world's hour: "🕰 Now (18:00): The Bell until 19:00" (hirelings: with the party).
+- A full sweep: all 368 browser tests rerun; no crashes or page errors, last time's three flags (the What's new link, fixed in #345, and two load flakes) are gone, and nothing new is flagged.
