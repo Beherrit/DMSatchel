@@ -674,6 +674,12 @@ to the log at the bottom.
     18:00–02:00", or "Can't read that; the usual hours apply").
 353. [x] **What changed when time moves.** When a GM moves the world's clock on, a note says which shops opened or
     shut and who moved where in the party's town.
+354. [ ] **Jump to a time of day.** The clock card gets quick jumps for GMs: to morning, midday, evening or night
+    (the next one coming), with the same "what changed" note.
+355. [ ] **Where they are, on their pin.** An NPC's map pin popup says where their routine has them now and their
+    usual day.
+356. [ ] **Hours in the Shops tool.** The Shops table tool shows the hours a rolled shop keeps.
+357. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 
 ## Ideas parking lot
 
