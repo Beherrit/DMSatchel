@@ -11,9 +11,9 @@ import { openSignIn } from './signin.js';
 import { stripMarks } from './rich.js';
 import { newLines, playJson } from './play-log.js';
 import { sinceLastCard, comingUpCard } from './world-sincelast.js';
-import { routineNow, hereNow, regularsLine, routinePreview, mindingLine, townHoursBox, rollTownButton, laterLine, aroundPartyCard, busiestLine, crossPathsLine, festivalLine, ownerDayLine, wantedCard, openNowLine } from './world-routine.js';
+import { routineNow, hereNow, regularsLine, routinePreview, mindingLine, townHoursBox, rollTownButton, laterLine, aroundPartyCard, busiestLine, crossPathsLine, festivalLine, ownerDayLine, wantedCard, openNowLine, marketDayLine } from './world-routine.js';
 import { offerBounty } from './world-bounty.js';
-import { untilChange, tradeDay, hoursSign } from './shop-hours.js';
+import { untilChange, hoursSign } from './shop-hours.js';
 import { leftText } from './clock.js';
 import { giftsSection, givenSection } from './world-gifts.js';
 import { world, worldEntries, getEntry, loadWorld, byName, kindLabel, kindFields, richInline, link, when, findByName, mentions, richText, contentsNav, notice, nameList } from './world-store.js';
@@ -98,7 +98,7 @@ import { familySection, clanTree, viewFamily } from './world-family.js';
 import { knowsButtons, knownSection } from './world-known.js';
 import { startCard, markPartySeen } from './onboarding.js';
 import { viewCalendar, worldCalendar, todayText, onThisDayCard } from './world-calendar.js';
-import { parseDate, toDays, yearLength, cleanCalendar } from './calendar.js';
+import { parseDate, toDays, yearLength } from './calendar.js';
 import { sheetSection } from './sheet-ui.js';
 import { pictureField, figure, thumb } from './image-ui.js';
 import { renderStats, renderSpells } from './statblock-ui.js';
@@ -106,6 +106,7 @@ import { renderStock } from './shop-ui.js';
 import { restockDraft } from './world-place.js';
 import { npcStats, NPC_CLASS_OPTIONS } from './npc-stats.js';
 import { patchEntry, setEntryState, stateBadges, syncWorld, descendantsOf, tagChip } from './world-store.js';
+import { dayFor } from './world-hours.js';
 
 // Pages used now and then load when first opened, so world pages start faster.
 const lazyView = (load, name) => async (...args) => (await load())[name](...args);
@@ -396,7 +397,7 @@ function viewEntry(id, tab) {
       e.summary ? el('p', { class: 'lede' }, richInline(e.summary)) : null,
       fieldRows.length ? el('dl', { class: 'traits' }, fieldRows.flatMap(([l, v, type]) => [el('dt', {}, l), el('dd', {}, type === 'long' ? richText(v) : /^https:\/\/\S+$/.test(v) ? el('a', { href: v, target: '_blank', rel: 'noopener' }, /dndbeyond\.com/.test(v) ? 'Open on D&D Beyond ↗' : 'Open link ↗') : el('span', {}, v))])) : null),
     sinceLastCard(e), comingUpCard(e),
-    routineNow(e), crossPathsLine(e), mindingLine(e), ownerDayLine(e), festivalLine(e), openNowLine(e), wantedCard(e), hereNow(e), laterLine(e), regularsLine(e), busiestLine(e), townHoursBox(e), turnUpBox(e), rollTownButton(e, rerenderWorld),
+    routineNow(e), crossPathsLine(e), mindingLine(e), ownerDayLine(e), festivalLine(e), marketDayLine(e), openNowLine(e), wantedCard(e), hereNow(e), laterLine(e), regularsLine(e), busiestLine(e), townHoursBox(e), turnUpBox(e), rollTownButton(e, rerenderWorld),
     e.kind === 'npc' || e.fields?.stats || e.fields?.spells ? statSection(e) : null,
     e.kind === 'clan' ? clanTree(e, rerenderWorld) : null,
     e.kind === 'npc' || e.kind === 'character' ? familySection(e, rerenderWorld) : null,
@@ -583,7 +584,7 @@ function placeSummary(e) {
 // Closing time: how long until a shop shuts, or opens, by the world's clock (and today's holiday).
 function closingLine(shop) {
   if (!(shop.fields?.stock || shop.fields?.menu) || world.info?.clock?.minutes === undefined) return null;
-  const u = untilChange(shop, world.info.clock.minutes, tradeDay(cleanCalendar(world.info?.cal)));
+  const u = untilChange(shop, world.info.clock.minutes, dayFor(shop));
   // Late night at the tavern: in the last hour, it's last orders.
   const last = u.open && u.mins <= 60;
   return el('p', { class: `small closing-line${last ? ' last-orders' : ' muted'}` }, last ? '🍺 ' : '🕰 ', last ? `${shop.fields?.type === 'Tavern' ? 'Last orders' : 'Closing soon'}: ${shop.name} shuts in ${leftText(u.mins)}.` : u.open ? `Open for another ${leftText(u.mins)}.` : u.mins === null ? 'Shut today; it opens tomorrow.' : `Shut; it opens in ${leftText(u.mins)}.`);

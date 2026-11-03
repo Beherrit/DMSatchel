@@ -9,14 +9,14 @@ import { playOf, characterOf, changePlay } from './sheet-ui.js';
 import { readList, withRations } from './shopping.js';
 import { overloaded, overloadedText } from './weights.js';
 import { aroundNow, laterLine, busiestLine, ownerDayLine } from './world-routine.js';
-import { openText, holidayToday, tradeDay } from './shop-hours.js';
+import { openText, holidayToday } from './shop-hours.js';
 import { festivalSpecial } from './menu.js';
 import { openBounties } from './bounty.js';
 import { coinText } from './economy.js';
 
 // Open or shut on the map: a shop's (or tavern's) hours by the world's clock and today's holiday, or null.
 const hoursOf = (entry) => (entry && (entry.fields?.stock || entry.fields?.menu) && world.info?.clock?.minutes !== undefined
-  ? openText(entry, world.info.clock.minutes, tradeDay(cleanCalendar(world.info?.cal))) : null);
+  ? openText(entry, world.info.clock.minutes, dayFor(entry)) : null);
 import { hhmm } from './clock.js';
 import { rationsFor } from './party-glance.js';
 import { dayWeather, weatherSlowdown, skyIcon } from './forecast.js';
@@ -33,6 +33,7 @@ import { advance, formatDate, today, cleanCalendar } from './calendar.js';
 import { journeyOnMap } from './journey.js';
 import { controllers, powerSlots } from './control.js';
 import { journey, chainOf, notePartyMove } from './world-journey.js';
+import { dayFor } from './world-hours.js';
 
 // The party's place, then each place above it (for the party token).
 const partyChain = () => { const at = world.info?.party_at && getEntry(world.info.party_at); return at ? [at.id, ...trail(at).reverse().map((p) => p.id)] : []; };

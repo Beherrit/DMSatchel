@@ -3,7 +3,7 @@
 import { el, setKids, toast } from './dom.js';
 import { world, worldEntries, link, findByName, getEntry, patchEntry } from './world-store.js';
 import { whereAt, aboutTown, regularsAt, townByHour, rollRoutine, dayOf, dueLater, busiestHour, crossPaths, atTaverns, ownerDay, timeAt, routineCheck } from './routine.js';
-import { holidayToday, nextHoliday, tradingHours, openText, tradeDay } from './shop-hours.js';
+import { holidayToday, nextHoliday, tradingHours, openText, tradeDay, isMarketDay } from './shop-hours.js';
 import { openBounties } from './bounty.js';
 import { cleanCalendar } from './calendar.js';
 import { makeRng, randomSeed } from './rng.js';
@@ -325,9 +325,16 @@ export function openNowLine(town) {
   const inside = (p) => { for (let x = p, i = 0; x && i < 12; x = x.parent_id && getEntry(x.parent_id), i++) if (x.id === town.id) return true; return false; };
   const day = tradeDay(cleanCalendar(world.info?.cal));
   const shops = worldEntries().filter((x) => x.kind === 'location' && x.id !== town.id && (x.fields?.stock || x.fields?.menu) && inside(x))
-    .map((x) => ({ x, o: openText(x, m, day) }));
+    .map((x) => ({ x, o: openText(x, m, { ...day, market: isMarketDay(town, day.weekday) }) }));
   const open = shops.filter((s) => s.o.open), shut = shops.length - open.length;
   if (!shut || !shops.length) return null;
   return el('p', { class: 'small open-now-town' }, `🕰 Open now (${hhmm(m)}): `,
     open.length ? open.sort((a, b) => a.x.name.localeCompare(b.x.name)).map(({ x, o }, i) => [i ? ', ' : '', link(x), el('span', { class: 'muted' }, ` (${o.text.replace(/^open /, '')})`)]) : el('span', { class: 'muted' }, 'nothing; everything’s shut'), '.');
+}
+
+// Market day: on a settlement's market day, its page says so.
+export function marketDayLine(town) {
+  if (town.kind !== 'settlement' || !town.fields?.market_day) return null;
+  const day = tradeDay(cleanCalendar(world.info?.cal));
+  return isMarketDay(town, day.weekday) ? el('p', { class: 'small market-day' }, el('strong', {}, '🧺 Market day today: '), 'stalls in the square, and the shops open two hours early.') : null;
 }

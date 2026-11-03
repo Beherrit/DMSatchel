@@ -5,10 +5,10 @@ import { isGm } from './api.js';
 import { world, worldEntries, getEntry, link } from './world-store.js';
 import { playOf, changePlay } from './sheet-ui.js';
 import { readList, addToList, removeFromList, shopsFor, tripPlan } from './shopping.js';
-import { openText, tradeDay } from './shop-hours.js';
-import { cleanCalendar } from './calendar.js';
+import { openText } from './shop-hours.js';
 import { ownerIn } from './world-routine.js';
 import { coinText } from './economy.js';
+import { dayFor } from './world-hours.js';
 
 // Open now?: under a line on the list, the shops that stock it (cheapest first), whether they're open at the world's
 // hour, and whether the owner is behind the counter.
@@ -16,9 +16,9 @@ function whereToBuy(line) {
   const shops = worldEntries().filter((s) => s.kind === 'location' && s.fields?.stock).map((s) => ({ ...s, stock: s.fields.stock }));
   const found = shopsFor(line, shops).slice(0, 3);
   if (!found.length) return null;
-  const m = world.info?.clock?.minutes ?? 480, holiday = tradeDay(cleanCalendar(world.info?.cal));
+  const m = world.info?.clock?.minutes ?? 480;
   return el('div', { class: 'small muted where-to-buy' }, found.map((f, i) => {
-    const open = openText(f.shop, m, holiday), who = ownerIn(f.shop);
+    const open = openText(f.shop, m, dayFor(getEntry(f.shop.id) || f.shop)), who = ownerIn(f.shop);
     return [i ? ' · ' : '', link(getEntry(f.shop.id) || f.shop), ` ${coinText(f.cp)}, `, open.open ? el('span', { class: 'open-now' }, open.text) : open.text,
       who && open.open ? (who.here ? `, ${who.owner.name} is in` : `, ${who.owner.name} is out`) : ''];
   }));
@@ -65,11 +65,11 @@ function tripBox(lists, mine = false) {
   const shops = worldEntries().filter((s) => s.kind === 'location' && s.fields?.stock && (!town || inTown(s))).map((s) => ({ ...s, stock: s.fields.stock }));
   const plan = tripPlan(lists.map(({ c, list }) => ({ who: c.name, lines: list })), shops);
   if (!plan.stops.length) return null;
-  const m = world.info?.clock?.minutes ?? 480, holiday = tradeDay(cleanCalendar(world.info?.cal));
+  const m = world.info?.clock?.minutes ?? 480;
   // Your own trip: only worth a route when there's more than one stop or more than one thing to fetch.
   if (mine && plan.stops.length < 2 && plan.stops.every((x) => x.wants.length < 2)) return null;
   return el(mine ? 'details' : 'div', { class: 'shopping-trip' }, el(mine ? 'summary' : 'h4', {}, `${mine ? 'Your shopping trip' : 'A shopping trip'}${town ? ` in ${town.name}` : ''}`),
-    el('ol', { class: 'trip-stops' }, plan.stops.map(({ shop, wants }) => { const o = openText(shop, m, holiday); return el('li', {},
+    el('ol', { class: 'trip-stops' }, plan.stops.map(({ shop, wants }) => { const o = openText(shop, m, dayFor(getEntry(shop.id) || shop)); return el('li', {},
       link(getEntry(shop.id) || shop), ' ', el('span', { class: `small ${o.open ? 'open-now' : 'muted'}` }, o.text),
       el('div', { class: 'small' }, wants.map((w, i) => [i ? '; ' : '', mine ? `${w.item} ` : `${w.item} for ${w.who} `, el('span', { class: 'muted' }, `(${coinText(w.cp)})`)]))); })),
     plan.missing.length ? el('p', { class: 'small muted' }, `Nowhere${town ? ' here' : ''} stocks: `, plan.missing.map((x) => (mine ? x.line : `${x.line} (${x.who})`)).join(', '), '.') : null);

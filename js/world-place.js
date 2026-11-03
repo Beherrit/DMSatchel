@@ -8,7 +8,7 @@ import { wildsSection, placeTerrains } from './encounter-ui.js';
 import { worldCalendar } from './world-calendar.js';
 import { dayWeather } from './forecast.js';
 import { toDays, today, cleanCalendar } from './calendar.js';
-import { openText, holidayToday, tradeDay, typicalHours } from './shop-hours.js';
+import { openText, holidayToday, typicalHours } from './shop-hours.js';
 import { hhmm } from './clock.js';
 import { counterGap } from './world-routine.js';
 import { deadlineOf, deadlineText } from './deadline.js';
@@ -30,6 +30,7 @@ import { renderMarket, renderStock } from './shop-ui.js';
 import { personName, ANCESTRY_WEIGHTS } from './names.js';
 import { makeRng } from './rng.js';
 import { createEntry } from './world-store.js';
+import { dayFor } from './world-hours.js';
 
 export const HUB_TABS = [['overview', 'Overview'], ['people', 'People'], ['quests', 'Quest board'], ['market', 'Market'], ['places', 'Places'], ['powers', 'Powers'], ['rumors', 'Rumors'], ['wilds', 'Encounters'], ['maps', 'Maps']];
 const er = makeRng(Date.now() ^ 0xec0);
@@ -283,7 +284,7 @@ function marketSection(place, rerender) {
 }
 
 // Open now: by the world's clock (and today's holiday), whether a shop is open, or null with no clock.
-const hoursNow = (shop) => (world.info?.clock?.minutes === undefined ? null : openText(shop, world.info.clock.minutes, tradeDay(cleanCalendar(world.info?.cal))));
+const hoursNow = (shop) => (world.info?.clock?.minutes === undefined ? null : openText(shop, world.info.clock.minutes, dayFor(shop)));
 function openNowLine(shops) {
   if (world.info?.clock?.minutes === undefined) return null;
   const hs = shops.map(hoursNow), open = hs.filter((h) => h.open).length, shut = hs.length - open;

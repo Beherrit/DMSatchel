@@ -28,8 +28,9 @@ export function parseHours(text) {
   return [from, to > from ? to : to + 1440];
 }
 
-// The hours a shop keeps: its own, or the usual for its kind.
-const hoursOf = (shop) => parseHours(shop?.fields?.hours) || HOURS[kindOf(shop)];
+// The hours a shop keeps: its own, or the usual for its kind; on its town's market day it opens two hours early.
+export const MARKET_EARLY = 120;
+const hoursOf = (shop, day) => { const [from, to] = parseHours(shop?.fields?.hours) || HOURS[kindOf(shop)]; return day?.market && kindOf(shop) === 'shop' ? [Math.max(0, from - MARKET_EARLY), to] : [from, to]; };
 const clock = (x) => `${String(Math.floor((x % 1440) / 60)).padStart(2, '0')}:${String(x % 60).padStart(2, '0')}`;
 const opensText = (from) => (from === 8 * 60 ? 'at 8 in the morning' : `at ${clock(from)}`);
 
@@ -42,7 +43,7 @@ export function shopOpen(shop, minutes, day = '') {
   if (holiday && kindOf(shop) === 'shop' && !/^yes$/i.test(String(shop?.fields?.holiday_open || '').trim())) return { open: false, opens: 'tomorrow', holiday };
   const off = typeof day === 'object' && day?.weekday && String(shop?.fields?.closed_on || '').trim().toLowerCase().replace(/s$/, '') === day.weekday.toLowerCase().replace(/s$/, '');
   if (off) return { open: false, opens: 'tomorrow', dayOff: day.weekday };
-  const [from, to] = hoursOf(shop);
+  const [from, to] = hoursOf(shop, day);
   const m = ((Math.round(Number(minutes) || 0) % 1440) + 1440) % 1440;
   const open = (m >= from && m < Math.min(to, 1440)) || (to > 1440 && m < to - 1440);
   // Shut at night, or (for a shop that keeps night hours) by day: "shut for the night" only when it is.
@@ -55,7 +56,8 @@ export function holidayToday(cal) {
   return cal.holidays.find((h) => h.month === cal.month && h.day === cal.day)?.name || '';
 }
 
-// Today, for the shops: { holiday, weekday } (weekday '' when the calendar has none), for shopOpen and friends.
+// Today, for the shops: { holiday, weekday } (weekday '' when the calendar has none), for shopOpen and friends. Add
+// market: true for a shop whose town's market day it is (see marketDayToday).
 export function tradeDay(cal) {
   if (!cal) return { holiday: '', weekday: '' };
   let wd = '';
@@ -71,7 +73,7 @@ export const shutText = (o) => (o.holiday ? `shut for ${o.holiday}` : o.dayOff ?
 export function untilChange(shop, minutes, holiday = '') {
   const o = shopOpen(shop, minutes, holiday);
   if (o.holiday || o.dayOff) return { open: false, mins: null };
-  const [from, to] = hoursOf(shop);
+  const [from, to] = hoursOf(shop, holiday);
   const m = ((Math.round(Number(minutes) || 0) % 1440) + 1440) % 1440;
   if (o.open) return { open: true, mins: to > 1440 && m < to - 1440 ? to - 1440 - m : to - m };
   return { open: false, mins: m < from ? from - m : 1440 - m + from };
@@ -114,14 +116,17 @@ export function nextHoliday(cal, within = 30) {
 }
 
 // Trading hours, in minutes after midnight: [open, close] (close may run past midnight: 26 * 60 is 2 at night).
-export const tradingHours = (shop) => [...hoursOf(shop)];
+export const tradingHours = (shop, day) => [...hoursOf(shop, day)];
 
 // Hours as a sign on the door: "Open 08:00–20:00", "Open 18:00–02:00 · Shut on Firedays".
 export function hoursSign(shop) {
-  const [from, to] = hoursOf(shop), off = String(shop?.fields?.closed_on || '').trim().replace(/s$/i, '');
+  const [from, to] = hoursOf(shop, null), off = String(shop?.fields?.closed_on || '').trim().replace(/s$/i, '');
   return `Open ${clock(from)}–${clock(to)}${off ? ` · Shut on ${off}s` : ''}`;
 }
 
 // Rolled shops keep sensible hours: the hours that suit a trade (SHOP_TYPES in economy.js), or '' for the usual.
 const TRADE_HOURS = { 'Black market': '10pm–4am', 'Curiosity shop': '11–19', 'Bookseller': '9–17', 'Temple': '6–20', 'Stables': '6–20', 'Shipwright & chandler': '6–18', 'Jeweler': '10–18', 'Magic shop': '10–18', 'Trading post': '7–19' };
 export const typicalHours = (type) => TRADE_HOURS[type] || '';
+
+// Market day: a settlement's Market day field names a weekday; is today it? (case and a plural "s" don't matter)
+export const isMarketDay = (town, weekdayName) => !!weekdayName && String(town?.fields?.market_day || '').trim().toLowerCase().replace(/s$/, '') === String(weekdayName).toLowerCase().replace(/s$/, '');

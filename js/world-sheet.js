@@ -19,11 +19,12 @@ import { remindersPrint } from './world-reminders.js';
 import { musicFor } from './music.js';
 import { dayWeather } from './forecast.js';
 import { deadlineOf, deadlineText } from './deadline.js';
-import { holidayToday, holidayTomorrow, EVE_MARKUP, openText, tradeDay } from './shop-hours.js';
+import { holidayToday, holidayTomorrow, EVE_MARKUP, openText } from './shop-hours.js';
 import { aroundNow } from './world-routine.js';
 import { dayLine } from './routine.js';
 import { isHired } from './hirelings.js';
 import { hhmm } from './clock.js';
+import { dayFor } from './world-hours.js';
 
 const ACTIVE_PC = (e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
 const townOf = (place) => (place?.kind === 'settlement' ? place : [...trail(place)].reverse().find((p) => p.kind === 'settlement') || null);
@@ -78,7 +79,7 @@ export async function viewSessionSheet() {
         weather ? el('p', {}, el('strong', {}, 'Weather: '), weather.line) : null,
         (() => { const m = musicFor([here, ...trail(here).reverse()]); return m ? el('p', { class: 'small' }, el('strong', {}, 'Music: '), m.url) : null; })(),
         // Open or shut on the sheet: each shop's hours by the world's clock, today.
-        shops.length ? el('p', { class: 'small ss-shops' }, el('strong', {}, 'Shops: '), shops.map((s) => { const m = world.info?.clock?.minutes; if (m === undefined) return s.name; const o = openText(s, m, tradeDay(cal)); return `${s.name} (${o.text})`; }).join(', ')) : null) : null,
+        shops.length ? el('p', { class: 'small ss-shops' }, el('strong', {}, 'Shops: '), shops.map((s) => { const m = world.info?.clock?.minutes; if (m === undefined) return s.name; const o = openText(s, m, dayFor(s)); return `${s.name} (${o.text})`; }).join(', ')) : null) : null,
       // Around now: who the routines put where the party is (or somewhere inside), at the world's hour.
       (() => { const a = here ? aroundNow(here) : null; return a?.list.length ? block(`🕰 Around now (${hhmm(a.m)})`, el('ul', { class: 'ss-list ss-around' }, a.list.map(({ npc, place, until }) =>
         el('li', {}, el('strong', {}, npc.entry.name), place.id === here.id ? '' : ` at ${place.name}`, until !== null ? ` until ${hhmm(until)}` : '')))) : null; })(),

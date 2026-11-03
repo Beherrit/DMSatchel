@@ -10,8 +10,8 @@ import { nearWord, wordsOf } from './name-check.js';
 let M = null;
 async function loadData() {
   if (!M) {
-    const [rules, items, store, hours, calendar] = await Promise.all([import('./rules2024.js'), import('./magic-items.js'), import('./world-store.js'), import('./shop-hours.js'), import('./calendar.js')]);
-    M = { ...rules, MAGIC_ITEMS: items.MAGIC_ITEMS, store, hours, calendar, changes: [] };
+    const [rules, items, store, hours, calendar, wh] = await Promise.all([import('./rules2024.js'), import('./magic-items.js'), import('./world-store.js'), import('./shop-hours.js'), import('./calendar.js'), import('./world-hours.js')]);
+    M = { ...rules, MAGIC_ITEMS: items.MAGIC_ITEMS, store, hours, calendar, wh, changes: [] };
     // Shipped changes (What's new), fetched alongside without holding the box up.
     Promise.all([import('./changelog.js'), fetch('/ROADMAP.md').then((r) => (r.ok ? r.text() : ''))])
       .then(([c, md]) => { M.changes = c.changelog(md); if (dialog?.open) render(); }).catch(() => {});
@@ -60,7 +60,7 @@ function baseItems() {
 function entryItems() {
   // Open now in search: a shop or tavern says whether it's open by the world's clock.
   const info = M.store.world.info || {}, holiday = info.clock?.minutes === undefined ? '' : M.hours.tradeDay(M.calendar.cleanCalendar(info.cal));
-  const hours = (e) => (info.clock?.minutes === undefined || e.kind !== 'location' || !(e.fields?.stock || e.fields?.menu) ? null : M.hours.openText(e, info.clock.minutes, holiday));
+  const hours = (e) => (info.clock?.minutes === undefined || e.kind !== 'location' || !(e.fields?.stock || e.fields?.menu) ? null : M.hours.openText(e, info.clock.minutes, { ...holiday, market: M.hours.isMarketDay(M.wh.townOfShop(e), holiday.weekday) }));
   const open = (e) => { const o = hours(e); return o ? `${o.open ? '🟢' : '🔒'} ${o.text}` : ''; };
   return M.store.worldEntries().map((e) => ({ label: e.name, group: M.store.kindLabel(e.kind), href: `#world/e/${e.id}`, openNow: hours(e)?.open, hint: [open(e), e.summary || (e.fields?.routine ? `Routine: ${String(e.fields.routine).slice(0, 90)}` : '')].filter(Boolean).join(' · '), haystack: `${e.name} ${(e.tags || []).join(' ')} ${Object.values(e.fields || {}).join(' ')}` }));
 }

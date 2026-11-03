@@ -126,3 +126,17 @@ test('a shop can stay open on holidays', async () => {
   assert.equal(shopOpen(shop, 600, 'Bridge Day').open, false);
   assert.deepEqual(openText(stall, 600, { holiday: 'Bridge Day', weekday: '' }), { open: true, text: 'open till 20:00' });
 });
+
+test('market day: the town\'s shops open two hours early', async () => {
+  const { shopOpen, openText, isMarketDay, tradingHours } = await import('../js/shop-hours.js');
+  const shop = { fields: { type: 'Shop' } }, inn = { fields: { type: 'Tavern' } };
+  assert.equal(shopOpen(shop, 6 * 60 + 30, { holiday: '', weekday: 'Fireday', market: true }).open, true);
+  assert.equal(shopOpen(shop, 6 * 60 + 30, { holiday: '', weekday: 'Fireday', market: false }).open, false);
+  assert.equal(shopOpen(shop, 5 * 60 + 30, { holiday: '', weekday: 'Fireday', market: true }).open, false);
+  assert.deepEqual(tradingHours(inn, { market: true }), [480, 1560]); // taverns keep their hours
+  assert.deepEqual(openText(shop, 300, { market: true }), { open: false, text: 'shut till 06:00' });
+  assert.equal(isMarketDay({ fields: { market_day: 'Firedays' } }, 'Fireday'), true);
+  assert.equal(isMarketDay({ fields: { market_day: 'fireday' } }, 'Fireday'), true);
+  assert.equal(isMarketDay({ fields: {} }, 'Fireday'), false);
+  assert.equal(isMarketDay(null, 'Fireday'), false);
+});
