@@ -48,7 +48,7 @@ export async function showNews(panel, sub = '') {
   const count = el('p', { class: 'muted news-count' });
   // A link to one change (#news/305): show enough to include it, then scroll to it.
   const at = target ? items.findIndex((i) => i.n === target) : -1;
-  let shown = Math.max(PAGE, at + 1);
+  let shown = Math.max(PAGE, Math.ceil((at + 1) / PAGE) * PAGE); // whole pages, so there's more around it
   const draw = () => {
     const q = filter.value.trim().toLowerCase();
     const hits = q ? items.filter((i) => `${i.title} ${i.text}`.toLowerCase().includes(q)) : items;

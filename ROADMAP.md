@@ -659,7 +659,7 @@ to the log at the bottom.
     an additive field); everywhere that says open or shut, including what the server allows, follows them.
 343. [x] **A day off.** A shop can shut on one weekday of the world's calendar ("Shut on Restday"), like a holiday.
 344. [x] **Open or shut on the session sheet.** The session sheet's shop list says which are open now.
-345. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
+345. [x] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 346. [x] **Hours on the printed shelf.** "Print the shelf" includes the shop's hours and day off.
 347. [x] **Rolled shops keep sensible hours.** A newly rolled shop gets hours that suit its trade (a baker opens
     early, a night market late); existing shops are left as they are.
@@ -1035,3 +1035,4 @@ to the log at the bottom.
 - Market day: settlements have a new "Market day (a weekday)" field (additive). On that day the town's page says "🧺 Market day today: stalls in the square, and the shops open two hours early.", and every shop in it (however deep) opens two hours early: page, Market tab, pins, shopping lists, Ctrl K, the session sheet, and the server's buy and sell checks (which find the town with a recursive query). Taverns keep their hours. Pages now get a shop's day from world-hours.js.
 - Hours as you type: the Opening hours field on a place's form reads them back as you type, "Open 18:00–02:00", or "Can't read that; the usual hours apply… Try “10–18” or “6pm–2am”." (marked as a problem).
 - What changed when time moves: when a GM moves the clock on (a step or setting the time), the toast and the clock card say what changed in the party's town: "⏩ 22:30 in Brindle: Smithy shut; Ada left." Shops that opened or shut and who came, went or moved, from routines and hours; the diff is pure (clock-diff.js).
+- A full sweep: 357 browser tests rerun. One real find: a link to a change on What's new showed the list exactly down to that change, so it sat last with nothing after it (and an older neighbour was missing). Fixed: it now shows whole pages of 40 around it. Two more flags (a timeout in the secrets test and the dialogs 403) pass on rerun, load flakes. No page errors.
