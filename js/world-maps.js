@@ -9,6 +9,11 @@ import { playOf, characterOf, changePlay } from './sheet-ui.js';
 import { readList, withRations } from './shopping.js';
 import { overloaded, overloadedText } from './weights.js';
 import { aroundNow, laterLine, busiestLine } from './world-routine.js';
+import { openText, holidayToday } from './shop-hours.js';
+
+// Open or shut on the map: a shop's (or tavern's) hours by the world's clock and today's holiday, or null.
+const hoursOf = (entry) => (entry && (entry.fields?.stock || entry.fields?.menu) && world.info?.clock?.minutes !== undefined
+  ? openText(entry, world.info.clock.minutes, holidayToday(cleanCalendar(world.info?.cal))) : null);
 import { hhmm } from './clock.js';
 import { rationsFor } from './party-glance.js';
 import { dayWeather, weatherSlowdown, skyIcon } from './forecast.js';
@@ -21,7 +26,7 @@ import { partyPin } from './party-pin.js';
 import { routeMiles, milesText, travelDayOptions } from './map-route.js';
 import { travel } from './encounters.js';
 import { worldCalendar, todayText, daysPassed } from './world-calendar.js';
-import { advance, formatDate, today } from './calendar.js';
+import { advance, formatDate, today, cleanCalendar } from './calendar.js';
 import { journeyOnMap } from './journey.js';
 import { controllers, powerSlots } from './control.js';
 import { journey, chainOf, notePartyMove } from './world-journey.js';
@@ -250,6 +255,8 @@ export async function viewMap(id, focusPin) {
         // Who's here, on the map: NPCs whose routine puts them at this place (or inside it) right now.
         // Who's due in, on the map: a tavern's pin also says who's coming in later tonight.
         entry ? laterLine(entry) : null,
+        // Open or shut, by the clock.
+        (() => { const h = hoursOf(entry); return h ? el('p', { class: `small pin-hours${h.open ? '' : ' shut'}` }, h.open ? '🟢 ' : '🔒 ', h.text[0].toUpperCase() + h.text.slice(1), '.') : null; })(),
         // Busy taverns on the map: when it's fullest.
         entry ? busiestLine(entry) : null,
         (() => { const a = entry && PLACE_KINDS.includes(entry.kind) ? aroundNow(entry) : null; return a?.list.length ? el('p', { class: 'small pin-here' }, `🕰 Here now (${hhmm(a.m)}): `, a.list.map(({ npc, place }, i) => [i ? ', ' : '', link(npc.entry), place.id === entry.id ? '' : el('span', { class: 'muted' }, ` at ${place.name}`)])) : null; })(),
@@ -398,9 +405,11 @@ export async function viewMap(id, focusPin) {
     ...pins.map((p) => {
       const held = holdsOn && p.entry_id && hold.get(p.entry_id);
       const slot = held ? slots.get(held.by.id) ?? -1 : null;
+      const hours = hoursOf(p.entry_id && getEntry(p.entry_id));
+      const said = `${p.label}${hours ? ` (${hours.text})` : ''}`;
       return el('button', {
-        class: `pin pin-${p.icon || 'poi'}${p.secret ? ' secret' : ''}${p.entry_id && mapsOf(p.entry_id).some((m) => m.id !== map.id) ? ' has-map' : ''}${held ? ` held hold-${slot < 0 ? 'other' : slot}` : ''}`, type: 'button', 'data-id': p.id, style: `left:${p.x * 100}%;top:${p.y * 100}%`,
-        title: held ? `${p.label}: held by ${held.by.name}` : p.label, 'aria-label': held ? `${p.label}, held by ${held.by.name}` : p.label, onclick: (ev) => { ev.stopPropagation(); showPin(p); },
+        class: `pin pin-${p.icon || 'poi'}${p.secret ? ' secret' : ''}${hours && !hours.open ? ' shut' : ''}${p.entry_id && mapsOf(p.entry_id).some((m) => m.id !== map.id) ? ' has-map' : ''}${held ? ` held hold-${slot < 0 ? 'other' : slot}` : ''}`, type: 'button', 'data-id': p.id, style: `left:${p.x * 100}%;top:${p.y * 100}%`,
+        title: held ? `${said}: held by ${held.by.name}` : said, 'aria-label': held ? `${said}, held by ${held.by.name}` : said, onclick: (ev) => { ev.stopPropagation(); showPin(p); },
       }, el('span', { class: 'glyph', 'aria-hidden': 'true' }, PIN_ICONS[p.icon || 'poi'][1]), el('span', { class: 'pin-label' }, p.label));
     }));
     drawHoldKey();

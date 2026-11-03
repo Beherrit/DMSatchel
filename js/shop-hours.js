@@ -46,3 +46,14 @@ const FESTIVE = /\b(candles?|ale|wine|mead|beer|cider|brandy|spirits?|sweets?|ca
 export const isFestive = (name) => FESTIVE.test(String(name || ''));
 // The price of one thing on the eve of a holiday (a quarter more for festive goods), or as it was.
 export const evePrice = (cp, name, eve) => (eve && isFestive(name) ? Math.ceil((Number(cp) || 0) * (100 + EVE_MARKUP) / 100) : Number(cp) || 0);
+
+// Open or shut, in a few words (for a map pin): "open till 20:00", "open till 02:00", "shut for Bridge Day",
+// "shut till 08:00". → { open, text }
+export function openText(shop, minutes, holiday = '') {
+  const o = shopOpen(shop, minutes, holiday);
+  if (o.holiday) return { open: false, text: shutText(o) };
+  const u = untilChange(shop, minutes, holiday);
+  const m = ((Math.round(Number(minutes) || 0) % 1440) + 1440) % 1440;
+  const at = (m + u.mins) % 1440, hh = (x) => `${String(Math.floor(x / 60)).padStart(2, '0')}:${String(x % 60).padStart(2, '0')}`;
+  return { open: u.open, text: `${u.open ? 'open' : 'shut'} till ${hh(at)}` };
+}

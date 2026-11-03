@@ -41,3 +41,15 @@ test('holiday prices on the shelf: the eve of a holiday', async () => {
   assert.ok(isFestive('Candle')); assert.ok(isFestive('Wine, common (pitcher)')); assert.ok(!isFestive('Rope'));
   assert.equal(evePrice(100, 'Candle', 'Bridge Day'), 125); assert.equal(evePrice(100, 'Rope', 'Bridge Day'), 100); assert.equal(evePrice(100, 'Candle', ''), 100);
 });
+
+test('openText: open till, shut till, shut for a holiday', async () => {
+  const { openText } = await import('../js/shop-hours.js');
+  const shop = { fields: { type: 'Shop' } }, inn = { fields: { type: 'Tavern' } };
+  assert.deepEqual(openText(shop, 600), { open: true, text: 'open till 20:00' });
+  assert.deepEqual(openText(shop, 21 * 60), { open: false, text: 'shut till 08:00' });
+  assert.deepEqual(openText(shop, 300), { open: false, text: 'shut till 08:00' });
+  assert.deepEqual(openText(inn, 23 * 60), { open: true, text: 'open till 02:00' });
+  assert.deepEqual(openText(inn, 60), { open: true, text: 'open till 02:00' });
+  assert.deepEqual(openText(shop, 600, 'Bridge Day'), { open: false, text: 'shut for Bridge Day' });
+  assert.deepEqual(openText(inn, 600, 'Bridge Day'), { open: true, text: 'open till 02:00' });
+});

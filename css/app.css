@@ -1771,3 +1771,7 @@ details.quest-group > summary .section-title { display: inline }
 .festival-card { border-left: 4px solid var(--accent, var(--line)) }
 .festival-card p { margin: 0 0 4px }
 .festival-taverns { margin: 0; padding-left: 18px; overflow-wrap: anywhere }
+/* Open or shut on the map (#302) */
+.pin.shut { opacity: .55; filter: grayscale(.7) }
+.pin.shut:hover, .pin.shut:focus-visible { opacity: 1; filter: none }
+.pin-hours.shut { color: var(--muted) }
