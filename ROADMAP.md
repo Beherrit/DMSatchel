@@ -606,6 +606,14 @@ to the log at the bottom.
     routine ("Bramwell is in by day; evenings at the Bell").
 313. [x] **The festival in session prep.** On a holiday, session prep notes it under where the party is, with who's
     at the taverns there now.
+314. [ ] **Nobody at the counter.** The Market tab flags shops whose owner's routine never has them in during
+    trading hours, so the GM can fix the routine or hire help.
+315. [ ] **A shopping trip.** Session prep plans a shopping trip: each shop in town that stocks something on anyone's
+    list, what and for whom, open now or when it opens.
+316. [ ] **Who minds the shop.** When the owner is out, a shop's buy panel says so ("Bramwell is out; an apprentice
+    minds the counter").
+317. [ ] **Due back, on an NPC's page.** GMs see on an NPC's page when the party hasn't met them for a while ("Not
+    seen for 3 sessions: might turn up").
 
 ## Ideas parking lot
 
