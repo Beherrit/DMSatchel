@@ -109,3 +109,13 @@ test('crossPaths: who knows whom', async () => {
   const others = [bram, { id: 2, name: 'Mags', routine: 'Evenings: the Bell; otherwise: home' }, { id: 3, name: 'Tom', routine: 'By day: the Forge' }, { id: 4, name: 'Homebody', routine: 'Always: home' }];
   assert.deepEqual(crossPaths(bram, others, resolve).map((x) => `${x.other.name}@${x.place.name}:${x.hours}`), ['Tom@The Forge:10', 'Mags@The Bell:2']);
 });
+
+test('atTaverns groups people by tavern, back rooms included, quiet taverns kept', async () => {
+  const { atTaverns } = await import('../js/routine.js');
+  const bell = { id: 'b', name: 'The Bell' }, fox = { id: 'f', name: 'The Fox' }, back = { id: 'r', parent: 'b' }, smithy = { id: 's' };
+  const tavernOf = (p) => (p.id === 'b' || p.parent === 'b' ? bell : p.id === 'f' ? fox : null);
+  const list = [{ npc: { name: 'Ada' }, place: bell, until: 600 }, { npc: { name: 'Bram' }, place: back, until: null }, { npc: { name: 'Cy' }, place: smithy, until: null }];
+  const g = atTaverns(list, [fox, bell], tavernOf);
+  assert.deepEqual(g.map((x) => [x.tavern.name, x.people.map((p) => p.npc.name)]), [['The Bell', ['Ada', 'Bram']], ['The Fox', []]]);
+  assert.deepEqual(atTaverns([], [], tavernOf), []);
+});

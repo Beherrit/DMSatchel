@@ -578,7 +578,7 @@ to the log at the bottom.
 297. [x] **Eve of a holiday on the clock.** The day before a holiday, the clock card says so and that festive goods
     cost more today.
 298. [ ] **A full sweep.** Run the whole browser suite after #290–#297 and note it.
-299. [ ] **Who's in town for the festival.** On a holiday, a settlement's page notes it's a festival day and who's at
+299. [x] **Who's in town for the festival.** On a holiday, a settlement's page notes it's a festival day and who's at
     the taverns now.
 300. [x] **The 300th: a changelog page.** A "What's new in the Satchel" page built from the README's feature list
     (newest first), linked from the footer.
@@ -890,3 +890,4 @@ to the log at the bottom.
 - Busy taverns on the map: a tavern's map pin now also says when it's busiest, the same line as its page: "🍺 Busiest around 17:00 (2 regulars in)."
 - Eve of a holiday on the clock: the day before one of the world's holidays, the clock card now says "🎉 Bridge Day tomorrow: festive goods cost a quarter more today, and the shops will be shut."
 - The 300th, a changelog page: a "What's new in the Satchel" page at #news, linked from the footer, lists every ticked roadmap item newest first (it reads ROADMAP.md itself rather than the README, so it stays current without extra upkeep), with a filter box and "Show more" in pages of 40.
+- Who's in town for the festival: on one of the world's holidays, a settlement's page opens with a festival card: "🎉 Bridge Day today: a festival day. The shops are shut; the taverns are open.", then each tavern in town with who's in now from routines (back rooms count, quiet taverns say "no regulars in just now"), busiest first.

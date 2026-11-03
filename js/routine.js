@@ -188,3 +188,17 @@ export function crossPaths(npc, others, resolve) {
   }
   return out.sort((a, b) => b.hours - a.hours || a.other.name.localeCompare(b.other.name));
 }
+
+// Who's at the taverns: from aboutTown's list ([{ npc, place, until }]), group the people at each tavern (a back room
+// counts: tavernOf walks up from a place to its tavern, or null). taverns: every tavern in town, so quiet ones show
+// too. → [{ tavern, people: [{ npc, until }] }], busiest first, then by name.
+export function atTaverns(list, taverns, tavernOf) {
+  const by = new Map(taverns.map((t) => [t.id, { tavern: t, people: [] }]));
+  for (const x of list) {
+    const t = tavernOf(x.place);
+    if (!t) continue;
+    if (!by.has(t.id)) by.set(t.id, { tavern: t, people: [] });
+    by.get(t.id).people.push({ npc: x.npc, until: x.until });
+  }
+  return [...by.values()].sort((a, b) => b.people.length - a.people.length || String(a.tavern.name).localeCompare(String(b.tavern.name)));
+}

@@ -1767,3 +1767,7 @@ details.quest-group > summary .section-title { display: inline }
 .news-item h3 { margin: 0 0 4px; font-size: calc(16px * var(--ts, 1)) }
 .news-item p { margin: 0; overflow-wrap: anywhere }
 .news-n { font-family: var(--f-mono); font-weight: normal; font-size: calc(13px * var(--ts, 1)) }
+/* Festival day on a settlement (#299) */
+.festival-card { border-left: 4px solid var(--accent, var(--line)) }
+.festival-card p { margin: 0 0 4px }
+.festival-taverns { margin: 0; padding-left: 18px; overflow-wrap: anywhere }

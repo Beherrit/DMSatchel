@@ -2,7 +2,9 @@
 // place's page lists who is there now. Read from the clock the GMs move on (Time and light).
 import { el, setKids, toast } from './dom.js';
 import { world, worldEntries, link, findByName, getEntry, patchEntry } from './world-store.js';
-import { whereAt, aboutTown, regularsAt, unreadable, townByHour, rollRoutine, dayOf, dueLater, busiestHour, crossPaths } from './routine.js';
+import { whereAt, aboutTown, regularsAt, unreadable, townByHour, rollRoutine, dayOf, dueLater, busiestHour, crossPaths, atTaverns } from './routine.js';
+import { holidayToday } from './shop-hours.js';
+import { cleanCalendar } from './calendar.js';
 import { makeRng, randomSeed } from './rng.js';
 import { isHired } from './hirelings.js';
 import { isGm, previewing } from './api.js';
@@ -209,3 +211,23 @@ export function crossPathsLine(npc) {
 
 // The place a routine names, for other views (the relationship web).
 export const routinePlace = (name) => placeOf(name);
+
+// Festival day in town: on one of the world's holidays, a settlement's page says so (the shops are shut, the taverns
+// are not) and who's at each tavern in town right now, from routines.
+export function festivalLine(town) {
+  if (town.kind !== 'settlement') return null;
+  const holiday = holidayToday(cleanCalendar(world.info?.cal));
+  if (!holiday) return null;
+  const inside = (p) => { for (let x = p, i = 0; x && i < 12; x = x.parent_id && getEntry(x.parent_id), i++) if (x.id === town.id) return true; return false; };
+  const isTavern = (p) => p?.kind === 'location' && p.fields?.type === 'Tavern';
+  const tavernOf = (p) => { for (let x = p, i = 0; x && i < 12; x = x.parent_id && getEntry(x.parent_id), i++) { if (isTavern(x)) return x; if (x.id === town.id) return null; } return null; };
+  const taverns = worldEntries().filter((x) => isTavern(x) && x.id !== town.id && inside(x));
+  const a = aroundNow(town);
+  const groups = a ? atTaverns(a.list, taverns, tavernOf) : taverns.map((t) => ({ tavern: t, people: [] }));
+  const head = el('p', { class: 'festival-head' }, el('strong', {}, `🎉 ${holiday} today`), ': a festival day. The shops are shut', taverns.length ? '; the taverns are open.' : '.');
+  if (!groups.length) return el('section', { class: 'card festival-card', 'aria-label': 'Festival day' }, head);
+  return el('section', { class: 'card festival-card', 'aria-label': 'Festival day' }, head,
+    el('ul', { class: 'festival-taverns small' }, groups.map(({ tavern, people }) => el('li', {}, link(tavern), ': ',
+      people.length ? people.map(({ npc, until }, i) => [i ? ', ' : '', link(npc.entry), until !== null ? el('span', { class: 'muted' }, ` until ${hhmm(until)}`) : null])
+        : el('span', { class: 'muted' }, a ? 'no regulars in just now' : 'set the world’s clock to see who’s in')))));
+}
