@@ -648,6 +648,13 @@ to the log at the bottom.
     soonest first, and how many days are left.
 337. [x] **Where they'll be, on the session sheet.** Each person in "Who's around" on the session sheet says where
     their routine usually has them by day.
+338. [ ] **A whole day on the cast list.** Who's who gives each person's whole usual day ("mornings: the Forge;
+    evenings: the Bell"), not just where they are by day.
+339. [ ] **Routines on NPC cards.** The printable NPC table cards say where each NPC usually is through the day, and
+    any bounty on them.
+340. [ ] **Holiday deadlines coming up.** "Coming up for you" says when one of your quest deadlines falls on a
+    holiday.
+341. [ ] **Open now in search.** Ctrl K shows whether a shop or tavern is open now beside its name.
 
 ## Ideas parking lot
 
