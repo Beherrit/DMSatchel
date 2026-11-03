@@ -696,7 +696,7 @@ to the log at the bottom.
 368. [x] **Lights on the session sheet.** The printable session sheet lists the lights burning and how long each has
     left, with the time.
 369. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
-370. [ ] **Where they are now, on the cast list.** Who's who says where each person is at the world's hour.
+370. [x] **Where they are now, on the cast list.** Who's who says where each person is at the world's hour.
 371. [ ] **Members about now.** A faction's page lists its members (the NPCs connected to it) and where each is
     right now.
 372. [ ] **The time on the party's map marker.** The party's marker on a map says the world's time with the weather.
@@ -1077,3 +1077,4 @@ to the log at the bottom.
 - Patrons on the quest board: each open job on a town's quest board says where its patron is right now: "🕰 Bramwell is at The Forge until 17:00 now" (finished jobs don't).
 - Where to ask, on the job poster: the printable job board now says where to find each patron, from the first part of their day their routine names (home aside): "Ask for Bramwell, by day at The Forge", "Ask for Mags, evenings at the Bell". Also fixed: a patron written as a [[link]] no longer shows its brackets on the poster.
 - Lights on the session sheet: the printable session sheet has a "🔥 Time and light" block: the world's time and part of the day, and each light burning with how long it has left ("Torch (1 h left)", "Continual flame (until put out)").
+- Where they are now, on the cast list: Who's who now says, under each person's usual day, where they are at the world's hour: "🕰 Now (18:00): The Bell until 19:00" (hirelings: with the party).

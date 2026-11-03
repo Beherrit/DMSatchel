@@ -376,8 +376,9 @@ export function dueInHere(place) {
 // or { npc, party: true } for a hireling, or null when they're not an NPC with a routine (or there's no clock).
 export function whereNow(name) {
   const m = now();
-  const n = String(name || '').replace(/\[\[([^\]|]+)(\|[^\]]*)?\]\]/g, '$1').split(/[,(;]/)[0].trim();
-  const npc = n && findByName(n);
+  // name: a name as written, or the NPC's entry itself.
+  const n = typeof name === 'object' ? '' : String(name || '').replace(/\[\[([^\]|]+)(\|[^\]]*)?\]\]/g, '$1').split(/[,(;]/)[0].trim();
+  const npc = typeof name === 'object' ? name : n && findByName(n);
   if (m === null || !npc || npc.kind !== 'npc' || ['Dead', 'Missing'].includes(npc.fields?.status)) return null;
   if (isHired(npc)) return { npc, party: true };
   const w = npc.fields?.routine && whereAt(npc.fields.routine, m);

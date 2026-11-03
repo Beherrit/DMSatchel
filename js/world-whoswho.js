@@ -2,7 +2,8 @@
 // pronunciations and one line each. Built from what the viewer can see, so a player's copy is safe to hand round.
 // Route: #world/whoswho
 import { el } from './dom.js';
-import { worldEntries, getEntry, link, mentions, notice } from './world-store.js';
+import { world, worldEntries, getEntry, link, mentions, notice } from './world-store.js';
+import { hhmm } from './clock.js';
 import { thumb } from './image-ui.js';
 import { sayOf } from './say.js';
 import { castList } from './cast.js';
@@ -14,6 +15,7 @@ import { isHired } from './hirelings.js';
 import { sceneOf } from './appearances.js';
 import { openBounties } from './bounty.js';
 import { PLACE_KINDS } from './world-schema.js';
+import { whereNow } from './world-routine.js';
 
 // Routines on the cast list: where they're usually found by day (morning, else afternoon), from their routine.
 const usually = (e) => { if (isHired(e)) return 'Travelling with the party'; const d = dayLine(e.fields?.routine); return d ? `Usually ${d}` : ''; };
@@ -38,6 +40,8 @@ export function viewWhosWho() {
             wanted.has(e.id) ? [' ', el('span', { class: 'tag cast-wanted' }, `🎯 wanted: ${wanted.get(e.id).text}`)] : null, sayOf(e) ? el('span', { class: 'cast-say' }, ` (${sayOf(e)})`) : null),
           el('div', { class: 'small muted' }, [f.role, ageOf(worldCalendar(), e) ? ageText(ageOf(worldCalendar(), e)) : '', where?.name].filter(Boolean).join(' · ')),
           usually(e) ? el('div', { class: 'small cast-where' }, usually(e)) : null,
+          // Where they are now, by the world's clock.
+          (() => { const w = whereNow(e); return w ? el('div', { class: 'small cast-now' }, `🕰 Now (${hhmm(world.info.clock.minutes)}): `, w.party ? 'with the party' : [typeof w.place === 'string' ? w.place : link(w.place), w.until !== null ? ` until ${hhmm(w.until)}` : '']) : null; })(),
           line(e) ? el('p', { class: 'small' }, line(e)) : null,
           el('div', { class: 'small muted' }, `Met in ${count} session${count === 1 ? '' : 's'} · last in `, link(last), (() => { const at = sceneOf(last, mentions, getEntry, PLACE_KINDS, e); return at ? [', at ', link(at)] : null; })())));
     })));
