@@ -19,7 +19,7 @@ import { readGoals, activeGoals } from './goals.js';
 import { readWishes, openWishes } from './wishes.js';
 import { spotlight } from './spotlight.js';
 import { clockCard } from './world-clock.js';
-import { appearances, dueBack, sceneOf } from './appearances.js';
+import { turnUp, turnUpList, turnUpNote } from './world-turnup.js';
 import { stripMarks } from './rich.js';
 import { notePartyMove } from './world-journey.js';
 import { readAloudList } from './world-readaloud.js';
@@ -168,20 +168,9 @@ function turnUpSection(prep) {
   const here = prep.location_id && getEntry(prep.location_id);
   if (!here) return null;
   const town = townOf(here) || here;
-  const people = descendantsOf(town.id).filter((e) => e.kind === 'npc' && e.fields?.status !== 'Dead');
-  const seen = appearances(worldEntries(), mentions);
-  const due = dueBack(people, seen).slice(0, 8);
+  const due = turnUp(town);
   if (!due.length) return null;
-  return card(`Who might turn up in ${town.name}`,
-    el('p', { class: 'muted small' }, 'People here the party has met before but not in the last two sessions, then key people they haven’t met yet.'),
-    list(due, (p) => { const s = seen.get(p.id); return [link(p), p.fields?.role ? el('span', { class: 'muted small' }, ` ${p.fields.role}`) : null,
-      el('div', { class: 'muted small prep-last-seen' }, s ? lastSeenBits(p, s) : 'Key person, not met yet')]; }));
-}
-
-// Where and when: "Last seen in Session 4, at The Bell, 3 sessions ago · met 2 times" (the place from that session's log).
-function lastSeenBits(p, s) {
-  const at = sceneOf(s.last, mentions, getEntry, PLACE_KINDS, p);
-  return ['Last seen in ', link(s.last), at ? [', at ', link(at)] : '', `, ${s.ago} sessions ago`, s.count > 1 ? ` · met ${s.count} times` : ''];
+  return card(`Who might turn up in ${town.name}`, el('p', { class: 'muted small' }, turnUpNote), turnUpList(due));
 }
 
 function questsSection() {

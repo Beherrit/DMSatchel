@@ -589,7 +589,7 @@ to the log at the bottom.
     month): "🎉 Bridge Day in 4 days."
 304. [x] **What's new since you looked.** The footer's "What's new" link counts changes shipped since this browser
     last opened the page, and the page marks them.
-305. [ ] **Who might turn up, on the town's page.** GMs see the people due back (met before but not lately, or key
+305. [x] **Who might turn up, on the town's page.** GMs see the people due back (met before but not lately, or key
     people not met) on a settlement's page, as session prep shows them.
 
 ## Ideas parking lot
@@ -904,3 +904,4 @@ to the log at the bottom.
 - The next festival: on other days, a settlement's page says when the next holiday is, within a month ("🎉 Bridge Day in 4 days."), and on the eve that festive goods cost a quarter more today and the shops will be shut.
 - A full sweep: all 315 browser tests rerun; no crashes or page errors, and the same flagged files as the last sweep (the deliberate error-path 400s).
 - What's new since you looked: once a browser has opened the What's new page, the footer link counts what has shipped since ("What's new (3 new)"), and the page tags those items "New" and says how many. The count is fetched at idle time and only for browsers that have looked before.
+- Who might turn up, on the town's page: GMs see a folded "Who might turn up (3)" on a settlement's page, the same list as session prep (people due back, with where and when each was last seen, then key people not met). Players and player preview don't see it. Prep and the town page now share one module (world-turnup.js).

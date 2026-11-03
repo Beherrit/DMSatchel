@@ -4,7 +4,8 @@
 
 import { el, toast, toastUndo, confirmButton, setKids, download } from './dom.js';
 import { entriesCSV } from './csv.js';
-import { api, session, isGm, isMember, isPlayer, signedIn, onSession, setPreview } from './api.js';
+import { api, session, isGm, isMember, isPlayer, signedIn, onSession, setPreview, previewing } from './api.js';
+import { turnUp, turnUpList, turnUpNote } from './world-turnup.js';
 import { KINDS, KIND_ORDER, LINK_LABELS, STANDING_KINDS, PLACE_KINDS, PLAYER_KINDS, fieldApplies } from './world-schema.js';
 import { openSignIn } from './signin.js';
 import { stripMarks } from './rich.js';
@@ -395,7 +396,7 @@ function viewEntry(id, tab) {
       e.summary ? el('p', { class: 'lede' }, richInline(e.summary)) : null,
       fieldRows.length ? el('dl', { class: 'traits' }, fieldRows.flatMap(([l, v, type]) => [el('dt', {}, l), el('dd', {}, type === 'long' ? richText(v) : /^https:\/\/\S+$/.test(v) ? el('a', { href: v, target: '_blank', rel: 'noopener' }, /dndbeyond\.com/.test(v) ? 'Open on D&D Beyond ↗' : 'Open link ↗') : el('span', {}, v))])) : null),
     sinceLastCard(e), comingUpCard(e),
-    routineNow(e), crossPathsLine(e), mindingLine(e), festivalLine(e), hereNow(e), laterLine(e), regularsLine(e), busiestLine(e), townHoursBox(e), rollTownButton(e, rerenderWorld),
+    routineNow(e), crossPathsLine(e), mindingLine(e), festivalLine(e), hereNow(e), laterLine(e), regularsLine(e), busiestLine(e), townHoursBox(e), turnUpBox(e), rollTownButton(e, rerenderWorld),
     e.kind === 'npc' || e.fields?.stats || e.fields?.spells ? statSection(e) : null,
     e.kind === 'clan' ? clanTree(e, rerenderWorld) : null,
     e.kind === 'npc' || e.kind === 'character' ? familySection(e, rerenderWorld) : null,
@@ -942,4 +943,12 @@ export function mountWorld(root) {
     world.loaded = false;
     if (location.hash.startsWith('#world')) showWorld(location.hash.slice(1).split('/').slice(1));
   });
+}
+
+// Who might turn up, on a settlement's page (GMs): the people due back here, as session prep shows them.
+function turnUpBox(e) {
+  if (e.kind !== 'settlement' || !isGm() || previewing()) return null;
+  const due = turnUp(e);
+  if (!due.length) return null;
+  return el('details', { class: 'turn-up' }, el('summary', {}, `Who might turn up (${due.length})`), el('p', { class: 'muted small' }, turnUpNote), turnUpList(due));
 }
