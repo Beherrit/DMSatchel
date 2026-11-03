@@ -598,6 +598,14 @@ to the log at the bottom.
 308. [x] **Shut shops on the shopping list.** A character's shopping list says when the shop an item is from is shut
     right now, and when it opens.
 309. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
+310. [ ] **Links to a change.** Each change on the What's new page has its own link (#news/305) that opens the page
+    scrolled to it, with a copy-link button.
+311. [ ] **Search finds changes.** Ctrl K finds shipped changes by name ("What's new: Festival day card") and opens
+    them on the What's new page.
+312. [ ] **When the owner's in.** A shop's page says when its owner is usually behind the counter, from their
+    routine ("Bramwell is in by day; evenings at the Bell").
+313. [ ] **The festival in session prep.** On a holiday, session prep notes it under where the party is, with who's
+    at the taverns there now.
 
 ## Ideas parking lot
 
