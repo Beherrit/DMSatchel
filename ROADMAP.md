@@ -627,7 +627,7 @@ to the log at the bottom.
 324. [x] **Bounties in session prep.** Session prep warns when someone with a bounty is about in the party's town now
     (or due in later today).
 325. [x] **Festival specials on the map.** On a holiday, a tavern's map pin popup shows its festival special.
-326. [ ] **A wanted poster.** An NPC with an open bounty gets a printable "WANTED" poster from their page: name, what
+326. [x] **A wanted poster.** An NPC with an open bounty gets a printable "WANTED" poster from their page: name, what
     they look like, the reward and who offers it.
 327. [ ] **Last seen, for bounty hunters.** The party page's Wanted card says where each was last seen, from the
     session logs.
@@ -967,3 +967,4 @@ to the log at the bottom.
 - Around now on the session sheet: the printable session sheet has a "🕰 Around now (18:00)" block: who the routines put where the party is (or somewhere inside it) at the world's hour, and until when ("Ada at The Bell until 19:00").
 - Bounties in session prep: under where the party is, prep warns "🎯 Wanted, and about: Red Jack (500 gp) is due in town around 17:00; Lim (50 gp) is in town now." for anyone with an open bounty whose routine has them in the party's town now or later today.
 - Festival specials on the map: on a holiday, a tavern's map pin popup shows the same special as its page: "🎉 Bridge Day special: Bridge Day cake (1 sp 5 cp)".
+- A wanted poster: an NPC with a bounty (not GM-only) has a "🎯 Wanted poster" button on their page; #world/poster/<their id> prints a poster with their name, appearance, the reward and who offers it (crossed out as CLAIMED once paid).

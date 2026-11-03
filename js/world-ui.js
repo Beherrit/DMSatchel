@@ -437,6 +437,8 @@ function viewEntry(id, tab) {
     isGm() && e.secret ? el('aside', { class: 'secret' }, el('div', { class: 'eyebrow' }, 'GM only'), richText(e.secret)) : null,
     mentionsCard(e, rerenderWorld),
     e.kind === 'npc' ? lastSeenLine(e) : null,
+    // A wanted poster: for anyone with a bounty on their head.
+    e.kind === 'npc' && String(e.fields?.bounty || '').trim() && e.visibility !== 'gm' ? el('p', { class: 'small' }, el('a', { class: 'btn small', href: `#world/poster/${e.id}` }, '🎯 Wanted poster')) : null,
     out.length || incoming.length ? el('section', {}, el('h3', { class: 'section-title' }, 'Connections'),
       el('ul', { class: 'links' },
         out.map((l) => el('li', { class: l.secret ? 'secret-link' : '' }, el('span', { class: 'rel' }, l.label), ' ', link(l.target), el('span', { class: 'kind-tag' }, kindLabel(l.target.kind)), l.secret ? el('span', { class: 'tag' }, 'GM only') : null)),

@@ -36,9 +36,24 @@ export async function showPoster(place) {
   } catch (err) { toast(err.message, 'bad'); }
 }
 
+// A wanted poster: one NPC with a bounty, on their own poster (claimed ones are crossed out).
+export function wantedPoster(npc) {
+  const wanted = wantedFor(npc, [npc], [npc], { claimed: true });
+  if (!wanted.length) return null;
+  return { title: `Wanted: ${npc.name}`, by: '', date: worldCalendar() ? todayText() : '', jobs: [], wanted, more: 0 };
+}
+
 export function viewPoster(id) {
   const place = getEntry(id);
   if (!place) return notice('Not found', 'That place doesn’t exist, or you can’t see it.');
+  if (place.kind === 'npc') {
+    const p = wantedPoster(place);
+    if (!p) return notice('No bounty', `There’s no bounty on ${place.name} to put on a poster.`);
+    return el('div', { class: 'w-view poster-view' },
+      el('div', { class: 'panel-head row' }, el('div', {}, el('h2', {}, `Wanted poster: ${place.name}`), el('p', {}, 'A poster for the table: print it, or pin it on the notice board.')),
+        el('div', { class: 'btnrow' }, el('button', { class: 'btn primary', type: 'button', onclick: () => window.print() }, 'Print'), el('a', { class: 'btn ghost', href: `#world/e/${place.id}` }, `Back to ${place.name}`))),
+      posterNode(p));
+  }
   return el('div', { class: 'w-view poster-view' },
     el('div', { class: 'panel-head row' }, el('div', {}, el('h2', {}, `Job board: ${place.name}`), el('p', {}, 'The open jobs and wanted notices as a poster for the table. Print it, or show it on everyone’s screen.')),
       el('div', { class: 'btnrow' },
