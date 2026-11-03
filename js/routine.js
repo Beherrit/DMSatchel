@@ -225,3 +225,12 @@ export function timeAt(routine, isHere, from, to) {
   for (let m = from; m < to; m += 30) { const w = whereAt(routine, m % 1440); if (w && isHere(w.place)) n += 30; }
   return n;
 }
+
+// Routines that don't read: the lines the clock can't read, and the places a routine names that aren't in the world
+// (resolve(name) → the place or null), leaving out everyday places that needn't be written up ("home", "the road").
+const ANYWHERE = /^(at )?(home|bed|abed|asleep|sleeping|out|away|about|about town|around town|elsewhere|anywhere|wandering|travell?ing|on the road|the road|the roads|the fields|the woods|the forest|the docks|the market|the streets|the wilds|outside|indoors|nowhere)$/i;
+export function routineCheck(text, resolve) {
+  const bad = unreadable(text);
+  const unknown = [...new Set(parseRoutine(text).map((p) => p.place).filter((p) => p && !ANYWHERE.test(p.trim()) && !resolve(p)))];
+  return { bad, unknown };
+}

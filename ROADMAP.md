@@ -631,7 +631,7 @@ to the log at the bottom.
     they look like, the reward and who offers it.
 327. [x] **Last seen, for bounty hunters.** The party page's Wanted card says where each was last seen, from the
     session logs.
-328. [ ] **Routines that don't read.** GMs get a list of every NPC routine with lines the clock can't read, or
+328. [x] **Routines that don't read.** GMs get a list of every NPC routine with lines the clock can't read, or
     places it names that aren't in the world, to fix in one go.
 329. [ ] **Wanted on the map.** A map pin's popup notes anyone wanted who's there right now.
 
@@ -969,3 +969,4 @@ to the log at the bottom.
 - Festival specials on the map: on a holiday, a tavern's map pin popup shows the same special as its page: "🎉 Bridge Day special: Bridge Day cake (1 sp 5 cp)".
 - A wanted poster: an NPC with a bounty (not GM-only) has a "🎯 Wanted poster" button on their page; #world/poster/<their id> prints a poster with their name, appearance, the reward and who offers it (crossed out as CLAIMED once paid).
 - Last seen, for bounty hunters: each person on the party page's Wanted card says where the party last saw them, from the session logs: "👁 Last seen in Session 1, at The Bell (1 session ago)".
+- Routines that don't read: the GMs' "What needs writing" page lists every NPC routine with lines the clock can't read ("Can't read: brunch: The Bell") or places it names that aren't in the world ("Not in the world: the Mill"), each with an Edit button. Everyday places (home, the road, the market, the woods…) aren't flagged.

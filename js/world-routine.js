@@ -2,7 +2,7 @@
 // place's page lists who is there now. Read from the clock the GMs move on (Time and light).
 import { el, setKids, toast } from './dom.js';
 import { world, worldEntries, link, findByName, getEntry, patchEntry } from './world-store.js';
-import { whereAt, aboutTown, regularsAt, unreadable, townByHour, rollRoutine, dayOf, dueLater, busiestHour, crossPaths, atTaverns, ownerDay, timeAt } from './routine.js';
+import { whereAt, aboutTown, regularsAt, unreadable, townByHour, rollRoutine, dayOf, dueLater, busiestHour, crossPaths, atTaverns, ownerDay, timeAt, routineCheck } from './routine.js';
 import { holidayToday, nextHoliday, tradingHours } from './shop-hours.js';
 import { openBounties } from './bounty.js';
 import { cleanCalendar } from './calendar.js';
@@ -304,4 +304,12 @@ export function wantedCard(town) {
   return el('section', { class: 'card wanted-here', 'aria-label': 'Wanted here' }, el('h3', {}, `🎯 Wanted in ${town.name}`),
     el('ul', { class: 'plain' }, list.slice(0, 8).map(({ bounty: b, now: n }) => el('li', {}, link(b.entry), `: ${b.text}`, b.by ? el('span', { class: 'muted small' }, ` (from ${b.by})`) : null,
       n ? el('div', { class: 'small' }, `🕰 About town now: `, n.place.id === town.id ? 'somewhere in town' : link(n.place), n.until !== null ? el('span', { class: 'muted' }, ` until ${hhmm(n.until)}`) : null) : null))));
+}
+
+// Routines that don't read (GMs): every NPC whose routine has lines the clock can't read or names places that
+// aren't in the world. → [{ entry, bad, unknown }]
+export function routineIssues() {
+  return worldEntries().filter((x) => x.kind === 'npc' && String(x.fields?.routine || '').trim() && !['Dead'].includes(x.fields?.status))
+    .map((entry) => ({ entry, ...routineCheck(entry.fields.routine, placeOf) })).filter((x) => x.bad.length || x.unknown.length)
+    .sort((a, b) => a.entry.name.localeCompare(b.entry.name));
 }

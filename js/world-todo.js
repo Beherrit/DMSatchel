@@ -4,6 +4,7 @@ import { isGm } from './api.js';
 import { worldEntries, link, kindLabel, byName, getEntry, notice } from './world-store.js';
 import { thinSpots, missingLinks } from './thin.js';
 import { KINDS, KIND_ORDER } from './world-schema.js';
+import { routineIssues } from './world-routine.js';
 
 const GROUPS = [
   ['undescribed', 'No summary or description', 'A line or two each is enough to run them at the table.'],
@@ -13,6 +14,17 @@ const GROUPS = [
   ['unconnected', 'Not connected to anything', 'Not inside a place and with no connections, so nothing leads to them.'],
   ['longHidden', 'Hidden from players for over a month', 'Still secret, or ready to reveal?'],
 ];
+
+// Routines that don't read: lines the clock can't read, and places named that aren't in the world, to fix in one go.
+function routinesSection(list) {
+  if (!list.length) return null;
+  return el('section', { class: 'card todo-group routine-issues' }, el('h3', {}, `Routines that don’t read (${list.length})`),
+    el('p', { class: 'muted small' }, 'Write each part of the day as “when: where” (mornings, evenings, nights, “9–17”, otherwise), and name places that are in the world so the clock can find them.'),
+    el('ul', { class: 'plain todo-list' }, list.slice(0, 40).map(({ entry, bad, unknown }) => el('li', {}, link(entry),
+      bad.length ? el('div', { class: 'small' }, 'Can’t read: ', bad.map((b, i) => [i ? ', ' : '', el('q', {}, b)])) : null,
+      unknown.length ? el('div', { class: 'small' }, 'Not in the world: ', unknown.join(', ')) : null,
+      el('a', { class: 'btn small ghost', href: `#world/edit/${entry.id}` }, 'Edit')))));
+}
 
 // [[Names]] that lead nowhere yet, with where they're mentioned and a way to create each (pick its kind first).
 function missingSection(missing) {
@@ -34,11 +46,13 @@ export function viewTodo() {
   if (!isGm()) return notice('GMs only', 'This page finds thin spots in the world for the GMs to fill in.');
   const spots = thinSpots(worldEntries());
   const missing = missingLinks(worldEntries());
-  const total = GROUPS.reduce((t, [k]) => t + spots[k].length, 0) + missing.length;
+  const routines = routineIssues();
+  const total = GROUPS.reduce((t, [k]) => t + spots[k].length, 0) + missing.length + routines.length;
   return el('div', { class: 'w-view todo-view' },
     el('div', { class: 'panel-head' }, el('h2', {}, 'What needs writing'), el('p', {}, total ? `${total} thin spot${total === 1 ? '' : 's'} to fill in, most useful first.` : 'Nothing thin: every entry has something written, every place has people in it.'),
       el('p', { class: 'small' }, el('a', { href: '#world/dupes' }, 'Likely duplicates'), ': entries that may be the same thing, to merge.')),
     missingSection(missing),
+    routinesSection(routines),
     GROUPS.map(([k, title, hint]) => {
       const list = [...spots[k]].sort(byName);
       return list.length ? el('section', { class: 'card todo-group' }, el('h3', {}, `${title} (${list.length})`), el('p', { class: 'muted small' }, hint),

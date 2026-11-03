@@ -141,3 +141,11 @@ test('timeAt counts the time a routine spends at a place', async () => {
   assert.equal(timeAt('Nights: the Forge; otherwise: home', forge, 8 * 60, 20 * 60), 0);
   assert.equal(timeAt('Nights: the Forge; otherwise: home', forge, 8 * 60, 26 * 60), 5 * 60);
 });
+
+test('routineCheck: unreadable lines and unknown places, everyday places left alone', async () => {
+  const { routineCheck } = await import('../js/routine.js');
+  const known = (p) => /bell|forge/i.test(p);
+  assert.deepEqual(routineCheck('By day: the Forge; evenings: the Bell; otherwise: home', known), { bad: [], unknown: [] });
+  assert.deepEqual(routineCheck('Mornings: the Mill; brunch: the Bell; nights: on the road', known), { bad: ['brunch: the Bell'], unknown: ['the Mill'] });
+  assert.deepEqual(routineCheck('', known), { bad: [], unknown: [] });
+});
