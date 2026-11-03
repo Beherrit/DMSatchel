@@ -11,6 +11,7 @@ import { outAndAbout, partyTown, townSnapshot } from './world-routine.js';
 import { clockDiff, diffText } from './clock-diff.js';
 import { formatDate, today, cleanCalendar } from './calendar.js';
 import { holidayToday, holidayTomorrow } from './shop-hours.js';
+import { moonlight } from './moonlight.js';
 
 // What changed when time last moved (kept across redraws: a new day redraws the whole page).
 let lastChange = '';
@@ -80,6 +81,9 @@ export function clockCard() {
       (() => { const h = holidayToday(cleanCalendar(world.info?.cal)); return h ? el('p', { class: 'small clock-holiday' }, `🎉 ${h}: the shops are shut today; the taverns are open.`) : null; })(),
       // Eve of a holiday on the clock: festive goods cost more today, and the shops shut tomorrow.
       (() => { const h = holidayTomorrow(cleanCalendar(world.info?.cal)); return h ? el('p', { class: 'small clock-eve' }, `🎉 ${h} tomorrow: festive goods cost a quarter more today, and the shops will be shut.`) : null; })(),
+      // Moonlight at night: how much the moons light the way (from 20:00 to 05:00).
+      (() => { const m = c.minutes % 1440, cal = cleanCalendar(world.info?.cal); if (!cal || !(m >= 20 * 60 || m < 5 * 60)) return null;
+        const l = moonlight(cal, today(cal)); return l ? el('p', { class: `small clock-moon${l.level === 0 ? ' dark' : ''}` }, `${l.icon} ${l.text}.`) : null; })(),
       // Last orders on the clock: late at night, when the world's taverns call last orders and shut.
       (() => {
         const m = c.minutes % 1440, taverns = worldEntries().some((e) => e.kind === 'location' && e.fields?.type === 'Tavern');

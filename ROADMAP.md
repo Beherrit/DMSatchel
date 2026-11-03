@@ -700,7 +700,7 @@ to the log at the bottom.
 371. [x] **Members about now.** A faction's page lists its members (the NPCs connected to it) and where each is
     right now.
 372. [x] **The time on the party's map marker.** The party's marker on a map says the world's time with the weather.
-373. [ ] **Moonlight at night.** At night the clock card says how much the moons light the way (full, half, dark).
+373. [x] **Moonlight at night.** At night the clock card says how much the moons light the way (full, half, dark).
 
 ## Ideas parking lot
 
@@ -1081,3 +1081,4 @@ to the log at the bottom.
 - A full sweep: all 368 browser tests rerun; no crashes or page errors, last time's three flags (the What's new link, fixed in #345, and two load flakes) are gone, and nothing new is flagged.
 - Members about now: a faction's (or guild's or clan's) page lists its members, the NPCs connected to it either way, with where each is right now: "🕰 Members about now (18:00): Ada is at The Bell until 19:00; Cpt. Rook is at Gatehouse".
 - The time on the party's map marker: hovering (or a screen reader on) the party's marker now gives the world's time with the weather: "The party is here, in Brindle. It's 18:30, evening. Today: Heavy rain…".
+- Moonlight at night: from 20:00 to 05:00 the clock card says how much the moons light the way, from tonight's phases (the brightest moon wins, named when there are several): "🌕 Full moon: bright enough to read by outdoors." down to "🌑 New moon: no moon to see by, so bring a light." Pure in moonlight.js.
