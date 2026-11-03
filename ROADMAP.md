@@ -697,7 +697,7 @@ to the log at the bottom.
     left, with the time.
 369. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 370. [x] **Where they are now, on the cast list.** Who's who says where each person is at the world's hour.
-371. [ ] **Members about now.** A faction's page lists its members (the NPCs connected to it) and where each is
+371. [x] **Members about now.** A faction's page lists its members (the NPCs connected to it) and where each is
     right now.
 372. [ ] **The time on the party's map marker.** The party's marker on a map says the world's time with the weather.
 373. [ ] **Moonlight at night.** At night the clock card says how much the moons light the way (full, half, dark).
@@ -1079,3 +1079,4 @@ to the log at the bottom.
 - Lights on the session sheet: the printable session sheet has a "🔥 Time and light" block: the world's time and part of the day, and each light burning with how long it has left ("Torch (1 h left)", "Continual flame (until put out)").
 - Where they are now, on the cast list: Who's who now says, under each person's usual day, where they are at the world's hour: "🕰 Now (18:00): The Bell until 19:00" (hirelings: with the party).
 - A full sweep: all 368 browser tests rerun; no crashes or page errors, last time's three flags (the What's new link, fixed in #345, and two load flakes) are gone, and nothing new is flagged.
+- Members about now: a faction's (or guild's or clan's) page lists its members, the NPCs connected to it either way, with where each is right now: "🕰 Members about now (18:00): Ada is at The Bell until 19:00; Cpt. Rook is at Gatehouse".

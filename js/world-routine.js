@@ -1,7 +1,7 @@
 // Where are they now?: an NPC's page says where their daily routine puts them at the world's current hour, and a
 // place's page lists who is there now. Read from the clock the GMs move on (Time and light).
 import { el, setKids, toast } from './dom.js';
-import { world, worldEntries, link, findByName, getEntry, patchEntry } from './world-store.js';
+import { world, worldEntries, link, findByName, getEntry, patchEntry, linkedTo } from './world-store.js';
 import { whereAt, aboutTown, regularsAt, townByHour, rollRoutine, dayOf, dueLater, busiestHour, crossPaths, atTaverns, ownerDay, timeAt, routineCheck } from './routine.js';
 import { holidayToday, nextHoliday, tradingHours, openText, tradeDay, isMarketDay } from './shop-hours.js';
 import { openBounties } from './bounty.js';
@@ -393,3 +393,14 @@ export function patronLine(q) {
   return w ? el('p', { class: 'small patron-now' }, `🕰 Now (${hhmm(now())}): `, link(w.npc), whereBits(w), '.') : null;
 }
 export { whereBits };
+
+// Members about now: on a faction, guild or clan, its members (NPCs connected to it either way) and where each is now.
+export function membersNowCard(org) {
+  if (!['faction', 'guild', 'clan'].includes(org.kind) || now() === null) return null;
+  const ids = new Set([...linkedTo(org.id, ['npc']).map((x) => x.id), ...(org.links || []).map((l) => l.id)]);
+  const rows = [...ids].map((id) => getEntry(id)).filter((x) => x?.kind === 'npc').map((npc) => ({ npc, w: whereNow(npc) })).filter((x) => x.w)
+    .sort((a, b) => a.npc.name.localeCompare(b.npc.name));
+  if (!rows.length) return null;
+  return el('section', { class: 'card members-now', 'aria-label': 'Members about now' }, el('h3', {}, `🕰 Members about now (${hhmm(now())})`),
+    el('ul', { class: 'plain' }, rows.slice(0, 20).map(({ npc, w }) => el('li', {}, link(npc), whereBits(w)))));
+}
