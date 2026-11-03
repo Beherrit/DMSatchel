@@ -23,7 +23,7 @@ import { holidayToday, holidayTomorrow, EVE_MARKUP, openText } from './shop-hour
 import { aroundNow, dueInHere } from './world-routine.js';
 import { dayLine } from './routine.js';
 import { isHired } from './hirelings.js';
-import { hhmm } from './clock.js';
+import { hhmm, readClock, leftText, partOfDay } from './clock.js';
 import { dayFor } from './world-hours.js';
 
 const ACTIVE_PC = (e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
@@ -71,6 +71,10 @@ export async function viewSessionSheet() {
       holidayNote(cal)),
     el('div', { class: 'ss-grid' },
       (() => { const r = remindersPrint(prep); return r.length ? block('📌 Remember', el('ul', { class: 'ss-steps' }, r)) : null; })(),
+      // Lights on the sheet: the time, and what's burning and for how long.
+      (() => { if (!world.info?.clock) return null; const c = readClock(world.info.clock);
+        return block('🔥 Time and light', el('p', {}, el('strong', {}, hhmm(c.minutes)), ` · ${partOfDay(c.minutes)}`),
+          c.lights.length ? el('ul', { class: 'ss-list ss-lights' }, c.lights.map((l) => el('li', {}, l.name, l.forever ? ' (until put out)' : ` (${leftText(l.left)} left)`))) : el('p', { class: 'small' }, 'No lights burning.')); })(),
       block('The party', pcs.length ? el('table', { class: 'ss-table' },
         el('thead', {}, el('tr', {}, ['Character', 'Player', 'AC', 'HP', 'Notes'].map((h) => el('th', { scope: 'col' }, h)))),
         el('tbody', {}, pcs.map((c) => { const v = vitals(c); return el('tr', {}, el('td', {}, c.name, sayOf(c) ? el('span', { class: 'small' }, ` (${sayOf(c)})`) : null), el('td', {}, c.owner || c.fields?.player || ''), el('td', { class: 'num' }, v.ac ?? '—'), el('td', { class: 'num' }, v.max ? `${v.hp}/${v.max}` : '—'), el('td', { class: 'small' }, [...(v.conditions || []), v.exhaustion ? `exhaustion ${v.exhaustion}` : '', v.inspiration ? 'inspired' : ''].filter(Boolean).join(', '))); })))

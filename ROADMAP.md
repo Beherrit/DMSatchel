@@ -693,7 +693,7 @@ to the log at the bottom.
 366. [x] **Patrons on the quest board.** A town's quest board says where each job's patron is right now.
 367. [x] **Where to ask, on the job poster.** The printable job board says where to find each patron ("Ask for
     Bramwell, by day at The Forge").
-368. [ ] **Lights on the session sheet.** The printable session sheet lists the lights burning and how long each has
+368. [x] **Lights on the session sheet.** The printable session sheet lists the lights burning and how long each has
     left, with the time.
 369. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 
@@ -1071,3 +1071,4 @@ to the log at the bottom.
 - Last orders on the map: in a tavern's last hour, its map pin popup says "🍺 Last orders: it shuts in 40 min." instead of its hours (following its own hours, if it keeps them).
 - Patrons on the quest board: each open job on a town's quest board says where its patron is right now: "🕰 Bramwell is at The Forge until 17:00 now" (finished jobs don't).
 - Where to ask, on the job poster: the printable job board now says where to find each patron, from the first part of their day their routine names (home aside): "Ask for Bramwell, by day at The Forge", "Ask for Mags, evenings at the Bell". Also fixed: a patron written as a [[link]] no longer shows its brackets on the poster.
+- Lights on the session sheet: the printable session sheet has a "🔥 Time and light" block: the world's time and part of the day, and each light burning with how long it has left ("Torch (1 h left)", "Continual flame (until put out)").
