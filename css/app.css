@@ -554,7 +554,7 @@ tr.disabled td { color: var(--muted) }
 .cond.shortage .cond-kind { color: var(--danger) } .cond.surplus .cond-kind { color: var(--good) }
 .cond-reason { flex-basis: 100%; font-family: var(--f-flavor); font-size: calc(17px * var(--ts, 1)) }
 .festival { font-family: var(--f-flavor); font-size: calc(17px * var(--ts, 1)); color: var(--brass) }
-.stock { display: grid; gap: 10px }
+.stock { display: grid; gap: 10px; grid-template-columns: minmax(0, 1fr) } /* a wide stock table scrolls in its wrap instead of widening the page */
 .shop-meta { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: calc(15px * var(--ts, 1)) }
 .shop-helpers { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; background: var(--sunk); border-radius: 8px; padding: 8px 10px }
 .helper { display: inline-flex; gap: 6px; align-items: center; flex-wrap: wrap; font-size: calc(14px * var(--ts, 1)) }

@@ -619,7 +619,7 @@ to the log at the bottom.
 319. [x] **Your shopping trip.** A character's shopping list groups what's on it by the shops in town that stock it,
     as a little route, open or shut.
 320. [x] **The owner's hours on the map.** A shop's map pin popup also says when its owner is usually in.
-321. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
+321. [x] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 322. [x] **Wanted in town.** A settlement's page lists the open bounties on people who live there or whose routine
     brings them there, and who's about town right now.
 323. [x] **Around now on the session sheet.** The printable session sheet marks who the routines put where the party
@@ -978,3 +978,4 @@ to the log at the bottom.
 - Routines that don't read: the GMs' "What needs writing" page lists every NPC routine with lines the clock can't read ("Can't read: brunch: The Bell") or places it names that aren't in the world ("Not in the world: the Mill"), each with an Edit button. Everyday places (home, the road, the market, the woods…) aren't flagged.
 - Wanted on the map: a place's map pin popup notes anyone with an open bounty whose routine has them there (or somewhere inside) right now: "🎯 Wanted, here now: Red Jack (500 gp) at The Bell".
 - Unknown places as you type: the routine preview on an NPC's form now also says "Not in the world yet: the Granary, the Mill" for the other places the routine names that have no entry (everyday ones like home and the road aside).
+- A full sweep: all 336 browser tests rerun, no crashes. Two new flags: a 403 in the dialogs test (passes on rerun, a load flake), and a real one: a curiosity shop whose stock table was wider than a phone widened its whole page (518 px). Fixed: the stock grid's column can now shrink, so a wide table scrolls in its own box. Checked across 12 rolled curiosity shops at 390 px.
