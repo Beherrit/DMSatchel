@@ -666,6 +666,14 @@ to the log at the bottom.
 348. [x] **Open now in town.** At night or on a day off, a settlement's page says what's still open ("Open now: The
     Bell, Night Market").
 349. [x] **"Open now" in search.** Typing "open now" in Ctrl K lists every shop and tavern open at the world's hour.
+350. [ ] **Open on holidays.** A shop can choose to stay open on holidays (a festival stall, a chandler selling
+    candles), an additive field; it's then open as usual on festival days.
+351. [ ] **Market day.** A settlement can name its market day (a weekday); on that day its page says so and its
+    shops open two hours early.
+352. [ ] **Hours as you type.** The Opening hours field on a place's form says how it reads them as you type ("Open
+    18:00–02:00", or "Can't read that; the usual hours apply").
+353. [ ] **What changed when time moves.** When a GM moves the world's clock on, a note says which shops opened or
+    shut and who moved where in the party's town.
 
 ## Ideas parking lot
 
