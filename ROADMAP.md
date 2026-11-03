@@ -661,7 +661,7 @@ to the log at the bottom.
 344. [x] **Open or shut on the session sheet.** The session sheet's shop list says which are open now.
 345. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 346. [x] **Hours on the printed shelf.** "Print the shelf" includes the shop's hours and day off.
-347. [ ] **Rolled shops keep sensible hours.** A newly rolled shop gets hours that suit its trade (a baker opens
+347. [x] **Rolled shops keep sensible hours.** A newly rolled shop gets hours that suit its trade (a baker opens
     early, a night market late); existing shops are left as they are.
 348. [ ] **Open now in town.** At night or on a day off, a settlement's page says what's still open ("Open now: The
     Bell, Night Market").
@@ -1020,3 +1020,4 @@ to the log at the bottom.
 - A full sweep: all 347 browser tests rerun; no crashes or page errors, last time's two flags (the phone-width shop page and a load flake) are gone, and nothing new is flagged.
 - Open or shut on the session sheet: the sheet's shop list now gives each shop's hours by the world's clock today: "Shops: Night Market (shut till 20:00), Smithy (open till 20:00)", following own hours, days off and holidays.
 - Hours on the printed shelf: "Print the shelf" now puts the sign on the door under the shop's name: "Open 18:00–02:00 · Shut on Firedays" (the usual hours when it keeps no hours of its own).
+- Rolled shops keep sensible hours: a newly rolled shop (Market tab, the Shops tool's "Add to world", or a generated draft) gets hours that suit its trade: black market 10pm–4am, curiosity shop 11–19, bookseller 9–17, temple and stables 6–20, and so on; the rest keep the usual hours. Existing shops are untouched.

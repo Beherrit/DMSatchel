@@ -110,3 +110,10 @@ test('hoursSign: the sign on the door', async () => {
   assert.equal(hoursSign({ fields: { type: 'Tavern' } }), 'Open 08:00–02:00');
   assert.equal(hoursSign({ fields: { type: 'Shop', hours: '6pm–2am', closed_on: 'Firedays' } }), 'Open 18:00–02:00 · Shut on Firedays');
 });
+
+test('rolled shops keep hours that suit their trade, and they all read', async () => {
+  const { typicalHours, parseHours } = await import('../js/shop-hours.js');
+  const { SHOP_TYPES } = await import('../js/economy.js');
+  for (const t of Object.keys(SHOP_TYPES)) { const h = typicalHours(t); if (h) assert.ok(parseHours(h), `${t}: ${h}`); }
+  assert.equal(typicalHours('Black market'), '10pm–4am'); assert.equal(typicalHours('General store'), ''); assert.equal(typicalHours('Nope'), '');
+});

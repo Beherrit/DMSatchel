@@ -8,7 +8,7 @@ import { wildsSection, placeTerrains } from './encounter-ui.js';
 import { worldCalendar } from './world-calendar.js';
 import { dayWeather } from './forecast.js';
 import { toDays, today, cleanCalendar } from './calendar.js';
-import { openText, holidayToday, tradeDay } from './shop-hours.js';
+import { openText, holidayToday, tradeDay, typicalHours } from './shop-hours.js';
 import { hhmm } from './clock.js';
 import { counterGap } from './world-routine.js';
 import { deadlineOf, deadlineText } from './deadline.js';
@@ -259,7 +259,7 @@ function marketSection(place, rerender) {
       setKids(box, el('div', { class: 'entry-head' }, el('h4', {}, `${sh.name} · ${sh.type}`), el('button', { class: 'reroll', type: 'button', 'aria-label': 'Close', onclick: () => box.remove() }, '✕')),
         el('p', { class: 'muted small' }, `Run by ${owner}. ${sh.items.length + sh.special.length} items.`), renderStock(stockText(sh)),
         el('div', { class: 'btnrow' }, el('button', { class: 'btn primary small', type: 'button', onclick: async () => {
-          try { await createEntry({ kind: 'location', name: sh.name, parent_id: place.id, summary: `${sh.type} run by ${owner}.`, fields: { type: 'Shop', shop_type: sh.type, owner, stock: stockText(sh) } }); toast(`Opened ${sh.name}`); box.remove(); rerender(); }
+          try { await createEntry({ kind: 'location', name: sh.name, parent_id: place.id, summary: `${sh.type} run by ${owner}.`, fields: { ...(typicalHours(sh.type) ? { hours: typicalHours(sh.type) } : {}), type: 'Shop', shop_type: sh.type, owner, stock: stockText(sh) } }); toast(`Opened ${sh.name}`); box.remove(); rerender(); }
           catch (err) { toast(err.message, 'bad'); }
         } }, 'Open this shop'), el('button', { class: 'btn small', type: 'button', onclick: draw }, 'Different shop'), el('button', { class: 'btn small ghost', type: 'button', onclick: () => box.remove() }, 'Discard')));
     };

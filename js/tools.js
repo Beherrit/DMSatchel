@@ -18,6 +18,7 @@ import { renderMarket, renderStock } from './shop-ui.js';
 import { world, worldEntries, loadWorld, patchEntry } from './world-store.js';
 import { isGm, session, onSession } from './api.js';
 import { randomItem, uniqueItem, CURSES, curseText, itemEntry, RARITIES, RARITY_KEYS, ITEM_TYPES, MINOR_PROPERTIES } from './magic-items.js';
+import { typicalHours } from './shop-hours.js';
 
 const r = makeRng(Date.now());
 const pick = r.pick, pickW = r.pickW, d = r.dice, R = r.int;
@@ -423,7 +424,7 @@ function mountShops(root) {
           el('button', { class: 'btn', type: 'button', onclick: () => saveNote('Shop', shop.name, text()) }, 'Save to notebook'),
           el('button', { class: 'btn', type: 'button', onclick: () => copyText(text()) }, 'Copy'),
           el('button', { class: 'btn world', type: 'button', onclick: () => sendToWorld({ kind: 'location', name: shop.name, parent_id: t?.id || null, summary: `${shop.type} run by ${shop.ownerFull}. ${shop.attitude} with prices.`,
-            fields: { type: 'Shop', shop_type: shop.type, owner: shop.ownerFull, stock: stockText(shop) } }) }, t ? `Add to ${t.name}` : 'Add to world'))));
+            fields: { type: 'Shop', shop_type: shop.type, owner: shop.ownerFull, stock: stockText(shop), ...(typicalHours(shop.type) ? { hours: typicalHours(shop.type) } : {}) } }) }, t ? `Add to ${t.name}` : 'Add to world'))));
     fresh(out.lastChild);
   }
   fillTowns(); onSession(() => fillTowns());

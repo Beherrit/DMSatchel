@@ -7,6 +7,7 @@ import { personName, lastName, townName, tavernName, shopName, ANCESTRY_WEIGHTS 
 import * as D from './tables.js';
 import { npcStats } from './npc-stats.js';
 import { generateShop, parseMarket, rollMarket, stockText } from './economy.js';
+import { typicalHours } from './shop-hours.js';
 
 const r = makeRng(Date.now() ^ 0x5eed);
 const aOrAn = (s) => (/^[aeiou]/i.test(s) && !/^(uni|one)/i.test(s) ? 'an ' : 'a ') + s;
@@ -72,7 +73,7 @@ export function shopDraft(place) {
   const market = place?.fields?.market ? parseMarket(place.fields.market, size) : rollMarket(r, { size, economy: 'Stable' });
   const owner = personName(r, r.pickW(ANCESTRY_WEIGHTS));
   const sh = generateShop(r, { market, ownerName: owner, size });
-  return { kind: 'location', name: sh.name, parent_id: place?.id || null, summary: `${sh.type} run by ${owner}. ${sh.attitude} with prices.`, fields: { type: 'Shop', shop_type: sh.type, owner, stock: stockText(sh) } };
+  return { kind: 'location', name: sh.name, parent_id: place?.id || null, summary: `${sh.type} run by ${owner}. ${sh.attitude} with prices.`, fields: { ...(typicalHours(sh.type) ? { hours: typicalHours(sh.type) } : {}), type: 'Shop', shop_type: sh.type, owner, stock: stockText(sh) } };
 }
 
 export function settlementDraft(place) {

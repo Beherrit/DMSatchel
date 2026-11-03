@@ -120,3 +120,7 @@ export function hoursSign(shop) {
   const [from, to] = hoursOf(shop), off = String(shop?.fields?.closed_on || '').trim().replace(/s$/i, '');
   return `Open ${clock(from)}–${clock(to)}${off ? ` · Shut on ${off}s` : ''}`;
 }
+
+// Rolled shops keep sensible hours: the hours that suit a trade (SHOP_TYPES in economy.js), or '' for the usual.
+const TRADE_HOURS = { 'Black market': '10pm–4am', 'Curiosity shop': '11–19', 'Bookseller': '9–17', 'Temple': '6–20', 'Stables': '6–20', 'Shipwright & chandler': '6–18', 'Jeweler': '10–18', 'Magic shop': '10–18', 'Trading post': '7–19' };
+export const typicalHours = (type) => TRADE_HOURS[type] || '';
