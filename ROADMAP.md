@@ -687,7 +687,7 @@ to the log at the bottom.
 361. [x] **Shops in the town by the hour.** The town-by-the-hour table also shows which shops are open at each hour.
 362. [x] **Where to find the patron.** A quest's page says where its patron (an NPC) is right now and until when,
     from their routine.
-363. [ ] **Patrons in session prep.** Session prep's active quests say where each patron is now.
+363. [x] **Patrons in session prep.** Session prep's active quests say where each patron is now.
 364. [ ] **"Who's at" in search.** Typing "at the Bell" (or "who's at the Bell") in Ctrl K lists who's there now.
 365. [ ] **Last orders on the map.** In a tavern's last hour, its map pin popup says it's last orders.
 
@@ -1060,3 +1060,4 @@ to the log at the bottom.
 - Market day coming up: a character's "Coming up for you" notes the next market day in the town the party is in, "🧺 Market day in Brindle · in 2 days" (the first one in the week, not every one).
 - Shops in the town by the hour: the town-by-the-hour table on a settlement's page ends with an "Open" row: which of the town's shops and taverns are open at each hour today (own hours, days off, holidays and market day included), linked; the table now shows for a town with shops even if nobody's routine is written.
 - Where to find the patron: an open quest's page says where its patron is right now, from their routine: "🕰 Now (10:00): Bramwell is at The Forge until 17:00." (a hireling is with the party; finished quests and patrons who aren't NPCs say nothing).
+- Patrons in session prep: each active quest in prep says where its patron is now: "🕰 Bramwell is at The Bell until 21:00 now" (patrons who aren't NPCs with routines say nothing).

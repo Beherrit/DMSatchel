@@ -34,7 +34,7 @@ import { readingPrepCard } from './world-reading.js';
 import { nextMovesCard } from './world-nextmove.js';
 import { shoppingPrepCard } from './world-shopping.js';
 import { partyRows, worries } from './party-glance.js';
-import { aroundNow, festivalLine, wantedPrepLine } from './world-routine.js';
+import { aroundNow, festivalLine, wantedPrepLine, whereNow, whereBits } from './world-routine.js';
 import { waitingOnGm } from './waiting.js';
 import { giftsSince, giftWhat } from './gifts.js';
 import { lastSession } from './recap.js';
@@ -184,6 +184,8 @@ function questsSection() {
   return card(`Quests in play (${active.length})`,
     waiting.length ? el('p', { class: 'small' }, el('strong', {}, 'Running out of time: '), waiting.flatMap((q, i) => [i ? ', ' : '', link(q), ` (${deadlineText(due(q).left, due(q).holiday)})`])) : null,
     active.length ? list(active, (q) => [link(q), pill(q), q.fields?.patron ? el('span', { class: 'muted small' }, ` for ${q.fields.patron}`) : null,
+      // Patrons in prep: where each patron is right now.
+      (() => { const w = q.fields?.patron && whereNow(q.fields.patron); return w ? el('div', { class: 'small prep-patron' }, '🕰 ', link(w.npc), whereBits(w), ' now') : null; })(),
       q.fields?.stakes ? el('div', { class: 'muted small' }, q.fields.stakes.length > 140 ? `${q.fields.stakes.slice(0, 138)}…` : q.fields.stakes) : null])
       : empty('No active quests. Mark a quest Active when the party takes it on.'));
 }
