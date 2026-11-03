@@ -14,3 +14,11 @@ test('comingUp: the week ahead for one character', () => {
   assert.deepEqual(comingUp(null, ann, quests), []);
   assert.equal(whenText(0), 'today'); assert.equal(whenText(1), 'tomorrow'); assert.equal(whenText(4), 'in 4 days');
 });
+
+test('comingUp notes a deadline that falls on a holiday', () => {
+  const base = makeCalendar('seasons', 1040);
+  const m = base.months[1].name;
+  const cal = { ...base, month: 1, day: 3, holidays: [{ name: 'Bridge Day', month: 1, day: 5 }] };
+  const list = comingUp(cal, { kind: 'character', name: 'Ann', fields: {} }, [{ kind: 'quest', name: 'Ring the Bell', fields: { deadline: `5 ${m} 1040`, status: 'Active' } }]);
+  assert.deepEqual(list.map((x) => x.text), ['Deadline: Ring the Bell (on Bridge Day)', 'Bridge Day (the shops are shut)']);
+});

@@ -652,7 +652,7 @@ to the log at the bottom.
     evenings: the Bell"), not just where they are by day.
 339. [x] **Routines on NPC cards.** The printable NPC table cards say where each NPC usually is through the day, and
     any bounty on them.
-340. [ ] **Holiday deadlines coming up.** "Coming up for you" says when one of your quest deadlines falls on a
+340. [x] **Holiday deadlines coming up.** "Coming up for you" says when one of your quest deadlines falls on a
     holiday.
 341. [ ] **Open now in search.** Ctrl K shows whether a shop or tavern is open now beside its name.
 
@@ -1002,3 +1002,4 @@ to the log at the bottom.
 - Where they'll be, on the session sheet: each person in "Who's around" on the printable session sheet has their usual day under their name, from their routine: "🕰 mornings and afternoons: the Forge; evenings: the Bell; nights: home" (hirelings: "with the party").
 - A whole day on the cast list: Who's who now gives each person's whole usual day, "Usually mornings: the market; afternoons, evenings and nights: The Bell", instead of only where they are by day.
 - Routines on NPC cards: each printable NPC table card now has "Day: mornings and afternoons: the Forge; evenings: the Bell; nights: home" (hirelings: with the party) and "🎯 Wanted: 50 gp (the Watch)" for an open bounty.
+- Holiday deadlines coming up: on a character's "Coming up for you", a quest deadline that falls on a holiday says so: "Deadline: Ring the Bell (on Bridge Day)".
