@@ -71,3 +71,6 @@ export function nextHoliday(cal, within = 30) {
   } catch { /* a calendar we can't count on */ }
   return null;
 }
+
+// Trading hours, in minutes after midnight: [open, close] (close may run past midnight: 26 * 60 is 2 at night).
+export const tradingHours = (shop) => [...HOURS[kindOf(shop)]];

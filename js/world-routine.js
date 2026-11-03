@@ -2,8 +2,8 @@
 // place's page lists who is there now. Read from the clock the GMs move on (Time and light).
 import { el, setKids, toast } from './dom.js';
 import { world, worldEntries, link, findByName, getEntry, patchEntry } from './world-store.js';
-import { whereAt, aboutTown, regularsAt, unreadable, townByHour, rollRoutine, dayOf, dueLater, busiestHour, crossPaths, atTaverns, ownerDay } from './routine.js';
-import { holidayToday, nextHoliday } from './shop-hours.js';
+import { whereAt, aboutTown, regularsAt, unreadable, townByHour, rollRoutine, dayOf, dueLater, busiestHour, crossPaths, atTaverns, ownerDay, timeAt } from './routine.js';
+import { holidayToday, nextHoliday, tradingHours } from './shop-hours.js';
 import { cleanCalendar } from './calendar.js';
 import { makeRng, randomSeed } from './rng.js';
 import { isHired } from './hirelings.js';
@@ -251,4 +251,21 @@ export function ownerDayLine(place) {
   const away = outs.map((g, i) => { const p = placeOf(g.place); return [i || ins.length ? '; ' : '', `${when(g.labels)} at `, p ? link(p) : g.place]; });
   return el('p', { class: 'small muted routine-owner-day' }, '🛎 ', link(owner),
     ins.length ? ` is usually in ${ins.map((g) => when(g.labels)).join(' and ')}` : ' isn’t usually here: ', away, '.');
+}
+
+// A place's owner, when they're an NPC with a routine who could be behind the counter (not a hireling, not dead or
+// missing), or null.
+export function ownerNpc(place) {
+  if (!place?.fields?.owner) return null;
+  const owner = findByName(String(place.fields.owner).replace(/\[\[([^\]|]+)(\|[^\]]*)?\]\]/g, '$1').trim());
+  return owner && owner.kind === 'npc' && owner.fields?.routine && !isHired(owner) && !['Dead', 'Missing'].includes(owner.fields?.status) ? owner : null;
+}
+
+// Nobody at the counter: a shop whose owner's routine never has them there in trading hours → { owner, from, to },
+// else null.
+export function counterGap(shop) {
+  const owner = ownerNpc(shop);
+  if (!owner) return null;
+  const [from, to] = tradingHours(shop);
+  return timeAt(owner.fields.routine, (name) => placeOf(name)?.id === shop.id, from, to) ? null : { owner, from, to };
 }

@@ -1784,3 +1784,5 @@ details.quest-group > summary .section-title { display: inline }
 /* Links to a change (#310) */
 .news-item.target { background: var(--surface); outline: 2px solid var(--accent, var(--line)); outline-offset: 4px; border-radius: 4px }
 .news-n { text-decoration: none } .news-copy { float: right; margin-left: 8px }
+.counter-gaps { border-left: 3px solid var(--warn); padding-left: 8px; margin: 6px 0 }
+.counter-gaps p { margin: 0 0 4px }

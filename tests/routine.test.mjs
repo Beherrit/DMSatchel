@@ -133,3 +133,11 @@ test('ownerDay groups the day by where the owner is', async () => {
     { labels: ['Afternoon', 'Evening'], here: false, place: null },
   ]);
 });
+
+test('timeAt counts the time a routine spends at a place', async () => {
+  const { timeAt } = await import('../js/routine.js');
+  const forge = (p) => /forge/i.test(p);
+  assert.equal(timeAt('By day: the Forge; otherwise: home', forge, 8 * 60, 20 * 60), (17 - 8) * 60);
+  assert.equal(timeAt('Nights: the Forge; otherwise: home', forge, 8 * 60, 20 * 60), 0);
+  assert.equal(timeAt('Nights: the Forge; otherwise: home', forge, 8 * 60, 26 * 60), 5 * 60);
+});

@@ -10,6 +10,7 @@ import { dayWeather } from './forecast.js';
 import { toDays, today, cleanCalendar } from './calendar.js';
 import { openText, holidayToday } from './shop-hours.js';
 import { hhmm } from './clock.js';
+import { counterGap } from './world-routine.js';
 import { deadlineOf, deadlineText } from './deadline.js';
 import { controllers } from './control.js';
 import { glanceOf } from './glance.js';
@@ -275,7 +276,7 @@ function marketSection(place, rerender) {
       typeSel, el('button', { class: 'btn primary small', type: 'button', onclick: openShop }, 'Open a shop'),
       shops.length ? el('button', { class: 'btn small ghost', type: 'button', onclick: restockAll }, `Restock all ${shops.length} at today’s prices`) : null) : null,
     slot,
-    shops.length ? el('div', {}, el('h4', {}, 'Shops'), openNowLine(shops), el('ul', { class: 'entry-list' }, shops.map((e) => el('li', {}, link(e), el('span', { class: 'kind-tag' }, e.fields?.shop_type || e.fields?.type),
+    shops.length ? el('div', {}, el('h4', {}, 'Shops'), openNowLine(shops), counterGaps(shops), el('ul', { class: 'entry-list' }, shops.map((e) => el('li', {}, link(e), el('span', { class: 'kind-tag' }, e.fields?.shop_type || e.fields?.type),
       (() => { const h = hoursNow(e); return h ? el('span', { class: `small shop-hours${h.open ? ' open' : ' shut'}` }, h.text) : null; })(),
       e.fields?.owner ? el('span', { class: 'muted small' }, e.fields.owner) : null,
       e.parent_id !== place.id && getEntry(e.parent_id) ? el('span', { class: 'muted small' }, 'in ', link(getEntry(e.parent_id))) : null)))) : el('p', { class: 'muted small' }, 'No shops yet.'));
@@ -289,6 +290,15 @@ function openNowLine(shops) {
   const holiday = holidayToday(cleanCalendar(world.info?.cal));
   return el('p', { class: 'small muted shops-open-now' }, `🕰 ${hhmm(world.info.clock.minutes)}: ${open} open, ${shut} shut`,
     shut ? (holiday && hs.some((h) => !h.open && h.text.endsWith(holiday)) ? ` (shut for ${holiday})` : ' (for the night)') : '', '.');
+}
+
+// Nobody at the counter (GMs): shops whose owner's routine never has them in during trading hours.
+function counterGaps(shops) {
+  if (!isGm()) return null;
+  const gaps = shops.map((sh) => ({ sh, gap: counterGap(sh) })).filter((x) => x.gap);
+  if (!gaps.length) return null;
+  return el('div', { class: 'small counter-gaps' }, el('p', {}, el('strong', {}, '⚠ Nobody at the counter: '), 'these owners’ routines never have them in while the shop is open. Fix the routine, or say who minds it.'),
+    el('ul', { class: 'plain' }, gaps.map(({ sh, gap }) => el('li', {}, link(sh), ': ', link(gap.owner), el('span', { class: 'muted' }, ` (open ${hhmm(gap.from)}–${hhmm(gap.to % 1440)})`)))));
 }
 
 // ---- hub -----------------------------------------------------------------------------------------

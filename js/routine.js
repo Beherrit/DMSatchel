@@ -217,3 +217,11 @@ export function ownerDay(routine, isHere, hours = DAY_HOURS) {
   }
   return out.map(({ key, ...g }) => g);
 }
+
+// How long a routine has someone at a place between two times (minutes; `to` may run past midnight), counted in
+// half hours. isHere(placeName) → whether that's the place.
+export function timeAt(routine, isHere, from, to) {
+  let n = 0;
+  for (let m = from; m < to; m += 30) { const w = whereAt(routine, m % 1440); if (w && isHere(w.place)) n += 30; }
+  return n;
+}

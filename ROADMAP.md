@@ -606,7 +606,7 @@ to the log at the bottom.
     routine ("Bramwell is in by day; evenings at the Bell").
 313. [x] **The festival in session prep.** On a holiday, session prep notes it under where the party is, with who's
     at the taverns there now.
-314. [ ] **Nobody at the counter.** The Market tab flags shops whose owner's routine never has them in during
+314. [x] **Nobody at the counter.** The Market tab flags shops whose owner's routine never has them in during
     trading hours, so the GM can fix the routine or hire help.
 315. [ ] **A shopping trip.** Session prep plans a shopping trip: each shop in town that stocks something on anyone's
     list, what and for whom, open now or when it opens.
@@ -935,3 +935,4 @@ to the log at the bottom.
 - Search finds changes: Ctrl K now lists the What's new page and every shipped change ("What's new: Festival specials", group "Change #251"), opening it on the What's new page. The list is fetched in the background when the box first opens, and changes rank below any page or entry that matches.
 - When the owner's in: a place with an owner whose routine is written now says their usual day there, under whether they're in now: "🛎 Bramwell is usually in mornings and afternoons; evenings at The Bell; nights at home." (or "isn't usually here: …"). Hirelings are left out; they go with the party.
 - The festival in session prep: under "Where the party is", prep shows the town's festival card on a holiday (shops shut, taverns open, who's at each tavern now), and on other days when the next holiday is, within a month. Out in the wilds it says nothing.
+- Nobody at the counter: GMs see on a settlement's Market tab which shops have an owner whose routine never has them in while the shop is open ("Candler: Nell (open 08:00–20:00)"), counted in half hours across trading hours (a tavern's run to 02:00).
