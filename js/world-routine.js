@@ -371,3 +371,24 @@ export function dueInHere(place) {
   const npcs = worldEntries().filter((x) => x.kind === 'npc' && x.fields?.routine && !isHired(x) && !['Dead', 'Missing'].includes(x.fields?.status)).map((x) => ({ id: x.id, name: x.name, routine: x.fields.routine, entry: x }));
   return dueLater(npcs, (name) => inside(placeOf(name)), m, 120).map((d) => ({ ...d, place: placeOf(whereAt(d.npc.routine, d.at)?.place || '') }));
 }
+
+// Where someone is now, by name ("Bramwell" or "[[Bramwell]], the smith"): { npc, place (entry or a name), until }
+// or { npc, party: true } for a hireling, or null when they're not an NPC with a routine (or there's no clock).
+export function whereNow(name) {
+  const m = now();
+  const n = String(name || '').replace(/\[\[([^\]|]+)(\|[^\]]*)?\]\]/g, '$1').split(/[,(;]/)[0].trim();
+  const npc = n && findByName(n);
+  if (m === null || !npc || npc.kind !== 'npc' || ['Dead', 'Missing'].includes(npc.fields?.status)) return null;
+  if (isHired(npc)) return { npc, party: true };
+  const w = npc.fields?.routine && whereAt(npc.fields.routine, m);
+  return w ? { npc, place: placeOf(w.place) || w.place, until: w.until } : null;
+}
+const whereBits = (w) => (w.party ? ' is with the party' : [' is at ', typeof w.place === 'string' ? w.place : link(w.place), w.until !== null ? el('span', { class: 'muted' }, ` until ${hhmm(w.until)}`) : null]);
+
+// Where to find the patron: on a quest's page, where its patron is right now.
+export function patronLine(q) {
+  if (q.kind !== 'quest' || !q.fields?.patron || ['Completed', 'Failed', 'Abandoned'].includes(q.fields?.status)) return null;
+  const w = whereNow(q.fields.patron);
+  return w ? el('p', { class: 'small patron-now' }, `🕰 Now (${hhmm(now())}): `, link(w.npc), whereBits(w), '.') : null;
+}
+export { whereBits };
