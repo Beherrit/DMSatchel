@@ -25,3 +25,10 @@ export function moonlight(cal, date, sky = '') {
   const level = moonLevel && PATCHY.test(sky) ? moonLevel - 1 : moonLevel;
   return { level, icon: best.icon, text: `${who}${best.name}${level < moonLevel ? ' through broken cloud' : ''}: ${SAY[level]}` };
 }
+
+// Night in the encounter roll: what tonight's light means at the table (moonlight is dim light; no moon is darkness).
+export function nightLight(level) {
+  return level > 0
+    ? 'Dim light (moonlit): the area is lightly obscured, so sight-based Perception checks have disadvantage.'
+    : 'Darkness: the area is heavily obscured without a light; creatures without darkvision are effectively blinded.';
+}

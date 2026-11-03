@@ -27,3 +27,8 @@ test('clouds hide the moon', () => {
   const dark = days.find((d) => moonPhase(cal, cal.moons[0], d).name === 'New moon');
   assert.match(moonlight(cal, dark, 'Overcast').text, /^New moon: /); // no moon to hide
 });
+
+test('nightLight: moonlit dim light, or darkness', async () => {
+  const { nightLight } = await import('../js/moonlight.js');
+  assert.match(nightLight(3), /^Dim light/); assert.match(nightLight(0), /^Darkness/);
+});

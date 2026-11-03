@@ -706,7 +706,7 @@ to the log at the bottom.
 375. [x] **Moonlight on the session sheet.** The session sheet's time and light block includes tonight's moonlight.
 376. [x] **Set the scene.** Session prep offers a one-line scene-setter for where the party is: the time, the
     weather, the light, and any festival ("Evening in Brindle: heavy rain, the Bell's lamps lit for Bridge Day").
-377. [ ] **Night in the encounter roll.** An encounter rolled in prep at night notes the light (moonlit, or dark).
+377. [x] **Night in the encounter roll.** An encounter rolled in prep at night notes the light (moonlit, or dark).
 
 ## Ideas parking lot
 
@@ -1091,3 +1091,4 @@ to the log at the bottom.
 - Clouds hide the moon: the moonlight line now takes tonight's weather where the party is: overcast, rain, snow, fog and the like hide the moon ("☁️ Full moon behind the clouds (light snow): no moon to see by, so bring a light."), and scattered clouds dim it a step ("through broken cloud").
 - Moonlight on the session sheet: at night the sheet's "Time and light" block adds tonight's moonlight where the party is, clouds and all.
 - Set the scene: under "Where the party is", session prep offers one line to read out, with a Copy button: "🎬 Night in Brindle: overcast, 14°C (57°F), wind moderate. Waxing crescent behind the clouds (overcast): no moon to see by, so bring a light. The party's torch is burning. It's Bridge Day: the shops are shut and the taverns are full." Pure in scene.js.
+- Night in the encounter roll: an encounter rolled in session prep at night (20:00–05:00) notes what the light means: moonlit dim light (lightly obscured) or, with no moon or under cloud, darkness (heavily obscured), and any lights the party has burning.

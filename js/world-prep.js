@@ -88,7 +88,7 @@ function worriesCard() {
 import { dayWeather, forecast } from './forecast.js';
 import { deadlineOf, deadlineText } from './deadline.js';
 import { holidayToday } from './shop-hours.js';
-import { moonlight } from './moonlight.js';
+import { moonlight, nightLight } from './moonlight.js';
 import { sceneLine } from './scene.js';
 
 const ACTIVE_PC = (e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
@@ -148,6 +148,13 @@ function whereSection(prep, rerender) {
     return sceneLine({ place: (here.kind === 'settlement' ? here : town || here).name, part: m === undefined ? '' : partOfDay(m), weather: weather?.line || '', moon: ml?.text || '',
       holiday: c ? holidayToday(c) : '', lights: readClock(world.info?.clock).lights.map((l) => l.name) });
   })();
+  // Night in the encounter roll: what the light means, at night (moonlit dim light, or darkness; lights noted).
+  const lightNote = () => {
+    const m = world.info?.clock?.minutes, c = cleanCalendar(world.info?.cal);
+    if (m === undefined || !(m % 1440 >= 20 * 60 || m % 1440 < 5 * 60)) return null;
+    const ml = c ? moonlight(c, today(c), weather?.sky || '') : null, lit = readClock(world.info?.clock).lights.map((l) => l.name);
+    return el('p', { class: 'small enc-light' }, `🌙 Night (${hhmm(m)}). ${nightLight(ml ? ml.level : 0)}`, lit.length ? ` The party has light: ${lit.join(', ')}.` : '');
+  };
   return card(`Where the party is: ${here.name}`, pick, musicLine(here, 'music-line prep-music'),
     sceneText ? el('p', { class: 'scene-line' }, '🎬 ', el('span', {}, sceneText), ' ', el('button', { class: 'btn small ghost', type: 'button', onclick: () => copyText(sceneText) }, 'Copy')) : null,
     // The festival: on a holiday, who's at the taverns in town now (and on other days, when the next one is).
@@ -171,7 +178,7 @@ function whereSection(prep, rerender) {
           el('ul', { class: 'plain forecast-list' }, week.map((d) => el('li', {}, el('strong', {}, d.label), el('span', { class: 'small' }, d.weather.line), d.weather.rules.length ? el('span', { class: 'muted small' }, d.weather.rules[0]) : null)))),
         el('h4', {}, 'If trouble comes'),
         (() => { const saved = [here, ...inside].filter((e) => e.kind === 'encounter'); return saved.length ? el('ul', { class: 'plain prep-list' }, saved.map((x) => el('li', {}, '⚔ ', link(x), x.fields?.difficulty ? el('span', { class: 'muted small' }, ` ${x.fields.difficulty}`) : null, x.fields?.when ? el('div', { class: 'muted small' }, x.fields.when) : null))) : null; })(),
-        el('div', { class: 'btnrow' }, el('button', { class: 'btn small', type: 'button', onclick: () => setKids(encBox, encounterCard(rollEncounter({ terrain, level: party.level, size: party.size, difficulty: 'Moderate', ...monsterSource() }), { title: `Near ${here.name}`, place: here })) }, 'Roll an encounter'),
+        el('div', { class: 'btnrow' }, el('button', { class: 'btn small', type: 'button', onclick: () => setKids(encBox, encounterCard(rollEncounter({ terrain, level: party.level, size: party.size, difficulty: 'Moderate', ...monsterSource() }), { title: `Near ${here.name}`, place: here }), lightNote()) }, 'Roll an encounter'),
           el('a', { class: 'btn small ghost', href: `#world/e/${here.id}/wilds` }, 'Encounter table')),
         encBox)));
 }
