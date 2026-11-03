@@ -707,6 +707,12 @@ to the log at the bottom.
 376. [x] **Set the scene.** Session prep offers a one-line scene-setter for where the party is: the time, the
     weather, the light, and any festival ("Evening in Brindle: heavy rain, the Bell's lamps lit for Bridge Day").
 377. [x] **Night in the encounter roll.** An encounter rolled in prep at night notes the light (moonlit, or dark).
+378. [ ] **The scene on the session sheet.** The printable session sheet opens with the scene-setter line.
+379. [ ] **Where we are, for players.** The party page tells everyone where the party is in a line: the time, the
+    weather and the light.
+380. [ ] **Who can see in the dark.** At night, the GM's party sheet says each character's darkvision (from their
+    species), and who'll need a light.
+381. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 
 ## Ideas parking lot
 
