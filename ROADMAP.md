@@ -591,6 +591,13 @@ to the log at the bottom.
     last opened the page, and the page marks them.
 305. [x] **Who might turn up, on the town's page.** GMs see the people due back (met before but not lately, or key
     people not met) on a settlement's page, as session prep shows them.
+306. [ ] **Open now on the Market tab.** A settlement's Market tab says, by the world's clock, which of its shops
+    are open now and which are shut (and why: night or a holiday).
+307. [ ] **Holidays on the session sheet.** The printable session sheet notes when today is a holiday (shops shut,
+    taverns open) or the eve of one (festive goods cost more).
+308. [ ] **Shut shops on the shopping list.** A character's shopping list says when the shop an item is from is shut
+    right now, and when it opens.
+309. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 
 ## Ideas parking lot
 
