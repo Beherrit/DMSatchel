@@ -13,7 +13,7 @@ import { newLines, playJson } from './play-log.js';
 import { sinceLastCard, comingUpCard } from './world-sincelast.js';
 import { routineNow, hereNow, regularsLine, routinePreview, mindingLine, townHoursBox, rollTownButton, laterLine, aroundPartyCard, busiestLine, crossPathsLine, festivalLine, ownerDayLine, wantedCard } from './world-routine.js';
 import { offerBounty } from './world-bounty.js';
-import { untilChange, tradeDay } from './shop-hours.js';
+import { untilChange, tradeDay, hoursSign } from './shop-hours.js';
 import { leftText } from './clock.js';
 import { giftsSection, givenSection } from './world-gifts.js';
 import { world, worldEntries, getEntry, loadWorld, byName, kindLabel, kindFields, richInline, link, when, findByName, mentions, richText, contentsNav, notice, nameList } from './world-store.js';
@@ -424,6 +424,7 @@ function viewEntry(id, tab) {
     e.kind === 'location' && e.fields?.type === 'Tavern' ? menuCard(e, trailTown(e), rerenderWorld) : null,
     e.fields?.stock || (e.kind === 'location' && e.fields?.type === 'Shop' && isGm()) ? el('section', { class: 'card shop-card' },
       el('p', { class: 'shelf-title' }, e.name),
+      el('p', { class: 'shelf-hours' }, hoursSign(e)),
       closingLine(e),
       el('div', { class: 'entry-head' }, el('h3', {}, 'For sale'),
         // Print the shelf: just the shop's prices, to hand round the table.

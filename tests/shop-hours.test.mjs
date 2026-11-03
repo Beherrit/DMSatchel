@@ -103,3 +103,10 @@ test('a day off each week', async () => {
   assert.equal(shopOpen(shop, 600, '').open, true);
   assert.deepEqual(tradeDay(null), { holiday: '', weekday: '' });
 });
+
+test('hoursSign: the sign on the door', async () => {
+  const { hoursSign } = await import('../js/shop-hours.js');
+  assert.equal(hoursSign({ fields: { type: 'Shop' } }), 'Open 08:00–20:00');
+  assert.equal(hoursSign({ fields: { type: 'Tavern' } }), 'Open 08:00–02:00');
+  assert.equal(hoursSign({ fields: { type: 'Shop', hours: '6pm–2am', closed_on: 'Firedays' } }), 'Open 18:00–02:00 · Shut on Firedays');
+});

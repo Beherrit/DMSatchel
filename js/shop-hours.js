@@ -114,3 +114,9 @@ export function nextHoliday(cal, within = 30) {
 
 // Trading hours, in minutes after midnight: [open, close] (close may run past midnight: 26 * 60 is 2 at night).
 export const tradingHours = (shop) => [...hoursOf(shop)];
+
+// Hours as a sign on the door: "Open 08:00–20:00", "Open 18:00–02:00 · Shut on Firedays".
+export function hoursSign(shop) {
+  const [from, to] = hoursOf(shop), off = String(shop?.fields?.closed_on || '').trim().replace(/s$/i, '');
+  return `Open ${clock(from)}–${clock(to)}${off ? ` · Shut on ${off}s` : ''}`;
+}

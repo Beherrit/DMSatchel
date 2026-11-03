@@ -660,7 +660,7 @@ to the log at the bottom.
 343. [x] **A day off.** A shop can shut on one weekday of the world's calendar ("Shut on Restday"), like a holiday.
 344. [x] **Open or shut on the session sheet.** The session sheet's shop list says which are open now.
 345. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
-346. [ ] **Hours on the printed shelf.** "Print the shelf" includes the shop's hours and day off.
+346. [x] **Hours on the printed shelf.** "Print the shelf" includes the shop's hours and day off.
 347. [ ] **Rolled shops keep sensible hours.** A newly rolled shop gets hours that suit its trade (a baker opens
     early, a night market late); existing shops are left as they are.
 348. [ ] **Open now in town.** At night or on a day off, a settlement's page says what's still open ("Open now: The
@@ -1019,3 +1019,4 @@ to the log at the bottom.
 - A day off: places have a new "Shut every (a weekday)" field (additive). On that weekday of the world's calendar the shop (or tavern) is shut all day, "shut on Firedays", on its page, map pin (dimmed), Market tab, shopping lists, Ctrl K and in the server's buy and sell checks; shop-hours now takes today as { holiday, weekday } via tradeDay().
 - A full sweep: all 347 browser tests rerun; no crashes or page errors, last time's two flags (the phone-width shop page and a load flake) are gone, and nothing new is flagged.
 - Open or shut on the session sheet: the sheet's shop list now gives each shop's hours by the world's clock today: "Shops: Night Market (shut till 20:00), Smithy (open till 20:00)", following own hours, days off and holidays.
+- Hours on the printed shelf: "Print the shelf" now puts the sign on the door under the shop's name: "Open 18:00–02:00 · Shut on Firedays" (the usual hours when it keeps no hours of its own).
