@@ -1,14 +1,14 @@
 // Session prep (GMs): everything for the next session on one page. Last time, where the party is and what's there,
 // secrets and clues, quests in play, who's due some spotlight, clocks about to finish, what's coming on the calendar, the party's state, loose threads, and a
 // scratch pad the GMs share. Route: #world/prep
-import { el, toast, setKids } from './dom.js';
+import { el, toast, setKids, copyText } from './dom.js';
 import { recapButton } from './world-recap.js';
 import { attitudeLine } from './world-attitudes.js';
 import { api, isGm, session } from './api.js';
 import { world, worldEntries, getEntry, link, kindLabel, byName, descendantsOf, trail, whenTime, notice, richText, mentions, patchEntry } from './world-store.js';
 import { PLACE_KINDS } from './world-schema.js';
 import { worldCalendar, todayText, datedEntries } from './world-calendar.js';
-import { toDays, fromDays, today, holidaysOn, formatDate } from './calendar.js';
+import { toDays, fromDays, today, holidaysOn, formatDate, cleanCalendar } from './calendar.js';
 import { clockFace } from './world-clocks.js';
 import { rumorsAt, letRumorsSpread } from './world-rumors.js';
 import { encounterCard, partyDefaults, placeTerrains, monsterSource } from './encounter-ui.js';
@@ -40,7 +40,7 @@ import { giftsSince, giftWhat } from './gifts.js';
 import { lastSession } from './recap.js';
 import { coinText } from './economy.js';
 import { offerBounty } from './world-bounty.js';
-import { hhmm, partOfDay } from './clock.js';
+import { hhmm, partOfDay, readClock } from './clock.js';
 
 // Before the session: who's hurt, hungry, exhausted or broke (from the characters' sheets).
 // Gifts in session prep: NPCs who've been given something since the last session (they may remember it).
@@ -87,6 +87,9 @@ function worriesCard() {
 }
 import { dayWeather, forecast } from './forecast.js';
 import { deadlineOf, deadlineText } from './deadline.js';
+import { holidayToday } from './shop-hours.js';
+import { moonlight } from './moonlight.js';
+import { sceneLine } from './scene.js';
 
 const ACTIVE_PC = (e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
 const card = (title, ...kids) => el('section', { class: 'card prep-card' }, el('h3', {}, title), ...kids);
@@ -138,7 +141,15 @@ function whereSection(prep, rerender) {
   const week = forecast(here.id, terrain, cal, 7).slice(1);
   const encBox = el('div');
   const party = partyDefaults();
+  // Set the scene: one line to read out, from the time, the weather, the light and any festival.
+  const sceneText = (() => {
+    const m = world.info?.clock?.minutes, c = cleanCalendar(world.info?.cal), night = m !== undefined && (m % 1440 >= 20 * 60 || m % 1440 < 5 * 60);
+    const ml = night && c ? moonlight(c, today(c), weather?.sky || '') : null;
+    return sceneLine({ place: (here.kind === 'settlement' ? here : town || here).name, part: m === undefined ? '' : partOfDay(m), weather: weather?.line || '', moon: ml?.text || '',
+      holiday: c ? holidayToday(c) : '', lights: readClock(world.info?.clock).lights.map((l) => l.name) });
+  })();
   return card(`Where the party is: ${here.name}`, pick, musicLine(here, 'music-line prep-music'),
+    sceneText ? el('p', { class: 'scene-line' }, '🎬 ', el('span', {}, sceneText), ' ', el('button', { class: 'btn small ghost', type: 'button', onclick: () => copyText(sceneText) }, 'Copy')) : null,
     // The festival: on a holiday, who's at the taverns in town now (and on other days, when the next one is).
     (() => { const t = here.kind === 'settlement' ? here : town; return t ? [festivalLine(t), wantedPrepLine(t)] : null; })(),
     el('div', { class: 'prep-grid' },
