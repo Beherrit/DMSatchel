@@ -701,6 +701,12 @@ to the log at the bottom.
     right now.
 372. [x] **The time on the party's map marker.** The party's marker on a map says the world's time with the weather.
 373. [x] **Moonlight at night.** At night the clock card says how much the moons light the way (full, half, dark).
+374. [ ] **Clouds hide the moon.** On an overcast or rainy night, the moonlight line says the clouds hide it (and
+    how dark that leaves things).
+375. [ ] **Moonlight on the session sheet.** The session sheet's time and light block includes tonight's moonlight.
+376. [ ] **Set the scene.** Session prep offers a one-line scene-setter for where the party is: the time, the
+    weather, the light, and any festival ("Evening in Brindle: heavy rain, the Bell's lamps lit for Bridge Day").
+377. [ ] **Night in the encounter roll.** An encounter rolled in prep at night notes the light (moonlit, or dark).
 
 ## Ideas parking lot
 
