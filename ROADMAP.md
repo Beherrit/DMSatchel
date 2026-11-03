@@ -678,7 +678,7 @@ to the log at the bottom.
     (the next one coming), with the same "what changed" note.
 355. [x] **Where they are, on their pin.** An NPC's map pin popup says where their routine has them now and their
     usual day.
-356. [ ] **Hours in the Shops tool.** The Shops table tool shows the hours a rolled shop keeps.
+356. [x] **Hours in the Shops tool.** The Shops table tool shows the hours a rolled shop keeps.
 357. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 
 ## Ideas parking lot
@@ -1044,3 +1044,4 @@ to the log at the bottom.
 - A full sweep: 357 browser tests rerun. One real find: a link to a change on What's new showed the list exactly down to that change, so it sat last with nothing after it (and an older neighbour was missing). Fixed: it now shows whole pages of 40 around it. Two more flags (a timeout in the secrets test and the dialogs 403) pass on rerun, load flakes. No page errors.
 - Jump to a time of day: the clock card has "→ Morning / → Midday / → Evening / → Night" for GMs, moving on to the next one (always forward, so the day rolls on past midnight), with the same "what changed" note, which now stays on the card after a new day redraws the page and clears when a move changes nothing.
 - Where they are, on their pin: an NPC's map pin popup now shows the same lines as their page: "🕰 Now (10:00, morning): The Forge until 17:00" and their day, linked; a hireling's says they're with the party.
+- Hours in the Shops tool: a rolled shop in the Shops table tool now says the hours it keeps, under who runs it and in the copied text: "Run by Ember Dunmore. Open 22:00–04:00." (a black market), taverns 08:00–02:00, the rest 08:00–20:00.

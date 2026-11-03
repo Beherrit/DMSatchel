@@ -18,7 +18,7 @@ import { renderMarket, renderStock } from './shop-ui.js';
 import { world, worldEntries, loadWorld, patchEntry } from './world-store.js';
 import { isGm, session, onSession } from './api.js';
 import { randomItem, uniqueItem, CURSES, curseText, itemEntry, RARITIES, RARITY_KEYS, ITEM_TYPES, MINOR_PROPERTIES } from './magic-items.js';
-import { typicalHours } from './shop-hours.js';
+import { typicalHours, hoursSign } from './shop-hours.js';
 
 const r = makeRng(Date.now());
 const pick = r.pick, pickW = r.pickW, d = r.dice, R = r.int;
@@ -406,7 +406,7 @@ function mountShops(root) {
     shop.ownerFull = owner;
     render();
   }
-  const text = () => `${shop.name} (${shop.type}), run by ${shop.ownerFull}\n${marketText(market)}\n\n${stockText(shop)}`;
+  const text = () => `${shop.name} (${shop.type}), run by ${shop.ownerFull}. ${hoursSign({ fields: { type: 'Shop', shop_type: shop.type, hours: typicalHours(shop.type) } })}\n${marketText(market)}\n\n${stockText(shop)}`;
   function render() {
     const t = town();
     setKids(out,
@@ -416,7 +416,7 @@ function mountShops(root) {
       el('article', { class: 'card fresh shop-card' },
         el('div', { class: 'eyebrow' }, shop.type),
         el('div', { class: 'entry-head' }, el('h3', { class: 'card-title' }, shop.name), el('button', { class: 'reroll', type: 'button', 'aria-label': 'Restock', title: 'Restock', onclick: () => newShop() }, '↻')),
-        el('p', { class: 'card-sub' }, `Run by ${shop.ownerFull}.`),
+        el('p', { class: 'card-sub' }, `Run by ${shop.ownerFull}. ${hoursSign({ fields: { type: 'Shop', shop_type: shop.type, hours: typicalHours(shop.type) } })}.`),
         renderStock(stockText(shop)),
         shop.special.length ? el('div', { class: 'special' }, el('h5', {}, 'Special stock'), el('ul', { class: 'loot-list' }, shop.special.map((sp) => el('li', {}, el('span', {}, sp.name, el('small', { class: 'muted block' }, sp.item.summary)),
           el('span', { class: 'item-side' }, el('span', { class: `pill r-${RARITY_KEYS[sp.item.rarity]}` }, RARITIES[sp.item.rarity]), el('span', { class: 'v' }, fmt(Math.round(sp.price)) + ' gp')))))) : null,
