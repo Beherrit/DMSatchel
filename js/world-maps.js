@@ -8,7 +8,7 @@ import { world, worldEntries, getEntry, findByName, link, kindLabel, notice, nam
 import { playOf, characterOf, changePlay } from './sheet-ui.js';
 import { readList, withRations } from './shopping.js';
 import { overloaded, overloadedText } from './weights.js';
-import { aroundNow, laterLine, busiestLine, ownerDayLine } from './world-routine.js';
+import { aroundNow, laterLine, busiestLine, ownerDayLine, routineNow } from './world-routine.js';
 import { openText, holidayToday } from './shop-hours.js';
 import { festivalSpecial } from './menu.js';
 import { openBounties } from './bounty.js';
@@ -261,6 +261,8 @@ export async function viewMap(id, focusPin) {
         entry ? laterLine(entry) : null,
         // Open or shut, by the clock.
         (() => { const h = hoursOf(entry); return h ? el('p', { class: `small pin-hours${h.open ? '' : ' shut'}` }, h.open ? '🟢 ' : '🔒 ', h.text[0].toUpperCase() + h.text.slice(1), '.') : null; })(),
+        // Where they are, on their pin: an NPC's routine now, and their usual day.
+        entry?.kind === 'npc' ? routineNow(entry) : null,
         // When the owner's usually in.
         entry ? ownerDayLine(entry) : null,
         // Wanted on the map: anyone with an open bounty whose routine has them here (or inside) right now.
