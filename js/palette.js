@@ -60,8 +60,9 @@ function baseItems() {
 function entryItems() {
   // Open now in search: a shop or tavern says whether it's open by the world's clock.
   const info = M.store.world.info || {}, holiday = info.clock?.minutes === undefined ? '' : M.hours.tradeDay(M.calendar.cleanCalendar(info.cal));
-  const open = (e) => { if (info.clock?.minutes === undefined || e.kind !== 'location' || !(e.fields?.stock || e.fields?.menu)) return ''; const o = M.hours.openText(e, info.clock.minutes, holiday); return `${o.open ? '🟢' : '🔒'} ${o.text}`; };
-  return M.store.worldEntries().map((e) => ({ label: e.name, group: M.store.kindLabel(e.kind), href: `#world/e/${e.id}`, hint: [open(e), e.summary || (e.fields?.routine ? `Routine: ${String(e.fields.routine).slice(0, 90)}` : '')].filter(Boolean).join(' · '), haystack: `${e.name} ${(e.tags || []).join(' ')} ${Object.values(e.fields || {}).join(' ')}` }));
+  const hours = (e) => (info.clock?.minutes === undefined || e.kind !== 'location' || !(e.fields?.stock || e.fields?.menu) ? null : M.hours.openText(e, info.clock.minutes, holiday));
+  const open = (e) => { const o = hours(e); return o ? `${o.open ? '🟢' : '🔒'} ${o.text}` : ''; };
+  return M.store.worldEntries().map((e) => ({ label: e.name, group: M.store.kindLabel(e.kind), href: `#world/e/${e.id}`, openNow: hours(e)?.open, hint: [open(e), e.summary || (e.fields?.routine ? `Routine: ${String(e.fields.routine).slice(0, 90)}` : '')].filter(Boolean).join(' · '), haystack: `${e.name} ${(e.tags || []).join(' ')} ${Object.values(e.fields || {}).join(' ')}` }));
 }
 
 // Shipped changes rank under every page and entry that matches at all (but above typos).
@@ -89,6 +90,16 @@ function render() {
   if (!M) return;
   const q = input.value.trim().toLowerCase();
   const all = [...baseItems(), ...entryItems()];
+  // "Open now": every shop and tavern open at the world's hour, by name.
+  if (/^(open now|what'?s open( now)?|what’s open( now)?)$/.test(q)) {
+    items = all.filter((it) => it.openNow).sort((a, b) => a.label.localeCompare(b.label)).slice(0, 40);
+    active = Math.min(active, Math.max(0, items.length - 1));
+    setKids(list, ...(items.length ? items.map((it, i) => el('li', { role: 'option', id: `pal-${i}`, 'aria-selected': String(i === active), class: i === active ? 'active' : '', onmousedown: (ev) => { ev.preventDefault(); go(it); } },
+      el('span', { class: 'pal-label' }, it.label), it.hint ? el('span', { class: 'pal-hint' }, it.hint.length > 70 ? `${it.hint.slice(0, 68)}…` : it.hint) : null, el('span', { class: 'pal-group' }, 'Open now')))
+      : [el('li', { class: 'pal-empty' }, M.store.world.info?.clock ? 'Nothing’s open just now.' : 'The world has no clock yet, so nothing can say it’s open.')]));
+    input.setAttribute('aria-activedescendant', items.length ? `pal-${active}` : '');
+    return;
+  }
   items = all.map((it) => [score(it, q), it]).filter(([s]) => s > 0).sort((a, b) => b[0] - a[0] || a[1].label.localeCompare(b[1].label)).slice(0, 40).map(([, it]) => it);
   // Nothing typed yet: the entries you opened last come first.
   if (!q) {
