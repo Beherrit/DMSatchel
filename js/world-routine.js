@@ -356,3 +356,13 @@ export function townSnapshot(town) {
   const people = (aroundNow(town)?.list || []).map(({ npc, place }) => ({ id: npc.entry.id, name: npc.entry.name, place: place.id === town.id ? `about ${town.name}` : place.name }));
   return { shops, people };
 }
+
+// Due in later, anywhere: people whose routine brings them to this place (or somewhere inside it) later today, before
+// 02:00, who aren't there now. → [{ npc: { entry, … }, at, place }] soonest first, or [] (no clock, or nobody).
+export function dueInHere(place) {
+  const m = now();
+  if (m === null || !place) return [];
+  const inside = (p) => { for (let x = p, i = 0; x && i < 12; x = x.parent_id && getEntry(x.parent_id), i++) if (x.id === place.id) return true; return false; };
+  const npcs = worldEntries().filter((x) => x.kind === 'npc' && x.fields?.routine && !isHired(x) && !['Dead', 'Missing'].includes(x.fields?.status)).map((x) => ({ id: x.id, name: x.name, routine: x.fields.routine, entry: x }));
+  return dueLater(npcs, (name) => inside(placeOf(name)), m, 120).map((d) => ({ ...d, place: placeOf(whereAt(d.npc.routine, d.at)?.place || '') }));
+}

@@ -20,7 +20,7 @@ import { musicFor } from './music.js';
 import { dayWeather } from './forecast.js';
 import { deadlineOf, deadlineText } from './deadline.js';
 import { holidayToday, holidayTomorrow, EVE_MARKUP, openText } from './shop-hours.js';
-import { aroundNow } from './world-routine.js';
+import { aroundNow, dueInHere } from './world-routine.js';
 import { dayLine } from './routine.js';
 import { isHired } from './hirelings.js';
 import { hhmm } from './clock.js';
@@ -83,6 +83,9 @@ export async function viewSessionSheet() {
       // Around now: who the routines put where the party is (or somewhere inside), at the world's hour.
       (() => { const a = here ? aroundNow(here) : null; return a?.list.length ? block(`🕰 Around now (${hhmm(a.m)})`, el('ul', { class: 'ss-list ss-around' }, a.list.map(({ npc, place, until }) =>
         el('li', {}, el('strong', {}, npc.entry.name), place.id === here.id ? '' : ` at ${place.name}`, until !== null ? ` until ${hhmm(until)}` : '')))) : null; })(),
+      // Due in later: who the routines bring here before the night's out, and about when.
+      (() => { const d = here ? dueInHere(here) : []; return d.length ? block('🌙 Due in later', el('ul', { class: 'ss-list ss-later' }, d.slice(0, 10).map(({ npc, at, place }) =>
+        el('li', {}, el('strong', {}, npc.entry.name), ` about ${hhmm(at)}`, place && place.id !== here.id ? ` at ${place.name}` : '')))) : null; })(),
       people.length ? block(`Who’s around (${people.length})`, el('ul', { class: 'ss-list' }, people.map((p) => {
         const att = towards(all, p.id);
         return el('li', {}, el('strong', {}, p.name), sayOf(p) ? ` [${sayOf(p)}]` : '', p.fields?.role ? ` (${p.fields.role})` : '', p.summary ? `: ${cut(p.summary, 110)}` : '',

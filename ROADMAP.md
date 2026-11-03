@@ -681,7 +681,7 @@ to the log at the bottom.
 356. [x] **Hours in the Shops tool.** The Shops table tool shows the hours a rolled shop keeps.
 357. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 358. [x] **When the session began.** A session log started from prep notes the in-world date and time it began.
-359. [ ] **Due in later, on the session sheet.** The printable session sheet says who's due in later where the
+359. [x] **Due in later, on the session sheet.** The printable session sheet says who's due in later where the
     party is, and about when.
 360. [ ] **Market day coming up.** "Coming up for you" notes the next market day in the party's town.
 361. [ ] **Shops in the town by the hour.** The town-by-the-hour table also shows which shops are open at each hour.
@@ -1051,3 +1051,4 @@ to the log at the bottom.
 - Where they are, on their pin: an NPC's map pin popup now shows the same lines as their page: "🕰 Now (10:00, morning): The Forge until 17:00" and their day, linked; a hireling's says they're with the party.
 - Hours in the Shops tool: a rolled shop in the Shops table tool now says the hours it keeps, under who runs it and in the copied text: "Run by Ember Dunmore. Open 22:00–04:00." (a black market), taverns 08:00–02:00, the rest 08:00–20:00.
 - When the session began: "Start session N" in prep now opens the log with "Began at 18:00 (evening) on Fireday, 5 Thawmoon 1040." from the world's clock and calendar (either part left out when the world has none).
+- Due in later, on the session sheet: the printable session sheet has a "🌙 Due in later" block: who the routines bring where the party is (or somewhere inside it) before 02:00, "Ada about 17:00 at The Bell", soonest first.
