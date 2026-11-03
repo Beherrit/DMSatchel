@@ -614,6 +614,12 @@ to the log at the bottom.
     minds the counter").
 317. [x] **Due back, on an NPC's page.** GMs see on an NPC's page when the party hasn't met them for a while ("Not
     seen for 3 sessions: might turn up").
+318. [ ] **Name who minds the shop.** A shop can name who minds it when the owner's out (a new Minder field, an
+    additive change); the buy panel and the "Nobody at the counter" check use it.
+319. [ ] **Your shopping trip.** A character's shopping list groups what's on it by the shops in town that stock it,
+    as a little route, open or shut.
+320. [ ] **The owner's hours on the map.** A shop's map pin popup also says when its owner is usually in.
+321. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 
 ## Ideas parking lot
 
