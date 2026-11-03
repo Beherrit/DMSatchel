@@ -17,7 +17,7 @@ import { coinText } from './economy.js';
 // Open or shut on the map: a shop's (or tavern's) hours by the world's clock and today's holiday, or null.
 const hoursOf = (entry) => (entry && (entry.fields?.stock || entry.fields?.menu) && world.info?.clock?.minutes !== undefined
   ? openText(entry, world.info.clock.minutes, dayFor(entry)) : null);
-import { hhmm } from './clock.js';
+import { hhmm, partOfDay } from './clock.js';
 import { rationsFor } from './party-glance.js';
 import { dayWeather, weatherSlowdown, skyIcon } from './forecast.js';
 import { placeTerrains } from './encounter-ui.js';
@@ -416,7 +416,9 @@ export async function viewMap(id, focusPin) {
       const place = getEntry(world.info.party_at);
       // Today's weather where the party is (the same seeded roll as prep and the front page).
       const w = dayWeather(place.id, placeTerrains(place), worldCalendar());
-      const sky = skyIcon(w), said = `Today: ${w.line}`;
+      // The time on the party's marker: the world's hour and part of the day, with the weather.
+      const m = world.info?.clock?.minutes, time = m === undefined ? '' : `It's ${hhmm(m)}, ${partOfDay(m)}. `;
+      const sky = skyIcon(w), said = `${time}Today: ${w.line}`;
       return [el('button', { class: 'pin party-token', type: 'button', style: `left:${at.pin.x * 100}%;top:${at.pin.y * 100}%`, title: `The party is ${at.exact ? 'here' : `in ${place.name}`}. ${said}`,
         'aria-label': `The party is ${at.exact ? `here, in ${place.name}` : `in ${place.name}, in ${at.pin.label}`}. ${said}`, onclick: (ev) => { ev.stopPropagation(); showPin(at.pin); } },
         el('span', { class: 'glyph', 'aria-hidden': 'true' }, '⚑'), el('span', { class: 'pin-label' }, at.exact ? 'The party' : `The party (${place.name})`, sky ? el('span', { class: 'party-weather', 'aria-hidden': 'true' }, ` ${sky}`) : null))];
