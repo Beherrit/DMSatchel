@@ -119,3 +119,17 @@ test('atTaverns groups people by tavern, back rooms included, quiet taverns kept
   assert.deepEqual(g.map((x) => [x.tavern.name, x.people.map((p) => p.npc.name)]), [['The Bell', ['Ada', 'Bram']], ['The Fox', []]]);
   assert.deepEqual(atTaverns([], [], tavernOf), []);
 });
+
+test('ownerDay groups the day by where the owner is', async () => {
+  const { ownerDay } = await import('../js/routine.js');
+  const here = (p) => /forge/i.test(p);
+  assert.deepEqual(ownerDay('By day: the Forge; evenings: the Bell; otherwise: home', here), [
+    { labels: ['Morning', 'Afternoon'], here: true, place: null },
+    { labels: ['Evening'], here: false, place: 'the Bell' },
+    { labels: ['Night'], here: false, place: 'home' },
+  ]);
+  assert.deepEqual(ownerDay('Mornings: the Forge; nights: the Forge', here), [
+    { labels: ['Morning', 'Night'], here: true, place: null },
+    { labels: ['Afternoon', 'Evening'], here: false, place: null },
+  ]);
+});

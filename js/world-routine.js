@@ -2,7 +2,7 @@
 // place's page lists who is there now. Read from the clock the GMs move on (Time and light).
 import { el, setKids, toast } from './dom.js';
 import { world, worldEntries, link, findByName, getEntry, patchEntry } from './world-store.js';
-import { whereAt, aboutTown, regularsAt, unreadable, townByHour, rollRoutine, dayOf, dueLater, busiestHour, crossPaths, atTaverns } from './routine.js';
+import { whereAt, aboutTown, regularsAt, unreadable, townByHour, rollRoutine, dayOf, dueLater, busiestHour, crossPaths, atTaverns, ownerDay } from './routine.js';
 import { holidayToday, nextHoliday } from './shop-hours.js';
 import { cleanCalendar } from './calendar.js';
 import { makeRng, randomSeed } from './rng.js';
@@ -236,4 +236,19 @@ export function festivalLine(town) {
     el('ul', { class: 'festival-taverns small' }, groups.map(({ tavern, people }) => el('li', {}, link(tavern), ': ',
       people.length ? people.map(({ npc, until }, i) => [i ? ', ' : '', link(npc.entry), until !== null ? el('span', { class: 'muted' }, ` until ${hhmm(until)}`) : null])
         : el('span', { class: 'muted' }, a ? 'no regulars in just now' : 'set the world’s clock to see who’s in')))));
+}
+
+// When the owner's in: on a shop's (or any place's) page, the owner's usual day there, from their routine:
+// "🛎 Bramwell is usually in mornings and afternoons; evenings at the Bell; nights at home."
+export function ownerDayLine(place) {
+  if (place.kind !== 'location' || !place.fields?.owner) return null;
+  const owner = findByName(String(place.fields.owner).replace(/\[\[([^\]|]+)(\|[^\]]*)?\]\]/g, '$1').trim());
+  if (!owner || owner.kind !== 'npc' || !owner.fields?.routine || isHired(owner) || ['Dead', 'Missing'].includes(owner.fields?.status)) return null;
+  const day = ownerDay(owner.fields.routine, (name) => placeOf(name)?.id === place.id);
+  const when = (labels) => labels.map((l) => `${l.toLowerCase()}s`).join(labels.length > 2 ? ', ' : ' and ').replace(/, ([^,]+)$/, ' and $1');
+  const ins = day.filter((g) => g.here), outs = day.filter((g) => !g.here && g.place);
+  if (!ins.length && !outs.length) return null;
+  const away = outs.map((g, i) => { const p = placeOf(g.place); return [i || ins.length ? '; ' : '', `${when(g.labels)} at `, p ? link(p) : g.place]; });
+  return el('p', { class: 'small muted routine-owner-day' }, '🛎 ', link(owner),
+    ins.length ? ` is usually in ${ins.map((g) => when(g.labels)).join(' and ')}` : ' isn’t usually here: ', away, '.');
 }

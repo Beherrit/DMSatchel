@@ -202,3 +202,18 @@ export function atTaverns(list, taverns, tavernOf) {
   }
   return [...by.values()].sort((a, b) => b.people.length - a.people.length || String(a.tavern.name).localeCompare(String(b.tavern.name)));
 }
+
+// When the owner's in: their day at a place, grouped by where they are: [{ labels: ['Morning', 'Afternoon'],
+// here: true }, { labels: ['Evening'], here: false, place: 'the Bell' }, …] (places as written; null when the routine
+// doesn't say). isHere(placeName) → whether that's this place.
+export function ownerDay(routine, isHere, hours = DAY_HOURS) {
+  const out = [];
+  for (const h of dayOf(routine, hours)) {
+    const here = !!(h.place && isHere(h.place));
+    const key = here ? '\u0000here' : (h.place || '').toLowerCase();
+    const g = out.find((x) => x.key === key);
+    if (g) g.labels.push(h.label);
+    else out.push({ key, labels: [h.label], here, place: here ? null : h.place });
+  }
+  return out.map(({ key, ...g }) => g);
+}
