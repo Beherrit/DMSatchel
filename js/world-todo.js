@@ -15,6 +15,15 @@ const GROUPS = [
   ['longHidden', 'Hidden from players for over a month', 'Still secret, or ready to reveal?'],
 ];
 
+// Make the missing place: a new location named as the routine has it ("the Mill" → "The Mill"), in the NPC's town
+// (or wherever the NPC is), ready to fill in and save.
+function makePlace(name, npc) {
+  let at = npc.parent_id && getEntry(npc.parent_id);
+  for (let p = at, i = 0; p && i < 12; p = p.parent_id && getEntry(p.parent_id), i++) if (p.kind === 'settlement') { at = p; break; }
+  const title = name.replace(/^(at|in) /i, '').replace(/^\w/, (c) => c.toUpperCase());
+  window.dispatchEvent(new CustomEvent('world:draft', { detail: { kind: 'location', name: title, parent_id: at?.id || null } }));
+}
+
 // Routines that don't read: lines the clock can't read, and places named that aren't in the world, to fix in one go.
 function routinesSection(list) {
   if (!list.length) return null;
@@ -22,7 +31,8 @@ function routinesSection(list) {
     el('p', { class: 'muted small' }, 'Write each part of the day as “when: where” (mornings, evenings, nights, “9–17”, otherwise), and name places that are in the world so the clock can find them.'),
     el('ul', { class: 'plain todo-list' }, list.slice(0, 40).map(({ entry, bad, unknown }) => el('li', {}, link(entry),
       bad.length ? el('div', { class: 'small' }, 'Can’t read: ', bad.map((b, i) => [i ? ', ' : '', el('q', {}, b)])) : null,
-      unknown.length ? el('div', { class: 'small' }, 'Not in the world: ', unknown.join(', ')) : null,
+      unknown.length ? el('div', { class: 'small' }, 'Not in the world: ', unknown.map((name, i) => [i ? ', ' : '', name, ' ',
+        el('button', { class: 'btn small ghost', type: 'button', 'aria-label': `Create ${name}`, onclick: () => makePlace(name, entry) }, 'Create')])) : null,
       el('a', { class: 'btn small ghost', href: `#world/edit/${entry.id}` }, 'Edit')))));
 }
 

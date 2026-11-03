@@ -636,7 +636,7 @@ to the log at the bottom.
 329. [x] **Wanted on the map.** A map pin's popup notes anyone wanted who's there right now.
 330. [x] **Unknown places as you type.** The routine preview on an NPC's form also warns about places it names that
     aren't in the world.
-331. [ ] **Make the missing place.** "Not in the world: the Mill" on What needs writing gets a button to create
+331. [x] **Make the missing place.** "Not in the world: the Mill" on What needs writing gets a button to create
     the place, in the NPC's town.
 332. [ ] **Wanted on the cast list.** The printable Who's who marks people with an open bounty, and the reward.
 333. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
@@ -979,3 +979,4 @@ to the log at the bottom.
 - Wanted on the map: a place's map pin popup notes anyone with an open bounty whose routine has them there (or somewhere inside) right now: "🎯 Wanted, here now: Red Jack (500 gp) at The Bell".
 - Unknown places as you type: the routine preview on an NPC's form now also says "Not in the world yet: the Granary, the Mill" for the other places the routine names that have no entry (everyday ones like home and the road aside).
 - A full sweep: all 336 browser tests rerun, no crashes. Two new flags: a 403 in the dialogs test (passes on rerun, a load flake), and a real one: a curiosity shop whose stock table was wider than a phone widened its whole page (518 px). Fixed: the stock grid's column can now shrink, so a wide table scrolls in its own box. Checked across 12 rolled curiosity shops at 390 px.
+- Make the missing place: each "Not in the world" place on What needs writing has a Create button that opens a new location named as the routine has it ("the Mill" → "The Mill"), placed in the NPC's town; once saved, the routine reads and drops off the list.
