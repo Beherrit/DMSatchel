@@ -10,8 +10,8 @@ import { nearWord, wordsOf } from './name-check.js';
 let M = null;
 async function loadData() {
   if (!M) {
-    const [rules, items, store, hours, calendar, wh] = await Promise.all([import('./rules2024.js'), import('./magic-items.js'), import('./world-store.js'), import('./shop-hours.js'), import('./calendar.js'), import('./world-hours.js')]);
-    M = { ...rules, MAGIC_ITEMS: items.MAGIC_ITEMS, store, hours, calendar, wh, changes: [] };
+    const [rules, items, store, hours, calendar, wh, routine] = await Promise.all([import('./rules2024.js'), import('./magic-items.js'), import('./world-store.js'), import('./shop-hours.js'), import('./calendar.js'), import('./world-hours.js'), import('./world-routine.js')]);
+    M = { ...rules, MAGIC_ITEMS: items.MAGIC_ITEMS, store, hours, calendar, wh, routine, changes: [] };
     // Shipped changes (What's new), fetched alongside without holding the box up.
     Promise.all([import('./changelog.js'), fetch('/ROADMAP.md').then((r) => (r.ok ? r.text() : ''))])
       .then(([c, md]) => { M.changes = c.changelog(md); if (dialog?.open) render(); }).catch(() => {});
@@ -90,6 +90,21 @@ function render() {
   if (!M) return;
   const q = input.value.trim().toLowerCase();
   const all = [...baseItems(), ...entryItems()];
+  // "Who's at the Bell": who the routines put at a place (or inside it) right now.
+  const at = /^(?:who'?s |who’s |who is )?at (.+)$/.exec(q);
+  const bare = (t) => t.toLowerCase().replace(/^the /, '').trim();
+  const place = at && M.store.worldEntries().find((e) => ['location', 'settlement', 'region', 'area'].includes(e.kind) && bare(e.name) === bare(at[1]));
+  if (place) {
+    const a = M.routine.aroundNow(place), hh = (x) => `${String(Math.floor(x / 60) % 24).padStart(2, '0')}:${String(x % 60).padStart(2, '0')}`;
+    items = (a?.list || []).map(({ npc, place: p, until }) => ({ label: npc.entry.name, group: 'Here now', href: `#world/e/${npc.entry.id}`, hint: [p.id === place.id ? '' : `at ${p.name}`, until !== null ? `until ${hh(until)}` : ''].filter(Boolean).join(' ') }))
+      .sort((x, y) => x.label.localeCompare(y.label)).slice(0, 40);
+    items.unshift({ label: place.name, group: M.store.kindLabel(place.kind), href: `#world/e/${place.id}`, hint: a ? `${items.length} here at ${hh(a.m)}` : 'The world has no clock yet' });
+    active = Math.min(active, Math.max(0, items.length - 1));
+    setKids(list, ...items.map((it, i) => el('li', { role: 'option', id: `pal-${i}`, 'aria-selected': String(i === active), class: i === active ? 'active' : '', onmousedown: (ev) => { ev.preventDefault(); go(it); } },
+      el('span', { class: 'pal-label' }, it.label), it.hint ? el('span', { class: 'pal-hint' }, it.hint) : null, el('span', { class: 'pal-group' }, it.group))));
+    input.setAttribute('aria-activedescendant', `pal-${active}`);
+    return;
+  }
   // "Open now": every shop and tavern open at the world's hour, by name.
   if (/^(open now|what'?s open( now)?|what’s open( now)?)$/.test(q)) {
     items = all.filter((it) => it.openNow).sort((a, b) => a.label.localeCompare(b.label)).slice(0, 40);
