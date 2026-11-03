@@ -670,7 +670,7 @@ to the log at the bottom.
     candles), an additive field; it's then open as usual on festival days.
 351. [x] **Market day.** A settlement can name its market day (a weekday); on that day its page says so and its
     shops open two hours early.
-352. [ ] **Hours as you type.** The Opening hours field on a place's form says how it reads them as you type ("Open
+352. [x] **Hours as you type.** The Opening hours field on a place's form says how it reads them as you type ("Open
     18:00–02:00", or "Can't read that; the usual hours apply").
 353. [ ] **What changed when time moves.** When a GM moves the world's clock on, a note says which shops opened or
     shut and who moved where in the party's town.
@@ -1033,3 +1033,4 @@ to the log at the bottom.
 - "Open now" in search: typing "open now" (or "what's open") in Ctrl K lists every shop and tavern open at the world's hour, by name, each with how long it's open; Enter opens it.
 - Open on holidays: places have a new "Open on holidays" Yes/No field (additive). A shop set to Yes trades on festival days as usual (still keeping its hours): the Market tab, buy panel, pins and the server's buy check all follow it; other shops stay shut for the holiday.
 - Market day: settlements have a new "Market day (a weekday)" field (additive). On that day the town's page says "🧺 Market day today: stalls in the square, and the shops open two hours early.", and every shop in it (however deep) opens two hours early: page, Market tab, pins, shopping lists, Ctrl K, the session sheet, and the server's buy and sell checks (which find the town with a recursive query). Taverns keep their hours. Pages now get a shop's day from world-hours.js.
+- Hours as you type: the Opening hours field on a place's form reads them back as you type, "Open 18:00–02:00", or "Can't read that; the usual hours apply… Try “10–18” or “6pm–2am”." (marked as a problem).

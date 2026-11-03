@@ -130,3 +130,10 @@ export const typicalHours = (type) => TRADE_HOURS[type] || '';
 
 // Market day: a settlement's Market day field names a weekday; is today it? (case and a plural "s" don't matter)
 export const isMarketDay = (town, weekdayName) => !!weekdayName && String(town?.fields?.market_day || '').trim().toLowerCase().replace(/s$/, '') === String(weekdayName).toLowerCase().replace(/s$/, '');
+
+// Hours as you type: how the Hours field reads ("Open 18:00–02:00"), or that it can't ('' when empty).
+export function hoursPreview(text) {
+  if (!String(text || '').trim()) return '';
+  const h = parseHours(text);
+  return h ? `Open ${clock(h[0])}–${clock(h[1])}` : 'Can’t read that; the usual hours apply (shops 08:00–20:00, taverns 08:00–02:00). Try “10–18” or “6pm–2am”.';
+}

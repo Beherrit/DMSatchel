@@ -13,7 +13,7 @@ import { newLines, playJson } from './play-log.js';
 import { sinceLastCard, comingUpCard } from './world-sincelast.js';
 import { routineNow, hereNow, regularsLine, routinePreview, mindingLine, townHoursBox, rollTownButton, laterLine, aroundPartyCard, busiestLine, crossPathsLine, festivalLine, ownerDayLine, wantedCard, openNowLine, marketDayLine } from './world-routine.js';
 import { offerBounty } from './world-bounty.js';
-import { untilChange, hoursSign } from './shop-hours.js';
+import { untilChange, hoursSign, hoursPreview } from './shop-hours.js';
 import { leftText } from './clock.js';
 import { giftsSection, givenSection } from './world-gifts.js';
 import { world, worldEntries, getEntry, loadWorld, byName, kindLabel, kindFields, richInline, link, when, findByName, mentions, richText, contentsNav, notice, nameList } from './world-store.js';
@@ -651,7 +651,7 @@ function viewEdit(id, kindForNew) {
       const box = type === 'long' ? el('textarea', { id: `ff-${k}`, 'data-field': k, rows: 3 }, v) : el('input', { type: 'text', id: `ff-${k}`, 'data-field': k, value: v });
       const roll = rollButton(() => kindSel.value, k, box, label, () => ({ type: fieldsBox.querySelector('[data-field="type"]')?.value, role: fieldsBox.querySelector('[data-field="role"]')?.value || '', places: k === 'routine' ? placesAbout(e) : [] }));
       const head = roll ? el('div', { class: 'label-row' }, el('label', { for: `ff-${k}` }, label), roll) : el('label', { for: `ff-${k}` }, label);
-      return el('div', { class: `field${type === 'long' ? ' wide' : ''}` }, head, box, k === 'routine' ? routinePreview(box) : null);
+      return el('div', { class: `field${type === 'long' ? ' wide' : ''}` }, head, box, k === 'routine' ? routinePreview(box) : k === 'hours' ? hoursHint(box) : null);
     }), gm ? el('p', { class: 'field wide own-fields' }, customFieldsButton(kindSel.value, renderFields)) : null);
   }
   function collectFields() { for (const f of fieldsBox.querySelectorAll('[data-field]')) e.fields[f.dataset.field] = f.value; }
@@ -959,4 +959,12 @@ function turnUpBox(e) {
   const due = turnUp(e);
   if (!due.length) return null;
   return el('details', { class: 'turn-up' }, el('summary', {}, `Who might turn up (${due.length})`), el('p', { class: 'muted small' }, turnUpNote), turnUpList(due));
+}
+
+// Hours as you type: under a place's Opening hours field, how it reads them.
+function hoursHint(box) {
+  const out = el('p', { class: 'small muted hours-preview', 'aria-live': 'polite' });
+  const draw = () => { out.textContent = hoursPreview(box.value); out.classList.toggle('bad-line', !!box.value.trim() && out.textContent.startsWith('Can’t')); };
+  box.addEventListener('input', draw); draw();
+  return out;
 }

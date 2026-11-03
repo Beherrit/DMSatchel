@@ -140,3 +140,10 @@ test('market day: the town\'s shops open two hours early', async () => {
   assert.equal(isMarketDay({ fields: {} }, 'Fireday'), false);
   assert.equal(isMarketDay(null, 'Fireday'), false);
 });
+
+test('hoursPreview reads the Hours field back', async () => {
+  const { hoursPreview } = await import('../js/shop-hours.js');
+  assert.equal(hoursPreview('6pm–2am'), 'Open 18:00–02:00');
+  assert.equal(hoursPreview(''), '');
+  assert.match(hoursPreview('whenever'), /^Can’t read that/);
+});
