@@ -666,7 +666,7 @@ to the log at the bottom.
 348. [x] **Open now in town.** At night or on a day off, a settlement's page says what's still open ("Open now: The
     Bell, Night Market").
 349. [x] **"Open now" in search.** Typing "open now" in Ctrl K lists every shop and tavern open at the world's hour.
-350. [ ] **Open on holidays.** A shop can choose to stay open on holidays (a festival stall, a chandler selling
+350. [x] **Open on holidays.** A shop can choose to stay open on holidays (a festival stall, a chandler selling
     candles), an additive field; it's then open as usual on festival days.
 351. [ ] **Market day.** A settlement can name its market day (a weekday); on that day its page says so and its
     shops open two hours early.
@@ -1031,3 +1031,4 @@ to the log at the bottom.
 - Rolled shops keep sensible hours: a newly rolled shop (Market tab, the Shops tool's "Add to world", or a generated draft) gets hours that suit its trade: black market 10pm–4am, curiosity shop 11–19, bookseller 9–17, temple and stables 6–20, and so on; the rest keep the usual hours. Existing shops are untouched.
 - Open now in town: whenever some of a settlement's shops are shut (night, a day off, a holiday, or a shop that keeps other hours), its page says what's still open: "🕰 Open now (22:00): Night Market (till 04:00), The Bell (till 02:00)." (or "nothing; everything's shut").
 - "Open now" in search: typing "open now" (or "what's open") in Ctrl K lists every shop and tavern open at the world's hour, by name, each with how long it's open; Enter opens it.
+- Open on holidays: places have a new "Open on holidays" Yes/No field (additive). A shop set to Yes trades on festival days as usual (still keeping its hours): the Market tab, buy panel, pins and the server's buy check all follow it; other shops stay shut for the holiday.

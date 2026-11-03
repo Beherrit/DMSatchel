@@ -117,3 +117,12 @@ test('rolled shops keep hours that suit their trade, and they all read', async (
   for (const t of Object.keys(SHOP_TYPES)) { const h = typicalHours(t); if (h) assert.ok(parseHours(h), `${t}: ${h}`); }
   assert.equal(typicalHours('Black market'), '10pm–4am'); assert.equal(typicalHours('General store'), ''); assert.equal(typicalHours('Nope'), '');
 });
+
+test('a shop can stay open on holidays', async () => {
+  const { shopOpen, openText } = await import('../js/shop-hours.js');
+  const stall = { fields: { type: 'Shop', holiday_open: 'Yes' } }, shop = { fields: { type: 'Shop', holiday_open: 'No' } };
+  assert.equal(shopOpen(stall, 600, 'Bridge Day').open, true);
+  assert.equal(shopOpen(stall, 22 * 60, 'Bridge Day').open, false); // still keeps its hours
+  assert.equal(shopOpen(shop, 600, 'Bridge Day').open, false);
+  assert.deepEqual(openText(stall, 600, { holiday: 'Bridge Day', weekday: '' }), { open: true, text: 'open till 20:00' });
+});

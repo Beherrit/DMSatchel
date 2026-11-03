@@ -38,7 +38,8 @@ const opensText = (from) => (from === 8 * 60 ? 'at 8 in the morning' : `at ${clo
 // day: today's holiday name, or tradeDay(cal)'s { holiday, weekday } (a shop with a day off shuts on it, taverns too).
 export function shopOpen(shop, minutes, day = '') {
   const holiday = typeof day === 'string' ? day : day?.holiday || '';
-  if (holiday && kindOf(shop) === 'shop') return { open: false, opens: 'tomorrow', holiday };
+  // Open on holidays: a shop can choose to trade on festival days (taverns always do).
+  if (holiday && kindOf(shop) === 'shop' && !/^yes$/i.test(String(shop?.fields?.holiday_open || '').trim())) return { open: false, opens: 'tomorrow', holiday };
   const off = typeof day === 'object' && day?.weekday && String(shop?.fields?.closed_on || '').trim().toLowerCase().replace(/s$/, '') === day.weekday.toLowerCase().replace(/s$/, '');
   if (off) return { open: false, opens: 'tomorrow', dayOff: day.weekday };
   const [from, to] = hoursOf(shop);
