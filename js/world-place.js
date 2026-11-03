@@ -7,7 +7,9 @@ import { progressBadge } from './world-objectives.js';
 import { wildsSection, placeTerrains } from './encounter-ui.js';
 import { worldCalendar } from './world-calendar.js';
 import { dayWeather } from './forecast.js';
-import { toDays, today } from './calendar.js';
+import { toDays, today, cleanCalendar } from './calendar.js';
+import { openText, holidayToday } from './shop-hours.js';
+import { hhmm } from './clock.js';
 import { deadlineOf, deadlineText } from './deadline.js';
 import { controllers } from './control.js';
 import { glanceOf } from './glance.js';
@@ -273,9 +275,20 @@ function marketSection(place, rerender) {
       typeSel, el('button', { class: 'btn primary small', type: 'button', onclick: openShop }, 'Open a shop'),
       shops.length ? el('button', { class: 'btn small ghost', type: 'button', onclick: restockAll }, `Restock all ${shops.length} at today’s prices`) : null) : null,
     slot,
-    shops.length ? el('div', {}, el('h4', {}, 'Shops'), el('ul', { class: 'entry-list' }, shops.map((e) => el('li', {}, link(e), el('span', { class: 'kind-tag' }, e.fields?.shop_type || e.fields?.type),
+    shops.length ? el('div', {}, el('h4', {}, 'Shops'), openNowLine(shops), el('ul', { class: 'entry-list' }, shops.map((e) => el('li', {}, link(e), el('span', { class: 'kind-tag' }, e.fields?.shop_type || e.fields?.type),
+      (() => { const h = hoursNow(e); return h ? el('span', { class: `small shop-hours${h.open ? ' open' : ' shut'}` }, h.text) : null; })(),
       e.fields?.owner ? el('span', { class: 'muted small' }, e.fields.owner) : null,
       e.parent_id !== place.id && getEntry(e.parent_id) ? el('span', { class: 'muted small' }, 'in ', link(getEntry(e.parent_id))) : null)))) : el('p', { class: 'muted small' }, 'No shops yet.'));
+}
+
+// Open now: by the world's clock (and today's holiday), whether a shop is open, or null with no clock.
+const hoursNow = (shop) => (world.info?.clock?.minutes === undefined ? null : openText(shop, world.info.clock.minutes, holidayToday(cleanCalendar(world.info?.cal))));
+function openNowLine(shops) {
+  if (world.info?.clock?.minutes === undefined) return null;
+  const hs = shops.map(hoursNow), open = hs.filter((h) => h.open).length, shut = hs.length - open;
+  const holiday = holidayToday(cleanCalendar(world.info?.cal));
+  return el('p', { class: 'small muted shops-open-now' }, `🕰 ${hhmm(world.info.clock.minutes)}: ${open} open, ${shut} shut`,
+    shut ? (holiday && hs.some((h) => !h.open && h.text.endsWith(holiday)) ? ` (shut for ${holiday})` : ' (for the night)') : '', '.');
 }
 
 // ---- hub -----------------------------------------------------------------------------------------
