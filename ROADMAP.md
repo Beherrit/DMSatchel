@@ -640,7 +640,7 @@ to the log at the bottom.
     the place, in the NPC's town.
 332. [x] **Wanted on the cast list.** The printable Who's who marks people with an open bounty, and the reward.
 333. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
-334. [ ] **Every page at phone width.** A test visits every route with a full world at 390 px wide and flags any
+334. [x] **Every page at phone width.** A test visits every route with a full world at 390 px wide and flags any
     page wider than the screen; fix what it finds.
 335. [ ] **Deadlines on holidays.** A quest deadline that falls on one of the world's holidays says so ("due on
     Bridge Day, in 4 days").
@@ -989,3 +989,4 @@ to the log at the bottom.
 - A full sweep: all 336 browser tests rerun, no crashes. Two new flags: a 403 in the dialogs test (passes on rerun, a load flake), and a real one: a curiosity shop whose stock table was wider than a phone widened its whole page (518 px). Fixed: the stock grid's column can now shrink, so a wide table scrolls in its own box. Checked across 12 rolled curiosity shops at 390 px.
 - Make the missing place: each "Not in the world" place on What needs writing has a Create button that opens a new location named as the routine has it ("the Mill" → "The Mill"), placed in the NPC's town; once saved, the routine reads and drops off the list.
 - Wanted on the cast list: the printable Who's who tags anyone with an open bounty "🎯 wanted: 500 gp" beside their name (captured or paid ones aren't tagged).
+- Every page at phone width: a new browser test visits all 89 routes (every world view, entry pages, a town's tabs, every table tool, Reference, What's new) with a full world at 390 px, including a rolled curiosity shop, a holiday, a bounty and long unbroken text. Everything fits since the stock-table fix in #321; with that fix undone, the test catches it.
