@@ -634,7 +634,7 @@ to the log at the bottom.
 328. [x] **Routines that don't read.** GMs get a list of every NPC routine with lines the clock can't read, or
     places it names that aren't in the world, to fix in one go.
 329. [x] **Wanted on the map.** A map pin's popup notes anyone wanted who's there right now.
-330. [ ] **Unknown places as you type.** The routine preview on an NPC's form also warns about places it names that
+330. [x] **Unknown places as you type.** The routine preview on an NPC's form also warns about places it names that
     aren't in the world.
 331. [ ] **Make the missing place.** "Not in the world: the Mill" on What needs writing gets a button to create
     the place, in the NPC's town.
@@ -977,3 +977,4 @@ to the log at the bottom.
 - Last seen, for bounty hunters: each person on the party page's Wanted card says where the party last saw them, from the session logs: "👁 Last seen in Session 1, at The Bell (1 session ago)".
 - Routines that don't read: the GMs' "What needs writing" page lists every NPC routine with lines the clock can't read ("Can't read: brunch: The Bell") or places it names that aren't in the world ("Not in the world: the Mill"), each with an Edit button. Everyday places (home, the road, the market, the woods…) aren't flagged.
 - Wanted on the map: a place's map pin popup notes anyone with an open bounty whose routine has them there (or somewhere inside) right now: "🎯 Wanted, here now: Red Jack (500 gp) at The Bell".
+- Unknown places as you type: the routine preview on an NPC's form now also says "Not in the world yet: the Granary, the Mill" for the other places the routine names that have no entry (everyday ones like home and the road aside).

@@ -2,7 +2,7 @@
 // place's page lists who is there now. Read from the clock the GMs move on (Time and light).
 import { el, setKids, toast } from './dom.js';
 import { world, worldEntries, link, findByName, getEntry, patchEntry } from './world-store.js';
-import { whereAt, aboutTown, regularsAt, unreadable, townByHour, rollRoutine, dayOf, dueLater, busiestHour, crossPaths, atTaverns, ownerDay, timeAt, routineCheck } from './routine.js';
+import { whereAt, aboutTown, regularsAt, townByHour, rollRoutine, dayOf, dueLater, busiestHour, crossPaths, atTaverns, ownerDay, timeAt, routineCheck } from './routine.js';
 import { holidayToday, nextHoliday, tradingHours } from './shop-hours.js';
 import { openBounties } from './bounty.js';
 import { cleanCalendar } from './calendar.js';
@@ -84,10 +84,13 @@ export function routinePreview(box) {
   const draw = () => {
     const text = box.value, m = now() ?? 480;
     if (!text.trim()) { out.textContent = 'Write it like “Mornings: the Forge; evenings: the Bell; nights: home”, or with hours (“8-12: the market”), and “Otherwise:” for the rest.'; out.className = 'small muted routine-preview'; return; }
-    const w = whereAt(text, m), bad = unreadable(text);
+    const w = whereAt(text, m), { bad, unknown } = routineCheck(text, placeOf);
     const p = w ? placeOf(w.place) : null;
+    // Unknown places as you type: the other places it names that aren't in the world (everyday ones like "home" aside).
+    const others = unknown.filter((x) => !w || x.toLowerCase() !== w.place.toLowerCase());
     setKids(out, `At ${hhmm(m)} (${partOfDay(m)}): `, w ? (p ? link(p) : el('strong', {}, w.place)) : 'nowhere it says', w && !p ? el('span', { class: 'muted' }, ' (not a place in the world yet)') : null,
-      bad.length ? el('span', { class: 'bad-line' }, ` · Can’t read: ${bad.map((x) => `“${x}”`).join(', ')}`) : null);
+      bad.length ? el('span', { class: 'bad-line' }, ` · Can’t read: ${bad.map((x) => `“${x}”`).join(', ')}`) : null,
+      others.length ? el('span', { class: 'unknown-places' }, ` · Not in the world yet: ${others.join(', ')}`) : null);
     out.className = 'small routine-preview';
   };
   box.addEventListener('input', draw); draw();
