@@ -626,7 +626,7 @@ to the log at the bottom.
     is right now, and until when.
 324. [x] **Bounties in session prep.** Session prep warns when someone with a bounty is about in the party's town now
     (or due in later today).
-325. [ ] **Festival specials on the map.** On a holiday, a tavern's map pin popup shows its festival special.
+325. [x] **Festival specials on the map.** On a holiday, a tavern's map pin popup shows its festival special.
 
 ## Ideas parking lot
 
@@ -959,3 +959,4 @@ to the log at the bottom.
 - Wanted in town: a settlement's page lists "🎯 Wanted in Brindle": open bounties on people who live there or whose routine brings them into town at some hour, richest first, with "🕰 About town now: The Bell until 19:00" when their routine has them there now.
 - Around now on the session sheet: the printable session sheet has a "🕰 Around now (18:00)" block: who the routines put where the party is (or somewhere inside it) at the world's hour, and until when ("Ada at The Bell until 19:00").
 - Bounties in session prep: under where the party is, prep warns "🎯 Wanted, and about: Red Jack (500 gp) is due in town around 17:00; Lim (50 gp) is in town now." for anyone with an open bounty whose routine has them in the party's town now or later today.
+- Festival specials on the map: on a holiday, a tavern's map pin popup shows the same special as its page: "🎉 Bridge Day special: Bridge Day cake (1 sp 5 cp)".

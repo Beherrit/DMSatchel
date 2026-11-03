@@ -10,6 +10,8 @@ import { readList, withRations } from './shopping.js';
 import { overloaded, overloadedText } from './weights.js';
 import { aroundNow, laterLine, busiestLine, ownerDayLine } from './world-routine.js';
 import { openText, holidayToday } from './shop-hours.js';
+import { festivalSpecial } from './menu.js';
+import { coinText } from './economy.js';
 
 // Open or shut on the map: a shop's (or tavern's) hours by the world's clock and today's holiday, or null.
 const hoursOf = (entry) => (entry && (entry.fields?.stock || entry.fields?.menu) && world.info?.clock?.minutes !== undefined
@@ -259,6 +261,9 @@ export async function viewMap(id, focusPin) {
         (() => { const h = hoursOf(entry); return h ? el('p', { class: `small pin-hours${h.open ? '' : ' shut'}` }, h.open ? '🟢 ' : '🔒 ', h.text[0].toUpperCase() + h.text.slice(1), '.') : null; })(),
         // When the owner's usually in.
         entry ? ownerDayLine(entry) : null,
+        // Festival specials on the map: on a holiday, a tavern's special of the day.
+        (() => { const hol = entry?.fields?.menu ? holidayToday(cleanCalendar(world.info?.cal)) : '', f = hol && festivalSpecial(entry.fields.menu, hol, entry.id);
+          return f ? el('p', { class: 'small pin-festival' }, `🎉 ${hol} special: `, el('strong', {}, f.name), ` (${coinText(f.cp)})`) : null; })(),
         // Busy taverns on the map: when it's fullest.
         entry ? busiestLine(entry) : null,
         (() => { const a = entry && PLACE_KINDS.includes(entry.kind) ? aroundNow(entry) : null; return a?.list.length ? el('p', { class: 'small pin-here' }, `🕰 Here now (${hhmm(a.m)}): `, a.list.map(({ npc, place }, i) => [i ? ', ' : '', link(npc.entry), place.id === entry.id ? '' : el('span', { class: 'muted' }, ` at ${place.name}`)])) : null; })(),
