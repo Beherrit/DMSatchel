@@ -49,3 +49,8 @@ export const fuelFor = (light) => FUEL[light] || null;
 
 // Whose torch is it: a light lit from someone's pack is named for them ("Ann’s torch").
 export const lightName = (light, who = '') => (who ? `${String(who).trim()}’s ${String(light).toLowerCase()}` : String(light));
+
+// Jump to a time of day: the next morning, midday, evening or night, as minutes to move the clock on (always forward;
+// a full day when it's that time now).
+export const JUMPS = [['Morning', 8 * 60], ['Midday', 12 * 60], ['Evening', 18 * 60], ['Night', 22 * 60]];
+export const untilNext = (minutes, target) => ((((target - Math.round(Number(minutes) || 0)) % 1440) + 1440) % 1440) || 1440;

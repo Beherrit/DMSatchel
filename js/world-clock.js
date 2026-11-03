@@ -4,7 +4,7 @@
 import { el, toast, setKids } from './dom.js';
 import { api, isGm, isMember } from './api.js';
 import { world, worldEntries } from './world-store.js';
-import { readClock, LIGHTS, STEPS, partOfDay, hhmm, leftText, fuelFor, lightName } from './clock.js';
+import { readClock, LIGHTS, STEPS, partOfDay, hhmm, leftText, fuelFor, lightName, JUMPS, untilNext } from './clock.js';
 import { changePlay } from './sheet-ui.js';
 import { takeItem } from './handover.js';
 import { outAndAbout, partyTown, townSnapshot } from './world-routine.js';
@@ -12,10 +12,12 @@ import { clockDiff, diffText } from './clock-diff.js';
 import { formatDate, today, cleanCalendar } from './calendar.js';
 import { holidayToday, holidayTomorrow } from './shop-hours.js';
 
+// What changed when time last moved (kept across redraws: a new day redraws the whole page).
+let lastChange = '';
+
 export function clockCard() {
   if (!isMember()) return null;
   const box = el('section', { class: 'card clock-card', 'aria-labelledby': 'clock-h' });
-  let lastChange = '';
   const send = async (clock, msg) => {
     try {
       // What changed when time moves: the party's town before and after.
@@ -28,7 +30,7 @@ export function clockCard() {
       const notes = [msg, r.out?.length ? `${r.out.join(', ')} went out` : '', r.days && r.cal ? `a new day: ${formatDate(r.cal, today(r.cal), { weekday: true })}` : '',
         r.days ? (late.length ? `out at this hour: ${late.slice(0, 4).map((x) => `${x.npc.name} (${x.place.name})`).join(', ')}${late.length > 4 ? ` and ${late.length - 4} more` : ''}` : 'a quiet night: nobody is about') : '',
         changed ? `in ${town.name}: ${changed}` : ''].filter(Boolean);
-      if (changed) lastChange = `${hhmm(r.clock.minutes)} in ${town.name}: ${changed}.`;
+      if (before) lastChange = changed ? `${hhmm(r.clock.minutes)} in ${town.name}: ${changed}.` : ''; // a move that changed nothing clears it
       if (notes.length) toast(notes.join(' · '));
       draw();
       if (r.days) window.dispatchEvent(new Event('world:rerender'));
@@ -63,6 +65,8 @@ export function clockCard() {
         send({ add_light: { name: called, minutes: Number(mins) } }, `${called} lit`);
       };
       tools = el('div', { class: 'clock-tools' },
+        // Jump to a time of day: the next morning, midday, evening or night (always forward, so days roll on).
+        el('div', { class: 'btnrow clock-jumps', role: 'group', 'aria-label': 'Jump to a time of day' }, JUMPS.map(([label, t]) => el('button', { class: 'btn small ghost', type: 'button', title: `On to the next ${label.toLowerCase()} (${hhmm(t)})`, onclick: () => send({ advance: untilNext(c.minutes, t) }, `On to ${label.toLowerCase()}`) }, `→ ${label}`))),
         el('div', { class: 'btnrow' }, STEPS.map(([m, label]) => el('button', { class: 'btn small', type: 'button', onclick: () => send({ advance: m }) }, label)),
           el('label', { class: 'check', for: 'clock-set' }, 'Time ', time)),
         el('div', { class: 'btnrow' }, pick, from, el('button', { class: 'btn small', type: 'button', onclick: light }, 'Light it')));

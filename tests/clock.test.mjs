@@ -46,3 +46,12 @@ test('lightName: whose light it is', async () => {
   const { lightName } = await import('../js/clock.js');
   assert.equal(lightName('Torch', 'Ann'), 'Ann’s torch'); assert.equal(lightName('Lantern'), 'Lantern');
 });
+
+test('untilNext: always forward to the next time of day', async () => {
+  const { untilNext, JUMPS } = await import('../js/clock.js');
+  assert.equal(untilNext(7 * 60, 8 * 60), 60);
+  assert.equal(untilNext(20 * 60, 8 * 60), 12 * 60);
+  assert.equal(untilNext(8 * 60, 8 * 60), 1440);
+  assert.equal(untilNext(23 * 60 + 30, 22 * 60), 22 * 60 + 30);
+  assert.deepEqual(JUMPS.map(([l]) => l), ['Morning', 'Midday', 'Evening', 'Night']);
+});

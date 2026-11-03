@@ -674,7 +674,7 @@ to the log at the bottom.
     18:00–02:00", or "Can't read that; the usual hours apply").
 353. [x] **What changed when time moves.** When a GM moves the world's clock on, a note says which shops opened or
     shut and who moved where in the party's town.
-354. [ ] **Jump to a time of day.** The clock card gets quick jumps for GMs: to morning, midday, evening or night
+354. [x] **Jump to a time of day.** The clock card gets quick jumps for GMs: to morning, midday, evening or night
     (the next one coming), with the same "what changed" note.
 355. [ ] **Where they are, on their pin.** An NPC's map pin popup says where their routine has them now and their
     usual day.
@@ -1042,3 +1042,4 @@ to the log at the bottom.
 - Hours as you type: the Opening hours field on a place's form reads them back as you type, "Open 18:00–02:00", or "Can't read that; the usual hours apply… Try “10–18” or “6pm–2am”." (marked as a problem).
 - What changed when time moves: when a GM moves the clock on (a step or setting the time), the toast and the clock card say what changed in the party's town: "⏩ 22:30 in Brindle: Smithy shut; Ada left." Shops that opened or shut and who came, went or moved, from routines and hours; the diff is pure (clock-diff.js).
 - A full sweep: 357 browser tests rerun. One real find: a link to a change on What's new showed the list exactly down to that change, so it sat last with nothing after it (and an older neighbour was missing). Fixed: it now shows whole pages of 40 around it. Two more flags (a timeout in the secrets test and the dialogs 403) pass on rerun, load flakes. No page errors.
+- Jump to a time of day: the clock card has "→ Morning / → Midday / → Evening / → Night" for GMs, moving on to the next one (always forward, so the day rolls on past midnight), with the same "what changed" note, which now stays on the card after a new day redraws the page and clears when a move changes nothing.
