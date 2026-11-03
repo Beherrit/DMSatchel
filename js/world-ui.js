@@ -858,11 +858,15 @@ function copyButton(e) {
 // On an NPC's page: when the party last met them, from the session logs.
 function lastSeenLine(e) {
   const seen = appearances(worldEntries(), mentions).get(e.id);
-  if (!seen) return null;
+  const gm = isGm() && !previewing() && e.fields?.status !== 'Dead';
+  // Due back (GMs): a key person the party hasn't met yet.
+  if (!seen) return gm && (e.tags || []).includes('key') && appearances(worldEntries(), mentions).size ? el('p', { class: 'small due-back' }, '🔔 Key person, not met yet: they might turn up.') : null;
   // …and where: the place that session's log mentions (their own home first).
   const at = sceneOf(seen.last, mentions, getEntry, PLACE_KINDS, e);
   return el('p', { class: 'muted small last-seen' }, '👁 Last seen in ', link(seen.last), seen.ago ? ` (${seen.ago} session${seen.ago === 1 ? '' : 's'} ago)` : ' (the latest session)',
-    at ? [', at ', link(at)] : '', seen.count > 1 ? ` · in ${seen.count} sessions` : '');
+    at ? [', at ', link(at)] : '', seen.count > 1 ? ` · in ${seen.count} sessions` : '',
+    // Due back (GMs): not met in the last two sessions, as session prep counts it.
+    gm && seen.ago >= 2 ? el('span', { class: 'due-back' }, ` · 🔔 not seen for ${seen.ago} sessions: might turn up`) : '');
 }
 
 // Undo a move to the bin: bring the entry back, then open it (or just redraw where we are).

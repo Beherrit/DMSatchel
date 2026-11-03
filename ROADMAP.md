@@ -612,7 +612,7 @@ to the log at the bottom.
     list, what and for whom, open now or when it opens.
 316. [x] **Who minds the shop.** When the owner is out, a shop's buy panel says so ("Bramwell is out; an apprentice
     minds the counter").
-317. [ ] **Due back, on an NPC's page.** GMs see on an NPC's page when the party hasn't met them for a while ("Not
+317. [x] **Due back, on an NPC's page.** GMs see on an NPC's page when the party hasn't met them for a while ("Not
     seen for 3 sessions: might turn up").
 
 ## Ideas parking lot
@@ -939,3 +939,4 @@ to the log at the bottom.
 - A shopping trip: session prep's shopping lists end with a trip plan for the town the party is in: each shop that stocks something on anyone's list, most wanted first, with what and for whom and the price, whether it's open now ("open till 20:00"), and what nowhere here stocks.
 - Who minds the shop: when a shop is open but its owner's routine has them elsewhere, its buy panel says "🛎 Bramwell is out; an apprentice minds the counter."
 - A full sweep: all 325 browser tests rerun (started after #308); no crashes or page errors, and the same flagged files as the last sweep (the deliberate error-path 400s).
+- Due back, on an NPC's page: GMs see "🔔 not seen for 3 sessions: might turn up" after the last-seen line once two sessions have passed without them (as session prep counts it), and "Key person, not met yet" for key NPCs the party hasn't met. Players don't see it.
