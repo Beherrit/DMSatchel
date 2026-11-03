@@ -634,6 +634,12 @@ to the log at the bottom.
 328. [x] **Routines that don't read.** GMs get a list of every NPC routine with lines the clock can't read, or
     places it names that aren't in the world, to fix in one go.
 329. [x] **Wanted on the map.** A map pin's popup notes anyone wanted who's there right now.
+330. [ ] **Unknown places as you type.** The routine preview on an NPC's form also warns about places it names that
+    aren't in the world.
+331. [ ] **Make the missing place.** "Not in the world: the Mill" on What needs writing gets a button to create
+    the place, in the NPC's town.
+332. [ ] **Wanted on the cast list.** The printable Who's who marks people with an open bounty, and the reward.
+333. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 
 ## Ideas parking lot
 
