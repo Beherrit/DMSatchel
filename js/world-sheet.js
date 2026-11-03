@@ -21,6 +21,8 @@ import { dayWeather } from './forecast.js';
 import { deadlineOf, deadlineText } from './deadline.js';
 import { holidayToday, holidayTomorrow, EVE_MARKUP } from './shop-hours.js';
 import { aroundNow } from './world-routine.js';
+import { dayLine } from './routine.js';
+import { isHired } from './hirelings.js';
 import { hhmm } from './clock.js';
 
 const ACTIVE_PC = (e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
@@ -82,6 +84,8 @@ export async function viewSessionSheet() {
       people.length ? block(`Who’s around (${people.length})`, el('ul', { class: 'ss-list' }, people.map((p) => {
         const att = towards(all, p.id);
         return el('li', {}, el('strong', {}, p.name), sayOf(p) ? ` [${sayOf(p)}]` : '', p.fields?.role ? ` (${p.fields.role})` : '', p.summary ? `: ${cut(p.summary, 110)}` : '',
+          // Where they'll be: their usual day, from their routine (hirelings go with the party).
+          (() => { const d = isHired(p) ? 'with the party' : dayLine(p.fields?.routine); return d ? el('div', { class: 'small ss-day' }, `🕰 ${d}`) : null; })(),
           att.length ? el('div', { class: 'small' }, att.map((x) => `${x.character.name}: ${x.a}`).join(' · ')) : null);
       }))) : null,
       jobs.length || rumors.length ? block('Jobs and rumors',

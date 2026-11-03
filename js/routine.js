@@ -234,3 +234,10 @@ export function routineCheck(text, resolve) {
   const unknown = [...new Set(parseRoutine(text).map((p) => p.place).filter((p) => p && !ANYWHERE.test(p.trim()) && !resolve(p)))];
   return { bad, unknown };
 }
+
+// A routine's day in a line: "mornings and afternoons: the Forge; evenings: the Bell; nights: home" ('' when it
+// doesn't say).
+export function dayLine(routine) {
+  const plural = (labels) => labels.map((l) => `${l.toLowerCase()}s`).join(', ').replace(/, ([^,]+)$/, ' and $1');
+  return ownerDay(routine, () => false).filter((g) => g.place).map((g) => `${plural(g.labels)}: ${g.place}`).join('; ');
+}

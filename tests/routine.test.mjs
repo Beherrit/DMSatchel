@@ -149,3 +149,10 @@ test('routineCheck: unreadable lines and unknown places, everyday places left al
   assert.deepEqual(routineCheck('Mornings: the Mill; brunch: the Bell; nights: on the road', known), { bad: ['brunch: the Bell'], unknown: ['the Mill'] });
   assert.deepEqual(routineCheck('', known), { bad: [], unknown: [] });
 });
+
+test('dayLine sums up a routine', async () => {
+  const { dayLine } = await import('../js/routine.js');
+  assert.equal(dayLine('By day: the Forge; evenings: the Bell; otherwise: home'), 'mornings and afternoons: the Forge; evenings: the Bell; nights: home');
+  assert.equal(dayLine('Evenings: the Bell'), 'evenings: the Bell');
+  assert.equal(dayLine(''), '');
+});

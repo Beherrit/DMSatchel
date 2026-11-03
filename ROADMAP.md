@@ -646,7 +646,7 @@ to the log at the bottom.
     Bridge Day, in 4 days").
 336. [x] **Deadlines on the session sheet.** The printable session sheet lists active quests with a deadline,
     soonest first, and how many days are left.
-337. [ ] **Where they'll be, on the session sheet.** Each person in "Who's around" on the session sheet says where
+337. [x] **Where they'll be, on the session sheet.** Each person in "Who's around" on the session sheet says where
     their routine usually has them by day.
 
 ## Ideas parking lot
@@ -992,3 +992,4 @@ to the log at the bottom.
 - Every page at phone width: a new browser test visits all 89 routes (every world view, entry pages, a town's tabs, every table tool, Reference, What's new) with a full world at 390 px, including a rolled curiosity shop, a holiday, a bounty and long unbroken text. Everything fits since the stock-table fix in #321; with that fix undone, the test catches it.
 - Deadlines on holidays: a quest deadline that falls on one of the world's holidays says so on the quest page, the quest board and in session prep: "⏳ due on Bridge Day, in 4 days" (or "was due on Bridge Day: overdue by 2 days").
 - Deadlines on the session sheet: "Quests in play" on the printable session sheet now lists quests with a deadline first, soonest (or most overdue) first, each with "⏳ 2 days left" or "due on Bridge Day, in 4 days"; the rest follow by name.
+- Where they'll be, on the session sheet: each person in "Who's around" on the printable session sheet has their usual day under their name, from their routine: "🕰 mornings and afternoons: the Forge; evenings: the Bell; nights: home" (hirelings: "with the party").
