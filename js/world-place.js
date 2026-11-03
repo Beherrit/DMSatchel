@@ -146,7 +146,7 @@ function questSection(place, rerender, compact) {
           el('span', { class: 'pinhead', 'aria-hidden': 'true' }),
           el('div', { class: 'notice-top' }, el('span', { class: `status-pill ${statusClass(s)}` }, s), q.fields?.reward ? el('span', { class: 'reward' }, q.fields.reward) : null),
           el('h5', {}, link(q)), progressBadge(q),
-          ((d) => (d ? el('span', { class: `deadline-pill${d.left <= 3 ? ' soon' : ''}` }, `⏳ ${deadlineText(d.left)}`) : null))(deadlineOf(worldCalendar(), q)),
+          ((d) => (d ? el('span', { class: `deadline-pill${d.left <= 3 ? ' soon' : ''}` }, `⏳ ${deadlineText(d.left, d.holiday)}`) : null))(deadlineOf(worldCalendar(), q)),
           q.summary ? el('p', {}, q.summary) : null,
           q.fields?.patron ? el('p', { class: 'muted small' }, `Ask for: ${q.fields.patron}`) : null,
           q.parent_id !== place.id && getEntry(q.parent_id) ? el('p', { class: 'muted small' }, 'Posted in ', link(getEntry(q.parent_id))) : null,

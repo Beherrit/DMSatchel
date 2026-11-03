@@ -383,7 +383,7 @@ function viewEntry(id, tab) {
   const sessions = all.filter((x) => x.kind === 'session' && x.id !== id && (mentions(`${x.body}\n${x.summary}\n${Object.values(x.fields || {}).join('\n')}`).has(id) || (x.links || []).some((l) => l.id === id)))
     .sort((a, b) => (parseFloat(b.fields.number) || 0) - (parseFloat(a.fields.number) || 0));
   const pins = pinsFor(id);
-  const fieldRows = kindFields(e.kind).filter((fd) => fieldApplies(fd, e.fields)).filter(([k, , type]) => e.fields?.[k] && !['stats', 'spells', 'level', 'stock', 'market', 'encounters', 'follows'].includes(k) && type !== 'hidden' && type !== 'image' && !(k === 'sheet' && e.fields.forge)).map(([k, label, type, , o]) => [o?.gmSecret ? `${label} (GMs only)` : label, k === 'born' && ageOf(worldCalendar(), e) ? `${e.fields[k]} (${ageText(ageOf(worldCalendar(), e))})` : k === 'deadline' && deadlineOf(worldCalendar(), e) ? `${e.fields[k]} (${deadlineText(deadlineOf(worldCalendar(), e).left)})` : e.fields[k], type]);
+  const fieldRows = kindFields(e.kind).filter((fd) => fieldApplies(fd, e.fields)).filter(([k, , type]) => e.fields?.[k] && !['stats', 'spells', 'level', 'stock', 'market', 'encounters', 'follows'].includes(k) && type !== 'hidden' && type !== 'image' && !(k === 'sheet' && e.fields.forge)).map(([k, label, type, , o]) => [o?.gmSecret ? `${label} (GMs only)` : label, k === 'born' && ageOf(worldCalendar(), e) ? `${e.fields[k]} (${ageText(ageOf(worldCalendar(), e))})` : k === 'deadline' && deadlineOf(worldCalendar(), e) ? `${e.fields[k]} (${((d) => deadlineText(d.left, d.holiday))(deadlineOf(worldCalendar(), e))})` : e.fields[k], type]);
 
   const history = el('div', { class: 'history', hidden: true });
   const isPlace = PLACE_KINDS.includes(e.kind);
