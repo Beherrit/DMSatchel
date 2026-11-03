@@ -10,7 +10,7 @@ import { dayWeather } from './forecast.js';
 import { toDays, today, cleanCalendar } from './calendar.js';
 import { openText, holidayToday, typicalHours } from './shop-hours.js';
 import { hhmm } from './clock.js';
-import { counterGap } from './world-routine.js';
+import { counterGap, whereNow, whereBits } from './world-routine.js';
 import { deadlineOf, deadlineText } from './deadline.js';
 import { controllers } from './control.js';
 import { glanceOf } from './glance.js';
@@ -150,6 +150,8 @@ function questSection(place, rerender, compact) {
           ((d) => (d ? el('span', { class: `deadline-pill${d.left <= 3 ? ' soon' : ''}` }, `⏳ ${deadlineText(d.left, d.holiday)}`) : null))(deadlineOf(worldCalendar(), q)),
           q.summary ? el('p', {}, q.summary) : null,
           q.fields?.patron ? el('p', { class: 'muted small' }, `Ask for: ${q.fields.patron}`) : null,
+          // Patrons on the quest board: where the patron is right now (open jobs only).
+          (() => { const w = ['Rumor', 'Available', 'Active'].includes(s) && q.fields?.patron && whereNow(q.fields.patron); return w ? el('p', { class: 'small board-patron' }, '🕰 ', link(w.npc), whereBits(w), ' now') : null; })(),
           q.parent_id !== place.id && getEntry(q.parent_id) ? el('p', { class: 'muted small' }, 'Posted in ', link(getEntry(q.parent_id))) : null,
           isGm() && !compact ? el('select', { class: 'status-sel', 'aria-label': `Status of ${q.name}`, onchange: async (ev) => {
             try {
