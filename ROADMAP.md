@@ -620,6 +620,13 @@ to the log at the bottom.
     as a little route, open or shut.
 320. [x] **The owner's hours on the map.** A shop's map pin popup also says when its owner is usually in.
 321. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
+322. [ ] **Wanted in town.** A settlement's page lists the open bounties on people who live there or whose routine
+    brings them there, and who's about town right now.
+323. [ ] **Around now on the session sheet.** The printable session sheet marks who the routines put where the party
+    is right now, and until when.
+324. [ ] **Bounties in session prep.** Session prep warns when someone with a bounty is about in the party's town now
+    (or due in later today).
+325. [ ] **Festival specials on the map.** On a holiday, a tavern's map pin popup shows its festival special.
 
 ## Ideas parking lot
 
