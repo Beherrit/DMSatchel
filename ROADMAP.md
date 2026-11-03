@@ -627,6 +627,13 @@ to the log at the bottom.
 324. [x] **Bounties in session prep.** Session prep warns when someone with a bounty is about in the party's town now
     (or due in later today).
 325. [x] **Festival specials on the map.** On a holiday, a tavern's map pin popup shows its festival special.
+326. [ ] **A wanted poster.** An NPC with an open bounty gets a printable "WANTED" poster from their page: name, what
+    they look like, the reward and who offers it.
+327. [ ] **Last seen, for bounty hunters.** The party page's Wanted card says where each was last seen, from the
+    session logs.
+328. [ ] **Routines that don't read.** GMs get a list of every NPC routine with lines the clock can't read, or
+    places it names that aren't in the world, to fix in one go.
+329. [ ] **Wanted on the map.** A map pin's popup notes anyone wanted who's there right now.
 
 ## Ideas parking lot
 
