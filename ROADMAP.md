@@ -680,6 +680,11 @@ to the log at the bottom.
     usual day.
 356. [x] **Hours in the Shops tool.** The Shops table tool shows the hours a rolled shop keeps.
 357. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
+358. [ ] **When the session began.** A session log started from prep notes the in-world date and time it began.
+359. [ ] **Due in later, on the session sheet.** The printable session sheet says who's due in later where the
+    party is, and about when.
+360. [ ] **Market day coming up.** "Coming up for you" notes the next market day in the party's town.
+361. [ ] **Shops in the town by the hour.** The town-by-the-hour table also shows which shops are open at each hour.
 
 ## Ideas parking lot
 
