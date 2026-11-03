@@ -281,8 +281,20 @@ export function wantedIn(town) {
   const visits = (e) => !isHired(e) && e.fields?.routine && dayOf(e.fields.routine).some((h) => h.place && inside(placeOf(h.place)));
   const a = aroundNow(town);
   const here = new Map((a?.list || []).map((x) => [x.npc.entry.id, x]));
+  // …or due in later today (before midnight), when they're not in town now.
+  const later = (e) => (a && e.fields?.routine && !isHired(e) ? dueLater([{ id: e.id, name: e.name, routine: e.fields.routine }], (name) => inside(placeOf(name)), a.m, 1439)[0]?.at ?? null : null);
   return openBounties(worldEntries()).filter((b) => inside(b.entry) || visits(b.entry) || here.has(b.entry.id))
-    .map((bounty) => ({ bounty, now: here.get(bounty.entry.id) || null }));
+    .map((bounty) => { const now = here.get(bounty.entry.id) || null; return { bounty, now, later: now ? null : later(bounty.entry) }; });
+}
+
+// Bounties in session prep: anyone wanted who's about in the party's town now, or due in later today.
+export function wantedPrepLine(town) {
+  if (!town || town.kind !== 'settlement') return null;
+  const list = wantedIn(town).filter((w) => w.now || w.later !== null);
+  if (!list.length) return null;
+  return el('div', { class: 'wanted-prep small' }, el('strong', {}, '🎯 Wanted, and about: '),
+    list.map(({ bounty: b, now: n, later: l }, i) => [i ? '; ' : '', link(b.entry), ` (${b.text})`,
+      n ? [' is in town now', n.place.id === town.id ? '' : [', at ', link(n.place)], n.until !== null ? ` until ${hhmm(n.until)}` : ''] : ` is due in town around ${hhmm(l)}`]), '.');
 }
 
 export function wantedCard(town) {

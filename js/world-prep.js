@@ -34,7 +34,7 @@ import { readingPrepCard } from './world-reading.js';
 import { nextMovesCard } from './world-nextmove.js';
 import { shoppingPrepCard } from './world-shopping.js';
 import { partyRows, worries } from './party-glance.js';
-import { aroundNow, festivalLine } from './world-routine.js';
+import { aroundNow, festivalLine, wantedPrepLine } from './world-routine.js';
 import { waitingOnGm } from './waiting.js';
 import { giftsSince, giftWhat } from './gifts.js';
 import { lastSession } from './recap.js';
@@ -140,7 +140,7 @@ function whereSection(prep, rerender) {
   const party = partyDefaults();
   return card(`Where the party is: ${here.name}`, pick, musicLine(here, 'music-line prep-music'),
     // The festival: on a holiday, who's at the taverns in town now (and on other days, when the next one is).
-    (() => { const t = here.kind === 'settlement' ? here : town; return t ? festivalLine(t) : null; })(),
+    (() => { const t = here.kind === 'settlement' ? here : town; return t ? [festivalLine(t), wantedPrepLine(t)] : null; })(),
     el('div', { class: 'prep-grid' },
       el('div', {}, (() => {
         // Who's around for the scene: NPCs whose daily routine puts them here (or somewhere inside) right now.
