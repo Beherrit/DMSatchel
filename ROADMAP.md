@@ -639,7 +639,7 @@ to the log at the bottom.
 331. [x] **Make the missing place.** "Not in the world: the Mill" on What needs writing gets a button to create
     the place, in the NPC's town.
 332. [x] **Wanted on the cast list.** The printable Who's who marks people with an open bounty, and the reward.
-333. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
+333. [x] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 334. [x] **Every page at phone width.** A test visits every route with a full world at 390 px wide and flags any
     page wider than the screen; fix what it finds.
 335. [x] **Deadlines on holidays.** A quest deadline that falls on one of the world's holidays says so ("due on
@@ -1011,3 +1011,4 @@ to the log at the bottom.
 - Open now in search: in Ctrl K, a shop or tavern's hint now starts with whether it's open by the world's clock: "Smithy · 🔒 shut till 08:00 · Hammers.", "The Bell · 🟢 open till 02:00".
 - A shop's own hours: places have a new "Opening hours" field (additive, no migration) that reads "10–18", "10:30–18", "6pm–2am", "9am to 5pm" or "noon–midnight"; unreadable hours fall back to the usual (shops 8–20, taverns 8–2). Everything that says open or shut follows them: the page's closing line, map pins, the Market tab, shopping lists and trips, Ctrl K, the "nobody at the counter" check, and the server's buy and sell checks ("Night Market is shut just now. It opens at 18:00."). "Shut for the night" is only said at night.
 - A day off: places have a new "Shut every (a weekday)" field (additive). On that weekday of the world's calendar the shop (or tavern) is shut all day, "shut on Firedays", on its page, map pin (dimmed), Market tab, shopping lists, Ctrl K and in the server's buy and sell checks; shop-hours now takes today as { holiday, weekday } via tradeDay().
+- A full sweep: all 347 browser tests rerun; no crashes or page errors, last time's two flags (the phone-width shop page and a load flake) are gone, and nothing new is flagged.
