@@ -22,3 +22,13 @@ test('comingUp notes a deadline that falls on a holiday', () => {
   const list = comingUp(cal, { kind: 'character', name: 'Ann', fields: {} }, [{ kind: 'quest', name: 'Ring the Bell', fields: { deadline: `5 ${m} 1040`, status: 'Active' } }]);
   assert.deepEqual(list.map((x) => x.text), ['Deadline: Ring the Bell (on Bridge Day)', 'Bridge Day (the shops are shut)']);
 });
+
+test('comingUp notes the next market day in the party town', async () => {
+  const { weekday } = await import('../js/calendar.js');
+  const base = makeCalendar('seasons', 1040);
+  const cal = { ...base, month: 1, day: 3, holidays: [] };
+  const wd = weekday(cal, { year: 1040, month: 1, day: 5 });
+  const list = comingUp(cal, { kind: 'character', name: 'Ann', fields: {} }, [], 7, { markets: [{ town: 'Brindle', day: `${wd}s` }] });
+  assert.deepEqual(list.map((x) => [x.in, x.text]), [[2, 'Market day in Brindle']]);
+  assert.deepEqual(comingUp(cal, { kind: 'character', name: 'Ann', fields: {} }, []), []);
+});

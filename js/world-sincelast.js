@@ -8,6 +8,7 @@ import { logSince, playJson } from './play-log.js';
 import { coinText } from './economy.js';
 import { worldCalendar } from './world-calendar.js';
 import { comingUp, whenText } from './coming-up.js';
+import { partyTown } from './world-routine.js';
 
 const list = (xs) => xs.map((x) => (x.qty > 1 ? `${x.qty} × ${x.name}` : x.name)).join(', ');
 
@@ -39,7 +40,9 @@ export function comingUpCard(e) {
   if (!cal) return null;
   const all = worldEntries().filter((x) => x.kind === 'quest');
   const mine = all.filter((q) => (q.links || []).some((l) => l.id === e.id) || (e.links || []).some((l) => l.id === q.id));
-  const list = comingUp(cal, e, mine.length ? mine : all);
+  // Market day coming up: in the town the party is in.
+  const town = partyTown(), markets = town?.kind === 'settlement' && town.fields?.market_day ? [{ town: town.name, day: town.fields.market_day }] : [];
+  const list = comingUp(cal, e, mine.length ? mine : all, 7, { markets });
   if (!list.length) return null;
   return el('section', { class: 'card coming-up' }, el('h3', {}, 'Coming up'),
     el('ul', { class: 'plain sheet-log' }, list.map((x) => el('li', {}, `${x.icon} `, x.entry ? [x.text.replace(/:.*$/, ': '), link(x.entry)] : x.text, el('span', { class: 'muted small' }, ` · ${whenText(x.in)}`)))));
