@@ -604,7 +604,7 @@ to the log at the bottom.
     them on the What's new page.
 312. [x] **When the owner's in.** A shop's page says when its owner is usually behind the counter, from their
     routine ("Bramwell is in by day; evenings at the Bell").
-313. [ ] **The festival in session prep.** On a holiday, session prep notes it under where the party is, with who's
+313. [x] **The festival in session prep.** On a holiday, session prep notes it under where the party is, with who's
     at the taverns there now.
 
 ## Ideas parking lot
@@ -926,3 +926,4 @@ to the log at the bottom.
 - Links to a change: every change on What's new links to itself (#news/305 opens the page scrolled to it and outlined, showing as many as it takes to reach an old one), with a "Copy link" button; an unknown number says so.
 - Search finds changes: Ctrl K now lists the What's new page and every shipped change ("What's new: Festival specials", group "Change #251"), opening it on the What's new page. The list is fetched in the background when the box first opens, and changes rank below any page or entry that matches.
 - When the owner's in: a place with an owner whose routine is written now says their usual day there, under whether they're in now: "🛎 Bramwell is usually in mornings and afternoons; evenings at The Bell; nights at home." (or "isn't usually here: …"). Hirelings are left out; they go with the party.
+- The festival in session prep: under "Where the party is", prep shows the town's festival card on a holiday (shops shut, taverns open, who's at each tavern now), and on other days when the next holiday is, within a month. Out in the wilds it says nothing.
