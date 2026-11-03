@@ -644,7 +644,7 @@ to the log at the bottom.
     page wider than the screen; fix what it finds.
 335. [x] **Deadlines on holidays.** A quest deadline that falls on one of the world's holidays says so ("due on
     Bridge Day, in 4 days").
-336. [ ] **Deadlines on the session sheet.** The printable session sheet lists active quests with a deadline,
+336. [x] **Deadlines on the session sheet.** The printable session sheet lists active quests with a deadline,
     soonest first, and how many days are left.
 337. [ ] **Where they'll be, on the session sheet.** Each person in "Who's around" on the session sheet says where
     their routine usually has them by day.
@@ -991,3 +991,4 @@ to the log at the bottom.
 - Wanted on the cast list: the printable Who's who tags anyone with an open bounty "🎯 wanted: 500 gp" beside their name (captured or paid ones aren't tagged).
 - Every page at phone width: a new browser test visits all 89 routes (every world view, entry pages, a town's tabs, every table tool, Reference, What's new) with a full world at 390 px, including a rolled curiosity shop, a holiday, a bounty and long unbroken text. Everything fits since the stock-table fix in #321; with that fix undone, the test catches it.
 - Deadlines on holidays: a quest deadline that falls on one of the world's holidays says so on the quest page, the quest board and in session prep: "⏳ due on Bridge Day, in 4 days" (or "was due on Bridge Day: overdue by 2 days").
+- Deadlines on the session sheet: "Quests in play" on the printable session sheet now lists quests with a deadline first, soonest (or most overdue) first, each with "⏳ 2 days left" or "due on Bridge Day, in 4 days"; the rest follow by name.

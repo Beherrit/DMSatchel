@@ -18,6 +18,7 @@ import { readAloudPrint } from './world-readaloud.js';
 import { remindersPrint } from './world-reminders.js';
 import { musicFor } from './music.js';
 import { dayWeather } from './forecast.js';
+import { deadlineOf, deadlineText } from './deadline.js';
 import { holidayToday, holidayTomorrow, EVE_MARKUP } from './shop-hours.js';
 import { aroundNow } from './world-routine.js';
 import { hhmm } from './clock.js';
@@ -44,7 +45,9 @@ export async function viewSessionSheet() {
   const town = here && townOf(here);
   const rumors = town ? rumorsAt(town.id).slice(0, 6) : [];
   const shops = inside.filter((e) => e.kind === 'location' && (e.fields?.type === 'Shop' || e.fields?.stock)).slice(0, 10);
-  const quests = all.filter((e) => e.kind === 'quest' && e.fields?.status === 'Active').sort(byName);
+  // Deadlines on the sheet: quests with one come first, soonest first.
+  const due = (q) => deadlineOf(cal, q);
+  const quests = all.filter((e) => e.kind === 'quest' && e.fields?.status === 'Active').sort((a, b) => (due(a)?.left ?? 1e9) - (due(b)?.left ?? 1e9) || byName(a, b));
   const clocks = (world.standings?.clocks || []).filter((c) => c.filled < c.size).sort((a, b) => (a.size - a.filled) - (b.size - b.filled)).slice(0, 6);
   // The same weather as session prep shows today (seeded by place and in-world date).
   const terrain = here ? placeTerrains(here) : ['road'];
@@ -86,7 +89,8 @@ export async function viewSessionSheet() {
         rumors.length ? el('ul', { class: 'ss-list' }, rumors.map(({ v }) => el('li', {}, el('q', {}, cut(v.text, 160))))) : null) : null,
       quests.length ? block('Quests in play', el('ul', { class: 'ss-list' }, quests.map((q) => {
         const steps = readObjectives(q), p = progress(steps), open = steps.filter((o) => !o.done);
-        return el('li', {}, el('strong', {}, q.name), p.total ? ` (${p.done}/${p.total})` : '', q.fields?.stakes ? `: ${cut(q.fields.stakes, 120)}` : '',
+        const d = due(q);
+        return el('li', {}, el('strong', {}, q.name), p.total ? ` (${p.done}/${p.total})` : '', d ? el('span', { class: `ss-due${d.left <= 3 ? ' soon' : ''}` }, ` ⏳ ${deadlineText(d.left, d.holiday)}`) : '', q.fields?.stakes ? `: ${cut(q.fields.stakes, 120)}` : '',
           open.length ? el('ul', { class: 'ss-steps' }, open.slice(0, 5).map((o) => el('li', {}, `☐ ${plain(o.text)}${o.secret ? ' (secret)' : ''}`))) : null);
       }))) : null,
       sortSecrets(prep.secrets).open.length ? block('Secrets and clues', el('ul', { class: 'ss-steps' }, sortSecrets(prep.secrets).open.slice(0, 12).map((s) => el('li', {}, `☐ ${plain(s.text)}`)))) : null,
