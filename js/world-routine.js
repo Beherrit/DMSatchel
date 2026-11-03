@@ -3,7 +3,7 @@
 import { el, setKids, toast } from './dom.js';
 import { world, worldEntries, link, findByName, getEntry, patchEntry } from './world-store.js';
 import { whereAt, aboutTown, regularsAt, unreadable, townByHour, rollRoutine, dayOf, dueLater, busiestHour, crossPaths, atTaverns } from './routine.js';
-import { holidayToday } from './shop-hours.js';
+import { holidayToday, nextHoliday } from './shop-hours.js';
 import { cleanCalendar } from './calendar.js';
 import { makeRng, randomSeed } from './rng.js';
 import { isHired } from './hirelings.js';
@@ -212,12 +212,18 @@ export function crossPathsLine(npc) {
 // The place a routine names, for other views (the relationship web).
 export const routinePlace = (name) => placeOf(name);
 
-// Festival day in town: on one of the world's holidays, a settlement's page says so (the shops are shut, the taverns
+// Festival day in town (and the next one, on other days): on one of the world's holidays, a settlement's page says so (the shops are shut, the taverns
 // are not) and who's at each tavern in town right now, from routines.
 export function festivalLine(town) {
   if (town.kind !== 'settlement') return null;
-  const holiday = holidayToday(cleanCalendar(world.info?.cal));
-  if (!holiday) return null;
+  const cal = cleanCalendar(world.info?.cal);
+  const holiday = holidayToday(cal);
+  // The next festival: when today isn't one, when the next is (within a month).
+  if (!holiday) {
+    const next = nextHoliday(cal, 30);
+    if (!next) return null;
+    return el('p', { class: 'small festival-next' }, '🎉 ', el('strong', {}, next.name), next.days === 1 ? ' tomorrow: festive goods cost a quarter more today, and the shops will be shut.' : ` in ${next.days} days.`);
+  }
   const inside = (p) => { for (let x = p, i = 0; x && i < 12; x = x.parent_id && getEntry(x.parent_id), i++) if (x.id === town.id) return true; return false; };
   const isTavern = (p) => p?.kind === 'location' && p.fields?.type === 'Tavern';
   const tavernOf = (p) => { for (let x = p, i = 0; x && i < 12; x = x.parent_id && getEntry(x.parent_id), i++) { if (isTavern(x)) return x; if (x.id === town.id) return null; } return null; };

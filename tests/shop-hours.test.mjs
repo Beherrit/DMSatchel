@@ -53,3 +53,16 @@ test('openText: open till, shut till, shut for a holiday', async () => {
   assert.deepEqual(openText(shop, 600, 'Bridge Day'), { open: false, text: 'shut for Bridge Day' });
   assert.deepEqual(openText(inn, 600, 'Bridge Day'), { open: true, text: 'open till 02:00' });
 });
+
+test('nextHoliday: the next one within a month, across a month end', async () => {
+  const { nextHoliday } = await import('../js/shop-hours.js');
+  const { makeCalendar } = await import('../js/calendar.js');
+  const cal = makeCalendar('seasons', 1040);
+  const len = cal.months[0].days;
+  const c = { ...cal, month: 1, day: 1, holidays: [{ name: 'Bridge Day', month: 1, day: 5 }, { name: 'Lanterns', month: 2, day: 2 }] };
+  assert.deepEqual(nextHoliday(c), { name: 'Bridge Day', days: 4 });
+  assert.deepEqual(nextHoliday({ ...c, day: 5 }), { name: 'Lanterns', days: len - 5 + 2 });
+  assert.equal(nextHoliday({ ...c, day: 5 }, 3), null);
+  assert.equal(nextHoliday({ ...c, holidays: [] }), null);
+  assert.equal(nextHoliday(null), null);
+});

@@ -585,7 +585,7 @@ to the log at the bottom.
 301. [x] **Last seen in session prep.** Session prep's "Who might turn up" says where each was last seen.
 302. [x] **Open or shut on the map.** A shop's map pin says whether it's open now ("open till 18:00", "shut for
     Bridge Day"), and shut shops' pins are dimmed.
-303. [ ] **The next festival.** When it isn't a holiday, a settlement's page says when the next one is (within a
+303. [x] **The next festival.** When it isn't a holiday, a settlement's page says when the next one is (within a
     month): "🎉 Bridge Day in 4 days."
 304. [ ] **What's new since you looked.** The footer's "What's new" link counts changes shipped since this browser
     last opened the page, and the page marks them.
@@ -901,3 +901,4 @@ to the log at the bottom.
 - Who's in town for the festival: on one of the world's holidays, a settlement's page opens with a festival card: "🎉 Bridge Day today: a festival day. The shops are shut; the taverns are open.", then each tavern in town with who's in now from routines (back rooms count, quiet taverns say "no regulars in just now"), busiest first.
 - Last seen in session prep: "Who might turn up" now links the session each person was last seen in and says where, from that session's log (their own place first): "Last seen in Session 2, at Inn, 3 sessions ago · met 2 times."
 - Open or shut on the map: a shop's or tavern's map pin now says its hours by the world's clock in its tooltip ("Smithy (shut till 08:00)") and popup ("🔒 Shut for Bridge Day."), and shut shops' pins are dimmed until hovered. Taverns stay open on holidays.
+- The next festival: on other days, a settlement's page says when the next holiday is, within a month ("🎉 Bridge Day in 4 days."), and on the eve that festive goods cost a quarter more today and the shops will be shut.

@@ -57,3 +57,17 @@ export function openText(shop, minutes, holiday = '') {
   const at = (m + u.mins) % 1440, hh = (x) => `${String(Math.floor(x / 60)).padStart(2, '0')}:${String(x % 60).padStart(2, '0')}`;
   return { open: u.open, text: `${u.open ? 'open' : 'shut'} till ${hh(at)}` };
 }
+
+// The next holiday after today, within `within` days: { name, days } (days 1 = tomorrow), or null.
+export function nextHoliday(cal, within = 30) {
+  if (!cal || !Array.isArray(cal.holidays) || !cal.holidays.length || !Array.isArray(cal.months)) return null;
+  try {
+    const t0 = toDays(cal, { year: cal.year, month: cal.month, day: cal.day });
+    for (let d = 1; d <= within; d++) {
+      const t = fromDays(cal, t0 + d);
+      const h = cal.holidays.find((x) => x.month === t.month && x.day === t.day);
+      if (h) return { name: h.name, days: d };
+    }
+  } catch { /* a calendar we can't count on */ }
+  return null;
+}
