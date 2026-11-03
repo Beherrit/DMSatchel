@@ -7,21 +7,28 @@ import { world, worldEntries } from './world-store.js';
 import { readClock, LIGHTS, STEPS, partOfDay, hhmm, leftText, fuelFor, lightName } from './clock.js';
 import { changePlay } from './sheet-ui.js';
 import { takeItem } from './handover.js';
-import { outAndAbout } from './world-routine.js';
+import { outAndAbout, partyTown, townSnapshot } from './world-routine.js';
+import { clockDiff, diffText } from './clock-diff.js';
 import { formatDate, today, cleanCalendar } from './calendar.js';
 import { holidayToday, holidayTomorrow } from './shop-hours.js';
 
 export function clockCard() {
   if (!isMember()) return null;
   const box = el('section', { class: 'card clock-card', 'aria-labelledby': 'clock-h' });
+  let lastChange = '';
   const send = async (clock, msg) => {
     try {
+      // What changed when time moves: the party's town before and after.
+      const town = clock.advance || clock.set !== undefined ? partyTown() : null, before = town && townSnapshot(town);
       const r = await api('settings', { method: 'PATCH', body: { clock } });
       world.info = { ...world.info, clock: r.clock, ...(r.cal ? { cal: r.cal } : {}) };
+      const changed = before ? diffText(clockDiff(before, townSnapshot(town))) : '';
       // A quiet night: past midnight, say who's still out and about at this hour.
       const late = r.days && r.clock ? outAndAbout(r.clock.minutes) : [];
       const notes = [msg, r.out?.length ? `${r.out.join(', ')} went out` : '', r.days && r.cal ? `a new day: ${formatDate(r.cal, today(r.cal), { weekday: true })}` : '',
-        r.days ? (late.length ? `out at this hour: ${late.slice(0, 4).map((x) => `${x.npc.name} (${x.place.name})`).join(', ')}${late.length > 4 ? ` and ${late.length - 4} more` : ''}` : 'a quiet night: nobody is about') : ''].filter(Boolean);
+        r.days ? (late.length ? `out at this hour: ${late.slice(0, 4).map((x) => `${x.npc.name} (${x.place.name})`).join(', ')}${late.length > 4 ? ` and ${late.length - 4} more` : ''}` : 'a quiet night: nobody is about') : '',
+        changed ? `in ${town.name}: ${changed}` : ''].filter(Boolean);
+      if (changed) lastChange = `${hhmm(r.clock.minutes)} in ${town.name}: ${changed}.`;
       if (notes.length) toast(notes.join(' · '));
       draw();
       if (r.days) window.dispatchEvent(new Event('world:rerender'));
@@ -63,6 +70,8 @@ export function clockCard() {
     setKids(box,
       el('h3', { id: 'clock-h' }, 'Time and light'),
       el('p', { class: 'clock-now' }, el('strong', {}, hhmm(c.minutes)), ` · ${partOfDay(c.minutes)}`),
+      // What changed when time last moved (this browser), in the party's town.
+      lastChange ? el('p', { class: 'small clock-changed' }, `⏩ ${lastChange}`) : null,
       // Holidays on the clock: a holiday shuts the shops (the taverns stay open).
       (() => { const h = holidayToday(cleanCalendar(world.info?.cal)); return h ? el('p', { class: 'small clock-holiday' }, `🎉 ${h}: the shops are shut today; the taverns are open.`) : null; })(),
       // Eve of a holiday on the clock: festive goods cost more today, and the shops shut tomorrow.

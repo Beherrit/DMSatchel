@@ -338,3 +338,21 @@ export function marketDayLine(town) {
   const day = tradeDay(cleanCalendar(world.info?.cal));
   return isMarketDay(town, day.weekday) ? el('p', { class: 'small market-day' }, el('strong', {}, '🧺 Market day today: '), 'stalls in the square, and the shops open two hours early.') : null;
 }
+
+// What changed when time moves: where the party is (its town, or the place itself), a snapshot of its shops (open or
+// not) and who's about where, for clock-diff.js. null when the party is on the road or the world has no clock.
+export function partyTown() {
+  const at = partyPlace();
+  for (let p = at, i = 0; p && i < 12; p = p.parent_id && getEntry(p.parent_id), i++) if (p.kind === 'settlement') return p;
+  return at || null;
+}
+export function townSnapshot(town) {
+  const m = now();
+  if (!town || m === null) return null;
+  const inside = (p) => { for (let x = p, i = 0; x && i < 12; x = x.parent_id && getEntry(x.parent_id), i++) if (x.id === town.id) return true; return false; };
+  const day = tradeDay(cleanCalendar(world.info?.cal)), market = isMarketDay(town, day.weekday);
+  const shops = worldEntries().filter((x) => x.kind === 'location' && x.id !== town.id && (x.fields?.stock || x.fields?.menu) && inside(x))
+    .map((x) => ({ id: x.id, name: x.name, open: openText(x, m, { ...day, market }).open }));
+  const people = (aroundNow(town)?.list || []).map(({ npc, place }) => ({ id: npc.entry.id, name: npc.entry.name, place: place.id === town.id ? `about ${town.name}` : place.name }));
+  return { shops, people };
+}
