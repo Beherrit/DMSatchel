@@ -2,7 +2,9 @@
 // Route: #world/party
 import { el, toast, confirmButton, setKids } from './dom.js';
 import { api, isGm, isMember, session } from './api.js';
-import { world, worldEntries, getEntry, byName, link, when, richText, setEntryState, patchEntry } from './world-store.js';
+import { world, worldEntries, getEntry, byName, link, when, richText, setEntryState, patchEntry, mentions } from './world-store.js';
+import { appearances, sceneOf } from './appearances.js';
+import { PLACE_KINDS } from './world-schema.js';
 import { thumb } from './image-ui.js';
 import { lastShownLine } from './world-show.js';
 import { addCoins, playOf, changePlay } from './sheet-ui.js';
@@ -333,11 +335,15 @@ function debtsCard(chars) {
 function bountiesCard() {
   const list = openBounties(worldEntries());
   if (!list.length) return null;
+  const seen = appearances(worldEntries(), mentions);
   return el('section', { class: 'card party-bounties' }, el('h3', {}, 'Wanted'),
     el('ul', { class: 'plain' }, list.slice(0, 10).map((b) => {
       // Bounty hunters' board: where they're usually found by day, from their routine.
       const d = b.entry.fields?.routine ? dayOf(b.entry.fields.routine) : [], by = d[0]?.place || d[1]?.place;
-      return el('li', {}, link(b.entry), `: ${b.text}`, b.by ? el('span', { class: 'muted small' }, ` (from ${b.by})`) : null, by ? el('div', { class: 'small' }, `Usually by day: ${by}`) : null);
+      // …and where the party last saw them, from the session logs.
+      const s = seen.get(b.entry.id), at = s && sceneOf(s.last, mentions, getEntry, PLACE_KINDS, b.entry);
+      return el('li', {}, link(b.entry), `: ${b.text}`, b.by ? el('span', { class: 'muted small' }, ` (from ${b.by})`) : null, by ? el('div', { class: 'small' }, `Usually by day: ${by}`) : null,
+        s ? el('div', { class: 'small muted wanted-seen' }, '👁 Last seen in ', link(s.last), at ? [', at ', link(at)] : '', s.ago ? ` (${s.ago} session${s.ago === 1 ? '' : 's'} ago)` : ' (the latest session)') : null);
     })));
 }
 
