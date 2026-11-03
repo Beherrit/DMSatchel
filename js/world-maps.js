@@ -11,6 +11,7 @@ import { overloaded, overloadedText } from './weights.js';
 import { aroundNow, laterLine, busiestLine, ownerDayLine } from './world-routine.js';
 import { openText, holidayToday } from './shop-hours.js';
 import { festivalSpecial } from './menu.js';
+import { openBounties } from './bounty.js';
 import { coinText } from './economy.js';
 
 // Open or shut on the map: a shop's (or tavern's) hours by the world's clock and today's holiday, or null.
@@ -261,6 +262,10 @@ export async function viewMap(id, focusPin) {
         (() => { const h = hoursOf(entry); return h ? el('p', { class: `small pin-hours${h.open ? '' : ' shut'}` }, h.open ? '🟢 ' : '🔒 ', h.text[0].toUpperCase() + h.text.slice(1), '.') : null; })(),
         // When the owner's usually in.
         entry ? ownerDayLine(entry) : null,
+        // Wanted on the map: anyone with an open bounty whose routine has them here (or inside) right now.
+        (() => { const a = entry && PLACE_KINDS.includes(entry.kind) ? aroundNow(entry) : null; if (!a?.list.length) return null;
+          const wanted = new Map(openBounties(worldEntries()).map((b) => [b.entry.id, b])), here = a.list.filter((x) => wanted.has(x.npc.entry.id));
+          return here.length ? el('p', { class: 'small pin-wanted' }, '🎯 Wanted, here now: ', here.map(({ npc, place }, i) => [i ? '; ' : '', link(npc.entry), ` (${wanted.get(npc.entry.id).text})`, place.id === entry.id ? '' : el('span', { class: 'muted' }, ` at ${place.name}`)])) : null; })(),
         // Festival specials on the map: on a holiday, a tavern's special of the day.
         (() => { const hol = entry?.fields?.menu ? holidayToday(cleanCalendar(world.info?.cal)) : '', f = hol && festivalSpecial(entry.fields.menu, hol, entry.id);
           return f ? el('p', { class: 'small pin-festival' }, `🎉 ${hol} special: `, el('strong', {}, f.name), ` (${coinText(f.cp)})`) : null; })(),

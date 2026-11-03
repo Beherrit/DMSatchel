@@ -633,7 +633,7 @@ to the log at the bottom.
     session logs.
 328. [x] **Routines that don't read.** GMs get a list of every NPC routine with lines the clock can't read, or
     places it names that aren't in the world, to fix in one go.
-329. [ ] **Wanted on the map.** A map pin's popup notes anyone wanted who's there right now.
+329. [x] **Wanted on the map.** A map pin's popup notes anyone wanted who's there right now.
 
 ## Ideas parking lot
 
@@ -970,3 +970,4 @@ to the log at the bottom.
 - A wanted poster: an NPC with a bounty (not GM-only) has a "🎯 Wanted poster" button on their page; #world/poster/<their id> prints a poster with their name, appearance, the reward and who offers it (crossed out as CLAIMED once paid).
 - Last seen, for bounty hunters: each person on the party page's Wanted card says where the party last saw them, from the session logs: "👁 Last seen in Session 1, at The Bell (1 session ago)".
 - Routines that don't read: the GMs' "What needs writing" page lists every NPC routine with lines the clock can't read ("Can't read: brunch: The Bell") or places it names that aren't in the world ("Not in the world: the Mill"), each with an Edit button. Everyday places (home, the road, the market, the woods…) aren't flagged.
+- Wanted on the map: a place's map pin popup notes anyone with an open bounty whose routine has them there (or somewhere inside) right now: "🎯 Wanted, here now: Red Jack (500 gp) at The Bell".
