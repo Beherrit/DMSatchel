@@ -121,11 +121,16 @@ export function townHoursBox(town) {
   const inside = (p) => { for (let x = p, i = 0; x && i < 12; x = x.parent_id && getEntry(x.parent_id), i++) if (x.id === town.id) return true; return false; };
   const npcs = worldEntries().filter((x) => x.kind === 'npc' && x.fields?.routine && !isHired(x) && !['Dead', 'Missing'].includes(x.fields?.status)).map((x) => ({ id: x.id, name: x.name, routine: x.fields.routine, entry: x }));
   const t = townByHour(npcs, placeOf, inside);
-  if (!t.rows.length) return null;
+  // Shops in the town by the hour: which are open at each of the table's hours, today.
+  const day = tradeDay(cleanCalendar(world.info?.cal)), market = isMarketDay(town, day.weekday);
+  const shops = worldEntries().filter((x) => x.kind === 'location' && x.id !== town.id && (x.fields?.stock || x.fields?.menu) && inside(x)).sort((a, b) => a.name.localeCompare(b.name));
+  if (!t.rows.length && !shops.length) return null;
+  const openAt = (m) => shops.filter((x) => openText(x, m, { ...day, market }).open);
   return el('details', { class: 'town-hours' }, el('summary', {}, `The ${town.kind === 'settlement' ? 'town' : 'place'} by the hour (${t.rows.length})`),
     el('div', { class: 'table-wrap' }, el('table', { class: 'glance-table town-hours-table' },
       el('thead', {}, el('tr', {}, el('th', { scope: 'col' }, 'Who'), t.hours.map((h) => el('th', { scope: 'col' }, `${h.label} (${hhmm(h.m)})`)))),
-      el('tbody', {}, t.rows.map((r) => el('tr', {}, el('th', { scope: 'row' }, link(r.npc.entry)), r.cells.map((c) => el('td', {}, c ? (c.id === town.id ? 'about town' : link(c)) : el('span', { class: 'muted' }, '—')))))))));
+      el('tbody', {}, t.rows.map((r) => el('tr', {}, el('th', { scope: 'row' }, link(r.npc.entry)), r.cells.map((c) => el('td', {}, c ? (c.id === town.id ? 'about town' : link(c)) : el('span', { class: 'muted' }, '—')))))),
+      shops.length ? el('tfoot', {}, el('tr', { class: 'town-hours-shops' }, el('th', { scope: 'row' }, 'Open'), t.hours.map((h) => { const o = openAt(h.m); return el('td', { class: 'small' }, o.length ? o.map((x, i) => [i ? ', ' : '', link(x)]) : el('span', { class: 'muted' }, 'all shut')); }))) : null)));
 }
 
 // Is a place's owner (its Owner field naming an NPC with a routine) there right now? → { owner, here } or null.

@@ -684,7 +684,7 @@ to the log at the bottom.
 359. [x] **Due in later, on the session sheet.** The printable session sheet says who's due in later where the
     party is, and about when.
 360. [x] **Market day coming up.** "Coming up for you" notes the next market day in the party's town.
-361. [ ] **Shops in the town by the hour.** The town-by-the-hour table also shows which shops are open at each hour.
+361. [x] **Shops in the town by the hour.** The town-by-the-hour table also shows which shops are open at each hour.
 
 ## Ideas parking lot
 
@@ -1053,3 +1053,4 @@ to the log at the bottom.
 - When the session began: "Start session N" in prep now opens the log with "Began at 18:00 (evening) on Fireday, 5 Thawmoon 1040." from the world's clock and calendar (either part left out when the world has none).
 - Due in later, on the session sheet: the printable session sheet has a "🌙 Due in later" block: who the routines bring where the party is (or somewhere inside it) before 02:00, "Ada about 17:00 at The Bell", soonest first.
 - Market day coming up: a character's "Coming up for you" notes the next market day in the town the party is in, "🧺 Market day in Brindle · in 2 days" (the first one in the week, not every one).
+- Shops in the town by the hour: the town-by-the-hour table on a settlement's page ends with an "Open" row: which of the town's shops and taverns are open at each hour today (own hours, days off, holidays and market day included), linked; the table now shows for a town with shops even if nobody's routine is written.
