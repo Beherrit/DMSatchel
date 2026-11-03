@@ -50,7 +50,7 @@ async function show(section, sub) {
   else if (section === 'world') { panel('world', mod.mountWorld).hidden = false; mod.showWorld(sub ? sub.split('/') : []); }
   else if (section === 'reference') { panel('reference', mod.mountReference).hidden = false; mod.showReference(sub); }
   else if (section === 'admin') { panel('admin', mod.mountAdmin).hidden = false; mod.showAdmin(sub); }
-  else if (section === 'news') { const p = panel('news', mod.mountNews); p.hidden = false; mod.showNews(p); }
+  else if (section === 'news') { const p = panel('news', mod.mountNews); p.hidden = false; mod.showNews(p, sub); }
   else if (section === 'worlds' || section === 'join') { panel('worlds', mountWorlds).hidden = false; showWorlds(section === 'join' ? `join/${sub}` : sub); }
 }
 

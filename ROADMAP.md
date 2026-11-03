@@ -598,7 +598,7 @@ to the log at the bottom.
 308. [x] **Shut shops on the shopping list.** A character's shopping list says when the shop an item is from is shut
     right now, and when it opens.
 309. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
-310. [ ] **Links to a change.** Each change on the What's new page has its own link (#news/305) that opens the page
+310. [x] **Links to a change.** Each change on the What's new page has its own link (#news/305) that opens the page
     scrolled to it, with a copy-link button.
 311. [ ] **Search finds changes.** Ctrl K finds shipped changes by name ("What's new: Festival day card") and opens
     them on the What's new page.
@@ -923,3 +923,4 @@ to the log at the bottom.
 - Open now on the Market tab: a settlement's shop list now says, by the world's clock, "🕰 21:00: 1 open, 2 shut (for the night)." (or "shut for Bridge Day" on a holiday), and each shop says "open till 20:00" or "shut till 08:00".
 - Holidays on the session sheet: under the date, the printable session sheet says "🎉 Bridge Day today: the shops are shut; the taverns are open." on a holiday, and on the eve that festive goods cost 25% more today and the shops shut tomorrow.
 - Shut shops on the shopping list: the list already said whether each shop is open; now it gives exact times ("open till 20:00", "shut till 08:00", "shut for Bridge Day"), and session prep's shopping lists show the same where-to-buy line under each item.
+- Links to a change: every change on What's new links to itself (#news/305 opens the page scrolled to it and outlined, showing as many as it takes to reach an old one), with a "Copy link" button; an unknown number says so.
