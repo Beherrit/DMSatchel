@@ -640,6 +640,14 @@ to the log at the bottom.
     the place, in the NPC's town.
 332. [x] **Wanted on the cast list.** The printable Who's who marks people with an open bounty, and the reward.
 333. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
+334. [ ] **Every page at phone width.** A test visits every route with a full world at 390 px wide and flags any
+    page wider than the screen; fix what it finds.
+335. [ ] **Deadlines on holidays.** A quest deadline that falls on one of the world's holidays says so ("due on
+    Bridge Day, in 4 days").
+336. [ ] **Deadlines on the session sheet.** The printable session sheet lists active quests with a deadline,
+    soonest first, and how many days are left.
+337. [ ] **Where they'll be, on the session sheet.** Each person in "Who's around" on the session sheet says where
+    their routine usually has them by day.
 
 ## Ideas parking lot
 
