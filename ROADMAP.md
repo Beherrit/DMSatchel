@@ -689,7 +689,7 @@ to the log at the bottom.
     from their routine.
 363. [x] **Patrons in session prep.** Session prep's active quests say where each patron is now.
 364. [x] **"Who's at" in search.** Typing "at the Bell" (or "who's at the Bell") in Ctrl K lists who's there now.
-365. [ ] **Last orders on the map.** In a tavern's last hour, its map pin popup says it's last orders.
+365. [x] **Last orders on the map.** In a tavern's last hour, its map pin popup says it's last orders.
 
 ## Ideas parking lot
 
@@ -1062,3 +1062,4 @@ to the log at the bottom.
 - Where to find the patron: an open quest's page says where its patron is right now, from their routine: "🕰 Now (10:00): Bramwell is at The Forge until 17:00." (a hireling is with the party; finished quests and patrons who aren't NPCs say nothing).
 - Patrons in session prep: each active quest in prep says where its patron is now: "🕰 Bramwell is at The Bell until 21:00 now" (patrons who aren't NPCs with routines say nothing).
 - "Who's at" in search: typing "at the Bell" or "who's at Brindle" in Ctrl K lists the place, then who the routines put there (or somewhere inside it) right now, with where and until when; a name that isn't a place falls back to ordinary search.
+- Last orders on the map: in a tavern's last hour, its map pin popup says "🍺 Last orders: it shuts in 40 min." instead of its hours (following its own hours, if it keeps them).

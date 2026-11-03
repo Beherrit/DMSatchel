@@ -9,7 +9,7 @@ import { playOf, characterOf, changePlay } from './sheet-ui.js';
 import { readList, withRations } from './shopping.js';
 import { overloaded, overloadedText } from './weights.js';
 import { aroundNow, laterLine, busiestLine, ownerDayLine, routineNow } from './world-routine.js';
-import { openText, holidayToday } from './shop-hours.js';
+import { openText, holidayToday, untilChange } from './shop-hours.js';
 import { festivalSpecial } from './menu.js';
 import { openBounties } from './bounty.js';
 import { coinText } from './economy.js';
@@ -260,7 +260,11 @@ export async function viewMap(id, focusPin) {
         // Who's due in, on the map: a tavern's pin also says who's coming in later tonight.
         entry ? laterLine(entry) : null,
         // Open or shut, by the clock.
-        (() => { const h = hoursOf(entry); return h ? el('p', { class: `small pin-hours${h.open ? '' : ' shut'}` }, h.open ? '🟢 ' : '🔒 ', h.text[0].toUpperCase() + h.text.slice(1), '.') : null; })(),
+        (() => { const h = hoursOf(entry); if (!h) return null;
+          // Last orders on the map: a tavern's last hour.
+          const u = h.open && entry.fields?.type === 'Tavern' ? untilChange(entry, world.info.clock.minutes, dayFor(entry)) : null;
+          if (u?.open && u.mins <= 60) return el('p', { class: 'small pin-hours last-orders' }, `🍺 Last orders: it shuts in ${u.mins} min.`);
+          return el('p', { class: `small pin-hours${h.open ? '' : ' shut'}` }, h.open ? '🟢 ' : '🔒 ', h.text[0].toUpperCase() + h.text.slice(1), '.'); })(),
         // Where they are, on their pin: an NPC's routine now, and their usual day.
         entry?.kind === 'npc' ? routineNow(entry) : null,
         // When the owner's usually in.
