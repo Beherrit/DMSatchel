@@ -19,6 +19,8 @@ import { remindersPrint } from './world-reminders.js';
 import { musicFor } from './music.js';
 import { dayWeather } from './forecast.js';
 import { holidayToday, holidayTomorrow, EVE_MARKUP } from './shop-hours.js';
+import { aroundNow } from './world-routine.js';
+import { hhmm } from './clock.js';
 
 const ACTIVE_PC = (e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
 const townOf = (place) => (place?.kind === 'settlement' ? place : [...trail(place)].reverse().find((p) => p.kind === 'settlement') || null);
@@ -71,6 +73,9 @@ export async function viewSessionSheet() {
         weather ? el('p', {}, el('strong', {}, 'Weather: '), weather.line) : null,
         (() => { const m = musicFor([here, ...trail(here).reverse()]); return m ? el('p', { class: 'small' }, el('strong', {}, 'Music: '), m.url) : null; })(),
         shops.length ? el('p', { class: 'small' }, el('strong', {}, 'Shops: '), shops.map((s) => s.name).join(', ')) : null) : null,
+      // Around now: who the routines put where the party is (or somewhere inside), at the world's hour.
+      (() => { const a = here ? aroundNow(here) : null; return a?.list.length ? block(`🕰 Around now (${hhmm(a.m)})`, el('ul', { class: 'ss-list ss-around' }, a.list.map(({ npc, place, until }) =>
+        el('li', {}, el('strong', {}, npc.entry.name), place.id === here.id ? '' : ` at ${place.name}`, until !== null ? ` until ${hhmm(until)}` : '')))) : null; })(),
       people.length ? block(`Who’s around (${people.length})`, el('ul', { class: 'ss-list' }, people.map((p) => {
         const att = towards(all, p.id);
         return el('li', {}, el('strong', {}, p.name), sayOf(p) ? ` [${sayOf(p)}]` : '', p.fields?.role ? ` (${p.fields.role})` : '', p.summary ? `: ${cut(p.summary, 110)}` : '',
