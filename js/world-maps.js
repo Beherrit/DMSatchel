@@ -8,7 +8,7 @@ import { world, worldEntries, getEntry, findByName, link, kindLabel, notice, nam
 import { playOf, characterOf, changePlay } from './sheet-ui.js';
 import { readList, withRations } from './shopping.js';
 import { overloaded, overloadedText } from './weights.js';
-import { aroundNow, laterLine, busiestLine } from './world-routine.js';
+import { aroundNow, laterLine, busiestLine, ownerDayLine } from './world-routine.js';
 import { openText, holidayToday } from './shop-hours.js';
 
 // Open or shut on the map: a shop's (or tavern's) hours by the world's clock and today's holiday, or null.
@@ -257,6 +257,8 @@ export async function viewMap(id, focusPin) {
         entry ? laterLine(entry) : null,
         // Open or shut, by the clock.
         (() => { const h = hoursOf(entry); return h ? el('p', { class: `small pin-hours${h.open ? '' : ' shut'}` }, h.open ? '🟢 ' : '🔒 ', h.text[0].toUpperCase() + h.text.slice(1), '.') : null; })(),
+        // When the owner's usually in.
+        entry ? ownerDayLine(entry) : null,
         // Busy taverns on the map: when it's fullest.
         entry ? busiestLine(entry) : null,
         (() => { const a = entry && PLACE_KINDS.includes(entry.kind) ? aroundNow(entry) : null; return a?.list.length ? el('p', { class: 'small pin-here' }, `🕰 Here now (${hhmm(a.m)}): `, a.list.map(({ npc, place }, i) => [i ? ', ' : '', link(npc.entry), place.id === entry.id ? '' : el('span', { class: 'muted' }, ` at ${place.name}`)])) : null; })(),
