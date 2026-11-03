@@ -597,7 +597,7 @@ to the log at the bottom.
     taverns open) or the eve of one (festive goods cost more).
 308. [x] **Shut shops on the shopping list.** A character's shopping list says when the shop an item is from is shut
     right now, and when it opens.
-309. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
+309. [x] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 310. [x] **Links to a change.** Each change on the What's new page has its own link (#news/305) that opens the page
     scrolled to it, with a copy-link button.
 311. [x] **Search finds changes.** Ctrl K finds shipped changes by name ("What's new: Festival day card") and opens
@@ -938,3 +938,4 @@ to the log at the bottom.
 - Nobody at the counter: GMs see on a settlement's Market tab which shops have an owner whose routine never has them in while the shop is open ("Candler: Nell (open 08:00–20:00)"), counted in half hours across trading hours (a tavern's run to 02:00).
 - A shopping trip: session prep's shopping lists end with a trip plan for the town the party is in: each shop that stocks something on anyone's list, most wanted first, with what and for whom and the price, whether it's open now ("open till 20:00"), and what nowhere here stocks.
 - Who minds the shop: when a shop is open but its owner's routine has them elsewhere, its buy panel says "🛎 Bramwell is out; an apprentice minds the counter."
+- A full sweep: all 325 browser tests rerun (started after #308); no crashes or page errors, and the same flagged files as the last sweep (the deliberate error-path 400s).
