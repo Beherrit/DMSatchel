@@ -685,6 +685,11 @@ to the log at the bottom.
     party is, and about when.
 360. [x] **Market day coming up.** "Coming up for you" notes the next market day in the party's town.
 361. [x] **Shops in the town by the hour.** The town-by-the-hour table also shows which shops are open at each hour.
+362. [ ] **Where to find the patron.** A quest's page says where its patron (an NPC) is right now and until when,
+    from their routine.
+363. [ ] **Patrons in session prep.** Session prep's active quests say where each patron is now.
+364. [ ] **"Who's at" in search.** Typing "at the Bell" (or "who's at the Bell") in Ctrl K lists who's there now.
+365. [ ] **Last orders on the map.** In a tavern's last hour, its map pin popup says it's last orders.
 
 ## Ideas parking lot
 
