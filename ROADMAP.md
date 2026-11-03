@@ -620,7 +620,7 @@ to the log at the bottom.
     as a little route, open or shut.
 320. [x] **The owner's hours on the map.** A shop's map pin popup also says when its owner is usually in.
 321. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
-322. [ ] **Wanted in town.** A settlement's page lists the open bounties on people who live there or whose routine
+322. [x] **Wanted in town.** A settlement's page lists the open bounties on people who live there or whose routine
     brings them there, and who's about town right now.
 323. [ ] **Around now on the session sheet.** The printable session sheet marks who the routines put where the party
     is right now, and until when.
@@ -956,3 +956,4 @@ to the log at the bottom.
 - Name who minds the shop: places have a new "Minds it when the owner's out" field (an additive schema field; stored with the other fields, no migration). When the owner is out, the page says "Nell is out: the chapel; Pip minds the counter." (linked when Pip is in the world), the buy panel names them instead of "an apprentice", and a named minder clears the Market tab's "Nobody at the counter" flag.
 - Your shopping trip: a character's shopping list now folds out "Your shopping trip in Brindle": the shops in the party's town that stock what's on it, most to fetch first, open or shut, and what nowhere here stocks. It only appears when there's more than one stop or thing to fetch.
 - The owner's hours on the map: a shop's map pin popup now says when its owner is usually in, under whether it's open: "🛎 Bramwell is usually in mornings and afternoons; evenings at the Bell; nights at home."
+- Wanted in town: a settlement's page lists "🎯 Wanted in Brindle": open bounties on people who live there or whose routine brings them into town at some hour, richest first, with "🕰 About town now: The Bell until 19:00" when their routine has them there now.

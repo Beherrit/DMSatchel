@@ -4,6 +4,7 @@ import { el, setKids, toast } from './dom.js';
 import { world, worldEntries, link, findByName, getEntry, patchEntry } from './world-store.js';
 import { whereAt, aboutTown, regularsAt, unreadable, townByHour, rollRoutine, dayOf, dueLater, busiestHour, crossPaths, atTaverns, ownerDay, timeAt } from './routine.js';
 import { holidayToday, nextHoliday, tradingHours } from './shop-hours.js';
+import { openBounties } from './bounty.js';
 import { cleanCalendar } from './calendar.js';
 import { makeRng, randomSeed } from './rng.js';
 import { isHired } from './hirelings.js';
@@ -271,4 +272,24 @@ export function counterGap(shop) {
   if (!owner || String(shop.fields?.minder || '').trim()) return null; // someone minds it
   const [from, to] = tradingHours(shop);
   return timeAt(owner.fields.routine, (name) => placeOf(name)?.id === shop.id, from, to) ? null : { owner, from, to };
+}
+
+// Wanted in town: open bounties on people who live in a settlement or whose routine brings them into it at some hour,
+// with where they are now when that's in town. → [{ bounty, now: { place, until } | null }]
+export function wantedIn(town) {
+  const inside = (p) => { for (let x = p, i = 0; x && i < 12; x = x.parent_id && getEntry(x.parent_id), i++) if (x.id === town.id) return true; return false; };
+  const visits = (e) => !isHired(e) && e.fields?.routine && dayOf(e.fields.routine).some((h) => h.place && inside(placeOf(h.place)));
+  const a = aroundNow(town);
+  const here = new Map((a?.list || []).map((x) => [x.npc.entry.id, x]));
+  return openBounties(worldEntries()).filter((b) => inside(b.entry) || visits(b.entry) || here.has(b.entry.id))
+    .map((bounty) => ({ bounty, now: here.get(bounty.entry.id) || null }));
+}
+
+export function wantedCard(town) {
+  if (town.kind !== 'settlement') return null;
+  const list = wantedIn(town);
+  if (!list.length) return null;
+  return el('section', { class: 'card wanted-here', 'aria-label': 'Wanted here' }, el('h3', {}, `🎯 Wanted in ${town.name}`),
+    el('ul', { class: 'plain' }, list.slice(0, 8).map(({ bounty: b, now: n }) => el('li', {}, link(b.entry), `: ${b.text}`, b.by ? el('span', { class: 'muted small' }, ` (from ${b.by})`) : null,
+      n ? el('div', { class: 'small' }, `🕰 About town now: `, n.place.id === town.id ? 'somewhere in town' : link(n.place), n.until !== null ? el('span', { class: 'muted' }, ` until ${hhmm(n.until)}`) : null) : null))));
 }
