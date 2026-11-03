@@ -15,6 +15,7 @@ import { inventoryLines } from './handover.js';
 import { readList, listFirst } from './shopping.js';
 import { shopOpen, holidayToday, shutText, holidayTomorrow, evePrice, isFestive } from './shop-hours.js';
 import { cleanCalendar } from './calendar.js';
+import { ownerIn } from './world-routine.js';
 import { shopStanding, sellWithStanding } from './standing-price.js';
 
 const ACTIVE = (e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
@@ -83,7 +84,10 @@ export function buyBox(shop, rerender) {
   const hours = shopOpen(shop, world.info?.clock?.minutes ?? 480, holidayToday(cleanCalendar(world.info?.cal)));
   const shut = hours.open ? null : el('p', { class: 'shop-shut small' }, el('span', { 'aria-hidden': 'true' }, hours.holiday ? '🎉 ' : '🌙 '), `${shop.name} is ${shutText(hours)}. It opens ${hours.opens}.`, isGm() ? ' (GMs can still trade.)' : '');
   if (shut && !isGm()) return el('div', { class: 'trade' }, shut);
-  return el('div', { class: 'trade' }, shut, items.length ? buyPart(shop, items, chars, rerender) : null, sellPart(shop, chars, rerender), askPart(shop, chars, rerender), isGm() && items.length ? hagglePart(shop, chars, rerender) : null);
+  // Who minds the shop: open, but the owner's routine has them elsewhere just now.
+  const who = hours.open ? ownerIn(shop) : null;
+  const minder = who && !who.here ? el('p', { class: 'shop-minder small muted' }, '🛎 ', who.owner.name, ' is out; an apprentice minds the counter.') : null;
+  return el('div', { class: 'trade' }, shut, minder, items.length ? buyPart(shop, items, chars, rerender) : null, sellPart(shop, chars, rerender), askPart(shop, chars, rerender), isGm() && items.length ? hagglePart(shop, chars, rerender) : null);
 }
 
 const dc = (shop) => Number((String(shop.fields?.stock || '').match(/Haggle DC (\d+)/) || [])[1]) || 0;

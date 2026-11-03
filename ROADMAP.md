@@ -610,7 +610,7 @@ to the log at the bottom.
     trading hours, so the GM can fix the routine or hire help.
 315. [x] **A shopping trip.** Session prep plans a shopping trip: each shop in town that stocks something on anyone's
     list, what and for whom, open now or when it opens.
-316. [ ] **Who minds the shop.** When the owner is out, a shop's buy panel says so ("Bramwell is out; an apprentice
+316. [x] **Who minds the shop.** When the owner is out, a shop's buy panel says so ("Bramwell is out; an apprentice
     minds the counter").
 317. [ ] **Due back, on an NPC's page.** GMs see on an NPC's page when the party hasn't met them for a while ("Not
     seen for 3 sessions: might turn up").
@@ -937,3 +937,4 @@ to the log at the bottom.
 - The festival in session prep: under "Where the party is", prep shows the town's festival card on a holiday (shops shut, taverns open, who's at each tavern now), and on other days when the next holiday is, within a month. Out in the wilds it says nothing.
 - Nobody at the counter: GMs see on a settlement's Market tab which shops have an owner whose routine never has them in while the shop is open ("Candler: Nell (open 08:00–20:00)"), counted in half hours across trading hours (a tavern's run to 02:00).
 - A shopping trip: session prep's shopping lists end with a trip plan for the town the party is in: each shop that stocks something on anyone's list, most wanted first, with what and for whom and the price, whether it's open now ("open till 20:00"), and what nowhere here stocks.
+- Who minds the shop: when a shop is open but its owner's routine has them elsewhere, its buy panel says "🛎 Bramwell is out; an apprentice minds the counter."
