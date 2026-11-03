@@ -5,7 +5,7 @@ import { isGm } from './api.js';
 import { world, worldEntries, getEntry, link } from './world-store.js';
 import { playOf, changePlay } from './sheet-ui.js';
 import { readList, addToList, removeFromList, shopsFor } from './shopping.js';
-import { shopOpen, holidayToday, shutText } from './shop-hours.js';
+import { openText, holidayToday } from './shop-hours.js';
 import { cleanCalendar } from './calendar.js';
 import { ownerIn } from './world-routine.js';
 import { coinText } from './economy.js';
@@ -18,8 +18,8 @@ function whereToBuy(line) {
   if (!found.length) return null;
   const m = world.info?.clock?.minutes ?? 480, holiday = holidayToday(cleanCalendar(world.info?.cal));
   return el('div', { class: 'small muted where-to-buy' }, found.map((f, i) => {
-    const open = shopOpen(f.shop, m, holiday), who = ownerIn(f.shop);
-    return [i ? ' · ' : '', link(getEntry(f.shop.id) || f.shop), ` ${coinText(f.cp)}, `, open.open ? el('span', { class: 'open-now' }, 'open') : open.holiday ? shutText(open) : `shut till ${open.opens.replace(/^at /, '')}`,
+    const open = openText(f.shop, m, holiday), who = ownerIn(f.shop);
+    return [i ? ' · ' : '', link(getEntry(f.shop.id) || f.shop), ` ${coinText(f.cp)}, `, open.open ? el('span', { class: 'open-now' }, open.text) : open.text,
       who && open.open ? (who.here ? `, ${who.owner.name} is in` : `, ${who.owner.name} is out`) : ''];
   }));
 }
@@ -50,5 +50,6 @@ export function shoppingPrepCard() {
     .map((c) => ({ c, list: readList(playOf(c)) })).filter((x) => x.list.length);
   if (!lists.length) return null;
   return el('section', { class: 'card prep-card shopping-lists' }, el('h3', {}, '🛒 Shopping lists'),
-    el('ul', { class: 'plain' }, lists.map(({ c, list }) => el('li', {}, link(getEntry(c.id) || c), `: ${list.join(', ')}`))));
+    el('ul', { class: 'plain' }, lists.map(({ c, list }) => el('li', {}, link(getEntry(c.id) || c), ':',
+      el('ul', { class: 'plain shopping-prep-lines' }, list.map((t) => el('li', {}, t, whereToBuy(t))))))));
 }

@@ -1780,3 +1780,4 @@ details.quest-group > summary .section-title { display: inline }
 .news-new { margin-left: 6px; font-size: calc(11px * var(--ts, 1)); vertical-align: middle }
 /* Open now on the Market tab (#306) */
 .shop-hours { margin-left: 6px } .shop-hours.open { color: var(--good, inherit) } .shop-hours.shut { color: var(--muted) }
+.shopping-prep-lines { margin: 2px 0 6px 14px }

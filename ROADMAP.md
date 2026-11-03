@@ -595,7 +595,7 @@ to the log at the bottom.
     are open now and which are shut (and why: night or a holiday).
 307. [x] **Holidays on the session sheet.** The printable session sheet notes when today is a holiday (shops shut,
     taverns open) or the eve of one (festive goods cost more).
-308. [ ] **Shut shops on the shopping list.** A character's shopping list says when the shop an item is from is shut
+308. [x] **Shut shops on the shopping list.** A character's shopping list says when the shop an item is from is shut
     right now, and when it opens.
 309. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 
@@ -914,3 +914,4 @@ to the log at the bottom.
 - Who might turn up, on the town's page: GMs see a folded "Who might turn up (3)" on a settlement's page, the same list as session prep (people due back, with where and when each was last seen, then key people not met). Players and player preview don't see it. Prep and the town page now share one module (world-turnup.js).
 - Open now on the Market tab: a settlement's shop list now says, by the world's clock, "🕰 21:00: 1 open, 2 shut (for the night)." (or "shut for Bridge Day" on a holiday), and each shop says "open till 20:00" or "shut till 08:00".
 - Holidays on the session sheet: under the date, the printable session sheet says "🎉 Bridge Day today: the shops are shut; the taverns are open." on a holiday, and on the eve that festive goods cost 25% more today and the shops shut tomorrow.
+- Shut shops on the shopping list: the list already said whether each shop is open; now it gives exact times ("open till 20:00", "shut till 08:00", "shut for Bridge Day"), and session prep's shopping lists show the same where-to-buy line under each item.
