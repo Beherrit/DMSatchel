@@ -16,3 +16,14 @@ test('moonlight follows the brightest moon', () => {
   const m = moonlight(two, dark); assert.ok(m.level >= 3, JSON.stringify(m)); assert.match(m.text, /^Pale Sister: /);
   assert.equal(moonlight({ ...cal, moons: [] }, full), null);
 });
+
+test('clouds hide the moon', () => {
+  const cal = makeCalendar('seasons', 1040);
+  const days = Array.from({ length: cal.months[0].days }, (_, i) => ({ year: 1040, month: 0, day: i + 1 }));
+  const full = days.find((d) => moonPhase(cal, cal.moons[0], d).name === 'Full moon');
+  assert.equal(moonlight(cal, full, 'Clear').level, 4);
+  const o = moonlight(cal, full, 'Heavy rain'); assert.equal(o.level, 0); assert.match(o.text, /behind the clouds \(heavy rain\)/);
+  const p = moonlight(cal, full, 'Scattered clouds'); assert.equal(p.level, 3); assert.match(p.text, /through broken cloud/);
+  const dark = days.find((d) => moonPhase(cal, cal.moons[0], d).name === 'New moon');
+  assert.match(moonlight(cal, dark, 'Overcast').text, /^New moon: /); // no moon to hide
+});

@@ -11,12 +11,17 @@ const SAY = [
   'bright enough to read by outdoors',
 ];
 
-export function moonlight(cal, date) {
+// sky: tonight's weather sky ("Overcast", "Heavy rain", "Scattered clouds"…), when known: cloud hides the moon.
+const CLOUDED = /overcast|rain|snow|storm|sleet|drizzle|fog|mist|hail|blizzard/i, PATCHY = /cloud/i;
+export function moonlight(cal, date, sky = '') {
   const moons = Array.isArray(cal?.moons) ? cal.moons.filter((m) => m && Number(m.cycle) > 0) : [];
   if (!moons.length) return null;
   const phases = moons.map((m) => ({ moon: m, ...moonPhase(cal, m, date) }));
   const best = phases.reduce((a, b) => ((LIGHT[b.name] ?? 0) > (LIGHT[a.name] ?? 0) ? b : a));
-  const level = LIGHT[best.name] ?? 0;
+  const moonLevel = LIGHT[best.name] ?? 0;
   const who = moons.length > 1 ? `${best.moon.name}: ` : '';
-  return { level, icon: best.icon, text: `${who}${best.name}: ${SAY[level]}` };
+  // Clouds hide the moon: overcast or worse leaves it dark; scattered clouds dim it a step.
+  if (moonLevel && CLOUDED.test(sky)) return { level: 0, icon: '☁️', text: `${who}${best.name} behind the clouds (${sky.toLowerCase()}): ${SAY[0]}` };
+  const level = moonLevel && PATCHY.test(sky) ? moonLevel - 1 : moonLevel;
+  return { level, icon: best.icon, text: `${who}${best.name}${level < moonLevel ? ' through broken cloud' : ''}: ${SAY[level]}` };
 }

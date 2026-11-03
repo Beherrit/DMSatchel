@@ -3,7 +3,10 @@
 // spells; when time passes midnight the calendar moves on a day. Players see it all, updated live.
 import { el, toast, setKids } from './dom.js';
 import { api, isGm, isMember } from './api.js';
-import { world, worldEntries } from './world-store.js';
+import { world, worldEntries, getEntry } from './world-store.js';
+import { dayWeather } from './forecast.js';
+import { placeTerrains } from './encounter-ui.js';
+import { worldCalendar } from './world-calendar.js';
 import { readClock, LIGHTS, STEPS, partOfDay, hhmm, leftText, fuelFor, lightName, JUMPS, untilNext } from './clock.js';
 import { changePlay } from './sheet-ui.js';
 import { takeItem } from './handover.js';
@@ -12,6 +15,12 @@ import { clockDiff, diffText } from './clock-diff.js';
 import { formatDate, today, cleanCalendar } from './calendar.js';
 import { holidayToday, holidayTomorrow } from './shop-hours.js';
 import { moonlight } from './moonlight.js';
+
+// Tonight's sky where the party is (the same seeded weather as prep and the map), for the moonlight line.
+function skyHere() {
+  const place = world.info?.party_at && getEntry(world.info.party_at);
+  try { return place ? dayWeather(place.id, placeTerrains(place), worldCalendar()).sky || '' : ''; } catch { return ''; }
+}
 
 // What changed when time last moved (kept across redraws: a new day redraws the whole page).
 let lastChange = '';
@@ -83,7 +92,7 @@ export function clockCard() {
       (() => { const h = holidayTomorrow(cleanCalendar(world.info?.cal)); return h ? el('p', { class: 'small clock-eve' }, `🎉 ${h} tomorrow: festive goods cost a quarter more today, and the shops will be shut.`) : null; })(),
       // Moonlight at night: how much the moons light the way (from 20:00 to 05:00).
       (() => { const m = c.minutes % 1440, cal = cleanCalendar(world.info?.cal); if (!cal || !(m >= 20 * 60 || m < 5 * 60)) return null;
-        const l = moonlight(cal, today(cal)); return l ? el('p', { class: `small clock-moon${l.level === 0 ? ' dark' : ''}` }, `${l.icon} ${l.text}.`) : null; })(),
+        const l = moonlight(cal, today(cal), skyHere()); return l ? el('p', { class: `small clock-moon${l.level === 0 ? ' dark' : ''}` }, `${l.icon} ${l.text}.`) : null; })(),
       // Last orders on the clock: late at night, when the world's taverns call last orders and shut.
       (() => {
         const m = c.minutes % 1440, taverns = worldEntries().some((e) => e.kind === 'location' && e.fields?.type === 'Tavern');
