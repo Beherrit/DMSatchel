@@ -650,7 +650,7 @@ to the log at the bottom.
     their routine usually has them by day.
 338. [x] **A whole day on the cast list.** Who's who gives each person's whole usual day ("mornings: the Forge;
     evenings: the Bell"), not just where they are by day.
-339. [ ] **Routines on NPC cards.** The printable NPC table cards say where each NPC usually is through the day, and
+339. [x] **Routines on NPC cards.** The printable NPC table cards say where each NPC usually is through the day, and
     any bounty on them.
 340. [ ] **Holiday deadlines coming up.** "Coming up for you" says when one of your quest deadlines falls on a
     holiday.
@@ -1001,3 +1001,4 @@ to the log at the bottom.
 - Deadlines on the session sheet: "Quests in play" on the printable session sheet now lists quests with a deadline first, soonest (or most overdue) first, each with "⏳ 2 days left" or "due on Bridge Day, in 4 days"; the rest follow by name.
 - Where they'll be, on the session sheet: each person in "Who's around" on the printable session sheet has their usual day under their name, from their routine: "🕰 mornings and afternoons: the Forge; evenings: the Bell; nights: home" (hirelings: "with the party").
 - A whole day on the cast list: Who's who now gives each person's whole usual day, "Usually mornings: the market; afternoons, evenings and nights: The Bell", instead of only where they are by day.
+- Routines on NPC cards: each printable NPC table card now has "Day: mornings and afternoons: the Forge; evenings: the Bell; nights: home" (hirelings: with the party) and "🎯 Wanted: 50 gp (the Watch)" for an open bounty.

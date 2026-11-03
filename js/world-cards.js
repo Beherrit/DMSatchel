@@ -7,6 +7,9 @@ import { towards } from './attitudes.js';
 import { stripMarks } from './rich.js';
 import { sayOf } from './say.js';
 import { readGifts, giftWhat } from './gifts.js';
+import { dayLine } from './routine.js';
+import { isHired } from './hirelings.js';
+import { openBounties } from './bounty.js';
 
 const plain = (t) => stripMarks(t).replace(/\s+/g, ' ').trim();
 const cut = (t, n) => { const s = plain(t); return s.length > n ? `${s.slice(0, n - 1)}…` : s; };
@@ -24,6 +27,9 @@ export function npcCard(e, { gm = isGm(), onRemove } = {}) {
     el('p', { class: 'npc-card-sub' }, [f.role, f.ancestry, f.level, getEntry(e.parent_id)?.name].filter(Boolean).join(' · ')),
     e.summary ? el('p', { class: 'npc-card-sum' }, cut(e.summary, 180)) : null,
     row('Looks', f.appearance, 120), row('Voice', f.voice, 110), row('Manner', f.personality, 130), row('Wants', f.wants, 130),
+    // Where they'll be: their usual day (hirelings go with the party), and any bounty on their head.
+    (() => { const d = isHired(e) ? 'with the party' : dayLine(f.routine); return d ? el('p', { class: 'small npc-card-day' }, el('strong', {}, 'Day: '), cut(d, 140)) : null; })(),
+    (() => { const b = String(f.bounty || '').trim() && openBounties([e])[0]; return b ? el('p', { class: 'small npc-card-bounty' }, el('strong', {}, '🎯 Wanted: '), b.text, b.by ? ` (${b.by})` : '') : null; })(),
     statLine(e) ? el('p', { class: 'npc-card-stats' }, cut(statLine(e), 140)) : null,
     att.length ? el('p', { class: 'small' }, el('strong', {}, 'Feels about: '), att.map((x) => `${x.character.name} ${x.a.toLowerCase()}`).join(', ')) : null,
     // Gifts in the NPC's card: the last thing the party gave them (they'll remember it).
