@@ -25,6 +25,8 @@ import { dayLine } from './routine.js';
 import { isHired } from './hirelings.js';
 import { hhmm, readClock, leftText, partOfDay } from './clock.js';
 import { dayFor } from './world-hours.js';
+import { moonlight } from './moonlight.js';
+import { today } from './calendar.js';
 
 const ACTIVE_PC = (e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
 const townOf = (place) => (place?.kind === 'settlement' ? place : [...trail(place)].reverse().find((p) => p.kind === 'settlement') || null);
@@ -73,7 +75,9 @@ export async function viewSessionSheet() {
       (() => { const r = remindersPrint(prep); return r.length ? block('📌 Remember', el('ul', { class: 'ss-steps' }, r)) : null; })(),
       // Lights on the sheet: the time, and what's burning and for how long.
       (() => { if (!world.info?.clock) return null; const c = readClock(world.info.clock);
-        return block('🔥 Time and light', el('p', {}, el('strong', {}, hhmm(c.minutes)), ` · ${partOfDay(c.minutes)}`),
+        // Moonlight on the sheet: at night, tonight's moonlight (behind the clouds, if the weather says so).
+        const mm = c.minutes % 1440, ml = cal && (mm >= 20 * 60 || mm < 5 * 60) ? moonlight(cal, today(cal), weather?.sky || '') : null;
+        return block('🔥 Time and light', el('p', {}, el('strong', {}, hhmm(c.minutes)), ` · ${partOfDay(c.minutes)}`), ml ? el('p', { class: 'small ss-moon' }, `${ml.icon} ${ml.text}.`) : null,
           c.lights.length ? el('ul', { class: 'ss-list ss-lights' }, c.lights.map((l) => el('li', {}, l.name, l.forever ? ' (until put out)' : ` (${leftText(l.left)} left)`))) : el('p', { class: 'small' }, 'No lights burning.')); })(),
       block('The party', pcs.length ? el('table', { class: 'ss-table' },
         el('thead', {}, el('tr', {}, ['Character', 'Player', 'AC', 'HP', 'Notes'].map((h) => el('th', { scope: 'col' }, h)))),
