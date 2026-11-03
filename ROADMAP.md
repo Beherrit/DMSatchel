@@ -696,6 +696,11 @@ to the log at the bottom.
 368. [x] **Lights on the session sheet.** The printable session sheet lists the lights burning and how long each has
     left, with the time.
 369. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
+370. [ ] **Where they are now, on the cast list.** Who's who says where each person is at the world's hour.
+371. [ ] **Members about now.** A faction's page lists its members (the NPCs connected to it) and where each is
+    right now.
+372. [ ] **The time on the party's map marker.** The party's marker on a map says the world's time with the weather.
+373. [ ] **Moonlight at night.** At night the clock card says how much the moons light the way (full, half, dark).
 
 ## Ideas parking lot
 
