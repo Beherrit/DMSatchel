@@ -582,7 +582,7 @@ to the log at the bottom.
     the taverns now.
 300. [x] **The 300th: a changelog page.** A "What's new in the Satchel" page built from the README's feature list
     (newest first), linked from the footer.
-301. [ ] **Last seen in session prep.** Session prep's "Who might turn up" says where each was last seen.
+301. [x] **Last seen in session prep.** Session prep's "Who might turn up" says where each was last seen.
 
 ## Ideas parking lot
 
@@ -891,3 +891,4 @@ to the log at the bottom.
 - Eve of a holiday on the clock: the day before one of the world's holidays, the clock card now says "🎉 Bridge Day tomorrow: festive goods cost a quarter more today, and the shops will be shut."
 - The 300th, a changelog page: a "What's new in the Satchel" page at #news, linked from the footer, lists every ticked roadmap item newest first (it reads ROADMAP.md itself rather than the README, so it stays current without extra upkeep), with a filter box and "Show more" in pages of 40.
 - Who's in town for the festival: on one of the world's holidays, a settlement's page opens with a festival card: "🎉 Bridge Day today: a festival day. The shops are shut; the taverns are open.", then each tavern in town with who's in now from routines (back rooms count, quiet taverns say "no regulars in just now"), busiest first.
+- Last seen in session prep: "Who might turn up" now links the session each person was last seen in and says where, from that session's log (their own place first): "Last seen in Session 2, at Inn, 3 sessions ago · met 2 times."
