@@ -583,6 +583,14 @@ to the log at the bottom.
 300. [x] **The 300th: a changelog page.** A "What's new in the Satchel" page built from the README's feature list
     (newest first), linked from the footer.
 301. [x] **Last seen in session prep.** Session prep's "Who might turn up" says where each was last seen.
+302. [ ] **Open or shut on the map.** A shop's map pin says whether it's open now ("open till 18:00", "shut for
+    Bridge Day"), and shut shops' pins are dimmed.
+303. [ ] **The next festival.** When it isn't a holiday, a settlement's page says when the next one is (within a
+    month): "🎉 Bridge Day in 4 days."
+304. [ ] **What's new since you looked.** The footer's "What's new" link counts changes shipped since this browser
+    last opened the page, and the page marks them.
+305. [ ] **Who might turn up, on the town's page.** GMs see the people due back (met before but not lately, or key
+    people not met) on a settlement's page, as session prep shows them.
 
 ## Ideas parking lot
 
