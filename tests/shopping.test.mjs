@@ -30,3 +30,12 @@ test('shopsFor: the shops that stock it, cheapest first', async () => {
   assert.deepEqual(shopsFor('rope', shops).map((x) => `${x.shop.name}:${x.item}:${x.cp}`), ['Chandler:Hempen rope (50 ft):100', 'Smithy:Rope:200']);
   assert.deepEqual(shopsFor('Rations × 2', shops), []);
 });
+
+test('tripPlan groups everyone\'s lists by shop', async () => {
+  const { tripPlan } = await import('../js/shopping.js');
+  const shops = [{ id: 's', name: 'Smithy', stock: 'Rope | 2 gp | 3\nDagger | 2 gp | 1' }, { id: 'c', name: 'Chandler', stock: 'Hempen rope (50 ft) | 1 gp | 5' }];
+  const plan = tripPlan([{ who: 'Ann', lines: ['rope', 'Unicorn horn'] }, { who: 'Bo', lines: ['dagger'] }], shops);
+  assert.deepEqual(plan.stops.map((s) => [s.shop.name, s.wants.map((w) => `${w.who}:${w.item}:${w.cp}`)]), [['Smithy', ['Ann:Rope:200', 'Bo:Dagger:200']], ['Chandler', ['Ann:Hempen rope (50 ft):100']]]);
+  assert.deepEqual(plan.missing, [{ who: 'Ann', line: 'Unicorn horn' }]);
+  assert.deepEqual(tripPlan([], shops), { stops: [], missing: [] });
+});

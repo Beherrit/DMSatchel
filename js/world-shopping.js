@@ -4,7 +4,7 @@ import { el, toast, setKids } from './dom.js';
 import { isGm } from './api.js';
 import { world, worldEntries, getEntry, link } from './world-store.js';
 import { playOf, changePlay } from './sheet-ui.js';
-import { readList, addToList, removeFromList, shopsFor } from './shopping.js';
+import { readList, addToList, removeFromList, shopsFor, tripPlan } from './shopping.js';
 import { openText, holidayToday } from './shop-hours.js';
 import { cleanCalendar } from './calendar.js';
 import { ownerIn } from './world-routine.js';
@@ -51,5 +51,23 @@ export function shoppingPrepCard() {
   if (!lists.length) return null;
   return el('section', { class: 'card prep-card shopping-lists' }, el('h3', {}, '🛒 Shopping lists'),
     el('ul', { class: 'plain' }, lists.map(({ c, list }) => el('li', {}, link(getEntry(c.id) || c), ':',
-      el('ul', { class: 'plain shopping-prep-lines' }, list.map((t) => el('li', {}, t, whereToBuy(t))))))));
+      el('ul', { class: 'plain shopping-prep-lines' }, list.map((t) => el('li', {}, t, whereToBuy(t))))))),
+    tripBox(lists));
+}
+
+// A shopping trip: the shops in town (where the party is; else anywhere) that stock something on someone's list,
+// most wanted first, with what and for whom, and whether each is open now.
+function tripBox(lists) {
+  let town = null;
+  for (let p = world.info?.party_at && getEntry(world.info.party_at), i = 0; p && i < 12; p = p.parent_id && getEntry(p.parent_id), i++) if (p.kind === 'settlement') { town = p; break; }
+  const inTown = (x) => { for (let p = x, i = 0; p && i < 12; p = p.parent_id && getEntry(p.parent_id), i++) if (p.id === town.id) return true; return false; };
+  const shops = worldEntries().filter((s) => s.kind === 'location' && s.fields?.stock && (!town || inTown(s))).map((s) => ({ ...s, stock: s.fields.stock }));
+  const plan = tripPlan(lists.map(({ c, list }) => ({ who: c.name, lines: list })), shops);
+  if (!plan.stops.length) return null;
+  const m = world.info?.clock?.minutes ?? 480, holiday = holidayToday(cleanCalendar(world.info?.cal));
+  return el('div', { class: 'shopping-trip' }, el('h4', {}, `A shopping trip${town ? ` in ${town.name}` : ''}`),
+    el('ol', { class: 'trip-stops' }, plan.stops.map(({ shop, wants }) => { const o = openText(shop, m, holiday); return el('li', {},
+      link(getEntry(shop.id) || shop), ' ', el('span', { class: `small ${o.open ? 'open-now' : 'muted'}` }, o.text),
+      el('div', { class: 'small' }, wants.map((w, i) => [i ? '; ' : '', `${w.item} for ${w.who} `, el('span', { class: 'muted' }, `(${coinText(w.cp)})`)]))); })),
+    plan.missing.length ? el('p', { class: 'small muted' }, `Nowhere${town ? ' here' : ''} stocks: `, plan.missing.map((x) => `${x.line} (${x.who})`).join(', '), '.') : null);
 }

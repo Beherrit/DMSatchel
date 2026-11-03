@@ -42,3 +42,19 @@ export function shopsFor(line, shops) {
   }
   return out.sort((a, b) => a.cp - b.cp || a.shop.name.localeCompare(b.shop.name));
 }
+
+// A shopping trip: for everyone's lists ([{ who, lines }]) and the shops in reach ([{ id, name, stock, … }]), each
+// shop that stocks something wanted, with what and for whom (the cheapest match per line per shop), most wanted first.
+// Lines nobody stocks come back as `missing`. → { stops: [{ shop, wants: [{ who, line, item, cp }] }], missing }
+export function tripPlan(lists, shops) {
+  const stops = new Map(), missing = [];
+  for (const { who, lines } of lists || []) for (const line of lines || []) {
+    const found = shopsFor(line, shops);
+    if (!found.length) { missing.push({ who, line }); continue; }
+    for (const f of found) {
+      if (!stops.has(f.shop.id)) stops.set(f.shop.id, { shop: f.shop, wants: [] });
+      stops.get(f.shop.id).wants.push({ who, line, item: f.item, cp: f.cp });
+    }
+  }
+  return { stops: [...stops.values()].sort((a, b) => b.wants.length - a.wants.length || a.shop.name.localeCompare(b.shop.name)), missing };
+}
