@@ -40,7 +40,7 @@ import { giftsSince, giftWhat } from './gifts.js';
 import { lastSession } from './recap.js';
 import { coinText } from './economy.js';
 import { offerBounty } from './world-bounty.js';
-import { hhmm } from './clock.js';
+import { hhmm, partOfDay } from './clock.js';
 
 // Before the session: who's hurt, hungry, exhausted or broke (from the characters' sheets).
 // Gifts in session prep: NPCs who've been given something since the last session (they may remember it).
@@ -297,7 +297,8 @@ function startSession(prep) {
     kind: 'session', name: `Session ${n}`,
     fields: { number: String(n), played_on: new Date().toISOString().slice(0, 10), world_date: cal ? formatDate(cal, today(cal)) : '', gm: session.gm?.name || '',
       players: pcs.map((c) => `${c.name}${c.owner || c.fields?.player ? ` (${c.owner || c.fields.player})` : ''}`).join('\n') },
-    body: [last?.fields?.next ? `Picking up from last time: ${last.fields.next}` : '', here ? `The party is in [[${here.name}]].` : '', 'What happened:', '', 'Who the party met (use [[Names]] so the entries link back to this session):'].filter((x, i) => x || i > 1).join('\n\n'),
+    // When the session began: the in-world date and time, from the calendar and the clock.
+    body: [began(cal), last?.fields?.next ? `Picking up from last time: ${last.fields.next}` : '', here ? `The party is in [[${here.name}]].` : '', 'What happened:', '', 'Who the party met (use [[Names]] so the entries link back to this session):'].filter((x, i) => x || i > 2).join('\n\n'),
   } }));
 }
 
@@ -319,4 +320,11 @@ export async function viewPrep(rerender) {
     el('div', { class: 'prep-columns' },
       el('div', { class: 'prep-main' }, remindersCard(prep), waitingCard(rerender), worriesCard(), giftsCard(), nextMovesCard(rerender), shoppingPrepCard(), readingPrepCard(), lastTime(), betweenSection(table), whereSection(prep, rerender), card('Read-aloud', ...readAloudList(prep)), secretsCard(prep, next), turnUpSection(prep), questsSection(), scratchPad(prep)),
       el('div', { class: 'prep-side' }, world.info?.rsvp ? card('Who’s coming', rsvpCard({ compact: true })) : null, checklistCard(prep, next), clockCard(), partySection(), spotlightSection(), clocksSection(), calendarSection(), threadsSection(gmThreads, table))));
+}
+
+// "Began at 18:00 (evening) on Fireday, 5 Thawmoon 1040." ('' with neither a clock nor a calendar).
+function began(cal) {
+  const m = world.info?.clock?.minutes;
+  const when = m === undefined ? '' : `at ${hhmm(m)} (${partOfDay(m)})`, date = cal ? `on ${formatDate(cal, today(cal), { weekday: true })}` : '';
+  return when || date ? `Began ${[when, date].filter(Boolean).join(' ')}.` : '';
 }
