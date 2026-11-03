@@ -614,7 +614,7 @@ to the log at the bottom.
     minds the counter").
 317. [x] **Due back, on an NPC's page.** GMs see on an NPC's page when the party hasn't met them for a while ("Not
     seen for 3 sessions: might turn up").
-318. [ ] **Name who minds the shop.** A shop can name who minds it when the owner's out (a new Minder field, an
+318. [x] **Name who minds the shop.** A shop can name who minds it when the owner's out (a new Minder field, an
     additive change); the buy panel and the "Nobody at the counter" check use it.
 319. [ ] **Your shopping trip.** A character's shopping list groups what's on it by the shops in town that stock it,
     as a little route, open or shut.
@@ -946,3 +946,4 @@ to the log at the bottom.
 - Who minds the shop: when a shop is open but its owner's routine has them elsewhere, its buy panel says "🛎 Bramwell is out; an apprentice minds the counter."
 - A full sweep: all 325 browser tests rerun (started after #308); no crashes or page errors, and the same flagged files as the last sweep (the deliberate error-path 400s).
 - Due back, on an NPC's page: GMs see "🔔 not seen for 3 sessions: might turn up" after the last-seen line once two sessions have passed without them (as session prep counts it), and "Key person, not met yet" for key NPCs the party hasn't met. Players don't see it.
+- Name who minds the shop: places have a new "Minds it when the owner's out" field (an additive schema field; stored with the other fields, no migration). When the owner is out, the page says "Nell is out: the chapel; Pip minds the counter." (linked when Pip is in the world), the buy panel names them instead of "an apprentice", and a named minder clears the Market tab's "Nobody at the counter" flag.

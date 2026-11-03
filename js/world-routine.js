@@ -105,7 +105,10 @@ export function mindingLine(place) {
   if (!w) return null;
   const at = placeOf(w.place);
   if (at?.id === place.id) return el('p', { class: 'routine-minding small' }, '🛎 ', link(owner), ' is here, behind the counter', w.until !== null ? el('span', { class: 'muted' }, ` until ${hhmm(w.until)}`) : null, '.');
-  return el('p', { class: 'routine-minding small' }, '🛎 ', link(owner), ' is out: ', at ? link(at) : w.place, w.until !== null ? el('span', { class: 'muted' }, ` until ${hhmm(w.until)}`) : null, '.');
+  // Who minds it meanwhile: the Minder field (linked when it names someone in the world).
+  const minds = String(place.fields?.minder || '').replace(/\[\[([^\]|]+)(\|[^\]]*)?\]\]/g, '$1').trim(), mp = minds && findByName(minds);
+  return el('p', { class: 'routine-minding small' }, '🛎 ', link(owner), ' is out: ', at ? link(at) : w.place, w.until !== null ? el('span', { class: 'muted' }, ` until ${hhmm(w.until)}`) : null,
+    minds ? ['; ', mp ? link(mp) : minds, ' minds the counter'] : '', '.');
 }
 
 // The town by the hour: for a settlement (or region or area), a table of who is where through the day, from routines.
@@ -265,7 +268,7 @@ export function ownerNpc(place) {
 // else null.
 export function counterGap(shop) {
   const owner = ownerNpc(shop);
-  if (!owner) return null;
+  if (!owner || String(shop.fields?.minder || '').trim()) return null; // someone minds it
   const [from, to] = tradingHours(shop);
   return timeAt(owner.fields.routine, (name) => placeOf(name)?.id === shop.id, from, to) ? null : { owner, from, to };
 }

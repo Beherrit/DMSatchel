@@ -86,7 +86,8 @@ export function buyBox(shop, rerender) {
   if (shut && !isGm()) return el('div', { class: 'trade' }, shut);
   // Who minds the shop: open, but the owner's routine has them elsewhere just now.
   const who = hours.open ? ownerIn(shop) : null;
-  const minder = who && !who.here ? el('p', { class: 'shop-minder small muted' }, '🛎 ', who.owner.name, ' is out; an apprentice minds the counter.') : null;
+  const minds = String(shop.fields?.minder || '').replace(/\[\[([^\]|]+)(\|[^\]]*)?\]\]/g, '$1').trim();
+  const minder = who && !who.here ? el('p', { class: 'shop-minder small muted' }, '🛎 ', who.owner.name, ` is out; ${minds || 'an apprentice'} minds the counter.`) : null;
   return el('div', { class: 'trade' }, shut, minder, items.length ? buyPart(shop, items, chars, rerender) : null, sellPart(shop, chars, rerender), askPart(shop, chars, rerender), isGm() && items.length ? hagglePart(shop, chars, rerender) : null);
 }
 
