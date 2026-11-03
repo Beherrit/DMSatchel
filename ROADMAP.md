@@ -657,7 +657,7 @@ to the log at the bottom.
 341. [x] **Open now in search.** Ctrl K shows whether a shop or tavern is open now beside its name.
 342. [x] **A shop's own hours.** A shop or tavern can keep its own hours (a new Hours field, "10–18" or "6pm–2am",
     an additive field); everywhere that says open or shut, including what the server allows, follows them.
-343. [ ] **A day off.** A shop can shut on one weekday of the world's calendar ("Shut on Restday"), like a holiday.
+343. [x] **A day off.** A shop can shut on one weekday of the world's calendar ("Shut on Restday"), like a holiday.
 344. [ ] **Open or shut on the session sheet.** The session sheet's shop list says which are open now.
 345. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 
@@ -1010,3 +1010,4 @@ to the log at the bottom.
 - Holiday deadlines coming up: on a character's "Coming up for you", a quest deadline that falls on a holiday says so: "Deadline: Ring the Bell (on Bridge Day)".
 - Open now in search: in Ctrl K, a shop or tavern's hint now starts with whether it's open by the world's clock: "Smithy · 🔒 shut till 08:00 · Hammers.", "The Bell · 🟢 open till 02:00".
 - A shop's own hours: places have a new "Opening hours" field (additive, no migration) that reads "10–18", "10:30–18", "6pm–2am", "9am to 5pm" or "noon–midnight"; unreadable hours fall back to the usual (shops 8–20, taverns 8–2). Everything that says open or shut follows them: the page's closing line, map pins, the Market tab, shopping lists and trips, Ctrl K, the "nobody at the counter" check, and the server's buy and sell checks ("Night Market is shut just now. It opens at 18:00."). "Shut for the night" is only said at night.
+- A day off: places have a new "Shut every (a weekday)" field (additive). On that weekday of the world's calendar the shop (or tavern) is shut all day, "shut on Firedays", on its page, map pin (dimmed), Market tab, shopping lists, Ctrl K and in the server's buy and sell checks; shop-hours now takes today as { holiday, weekday } via tradeDay().

@@ -44,7 +44,7 @@ import { addTrade } from '../js/shop-trade.js';
 import { addGift, giftWhat, wantsMatch } from '../js/gifts.js';
 import { addAsk } from '../js/shop-asks.js';
 import { addTab, readTab, tabTotal, splitTab } from '../js/tab.js';
-import { shopOpen, holidayToday, holidayTomorrow, evePrice, shutText } from '../js/shop-hours.js';
+import { shopOpen, holidayToday, holidayTomorrow, evePrice, shutText, tradeDay } from '../js/shop-hours.js';
 import { cleanCalendar } from '../js/calendar.js';
 import { shopStanding, sellWithStanding } from '../js/standing-price.js';
 import { coinText, GOODS } from '../js/economy.js';
@@ -469,7 +469,7 @@ export default route({
       const b = req.body.buy;
       const shop = await loadOne(String(b.shop || '').slice(0, 40), req.world.id), ch = await loadOne(String(b.character || '').slice(0, 40), req.world.id);
       if (!shop || shop.deleted || !visibleTo(shop, req) || !shop.fields?.stock) return fail(res, 404, 'That shop isn’t open.');
-      { const o = shopOpen(shop, readClock(req.world.clock).minutes, holidayToday(cleanCalendar(req.world.cal))); if (!req.isGmHere && !o.open) return fail(res, 400, o.holiday ? `${shop.name} is shut for ${o.holiday}. It opens tomorrow.` : `${shop.name} is ${shutText(o)}. It opens ${o.opens}.`); }
+      { const o = shopOpen(shop, readClock(req.world.clock).minutes, tradeDay(cleanCalendar(req.world.cal))); if (!req.isGmHere && !o.open) return fail(res, 400, o.holiday ? `${shop.name} is shut for ${o.holiday}. It opens tomorrow.` : `${shop.name} is ${shutText(o)}. It opens ${o.opens}.`); }
       if (!ch || ch.deleted || ch.kind !== 'character') return fail(res, 404, 'Pick a character.');
       if (!req.isGmHere && ch.owner_id !== req.gm.id) return fail(res, 403, 'You can only buy for your own character.');
       const r = buyFrom(shop.fields.stock, clip(b.item, 200), b.qty);
@@ -505,7 +505,7 @@ export default route({
       const b = req.body.sell;
       const shop = await loadOne(String(b.shop || '').slice(0, 40), req.world.id), ch = await loadOne(String(b.character || '').slice(0, 40), req.world.id);
       if (!shop || shop.deleted || !visibleTo(shop, req) || !shop.fields?.stock) return fail(res, 404, 'That shop isn’t open.');
-      { const o = shopOpen(shop, readClock(req.world.clock).minutes, holidayToday(cleanCalendar(req.world.cal))); if (!req.isGmHere && !o.open) return fail(res, 400, o.holiday ? `${shop.name} is shut for ${o.holiday}. It opens tomorrow.` : `${shop.name} is ${shutText(o)}. It opens ${o.opens}.`); }
+      { const o = shopOpen(shop, readClock(req.world.clock).minutes, tradeDay(cleanCalendar(req.world.cal))); if (!req.isGmHere && !o.open) return fail(res, 400, o.holiday ? `${shop.name} is shut for ${o.holiday}. It opens tomorrow.` : `${shop.name} is ${shutText(o)}. It opens ${o.opens}.`); }
       if (!ch || ch.deleted || ch.kind !== 'character') return fail(res, 404, 'Pick a character.');
       if (!req.isGmHere && ch.owner_id !== req.gm.id) return fail(res, 403, 'You can only sell your own character’s things.');
       let p = {}; try { p = JSON.parse(ch.fields?.play || '{}') || {}; } catch { p = {}; }

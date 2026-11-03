@@ -9,14 +9,14 @@ import { playOf, characterOf, changePlay } from './sheet-ui.js';
 import { readList, withRations } from './shopping.js';
 import { overloaded, overloadedText } from './weights.js';
 import { aroundNow, laterLine, busiestLine, ownerDayLine } from './world-routine.js';
-import { openText, holidayToday } from './shop-hours.js';
+import { openText, holidayToday, tradeDay } from './shop-hours.js';
 import { festivalSpecial } from './menu.js';
 import { openBounties } from './bounty.js';
 import { coinText } from './economy.js';
 
 // Open or shut on the map: a shop's (or tavern's) hours by the world's clock and today's holiday, or null.
 const hoursOf = (entry) => (entry && (entry.fields?.stock || entry.fields?.menu) && world.info?.clock?.minutes !== undefined
-  ? openText(entry, world.info.clock.minutes, holidayToday(cleanCalendar(world.info?.cal))) : null);
+  ? openText(entry, world.info.clock.minutes, tradeDay(cleanCalendar(world.info?.cal))) : null);
 import { hhmm } from './clock.js';
 import { rationsFor } from './party-glance.js';
 import { dayWeather, weatherSlowdown, skyIcon } from './forecast.js';

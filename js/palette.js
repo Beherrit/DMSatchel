@@ -59,7 +59,7 @@ function baseItems() {
 
 function entryItems() {
   // Open now in search: a shop or tavern says whether it's open by the world's clock.
-  const info = M.store.world.info || {}, holiday = info.clock?.minutes === undefined ? '' : M.hours.holidayToday(M.calendar.cleanCalendar(info.cal));
+  const info = M.store.world.info || {}, holiday = info.clock?.minutes === undefined ? '' : M.hours.tradeDay(M.calendar.cleanCalendar(info.cal));
   const open = (e) => { if (info.clock?.minutes === undefined || e.kind !== 'location' || !(e.fields?.stock || e.fields?.menu)) return ''; const o = M.hours.openText(e, info.clock.minutes, holiday); return `${o.open ? '🟢' : '🔒'} ${o.text}`; };
   return M.store.worldEntries().map((e) => ({ label: e.name, group: M.store.kindLabel(e.kind), href: `#world/e/${e.id}`, hint: [open(e), e.summary || (e.fields?.routine ? `Routine: ${String(e.fields.routine).slice(0, 90)}` : '')].filter(Boolean).join(' · '), haystack: `${e.name} ${(e.tags || []).join(' ')} ${Object.values(e.fields || {}).join(' ')}` }));
 }

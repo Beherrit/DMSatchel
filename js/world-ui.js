@@ -13,7 +13,7 @@ import { newLines, playJson } from './play-log.js';
 import { sinceLastCard, comingUpCard } from './world-sincelast.js';
 import { routineNow, hereNow, regularsLine, routinePreview, mindingLine, townHoursBox, rollTownButton, laterLine, aroundPartyCard, busiestLine, crossPathsLine, festivalLine, ownerDayLine, wantedCard } from './world-routine.js';
 import { offerBounty } from './world-bounty.js';
-import { untilChange, holidayToday } from './shop-hours.js';
+import { untilChange, tradeDay } from './shop-hours.js';
 import { leftText } from './clock.js';
 import { giftsSection, givenSection } from './world-gifts.js';
 import { world, worldEntries, getEntry, loadWorld, byName, kindLabel, kindFields, richInline, link, when, findByName, mentions, richText, contentsNav, notice, nameList } from './world-store.js';
@@ -582,7 +582,7 @@ function placeSummary(e) {
 // Closing time: how long until a shop shuts, or opens, by the world's clock (and today's holiday).
 function closingLine(shop) {
   if (!(shop.fields?.stock || shop.fields?.menu) || world.info?.clock?.minutes === undefined) return null;
-  const u = untilChange(shop, world.info.clock.minutes, holidayToday(cleanCalendar(world.info?.cal)));
+  const u = untilChange(shop, world.info.clock.minutes, tradeDay(cleanCalendar(world.info?.cal)));
   // Late night at the tavern: in the last hour, it's last orders.
   const last = u.open && u.mins <= 60;
   return el('p', { class: `small closing-line${last ? ' last-orders' : ' muted'}` }, last ? '🍺 ' : '🕰 ', last ? `${shop.fields?.type === 'Tavern' ? 'Last orders' : 'Closing soon'}: ${shop.name} shuts in ${leftText(u.mins)}.` : u.open ? `Open for another ${leftText(u.mins)}.` : u.mins === null ? 'Shut today; it opens tomorrow.' : `Shut; it opens in ${leftText(u.mins)}.`);

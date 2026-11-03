@@ -1,4 +1,4 @@
-import { toDays, fromDays } from './calendar.js';
+import { toDays, fromDays, weekday } from './calendar.js';
 // Shops keep hours: by the world's clock (minutes after midnight), shops trade from 8 in the morning to 8 at night,
 // and taverns until 2 in the morning. Pure, so the page and the server share it.
 
@@ -35,8 +35,12 @@ const opensText = (from) => (from === 8 * 60 ? 'at 8 in the morning' : `at ${clo
 
 // holiday: the name of today's holiday, if any: shops shut for it all day (taverns stay open: it's a festival).
 // → { open, opens (text, when shut), holiday? }
-export function shopOpen(shop, minutes, holiday = '') {
+// day: today's holiday name, or tradeDay(cal)'s { holiday, weekday } (a shop with a day off shuts on it, taverns too).
+export function shopOpen(shop, minutes, day = '') {
+  const holiday = typeof day === 'string' ? day : day?.holiday || '';
   if (holiday && kindOf(shop) === 'shop') return { open: false, opens: 'tomorrow', holiday };
+  const off = typeof day === 'object' && day?.weekday && String(shop?.fields?.closed_on || '').trim().toLowerCase().replace(/s$/, '') === day.weekday.toLowerCase().replace(/s$/, '');
+  if (off) return { open: false, opens: 'tomorrow', dayOff: day.weekday };
   const [from, to] = hoursOf(shop);
   const m = ((Math.round(Number(minutes) || 0) % 1440) + 1440) % 1440;
   const open = (m >= from && m < Math.min(to, 1440)) || (to > 1440 && m < to - 1440);
@@ -50,14 +54,22 @@ export function holidayToday(cal) {
   return cal.holidays.find((h) => h.month === cal.month && h.day === cal.day)?.name || '';
 }
 
+// Today, for the shops: { holiday, weekday } (weekday '' when the calendar has none), for shopOpen and friends.
+export function tradeDay(cal) {
+  if (!cal) return { holiday: '', weekday: '' };
+  let wd = '';
+  try { wd = Array.isArray(cal.weekdays) && cal.weekdays.length && Array.isArray(cal.months) ? weekday(cal, { year: cal.year, month: cal.month, day: cal.day }) || '' : ''; } catch { wd = ''; }
+  return { holiday: holidayToday(cal), weekday: wd };
+}
+
 // What a shut shop says: "shut for Bridge Day" or "shut for the night".
-export const shutText = (o) => (o.holiday ? `shut for ${o.holiday}` : o.night === false ? 'shut just now' : 'shut for the night');
+export const shutText = (o) => (o.holiday ? `shut for ${o.holiday}` : o.dayOff ? `shut on ${o.dayOff}s` : o.night === false ? 'shut just now' : 'shut for the night');
 
 // Closing time: how long until a shop shuts (when open) or opens (when shut), in minutes of the world's clock.
 // → { open, mins } (mins null when it's shut for a holiday: it opens tomorrow).
 export function untilChange(shop, minutes, holiday = '') {
   const o = shopOpen(shop, minutes, holiday);
-  if (o.holiday) return { open: false, mins: null };
+  if (o.holiday || o.dayOff) return { open: false, mins: null };
   const [from, to] = hoursOf(shop);
   const m = ((Math.round(Number(minutes) || 0) % 1440) + 1440) % 1440;
   if (o.open) return { open: true, mins: to > 1440 && m < to - 1440 ? to - 1440 - m : to - m };
@@ -79,7 +91,7 @@ export const evePrice = (cp, name, eve) => (eve && isFestive(name) ? Math.ceil((
 // "shut till 08:00". → { open, text }
 export function openText(shop, minutes, holiday = '') {
   const o = shopOpen(shop, minutes, holiday);
-  if (o.holiday) return { open: false, text: shutText(o) };
+  if (o.holiday || o.dayOff) return { open: false, text: shutText(o) };
   const u = untilChange(shop, minutes, holiday);
   const m = ((Math.round(Number(minutes) || 0) % 1440) + 1440) % 1440;
   const at = (m + u.mins) % 1440, hh = (x) => `${String(Math.floor(x / 60)).padStart(2, '0')}:${String(x % 60).padStart(2, '0')}`;

@@ -8,7 +8,7 @@ import { wildsSection, placeTerrains } from './encounter-ui.js';
 import { worldCalendar } from './world-calendar.js';
 import { dayWeather } from './forecast.js';
 import { toDays, today, cleanCalendar } from './calendar.js';
-import { openText, holidayToday } from './shop-hours.js';
+import { openText, holidayToday, tradeDay } from './shop-hours.js';
 import { hhmm } from './clock.js';
 import { counterGap } from './world-routine.js';
 import { deadlineOf, deadlineText } from './deadline.js';
@@ -283,7 +283,7 @@ function marketSection(place, rerender) {
 }
 
 // Open now: by the world's clock (and today's holiday), whether a shop is open, or null with no clock.
-const hoursNow = (shop) => (world.info?.clock?.minutes === undefined ? null : openText(shop, world.info.clock.minutes, holidayToday(cleanCalendar(world.info?.cal))));
+const hoursNow = (shop) => (world.info?.clock?.minutes === undefined ? null : openText(shop, world.info.clock.minutes, tradeDay(cleanCalendar(world.info?.cal))));
 function openNowLine(shops) {
   if (world.info?.clock?.minutes === undefined) return null;
   const hs = shops.map(hoursNow), open = hs.filter((h) => h.open).length, shut = hs.length - open;

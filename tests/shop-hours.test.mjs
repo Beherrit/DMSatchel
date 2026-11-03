@@ -85,3 +85,21 @@ test('a shop keeps its own hours', async () => {
   // Still shut on holidays.
   assert.equal(shopOpen(night, 23 * 60, 'Bridge Day').open, false);
 });
+
+test('a day off each week', async () => {
+  const { shopOpen, openText, untilChange, tradeDay, shutText } = await import('../js/shop-hours.js');
+  const { makeCalendar, weekday } = await import('../js/calendar.js');
+  const cal = { ...makeCalendar('seasons', 1040), month: 1, day: 5, holidays: [] };
+  const wd = weekday(cal, { year: 1040, month: 1, day: 5 });
+  assert.deepEqual(tradeDay(cal), { holiday: '', weekday: wd });
+  const shop = { fields: { type: 'Shop', closed_on: wd } }, inn = { fields: { type: 'Tavern', closed_on: `${wd}s` } }, other = { fields: { type: 'Shop', closed_on: 'Nonday' } };
+  assert.deepEqual(shopOpen(shop, 600, tradeDay(cal)), { open: false, opens: 'tomorrow', dayOff: wd });
+  assert.equal(shopOpen(inn, 600, tradeDay(cal)).open, false); // taverns take their day off too
+  assert.equal(shopOpen(other, 600, tradeDay(cal)).open, true);
+  assert.deepEqual(openText(shop, 600, tradeDay(cal)), { open: false, text: `shut on ${wd}s` });
+  assert.deepEqual(untilChange(shop, 600, tradeDay(cal)), { open: false, mins: null });
+  assert.equal(shutText({ dayOff: wd }), `shut on ${wd}s`);
+  // A plain holiday name still works as before.
+  assert.equal(shopOpen(shop, 600, '').open, true);
+  assert.deepEqual(tradeDay(null), { holiday: '', weekday: '' });
+});

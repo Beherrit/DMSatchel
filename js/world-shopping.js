@@ -5,7 +5,7 @@ import { isGm } from './api.js';
 import { world, worldEntries, getEntry, link } from './world-store.js';
 import { playOf, changePlay } from './sheet-ui.js';
 import { readList, addToList, removeFromList, shopsFor, tripPlan } from './shopping.js';
-import { openText, holidayToday } from './shop-hours.js';
+import { openText, tradeDay } from './shop-hours.js';
 import { cleanCalendar } from './calendar.js';
 import { ownerIn } from './world-routine.js';
 import { coinText } from './economy.js';
@@ -16,7 +16,7 @@ function whereToBuy(line) {
   const shops = worldEntries().filter((s) => s.kind === 'location' && s.fields?.stock).map((s) => ({ ...s, stock: s.fields.stock }));
   const found = shopsFor(line, shops).slice(0, 3);
   if (!found.length) return null;
-  const m = world.info?.clock?.minutes ?? 480, holiday = holidayToday(cleanCalendar(world.info?.cal));
+  const m = world.info?.clock?.minutes ?? 480, holiday = tradeDay(cleanCalendar(world.info?.cal));
   return el('div', { class: 'small muted where-to-buy' }, found.map((f, i) => {
     const open = openText(f.shop, m, holiday), who = ownerIn(f.shop);
     return [i ? ' · ' : '', link(getEntry(f.shop.id) || f.shop), ` ${coinText(f.cp)}, `, open.open ? el('span', { class: 'open-now' }, open.text) : open.text,
@@ -65,7 +65,7 @@ function tripBox(lists, mine = false) {
   const shops = worldEntries().filter((s) => s.kind === 'location' && s.fields?.stock && (!town || inTown(s))).map((s) => ({ ...s, stock: s.fields.stock }));
   const plan = tripPlan(lists.map(({ c, list }) => ({ who: c.name, lines: list })), shops);
   if (!plan.stops.length) return null;
-  const m = world.info?.clock?.minutes ?? 480, holiday = holidayToday(cleanCalendar(world.info?.cal));
+  const m = world.info?.clock?.minutes ?? 480, holiday = tradeDay(cleanCalendar(world.info?.cal));
   // Your own trip: only worth a route when there's more than one stop or more than one thing to fetch.
   if (mine && plan.stops.length < 2 && plan.stops.every((x) => x.wants.length < 2)) return null;
   return el(mine ? 'details' : 'div', { class: 'shopping-trip' }, el(mine ? 'summary' : 'h4', {}, `${mine ? 'Your shopping trip' : 'A shopping trip'}${town ? ` in ${town.name}` : ''}`),
