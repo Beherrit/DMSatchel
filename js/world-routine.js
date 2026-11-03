@@ -3,7 +3,7 @@
 import { el, setKids, toast } from './dom.js';
 import { world, worldEntries, link, findByName, getEntry, patchEntry } from './world-store.js';
 import { whereAt, aboutTown, regularsAt, townByHour, rollRoutine, dayOf, dueLater, busiestHour, crossPaths, atTaverns, ownerDay, timeAt, routineCheck } from './routine.js';
-import { holidayToday, nextHoliday, tradingHours } from './shop-hours.js';
+import { holidayToday, nextHoliday, tradingHours, openText, tradeDay } from './shop-hours.js';
 import { openBounties } from './bounty.js';
 import { cleanCalendar } from './calendar.js';
 import { makeRng, randomSeed } from './rng.js';
@@ -315,4 +315,19 @@ export function routineIssues() {
   return worldEntries().filter((x) => x.kind === 'npc' && String(x.fields?.routine || '').trim() && !['Dead'].includes(x.fields?.status))
     .map((entry) => ({ entry, ...routineCheck(entry.fields.routine, placeOf) })).filter((x) => x.bad.length || x.unknown.length)
     .sort((a, b) => a.entry.name.localeCompare(b.entry.name));
+}
+
+// Open now in town: when some of a settlement's shops are shut (at night, on a day off, a holiday), what's still open.
+export function openNowLine(town) {
+  if (town.kind !== 'settlement') return null;
+  const m = now();
+  if (m === null) return null;
+  const inside = (p) => { for (let x = p, i = 0; x && i < 12; x = x.parent_id && getEntry(x.parent_id), i++) if (x.id === town.id) return true; return false; };
+  const day = tradeDay(cleanCalendar(world.info?.cal));
+  const shops = worldEntries().filter((x) => x.kind === 'location' && x.id !== town.id && (x.fields?.stock || x.fields?.menu) && inside(x))
+    .map((x) => ({ x, o: openText(x, m, day) }));
+  const open = shops.filter((s) => s.o.open), shut = shops.length - open.length;
+  if (!shut || !shops.length) return null;
+  return el('p', { class: 'small open-now-town' }, `🕰 Open now (${hhmm(m)}): `,
+    open.length ? open.sort((a, b) => a.x.name.localeCompare(b.x.name)).map(({ x, o }, i) => [i ? ', ' : '', link(x), el('span', { class: 'muted' }, ` (${o.text.replace(/^open /, '')})`)]) : el('span', { class: 'muted' }, 'nothing; everything’s shut'), '.');
 }
