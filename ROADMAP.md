@@ -660,6 +660,12 @@ to the log at the bottom.
 343. [x] **A day off.** A shop can shut on one weekday of the world's calendar ("Shut on Restday"), like a holiday.
 344. [x] **Open or shut on the session sheet.** The session sheet's shop list says which are open now.
 345. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
+346. [ ] **Hours on the printed shelf.** "Print the shelf" includes the shop's hours and day off.
+347. [ ] **Rolled shops keep sensible hours.** A newly rolled shop gets hours that suit its trade (a baker opens
+    early, a night market late); existing shops are left as they are.
+348. [ ] **Open now in town.** At night or on a day off, a settlement's page says what's still open ("Open now: The
+    Bell, Night Market").
+349. [ ] **"Open now" in search.** Typing "open now" in Ctrl K lists every shop and tavern open at the world's hour.
 
 ## Ideas parking lot
 
