@@ -713,6 +713,13 @@ to the log at the bottom.
 380. [x] **Who can see in the dark.** At night, the GM's party sheet says each character's darkvision (from their
     species), and who'll need a light.
 381. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
+382. [ ] **Darkvision from the library.** A character whose species comes from the world's library gets its
+    darkvision from the species it's "similar to".
+383. [ ] **The weather when the session began.** The "Began at…" line on a new session log includes the weather.
+384. [ ] **Print the town by the hour.** A settlement's town-by-the-hour table can be printed on its own as a handout
+    for the GM's screen.
+385. [ ] **Lights running low in prep.** Session prep warns when a light the party has burning has ten minutes or
+    less left.
 
 ## Ideas parking lot
 
