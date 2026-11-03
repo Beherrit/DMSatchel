@@ -82,7 +82,7 @@ export function buyBox(shop, rerender) {
   // Shut at night by the world's clock: players see a notice; GMs can still trade (and are told).
   // …and on the world's holidays (taverns stay open for those).
   const hours = shopOpen(shop, world.info?.clock?.minutes ?? 480, holidayToday(cleanCalendar(world.info?.cal)));
-  const shut = hours.open ? null : el('p', { class: 'shop-shut small' }, el('span', { 'aria-hidden': 'true' }, hours.holiday ? '🎉 ' : '🌙 '), `${shop.name} is ${shutText(hours)}. It opens ${hours.opens}.`, isGm() ? ' (GMs can still trade.)' : '');
+  const shut = hours.open ? null : el('p', { class: 'shop-shut small' }, el('span', { 'aria-hidden': 'true' }, hours.holiday ? '🎉 ' : hours.night === false ? '🔒 ' : '🌙 '), `${shop.name} is ${shutText(hours)}. It opens ${hours.opens}.`, isGm() ? ' (GMs can still trade.)' : '');
   if (shut && !isGm()) return el('div', { class: 'trade' }, shut);
   // Who minds the shop: open, but the owner's routine has them elsewhere just now.
   const who = hours.open ? ownerIn(shop) : null;

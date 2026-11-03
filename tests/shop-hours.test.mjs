@@ -66,3 +66,22 @@ test('nextHoliday: the next one within a month, across a month end', async () =>
   assert.equal(nextHoliday({ ...c, holidays: [] }), null);
   assert.equal(nextHoliday(null), null);
 });
+
+test('a shop keeps its own hours', async () => {
+  const { shopOpen, untilChange, openText, parseHours, tradingHours } = await import('../js/shop-hours.js');
+  assert.deepEqual(parseHours('10-18'), [600, 1080]);
+  assert.deepEqual(parseHours('6pm–2am'), [1080, 1560]);
+  assert.deepEqual(parseHours('9am to 5pm'), [540, 1020]);
+  assert.deepEqual(parseHours('noon–midnight'), [720, 1440]);
+  assert.equal(parseHours('whenever'), null); assert.equal(parseHours('5-5'), null); assert.equal(parseHours(''), null);
+  const night = { fields: { type: 'Shop', hours: '6pm–2am' } };
+  assert.equal(shopOpen(night, 600).open, false); assert.equal(shopOpen(night, 600).opens, 'at 18:00');
+  assert.equal(shopOpen(night, 23 * 60).open, true); assert.equal(shopOpen(night, 60).open, true);
+  assert.deepEqual(untilChange(night, 23 * 60), { open: true, mins: 180 });
+  assert.deepEqual(openText(night, 600), { open: false, text: 'shut till 18:00' });
+  assert.deepEqual(tradingHours(night), [1080, 1560]);
+  // Unreadable hours fall back to the usual.
+  assert.equal(shopOpen({ fields: { type: 'Shop', hours: 'whenever' } }, 600).open, true);
+  // Still shut on holidays.
+  assert.equal(shopOpen(night, 23 * 60, 'Bridge Day').open, false);
+});

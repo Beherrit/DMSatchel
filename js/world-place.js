@@ -289,7 +289,7 @@ function openNowLine(shops) {
   const hs = shops.map(hoursNow), open = hs.filter((h) => h.open).length, shut = hs.length - open;
   const holiday = holidayToday(cleanCalendar(world.info?.cal));
   return el('p', { class: 'small muted shops-open-now' }, `🕰 ${hhmm(world.info.clock.minutes)}: ${open} open, ${shut} shut`,
-    shut ? (holiday && hs.some((h) => !h.open && h.text.endsWith(holiday)) ? ` (shut for ${holiday})` : ' (for the night)') : '', '.');
+    shut ? (holiday && hs.some((h) => !h.open && h.text.endsWith(holiday)) ? ` (shut for ${holiday})` : (world.info.clock.minutes >= 20 * 60 || world.info.clock.minutes < 6 * 60) ? ' (for the night)' : '') : '', '.');
 }
 
 // Nobody at the counter (GMs): shops whose owner's routine never has them in during trading hours.

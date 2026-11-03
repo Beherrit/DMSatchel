@@ -6,14 +6,42 @@ const HOURS = { shop: [8 * 60, 20 * 60], tavern: [8 * 60, 26 * 60] }; // a close
 
 const kindOf = (shop) => (shop?.fields?.type === 'Tavern' || /tavern|inn/i.test(shop?.fields?.shop_type || '') ? 'tavern' : 'shop');
 
+// A shop's own hours (its Hours field): "10-18", "10:30–18", "6pm–2am", "9am to 5pm", "noon–midnight" →
+// [open, close] in minutes (close past 24:00 when it runs into the night), or null when it can't read them.
+export function parseHours(text) {
+  const t = String(text || '').toLowerCase().replace(/[’']/g, '').trim();
+  if (!t) return null;
+  const part = '(\\d{1,2}(?::\\d\\d)?\\s*(?:am|pm)?|noon|midnight)';
+  const m = new RegExp(`^${part}\\s*(?:-|–|—|to|till|until)\\s*${part}$`).exec(t);
+  if (!m) return null;
+  const at = (x) => {
+    if (x === 'noon') return 720;
+    if (x === 'midnight') return 1440;
+    const r = /^(\d{1,2})(?::(\d\d))?\s*(am|pm)?$/.exec(x.trim());
+    let h = Number(r[1]) % 24;
+    if (r[3]) h = (Number(r[1]) % 12) + (r[3] === 'pm' ? 12 : 0);
+    return h * 60 + (Number(r[2]) || 0);
+  };
+  let from = at(m[1]); const to = at(m[2]);
+  if (from === 1440) from = 0;
+  if (from === to) return null;
+  return [from, to > from ? to : to + 1440];
+}
+
+// The hours a shop keeps: its own, or the usual for its kind.
+const hoursOf = (shop) => parseHours(shop?.fields?.hours) || HOURS[kindOf(shop)];
+const clock = (x) => `${String(Math.floor((x % 1440) / 60)).padStart(2, '0')}:${String(x % 60).padStart(2, '0')}`;
+const opensText = (from) => (from === 8 * 60 ? 'at 8 in the morning' : `at ${clock(from)}`);
+
 // holiday: the name of today's holiday, if any: shops shut for it all day (taverns stay open: it's a festival).
 // → { open, opens (text, when shut), holiday? }
 export function shopOpen(shop, minutes, holiday = '') {
   if (holiday && kindOf(shop) === 'shop') return { open: false, opens: 'tomorrow', holiday };
-  const [from, to] = HOURS[kindOf(shop)];
+  const [from, to] = hoursOf(shop);
   const m = ((Math.round(Number(minutes) || 0) % 1440) + 1440) % 1440;
   const open = (m >= from && m < Math.min(to, 1440)) || (to > 1440 && m < to - 1440);
-  return { open, opens: open ? '' : 'at 8 in the morning' };
+  // Shut at night, or (for a shop that keeps night hours) by day: "shut for the night" only when it is.
+  return { open, opens: open ? '' : opensText(from), ...(open ? {} : { night: m >= 20 * 60 || m < 6 * 60 }) };
 }
 
 // Today's holiday on a calendar (from calendar.js's cleaned calendar), for shopOpen: its name, or ''.
@@ -23,14 +51,14 @@ export function holidayToday(cal) {
 }
 
 // What a shut shop says: "shut for Bridge Day" or "shut for the night".
-export const shutText = (o) => (o.holiday ? `shut for ${o.holiday}` : 'shut for the night');
+export const shutText = (o) => (o.holiday ? `shut for ${o.holiday}` : o.night === false ? 'shut just now' : 'shut for the night');
 
 // Closing time: how long until a shop shuts (when open) or opens (when shut), in minutes of the world's clock.
 // → { open, mins } (mins null when it's shut for a holiday: it opens tomorrow).
 export function untilChange(shop, minutes, holiday = '') {
   const o = shopOpen(shop, minutes, holiday);
   if (o.holiday) return { open: false, mins: null };
-  const [from, to] = HOURS[kindOf(shop)];
+  const [from, to] = hoursOf(shop);
   const m = ((Math.round(Number(minutes) || 0) % 1440) + 1440) % 1440;
   if (o.open) return { open: true, mins: to > 1440 && m < to - 1440 ? to - 1440 - m : to - m };
   return { open: false, mins: m < from ? from - m : 1440 - m + from };
@@ -73,4 +101,4 @@ export function nextHoliday(cal, within = 30) {
 }
 
 // Trading hours, in minutes after midnight: [open, close] (close may run past midnight: 26 * 60 is 2 at night).
-export const tradingHours = (shop) => [...HOURS[kindOf(shop)]];
+export const tradingHours = (shop) => [...hoursOf(shop)];
