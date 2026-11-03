@@ -32,3 +32,11 @@ test('nightLight: moonlit dim light, or darkness', async () => {
   const { nightLight } = await import('../js/moonlight.js');
   assert.match(nightLight(3), /^Dim light/); assert.match(nightLight(0), /^Darkness/);
 });
+
+test('darkSight: who sees in the dark, who needs a light', async () => {
+  const { darkSight } = await import('../js/moonlight.js');
+  const { SPECIES } = await import('../js/rules2024.js');
+  const r = darkSight([{ name: 'Ann', species: 'Human' }, { name: 'Bo', species: 'dwarf' }, { name: 'Cy', species: 'Made-up' }], SPECIES);
+  assert.deepEqual(r.need, ['Ann', 'Cy']);
+  assert.equal(r.see.length, 1); assert.equal(r.see[0].name, 'Bo'); assert.ok(r.see[0].ft >= 60);
+});

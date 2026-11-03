@@ -710,7 +710,7 @@ to the log at the bottom.
 378. [x] **The scene on the session sheet.** The printable session sheet opens with the scene-setter line.
 379. [x] **Where we are, for players.** The party page tells everyone where the party is in a line: the time, the
     weather and the light.
-380. [ ] **Who can see in the dark.** At night, the GM's party sheet says each character's darkvision (from their
+380. [x] **Who can see in the dark.** At night, the GM's party sheet says each character's darkvision (from their
     species), and who'll need a light.
 381. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 
@@ -1100,3 +1100,4 @@ to the log at the bottom.
 - Night in the encounter roll: an encounter rolled in session prep at night (20:00–05:00) notes what the light means: moonlit dim light (lightly obscured) or, with no moon or under cloud, darkness (heavily obscured), and any lights the party has burning.
 - The scene on the session sheet: the printable session sheet now opens, under the date, with the same scene-setter line as prep ("🎬 Night in Brindle: overcast…"); the line is built in one place (world-scene.js) for both.
 - Where we are, for players: the party page now says where the party is, for everyone, in the same scene-setting line: "📍 Afternoon in Brindle: heavy rain, 18°C (64°F), wind moderate." (with the moon, lights and any festival when they apply; nothing when the party's on the road).
+- Who can see in the dark: at night (20:00–05:00) the GM's party sheet says "🌙 Night: darkvision: Bo 120 ft, Cy 60 ft; needs a light: Ann.", from each character's species (SRD species' darkvision).

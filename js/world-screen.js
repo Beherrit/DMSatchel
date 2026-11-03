@@ -3,13 +3,15 @@
 // Route: #world/screen
 import { el, setKids } from './dom.js';
 import { isGm } from './api.js';
-import { worldEntries, link, notice } from './world-store.js';
+import { world, worldEntries, link, notice } from './world-store.js';
 import { playOf, characterOf } from './sheet-ui.js';
 import { coinText } from './economy.js';
 import { screenRows } from './party-screen.js';
 import { lbs } from './weights.js';
 import { partyDebts } from './debts.js';
 import { giftCounts } from './gifts.js';
+import { darkSight } from './moonlight.js';
+import { SPECIES } from './rules2024.js';
 
 const ACTIVE = (e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
 
@@ -35,7 +37,12 @@ export function viewScreen() {
   const drawRows = () => setKids(body, [...rows].sort(order[sortBy.value]).map(rowOf));
   sortBy.addEventListener('change', drawRows);
   const debtsLine = debts.length ? el('p', { class: 'small screen-debts' }, el('strong', {}, 'Who owes whom: '), debts.map((d) => `${d.from} owes ${d.to} ${coinText(d.cp)}${d.note ? ` (${d.note})` : ''}`).join('; '), '.') : null;
+  // Who can see in the dark (at night): each character's darkvision, from their species, and who needs a light.
+  const m = world.info?.clock?.minutes, night = m !== undefined && (m % 1440 >= 20 * 60 || m % 1440 < 5 * 60);
+  const dark = night ? darkSight(chars.map((e) => ({ name: e.name, species: e.fields?.species })), SPECIES) : null;
   const view = el('div', { class: 'w-view screen-view' }, head,
+    dark ? el('p', { class: 'small screen-dark' }, '🌙 Night: ', dark.see.length ? `darkvision: ${dark.see.map((x) => `${x.name} ${x.ft} ft`).join(', ')}` : 'nobody has darkvision',
+      dark.need.length ? `; needs a light: ${dark.need.join(', ')}` : '; everyone can see in the dark', '.') : null,
     el('div', { class: 'controls screen-sort' }, el('label', { for: 'screen-sort' }, 'Sort by'), sortBy),
     el('div', { class: 'table-wrap' }, el('table', { class: 'screen-table' },
       el('thead', {}, el('tr', {}, ['Character', 'HP', 'AC', 'Passive Perception', 'Coin', 'Load', 'Carrying'].map((h, i) => el('th', { scope: 'col', class: i && i < 6 ? 'num' : null }, h)))),

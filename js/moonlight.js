@@ -32,3 +32,15 @@ export function nightLight(level) {
     ? 'Dim light (moonlit): the area is lightly obscured, so sight-based Perception checks have disadvantage.'
     : 'Darkness: the area is heavily obscured without a light; creatures without darkvision are effectively blinded.';
 }
+
+// Who can see in the dark: characters ([{ name, species }]) with their darkvision (feet, from a species table such as
+// rules2024's SPECIES), and who needs a light. → { see: [{ name, ft }], need: [names] }
+export function darkSight(chars, species) {
+  const see = [], need = [];
+  for (const c of chars || []) {
+    const s = species?.[String(c.species || '').trim()] || Object.entries(species || {}).find(([k]) => k.toLowerCase() === String(c.species || '').trim().toLowerCase())?.[1];
+    const ft = Number(s?.darkvision) || 0;
+    if (ft) see.push({ name: c.name, ft }); else need.push(c.name);
+  }
+  return { see, need };
+}
