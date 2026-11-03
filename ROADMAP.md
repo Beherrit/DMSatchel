@@ -654,7 +654,7 @@ to the log at the bottom.
     any bounty on them.
 340. [x] **Holiday deadlines coming up.** "Coming up for you" says when one of your quest deadlines falls on a
     holiday.
-341. [ ] **Open now in search.** Ctrl K shows whether a shop or tavern is open now beside its name.
+341. [x] **Open now in search.** Ctrl K shows whether a shop or tavern is open now beside its name.
 
 ## Ideas parking lot
 
@@ -1003,3 +1003,4 @@ to the log at the bottom.
 - A whole day on the cast list: Who's who now gives each person's whole usual day, "Usually mornings: the market; afternoons, evenings and nights: The Bell", instead of only where they are by day.
 - Routines on NPC cards: each printable NPC table card now has "Day: mornings and afternoons: the Forge; evenings: the Bell; nights: home" (hirelings: with the party) and "🎯 Wanted: 50 gp (the Watch)" for an open bounty.
 - Holiday deadlines coming up: on a character's "Coming up for you", a quest deadline that falls on a holiday says so: "Deadline: Ring the Bell (on Bridge Day)".
+- Open now in search: in Ctrl K, a shop or tavern's hint now starts with whether it's open by the world's clock: "Smithy · 🔒 shut till 08:00 · Hammers.", "The Bell · 🟢 open till 02:00".

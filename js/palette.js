@@ -10,8 +10,8 @@ import { nearWord, wordsOf } from './name-check.js';
 let M = null;
 async function loadData() {
   if (!M) {
-    const [rules, items, store] = await Promise.all([import('./rules2024.js'), import('./magic-items.js'), import('./world-store.js')]);
-    M = { ...rules, MAGIC_ITEMS: items.MAGIC_ITEMS, store, changes: [] };
+    const [rules, items, store, hours, calendar] = await Promise.all([import('./rules2024.js'), import('./magic-items.js'), import('./world-store.js'), import('./shop-hours.js'), import('./calendar.js')]);
+    M = { ...rules, MAGIC_ITEMS: items.MAGIC_ITEMS, store, hours, calendar, changes: [] };
     // Shipped changes (What's new), fetched alongside without holding the box up.
     Promise.all([import('./changelog.js'), fetch('/ROADMAP.md').then((r) => (r.ok ? r.text() : ''))])
       .then(([c, md]) => { M.changes = c.changelog(md); if (dialog?.open) render(); }).catch(() => {});
@@ -58,7 +58,10 @@ function baseItems() {
 }
 
 function entryItems() {
-  return M.store.worldEntries().map((e) => ({ label: e.name, group: M.store.kindLabel(e.kind), href: `#world/e/${e.id}`, hint: e.summary || (e.fields?.routine ? `Routine: ${String(e.fields.routine).slice(0, 90)}` : ''), haystack: `${e.name} ${(e.tags || []).join(' ')} ${Object.values(e.fields || {}).join(' ')}` }));
+  // Open now in search: a shop or tavern says whether it's open by the world's clock.
+  const info = M.store.world.info || {}, holiday = info.clock?.minutes === undefined ? '' : M.hours.holidayToday(M.calendar.cleanCalendar(info.cal));
+  const open = (e) => { if (info.clock?.minutes === undefined || e.kind !== 'location' || !(e.fields?.stock || e.fields?.menu)) return ''; const o = M.hours.openText(e, info.clock.minutes, holiday); return `${o.open ? '🟢' : '🔒'} ${o.text}`; };
+  return M.store.worldEntries().map((e) => ({ label: e.name, group: M.store.kindLabel(e.kind), href: `#world/e/${e.id}`, hint: [open(e), e.summary || (e.fields?.routine ? `Routine: ${String(e.fields.routine).slice(0, 90)}` : '')].filter(Boolean).join(' · '), haystack: `${e.name} ${(e.tags || []).join(' ')} ${Object.values(e.fields || {}).join(' ')}` }));
 }
 
 // Shipped changes rank under every page and entry that matches at all (but above typos).
