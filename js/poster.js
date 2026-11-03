@@ -36,7 +36,8 @@ export function wantedFor(place, entries, inside, opts = {}) {
     .map((e) => ({ id: e.id, headline: 'WANTED', name: e.name, text: short(stripMarks(String(e.fields?.appearance || e.summary || '')).trim(), 200), reward: String(e.fields.bounty).trim(), by: String(e.fields?.bounty_by || '').trim(), ...(e.fields?.status === 'Captured' || e.fields?.bounty_paid ? { claimed: true } : {}) }));
 }
 
-export function posterOf(place, quests, { date = '', wanted = [] } = {}) {
+// where(patron) → where to find them ('' when unknown), e.g. "by day at The Forge".
+export function posterOf(place, quests, { date = '', wanted = [], where = () => '' } = {}) {
   const posted = (quests || []).filter((q) => q.kind === 'quest' && q.visibility !== 'gm' && q.status !== 'suggested' && (q.fields?.status || 'Available') === 'Available')
     .sort((a, b) => a.name.localeCompare(b.name));
   const ruler = String(place?.fields?.ruler || '').trim();
@@ -48,7 +49,8 @@ export function posterOf(place, quests, { date = '', wanted = [] } = {}) {
       id: q.id, headline: headlineFor(q), name: q.name,
       text: short(stripMarks(String(q.summary || '')).trim(), 240),
       reward: String(q.fields?.reward || '').trim(),
-      ask: String(q.fields?.patron || '').trim(),
+      ask: stripMarks(String(q.fields?.patron || '')).trim(),
+      where: q.fields?.patron ? String(where(q.fields.patron) || '') : '',
     })),
     more: Math.max(0, posted.length - MAX_ON_POSTER),
     wanted: wanted.slice(0, 4),

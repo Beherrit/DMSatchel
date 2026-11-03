@@ -50,3 +50,11 @@ test('wantedFor with claimed bounties', async () => {
   assert.deepEqual(wantedFor(town, all, []).map((w) => w.name), ['Jory']);
   assert.deepEqual(wantedFor(town, all, [], { claimed: true }).map((w) => `${w.name}${w.claimed ? '*' : ''}`), ['Jory', 'Pete*']);
 });
+
+test('posterOf says where to find a patron when it can', async () => {
+  const { posterOf } = await import('../js/poster.js');
+  const q = (name, patron) => ({ kind: 'quest', name, fields: { status: 'Available', patron } });
+  const p = posterOf({ name: 'Brindle' }, [q('A', 'Bramwell'), q('B', 'Nobody')], { where: (n) => (n === 'Bramwell' ? 'by day at The Forge' : '') });
+  assert.deepEqual(p.jobs.map((j) => [j.ask, j.where]), [['Bramwell', 'by day at The Forge'], ['Nobody', '']]);
+  assert.equal(posterOf({ name: 'Brindle' }, [q('A', 'Bramwell')]).jobs[0].where, '');
+});

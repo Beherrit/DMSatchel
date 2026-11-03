@@ -2,11 +2,23 @@
 // table (each person sees it built from the jobs they can see).
 import { el, toast } from './dom.js';
 import { api, isGm } from './api.js';
-import { world, worldEntries, getEntry, descendantsOf, notice } from './world-store.js';
+import { world, worldEntries, getEntry, descendantsOf, notice, findByName } from './world-store.js';
+import { ownerDay } from './routine.js';
+import { isHired } from './hirelings.js';
 import { worldCalendar, todayText } from './world-calendar.js';
 import { posterOf, wantedFor } from './poster.js';
 
-export const posterFor = (place) => posterOf(place, descendantsOf(place.id, ['quest']), { date: worldCalendar() ? todayText() : '', wanted: wantedFor(place, worldEntries(), descendantsOf(place.id), { claimed: true }) });
+// Where to ask: a patron's usual place, from the first part of their day their routine names ("by day at The Forge").
+function whereToAsk(name) {
+  const npc = findByName(String(name).replace(/\[\[([^\]|]+)(\|[^\]]*)?\]\]/g, '$1').split(/[,(;]/)[0].trim());
+  if (!npc || npc.kind !== 'npc' || !npc.fields?.routine || isHired(npc)) return '';
+  const g = ownerDay(npc.fields.routine, () => false).find((x) => x.place && !/^(at )?home$/i.test(x.place));
+  if (!g) return '';
+  const when = g.labels.length === 2 && g.labels[0] === 'Morning' && g.labels[1] === 'Afternoon' ? 'by day' : g.labels.map((l) => `${l.toLowerCase()}s`).join(' and ');
+  return `${when} at ${g.place.replace(/^(at|in) /i, '')}`;
+}
+
+export const posterFor = (place) => posterOf(place, descendantsOf(place.id, ['quest']), { date: worldCalendar() ? todayText() : '', wanted: wantedFor(place, worldEntries(), descendantsOf(place.id), { claimed: true }), where: whereToAsk });
 
 export function posterNode(p) {
   return el('article', { class: 'poster', 'aria-label': p.title },
@@ -16,7 +28,7 @@ export function posterNode(p) {
       el('h3', {}, j.name),
       j.text ? el('p', {}, j.text) : null,
       j.reward ? el('p', { class: 'poster-reward' }, `Reward: ${j.reward}`) : null,
-      j.ask ? el('p', { class: 'poster-ask' }, `Ask for ${j.ask}`) : null)))
+      j.ask ? el('p', { class: 'poster-ask' }, `Ask for ${j.ask}${j.where ? `, ${j.where}` : ''}`) : null)))
       : p.wanted.length ? null : el('p', { class: 'poster-empty' }, 'Nothing posted. Come back on market day.'),
     p.wanted.length ? el('ul', { class: 'poster-jobs poster-wanted', 'aria-label': 'Wanted' }, p.wanted.map((w) => el('li', { class: `poster-job${w.claimed ? ' claimed' : ''}` },
       el('p', { class: 'poster-headline' }, w.claimed ? 'CLAIMED' : 'WANTED'),

@@ -691,7 +691,7 @@ to the log at the bottom.
 364. [x] **"Who's at" in search.** Typing "at the Bell" (or "who's at the Bell") in Ctrl K lists who's there now.
 365. [x] **Last orders on the map.** In a tavern's last hour, its map pin popup says it's last orders.
 366. [x] **Patrons on the quest board.** A town's quest board says where each job's patron is right now.
-367. [ ] **Where to ask, on the job poster.** The printable job board says where to find each patron ("Ask for
+367. [x] **Where to ask, on the job poster.** The printable job board says where to find each patron ("Ask for
     Bramwell, by day at The Forge").
 368. [ ] **Lights on the session sheet.** The printable session sheet lists the lights burning and how long each has
     left, with the time.
@@ -1070,3 +1070,4 @@ to the log at the bottom.
 - "Who's at" in search: typing "at the Bell" or "who's at Brindle" in Ctrl K lists the place, then who the routines put there (or somewhere inside it) right now, with where and until when; a name that isn't a place falls back to ordinary search.
 - Last orders on the map: in a tavern's last hour, its map pin popup says "🍺 Last orders: it shuts in 40 min." instead of its hours (following its own hours, if it keeps them).
 - Patrons on the quest board: each open job on a town's quest board says where its patron is right now: "🕰 Bramwell is at The Forge until 17:00 now" (finished jobs don't).
+- Where to ask, on the job poster: the printable job board now says where to find each patron, from the first part of their day their routine names (home aside): "Ask for Bramwell, by day at The Forge", "Ask for Mags, evenings at the Bell". Also fixed: a patron written as a [[link]] no longer shows its brackets on the poster.
