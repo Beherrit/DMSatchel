@@ -9,5 +9,6 @@ export function changelog(md) {
     if (cur && /^\s{2,}\S/.test(line)) cur.text = `${cur.text} ${line.trim()}`.trim();
     else if (!line.trim() || /^#/.test(line)) cur = null;
   }
-  return out.sort((a, b) => b.n - a.n);
+  const plain = (t) => t.replace(/\*\*(.+?)\*\*/g, '$1').replace(/`([^`]+)`/g, '$1').replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
+  return out.map((i) => ({ ...i, title: plain(i.title), text: plain(i.text) })).sort((a, b) => b.n - a.n);
 }

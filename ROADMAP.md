@@ -580,7 +580,7 @@ to the log at the bottom.
 298. [ ] **A full sweep.** Run the whole browser suite after #290–#297 and note it.
 299. [ ] **Who's in town for the festival.** On a holiday, a settlement's page notes it's a festival day and who's at
     the taverns now.
-300. [ ] **The 300th: a changelog page.** A "What's new in the Satchel" page built from the README's feature list
+300. [x] **The 300th: a changelog page.** A "What's new in the Satchel" page built from the README's feature list
     (newest first), linked from the footer.
 301. [ ] **Last seen in session prep.** Session prep's "Who might turn up" says where each was last seen.
 
@@ -889,3 +889,4 @@ to the log at the bottom.
 - Acquaintances in the relationship web: the web has a new "Acquaintances (from routines)" option, off by default. Ticked, it draws a faint dotted line between NPCs whose routines put them in the same place at the same hours, two hours a day or more. Hovering a line shows "Bramwell — crosses paths at The Forge — Tom". It uses the same reading as the NPC pages' "Often crosses paths with".
 - Busy taverns on the map: a tavern's map pin now also says when it's busiest, the same line as its page: "🍺 Busiest around 17:00 (2 regulars in)."
 - Eve of a holiday on the clock: the day before one of the world's holidays, the clock card now says "🎉 Bridge Day tomorrow: festive goods cost a quarter more today, and the shops will be shut."
+- The 300th, a changelog page: a "What's new in the Satchel" page at #news, linked from the footer, lists every ticked roadmap item newest first (it reads ROADMAP.md itself rather than the README, so it stays current without extra upkeep), with a filter box and "Show more" in pages of 40.

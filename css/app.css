@@ -1759,3 +1759,11 @@ details.quest-group > summary .section-title { display: inline }
 .poster-job.claimed { opacity: .65 } .poster-job.claimed .poster-headline { transform: rotate(-4deg); display: inline-block; border: 2px solid currentColor; padding: 0 6px }
 @media print { .screen-sort { display: none !important } }
 .edge.acquaint { stroke-dasharray: 2 4; opacity: .55 }
+/* What's new (#news) */
+.news-view { max-width: 80ch }
+.news-filter { width: 100%; max-width: 40ch; margin: 4px 0 6px }
+.news-list { list-style: none; padding: 0; margin: 8px 0 }
+.news-item { border-top: 1px solid var(--line); padding: 10px 0 }
+.news-item h3 { margin: 0 0 4px; font-size: calc(16px * var(--ts, 1)) }
+.news-item p { margin: 0; overflow-wrap: anywhere }
+.news-n { font-family: var(--f-mono); font-weight: normal; font-size: calc(13px * var(--ts, 1)) }

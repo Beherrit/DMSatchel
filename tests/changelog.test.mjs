@@ -10,3 +10,9 @@ test('changelog: shipped roadmap items, newest first', () => {
   const real = changelog(readFileSync(new URL('../ROADMAP.md', import.meta.url), 'utf8'));
   assert.ok(real.length > 250 && real[0].n > real[1].n && real.every((x) => x.title && x.text));
 });
+
+test('changelog strips inline markdown', () => {
+  const [i] = changelog('5. [x] **A `b` c.** Uses **bold**, `code` and [a link](https://x.y).');
+  assert.equal(i.title, 'A b c');
+  assert.equal(i.text, 'Uses bold, code and a link.');
+});

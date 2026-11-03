@@ -18,7 +18,7 @@ const panels = {};
 const lazy = (load) => { let p = null; return () => (p ||= load()); };
 const sections = {
   tools: lazy(() => import('./tools.js')), characters: lazy(() => import('./character-ui.js')), world: lazy(() => import('./world-ui.js')),
-  reference: lazy(() => import('./reference-ui.js')), admin: lazy(() => import('./admin-ui.js')),
+  reference: lazy(() => import('./reference-ui.js')), admin: lazy(() => import('./admin-ui.js')), news: lazy(() => import('./news-ui.js')),
 };
 let showing = 0;
 
@@ -50,13 +50,14 @@ async function show(section, sub) {
   else if (section === 'world') { panel('world', mod.mountWorld).hidden = false; mod.showWorld(sub ? sub.split('/') : []); }
   else if (section === 'reference') { panel('reference', mod.mountReference).hidden = false; mod.showReference(sub); }
   else if (section === 'admin') { panel('admin', mod.mountAdmin).hidden = false; mod.showAdmin(sub); }
+  else if (section === 'news') { const p = panel('news', mod.mountNews); p.hidden = false; mod.showNews(p); }
   else if (section === 'worlds' || section === 'join') { panel('worlds', mountWorlds).hidden = false; showWorlds(section === 'join' ? `join/${sub}` : sub); }
 }
 
 function route() {
   const h = location.hash.replace(/^#/, '');
   const [section, ...rest] = h.split('/');
-  const known = ['tools', 'characters', 'world', 'reference', 'admin', 'worlds', 'join'];
+  const known = ['tools', 'characters', 'world', 'reference', 'admin', 'worlds', 'join', 'news'];
   show(known.includes(section) ? section : 'tools', rest.join('/'));
 }
 
