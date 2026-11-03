@@ -690,6 +690,12 @@ to the log at the bottom.
 363. [x] **Patrons in session prep.** Session prep's active quests say where each patron is now.
 364. [x] **"Who's at" in search.** Typing "at the Bell" (or "who's at the Bell") in Ctrl K lists who's there now.
 365. [x] **Last orders on the map.** In a tavern's last hour, its map pin popup says it's last orders.
+366. [ ] **Patrons on the quest board.** A town's quest board says where each job's patron is right now.
+367. [ ] **Where to ask, on the job poster.** The printable job board says where to find each patron ("Ask for
+    Bramwell, by day at The Forge").
+368. [ ] **Lights on the session sheet.** The printable session sheet lists the lights burning and how long each has
+    left, with the time.
+369. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 
 ## Ideas parking lot
 
