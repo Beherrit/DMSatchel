@@ -1,5 +1,6 @@
 // Who and what a session's log names (or connects to), as the viewer can see them: the entries, sessions left out.
 import { getEntry, mentions, worldEntries } from './world-store.js';
+import { appearances } from './appearances.js';
 
 export function namedIn(session) {
   if (!session) return [];
@@ -11,4 +12,10 @@ export function namedIn(session) {
 export function journalsAbout(id) {
   return worldEntries().filter((x) => x.kind === 'journal' && (mentions([x.summary, x.body].join('\n')).has(id) || (x.links || []).some((l) => l.id === id)))
     .sort((a, b) => String(a.created_at).localeCompare(String(b.created_at)));
+}
+
+// New in a session: who and what its log names for the first time (never in an earlier session). seen: appearances()
+// of the world, when the caller already has it.
+export function newIn(session, seen = appearances(worldEntries(), mentions)) {
+  return namedIn(session).filter((x) => seen.get(x.id)?.first?.id === session.id);
 }

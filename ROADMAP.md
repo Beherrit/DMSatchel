@@ -811,7 +811,7 @@ to the log at the bottom.
 444. [x] **Taken on in, finished in.** A quest's page says which session first mentioned it, and for a finished quest,
     the last.
 445. [x] **First visited.** A place's page says which session first mentioned it.
-446. [ ] **New in this session.** A session's page says who and what came up for the first time in it.
+446. [x] **New in this session.** A session's page says who and what came up for the first time in it.
 447. [ ] **New faces on the session list.** The list of sessions says how many people and places each one
     introduced.
 448. [ ] **New last time, in prep.** Session prep's "Last time" card names who and what was new in it.
@@ -1268,3 +1268,4 @@ to the log at the bottom.
 - Playing since: the world's numbers page has a "Playing since" tile: the date the first session was played and how long ago ("2026-10-18 · 3 weeks ago").
 - Taken on in, finished in: a quest's page says "🧭 Taken on in Session 1", and once it's done "· completed in Session 3" (or failed or abandoned), from the first and last sessions that mention it.
 - First visited: a place mentioned in more than one session says "🗺 First visited in Session 1" under when it was last in the log.
+- New in this session: a session's "In this session" card starts with "✨ New this session: Bo, The Market", who and what its log names for the first time (newIn() in session-named.js).

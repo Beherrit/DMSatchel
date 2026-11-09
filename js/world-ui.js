@@ -107,7 +107,7 @@ import { restockDraft } from './world-place.js';
 import { npcStats, NPC_CLASS_OPTIONS } from './npc-stats.js';
 import { patchEntry, setEntryState, stateBadges, syncWorld, descendantsOf, tagChip } from './world-store.js';
 import { dayFor } from './world-hours.js';
-import { namedIn, journalsAbout } from './session-named.js';
+import { namedIn, journalsAbout, newIn } from './session-named.js';
 import { unlinkedIn, linkNames } from './unlinked.js';
 import { sessionText } from './session-text.js';
 import { sessionGaps, realGapText } from './session-gaps.js';
@@ -921,7 +921,10 @@ function inSessionCard(e) {
   if (!named.length) return null;
   const groups = new Map();
   for (const x of named) { const k = kindLabel(x.kind); if (!groups.has(k)) groups.set(k, []); groups.get(k).push(x); }
+  // New in this session: who and what came up for the first time.
+  const fresh = e.kind === 'session' ? newIn(e) : [];
   return el('section', { class: 'card in-session' }, el('h3', {}, `In this ${e.kind === 'journal' ? 'entry' : 'session'} (${named.length})`),
+    fresh.length ? el('p', { class: 'small session-new' }, el('strong', {}, '✨ New this session: '), fresh.sort(byName).map((x, i) => [i ? ', ' : '', link(x)])) : null,
     el('dl', { class: 'in-session-list' }, [...groups].map(([k, xs]) => [el('dt', {}, k), el('dd', {}, xs.sort(byName).map((x, i) => [i ? ', ' : '', link(x)]))])));
 }
 
