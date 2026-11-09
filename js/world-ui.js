@@ -108,6 +108,7 @@ import { npcStats, NPC_CLASS_OPTIONS } from './npc-stats.js';
 import { patchEntry, setEntryState, stateBadges, syncWorld, descendantsOf, tagChip } from './world-store.js';
 import { dayFor } from './world-hours.js';
 import { namedIn } from './session-named.js';
+import { unlinkedIn, linkNames } from './unlinked.js';
 
 // Pages used now and then load when first opened, so world pages start faster.
 const lazyView = (load, name) => async (...args) => (await load())[name](...args);
@@ -690,6 +691,8 @@ function viewEdit(id, kindForNew) {
     area('summary', 'Summary', e.summary, 2, 'One or two sentences. This shows in lists and search.'),
     fieldsBox,
     area('body', 'Description & notes', e.body, 8, 'Link to other entries with [[double brackets]], e.g. [[The Silver Hand]]. **Bold**, *italic*, “- ” for a list, “## ” for a small heading, “> ” for text to read aloud.'),
+    // Link names as you write: in a session log, the entries it names as plain text, with a button to link them.
+    e.kind === 'session' ? linkHint() : null,
     gm ? area('secret', 'GM-only secrets', e.secret, 4, 'Players never see this. Only this world’s GMs can read it.') : null,
     input('tags', 'Tags', (e.tags || []).join(', '), { placeholder: 'comma separated, e.g. north, war, session-12' }),
     el('div', { class: 'field wide' }, el('label', {}, 'Connections'), linksBox,
@@ -998,6 +1001,24 @@ function turnUpBox(e) {
   const due = turnUp(e);
   if (!due.length) return null;
   return el('details', { class: 'turn-up' }, el('summary', {}, `Who might turn up (${due.length})`), el('p', { class: 'muted small' }, turnUpNote), turnUpList(due));
+}
+
+// Link names as you write: under a session log's text, the entries it names without [[links]], and a button that
+// links them in the text (the GM saves the form as usual).
+function linkHint() {
+  const out = el('p', { class: 'small link-hint', 'aria-live': 'polite' });
+  const draw = () => {
+    const box = document.getElementById('f-body');
+    if (!box) return;
+    const found = unlinkedIn(box.value, worldEntries());
+    if (!found.length) { setKids(out); return; }
+    setKids(out, el('span', { class: 'muted' }, 'Names you could link: '), found.map((f, i) => [i ? ', ' : '', f.entry.name]), ' ',
+      el('button', { class: 'btn small ghost', type: 'button', onclick: () => { box.value = linkNames(box.value, found.map((f) => f.entry)); box.dispatchEvent(new Event('input', { bubbles: true })); draw(); } }, 'Link them'));
+  };
+  // The text box is in the form by the time this runs (next tick); then follow what's typed, a moment after.
+  let t = null;
+  setTimeout(() => { const box = document.getElementById('f-body'); if (box) box.addEventListener('input', () => { clearTimeout(t); t = setTimeout(draw, 300); }); draw(); });
+  return out;
 }
 
 // Hours as you type: under a place's Opening hours field, how it reads them.
