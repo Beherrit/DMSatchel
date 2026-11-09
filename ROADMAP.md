@@ -755,6 +755,11 @@ to the log at the bottom.
 407. [x] **Session numbers in order.** What needs writing flags sessions with a missing or repeated number.
 408. [x] **Logs still to write.** What needs writing lists sessions whose log is empty or only a line.
 409. [x] **Who came up, on the session list.** The list of sessions shows under each who and what its log names.
+410. [ ] **Last time, in prep.** Session prep's "Last time" card lists who and what came up in the last session.
+411. [ ] **Link names as you write.** Editing a session log, the form offers the names it could link ("Bramwell, The
+    Bell") with a button that links them in the text.
+412. [ ] **Last time on the map.** An NPC's map pin popup quotes the line from the last session that named them.
+413. [ ] **Last session, for players.** The party page says which session was last and who and what came up in it.
 
 ## Ideas parking lot
 
