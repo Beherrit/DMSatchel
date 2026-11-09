@@ -805,6 +805,12 @@ to the log at the bottom.
 440. [x] **Unlinked names in quests and places.** What needs writing also finds unlinked names in the descriptions
     of quests and places, not only logs and journals.
 441. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
+442. [ ] **Link names in descriptions too.** Quest and place forms offer the names their description could link, as
+    session logs do.
+443. [ ] **Playing since.** The world's numbers page says when the first session was played and how long ago.
+444. [ ] **Taken on in, finished in.** A quest's page says which session first mentioned it, and for a finished quest,
+    the last.
+445. [ ] **First visited.** A place's page says which session first mentioned it.
 
 ## Ideas parking lot
 
