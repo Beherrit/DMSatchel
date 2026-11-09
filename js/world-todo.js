@@ -48,16 +48,17 @@ function emptyLogsSection(chk) {
 // Names left unlinked: entries the session logs name as plain text, with a button to link them for the GM.
 function unlinkedSection() {
   const all = worldEntries();
-  const rows = all.filter((e) => e.kind === 'session' && e.body).map((s) => ({ s, found: unlinkedIn(s.body, all) })).filter((x) => x.found.length)
-    .sort((a, b) => (parseFloat(b.s.fields?.number) || 0) - (parseFloat(a.s.fields?.number) || 0));
+  // Session logs first (newest first), then journal entries (newest first).
+  const rows = all.filter((e) => ['session', 'journal'].includes(e.kind) && e.body && e.can_edit !== false).map((s) => ({ s, found: unlinkedIn(s.body, all) })).filter((x) => x.found.length)
+    .sort((a, b) => (a.s.kind === b.s.kind ? 0 : a.s.kind === 'session' ? -1 : 1) || (parseFloat(b.s.fields?.number) || 0) - (parseFloat(a.s.fields?.number) || 0) || String(b.s.created_at).localeCompare(String(a.s.created_at)));
   if (!rows.length) return null;
   const linkThem = async (s, found, btn) => {
     btn.disabled = true;
     try { await patchEntry(getEntry(s.id) || s, { body: linkNames((getEntry(s.id) || s).body, found.map((f) => f.entry)) }); toast(`Linked ${found.length} name${found.length === 1 ? '' : 's'} in ${s.name}`); window.dispatchEvent(new Event('world:rerender')); }
     catch (err) { toast(err.message, 'bad'); btn.disabled = false; }
   };
-  return el('section', { class: 'card todo-group unlinked-names' }, el('h3', {}, `Names left unlinked in the logs (${rows.length})`),
-    el('p', { class: 'muted small' }, 'Session logs that name entries without [[links]], so they don’t count as mentioned (last seen, who came up, gone quiet).'),
+  return el('section', { class: 'card todo-group unlinked-names' }, el('h3', {}, `Names left unlinked in logs and journals (${rows.length})`),
+    el('p', { class: 'muted small' }, 'Session logs and journal entries that name entries without [[links]], so they don’t link through (and, in logs, don’t count for last seen, who came up or gone quiet).'),
     el('ul', { class: 'plain todo-list' }, rows.slice(0, 30).map(({ s, found }) => el('li', {}, el('span', {}, link(s), ': ',
       found.map((f, i) => [i ? ', ' : '', link(f.entry), f.count > 1 ? el('span', { class: 'muted' }, ` ×${f.count}`) : ''])),
       (() => { const b = el('button', { class: 'btn small', type: 'button' }, 'Link them'); b.onclick = () => linkThem(s, found, b); return b; })()))));
