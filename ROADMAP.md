@@ -720,6 +720,11 @@ to the log at the bottom.
     for the GM's screen.
 385. [x] **Lights running low in prep.** Session prep warns when a light the party has burning has ten minutes or
     less left.
+386. [ ] **What happened with them.** An NPC's page quotes the line of the last session log that mentions them.
+387. [ ] **Open now, for players.** The party page tells everyone what's open now in the town the party is in.
+388. [ ] **The scene, read aloud.** Session prep can add the scene-setter line to the read-aloud list in one click.
+389. [ ] **What happened, on the cast list.** Who's who quotes the line of the last session log that mentions each
+    person, under when they were last seen.
 
 ## Ideas parking lot
 
