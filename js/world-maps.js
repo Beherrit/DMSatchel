@@ -4,7 +4,7 @@ import { el, toast, confirmButton, setKids } from './dom.js';
 import { api, isGm, isMember, mapImageUrl } from './api.js';
 import { shrinkImage } from './dom.js';
 import { travelText } from './encounters.js';
-import { world, worldEntries, getEntry, findByName, link, kindLabel, notice, nameList, whenTime, createEntry, mapsOf, trail } from './world-store.js';
+import { world, worldEntries, getEntry, findByName, mentions, link, kindLabel, notice, nameList, whenTime, createEntry, mapsOf, trail } from './world-store.js';
 import { playOf, characterOf, changePlay } from './sheet-ui.js';
 import { readList, withRations } from './shopping.js';
 import { overloaded, overloadedText } from './weights.js';
@@ -34,6 +34,7 @@ import { journeyOnMap } from './journey.js';
 import { controllers, powerSlots } from './control.js';
 import { journey, chainOf, notePartyMove } from './world-journey.js';
 import { dayFor } from './world-hours.js';
+import { appearances, quoteOf } from './appearances.js';
 
 // The party's place, then each place above it (for the party token).
 const partyChain = () => { const at = world.info?.party_at && getEntry(world.info.party_at); return at ? [at.id, ...trail(at).reverse().map((p) => p.id)] : []; };
@@ -267,6 +268,9 @@ export async function viewMap(id, focusPin) {
           return el('p', { class: `small pin-hours${h.open ? '' : ' shut'}` }, h.open ? '🟢 ' : '🔒 ', h.text[0].toUpperCase() + h.text.slice(1), '.'); })(),
         // Where they are, on their pin: an NPC's routine now, and their usual day.
         entry?.kind === 'npc' ? routineNow(entry) : null,
+        // Last time on the map: the line from the last session that named them.
+        (() => { if (entry?.kind !== 'npc') return null; const seen = appearances(worldEntries(), mentions).get(entry.id), q = seen && quoteOf(seen.last, entry, 140);
+          return q ? el('p', { class: 'small pin-last' }, el('span', { class: 'muted' }, `Last time (${seen.last.name}): `), el('q', {}, q)) : null; })(),
         // When the owner's usually in.
         entry ? ownerDayLine(entry) : null,
         // Wanted on the map: anyone with an open bounty whose routine has them here (or inside) right now.
