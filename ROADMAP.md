@@ -793,6 +793,11 @@ to the log at the bottom.
     it.
 432. [x] **In the players' journals.** An NPC's page lists the journal entries that name them.
 433. [x] **Copy the cast as text.** Who's who can copy the cast list as plain text to paste into a chat.
+434. [ ] **Search the journals too.** "log: dragon" in Ctrl K also finds journal entries that mention it.
+435. [ ] **What they wrote, on a character.** A character's page lists the journal entries its player wrote.
+436. [ ] **When a journal entry is set.** A journal entry about a session shows that session's in-world date.
+437. [ ] **Not a name.** In "Names left unlinked", a GM can mark a name as never to be linked (an entry called "The
+    Watch" that's often just words), and it stops being flagged.
 
 ## Ideas parking lot
 
