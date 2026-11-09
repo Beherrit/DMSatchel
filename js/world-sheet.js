@@ -88,6 +88,8 @@ export async function viewSessionSheet() {
         : el('p', { class: 'muted' }, 'No active characters.')),
       here ? block(here.name, here.summary ? el('p', {}, cut(here.summary, 300)) : null,
         weather ? el('p', {}, el('strong', {}, 'Weather: '), weather.line) : null,
+        // Tomorrow's weather on the sheet: the next day's forecast, the same seeded roll as prep's week ahead.
+        (() => { try { const t = here && dayWeather(here.id, terrain, cal, 1); return t ? el('p', { class: 'small ss-tomorrow' }, el('strong', {}, 'Tomorrow: '), t.line) : null; } catch { return null; } })(),
         (() => { const m = musicFor([here, ...trail(here).reverse()]); return m ? el('p', { class: 'small' }, el('strong', {}, 'Music: '), m.url) : null; })(),
         // Open or shut on the sheet: each shop's hours by the world's clock, today.
         shops.length ? el('p', { class: 'small ss-shops' }, el('strong', {}, 'Shops: '), shops.map((s) => { const m = world.info?.clock?.minutes; if (m === undefined) return s.name; const o = openText(s, m, dayFor(s)); return `${s.name} (${o.text})`; }).join(', ')) : null) : null,
