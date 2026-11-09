@@ -454,6 +454,9 @@ function viewEntry(id, tab) {
     mentionsCard(e, rerenderWorld),
     e.kind === 'npc' ? lastSeenLine(e) : lastLogLine(e),
     ['npc', 'character', 'quest', ...PLACE_KINDS].includes(e.kind) ? cameUpBox(e) : null,
+    // In the players' journals: the journal entries that name an NPC, each with the line.
+    e.kind === 'npc' ? (() => { const js = journalsAbout(e.id); return js.length ? el('details', { class: 'came-up in-journals' }, el('summary', { class: 'small' }, `In the players’ journals (${js.length})`),
+      el('ol', { class: 'plain small came-up-list' }, js.map((x) => { const q = quoteOf(x, e); return el('li', {}, link(x), x.created_by ? el('span', { class: 'muted' }, ` by ${x.created_by}`) : '', q ? el('q', { class: 'last-seen-quote' }, q) : null); }))) : null; })() : null,
     // Copy a session as text: the log as plain text (no GM secrets), to paste into a chat.
     // The gap on a session's page: how long after the one before, at the table and in the world.
     e.kind === 'session' ? (() => { const order = sessionOrder(worldEntries()), i = order.findIndex((x) => x.id === e.id), prev = order[i + 1];
