@@ -770,7 +770,7 @@ to the log at the bottom.
     session logs (twice or more), toggled on like acquaintances.
 419. [x] **In this entry, for journals.** A journal entry's page lists who and what it names, grouped, as session
     pages do.
-420. [ ] **Last time, on the session sheet.** Each person in "Who's around" on the session sheet gets the line from
+420. [x] **Last time, on the session sheet.** Each person in "Who's around" on the session sheet gets the line from
     the last session that named them.
 421. [ ] **Copy a session as text.** A session's page can copy its log as plain text (links as plain names) to paste
     into a chat.
@@ -1201,3 +1201,4 @@ to the log at the bottom.
 - A full sweep: all 405 browser tests rerun; no crashes or page errors. Two flags, a timeout in the secrets test and a 403 in the dialogs test, both pass on rerun (the same load flakes as before).
 - Met together: the relationship web has a "Met together (from the logs)" option, off by default, that draws a faint dashed line between NPCs the session logs name in the same sessions twice or more ("Ann — in the same session logs 2 times — Bo"). Pure in appearances.js (metTogether).
 - In this entry, for journals: a journal entry's page lists "In this entry (2)": who and what it names, grouped by kind, as session pages do.
+- Last time, on the session sheet: each person in "Who's around" on the printable session sheet adds the line from the last session that named them: "Session 1: “Met Ann at the inn, who poured ale!”".

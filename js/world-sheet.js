@@ -3,7 +3,7 @@
 // their open steps, clocks about to finish, a rolled encounter and the GMs' notes. Route: #world/sheet
 import { el, setKids } from './dom.js';
 import { api, isGm } from './api.js';
-import { world, worldEntries, getEntry, byName, descendantsOf, trail, notice } from './world-store.js';
+import { world, worldEntries, getEntry, byName, descendantsOf, trail, notice, mentions } from './world-store.js';
 import { worldCalendar, todayText } from './world-calendar.js';
 import { rumorsAt } from './world-rumors.js';
 import { encounterCard, partyDefaults, placeTerrains, monsterSource } from './encounter-ui.js';
@@ -28,6 +28,7 @@ import { dayFor } from './world-hours.js';
 import { moonlight } from './moonlight.js';
 import { today } from './calendar.js';
 import { sceneFor } from './world-scene.js';
+import { appearances, quoteOf } from './appearances.js';
 
 const ACTIVE_PC = (e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
 const townOf = (place) => (place?.kind === 'settlement' ? place : [...trail(place)].reverse().find((p) => p.kind === 'settlement') || null);
@@ -45,6 +46,7 @@ export async function viewSessionSheet() {
   const cal = worldCalendar();
   const pcs = all.filter(ACTIVE_PC).sort(byName);
   const inside = here ? descendantsOf(here.id) : [];
+  const seen = appearances(all, mentions);
   const people = inside.filter((e) => e.kind === 'npc' && e.fields?.status !== 'Dead')
     .sort((a, b) => Number((b.tags || []).includes('key')) - Number((a.tags || []).includes('key')) || byName(a, b)).slice(0, 14);
   const jobs = inside.filter((e) => e.kind === 'quest' && ['Available', 'Rumor'].includes(e.fields?.status)).slice(0, 8);
@@ -104,6 +106,8 @@ export async function viewSessionSheet() {
         return el('li', {}, el('strong', {}, p.name), sayOf(p) ? ` [${sayOf(p)}]` : '', p.fields?.role ? ` (${p.fields.role})` : '', p.summary ? `: ${cut(p.summary, 110)}` : '',
           // Where they'll be: their usual day, from their routine (hirelings go with the party).
           (() => { const d = isHired(p) ? 'with the party' : dayLine(p.fields?.routine); return d ? el('div', { class: 'small ss-day' }, `🕰 ${d}`) : null; })(),
+          // Last time, on the sheet: the line from the last session that named them.
+          (() => { const sn = seen.get(p.id), q = sn && quoteOf(sn.last, p, 120); return q ? el('div', { class: 'small ss-last' }, `${sn.last.name}: “${q}”`) : null; })(),
           att.length ? el('div', { class: 'small' }, att.map((x) => `${x.character.name}: ${x.a}`).join(' · ')) : null);
       }))) : null,
       jobs.length || rumors.length ? block('Jobs and rumors',
