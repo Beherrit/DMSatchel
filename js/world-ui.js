@@ -440,6 +440,7 @@ function viewEntry(id, tab) {
     mentionsCard(e, rerenderWorld),
     e.kind === 'npc' ? lastSeenLine(e) : lastLogLine(e),
     e.kind === 'npc' ? cameUpBox(e) : null,
+    e.kind === 'session' ? inSessionCard(e) : null,
     // A wanted poster: for anyone with a bounty on their head.
     e.kind === 'npc' && String(e.fields?.bounty || '').trim() && e.visibility !== 'gm' ? el('p', { class: 'small' }, el('a', { class: 'btn small', href: `#world/poster/${e.id}` }, '🎯 Wanted poster')) : null,
     out.length || incoming.length ? el('section', {}, el('h3', { class: 'section-title' }, 'Connections'),
@@ -874,6 +875,17 @@ function lastSeenLine(e) {
     gm && seen.ago >= 2 ? el('span', { class: 'due-back' }, ` · 🔔 not seen for ${seen.ago} sessions: might turn up`) : '',
     // What happened with them: the line of that session's log that names them.
     (() => { const q = quoteOf(seen.last, e); return q ? el('q', { class: 'last-seen-quote' }, q) : null; })());
+}
+
+// In this session: the people, places, quests and things a session's log names (or connects to), grouped by kind.
+function inSessionCard(e) {
+  const ids = [...new Set([...mentions([e.summary, e.body, ...Object.values(e.fields || {})].join('\n')), ...(e.links || []).map((l) => l.id)])];
+  const named = ids.map((id) => getEntry(id)).filter((x) => x && x.id !== e.id && x.kind !== 'session');
+  if (!named.length) return null;
+  const groups = new Map();
+  for (const x of named) { const k = kindLabel(x.kind); if (!groups.has(k)) groups.set(k, []); groups.get(k).push(x); }
+  return el('section', { class: 'card in-session' }, el('h3', {}, `In this session (${named.length})`),
+    el('dl', { class: 'in-session-list' }, [...groups].map(([k, xs]) => [el('dt', {}, k), el('dd', {}, xs.sort(byName).map((x, i) => [i ? ', ' : '', link(x)]))])));
 }
 
 // Every time they came up: an NPC's sessions (when there's more than one), each with the line that names them.
