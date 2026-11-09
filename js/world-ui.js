@@ -445,7 +445,7 @@ function viewEntry(id, tab) {
     mentionsCard(e, rerenderWorld),
     e.kind === 'npc' ? lastSeenLine(e) : lastLogLine(e),
     ['npc', 'character', 'quest', ...PLACE_KINDS].includes(e.kind) ? cameUpBox(e) : null,
-    e.kind === 'session' ? inSessionCard(e) : null,
+    ['session', 'journal'].includes(e.kind) ? inSessionCard(e) : null,
     // A wanted poster: for anyone with a bounty on their head.
     e.kind === 'npc' && String(e.fields?.bounty || '').trim() && e.visibility !== 'gm' ? el('p', { class: 'small' }, el('a', { class: 'btn small', href: `#world/poster/${e.id}` }, '🎯 Wanted poster')) : null,
     out.length || incoming.length ? el('section', {}, el('h3', { class: 'section-title' }, 'Connections'),
@@ -893,7 +893,7 @@ function inSessionCard(e) {
   if (!named.length) return null;
   const groups = new Map();
   for (const x of named) { const k = kindLabel(x.kind); if (!groups.has(k)) groups.set(k, []); groups.get(k).push(x); }
-  return el('section', { class: 'card in-session' }, el('h3', {}, `In this session (${named.length})`),
+  return el('section', { class: 'card in-session' }, el('h3', {}, `In this ${e.kind === 'journal' ? 'entry' : 'session'} (${named.length})`),
     el('dl', { class: 'in-session-list' }, [...groups].map(([k, xs]) => [el('dt', {}, k), el('dd', {}, xs.sort(byName).map((x, i) => [i ? ', ' : '', link(x)]))])));
 }
 
