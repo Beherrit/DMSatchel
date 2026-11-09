@@ -723,7 +723,7 @@ to the log at the bottom.
 386. [x] **What happened with them.** An NPC's page quotes the line of the last session log that mentions them.
 387. [x] **Open now, for players.** The party page tells everyone what's open now in the town the party is in.
 388. [x] **The scene, read aloud.** Session prep can add the scene-setter line to the read-aloud list in one click.
-389. [ ] **What happened, on the cast list.** Who's who quotes the line of the last session log that mentions each
+389. [x] **What happened, on the cast list.** Who's who quotes the line of the last session log that mentions each
     person, under when they were last seen.
 
 ## Ideas parking lot
@@ -1121,3 +1121,4 @@ to the log at the bottom.
 - What happened with them: an NPC's last-seen line now quotes the sentence of that session's log that names them ("They met Ann at the Inn, who poured ale!"), links shown as plain names; nothing when the log only connects to them.
 - Open now, for players: the party page tells everyone what's open in the town the party is in: "🕰 Open now in Brindle (22:00): The Bell (till 02:00)." (nothing when the party's on the road).
 - The scene, read aloud: the scene-setter line in prep has a "Read aloud" toggle that puts the line first in the read-aloud list as "The scene" and on the printed session sheet. The choice is kept in prep (a new prep.scene_aloud flag, additive) and survives other prep saves.
+- What happened, on the cast list: under when each person was last seen, Who's who quotes the sentence of that session's log that names them ("They met Ann at the inn, who poured ale!").

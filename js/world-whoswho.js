@@ -12,7 +12,7 @@ import { ageOf, ageText } from './birthdays.js';
 import { worldCalendar } from './world-calendar.js';
 import { dayLine } from './routine.js';
 import { isHired } from './hirelings.js';
-import { sceneOf } from './appearances.js';
+import { sceneOf, quoteOf } from './appearances.js';
 import { openBounties } from './bounty.js';
 import { PLACE_KINDS } from './world-schema.js';
 import { whereNow } from './world-routine.js';
@@ -43,6 +43,8 @@ export function viewWhosWho() {
           // Where they are now, by the world's clock.
           (() => { const w = whereNow(e); return w ? el('div', { class: 'small cast-now' }, `🕰 Now (${hhmm(world.info.clock.minutes)}): `, w.party ? 'with the party' : [typeof w.place === 'string' ? w.place : link(w.place), w.until !== null ? ` until ${hhmm(w.until)}` : '']) : null; })(),
           line(e) ? el('p', { class: 'small' }, line(e)) : null,
-          el('div', { class: 'small muted' }, `Met in ${count} session${count === 1 ? '' : 's'} · last in `, link(last), (() => { const at = sceneOf(last, mentions, getEntry, PLACE_KINDS, e); return at ? [', at ', link(at)] : null; })())));
+          el('div', { class: 'small muted' }, `Met in ${count} session${count === 1 ? '' : 's'} · last in `, link(last), (() => { const at = sceneOf(last, mentions, getEntry, PLACE_KINDS, e); return at ? [', at ', link(at)] : null; })()),
+          // What happened, on the cast list: the line of that log that names them.
+          (() => { const q = quoteOf(last, e, 160); return q ? el('q', { class: 'small cast-quote' }, q) : null; })()));
     })));
 }
