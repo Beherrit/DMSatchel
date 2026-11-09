@@ -811,6 +811,11 @@ to the log at the bottom.
 444. [x] **Taken on in, finished in.** A quest's page says which session first mentioned it, and for a finished quest,
     the last.
 445. [x] **First visited.** A place's page says which session first mentioned it.
+446. [ ] **New in this session.** A session's page says who and what came up for the first time in it.
+447. [ ] **New faces on the session list.** The list of sessions says how many people and places each one
+    introduced.
+448. [ ] **New last time, in prep.** Session prep's "Last time" card names who and what was new in it.
+449. [ ] **New on the cast list.** Who's who marks the people first met in the latest session.
 
 ## Ideas parking lot
 
