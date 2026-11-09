@@ -747,7 +747,7 @@ to the log at the bottom.
     wherever they are.
 403. [x] **Every session, for quests and places.** Quests and places can fold out every session that mentions them,
     each with its line, as NPCs do.
-404. [ ] **Threads in the new log.** A session log started from prep lists the quests in play, so the GM can note
+404. [x] **Threads in the new log.** A session log started from prep lists the quests in play, so the GM can note
     what moved.
 405. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 
@@ -1161,3 +1161,4 @@ to the log at the bottom.
 - Sort the cast: Who's who has "By name / Longest unseen / Most seen" buttons (hidden in print); the choice is kept in this browser.
 - Key people gone quiet: session prep has a "Key people gone quiet" card listing key NPCs the logs haven't mentioned for five sessions or more, wherever they are, longest first, each with when they were last in the log and the line.
 - Every session, for quests and places: quests and places that have come up in more than one session fold out "Every time it came up (2)", each session newest first with its line, as NPCs and characters do.
+- Threads in the new log: a session log started from prep ends with "Threads in play (link the ones that moved): Find the cat; Ring the Bell", plain names so they don't count as mentioned until the GM links the ones that moved.

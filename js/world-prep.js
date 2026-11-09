@@ -335,7 +335,9 @@ function startSession(prep) {
     fields: { number: String(n), played_on: new Date().toISOString().slice(0, 10), world_date: cal ? formatDate(cal, today(cal)) : '', gm: session.gm?.name || '',
       players: pcs.map((c) => `${c.name}${c.owner || c.fields?.player ? ` (${c.owner || c.fields.player})` : ''}`).join('\n') },
     // When the session began: the in-world date and time, from the calendar and the clock.
-    body: [began(cal, here), last?.fields?.next ? `Picking up from last time: ${last.fields.next}` : '', here ? `The party is in [[${here.name}]].` : '', 'What happened:', '', 'Who the party met (use [[Names]] so the entries link back to this session):'].filter((x, i) => x || i > 2).join('\n\n'),
+    body: [began(cal, here), last?.fields?.next ? `Picking up from last time: ${last.fields.next}` : '', here ? `The party is in [[${here.name}]].` : '', 'What happened:', '', 'Who the party met (use [[Names]] so the entries link back to this session):',
+      // Threads in the new log: the quests in play, as plain names (link the ones that moved, so they count as mentioned).
+      ...(() => { const qs = worldEntries().filter((x) => x.kind === 'quest' && x.fields?.status === 'Active').sort(byName); return qs.length ? [`Threads in play (link the ones that moved): ${qs.map((x) => x.name).join('; ')}`] : []; })()].filter((x, i) => x || i > 2).join('\n\n'),
   } }));
 }
 
