@@ -126,7 +126,11 @@ export function townHoursBox(town) {
   const shops = worldEntries().filter((x) => x.kind === 'location' && x.id !== town.id && (x.fields?.stock || x.fields?.menu) && inside(x)).sort((a, b) => a.name.localeCompare(b.name));
   if (!t.rows.length && !shops.length) return null;
   const openAt = (m) => shops.filter((x) => openText(x, m, { ...day, market }).open);
+  // Print the town by the hour: just this table, as a handout for the GM's screen.
+  const print = () => { document.body.classList.add('print-hours'); const box = document.querySelector('.town-hours'); if (box) box.open = true; window.print(); setTimeout(() => document.body.classList.remove('print-hours'), 500); };
   return el('details', { class: 'town-hours' }, el('summary', {}, `The ${town.kind === 'settlement' ? 'town' : 'place'} by the hour (${t.rows.length})`),
+    el('p', { class: 'town-hours-title' }, `${town.name} by the hour`),
+    el('div', { class: 'btnrow' }, el('button', { class: 'btn small ghost town-hours-print', type: 'button', onclick: print }, 'Print this table')),
     el('div', { class: 'table-wrap' }, el('table', { class: 'glance-table town-hours-table' },
       el('thead', {}, el('tr', {}, el('th', { scope: 'col' }, 'Who'), t.hours.map((h) => el('th', { scope: 'col' }, `${h.label} (${hhmm(h.m)})`)))),
       el('tbody', {}, t.rows.map((r) => el('tr', {}, el('th', { scope: 'row' }, link(r.npc.entry)), r.cells.map((c) => el('td', {}, c ? (c.id === town.id ? 'about town' : link(c)) : el('span', { class: 'muted' }, '—')))))),
