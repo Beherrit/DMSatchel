@@ -780,6 +780,13 @@ to the log at the bottom.
 424. [x] **Days in the world, per session.** The session list says how many in-world days passed between sessions,
     from their in-world dates.
 425. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
+426. [ ] **The gap on a session's page.** A session's page says how long after the one before it was played, and how
+    many in-world days passed.
+427. [ ] **Pace of play.** The world's numbers page says how often the table meets on average, and how many in-world
+    days pass per session.
+428. [ ] **Write about the last session.** The party page offers players a journal entry about the last session,
+    started with a link to it.
+429. [ ] **What the players wrote.** A session's page lists the journal entries that link to it.
 
 ## Ideas parking lot
 
