@@ -2,7 +2,8 @@
 // about the party and, for GMs, their secret) to print as a set. Route: #world/cards/<place id> · /prep · /n:<npc id>
 import { el, setKids } from './dom.js';
 import { api, isGm } from './api.js';
-import { worldEntries, getEntry, descendantsOf, byName, notice, link } from './world-store.js';
+import { worldEntries, getEntry, descendantsOf, byName, notice, link, mentions } from './world-store.js';
+import { appearances, quoteOf } from './appearances.js';
 import { towards } from './attitudes.js';
 import { stripMarks } from './rich.js';
 import { sayOf } from './say.js';
@@ -32,6 +33,8 @@ export function npcCard(e, { gm = isGm(), onRemove } = {}) {
     (() => { const b = String(f.bounty || '').trim() && openBounties([e])[0]; return b ? el('p', { class: 'small npc-card-bounty' }, el('strong', {}, '🎯 Wanted: '), b.text, b.by ? ` (${b.by})` : '') : null; })(),
     statLine(e) ? el('p', { class: 'npc-card-stats' }, cut(statLine(e), 140)) : null,
     att.length ? el('p', { class: 'small' }, el('strong', {}, 'Feels about: '), att.map((x) => `${x.character.name} ${x.a.toLowerCase()}`).join(', ')) : null,
+    // Last time, on NPC cards: the line from the last session that named them.
+    (() => { const seen = appearances(worldEntries(), mentions).get(e.id), q = seen && quoteOf(seen.last, e, 140); return q ? el('p', { class: 'small npc-card-last' }, el('strong', {}, `Last time (${seen.last.name}): `), q) : null; })(),
     // Gifts in the NPC's card: the last thing the party gave them (they'll remember it).
     (() => { const g = readGifts(f.gifts).at(-1); return g ? el('p', { class: 'small npc-card-gift' }, el('strong', {}, 'Last gift: '), `${giftWhat(g)} from ${g.by}`, g.wanted ? ' (something they wanted)' : '') : null; })(),
     gm && e.secret ? el('p', { class: 'npc-card-secret' }, el('strong', {}, 'Secret: '), cut(e.secret, 160)) : null);
