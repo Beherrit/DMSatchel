@@ -1,6 +1,7 @@
 // The world in numbers: counts and fun facts from what this person can see. Route: #world/numbers
 import { el } from './dom.js';
-import { worldEntries, link, kindLabel, mentions, notice } from './world-store.js';
+import { worldEntries, link, kindLabel, mentions, notice, getEntry } from './world-store.js';
+import { appearances } from './appearances.js';
 import { KINDS } from './world-schema.js';
 import { worldStats } from './world-stats.js';
 
@@ -23,6 +24,10 @@ export function viewNumbers() {
       tile('Quests completed', s.questsDone)),
     el('div', { class: 'num-grid' },
       ranked('Most talked-about NPCs', s.mentionedNpcs, (n) => `in ${plural(n, 'entry', 'entries')}`),
+      // Who comes up most: the people, places and quests the session logs name in the most sessions.
+      ranked('Who comes up most in the logs', [...appearances(worldEntries(), mentions)].map(([id, a]) => [getEntry(id), a.count])
+        .filter(([x, n]) => x && n > 1 && ['npc', 'character', 'location', 'settlement', 'region', 'area', 'quest', 'faction'].includes(x.kind))
+        .sort((a, b) => b[1] - a[1] || a[0].name.localeCompare(b[0].name)).slice(0, 8), (n) => `in ${plural(n, 'session')}`),
       ranked('Busiest places', s.busiestPlaces, (n) => `${n} inside`),
       ranked('Who has written the most', s.writers, (n) => plural(n, 'entry', 'entries')),
       el('section', { class: 'card num-card' }, el('h3', {}, 'Records'),

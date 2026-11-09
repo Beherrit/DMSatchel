@@ -738,7 +738,7 @@ to the log at the bottom.
     sentence.
 398. [x] **Characters in the log too.** A character's page says when the log last mentioned them, with the line,
     and folds out every session they came up in.
-399. [ ] **Who comes up most.** The world's numbers page lists the people, places and quests the session logs name
+399. [x] **Who comes up most.** The world's numbers page lists the people, places and quests the session logs name
     most.
 400. [ ] **Forgotten threads.** Session prep flags active quests the logs haven't mentioned for three sessions or
     more.
@@ -1148,3 +1148,4 @@ to the log at the bottom.
 - Last time, on NPC cards: each printable NPC card adds "Last time (Session 1): Met Ann at the inn, who poured ale!", the line from the last session that named them.
 - Search the logs: typing "log: dragon" in Ctrl K lists the sessions whose log mentions it, newest first, each with the sentence ("Session 3 · The Dragon burned the mill!"); Enter opens the session.
 - Characters in the log too: a character's page now says "📜 Last in the log: Session 2 · in 2 sessions" with the line ("Ann fell asleep on watch!"), and folds out every session they came up in.
+- Who comes up most: the world's numbers page lists "Who comes up most in the logs": the people, places, quests and factions named in the most sessions (two or more), "Ann in 3 sessions".
