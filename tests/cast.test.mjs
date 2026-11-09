@@ -18,3 +18,9 @@ test('sortCast by name, longest unseen or most seen', async () => {
   assert.deepEqual(sortCast(L, 'unseen').map((x) => x.entry.name), ['Bo', 'Cy', 'ann']);
   assert.deepEqual(sortCast(L, 'seen').map((x) => x.entry.name), ['ann', 'Bo', 'Cy']);
 });
+
+test('castText: one plain line each', async () => {
+  const { castText } = await import('../js/cast.js');
+  const L = [{ entry: { name: 'Ann', fields: { role: 'Innkeeper' } }, count: 2, last: { name: 'Session 2' } }, { entry: { name: 'Bo', fields: { status: 'Dead' } }, count: 1, last: { name: 'Session 1' } }];
+  assert.equal(castText(L, (e) => (e.name === 'Ann' ? 'AN' : '')), 'Ann (AN) — Innkeeper · met in 2 sessions, last in Session 2\nBo · met in 1 session, last in Session 1 · dead');
+});

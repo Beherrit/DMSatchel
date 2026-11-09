@@ -792,7 +792,7 @@ to the log at the bottom.
 431. [x] **Who wrote, in prep.** Session prep's "Last time" card says which journal entries the players wrote about
     it.
 432. [x] **In the players' journals.** An NPC's page lists the journal entries that name them.
-433. [ ] **Copy the cast as text.** Who's who can copy the cast list as plain text to paste into a chat.
+433. [x] **Copy the cast as text.** Who's who can copy the cast list as plain text to paste into a chat.
 
 ## Ideas parking lot
 
@@ -1232,3 +1232,4 @@ to the log at the bottom.
 - Journals on the session list: each session in the list says "📓 2 journal entries about it" when players have written about it (journalsAbout() in session-named.js, shared with the session page).
 - Who wrote, in prep: session prep's "Last time" card adds "📓 The players wrote: After Session 2 (Pip), Notes (Bo)", the journal entries about the last session.
 - In the players' journals: an NPC's page folds out "In the players' journals (1)": the journal entries that name them, with who wrote each and the first line that names them.
+- Copy the cast as text: Who's who has "Copy as text", one line per person in the chosen order ("Ann (AN) — Innkeeper · met in 2 sessions, last in Session 2"), to paste into a chat.

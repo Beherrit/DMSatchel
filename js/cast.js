@@ -17,3 +17,12 @@ export function sortCast(list, by = 'name') {
   const cmp = by === 'unseen' ? (a, b) => (b.ago ?? 0) - (a.ago ?? 0) || name(a, b) : by === 'seen' ? (a, b) => b.count - a.count || name(a, b) : name;
   return [...(list || [])].sort(cmp);
 }
+
+// Copy the cast as text: one line each, "Ann (AN) — innkeeper · met in 2 sessions, last in Session 2", to paste into
+// a chat. say(entry) → how to say the name ('' if none).
+export function castText(list, say = () => '') {
+  return (list || []).map(({ entry: e, count, last }) => {
+    const s = say(e), role = e.fields?.role;
+    return `${e.name}${s ? ` (${s})` : ''}${role ? ` — ${role}` : ''} · met in ${count} session${count === 1 ? '' : 's'}${last ? `, last in ${last.name}` : ''}${e.fields?.status === 'Dead' ? ' · dead' : ''}`;
+  }).join('\n');
+}

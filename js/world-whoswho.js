@@ -1,12 +1,12 @@
 // Who's who: a printable cast list of the people the party has met (from the session log), with pictures,
 // pronunciations and one line each. Built from what the viewer can see, so a player's copy is safe to hand round.
 // Route: #world/whoswho
-import { el } from './dom.js';
+import { el, copyText } from './dom.js';
 import { world, worldEntries, getEntry, link, mentions, notice } from './world-store.js';
 import { hhmm } from './clock.js';
 import { thumb } from './image-ui.js';
 import { sayOf } from './say.js';
-import { castList, sortCast } from './cast.js';
+import { castList, sortCast, castText } from './cast.js';
 import { stripMarks } from './rich.js';
 import { ageOf, ageText } from './birthdays.js';
 import { worldCalendar } from './world-calendar.js';
@@ -30,7 +30,9 @@ export function viewWhosWho() {
     el('button', { type: 'button', 'aria-pressed': String(by === v), onclick: () => { try { localStorage.setItem('satchel-cast-sort', v); } catch { /* fine */ } window.dispatchEvent(new Event('world:rerender')); } }, t)));
   const head = el('div', { class: 'panel-head row card-tools' },
     el('div', {}, el('h2', {}, 'Who’s who'), el('p', {}, 'Everyone the party has met, from the session log: who they are, how to say their name, and when they were last seen.')),
-    cast.length ? el('div', { class: 'btnrow' }, el('button', { class: 'btn primary', type: 'button', onclick: () => window.print() }, 'Print')) : null);
+    cast.length ? el('div', { class: 'btnrow' }, el('button', { class: 'btn primary', type: 'button', onclick: () => window.print() }, 'Print'),
+      // Copy the cast as text, to paste into a chat.
+      el('button', { class: 'btn cast-copy', type: 'button', onclick: () => copyText(castText(sortCast(castList(worldEntries(), mentions), by), sayOf)) }, 'Copy as text')) : null);
   if (!cast.length) return el('div', { class: 'w-view' }, head, notice('Nobody yet', 'When a session’s log links an NPC ([[Name]]) or connects to them, they join the cast here.'));
   // Wanted on the cast list: open bounties, by who's wanted.
   const wanted = new Map(openBounties(worldEntries()).map((b) => [b.entry.id, b]));
