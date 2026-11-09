@@ -4,15 +4,16 @@
 export const sessionOrder = (entries) => entries.filter((e) => e.kind === 'session')
   .sort((a, b) => (parseFloat(b.fields?.number) || 0) - (parseFloat(a.fields?.number) || 0) || String(b.created_at).localeCompare(String(a.created_at)));
 
-// → Map(id → { count, last: session, ago }) where ago is how many sessions back the last appearance was (0 = latest).
+// → Map(id → { count, last: session, ago, first: session }) where ago is how many sessions back the last appearance was
+// (0 = latest) and first is the session they first came up in.
 export function appearances(entries, idsIn) {
   const out = new Map();
   sessionOrder(entries).forEach((s, ago) => {
     const ids = new Set([...idsIn([s.summary, s.body, ...Object.values(s.fields || {})].join('\n')), ...(s.links || []).map((l) => l.id)]);
     for (const id of ids) {
       const cur = out.get(id);
-      if (cur) cur.count++;
-      else out.set(id, { count: 1, last: s, ago });
+      if (cur) { cur.count++; cur.first = s; } // newest first, so the last one seen here is the first meeting
+      else out.set(id, { count: 1, last: s, ago, first: s });
     }
   });
   return out;

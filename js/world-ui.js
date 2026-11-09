@@ -881,7 +881,10 @@ function lastSeenLine(e) {
     // Due back (GMs): not met in the last two sessions, as session prep counts it.
     gm && seen.ago >= 2 ? el('span', { class: 'due-back' }, ` · 🔔 not seen for ${seen.ago} sessions: might turn up`) : '',
     // What happened with them: the line of that session's log that names them.
-    (() => { const q = quoteOf(seen.last, e); return q ? el('q', { class: 'last-seen-quote' }, q) : null; })());
+    (() => { const q = quoteOf(seen.last, e); return q ? el('q', { class: 'last-seen-quote' }, q) : null; })(),
+    // First met: the session they first came up in, and where (when that isn't the last time too).
+    seen.first && seen.first.id !== seen.last.id ? (() => { const at1 = sceneOf(seen.first, mentions, getEntry, PLACE_KINDS, e);
+      return el('span', { class: 'first-met' }, '🤝 First met in ', link(seen.first), at1 ? [', at ', link(at1)] : ''); })() : null);
 }
 
 // In this session: the people, places, quests and things a session's log names (or connects to), grouped by kind.

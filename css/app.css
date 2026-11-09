@@ -1807,3 +1807,4 @@ details.quest-group > summary .section-title { display: inline }
 .in-session-list dt { font-weight: 600 } .in-session-list dd { margin: 0 }
 .cast-sort { margin: 0 0 10px }
 @media print { .cast-sort { display: none } }
+.first-met { display: block; margin-top: 2px }

@@ -764,7 +764,7 @@ to the log at the bottom.
     logs do.
 415. [x] **Unlinked names in journals.** What needs writing finds unlinked names in journal entries as well as
     session logs.
-416. [ ] **First met.** An NPC's page says which session the party first met them in, and where.
+416. [x] **First met.** An NPC's page says which session the party first met them in, and where.
 417. [ ] **First met, on the cast list.** Who's who says when each person was first met.
 
 ## Ideas parking lot
@@ -1188,3 +1188,4 @@ to the log at the bottom.
 - Last session, for players: the party page tells everyone "📖 Last session: Session 2 · came up: Ann, The Bell" (the party's own characters left out of the list).
 - Link names in journals too: writing a journal entry, the form offers "Names you could link: Bramwell" with the same "Link them" button as session logs.
 - Unlinked names in journals: What needs writing's "Names left unlinked in logs and journals" now finds them in journal entries too (logs first), each with its "Link them" button.
+- First met: an NPC met in more than one session now says "🤝 First met in Session 1, at The Inn" under where they were last seen (appearances() now also remembers the first session).

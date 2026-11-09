@@ -44,3 +44,12 @@ test('sessionsWith lists every session that names someone, newest first', async 
   const list = sessionsWith([S(1, 'Met [[ann]].'), S(2, 'Road.'), S(3, 'Quiet.', [{ id: 'ann' }]), { kind: 'npc', id: 'ann' }], idsIn, 'ann');
   assert.deepEqual(list.map((s) => s.name), ['Session 3', 'Session 1']);
 });
+
+test('appearances remembers the first session too', async () => {
+  const { appearances } = await import('../js/appearances.js');
+  const S = (n, body) => ({ kind: 'session', id: `s${n}`, name: `Session ${n}`, body, fields: { number: String(n) } });
+  const idsIn = (t) => [...t.matchAll(/\[\[([^\]]+)\]\]/g)].map((m) => m[1]);
+  const a = appearances([S(1, '[[ann]]'), S(2, 'road'), S(3, '[[ann]]'), S(4, '[[bo]]')], idsIn);
+  assert.equal(a.get('ann').first.name, 'Session 1'); assert.equal(a.get('ann').last.name, 'Session 3');
+  assert.equal(a.get('bo').first.name, 'Session 4');
+});
