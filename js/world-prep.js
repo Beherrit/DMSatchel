@@ -40,7 +40,7 @@ import { giftsSince, giftWhat } from './gifts.js';
 import { lastSession } from './recap.js';
 import { coinText } from './economy.js';
 import { offerBounty } from './world-bounty.js';
-import { hhmm, partOfDay, readClock } from './clock.js';
+import { hhmm, partOfDay, readClock, leftText } from './clock.js';
 
 // Before the session: who's hurt, hungry, exhausted or broke (from the characters' sheets).
 // Gifts in session prep: NPCs who've been given something since the last session (they may remember it).
@@ -150,6 +150,9 @@ function whereSection(prep, rerender) {
     return el('p', { class: 'small enc-light' }, `🌙 Night (${hhmm(m)}). ${nightLight(ml ? ml.level : 0)}`, lit.length ? ` The party has light: ${lit.join(', ')}.` : '');
   };
   return card(`Where the party is: ${here.name}`, pick, musicLine(here, 'music-line prep-music'),
+    // Lights running low: any light burning with ten minutes or less left.
+    (() => { const low = readClock(world.info?.clock).lights.filter((l) => !l.forever && l.left <= 10);
+      return low.length ? el('p', { class: 'small prep-lights-low' }, '🔥 Running low: ', low.map((l) => `${l.name} (${leftText(l.left)} left)`).join(', '), '. Light another or the party is in the dark.') : null; })(),
     sceneText ? el('p', { class: 'scene-line' }, '🎬 ', el('span', {}, sceneText), ' ', el('button', { class: 'btn small ghost', type: 'button', onclick: () => copyText(sceneText) }, 'Copy')) : null,
     // The festival: on a holiday, who's at the taverns in town now (and on other days, when the next one is).
     (() => { const t = here.kind === 'settlement' ? here : town; return t ? [festivalLine(t), wantedPrepLine(t)] : null; })(),

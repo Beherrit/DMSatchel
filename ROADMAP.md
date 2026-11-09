@@ -718,7 +718,7 @@ to the log at the bottom.
 383. [x] **The weather when the session began.** The "Began at…" line on a new session log includes the weather.
 384. [x] **Print the town by the hour.** A settlement's town-by-the-hour table can be printed on its own as a handout
     for the GM's screen.
-385. [ ] **Lights running low in prep.** Session prep warns when a light the party has burning has ten minutes or
+385. [x] **Lights running low in prep.** Session prep warns when a light the party has burning has ten minutes or
     less left.
 
 ## Ideas parking lot
@@ -1112,3 +1112,4 @@ to the log at the bottom.
 - A full sweep: 380 browser tests rerun; no crashes or page errors. One flag, a timeout in the secrets test, passes on rerun (the same load flake as in sweep 345).
 - The weather when the session began: the "Began at…" line of a session log started from prep now ends with the weather where the party is: "Began at 18:00 (evening) on Fireday, 5 Thawmoon 1040; clear, 13°C (55°F), wind calm or light."
 - Print the town by the hour: the town-by-the-hour table on a settlement's page has a "Print this table" button that prints just the table, titled "Brindle by the hour", as a handout for the GM's screen.
+- Lights running low in prep: under "Where the party is", session prep warns "🔥 Running low: Torch (8 min left). Light another or the party is in the dark." for any light with ten minutes or less left.
