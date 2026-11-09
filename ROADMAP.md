@@ -772,7 +772,7 @@ to the log at the bottom.
     pages do.
 420. [x] **Last time, on the session sheet.** Each person in "Who's around" on the session sheet gets the line from
     the last session that named them.
-421. [ ] **Copy a session as text.** A session's page can copy its log as plain text (links as plain names) to paste
+421. [x] **Copy a session as text.** A session's page can copy its log as plain text (links as plain names) to paste
     into a chat.
 
 ## Ideas parking lot
@@ -1202,3 +1202,4 @@ to the log at the bottom.
 - Met together: the relationship web has a "Met together (from the logs)" option, off by default, that draws a faint dashed line between NPCs the session logs name in the same sessions twice or more ("Ann — in the same session logs 2 times — Bo"). Pure in appearances.js (metTogether).
 - In this entry, for journals: a journal entry's page lists "In this entry (2)": who and what it names, grouped by kind, as session pages do.
 - Last time, on the session sheet: each person in "Who's around" on the printable session sheet adds the line from the last session that named them: "Session 1: “Met Ann at the inn, who poured ale!”".
+- Copy a session as text: a session's page has "Copy as text", which copies its name, dates, summary, log and "Next time" as plain text (links as plain names, Markdown marks out, the GM's secret never included), to paste into a chat.

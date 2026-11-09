@@ -2,7 +2,7 @@
 // Routes: #world · #world/k/<kind> · #world/e/<id> · #world/new/<kind> · #world/edit/<id> · #world/q/<search> · #world/bin
 //         #world/party · #world/zero (session zero) · #world/schedule · #world/downtime[/<character>] · #world/suggestions (GMs) · #world/mine (your characters, journals and suggestions)
 
-import { el, toast, toastUndo, confirmButton, setKids, download } from './dom.js';
+import { el, toast, toastUndo, confirmButton, setKids, download, copyText } from './dom.js';
 import { entriesCSV } from './csv.js';
 import { api, session, isGm, isMember, isPlayer, signedIn, onSession, setPreview, previewing } from './api.js';
 import { turnUp, turnUpList, turnUpNote } from './world-turnup.js';
@@ -109,6 +109,7 @@ import { patchEntry, setEntryState, stateBadges, syncWorld, descendantsOf, tagCh
 import { dayFor } from './world-hours.js';
 import { namedIn } from './session-named.js';
 import { unlinkedIn, linkNames } from './unlinked.js';
+import { sessionText } from './session-text.js';
 
 // Pages used now and then load when first opened, so world pages start faster.
 const lazyView = (load, name) => async (...args) => (await load())[name](...args);
@@ -445,6 +446,8 @@ function viewEntry(id, tab) {
     mentionsCard(e, rerenderWorld),
     e.kind === 'npc' ? lastSeenLine(e) : lastLogLine(e),
     ['npc', 'character', 'quest', ...PLACE_KINDS].includes(e.kind) ? cameUpBox(e) : null,
+    // Copy a session as text: the log as plain text (no GM secrets), to paste into a chat.
+    e.kind === 'session' ? el('div', { class: 'btnrow' }, el('button', { class: 'btn small ghost session-copy', type: 'button', onclick: () => copyText(sessionText(e)) }, 'Copy as text')) : null,
     ['session', 'journal'].includes(e.kind) ? inSessionCard(e) : null,
     // A wanted poster: for anyone with a bounty on their head.
     e.kind === 'npc' && String(e.fields?.bounty || '').trim() && e.visibility !== 'gm' ? el('p', { class: 'small' }, el('a', { class: 'btn small', href: `#world/poster/${e.id}` }, '🎯 Wanted poster')) : null,
