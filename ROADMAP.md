@@ -766,6 +766,14 @@ to the log at the bottom.
     session logs.
 416. [x] **First met.** An NPC's page says which session the party first met them in, and where.
 417. [x] **First met, on the cast list.** Who's who says when each person was first met.
+418. [ ] **Met together.** The relationship web can show, as faint lines, NPCs whose names come up in the same
+    session logs (twice or more), toggled on like acquaintances.
+419. [ ] **In this entry, for journals.** A journal entry's page lists who and what it names, grouped, as session
+    pages do.
+420. [ ] **Last time, on the session sheet.** Each person in "Who's around" on the session sheet gets the line from
+    the last session that named them.
+421. [ ] **Copy a session as text.** A session's page can copy its log as plain text (links as plain names) to paste
+    into a chat.
 
 ## Ideas parking lot
 
