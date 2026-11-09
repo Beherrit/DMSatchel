@@ -35,7 +35,7 @@ export function viewWhosWho() {
   // Wanted on the cast list: open bounties, by who's wanted.
   const wanted = new Map(openBounties(worldEntries()).map((b) => [b.entry.id, b]));
   return el('div', { class: 'w-view whoswho-view' }, head, sortBtns,
-    el('ul', { class: 'plain cast-list' }, cast.map(({ entry: e, count, last }) => {
+    el('ul', { class: 'plain cast-list' }, cast.map(({ entry: e, count, last, first }) => {
       const f = e.fields || {};
       const where = getEntry(e.parent_id);
       return el('li', { class: `cast${f.status === 'Dead' ? ' dead' : ''}` },
@@ -48,7 +48,9 @@ export function viewWhosWho() {
           // Where they are now, by the world's clock.
           (() => { const w = whereNow(e); return w ? el('div', { class: 'small cast-now' }, `🕰 Now (${hhmm(world.info.clock.minutes)}): `, w.party ? 'with the party' : [typeof w.place === 'string' ? w.place : link(w.place), w.until !== null ? ` until ${hhmm(w.until)}` : '']) : null; })(),
           line(e) ? el('p', { class: 'small' }, line(e)) : null,
-          el('div', { class: 'small muted' }, `Met in ${count} session${count === 1 ? '' : 's'} · last in `, link(last), (() => { const at = sceneOf(last, mentions, getEntry, PLACE_KINDS, e); return at ? [', at ', link(at)] : null; })()),
+          el('div', { class: 'small muted' }, `Met in ${count} session${count === 1 ? '' : 's'} · last in `, link(last), (() => { const at = sceneOf(last, mentions, getEntry, PLACE_KINDS, e); return at ? [', at ', link(at)] : null; })(),
+            // First met, on the cast list.
+            first && first.id !== last.id ? [' · first in ', link(first)] : null),
           // What happened, on the cast list: the line of that log that names them.
           (() => { const q = quoteOf(last, e, 160); return q ? el('q', { class: 'small cast-quote' }, q) : null; })()));
     })));

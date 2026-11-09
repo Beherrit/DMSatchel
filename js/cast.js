@@ -6,7 +6,7 @@ import { appearances } from './appearances.js';
 export function castList(entries, idsIn) {
   const seen = appearances(entries, idsIn);
   return (entries || []).filter((e) => e.kind === 'npc' && seen.has(e.id))
-    .map((e) => ({ entry: e, count: seen.get(e.id).count, last: seen.get(e.id).last, ago: seen.get(e.id).ago }))
+    .map((e) => ({ entry: e, count: seen.get(e.id).count, last: seen.get(e.id).last, ago: seen.get(e.id).ago, first: seen.get(e.id).first }))
     .sort((a, b) => a.entry.name.localeCompare(b.entry.name, undefined, { sensitivity: 'base' }));
 }
 
