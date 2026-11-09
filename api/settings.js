@@ -1,7 +1,7 @@
 // GET the current world's name and description · PUT to change them (world owner).
 // PATCH {cal}  set the in-world calendar and today's date (any GM: days pass during play).
 // PUT {discord_webhook}  (owner) a Discord webhook link; it never leaves the server. Empty string removes it.
-// PATCH {prep: {location_id, notes}}   (GM) session prep: where the party is, and the GMs' scratch pad. Moving the
+// PATCH {prep: {location_id, notes, scene_aloud}}   (GM) session prep: where the party is, and the GMs' scratch pad. Moving the
 //   party adds a stop to prep.journey (with the in-world date); PATCH {journey_remove: at} strikes one.
 // PATCH {checklist: {add} | {remove} | {done, on} | {order}, round}   (GM) the prep checklist (prep.checklist); round
 //   is the next session's number, so ticks clear when a new session is logged
@@ -232,6 +232,8 @@ export default route({
       const next = {
         location_id: p.location_id === undefined ? cur.location_id || null : p.location_id ? String(p.location_id).slice(0, 40) : null,
         notes: p.notes === undefined ? cur.notes || '' : String(p.notes).slice(0, 20000),
+        // The scene, read aloud: whether the scene-setter line opens the read-aloud list.
+        scene_aloud: p.scene_aloud === undefined ? Boolean(cur.scene_aloud) : Boolean(p.scene_aloud),
         updated_by: req.gm.name, updated_at: new Date().toISOString(),
       };
       // Where the party has been: a stop each time they move somewhere new.

@@ -153,7 +153,12 @@ function whereSection(prep, rerender) {
     // Lights running low: any light burning with ten minutes or less left.
     (() => { const low = readClock(world.info?.clock).lights.filter((l) => !l.forever && l.left <= 10);
       return low.length ? el('p', { class: 'small prep-lights-low' }, '🔥 Running low: ', low.map((l) => `${l.name} (${leftText(l.left)} left)`).join(', '), '. Light another or the party is in the dark.') : null; })(),
-    sceneText ? el('p', { class: 'scene-line' }, '🎬 ', el('span', {}, sceneText), ' ', el('button', { class: 'btn small ghost', type: 'button', onclick: () => copyText(sceneText) }, 'Copy')) : null,
+    sceneText ? el('p', { class: 'scene-line' }, '🎬 ', el('span', {}, sceneText), ' ', el('button', { class: 'btn small ghost', type: 'button', onclick: () => copyText(sceneText) }, 'Copy'), ' ',
+      // The scene, read aloud: one click puts it first in the read-aloud list (and on the printed sheet).
+      el('button', { class: 'btn small ghost scene-aloud', type: 'button', 'aria-pressed': String(Boolean(prep.scene_aloud)), onclick: async () => {
+        try { await savePrep({ scene_aloud: !prep.scene_aloud }); toast(prep.scene_aloud ? 'Taken out of the read-aloud list' : 'Added to the read-aloud list'); window.dispatchEvent(new Event('world:rerender')); }
+        catch (err) { toast(err.message, 'bad'); }
+      } }, prep.scene_aloud ? 'In the read-aloud list ✓' : 'Read aloud')) : null,
     // The festival: on a holiday, who's at the taverns in town now (and on other days, when the next one is).
     (() => { const t = here.kind === 'settlement' ? here : town; return t ? [festivalLine(t), wantedPrepLine(t)] : null; })(),
     el('div', { class: 'prep-grid' },
