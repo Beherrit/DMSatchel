@@ -36,6 +36,15 @@ function numbersSection(chk) {
       chk.unnumbered.length ? el('li', {}, el('span', {}, 'No number: ', chk.unnumbered.map((x, i) => [i ? ', ' : '', link(x)]))) : null));
 }
 
+// Logs still to write: sessions with no log, or only a line.
+function emptyLogsSection(chk) {
+  if (!chk.empty.length) return null;
+  return el('section', { class: 'card todo-group empty-logs' }, el('h3', {}, `Logs still to write (${chk.empty.length})`),
+    el('p', { class: 'muted small' }, 'Sessions with no log yet, or only a line. A few sentences with [[Names]] keep last seen, who came up and the recap working.'),
+    el('ul', { class: 'plain todo-list' }, chk.empty.slice(0, 20).map((x) => el('li', {}, link(x), el('span', { class: 'muted small' }, x.body?.trim() ? ' (only a line)' : ' (no log yet)'),
+      el('a', { class: 'btn small ghost', href: `#world/edit/${x.id}` }, 'Write it')))));
+}
+
 // Names left unlinked: entries the session logs name as plain text, with a button to link them for the GM.
 function unlinkedSection() {
   const all = worldEntries();
@@ -94,7 +103,7 @@ export function viewTodo() {
     missingSection(missing),
     routinesSection(routines),
     unlinkedSection(),
-    numbersSection(sessionChecks(worldEntries())),
+    ...(() => { const chk = sessionChecks(worldEntries()); return [emptyLogsSection(chk), numbersSection(chk)]; })(),
     GROUPS.map(([k, title, hint]) => {
       const list = [...spots[k]].sort(byName);
       return list.length ? el('section', { class: 'card todo-group' }, el('h3', {}, `${title} (${list.length})`), el('p', { class: 'muted small' }, hint),

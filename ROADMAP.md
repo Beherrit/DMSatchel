@@ -753,7 +753,7 @@ to the log at the bottom.
 406. [x] **Names left unlinked.** What needs writing finds names of entries that session logs mention as plain text,
     without [[links]], and links them in one click for the GM.
 407. [x] **Session numbers in order.** What needs writing flags sessions with a missing or repeated number.
-408. [ ] **Logs still to write.** What needs writing lists sessions whose log is empty or only a line.
+408. [x] **Logs still to write.** What needs writing lists sessions whose log is empty or only a line.
 409. [ ] **Who came up, on the session list.** The list of sessions shows under each who and what its log names.
 
 ## Ideas parking lot
@@ -1169,3 +1169,4 @@ to the log at the bottom.
 - Threads in the new log: a session log started from prep ends with "Threads in play (link the ones that moved): Find the cat; Ring the Bell", plain names so they don't count as mentioned until the GM links the ones that moved.
 - Names left unlinked: What needs writing lists session logs that name entries as plain text without [[links]] ("Session 1: Bramwell ×2, The Bell"), matching whole names of four letters or more, longest first. A "Link them" button turns those mentions into links (existing links are kept), so they count for last seen, who came up and gone quiet.
 - Session numbers in order: What needs writing flags "No session numbered 3, 4.", numbers used more than once (with the sessions) and sessions with no number. Pure in session-checks.js.
+- Logs still to write: What needs writing lists "Logs still to write (2)": sessions with no log yet or only a line (under 60 characters of text), newest first, each with a "Write it" button.
