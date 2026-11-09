@@ -447,7 +447,7 @@ function viewEntry(id, tab) {
     e.kind === 'npc' ? lastSeenLine(e) : lastLogLine(e),
     ['npc', 'character', 'quest', ...PLACE_KINDS].includes(e.kind) ? cameUpBox(e) : null,
     // Copy a session as text: the log as plain text (no GM secrets), to paste into a chat.
-    e.kind === 'session' ? el('div', { class: 'btnrow' }, el('button', { class: 'btn small ghost session-copy', type: 'button', onclick: () => copyText(sessionText(e)) }, 'Copy as text')) : null,
+    ['session', 'journal'].includes(e.kind) ? el('div', { class: 'btnrow' }, el('button', { class: 'btn small ghost session-copy', type: 'button', onclick: () => copyText(sessionText(e)) }, 'Copy as text')) : null,
     ['session', 'journal'].includes(e.kind) ? inSessionCard(e) : null,
     // A wanted poster: for anyone with a bounty on their head.
     e.kind === 'npc' && String(e.fields?.bounty || '').trim() && e.visibility !== 'gm' ? el('p', { class: 'small' }, el('a', { class: 'btn small', href: `#world/poster/${e.id}` }, '🎯 Wanted poster')) : null,

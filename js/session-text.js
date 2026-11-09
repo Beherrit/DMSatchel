@@ -1,4 +1,4 @@
-// Copy a session as text: its name, when it was played and the in-world date, then its summary and log, with
+// Copy a session (or journal entry) as text: its name, when it was played and the in-world date, then its summary and log, with
 // [[links]] as plain names and Markdown marks taken out, to paste into a chat. Pure.
 export function sessionText(s) {
   if (!s) return '';
