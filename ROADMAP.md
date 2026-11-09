@@ -808,7 +808,7 @@ to the log at the bottom.
 442. [x] **Link names in descriptions too.** Quest and place forms offer the names their description could link, as
     session logs do.
 443. [x] **Playing since.** The world's numbers page says when the first session was played and how long ago.
-444. [ ] **Taken on in, finished in.** A quest's page says which session first mentioned it, and for a finished quest,
+444. [x] **Taken on in, finished in.** A quest's page says which session first mentioned it, and for a finished quest,
     the last.
 445. [ ] **First visited.** A place's page says which session first mentioned it.
 
@@ -1261,3 +1261,4 @@ to the log at the bottom.
 - Unlinked names in quests and places: "Names left unlinked" now also finds them in the descriptions of quests and places (after logs and journals), never flagging an entry's own name.
 - Link names in descriptions too: quest and place forms offer "Names you could link" under their description, as session logs do, never their own name.
 - Playing since: the world's numbers page has a "Playing since" tile: the date the first session was played and how long ago ("2026-10-18 · 3 weeks ago").
+- Taken on in, finished in: a quest's page says "🧭 Taken on in Session 1", and once it's done "· completed in Session 3" (or failed or abandoned), from the first and last sessions that mention it.

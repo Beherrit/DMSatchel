@@ -943,7 +943,14 @@ function lastLogLine(e) {
   if (!seen) return null;
   const q = quoteOf(seen.last, e);
   return el('p', { class: 'muted small last-log' }, '📜 Last in the log: ', link(seen.last), seen.ago ? ` (${seen.ago} session${seen.ago === 1 ? '' : 's'} ago)` : ' (the latest session)',
-    seen.count > 1 ? ` · in ${seen.count} sessions` : '', q ? el('q', { class: 'last-seen-quote' }, q) : null);
+    seen.count > 1 ? ` · in ${seen.count} sessions` : '', q ? el('q', { class: 'last-seen-quote' }, q) : null, firstLine(e, seen));
+}
+
+// Taken on in, finished in: for a quest, the session that first mentioned it and, once it's done, the last.
+function firstLine(e, seen) {
+  if (e.kind !== 'quest' || !seen.first) return null;
+  const done = ['Completed', 'Failed', 'Abandoned'].includes(e.fields?.status);
+  return el('span', { class: 'first-log' }, '🧭 Taken on in ', link(seen.first), done ? [` · ${e.fields.status.toLowerCase()} in `, link(seen.last)] : '');
 }
 
 // Undo a move to the bin: bring the entry back, then open it (or just redraw where we are).
