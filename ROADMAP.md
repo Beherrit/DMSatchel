@@ -800,7 +800,7 @@ to the log at the bottom.
     Watch" that's often just words), and it stops being flagged.
 438. [x] **Not a name, as you write.** The session log form's "Names you could link" leaves out names marked never
     to be linked.
-439. [ ] **Change your mind.** What needs writing lists the names marked never to be linked, each with a way to take
+439. [x] **Change your mind.** What needs writing lists the names marked never to be linked, each with a way to take
     the mark back.
 440. [ ] **Unlinked names in quests and places.** What needs writing also finds unlinked names in the descriptions
     of quests and places, not only logs and journals.
@@ -1251,3 +1251,4 @@ to the log at the bottom.
 - Not a name: each name in "Names left unlinked" has a ✕ that tells the Satchel never to offer it for linking (an entry called "The Watch" that's often just words); it's kept in prep.not_links (additive, GM-only; players get a 403) and the name stops being flagged.
 - Not a name, as you write: the session log (and journal) form's "Names you could link" leaves out names marked never to be linked (GMs only; players can't read that list, so they see every name).
 - A full sweep: all 421 browser tests rerun; no crashes or page errors, last time's two load flakes are gone, and nothing new is flagged.
+- Change your mind: What needs writing folds out "Names never offered for linking (1)", each with "Offer it again" to take the mark back (PATCH {relink}, GM-only).

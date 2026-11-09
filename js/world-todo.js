@@ -69,6 +69,16 @@ function unlinkedSection(notLinks = []) {
       (() => { const b = el('button', { class: 'btn small', type: 'button' }, 'Link them'); b.onclick = () => linkThem(s, found, b); return b; })()))));
 }
 
+// Change your mind: the names marked never to be linked, each with a way to take the mark back.
+function notLinksSection(notLinks = []) {
+  const list = notLinks.map((id) => getEntry(id)).filter(Boolean).sort(byName);
+  if (!list.length) return null;
+  return el('details', { class: 'card todo-group not-links' }, el('summary', {}, `Names never offered for linking (${list.length})`),
+    el('ul', { class: 'plain todo-list' }, list.map((x) => el('li', {}, link(x), el('button', { class: 'btn small ghost', type: 'button', onclick: async () => {
+      try { await api('settings', { method: 'PATCH', body: { relink: x.id } }); toast(`“${x.name}” can be offered for linking again`); window.dispatchEvent(new Event('world:rerender')); } catch (err) { toast(err.message, 'bad'); }
+    } }, 'Offer it again')))));
+}
+
 // Routines that don't read: lines the clock can't read, and places named that aren't in the world, to fix in one go.
 function routinesSection(list) {
   if (!list.length) return null;
@@ -111,6 +121,7 @@ export async function viewTodo() {
     missingSection(missing),
     routinesSection(routines),
     unlinkedSection(prep.not_links || []),
+    notLinksSection(prep.not_links || []),
     ...(() => { const chk = sessionChecks(worldEntries()); return [emptyLogsSection(chk), numbersSection(chk)]; })(),
     GROUPS.map(([k, title, hint]) => {
       const list = [...spots[k]].sort(byName);
