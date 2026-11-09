@@ -695,7 +695,7 @@ to the log at the bottom.
     Bramwell, by day at The Forge").
 368. [x] **Lights on the session sheet.** The printable session sheet lists the lights burning and how long each has
     left, with the time.
-369. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
+369. [x] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 370. [x] **Where they are now, on the cast list.** Who's who says where each person is at the world's hour.
 371. [x] **Members about now.** A faction's page lists its members (the NPCs connected to it) and where each is
     right now.
@@ -713,7 +713,7 @@ to the log at the bottom.
 380. [x] **Who can see in the dark.** At night, the GM's party sheet says each character's darkvision (from their
     species), and who'll need a light.
 381. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
-382. [ ] **Darkvision from the library.** A character whose species comes from the world's library gets its
+382. [x] **Darkvision from the library.** A character whose species comes from the world's library gets its
     darkvision from the species it's "similar to".
 383. [ ] **The weather when the session began.** The "Began at…" line on a new session log includes the weather.
 384. [ ] **Print the town by the hour.** A settlement's town-by-the-hour table can be printed on its own as a handout
@@ -1108,3 +1108,5 @@ to the log at the bottom.
 - The scene on the session sheet: the printable session sheet now opens, under the date, with the same scene-setter line as prep ("🎬 Night in Brindle: overcast…"); the line is built in one place (world-scene.js) for both.
 - Where we are, for players: the party page now says where the party is, for everyone, in the same scene-setting line: "📍 Afternoon in Brindle: heavy rain, 18°C (64°F), wind moderate." (with the moon, lights and any festival when they apply; nothing when the party's on the road).
 - Who can see in the dark: at night (20:00–05:00) the GM's party sheet says "🌙 Night: darkvision: Bo 120 ft, Cy 60 ft; needs a light: Ann.", from each character's species (SRD species' darkvision).
+- Darkvision from the library: the night line on the party sheet counts species from the world's library: their own Darkvision when it's filled in (0 means none), else that of the species they're "similar to".
+- A full sweep: 380 browser tests rerun; no crashes or page errors. One flag, a timeout in the secrets test, passes on rerun (the same load flake as in sweep 345).
