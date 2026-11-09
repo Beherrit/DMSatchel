@@ -725,6 +725,12 @@ to the log at the bottom.
 388. [x] **The scene, read aloud.** Session prep can add the scene-setter line to the read-aloud list in one click.
 389. [x] **What happened, on the cast list.** Who's who quotes the line of the last session log that mentions each
     person, under when they were last seen.
+390. [ ] **Last in the log, everywhere.** Places, quests, factions and items say which session last mentioned them,
+    with the line from its log.
+391. [ ] **Tomorrow's weather on the session sheet.** The session sheet adds tomorrow's forecast where the party is.
+392. [ ] **Every time they came up.** An NPC's page can fold out every session that mentions them, each with its
+    line, newest first.
+393. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 
 ## Ideas parking lot
 
