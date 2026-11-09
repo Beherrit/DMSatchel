@@ -26,3 +26,13 @@ test('sceneOf: where a session was set', async () => {
   assert.equal(sceneOf(s, idsIn, (id) => all[id], ['settlement', 'location']).name, 'The Mill');
   assert.equal(sceneOf({ body: 'Nowhere.' }, idsIn, (id) => all[id], ['location']), null);
 });
+
+test('quoteOf finds the sentence that names someone', async () => {
+  const { quoteOf } = await import('../js/appearances.js');
+  const s = { body: 'The party reached town. They met [[Ann]] at the [[Inn|old inn]], who poured ale!\nLater, Bo sulked.' };
+  assert.equal(quoteOf(s, { name: 'Ann' }), 'They met Ann at the old inn, who poured ale!');
+  assert.equal(quoteOf(s, { name: 'Bo' }), 'Later, Bo sulked.');
+  assert.equal(quoteOf(s, { name: 'Cy' }), '');
+  assert.equal(quoteOf(null, { name: 'Ann' }), '');
+  assert.equal(quoteOf({ body: `[[Ann]] ${'x'.repeat(300)}` }, { name: 'Ann' }, 20).length, 20);
+});

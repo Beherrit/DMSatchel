@@ -37,3 +37,19 @@ export function sceneOf(session, idsIn, byId, places, npc = null) {
   for (let p = npc?.parent_id && byId(npc.parent_id), i = 0; p && i < 12; p = p.parent_id && byId(p.parent_id), i++) { const hit = found.find((f) => f.id === p.id); if (hit) return hit; }
   return found[0];
 }
+
+// What happened with them: the first line (or sentence) of a session's log that names an entry, as plain text
+// ([[links]] shown as their names), trimmed to `max` characters; '' when the log doesn't name them in its text.
+export function quoteOf(session, entry, max = 200) {
+  const name = String(entry?.name || '').toLowerCase();
+  if (!session || !name) return '';
+  const plain = (t) => t.replace(/\[\[([^\]|]+)\|([^\]]+)\]\]/g, '$2').replace(/\[\[([^\]]+)\]\]/g, '$1').replace(/[*_`#>]/g, '').replace(/\s+/g, ' ').trim();
+  for (const line of String(session.body || '').split(/\n+/)) {
+    for (const bit of line.split(/(?<=[.!?])\s+/)) {
+      if (!bit.toLowerCase().includes(name)) continue;
+      const t = plain(bit);
+      if (t) return t.length > max ? `${t.slice(0, max - 1)}…` : t;
+    }
+  }
+  return '';
+}

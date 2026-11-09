@@ -53,7 +53,7 @@ import { itemCardButton, spellCardButton } from './world-playcards.js';
 import { mentionsCard } from './world-mentions.js';
 import { starButton, favoritesNav, followButton, followingNav } from './world-favorites.js';
 import { rewardCard } from './world-reward.js';
-import { appearances, sceneOf } from './appearances.js';
+import { appearances, sceneOf, quoteOf } from './appearances.js';
 import { withPronouns } from './world-profiles.js';
 import { noticesCard, drawNoticeBanner } from './world-notices.js';
 import { gallerySection } from './world-gallery.js';
@@ -870,7 +870,9 @@ function lastSeenLine(e) {
   return el('p', { class: 'muted small last-seen' }, '👁 Last seen in ', link(seen.last), seen.ago ? ` (${seen.ago} session${seen.ago === 1 ? '' : 's'} ago)` : ' (the latest session)',
     at ? [', at ', link(at)] : '', seen.count > 1 ? ` · in ${seen.count} sessions` : '',
     // Due back (GMs): not met in the last two sessions, as session prep counts it.
-    gm && seen.ago >= 2 ? el('span', { class: 'due-back' }, ` · 🔔 not seen for ${seen.ago} sessions: might turn up`) : '');
+    gm && seen.ago >= 2 ? el('span', { class: 'due-back' }, ` · 🔔 not seen for ${seen.ago} sessions: might turn up`) : '',
+    // What happened with them: the line of that session's log that names them.
+    (() => { const q = quoteOf(seen.last, e); return q ? el('q', { class: 'last-seen-quote' }, q) : null; })());
 }
 
 // Undo a move to the bin: bring the entry back, then open it (or just redraw where we are).

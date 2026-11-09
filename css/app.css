@@ -1800,3 +1800,4 @@ details.quest-group > summary .section-title { display: inline }
   body.print-hours .town-hours-title { display: block; font-size: 16pt; font-weight: 700; margin: 0 0 3mm }
 }
 .prep-lights-low { border-left: 3px solid var(--warn); padding-left: 8px }
+.last-seen-quote { display: block; margin-top: 2px; font-style: italic }
