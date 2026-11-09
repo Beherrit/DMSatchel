@@ -816,6 +816,11 @@ to the log at the bottom.
     introduced.
 448. [x] **New last time, in prep.** Session prep's "Last time" card names who and what was new in it.
 449. [x] **New on the cast list.** Who's who marks the people first met in the latest session.
+450. [ ] **Sessions here.** A place's map pin popup lists the sessions whose log mentions it.
+451. [ ] **How many are here.** A map pin shows a small count of the people the routines put there right now.
+452. [ ] **Wanted, at a glance.** A map pin where someone wanted is right now gets a 🎯 mark.
+453. [ ] **Find a person on the map.** The map's "Find a pin" also finds NPCs by name and points to the pin where they
+    are now.
 
 ## Ideas parking lot
 
