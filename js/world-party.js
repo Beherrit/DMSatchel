@@ -380,7 +380,9 @@ export async function viewParty(rerender) {
       openNowLine(partyTown(), true),
       // Last session, for players: which it was and who and what came up in it.
       (() => { const last = sessionOrder(worldEntries())[0]; if (!last) return null; const named = namedIn(last).filter((x) => x.kind !== 'character');
-        return el('p', { class: 'small party-last-session' }, '📖 Last session: ', link(last), named.length ? [' · came up: ', named.slice(0, 8).map((x, i) => [i ? ', ' : '', link(x)])] : ''); })(),
+        // Write about the last session: a journal entry started with a link to it.
+        const write = isMember() ? el('button', { class: 'btn small ghost', type: 'button', onclick: () => window.dispatchEvent(new CustomEvent('world:draft', { detail: { kind: 'journal', name: `After ${last.name}`, body: `About [[${last.name}]]:\n\n` } })) }, `Write about ${last.name}`) : null;
+        return el('p', { class: 'small party-last-session' }, '📖 Last session: ', link(last), named.length ? [' · came up: ', named.slice(0, 8).map((x, i) => [i ? ', ' : '', link(x)])] : '', ' ', write); })(),
       isGm() ? el('div', { class: 'btnrow' }, campButton(rerender)) : null),
     el('div', { class: 'party-grid' },
       el('div', { class: 'party-main' }, isGm() ? glanceTable(chars.filter(ACTIVE)) : null, members(chars), partyBondsSection(), advancementSection(),
