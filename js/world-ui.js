@@ -322,6 +322,7 @@ function questList(list) {
 function sessionList(list) {
   // Time between sessions: how long after the one before each was played.
   const gaps = sessionGaps(list, worldCalendar());
+  const seenAll = appearances(worldEntries(), mentions); // once for the whole list
   return el('ol', { class: 'session-list' }, list.map((e) => el('li', { class: 'card', 'data-id': e.id },
     el('div', { class: 'entry-head' }, el('span', { class: 'eyebrow' }, [e.fields.number && `Session ${e.fields.number}`, e.fields.played_on, e.fields.world_date].filter(Boolean).join(' · ') || 'Session'),
       e.fields.gm ? el('span', { class: 'muted small' }, `GM ${e.fields.gm}`) : null),
@@ -331,6 +332,10 @@ function sessionList(list) {
     e.summary ? el('p', {}, e.summary) : null,
     e.fields.players ? el('p', { class: 'muted small' }, `Players: ${e.fields.players.replace(/\n+/g, ', ')}`) : null,
     e.fields.xp ? el('p', { class: 'muted small' }, `XP: ${e.fields.xp}`) : null,
+    // New faces on the session list: how many people and places it introduced.
+    (() => { const fresh = newIn(e, seenAll), people = fresh.filter((x) => x.kind === 'npc').length, places = fresh.filter((x) => PLACE_KINDS.includes(x.kind)).length;
+      const bits = [people && `${people} new face${people === 1 ? '' : 's'}`, places && `${places} new place${places === 1 ? '' : 's'}`].filter(Boolean);
+      return bits.length ? el('p', { class: 'muted small session-new-count' }, `✨ ${bits.join(', ')}`) : null; })(),
     // Journals on the session list: how many entries the players wrote about it.
     (() => { const n = journalsAbout(e.id).length; return n ? el('p', { class: 'muted small session-journal-count' }, `📓 ${n} journal entr${n === 1 ? 'y' : 'ies'} about it`) : null; })(),
     // Who came up, on the session list: who and what the log names (or connects to), up to eight.
