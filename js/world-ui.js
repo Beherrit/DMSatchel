@@ -439,7 +439,7 @@ function viewEntry(id, tab) {
     isGm() && e.secret ? el('aside', { class: 'secret' }, el('div', { class: 'eyebrow' }, 'GM only'), richText(e.secret)) : null,
     mentionsCard(e, rerenderWorld),
     e.kind === 'npc' ? lastSeenLine(e) : lastLogLine(e),
-    e.kind === 'npc' ? cameUpBox(e) : null,
+    ['npc', 'character'].includes(e.kind) ? cameUpBox(e) : null,
     e.kind === 'session' ? inSessionCard(e) : null,
     // A wanted poster: for anyone with a bounty on their head.
     e.kind === 'npc' && String(e.fields?.bounty || '').trim() && e.visibility !== 'gm' ? el('p', { class: 'small' }, el('a', { class: 'btn small', href: `#world/poster/${e.id}` }, '🎯 Wanted poster')) : null,
@@ -898,7 +898,7 @@ function cameUpBox(e) {
 
 // Last in the log, everywhere: for places, quests, factions and items, the session that last mentioned them, with
 // the line from its log.
-const LOGGED = ['region', 'area', 'settlement', 'location', 'quest', 'faction', 'guild', 'clan', 'item'];
+const LOGGED = ['region', 'area', 'settlement', 'location', 'quest', 'faction', 'guild', 'clan', 'item', 'character'];
 function lastLogLine(e) {
   if (!LOGGED.includes(e.kind)) return null;
   const seen = appearances(worldEntries(), mentions).get(e.id);
