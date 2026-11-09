@@ -39,6 +39,7 @@ import { journeySection } from './world-journey.js';
 import { wishedBy } from './world-wishes.js';
 import { itemsNamed } from './play-cards.js';
 import { sceneFor } from './world-scene.js';
+import { openNowLine, partyTown } from './world-routine.js';
 
 // GMs: every active character in one table: hit points (flagged in words when low or down), coin, days of rations,
 // exhaustion and conditions.
@@ -374,6 +375,8 @@ export async function viewParty(rerender) {
     el('div', { class: 'panel-head' }, el('h2', {}, 'The Party'), el('p', {}, 'Who’s adventuring, what they carry, what they’re chasing and what they’ve found.'), lastShownLine(),
       // Where we are, for everyone: the time, the weather and the light where the party is.
       (() => { const t = sceneFor(); return t ? el('p', { class: 'party-scene' }, '📍 ', t) : null; })(),
+      // Open now, for players: what's open in the town the party is in.
+      openNowLine(partyTown(), true),
       isGm() ? el('div', { class: 'btnrow' }, campButton(rerender)) : null),
     el('div', { class: 'party-grid' },
       el('div', { class: 'party-main' }, isGm() ? glanceTable(chars.filter(ACTIVE)) : null, members(chars), partyBondsSection(), advancementSection(),

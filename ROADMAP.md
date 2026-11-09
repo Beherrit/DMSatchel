@@ -721,7 +721,7 @@ to the log at the bottom.
 385. [x] **Lights running low in prep.** Session prep warns when a light the party has burning has ten minutes or
     less left.
 386. [x] **What happened with them.** An NPC's page quotes the line of the last session log that mentions them.
-387. [ ] **Open now, for players.** The party page tells everyone what's open now in the town the party is in.
+387. [x] **Open now, for players.** The party page tells everyone what's open now in the town the party is in.
 388. [ ] **The scene, read aloud.** Session prep can add the scene-setter line to the read-aloud list in one click.
 389. [ ] **What happened, on the cast list.** Who's who quotes the line of the last session log that mentions each
     person, under when they were last seen.
@@ -1119,3 +1119,4 @@ to the log at the bottom.
 - Print the town by the hour: the town-by-the-hour table on a settlement's page has a "Print this table" button that prints just the table, titled "Brindle by the hour", as a handout for the GM's screen.
 - Lights running low in prep: under "Where the party is", session prep warns "🔥 Running low: Torch (8 min left). Light another or the party is in the dark." for any light with ten minutes or less left.
 - What happened with them: an NPC's last-seen line now quotes the sentence of that session's log that names them ("They met Ann at the Inn, who poured ale!"), links shown as plain names; nothing when the log only connects to them.
+- Open now, for players: the party page tells everyone what's open in the town the party is in: "🕰 Open now in Brindle (22:00): The Bell (till 02:00)." (nothing when the party's on the road).
