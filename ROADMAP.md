@@ -815,7 +815,7 @@ to the log at the bottom.
 447. [x] **New faces on the session list.** The list of sessions says how many people and places each one
     introduced.
 448. [x] **New last time, in prep.** Session prep's "Last time" card names who and what was new in it.
-449. [ ] **New on the cast list.** Who's who marks the people first met in the latest session.
+449. [x] **New on the cast list.** Who's who marks the people first met in the latest session.
 
 ## Ideas parking lot
 
@@ -1271,3 +1271,4 @@ to the log at the bottom.
 - New in this session: a session's "In this session" card starts with "✨ New this session: Bo, The Market", who and what its log names for the first time (newIn() in session-named.js).
 - New faces on the session list: each session in the list says "✨ 1 new face, 1 new place": the NPCs and places it introduced.
 - New last time, in prep: session prep's "Last time" card names "✨ New last time: Bo, The Market".
+- New on the cast list: Who's who tags the people first met in the latest session "✨ new".

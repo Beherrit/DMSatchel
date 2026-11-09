@@ -12,7 +12,7 @@ import { ageOf, ageText } from './birthdays.js';
 import { worldCalendar } from './world-calendar.js';
 import { dayLine } from './routine.js';
 import { isHired } from './hirelings.js';
-import { sceneOf, quoteOf } from './appearances.js';
+import { sceneOf, quoteOf, sessionOrder } from './appearances.js';
 import { openBounties } from './bounty.js';
 import { PLACE_KINDS } from './world-schema.js';
 import { whereNow } from './world-routine.js';
@@ -34,6 +34,7 @@ export function viewWhosWho() {
       // Copy the cast as text, to paste into a chat.
       el('button', { class: 'btn cast-copy', type: 'button', onclick: () => copyText(castText(sortCast(castList(worldEntries(), mentions), by), sayOf)) }, 'Copy as text')) : null);
   if (!cast.length) return el('div', { class: 'w-view' }, head, notice('Nobody yet', 'When a session’s log links an NPC ([[Name]]) or connects to them, they join the cast here.'));
+  const latest = sessionOrder(worldEntries())[0];
   // Wanted on the cast list: open bounties, by who's wanted.
   const wanted = new Map(openBounties(worldEntries()).map((b) => [b.entry.id, b]));
   return el('div', { class: 'w-view whoswho-view' }, head, sortBtns,
@@ -44,7 +45,9 @@ export function viewWhosWho() {
         thumb(e, 'avatar') || el('span', { class: 'avatar cast-blank', 'aria-hidden': 'true' }, e.name.slice(0, 1)),
         el('div', {},
           el('div', { class: 'cast-name' }, link(e), f.status === 'Dead' ? [' ', el('span', { class: 'tag' }, 'dead')] : null,
-            wanted.has(e.id) ? [' ', el('span', { class: 'tag cast-wanted' }, `🎯 wanted: ${wanted.get(e.id).text}`)] : null, sayOf(e) ? el('span', { class: 'cast-say' }, ` (${sayOf(e)})`) : null),
+            wanted.has(e.id) ? [' ', el('span', { class: 'tag cast-wanted' }, `🎯 wanted: ${wanted.get(e.id).text}`)] : null,
+            // New on the cast list: first met in the latest session.
+            latest && first?.id === latest.id ? [' ', el('span', { class: 'tag cast-new' }, '✨ new')] : null, sayOf(e) ? el('span', { class: 'cast-say' }, ` (${sayOf(e)})`) : null),
           el('div', { class: 'small muted' }, [f.role, ageOf(worldCalendar(), e) ? ageText(ageOf(worldCalendar(), e)) : '', where?.name].filter(Boolean).join(' · ')),
           usually(e) ? el('div', { class: 'small cast-where' }, usually(e)) : null,
           // Where they are now, by the world's clock.
