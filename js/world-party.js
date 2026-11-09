@@ -3,7 +3,8 @@
 import { el, toast, confirmButton, setKids } from './dom.js';
 import { api, isGm, isMember, session } from './api.js';
 import { world, worldEntries, getEntry, byName, link, when, richText, setEntryState, patchEntry, mentions } from './world-store.js';
-import { appearances, sceneOf } from './appearances.js';
+import { appearances, sceneOf, sessionOrder } from './appearances.js';
+import { namedIn } from './session-named.js';
 import { PLACE_KINDS } from './world-schema.js';
 import { thumb } from './image-ui.js';
 import { lastShownLine } from './world-show.js';
@@ -377,6 +378,9 @@ export async function viewParty(rerender) {
       (() => { const t = sceneFor(); return t ? el('p', { class: 'party-scene' }, '📍 ', t) : null; })(),
       // Open now, for players: what's open in the town the party is in.
       openNowLine(partyTown(), true),
+      // Last session, for players: which it was and who and what came up in it.
+      (() => { const last = sessionOrder(worldEntries())[0]; if (!last) return null; const named = namedIn(last).filter((x) => x.kind !== 'character');
+        return el('p', { class: 'small party-last-session' }, '📖 Last session: ', link(last), named.length ? [' · came up: ', named.slice(0, 8).map((x, i) => [i ? ', ' : '', link(x)])] : ''); })(),
       isGm() ? el('div', { class: 'btnrow' }, campButton(rerender)) : null),
     el('div', { class: 'party-grid' },
       el('div', { class: 'party-main' }, isGm() ? glanceTable(chars.filter(ACTIVE)) : null, members(chars), partyBondsSection(), advancementSection(),

@@ -759,7 +759,7 @@ to the log at the bottom.
 411. [x] **Link names as you write.** Editing a session log, the form offers the names it could link ("Bramwell, The
     Bell") with a button that links them in the text.
 412. [x] **Last time on the map.** An NPC's map pin popup quotes the line from the last session that named them.
-413. [ ] **Last session, for players.** The party page says which session was last and who and what came up in it.
+413. [x] **Last session, for players.** The party page says which session was last and who and what came up in it.
 
 ## Ideas parking lot
 
@@ -1179,3 +1179,4 @@ to the log at the bottom.
 - Last time, in prep: session prep's "Last time" card adds "Came up: Ann, The Bell", who and what the last session's log names. The session page, the session list and prep now share one helper for it (session-named.js).
 - Link names as you write: under a session log's text, the form says "Names you could link: Bramwell, The Bell" as you type, with a "Link them" button that turns them into [[links]] in the text before saving.
 - Last time on the map: an NPC's map pin popup quotes the line from the last session that named them: "Last time (Session 1): Bought nails from Bramwell, who grumbled."
+- Last session, for players: the party page tells everyone "📖 Last session: Session 2 · came up: Ann, The Bell" (the party's own characters left out of the list).
