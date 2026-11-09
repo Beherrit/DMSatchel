@@ -21,3 +21,11 @@ test('pace averages the gaps', async () => {
   assert.deepEqual(pace(new Map([['a', { real: 14, world: 4 }], ['b', { real: 7, world: null }], ['c', { real: null, world: 2 }]])), { real: 11, world: 3 });
   assert.deepEqual(pace(new Map()), { real: null, world: null });
 });
+
+test('playingSince: the first session and how long ago', async () => {
+  const { playingSince } = await import('../js/session-gaps.js');
+  const S = (d) => ({ kind: 'session', fields: { played_on: d } });
+  assert.deepEqual(playingSince([S('2026-11-01'), S('2026-10-18'), S('')], '2026-11-09'), { date: '2026-10-18', ago: '3 weeks ago' });
+  assert.deepEqual(playingSince([S('2026-11-09')], '2026-11-09'), { date: '2026-11-09', ago: 'today' });
+  assert.equal(playingSince([], '2026-11-09'), null);
+});

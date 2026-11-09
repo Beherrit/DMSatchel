@@ -33,3 +33,13 @@ export function pace(gaps) {
   const g = [...(gaps?.values?.() || [])];
   return { real: avg(g.map((x) => x.real).filter((x) => x !== null && x >= 0)), world: avg(g.map((x) => x.world).filter((x) => x !== null && x >= 0)) };
 }
+
+// Playing since: the date the first session was played (fields.played_on), and how long ago from `today` (YYYY-MM-DD).
+// → { date, ago: "3 weeks ago" } or null.
+export function playingSince(list, today) {
+  const dates = (list || []).map((s) => s.fields?.played_on).filter((d) => dayOf(d) !== null).sort();
+  if (!dates.length) return null;
+  const days = dayOf(today) - dayOf(dates[0]);
+  const ago = days <= 0 ? 'today' : days === 1 ? 'yesterday' : realGapText(days).replace(/ later$/, ' ago').replace(/^the next day$/, 'yesterday');
+  return { date: dates[0], ago };
+}

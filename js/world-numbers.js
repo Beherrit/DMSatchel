@@ -2,7 +2,7 @@
 import { el } from './dom.js';
 import { worldEntries, link, kindLabel, mentions, notice, getEntry } from './world-store.js';
 import { appearances, sessionOrder } from './appearances.js';
-import { sessionGaps, pace } from './session-gaps.js';
+import { sessionGaps, pace, playingSince } from './session-gaps.js';
 import { worldCalendar } from './world-calendar.js';
 import { KINDS } from './world-schema.js';
 import { worldStats } from './world-stats.js';
@@ -24,6 +24,8 @@ export function viewNumbers() {
       tile('Sessions played', s.sessions.count, s.sessions.first && s.sessions.last && s.sessions.count > 1 ? `${s.sessions.first.name} to ${s.sessions.last.name}` : null),
       tile('Player characters', s.characters, s.fallen ? `${s.fallen} fallen` : null),
       tile('Quests completed', s.questsDone),
+      // Playing since: the first session played, and how long ago.
+      (() => { const p = playingSince(sessionOrder(worldEntries()), new Date().toISOString().slice(0, 10)); return p ? tile('Playing since', p.date, p.ago) : null; })(),
       // Pace of play: how often the table meets, and how many in-world days pass per session.
       (() => { const p = pace(sessionGaps(sessionOrder(worldEntries()), worldCalendar())); if (p.real === null && p.world === null) return null;
         return tile('Pace of play', p.real !== null ? (p.real === 0 ? 'Same day' : `Every ${p.real} day${p.real === 1 ? '' : 's'}`) : '—', p.world !== null ? `${p.world} in-world day${p.world === 1 ? '' : 's'} a session` : null); })()),
