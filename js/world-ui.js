@@ -948,7 +948,10 @@ function lastLogLine(e) {
 
 // Taken on in, finished in: for a quest, the session that first mentioned it and, once it's done, the last.
 function firstLine(e, seen) {
-  if (e.kind !== 'quest' || !seen.first) return null;
+  if (!seen.first) return null;
+  // First visited: for a place, the session that first mentioned it (when that isn't the last too).
+  if (PLACE_KINDS.includes(e.kind)) return seen.first.id !== seen.last.id ? el('span', { class: 'first-log' }, '🗺 First visited in ', link(seen.first)) : null;
+  if (e.kind !== 'quest') return null;
   const done = ['Completed', 'Failed', 'Abandoned'].includes(e.fields?.status);
   return el('span', { class: 'first-log' }, '🧭 Taken on in ', link(seen.first), done ? [` · ${e.fields.status.toLowerCase()} in `, link(seen.last)] : '');
 }
