@@ -1041,11 +1041,14 @@ function linkHint() {
   const draw = () => {
     const box = document.getElementById('f-body');
     if (!box) return;
-    const found = unlinkedIn(box.value, worldEntries());
+    const found = unlinkedIn(box.value, worldEntries().filter((x) => !skip.has(x.id)));
     if (!found.length) { setKids(out); return; }
     setKids(out, el('span', { class: 'muted' }, 'Names you could link: '), found.map((f, i) => [i ? ', ' : '', f.entry.name]), ' ',
       el('button', { class: 'btn small ghost', type: 'button', onclick: () => { box.value = linkNames(box.value, found.map((f) => f.entry)); box.dispatchEvent(new Event('input', { bubbles: true })); draw(); } }, 'Link them'));
   };
+  // Not a name, as you write: names the GMs marked never to link are left out (only GMs can read that list).
+  let skip = new Set();
+  if (isGm()) api('settings').then((r) => { skip = new Set(r.world?.prep?.not_links || []); draw(); }).catch(() => {});
   // The text box is in the form by the time this runs (next tick); then follow what's typed, a moment after.
   let t = null;
   setTimeout(() => { const box = document.getElementById('f-body'); if (box) box.addEventListener('input', () => { clearTimeout(t); t = setTimeout(draw, 300); }); draw(); });

@@ -798,7 +798,7 @@ to the log at the bottom.
 436. [x] **When a journal entry is set.** A journal entry about a session shows that session's in-world date.
 437. [x] **Not a name.** In "Names left unlinked", a GM can mark a name as never to be linked (an entry called "The
     Watch" that's often just words), and it stops being flagged.
-438. [ ] **Not a name, as you write.** The session log form's "Names you could link" leaves out names marked never
+438. [x] **Not a name, as you write.** The session log form's "Names you could link" leaves out names marked never
     to be linked.
 439. [ ] **Change your mind.** What needs writing lists the names marked never to be linked, each with a way to take
     the mark back.
@@ -1249,3 +1249,4 @@ to the log at the bottom.
 - What they wrote, on a character: a character's page lists "📓 Their player's journal (2): Day two, Day one", the journal entries by the same player, newest first.
 - When a journal entry is set: a journal entry that links a session says "📅 About Session 2 (5 Thawmoon 1040)", the session's in-world date.
 - Not a name: each name in "Names left unlinked" has a ✕ that tells the Satchel never to offer it for linking (an entry called "The Watch" that's often just words); it's kept in prep.not_links (additive, GM-only; players get a 403) and the name stops being flagged.
+- Not a name, as you write: the session log (and journal) form's "Names you could link" leaves out names marked never to be linked (GMs only; players can't read that list, so they see every name).
