@@ -34,7 +34,7 @@ import { journeyOnMap } from './journey.js';
 import { controllers, powerSlots } from './control.js';
 import { journey, chainOf, notePartyMove } from './world-journey.js';
 import { dayFor } from './world-hours.js';
-import { appearances, quoteOf } from './appearances.js';
+import { appearances, quoteOf, sessionsWith } from './appearances.js';
 
 // The party's place, then each place above it (for the party token).
 const partyChain = () => { const at = world.info?.party_at && getEntry(world.info.party_at); return at ? [at.id, ...trail(at).reverse().map((p) => p.id)] : []; };
@@ -268,6 +268,9 @@ export async function viewMap(id, focusPin) {
           return el('p', { class: `small pin-hours${h.open ? '' : ' shut'}` }, h.open ? '🟢 ' : '🔒 ', h.text[0].toUpperCase() + h.text.slice(1), '.'); })(),
         // Where they are, on their pin: an NPC's routine now, and their usual day.
         entry?.kind === 'npc' ? routineNow(entry) : null,
+        // Sessions here: the sessions whose log mentions this place, newest first.
+        (() => { if (!entry || !PLACE_KINDS.includes(entry.kind)) return null; const ss = sessionsWith(worldEntries(), mentions, entry.id);
+          return ss.length ? el('p', { class: 'small pin-sessions' }, el('span', { class: 'muted' }, `📜 In ${ss.length} session log${ss.length === 1 ? '' : 's'}: `), ss.slice(0, 6).map((x, i) => [i ? ', ' : '', link(x)]), ss.length > 6 ? el('span', { class: 'muted' }, ` and ${ss.length - 6} more`) : '') : null; })(),
         // Last time on the map: the line from the last session that named them.
         (() => { if (entry?.kind !== 'npc') return null; const seen = appearances(worldEntries(), mentions).get(entry.id), q = seen && quoteOf(seen.last, entry, 140);
           return q ? el('p', { class: 'small pin-last' }, el('span', { class: 'muted' }, `Last time (${seen.last.name}): `), el('q', {}, q)) : null; })(),
