@@ -326,6 +326,8 @@ function sessionList(list) {
     el('div', { class: 'entry-head' }, el('span', { class: 'eyebrow' }, [e.fields.number && `Session ${e.fields.number}`, e.fields.played_on, e.fields.world_date].filter(Boolean).join(' · ') || 'Session'),
       e.fields.gm ? el('span', { class: 'muted small' }, `GM ${e.fields.gm}`) : null),
     link(e), (() => { const g = gaps.get(e.id); const t = g && realGapText(g.real); return t ? el('span', { class: 'muted small session-gap' }, ` · ${t}`) : null; })(),
+    // Days in the world, per session: in-world days since the session before, from their in-world dates.
+    (() => { const w = gaps.get(e.id)?.world; return w !== null && w !== undefined && w >= 0 ? el('span', { class: 'muted small session-world-gap' }, w === 0 ? ' · the same day in the world' : ` · ${w} day${w === 1 ? '' : 's'} on in the world`) : null; })(),
     e.summary ? el('p', {}, e.summary) : null,
     e.fields.players ? el('p', { class: 'muted small' }, `Players: ${e.fields.players.replace(/\n+/g, ', ')}`) : null,
     e.fields.xp ? el('p', { class: 'muted small' }, `XP: ${e.fields.xp}`) : null,
