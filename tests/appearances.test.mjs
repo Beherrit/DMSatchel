@@ -36,3 +36,11 @@ test('quoteOf finds the sentence that names someone', async () => {
   assert.equal(quoteOf(null, { name: 'Ann' }), '');
   assert.equal(quoteOf({ body: `[[Ann]] ${'x'.repeat(300)}` }, { name: 'Ann' }, 20).length, 20);
 });
+
+test('sessionsWith lists every session that names someone, newest first', async () => {
+  const { sessionsWith } = await import('../js/appearances.js');
+  const S = (n, body, links = []) => ({ kind: 'session', id: `s${n}`, name: `Session ${n}`, body, links, fields: { number: String(n) } });
+  const idsIn = (t) => [...t.matchAll(/\[\[([^\]]+)\]\]/g)].map((m) => m[1].toLowerCase());
+  const list = sessionsWith([S(1, 'Met [[ann]].'), S(2, 'Road.'), S(3, 'Quiet.', [{ id: 'ann' }]), { kind: 'npc', id: 'ann' }], idsIn, 'ann');
+  assert.deepEqual(list.map((s) => s.name), ['Session 3', 'Session 1']);
+});

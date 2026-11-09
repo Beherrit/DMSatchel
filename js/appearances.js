@@ -53,3 +53,11 @@ export function quoteOf(session, entry, max = 200) {
   }
   return '';
 }
+
+// Every time they came up: the sessions that name an entry (or connect to it), newest first.
+export function sessionsWith(entries, idsIn, id) {
+  return sessionOrder(entries).filter((s) => {
+    const ids = new Set([...idsIn([s.summary, s.body, ...Object.values(s.fields || {})].join('\n')), ...(s.links || []).map((l) => l.id)]);
+    return ids.has(id);
+  });
+}

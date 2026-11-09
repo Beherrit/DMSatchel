@@ -728,7 +728,7 @@ to the log at the bottom.
 390. [x] **Last in the log, everywhere.** Places, quests, factions and items say which session last mentioned them,
     with the line from its log.
 391. [x] **Tomorrow's weather on the session sheet.** The session sheet adds tomorrow's forecast where the party is.
-392. [ ] **Every time they came up.** An NPC's page can fold out every session that mentions them, each with its
+392. [x] **Every time they came up.** An NPC's page can fold out every session that mentions them, each with its
     line, newest first.
 393. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 
@@ -1130,3 +1130,4 @@ to the log at the bottom.
 - What happened, on the cast list: under when each person was last seen, Who's who quotes the sentence of that session's log that names them ("They met Ann at the inn, who poured ale!").
 - Last in the log, everywhere: places, quests, factions (and guilds and clans) and items now say "📜 Last in the log: Session 2 (the latest session) · in 2 sessions" with the sentence from that log that names them, like an NPC's last-seen line.
 - Tomorrow's weather on the session sheet: under today's weather, the sheet adds "Tomorrow: Scattered clouds, 15°C (59°F), wind strong.", the same roll as the first day of prep's week ahead.
+- Every time they came up: an NPC who has come up in more than one session gets a folded "Every time they came up (3)" list on their page: each session, newest first, with the line from its log that names them (or "connected, not named in the log").

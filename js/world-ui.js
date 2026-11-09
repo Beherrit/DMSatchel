@@ -53,7 +53,7 @@ import { itemCardButton, spellCardButton } from './world-playcards.js';
 import { mentionsCard } from './world-mentions.js';
 import { starButton, favoritesNav, followButton, followingNav } from './world-favorites.js';
 import { rewardCard } from './world-reward.js';
-import { appearances, sceneOf, quoteOf } from './appearances.js';
+import { appearances, sceneOf, quoteOf, sessionsWith } from './appearances.js';
 import { withPronouns } from './world-profiles.js';
 import { noticesCard, drawNoticeBanner } from './world-notices.js';
 import { gallerySection } from './world-gallery.js';
@@ -439,6 +439,7 @@ function viewEntry(id, tab) {
     isGm() && e.secret ? el('aside', { class: 'secret' }, el('div', { class: 'eyebrow' }, 'GM only'), richText(e.secret)) : null,
     mentionsCard(e, rerenderWorld),
     e.kind === 'npc' ? lastSeenLine(e) : lastLogLine(e),
+    e.kind === 'npc' ? cameUpBox(e) : null,
     // A wanted poster: for anyone with a bounty on their head.
     e.kind === 'npc' && String(e.fields?.bounty || '').trim() && e.visibility !== 'gm' ? el('p', { class: 'small' }, el('a', { class: 'btn small', href: `#world/poster/${e.id}` }, '🎯 Wanted poster')) : null,
     out.length || incoming.length ? el('section', {}, el('h3', { class: 'section-title' }, 'Connections'),
@@ -873,6 +874,14 @@ function lastSeenLine(e) {
     gm && seen.ago >= 2 ? el('span', { class: 'due-back' }, ` · 🔔 not seen for ${seen.ago} sessions: might turn up`) : '',
     // What happened with them: the line of that session's log that names them.
     (() => { const q = quoteOf(seen.last, e); return q ? el('q', { class: 'last-seen-quote' }, q) : null; })());
+}
+
+// Every time they came up: an NPC's sessions (when there's more than one), each with the line that names them.
+function cameUpBox(e) {
+  const list = sessionsWith(worldEntries(), mentions, e.id);
+  if (list.length < 2) return null;
+  return el('details', { class: 'came-up' }, el('summary', { class: 'small' }, `Every time they came up (${list.length})`),
+    el('ol', { class: 'plain small came-up-list' }, list.map((s) => { const q = quoteOf(s, e); return el('li', {}, link(s), q ? el('q', { class: 'last-seen-quote' }, q) : el('span', { class: 'muted' }, ' (connected, not named in the log)')); })));
 }
 
 // Last in the log, everywhere: for places, quests, factions and items, the session that last mentioned them, with
