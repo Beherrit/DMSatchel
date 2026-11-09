@@ -798,6 +798,13 @@ to the log at the bottom.
 436. [x] **When a journal entry is set.** A journal entry about a session shows that session's in-world date.
 437. [x] **Not a name.** In "Names left unlinked", a GM can mark a name as never to be linked (an entry called "The
     Watch" that's often just words), and it stops being flagged.
+438. [ ] **Not a name, as you write.** The session log form's "Names you could link" leaves out names marked never
+    to be linked.
+439. [ ] **Change your mind.** What needs writing lists the names marked never to be linked, each with a way to take
+    the mark back.
+440. [ ] **Unlinked names in quests and places.** What needs writing also finds unlinked names in the descriptions
+    of quests and places, not only logs and journals.
+441. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 
 ## Ideas parking lot
 
