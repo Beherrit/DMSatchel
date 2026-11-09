@@ -731,6 +731,11 @@ to the log at the bottom.
 392. [x] **Every time they came up.** An NPC's page can fold out every session that mentions them, each with its
     line, newest first.
 393. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
+394. [ ] **In this session.** A session's page lists the people, places, quests and things its log names, grouped.
+395. [ ] **What happened, in prep.** Session prep's "Who might turn up" quotes the line from when each was last seen.
+396. [ ] **Last time, on NPC cards.** The printable NPC cards add the line from the last session that named them.
+397. [ ] **Search the logs.** Typing "log: dragon" in Ctrl K lists the sessions whose log mentions it, each with the
+    sentence.
 
 ## Ideas parking lot
 
