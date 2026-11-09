@@ -786,7 +786,7 @@ to the log at the bottom.
     days pass per session.
 428. [x] **Write about the last session.** The party page offers players a journal entry about the last session,
     started with a link to it.
-429. [ ] **What the players wrote.** A session's page lists the journal entries that link to it.
+429. [x] **What the players wrote.** A session's page lists the journal entries that link to it.
 
 ## Ideas parking lot
 
@@ -1222,3 +1222,4 @@ to the log at the bottom.
 - The gap on a session's page: a session's page says "After Session 1: 2 weeks later · 4 days on in the world".
 - Pace of play: the world's numbers page has a "Pace of play" tile: "Every 8 days" at the table on average, and "2 in-world days a session", from the dates played and the in-world dates.
 - Write about the last session: beside "Last session" on the party page, members get "Write about Session 2", which starts a journal entry "After Session 2" with a link to the session.
+- What the players wrote: a session's page lists "What the players wrote (2)": the journal entries that link to it (in the text or as a connection), oldest first, with who wrote each.

@@ -459,6 +459,10 @@ function viewEntry(id, tab) {
       return el('p', { class: 'muted small session-gap-line' }, `After `, link(prev), bits.length ? `: ${bits.join(' · ')}` : ''); })() : null,
     ['session', 'journal'].includes(e.kind) ? el('div', { class: 'btnrow' }, el('button', { class: 'btn small ghost session-copy', type: 'button', onclick: () => copyText(sessionText(e)) }, 'Copy as text')) : null,
     ['session', 'journal'].includes(e.kind) ? inSessionCard(e) : null,
+    // What the players wrote: journal entries that link to this session.
+    e.kind === 'session' ? (() => { const js = worldEntries().filter((x) => x.kind === 'journal' && (mentions([x.summary, x.body].join('\n')).has(e.id) || (x.links || []).some((l) => l.id === e.id))).sort((a, b) => String(a.created_at).localeCompare(String(b.created_at)));
+      return js.length ? el('section', { class: 'card session-journals' }, el('h3', {}, `What the players wrote (${js.length})`),
+        el('ul', { class: 'plain' }, js.map((x) => el('li', {}, link(x), x.created_by ? el('span', { class: 'muted small' }, ` by ${x.created_by}`) : null)))) : null; })() : null,
     // A wanted poster: for anyone with a bounty on their head.
     e.kind === 'npc' && String(e.fields?.bounty || '').trim() && e.visibility !== 'gm' ? el('p', { class: 'small' }, el('a', { class: 'btn small', href: `#world/poster/${e.id}` }, '🎯 Wanted poster')) : null,
     out.length || incoming.length ? el('section', {}, el('h3', { class: 'section-title' }, 'Connections'),
