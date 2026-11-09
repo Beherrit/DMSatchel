@@ -1805,3 +1805,5 @@ details.quest-group > summary .section-title { display: inline }
 .came-up-list li { margin: 4px 0 }
 .in-session-list { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 12px; margin: 0 }
 .in-session-list dt { font-weight: 600 } .in-session-list dd { margin: 0 }
+.cast-sort { margin: 0 0 10px }
+@media print { .cast-sort { display: none } }

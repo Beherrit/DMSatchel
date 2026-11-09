@@ -742,7 +742,7 @@ to the log at the bottom.
     most.
 400. [x] **Forgotten threads.** Session prep flags active quests the logs haven't mentioned for three sessions or
     more.
-401. [ ] **Sort the cast.** Who's who can be sorted by name or by how long since each was last seen.
+401. [x] **Sort the cast.** Who's who can be sorted by name or by how long since each was last seen.
 
 ## Ideas parking lot
 
@@ -1151,3 +1151,4 @@ to the log at the bottom.
 - Who comes up most: the world's numbers page lists "Who comes up most in the logs": the people, places, quests and factions named in the most sessions (two or more), "Ann in 3 sessions".
 - Forgotten threads: once three sessions are logged, session prep's quests flag "🧵 Gone quiet: Ring the Bell (not in the log for 3 sessions), Never mentioned (never in the log)." for active quests the logs have let slide.
 - A full sweep: all 392 browser tests rerun; no crashes or page errors, last time's one flag (a load flake) is gone, and nothing new is flagged.
+- Sort the cast: Who's who has "By name / Longest unseen / Most seen" buttons (hidden in print); the choice is kept in this browser.

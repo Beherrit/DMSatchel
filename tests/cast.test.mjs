@@ -10,3 +10,11 @@ test('people met in the session log, alphabetical, with how often and when last'
   const idsIn = (t) => [...String(t).matchAll(/\[\[([^\]|]+)/g)].map((m) => names[m[1]]).filter(Boolean);
   assert.deepEqual(castList(list, idsIn).map((x) => [x.entry.name, x.count, x.last.id]), [['Ann', 1, 's2'], ['bram', 2, 's2']]);
 });
+
+test('sortCast by name, longest unseen or most seen', async () => {
+  const { sortCast } = await import('../js/cast.js');
+  const L = [{ entry: { name: 'Bo' }, count: 1, ago: 3 }, { entry: { name: 'ann' }, count: 4, ago: 0 }, { entry: { name: 'Cy' }, count: 1, ago: 3 }];
+  assert.deepEqual(sortCast(L).map((x) => x.entry.name), ['ann', 'Bo', 'Cy']);
+  assert.deepEqual(sortCast(L, 'unseen').map((x) => x.entry.name), ['Bo', 'Cy', 'ann']);
+  assert.deepEqual(sortCast(L, 'seen').map((x) => x.entry.name), ['ann', 'Bo', 'Cy']);
+});

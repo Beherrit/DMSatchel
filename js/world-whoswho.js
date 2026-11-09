@@ -6,7 +6,7 @@ import { world, worldEntries, getEntry, link, mentions, notice } from './world-s
 import { hhmm } from './clock.js';
 import { thumb } from './image-ui.js';
 import { sayOf } from './say.js';
-import { castList } from './cast.js';
+import { castList, sortCast } from './cast.js';
 import { stripMarks } from './rich.js';
 import { ageOf, ageText } from './birthdays.js';
 import { worldCalendar } from './world-calendar.js';
@@ -22,14 +22,19 @@ const usually = (e) => { if (isHired(e)) return 'Travelling with the party'; con
 const line = (e) => { const s = stripMarks(e.summary || '').replace(/\s+/g, ' ').trim(); return s.length > 150 ? `${s.slice(0, 149)}…` : s; };
 
 export function viewWhosWho() {
-  const cast = castList(worldEntries(), mentions);
+  // Sort the cast: by name, by how long since each was last seen, or by how often (kept in this browser).
+  let by = 'name';
+  try { by = localStorage.getItem('satchel-cast-sort') || 'name'; } catch { /* fine */ }
+  const cast = sortCast(castList(worldEntries(), mentions), by);
+  const sortBtns = el('div', { class: 'seg small-seg cast-sort', role: 'group', 'aria-label': 'Sort the cast' }, [['name', 'By name'], ['unseen', 'Longest unseen'], ['seen', 'Most seen']].map(([v, t]) =>
+    el('button', { type: 'button', 'aria-pressed': String(by === v), onclick: () => { try { localStorage.setItem('satchel-cast-sort', v); } catch { /* fine */ } window.dispatchEvent(new Event('world:rerender')); } }, t)));
   const head = el('div', { class: 'panel-head row card-tools' },
     el('div', {}, el('h2', {}, 'Who’s who'), el('p', {}, 'Everyone the party has met, from the session log: who they are, how to say their name, and when they were last seen.')),
     cast.length ? el('div', { class: 'btnrow' }, el('button', { class: 'btn primary', type: 'button', onclick: () => window.print() }, 'Print')) : null);
   if (!cast.length) return el('div', { class: 'w-view' }, head, notice('Nobody yet', 'When a session’s log links an NPC ([[Name]]) or connects to them, they join the cast here.'));
   // Wanted on the cast list: open bounties, by who's wanted.
   const wanted = new Map(openBounties(worldEntries()).map((b) => [b.entry.id, b]));
-  return el('div', { class: 'w-view whoswho-view' }, head,
+  return el('div', { class: 'w-view whoswho-view' }, head, sortBtns,
     el('ul', { class: 'plain cast-list' }, cast.map(({ entry: e, count, last }) => {
       const f = e.fields || {};
       const where = getEntry(e.parent_id);
