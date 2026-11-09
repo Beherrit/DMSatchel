@@ -802,7 +802,7 @@ to the log at the bottom.
     to be linked.
 439. [x] **Change your mind.** What needs writing lists the names marked never to be linked, each with a way to take
     the mark back.
-440. [ ] **Unlinked names in quests and places.** What needs writing also finds unlinked names in the descriptions
+440. [x] **Unlinked names in quests and places.** What needs writing also finds unlinked names in the descriptions
     of quests and places, not only logs and journals.
 441. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 
@@ -1252,3 +1252,4 @@ to the log at the bottom.
 - Not a name, as you write: the session log (and journal) form's "Names you could link" leaves out names marked never to be linked (GMs only; players can't read that list, so they see every name).
 - A full sweep: all 421 browser tests rerun; no crashes or page errors, last time's two load flakes are gone, and nothing new is flagged.
 - Change your mind: What needs writing folds out "Names never offered for linking (1)", each with "Offer it again" to take the mark back (PATCH {relink}, GM-only).
+- Unlinked names in quests and places: "Names left unlinked" now also finds them in the descriptions of quests and places (after logs and journals), never flagging an entry's own name.

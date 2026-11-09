@@ -51,16 +51,19 @@ function unlinkedSection(notLinks = []) {
   const skip = new Set(notLinks);
   const all = worldEntries().filter((e) => !skip.has(e.id) || e.kind === 'session' || e.kind === 'journal');
   // Session logs first (newest first), then journal entries (newest first).
-  const rows = all.filter((e) => ['session', 'journal'].includes(e.kind) && e.body && e.can_edit !== false).map((s) => ({ s, found: unlinkedIn(s.body, all) })).filter((x) => x.found.length)
-    .sort((a, b) => (a.s.kind === b.s.kind ? 0 : a.s.kind === 'session' ? -1 : 1) || (parseFloat(b.s.fields?.number) || 0) - (parseFloat(a.s.fields?.number) || 0) || String(b.s.created_at).localeCompare(String(a.s.created_at)));
+  // Logs, then journals, then quests and places (their descriptions), each group newest first; never an entry's own name.
+  const ORDER = ['session', 'journal', 'quest', 'region', 'area', 'settlement', 'location'];
+  const rank = (k) => (ORDER.indexOf(k) < 2 ? ORDER.indexOf(k) : 2);
+  const rows = all.filter((e) => ORDER.includes(e.kind) && e.body && e.can_edit !== false).map((s) => ({ s, found: unlinkedIn(s.body, all.filter((x) => x.id !== s.id)) })).filter((x) => x.found.length)
+    .sort((a, b) => rank(a.s.kind) - rank(b.s.kind) || (parseFloat(b.s.fields?.number) || 0) - (parseFloat(a.s.fields?.number) || 0) || String(b.s.created_at).localeCompare(String(a.s.created_at)));
   if (!rows.length) return null;
   const linkThem = async (s, found, btn) => {
     btn.disabled = true;
     try { await patchEntry(getEntry(s.id) || s, { body: linkNames((getEntry(s.id) || s).body, found.map((f) => f.entry)) }); toast(`Linked ${found.length} name${found.length === 1 ? '' : 's'} in ${s.name}`); window.dispatchEvent(new Event('world:rerender')); }
     catch (err) { toast(err.message, 'bad'); btn.disabled = false; }
   };
-  return el('section', { class: 'card todo-group unlinked-names' }, el('h3', {}, `Names left unlinked in logs and journals (${rows.length})`),
-    el('p', { class: 'muted small' }, 'Session logs and journal entries that name entries without [[links]], so they don’t link through (and, in logs, don’t count for last seen, who came up or gone quiet).'),
+  return el('section', { class: 'card todo-group unlinked-names' }, el('h3', {}, `Names left unlinked (${rows.length})`),
+    el('p', { class: 'muted small' }, 'Session logs, journal entries, quests and places that name entries without [[links]], so they don’t link through (and, in logs, don’t count for last seen, who came up or gone quiet).'),
     el('ul', { class: 'plain todo-list' }, rows.slice(0, 30).map(({ s, found }) => el('li', {}, el('span', {}, link(s), ': ',
       found.map((f, i) => [i ? ', ' : '', link(f.entry), f.count > 1 ? el('span', { class: 'muted' }, ` ×${f.count}`) : '',
         el('button', { class: 'reroll not-link', type: 'button', title: `Never offer to link “${f.entry.name}”`, 'aria-label': `Never offer to link ${f.entry.name}`, onclick: async () => {
