@@ -730,7 +730,7 @@ to the log at the bottom.
 391. [x] **Tomorrow's weather on the session sheet.** The session sheet adds tomorrow's forecast where the party is.
 392. [x] **Every time they came up.** An NPC's page can fold out every session that mentions them, each with its
     line, newest first.
-393. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
+393. [x] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 394. [x] **In this session.** A session's page lists the people, places, quests and things its log names, grouped.
 395. [x] **What happened, in prep.** Session prep's "Who might turn up" quotes the line from when each was last seen.
 396. [x] **Last time, on NPC cards.** The printable NPC cards add the line from the last session that named them.
@@ -1190,3 +1190,4 @@ to the log at the bottom.
 - Unlinked names in journals: What needs writing's "Names left unlinked in logs and journals" now finds them in journal entries too (logs first), each with its "Link them" button.
 - First met: an NPC met in more than one session now says "🤝 First met in Session 1, at The Inn" under where they were last seen (appearances() now also remembers the first session).
 - First met, on the cast list: Who's who now reads "Met in 2 sessions · last in Session 2 · first in Session 1" for anyone met more than once.
+- A full sweep: all 405 browser tests rerun; no crashes or page errors. Two flags, a timeout in the secrets test and a 403 in the dialogs test, both pass on rerun (the same load flakes as before).
