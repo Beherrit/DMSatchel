@@ -743,6 +743,13 @@ to the log at the bottom.
 400. [x] **Forgotten threads.** Session prep flags active quests the logs haven't mentioned for three sessions or
     more.
 401. [x] **Sort the cast.** Who's who can be sorted by name or by how long since each was last seen.
+402. [ ] **Key people gone quiet.** Session prep lists key NPCs the logs haven't mentioned for five sessions or more,
+    wherever they are.
+403. [ ] **Every session, for quests and places.** Quests and places can fold out every session that mentions them,
+    each with its line, as NPCs do.
+404. [ ] **Threads in the new log.** A session log started from prep lists the quests in play, so the GM can note
+    what moved.
+405. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 
 ## Ideas parking lot
 
