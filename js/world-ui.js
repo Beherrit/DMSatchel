@@ -107,7 +107,7 @@ import { restockDraft } from './world-place.js';
 import { npcStats, NPC_CLASS_OPTIONS } from './npc-stats.js';
 import { patchEntry, setEntryState, stateBadges, syncWorld, descendantsOf, tagChip } from './world-store.js';
 import { dayFor } from './world-hours.js';
-import { namedIn } from './session-named.js';
+import { namedIn, journalsAbout } from './session-named.js';
 import { unlinkedIn, linkNames } from './unlinked.js';
 import { sessionText } from './session-text.js';
 import { sessionGaps, realGapText } from './session-gaps.js';
@@ -331,6 +331,8 @@ function sessionList(list) {
     e.summary ? el('p', {}, e.summary) : null,
     e.fields.players ? el('p', { class: 'muted small' }, `Players: ${e.fields.players.replace(/\n+/g, ', ')}`) : null,
     e.fields.xp ? el('p', { class: 'muted small' }, `XP: ${e.fields.xp}`) : null,
+    // Journals on the session list: how many entries the players wrote about it.
+    (() => { const n = journalsAbout(e.id).length; return n ? el('p', { class: 'muted small session-journal-count' }, `📓 ${n} journal entr${n === 1 ? 'y' : 'ies'} about it`) : null; })(),
     // Who came up, on the session list: who and what the log names (or connects to), up to eight.
     (() => { const named = namedIn(e);
       return named.length ? el('p', { class: 'small session-named' }, el('span', { class: 'muted' }, 'Came up: '), named.slice(0, 8).map((x, i) => [i ? ', ' : '', link(x)]), named.length > 8 ? el('span', { class: 'muted' }, ` and ${named.length - 8} more`) : '') : null; })())));
@@ -460,7 +462,7 @@ function viewEntry(id, tab) {
     ['session', 'journal'].includes(e.kind) ? el('div', { class: 'btnrow' }, el('button', { class: 'btn small ghost session-copy', type: 'button', onclick: () => copyText(sessionText(e)) }, 'Copy as text')) : null,
     ['session', 'journal'].includes(e.kind) ? inSessionCard(e) : null,
     // What the players wrote: journal entries that link to this session.
-    e.kind === 'session' ? (() => { const js = worldEntries().filter((x) => x.kind === 'journal' && (mentions([x.summary, x.body].join('\n')).has(e.id) || (x.links || []).some((l) => l.id === e.id))).sort((a, b) => String(a.created_at).localeCompare(String(b.created_at)));
+    e.kind === 'session' ? (() => { const js = journalsAbout(e.id);
       return js.length ? el('section', { class: 'card session-journals' }, el('h3', {}, `What the players wrote (${js.length})`),
         el('ul', { class: 'plain' }, js.map((x) => el('li', {}, link(x), x.created_by ? el('span', { class: 'muted small' }, ` by ${x.created_by}`) : null)))) : null; })() : null,
     // A wanted poster: for anyone with a bounty on their head.
