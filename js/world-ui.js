@@ -454,6 +454,9 @@ function viewEntry(id, tab) {
     mentionsCard(e, rerenderWorld),
     e.kind === 'npc' ? lastSeenLine(e) : lastLogLine(e),
     ['npc', 'character', 'quest', ...PLACE_KINDS].includes(e.kind) ? cameUpBox(e) : null,
+    // When a journal entry is set: the sessions it's about, with their in-world dates.
+    e.kind === 'journal' ? (() => { const ss = [...new Set([...mentions([e.summary, e.body].join('\n')), ...(e.links || []).map((l) => l.id)])].map((id) => getEntry(id)).filter((x) => x?.kind === 'session');
+      return ss.length ? el('p', { class: 'small muted journal-set' }, '📅 About ', ss.map((x, i) => [i ? ', ' : '', link(x), x.fields?.world_date ? ` (${x.fields.world_date})` : ''])) : null; })() : null,
     // What they wrote, on a character: the journal entries by the character's player (newest first).
     e.kind === 'character' && e.owner_id ? (() => { const js = worldEntries().filter((x) => x.kind === 'journal' && x.owner_id === e.owner_id).sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)));
       return js.length ? el('p', { class: 'small char-journals' }, el('strong', {}, `📓 Their player’s journal (${js.length}): `), js.slice(0, 8).map((x, i) => [i ? ', ' : '', link(x)]), js.length > 8 ? el('span', { class: 'muted' }, ` and ${js.length - 8} more`) : '') : null; })() : null,
