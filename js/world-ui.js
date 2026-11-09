@@ -53,7 +53,7 @@ import { itemCardButton, spellCardButton } from './world-playcards.js';
 import { mentionsCard } from './world-mentions.js';
 import { starButton, favoritesNav, followButton, followingNav } from './world-favorites.js';
 import { rewardCard } from './world-reward.js';
-import { appearances, sceneOf, quoteOf, sessionsWith } from './appearances.js';
+import { appearances, sceneOf, quoteOf, sessionsWith, sessionOrder } from './appearances.js';
 import { withPronouns } from './world-profiles.js';
 import { noticesCard, drawNoticeBanner } from './world-notices.js';
 import { gallerySection } from './world-gallery.js';
@@ -453,6 +453,10 @@ function viewEntry(id, tab) {
     e.kind === 'npc' ? lastSeenLine(e) : lastLogLine(e),
     ['npc', 'character', 'quest', ...PLACE_KINDS].includes(e.kind) ? cameUpBox(e) : null,
     // Copy a session as text: the log as plain text (no GM secrets), to paste into a chat.
+    // The gap on a session's page: how long after the one before, at the table and in the world.
+    e.kind === 'session' ? (() => { const order = sessionOrder(worldEntries()), i = order.findIndex((x) => x.id === e.id), prev = order[i + 1];
+      if (i < 0 || !prev) return null; const g = sessionGaps([e, prev], worldCalendar()).get(e.id), bits = [realGapText(g.real), g.world !== null && g.world >= 0 ? (g.world === 0 ? 'the same day in the world' : `${g.world} day${g.world === 1 ? '' : 's'} on in the world`) : ''].filter(Boolean);
+      return el('p', { class: 'muted small session-gap-line' }, `After `, link(prev), bits.length ? `: ${bits.join(' · ')}` : ''); })() : null,
     ['session', 'journal'].includes(e.kind) ? el('div', { class: 'btnrow' }, el('button', { class: 'btn small ghost session-copy', type: 'button', onclick: () => copyText(sessionText(e)) }, 'Copy as text')) : null,
     ['session', 'journal'].includes(e.kind) ? inSessionCard(e) : null,
     // A wanted poster: for anyone with a bounty on their head.

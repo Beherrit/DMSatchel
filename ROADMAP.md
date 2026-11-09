@@ -780,7 +780,7 @@ to the log at the bottom.
 424. [x] **Days in the world, per session.** The session list says how many in-world days passed between sessions,
     from their in-world dates.
 425. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
-426. [ ] **The gap on a session's page.** A session's page says how long after the one before it was played, and how
+426. [x] **The gap on a session's page.** A session's page says how long after the one before it was played, and how
     many in-world days passed.
 427. [ ] **Pace of play.** The world's numbers page says how often the table meets on average, and how many in-world
     days pass per session.
@@ -1219,3 +1219,4 @@ to the log at the bottom.
 - Copy a journal entry as text: journal pages get the same "Copy as text" button as sessions (plain names, no secrets).
 - Time between sessions: the session list says after each session's name how long after the one before it was played, from the dates played: "· the next day", "· 2 weeks later". Pure in session-gaps.js.
 - Days in the world, per session: next to that, the session list says how many in-world days passed since the session before, from their in-world dates: "· 4 days on in the world", "· the same day in the world".
+- The gap on a session's page: a session's page says "After Session 1: 2 weeks later · 4 days on in the world".
