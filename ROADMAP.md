@@ -774,6 +774,12 @@ to the log at the bottom.
     the last session that named them.
 421. [x] **Copy a session as text.** A session's page can copy its log as plain text (links as plain names) to paste
     into a chat.
+422. [ ] **Copy a journal entry as text.** Journal pages get the same "Copy as text" button.
+423. [ ] **Time between sessions.** The session list says how long after the one before each session was played
+    ("2 weeks later").
+424. [ ] **Days in the world, per session.** The session list says how many in-world days passed between sessions,
+    from their in-world dates.
+425. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 
 ## Ideas parking lot
 
