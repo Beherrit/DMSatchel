@@ -94,12 +94,14 @@ function render() {
   const lg = /^(?:log|logs|in the log):\s*(.+)$/.exec(q);
   if (lg) {
     const word = lg[1].trim();
-    items = M.appearances.sessionOrder(M.store.worldEntries()).map((sn) => ({ sn, line: M.appearances.quoteOf(sn, { name: word }, 90) })).filter((x) => x.line)
-      .slice(0, 40).map(({ sn, line }) => ({ label: sn.name, group: 'In the log', href: `#world/e/${sn.id}`, hint: line }));
+    // Session logs first (newest first), then the players' journal entries (newest first).
+    const journals = M.store.worldEntries().filter((x) => x.kind === 'journal').sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)));
+    items = [...M.appearances.sessionOrder(M.store.worldEntries()), ...journals].map((sn) => ({ sn, line: M.appearances.quoteOf(sn, { name: word }, 90) })).filter((x) => x.line)
+      .slice(0, 40).map(({ sn, line }) => ({ label: sn.name, group: sn.kind === 'journal' ? 'In a journal' : 'In the log', href: `#world/e/${sn.id}`, hint: line }));
     active = Math.min(active, Math.max(0, items.length - 1));
     setKids(list, ...(items.length ? items.map((it, i) => el('li', { role: 'option', id: `pal-${i}`, 'aria-selected': String(i === active), class: i === active ? 'active' : '', onmousedown: (ev) => { ev.preventDefault(); go(it); } },
       el('span', { class: 'pal-label' }, it.label), el('span', { class: 'pal-hint' }, it.hint), el('span', { class: 'pal-group' }, it.group)))
-      : [el('li', { class: 'pal-empty' }, `No session log mentions “${word}”.`)]));
+      : [el('li', { class: 'pal-empty' }, `No session log or journal entry mentions “${word}”.`)]));
     input.setAttribute('aria-activedescendant', items.length ? `pal-${active}` : '');
     return;
   }

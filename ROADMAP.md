@@ -793,7 +793,7 @@ to the log at the bottom.
     it.
 432. [x] **In the players' journals.** An NPC's page lists the journal entries that name them.
 433. [x] **Copy the cast as text.** Who's who can copy the cast list as plain text to paste into a chat.
-434. [ ] **Search the journals too.** "log: dragon" in Ctrl K also finds journal entries that mention it.
+434. [x] **Search the journals too.** "log: dragon" in Ctrl K also finds journal entries that mention it.
 435. [ ] **What they wrote, on a character.** A character's page lists the journal entries its player wrote.
 436. [ ] **When a journal entry is set.** A journal entry about a session shows that session's in-world date.
 437. [ ] **Not a name.** In "Names left unlinked", a GM can mark a name as never to be linked (an entry called "The
@@ -1238,3 +1238,4 @@ to the log at the bottom.
 - Who wrote, in prep: session prep's "Last time" card adds "📓 The players wrote: After Session 2 (Pip), Notes (Bo)", the journal entries about the last session.
 - In the players' journals: an NPC's page folds out "In the players' journals (1)": the journal entries that name them, with who wrote each and the first line that names them.
 - Copy the cast as text: Who's who has "Copy as text", one line per person in the chosen order ("Ann (AN) — Innkeeper · met in 2 sessions, last in Session 2"), to paste into a chat.
+- Search the journals too: "log: dragon" in Ctrl K now lists journal entries that mention it after the session logs, grouped "In a journal", each with the sentence.
