@@ -715,7 +715,7 @@ to the log at the bottom.
 381. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 382. [x] **Darkvision from the library.** A character whose species comes from the world's library gets its
     darkvision from the species it's "similar to".
-383. [ ] **The weather when the session began.** The "Began at…" line on a new session log includes the weather.
+383. [x] **The weather when the session began.** The "Began at…" line on a new session log includes the weather.
 384. [ ] **Print the town by the hour.** A settlement's town-by-the-hour table can be printed on its own as a handout
     for the GM's screen.
 385. [ ] **Lights running low in prep.** Session prep warns when a light the party has burning has ten minutes or
@@ -1110,3 +1110,4 @@ to the log at the bottom.
 - Who can see in the dark: at night (20:00–05:00) the GM's party sheet says "🌙 Night: darkvision: Bo 120 ft, Cy 60 ft; needs a light: Ann.", from each character's species (SRD species' darkvision).
 - Darkvision from the library: the night line on the party sheet counts species from the world's library: their own Darkvision when it's filled in (0 means none), else that of the species they're "similar to".
 - A full sweep: 380 browser tests rerun; no crashes or page errors. One flag, a timeout in the secrets test, passes on rerun (the same load flake as in sweep 345).
+- The weather when the session began: the "Began at…" line of a session log started from prep now ends with the weather where the party is: "Began at 18:00 (evening) on Fireday, 5 Thawmoon 1040; clear, 13°C (55°F), wind calm or light."
