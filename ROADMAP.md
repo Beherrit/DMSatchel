@@ -749,7 +749,7 @@ to the log at the bottom.
     each with its line, as NPCs do.
 404. [x] **Threads in the new log.** A session log started from prep lists the quests in play, so the GM can note
     what moved.
-405. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
+405. [x] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 406. [x] **Names left unlinked.** What needs writing finds names of entries that session logs mention as plain text,
     without [[links]], and links them in one click for the GM.
 407. [x] **Session numbers in order.** What needs writing flags sessions with a missing or repeated number.
@@ -1250,3 +1250,4 @@ to the log at the bottom.
 - When a journal entry is set: a journal entry that links a session says "📅 About Session 2 (5 Thawmoon 1040)", the session's in-world date.
 - Not a name: each name in "Names left unlinked" has a ✕ that tells the Satchel never to offer it for linking (an entry called "The Watch" that's often just words); it's kept in prep.not_links (additive, GM-only; players get a 403) and the name stops being flagged.
 - Not a name, as you write: the session log (and journal) form's "Names you could link" leaves out names marked never to be linked (GMs only; players can't read that list, so they see every name).
+- A full sweep: all 421 browser tests rerun; no crashes or page errors, last time's two load flakes are gone, and nothing new is flagged.
