@@ -789,7 +789,7 @@ to the log at the bottom.
 429. [x] **What the players wrote.** A session's page lists the journal entries that link to it.
 430. [x] **Journals on the session list.** The list of sessions says how many journal entries the players wrote
     about each.
-431. [ ] **Who wrote, in prep.** Session prep's "Last time" card says which journal entries the players wrote about
+431. [x] **Who wrote, in prep.** Session prep's "Last time" card says which journal entries the players wrote about
     it.
 432. [ ] **In the players' journals.** An NPC's page lists the journal entries that name them.
 433. [ ] **Copy the cast as text.** Who's who can copy the cast list as plain text to paste into a chat.
@@ -1230,3 +1230,4 @@ to the log at the bottom.
 - Write about the last session: beside "Last session" on the party page, members get "Write about Session 2", which starts a journal entry "After Session 2" with a link to the session.
 - What the players wrote: a session's page lists "What the players wrote (2)": the journal entries that link to it (in the text or as a connection), oldest first, with who wrote each.
 - Journals on the session list: each session in the list says "📓 2 journal entries about it" when players have written about it (journalsAbout() in session-named.js, shared with the session page).
+- Who wrote, in prep: session prep's "Last time" card adds "📓 The players wrote: After Session 2 (Pip), Notes (Bo)", the journal entries about the last session.

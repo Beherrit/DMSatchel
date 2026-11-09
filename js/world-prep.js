@@ -90,7 +90,7 @@ import { deadlineOf, deadlineText } from './deadline.js';
 import { moonlight, nightLight } from './moonlight.js';
 import { sceneFor } from './world-scene.js';
 import { appearances, quoteOf } from './appearances.js';
-import { namedIn } from './session-named.js';
+import { namedIn, journalsAbout } from './session-named.js';
 
 const ACTIVE_PC = (e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
 const card = (title, ...kids) => el('section', { class: 'card prep-card' }, el('h3', {}, title), ...kids);
@@ -115,6 +115,8 @@ function lastTime() {
     last.fields?.next ? el('div', { class: 'prep-next' }, el('strong', {}, 'Next time: '), richText(last.fields.next)) : null,
     // Last time, in prep: who and what came up in it.
     (() => { const named = namedIn(last); return named.length ? el('p', { class: 'small prep-came-up' }, el('strong', {}, 'Came up: '), named.slice(0, 12).map((x, i) => [i ? ', ' : '', link(x)])) : null; })(),
+    // Who wrote, in prep: the players' journal entries about it.
+    (() => { const js = journalsAbout(last.id); return js.length ? el('p', { class: 'small prep-journals' }, el('strong', {}, '📓 The players wrote: '), js.map((x, i) => [i ? ', ' : '', link(x), x.created_by ? el('span', { class: 'muted' }, ` (${x.created_by})`) : ''])) : null; })(),
     el('p', {}, link(last, 'Read the full session')));
 }
 
