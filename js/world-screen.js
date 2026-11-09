@@ -3,7 +3,8 @@
 // Route: #world/screen
 import { el, setKids } from './dom.js';
 import { isGm } from './api.js';
-import { world, worldEntries, link, notice } from './world-store.js';
+import { world, worldEntries, link, notice, getEntry } from './world-store.js';
+import { librarySpecies } from './library.js';
 import { playOf, characterOf } from './sheet-ui.js';
 import { coinText } from './economy.js';
 import { screenRows } from './party-screen.js';
@@ -39,7 +40,9 @@ export function viewScreen() {
   const debtsLine = debts.length ? el('p', { class: 'small screen-debts' }, el('strong', {}, 'Who owes whom: '), debts.map((d) => `${d.from} owes ${d.to} ${coinText(d.cp)}${d.note ? ` (${d.note})` : ''}`).join('; '), '.') : null;
   // Who can see in the dark (at night): each character's darkvision, from their species, and who needs a light.
   const m = world.info?.clock?.minutes, night = m !== undefined && (m % 1440 >= 20 * 60 || m % 1440 < 5 * 60);
-  const dark = night ? darkSight(chars.map((e) => ({ name: e.name, species: e.fields?.species })), SPECIES) : null;
+  // Library species count too: their own Darkvision when it's filled in, else the species they're "similar to".
+  const table = { ...SPECIES, ...Object.fromEntries(librarySpecies(worldEntries()).map((x) => [x.name, { darkvision: String(getEntry(x.entryId)?.fields?.darkvision ?? '').trim() ? x.darkvision : SPECIES[x.like]?.darkvision || 0 }])) };
+  const dark = night ? darkSight(chars.map((e) => ({ name: e.name, species: e.fields?.species })), table) : null;
   const view = el('div', { class: 'w-view screen-view' }, head,
     dark ? el('p', { class: 'small screen-dark' }, '🌙 Night: ', dark.see.length ? `darkvision: ${dark.see.map((x) => `${x.name} ${x.ft} ft`).join(', ')}` : 'nobody has darkvision',
       dark.need.length ? `; needs a light: ${dark.need.join(', ')}` : '; everyone can see in the dark', '.') : null,
