@@ -814,7 +814,7 @@ to the log at the bottom.
 446. [x] **New in this session.** A session's page says who and what came up for the first time in it.
 447. [x] **New faces on the session list.** The list of sessions says how many people and places each one
     introduced.
-448. [ ] **New last time, in prep.** Session prep's "Last time" card names who and what was new in it.
+448. [x] **New last time, in prep.** Session prep's "Last time" card names who and what was new in it.
 449. [ ] **New on the cast list.** Who's who marks the people first met in the latest session.
 
 ## Ideas parking lot
@@ -1270,3 +1270,4 @@ to the log at the bottom.
 - First visited: a place mentioned in more than one session says "🗺 First visited in Session 1" under when it was last in the log.
 - New in this session: a session's "In this session" card starts with "✨ New this session: Bo, The Market", who and what its log names for the first time (newIn() in session-named.js).
 - New faces on the session list: each session in the list says "✨ 1 new face, 1 new place": the NPCs and places it introduced.
+- New last time, in prep: session prep's "Last time" card names "✨ New last time: Bo, The Market".
