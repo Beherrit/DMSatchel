@@ -750,6 +750,11 @@ to the log at the bottom.
 404. [x] **Threads in the new log.** A session log started from prep lists the quests in play, so the GM can note
     what moved.
 405. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
+406. [ ] **Names left unlinked.** What needs writing finds names of entries that session logs mention as plain text,
+    without [[links]], and links them in one click for the GM.
+407. [ ] **Session numbers in order.** What needs writing flags sessions with a missing or repeated number.
+408. [ ] **Logs still to write.** What needs writing lists sessions whose log is empty or only a line.
+409. [ ] **Who came up, on the session list.** The list of sessions shows under each who and what its log names.
 
 ## Ideas parking lot
 
