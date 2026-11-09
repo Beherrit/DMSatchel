@@ -3,6 +3,7 @@ import { el, toast } from './dom.js';
 import { isGm } from './api.js';
 import { worldEntries, link, kindLabel, byName, getEntry, notice, patchEntry } from './world-store.js';
 import { unlinkedIn, linkNames } from './unlinked.js';
+import { sessionChecks } from './session-checks.js';
 import { thinSpots, missingLinks } from './thin.js';
 import { KINDS, KIND_ORDER } from './world-schema.js';
 import { routineIssues } from './world-routine.js';
@@ -23,6 +24,16 @@ function makePlace(name, npc) {
   for (let p = at, i = 0; p && i < 12; p = p.parent_id && getEntry(p.parent_id), i++) if (p.kind === 'settlement') { at = p; break; }
   const title = name.replace(/^(at|in) /i, '').replace(/^\w/, (c) => c.toUpperCase());
   window.dispatchEvent(new CustomEvent('world:draft', { detail: { kind: 'location', name: title, parent_id: at?.id || null } }));
+}
+
+// Session numbers in order: numbers skipped or used twice, and sessions with no number.
+function numbersSection(chk) {
+  if (!chk.missing.length && !chk.repeated.length && !chk.unnumbered.length) return null;
+  return el('section', { class: 'card todo-group session-numbers' }, el('h3', {}, 'Session numbers out of order'),
+    el('ul', { class: 'plain todo-list' },
+      chk.missing.length ? el('li', {}, el('span', {}, `No session numbered ${chk.missing.slice(0, 12).join(', ')}${chk.missing.length > 12 ? '…' : ''}.`)) : null,
+      chk.repeated.map((r) => el('li', {}, el('span', {}, `Number ${r.n} is used ${r.sessions.length} times: `, r.sessions.map((x, i) => [i ? ', ' : '', link(x)])))),
+      chk.unnumbered.length ? el('li', {}, el('span', {}, 'No number: ', chk.unnumbered.map((x, i) => [i ? ', ' : '', link(x)]))) : null));
 }
 
 // Names left unlinked: entries the session logs name as plain text, with a button to link them for the GM.
@@ -83,6 +94,7 @@ export function viewTodo() {
     missingSection(missing),
     routinesSection(routines),
     unlinkedSection(),
+    numbersSection(sessionChecks(worldEntries())),
     GROUPS.map(([k, title, hint]) => {
       const list = [...spots[k]].sort(byName);
       return list.length ? el('section', { class: 'card todo-group' }, el('h3', {}, `${title} (${list.length})`), el('p', { class: 'muted small' }, hint),
