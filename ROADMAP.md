@@ -732,7 +732,7 @@ to the log at the bottom.
     line, newest first.
 393. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 394. [x] **In this session.** A session's page lists the people, places, quests and things its log names, grouped.
-395. [ ] **What happened, in prep.** Session prep's "Who might turn up" quotes the line from when each was last seen.
+395. [x] **What happened, in prep.** Session prep's "Who might turn up" quotes the line from when each was last seen.
 396. [ ] **Last time, on NPC cards.** The printable NPC cards add the line from the last session that named them.
 397. [ ] **Search the logs.** Typing "log: dragon" in Ctrl K lists the sessions whose log mentions it, each with the
     sentence.
@@ -1137,3 +1137,4 @@ to the log at the bottom.
 - Tomorrow's weather on the session sheet: under today's weather, the sheet adds "Tomorrow: Scattered clouds, 15°C (59°F), wind strong.", the same roll as the first day of prep's week ahead.
 - Every time they came up: an NPC who has come up in more than one session gets a folded "Every time they came up (3)" list on their page: each session, newest first, with the line from its log that names them (or "connected, not named in the log").
 - In this session: a session's page lists "In this session (5)": the people, places, quests and things its log names or connects to, grouped by kind and linked.
+- What happened, in prep: "Who might turn up" (in session prep and on a town's page) quotes the line from when each person was last seen ("Saw Ann again at the Inn.").

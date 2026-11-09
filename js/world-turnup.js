@@ -3,7 +3,7 @@
 import { el } from './dom.js';
 import { worldEntries, getEntry, link, descendantsOf, mentions } from './world-store.js';
 import { PLACE_KINDS } from './world-schema.js';
-import { appearances, dueBack, sceneOf } from './appearances.js';
+import { appearances, dueBack, sceneOf, quoteOf } from './appearances.js';
 
 // → [{ person, seen }] (seen: appearances' { count, last, ago } or undefined), at most `max`.
 export function turnUp(town, max = 8) {
@@ -22,4 +22,6 @@ export const turnUpNote = 'People here the party has met before but not in the l
 
 export const turnUpList = (due) => el('ul', { class: 'plain prep-list turn-up-list' }, due.map(({ person: p, seen: s }) => el('li', {},
   link(p), p.fields?.role ? el('span', { class: 'muted small' }, ` ${p.fields.role}`) : null,
-  el('div', { class: 'muted small prep-last-seen' }, s ? lastSeenBits(p, s) : 'Key person, not met yet'))));
+  el('div', { class: 'muted small prep-last-seen' }, s ? lastSeenBits(p, s) : 'Key person, not met yet'),
+  // What happened, in prep: the line from when they were last seen.
+  (() => { const q = s && quoteOf(s.last, p, 160); return q ? el('q', { class: 'small last-seen-quote' }, q) : null; })())));
