@@ -89,6 +89,7 @@ import { dayWeather, forecast } from './forecast.js';
 import { deadlineOf, deadlineText } from './deadline.js';
 import { moonlight, nightLight } from './moonlight.js';
 import { sceneFor } from './world-scene.js';
+import { appearances } from './appearances.js';
 
 const ACTIVE_PC = (e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
 const card = (title, ...kids) => el('section', { class: 'card prep-card' }, el('h3', {}, title), ...kids);
@@ -201,7 +202,11 @@ function questsSection() {
   // Open jobs nobody has taken yet whose time is running out (two weeks or less).
   const waiting = worldEntries().filter((e) => e.kind === 'quest' && e.fields?.status !== 'Active' && due(e) && due(e).left <= 14).sort((a, b) => due(a).left - due(b).left);
   const pill = (q) => (due(q) ? el('span', { class: `deadline-pill${due(q).left <= 3 ? ' soon' : ''}` }, ` ⏳ ${deadlineText(due(q).left, due(q).holiday)}`) : null);
+  // Forgotten threads: active quests the logs haven't mentioned for three sessions or more (or ever, once there are three).
+  const seen = appearances(worldEntries(), mentions), played = worldEntries().filter((e) => e.kind === 'session').length;
+  const quiet = played >= 3 ? active.map((q) => ({ q, ago: seen.get(q.id)?.ago ?? null })).filter((x) => (x.ago === null ? true : x.ago >= 3)) : [];
   return card(`Quests in play (${active.length})`,
+    quiet.length ? el('p', { class: 'small forgotten-threads' }, el('strong', {}, '🧵 Gone quiet: '), quiet.flatMap(({ q, ago }, i) => [i ? ', ' : '', link(q), el('span', { class: 'muted' }, ago === null ? ' (never in the log)' : ` (not in the log for ${ago} sessions)`)]), '.') : null,
     waiting.length ? el('p', { class: 'small' }, el('strong', {}, 'Running out of time: '), waiting.flatMap((q, i) => [i ? ', ' : '', link(q), ` (${deadlineText(due(q).left, due(q).holiday)})`])) : null,
     active.length ? list(active, (q) => [link(q), pill(q), q.fields?.patron ? el('span', { class: 'muted small' }, ` for ${q.fields.patron}`) : null,
       // Patrons in prep: where each patron is right now.

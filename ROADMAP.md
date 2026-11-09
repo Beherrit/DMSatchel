@@ -740,7 +740,7 @@ to the log at the bottom.
     and folds out every session they came up in.
 399. [x] **Who comes up most.** The world's numbers page lists the people, places and quests the session logs name
     most.
-400. [ ] **Forgotten threads.** Session prep flags active quests the logs haven't mentioned for three sessions or
+400. [x] **Forgotten threads.** Session prep flags active quests the logs haven't mentioned for three sessions or
     more.
 401. [ ] **Sort the cast.** Who's who can be sorted by name or by how long since each was last seen.
 
@@ -1149,3 +1149,4 @@ to the log at the bottom.
 - Search the logs: typing "log: dragon" in Ctrl K lists the sessions whose log mentions it, newest first, each with the sentence ("Session 3 · The Dragon burned the mill!"); Enter opens the session.
 - Characters in the log too: a character's page now says "📜 Last in the log: Session 2 · in 2 sessions" with the line ("Ann fell asleep on watch!"), and folds out every session they came up in.
 - Who comes up most: the world's numbers page lists "Who comes up most in the logs": the people, places, quests and factions named in the most sessions (two or more), "Ann in 3 sessions".
+- Forgotten threads: once three sessions are logged, session prep's quests flag "🧵 Gone quiet: Ring the Bell (not in the log for 3 sessions), Never mentioned (never in the log)." for active quests the logs have let slide.
