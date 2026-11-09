@@ -725,7 +725,7 @@ to the log at the bottom.
 388. [x] **The scene, read aloud.** Session prep can add the scene-setter line to the read-aloud list in one click.
 389. [x] **What happened, on the cast list.** Who's who quotes the line of the last session log that mentions each
     person, under when they were last seen.
-390. [ ] **Last in the log, everywhere.** Places, quests, factions and items say which session last mentioned them,
+390. [x] **Last in the log, everywhere.** Places, quests, factions and items say which session last mentioned them,
     with the line from its log.
 391. [ ] **Tomorrow's weather on the session sheet.** The session sheet adds tomorrow's forecast where the party is.
 392. [ ] **Every time they came up.** An NPC's page can fold out every session that mentions them, each with its
@@ -1128,3 +1128,4 @@ to the log at the bottom.
 - Open now, for players: the party page tells everyone what's open in the town the party is in: "🕰 Open now in Brindle (22:00): The Bell (till 02:00)." (nothing when the party's on the road).
 - The scene, read aloud: the scene-setter line in prep has a "Read aloud" toggle that puts the line first in the read-aloud list as "The scene" and on the printed session sheet. The choice is kept in prep (a new prep.scene_aloud flag, additive) and survives other prep saves.
 - What happened, on the cast list: under when each person was last seen, Who's who quotes the sentence of that session's log that names them ("They met Ann at the inn, who poured ale!").
+- Last in the log, everywhere: places, quests, factions (and guilds and clans) and items now say "📜 Last in the log: Session 2 (the latest session) · in 2 sessions" with the sentence from that log that names them, like an NPC's last-seen line.

@@ -438,7 +438,7 @@ function viewEntry(id, tab) {
     e.body ? el('section', {}, contentsNav(e.body), richText(e.body, { anchors: true })) : null,
     isGm() && e.secret ? el('aside', { class: 'secret' }, el('div', { class: 'eyebrow' }, 'GM only'), richText(e.secret)) : null,
     mentionsCard(e, rerenderWorld),
-    e.kind === 'npc' ? lastSeenLine(e) : null,
+    e.kind === 'npc' ? lastSeenLine(e) : lastLogLine(e),
     // A wanted poster: for anyone with a bounty on their head.
     e.kind === 'npc' && String(e.fields?.bounty || '').trim() && e.visibility !== 'gm' ? el('p', { class: 'small' }, el('a', { class: 'btn small', href: `#world/poster/${e.id}` }, '🎯 Wanted poster')) : null,
     out.length || incoming.length ? el('section', {}, el('h3', { class: 'section-title' }, 'Connections'),
@@ -873,6 +873,18 @@ function lastSeenLine(e) {
     gm && seen.ago >= 2 ? el('span', { class: 'due-back' }, ` · 🔔 not seen for ${seen.ago} sessions: might turn up`) : '',
     // What happened with them: the line of that session's log that names them.
     (() => { const q = quoteOf(seen.last, e); return q ? el('q', { class: 'last-seen-quote' }, q) : null; })());
+}
+
+// Last in the log, everywhere: for places, quests, factions and items, the session that last mentioned them, with
+// the line from its log.
+const LOGGED = ['region', 'area', 'settlement', 'location', 'quest', 'faction', 'guild', 'clan', 'item'];
+function lastLogLine(e) {
+  if (!LOGGED.includes(e.kind)) return null;
+  const seen = appearances(worldEntries(), mentions).get(e.id);
+  if (!seen) return null;
+  const q = quoteOf(seen.last, e);
+  return el('p', { class: 'muted small last-log' }, '📜 Last in the log: ', link(seen.last), seen.ago ? ` (${seen.ago} session${seen.ago === 1 ? '' : 's'} ago)` : ' (the latest session)',
+    seen.count > 1 ? ` · in ${seen.count} sessions` : '', q ? el('q', { class: 'last-seen-quote' }, q) : null);
 }
 
 // Undo a move to the bin: bring the entry back, then open it (or just redraw where we are).
