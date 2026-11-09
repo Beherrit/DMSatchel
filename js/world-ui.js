@@ -720,7 +720,7 @@ function viewEdit(id, kindForNew) {
     fieldsBox,
     area('body', 'Description & notes', e.body, 8, 'Link to other entries with [[double brackets]], e.g. [[The Silver Hand]]. **Bold**, *italic*, “- ” for a list, “## ” for a small heading, “> ” for text to read aloud.'),
     // Link names as you write: in a session log, the entries it names as plain text, with a button to link them.
-    ['session', 'journal'].includes(e.kind) ? linkHint() : null,
+    ['session', 'journal', 'quest', ...PLACE_KINDS].includes(e.kind) ? linkHint(e.id) : null,
     gm ? area('secret', 'GM-only secrets', e.secret, 4, 'Players never see this. Only this world’s GMs can read it.') : null,
     input('tags', 'Tags', (e.tags || []).join(', '), { placeholder: 'comma separated, e.g. north, war, session-12' }),
     el('div', { class: 'field wide' }, el('label', {}, 'Connections'), linksBox,
@@ -1036,12 +1036,12 @@ function turnUpBox(e) {
 
 // Link names as you write: under a session log's (or journal entry's) text, the entries it names without [[links]], and a button that
 // links them in the text (the GM saves the form as usual).
-function linkHint() {
+function linkHint(selfId = null) {
   const out = el('p', { class: 'small link-hint', 'aria-live': 'polite' });
   const draw = () => {
     const box = document.getElementById('f-body');
     if (!box) return;
-    const found = unlinkedIn(box.value, worldEntries().filter((x) => !skip.has(x.id)));
+    const found = unlinkedIn(box.value, worldEntries().filter((x) => !skip.has(x.id) && x.id !== selfId)); // never the entry's own name
     if (!found.length) { setKids(out); return; }
     setKids(out, el('span', { class: 'muted' }, 'Names you could link: '), found.map((f, i) => [i ? ', ' : '', f.entry.name]), ' ',
       el('button', { class: 'btn small ghost', type: 'button', onclick: () => { box.value = linkNames(box.value, found.map((f) => f.entry)); box.dispatchEvent(new Event('input', { bubbles: true })); draw(); } }, 'Link them'));

@@ -805,7 +805,7 @@ to the log at the bottom.
 440. [x] **Unlinked names in quests and places.** What needs writing also finds unlinked names in the descriptions
     of quests and places, not only logs and journals.
 441. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
-442. [ ] **Link names in descriptions too.** Quest and place forms offer the names their description could link, as
+442. [x] **Link names in descriptions too.** Quest and place forms offer the names their description could link, as
     session logs do.
 443. [ ] **Playing since.** The world's numbers page says when the first session was played and how long ago.
 444. [ ] **Taken on in, finished in.** A quest's page says which session first mentioned it, and for a finished quest,
@@ -1259,3 +1259,4 @@ to the log at the bottom.
 - A full sweep: all 421 browser tests rerun; no crashes or page errors, last time's two load flakes are gone, and nothing new is flagged.
 - Change your mind: What needs writing folds out "Names never offered for linking (1)", each with "Offer it again" to take the mark back (PATCH {relink}, GM-only).
 - Unlinked names in quests and places: "Names left unlinked" now also finds them in the descriptions of quests and places (after logs and journals), never flagging an entry's own name.
+- Link names in descriptions too: quest and place forms offer "Names you could link" under their description, as session logs do, never their own name.
