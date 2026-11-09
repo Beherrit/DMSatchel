@@ -1,0 +1,17 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { sessionGaps, realGapText } from '../js/session-gaps.js';
+import { makeCalendar } from '../js/calendar.js';
+
+test('sessionGaps: real days and in-world days since the session before', () => {
+  const cal = makeCalendar('seasons', 1040), m = cal.months[1].name;
+  const S = (id, played_on, world_date) => ({ id, kind: 'session', fields: { played_on, world_date } });
+  const g = sessionGaps([S('c', '2026-11-15', `9 ${m} 1040`), S('b', '2026-11-01', `5 ${m} 1040`), S('a', '2026-10-31', '')], cal);
+  assert.deepEqual(g.get('c'), { real: 14, world: 4 });
+  assert.deepEqual(g.get('b'), { real: 1, world: null });
+  assert.equal(g.has('a'), false);
+});
+
+test('realGapText', () => {
+  assert.deepEqual([0, 1, 5, 14, 40, 90, null].map(realGapText), ['the same day', 'the next day', '5 days later', '2 weeks later', '6 weeks later', '3 months later', '']);
+});

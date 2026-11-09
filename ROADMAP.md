@@ -775,7 +775,7 @@ to the log at the bottom.
 421. [x] **Copy a session as text.** A session's page can copy its log as plain text (links as plain names) to paste
     into a chat.
 422. [x] **Copy a journal entry as text.** Journal pages get the same "Copy as text" button.
-423. [ ] **Time between sessions.** The session list says how long after the one before each session was played
+423. [x] **Time between sessions.** The session list says how long after the one before each session was played
     ("2 weeks later").
 424. [ ] **Days in the world, per session.** The session list says how many in-world days passed between sessions,
     from their in-world dates.
@@ -1210,3 +1210,4 @@ to the log at the bottom.
 - Last time, on the session sheet: each person in "Who's around" on the printable session sheet adds the line from the last session that named them: "Session 1: “Met Ann at the inn, who poured ale!”".
 - Copy a session as text: a session's page has "Copy as text", which copies its name, dates, summary, log and "Next time" as plain text (links as plain names, Markdown marks out, the GM's secret never included), to paste into a chat.
 - Copy a journal entry as text: journal pages get the same "Copy as text" button as sessions (plain names, no secrets).
+- Time between sessions: the session list says after each session's name how long after the one before it was played, from the dates played: "· the next day", "· 2 weeks later". Pure in session-gaps.js.

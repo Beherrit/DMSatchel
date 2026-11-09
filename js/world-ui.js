@@ -110,6 +110,7 @@ import { dayFor } from './world-hours.js';
 import { namedIn } from './session-named.js';
 import { unlinkedIn, linkNames } from './unlinked.js';
 import { sessionText } from './session-text.js';
+import { sessionGaps, realGapText } from './session-gaps.js';
 
 // Pages used now and then load when first opened, so world pages start faster.
 const lazyView = (load, name) => async (...args) => (await load())[name](...args);
@@ -319,10 +320,13 @@ function questList(list) {
 }
 
 function sessionList(list) {
+  // Time between sessions: how long after the one before each was played.
+  const gaps = sessionGaps(list, worldCalendar());
   return el('ol', { class: 'session-list' }, list.map((e) => el('li', { class: 'card', 'data-id': e.id },
     el('div', { class: 'entry-head' }, el('span', { class: 'eyebrow' }, [e.fields.number && `Session ${e.fields.number}`, e.fields.played_on, e.fields.world_date].filter(Boolean).join(' · ') || 'Session'),
       e.fields.gm ? el('span', { class: 'muted small' }, `GM ${e.fields.gm}`) : null),
-    link(e), e.summary ? el('p', {}, e.summary) : null,
+    link(e), (() => { const g = gaps.get(e.id); const t = g && realGapText(g.real); return t ? el('span', { class: 'muted small session-gap' }, ` · ${t}`) : null; })(),
+    e.summary ? el('p', {}, e.summary) : null,
     e.fields.players ? el('p', { class: 'muted small' }, `Players: ${e.fields.players.replace(/\n+/g, ', ')}`) : null,
     e.fields.xp ? el('p', { class: 'muted small' }, `XP: ${e.fields.xp}`) : null,
     // Who came up, on the session list: who and what the log names (or connects to), up to eight.
