@@ -787,6 +787,12 @@ to the log at the bottom.
 428. [x] **Write about the last session.** The party page offers players a journal entry about the last session,
     started with a link to it.
 429. [x] **What the players wrote.** A session's page lists the journal entries that link to it.
+430. [ ] **Journals on the session list.** The list of sessions says how many journal entries the players wrote
+    about each.
+431. [ ] **Who wrote, in prep.** Session prep's "Last time" card says which journal entries the players wrote about
+    it.
+432. [ ] **In the players' journals.** An NPC's page lists the journal entries that name them.
+433. [ ] **Copy the cast as text.** Who's who can copy the cast list as plain text to paste into a chat.
 
 ## Ideas parking lot
 
