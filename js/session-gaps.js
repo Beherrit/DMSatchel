@@ -25,3 +25,11 @@ export function realGapText(days) {
   if (days < 60) return `${Math.round(days / 7)} weeks later`;
   return `${Math.round(days / 30)} months later`;
 }
+
+// Pace of play: the average days between sessions at the table, and in-world days per session (rounded; null when
+// there's nothing to average).
+export function pace(gaps) {
+  const avg = (xs) => (xs.length ? Math.round(xs.reduce((a, b) => a + b, 0) / xs.length) : null);
+  const g = [...(gaps?.values?.() || [])];
+  return { real: avg(g.map((x) => x.real).filter((x) => x !== null && x >= 0)), world: avg(g.map((x) => x.world).filter((x) => x !== null && x >= 0)) };
+}

@@ -15,3 +15,9 @@ test('sessionGaps: real days and in-world days since the session before', () => 
 test('realGapText', () => {
   assert.deepEqual([0, 1, 5, 14, 40, 90, null].map(realGapText), ['the same day', 'the next day', '5 days later', '2 weeks later', '6 weeks later', '3 months later', '']);
 });
+
+test('pace averages the gaps', async () => {
+  const { pace } = await import('../js/session-gaps.js');
+  assert.deepEqual(pace(new Map([['a', { real: 14, world: 4 }], ['b', { real: 7, world: null }], ['c', { real: null, world: 2 }]])), { real: 11, world: 3 });
+  assert.deepEqual(pace(new Map()), { real: null, world: null });
+});
