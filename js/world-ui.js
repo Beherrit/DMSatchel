@@ -439,7 +439,7 @@ function viewEntry(id, tab) {
     isGm() && e.secret ? el('aside', { class: 'secret' }, el('div', { class: 'eyebrow' }, 'GM only'), richText(e.secret)) : null,
     mentionsCard(e, rerenderWorld),
     e.kind === 'npc' ? lastSeenLine(e) : lastLogLine(e),
-    ['npc', 'character'].includes(e.kind) ? cameUpBox(e) : null,
+    ['npc', 'character', 'quest', ...PLACE_KINDS].includes(e.kind) ? cameUpBox(e) : null,
     e.kind === 'session' ? inSessionCard(e) : null,
     // A wanted poster: for anyone with a bounty on their head.
     e.kind === 'npc' && String(e.fields?.bounty || '').trim() && e.visibility !== 'gm' ? el('p', { class: 'small' }, el('a', { class: 'btn small', href: `#world/poster/${e.id}` }, '🎯 Wanted poster')) : null,
@@ -892,7 +892,8 @@ function inSessionCard(e) {
 function cameUpBox(e) {
   const list = sessionsWith(worldEntries(), mentions, e.id);
   if (list.length < 2) return null;
-  return el('details', { class: 'came-up' }, el('summary', { class: 'small' }, `Every time they came up (${list.length})`),
+  const who = ['npc', 'character'].includes(e.kind);
+  return el('details', { class: 'came-up' }, el('summary', { class: 'small' }, `Every time ${who ? 'they' : 'it'} came up (${list.length})`),
     el('ol', { class: 'plain small came-up-list' }, list.map((s) => { const q = quoteOf(s, e); return el('li', {}, link(s), q ? el('q', { class: 'last-seen-quote' }, q) : el('span', { class: 'muted' }, ' (connected, not named in the log)')); })));
 }
 
