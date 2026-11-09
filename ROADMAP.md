@@ -712,7 +712,7 @@ to the log at the bottom.
     weather and the light.
 380. [x] **Who can see in the dark.** At night, the GM's party sheet says each character's darkvision (from their
     species), and who'll need a light.
-381. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
+381. [x] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 382. [x] **Darkvision from the library.** A character whose species comes from the world's library gets its
     darkvision from the species it's "similar to".
 383. [x] **The weather when the session began.** The "Began at…" line on a new session log includes the weather.
@@ -1150,3 +1150,4 @@ to the log at the bottom.
 - Characters in the log too: a character's page now says "📜 Last in the log: Session 2 · in 2 sessions" with the line ("Ann fell asleep on watch!"), and folds out every session they came up in.
 - Who comes up most: the world's numbers page lists "Who comes up most in the logs": the people, places, quests and factions named in the most sessions (two or more), "Ann in 3 sessions".
 - Forgotten threads: once three sessions are logged, session prep's quests flag "🧵 Gone quiet: Ring the Bell (not in the log for 3 sessions), Never mentioned (never in the log)." for active quests the logs have let slide.
+- A full sweep: all 392 browser tests rerun; no crashes or page errors, last time's one flag (a load flake) is gone, and nothing new is flagged.
