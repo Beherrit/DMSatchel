@@ -736,6 +736,13 @@ to the log at the bottom.
 396. [x] **Last time, on NPC cards.** The printable NPC cards add the line from the last session that named them.
 397. [x] **Search the logs.** Typing "log: dragon" in Ctrl K lists the sessions whose log mentions it, each with the
     sentence.
+398. [ ] **Characters in the log too.** A character's page says when the log last mentioned them, with the line,
+    and folds out every session they came up in.
+399. [ ] **Who comes up most.** The world's numbers page lists the people, places and quests the session logs name
+    most.
+400. [ ] **Forgotten threads.** Session prep flags active quests the logs haven't mentioned for three sessions or
+    more.
+401. [ ] **Sort the cast.** Who's who can be sorted by name or by how long since each was last seen.
 
 ## Ideas parking lot
 
