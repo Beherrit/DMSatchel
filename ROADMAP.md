@@ -734,7 +734,7 @@ to the log at the bottom.
 394. [x] **In this session.** A session's page lists the people, places, quests and things its log names, grouped.
 395. [x] **What happened, in prep.** Session prep's "Who might turn up" quotes the line from when each was last seen.
 396. [x] **Last time, on NPC cards.** The printable NPC cards add the line from the last session that named them.
-397. [ ] **Search the logs.** Typing "log: dragon" in Ctrl K lists the sessions whose log mentions it, each with the
+397. [x] **Search the logs.** Typing "log: dragon" in Ctrl K lists the sessions whose log mentions it, each with the
     sentence.
 
 ## Ideas parking lot
@@ -1139,3 +1139,4 @@ to the log at the bottom.
 - In this session: a session's page lists "In this session (5)": the people, places, quests and things its log names or connects to, grouped by kind and linked.
 - What happened, in prep: "Who might turn up" (in session prep and on a town's page) quotes the line from when each person was last seen ("Saw Ann again at the Inn.").
 - Last time, on NPC cards: each printable NPC card adds "Last time (Session 1): Met Ann at the inn, who poured ale!", the line from the last session that named them.
+- Search the logs: typing "log: dragon" in Ctrl K lists the sessions whose log mentions it, newest first, each with the sentence ("Session 3 · The Dragon burned the mill!"); Enter opens the session.

@@ -10,8 +10,8 @@ import { nearWord, wordsOf } from './name-check.js';
 let M = null;
 async function loadData() {
   if (!M) {
-    const [rules, items, store, hours, calendar, wh, routine] = await Promise.all([import('./rules2024.js'), import('./magic-items.js'), import('./world-store.js'), import('./shop-hours.js'), import('./calendar.js'), import('./world-hours.js'), import('./world-routine.js')]);
-    M = { ...rules, MAGIC_ITEMS: items.MAGIC_ITEMS, store, hours, calendar, wh, routine, changes: [] };
+    const [rules, items, store, hours, calendar, wh, routine, appearances] = await Promise.all([import('./rules2024.js'), import('./magic-items.js'), import('./world-store.js'), import('./shop-hours.js'), import('./calendar.js'), import('./world-hours.js'), import('./world-routine.js'), import('./appearances.js')]);
+    M = { ...rules, MAGIC_ITEMS: items.MAGIC_ITEMS, store, hours, calendar, wh, routine, appearances, changes: [] };
     // Shipped changes (What's new), fetched alongside without holding the box up.
     Promise.all([import('./changelog.js'), fetch('/ROADMAP.md').then((r) => (r.ok ? r.text() : ''))])
       .then(([c, md]) => { M.changes = c.changelog(md); if (dialog?.open) render(); }).catch(() => {});
@@ -90,6 +90,19 @@ function render() {
   if (!M) return;
   const q = input.value.trim().toLowerCase();
   const all = [...baseItems(), ...entryItems()];
+  // Search the logs: "log: dragon" lists the sessions whose log mentions it, newest first, each with the sentence.
+  const lg = /^(?:log|logs|in the log):\s*(.+)$/.exec(q);
+  if (lg) {
+    const word = lg[1].trim();
+    items = M.appearances.sessionOrder(M.store.worldEntries()).map((sn) => ({ sn, line: M.appearances.quoteOf(sn, { name: word }, 90) })).filter((x) => x.line)
+      .slice(0, 40).map(({ sn, line }) => ({ label: sn.name, group: 'In the log', href: `#world/e/${sn.id}`, hint: line }));
+    active = Math.min(active, Math.max(0, items.length - 1));
+    setKids(list, ...(items.length ? items.map((it, i) => el('li', { role: 'option', id: `pal-${i}`, 'aria-selected': String(i === active), class: i === active ? 'active' : '', onmousedown: (ev) => { ev.preventDefault(); go(it); } },
+      el('span', { class: 'pal-label' }, it.label), el('span', { class: 'pal-hint' }, it.hint), el('span', { class: 'pal-group' }, it.group)))
+      : [el('li', { class: 'pal-empty' }, `No session log mentions “${word}”.`)]));
+    input.setAttribute('aria-activedescendant', items.length ? `pal-${active}` : '');
+    return;
+  }
   // "Who's at the Bell": who the routines put at a place (or inside it) right now.
   const at = /^(?:who'?s |who’s |who is )?at (.+)$/.exec(q);
   const bare = (t) => t.toLowerCase().replace(/^the /, '').trim();
