@@ -796,7 +796,7 @@ to the log at the bottom.
 434. [x] **Search the journals too.** "log: dragon" in Ctrl K also finds journal entries that mention it.
 435. [x] **What they wrote, on a character.** A character's page lists the journal entries its player wrote.
 436. [x] **When a journal entry is set.** A journal entry about a session shows that session's in-world date.
-437. [ ] **Not a name.** In "Names left unlinked", a GM can mark a name as never to be linked (an entry called "The
+437. [x] **Not a name.** In "Names left unlinked", a GM can mark a name as never to be linked (an entry called "The
     Watch" that's often just words), and it stops being flagged.
 
 ## Ideas parking lot
@@ -1241,3 +1241,4 @@ to the log at the bottom.
 - Search the journals too: "log: dragon" in Ctrl K now lists journal entries that mention it after the session logs, grouped "In a journal", each with the sentence.
 - What they wrote, on a character: a character's page lists "📓 Their player's journal (2): Day two, Day one", the journal entries by the same player, newest first.
 - When a journal entry is set: a journal entry that links a session says "📅 About Session 2 (5 Thawmoon 1040)", the session's in-world date.
+- Not a name: each name in "Names left unlinked" has a ✕ that tells the Satchel never to offer it for linking (an entry called "The Watch" that's often just words); it's kept in prep.not_links (additive, GM-only; players get a 403) and the name stops being flagged.

@@ -1,6 +1,6 @@
 // "What needs writing" (GMs): thin spots to fill in before the party gets there. Route: #world/todo
 import { el, toast } from './dom.js';
-import { isGm } from './api.js';
+import { isGm, api } from './api.js';
 import { worldEntries, link, kindLabel, byName, getEntry, notice, patchEntry } from './world-store.js';
 import { unlinkedIn, linkNames } from './unlinked.js';
 import { sessionChecks } from './session-checks.js';
@@ -46,8 +46,10 @@ function emptyLogsSection(chk) {
 }
 
 // Names left unlinked: entries the session logs name as plain text, with a button to link them for the GM.
-function unlinkedSection() {
-  const all = worldEntries();
+function unlinkedSection(notLinks = []) {
+  // Not a name: entries the GMs marked never to be offered for linking are left out.
+  const skip = new Set(notLinks);
+  const all = worldEntries().filter((e) => !skip.has(e.id) || e.kind === 'session' || e.kind === 'journal');
   // Session logs first (newest first), then journal entries (newest first).
   const rows = all.filter((e) => ['session', 'journal'].includes(e.kind) && e.body && e.can_edit !== false).map((s) => ({ s, found: unlinkedIn(s.body, all) })).filter((x) => x.found.length)
     .sort((a, b) => (a.s.kind === b.s.kind ? 0 : a.s.kind === 'session' ? -1 : 1) || (parseFloat(b.s.fields?.number) || 0) - (parseFloat(a.s.fields?.number) || 0) || String(b.s.created_at).localeCompare(String(a.s.created_at)));
@@ -60,7 +62,10 @@ function unlinkedSection() {
   return el('section', { class: 'card todo-group unlinked-names' }, el('h3', {}, `Names left unlinked in logs and journals (${rows.length})`),
     el('p', { class: 'muted small' }, 'Session logs and journal entries that name entries without [[links]], so they don’t link through (and, in logs, don’t count for last seen, who came up or gone quiet).'),
     el('ul', { class: 'plain todo-list' }, rows.slice(0, 30).map(({ s, found }) => el('li', {}, el('span', {}, link(s), ': ',
-      found.map((f, i) => [i ? ', ' : '', link(f.entry), f.count > 1 ? el('span', { class: 'muted' }, ` ×${f.count}`) : ''])),
+      found.map((f, i) => [i ? ', ' : '', link(f.entry), f.count > 1 ? el('span', { class: 'muted' }, ` ×${f.count}`) : '',
+        el('button', { class: 'reroll not-link', type: 'button', title: `Never offer to link “${f.entry.name}”`, 'aria-label': `Never offer to link ${f.entry.name}`, onclick: async () => {
+          try { await api('settings', { method: 'PATCH', body: { not_link: f.entry.id } }); toast(`“${f.entry.name}” won’t be offered for linking again`); window.dispatchEvent(new Event('world:rerender')); } catch (err) { toast(err.message, 'bad'); }
+        } }, '✕')])),
       (() => { const b = el('button', { class: 'btn small', type: 'button' }, 'Link them'); b.onclick = () => linkThem(s, found, b); return b; })()))));
 }
 
@@ -92,8 +97,10 @@ function missingSection(missing) {
     missing.length > 40 ? el('p', { class: 'muted small' }, `and ${missing.length - 40} more`) : null);
 }
 
-export function viewTodo() {
+export async function viewTodo() {
   if (!isGm()) return notice('GMs only', 'This page finds thin spots in the world for the GMs to fill in.');
+  let prep = {};
+  try { prep = (await api('settings')).world?.prep || {}; } catch { /* without the GMs' lists */ }
   const spots = thinSpots(worldEntries());
   const missing = missingLinks(worldEntries());
   const routines = routineIssues();
@@ -103,7 +110,7 @@ export function viewTodo() {
       el('p', { class: 'small' }, el('a', { href: '#world/dupes' }, 'Likely duplicates'), ': entries that may be the same thing, to merge.')),
     missingSection(missing),
     routinesSection(routines),
-    unlinkedSection(),
+    unlinkedSection(prep.not_links || []),
     ...(() => { const chk = sessionChecks(worldEntries()); return [emptyLogsSection(chk), numbersSection(chk)]; })(),
     GROUPS.map(([k, title, hint]) => {
       const list = [...spots[k]].sort(byName);

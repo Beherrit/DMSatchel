@@ -8,6 +8,7 @@
 // PATCH {reminder: {add} | {done, on} | {remove} | {clear_done}}   (GM) notes pinned to the next session (prep.reminders)
 // PATCH {reading: [entryIds]}   (GM) what players are asked to read before the next session (prep.reading)
 // PATCH {not_dupe: 'idA|idB'}   (GM) two entries with alike names are different things (prep.not_dupes)
+// PATCH {not_link: id}   (GM) an entry whose name is never offered for linking in logs (prep.not_links)
 // PATCH {tag_note: {tag, text}}   (GM) a tag's description on its page
 // PATCH {tag_color: {tag, color}}  (GM) a tag's colour (0–7), or null to take it off
 // PATCH {start_here: {id, on} | {order}}   (GM) the entries newcomers should read first
@@ -220,6 +221,14 @@ export default route({
       const list = [...new Set([...(Array.isArray(req.world.prep?.not_dupes) ? req.world.prep.not_dupes : []), key])].slice(-2000);
       await sql`UPDATE worlds SET prep = jsonb_set(COALESCE(prep, '{}'::jsonb), '{not_dupes}', ${JSON.stringify(list)}::jsonb) WHERE id = ${req.world.id}`;
       return send(res, 200, { not_dupes: list });
+    }
+    // Not a name: an entry whose name is often just words in the logs ("The Watch"), never offered for linking.
+    if (req.body.not_link !== undefined) {
+      const id = String(req.body.not_link || '').trim().slice(0, 40);
+      if (!id) return fail(res, 400, 'Name an entry.');
+      const list = [...new Set([...(Array.isArray(req.world.prep?.not_links) ? req.world.prep.not_links : []), id])].slice(-2000);
+      await sql`UPDATE worlds SET prep = jsonb_set(COALESCE(prep, '{}'::jsonb), '{not_links}', ${JSON.stringify(list)}::jsonb) WHERE id = ${req.world.id}`;
+      return send(res, 200, { not_links: list });
     }
     if (req.body.journey_remove !== undefined) {
       const list = removeStop(req.world.prep?.journey, String(req.body.journey_remove));
