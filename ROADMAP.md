@@ -760,6 +760,12 @@ to the log at the bottom.
     Bell") with a button that links them in the text.
 412. [x] **Last time on the map.** An NPC's map pin popup quotes the line from the last session that named them.
 413. [x] **Last session, for players.** The party page says which session was last and who and what came up in it.
+414. [ ] **Link names in journals too.** Writing a journal entry, the form offers the names it could link, as session
+    logs do.
+415. [ ] **Unlinked names in journals.** What needs writing finds unlinked names in journal entries as well as
+    session logs.
+416. [ ] **First met.** An NPC's page says which session the party first met them in, and where.
+417. [ ] **First met, on the cast list.** Who's who says when each person was first met.
 
 ## Ideas parking lot
 
