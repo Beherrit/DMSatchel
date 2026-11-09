@@ -454,6 +454,9 @@ function viewEntry(id, tab) {
     mentionsCard(e, rerenderWorld),
     e.kind === 'npc' ? lastSeenLine(e) : lastLogLine(e),
     ['npc', 'character', 'quest', ...PLACE_KINDS].includes(e.kind) ? cameUpBox(e) : null,
+    // What they wrote, on a character: the journal entries by the character's player (newest first).
+    e.kind === 'character' && e.owner_id ? (() => { const js = worldEntries().filter((x) => x.kind === 'journal' && x.owner_id === e.owner_id).sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)));
+      return js.length ? el('p', { class: 'small char-journals' }, el('strong', {}, `📓 Their player’s journal (${js.length}): `), js.slice(0, 8).map((x, i) => [i ? ', ' : '', link(x)]), js.length > 8 ? el('span', { class: 'muted' }, ` and ${js.length - 8} more`) : '') : null; })() : null,
     // In the players' journals: the journal entries that name an NPC, each with the line.
     e.kind === 'npc' ? (() => { const js = journalsAbout(e.id); return js.length ? el('details', { class: 'came-up in-journals' }, el('summary', { class: 'small' }, `In the players’ journals (${js.length})`),
       el('ol', { class: 'plain small came-up-list' }, js.map((x) => { const q = quoteOf(x, e); return el('li', {}, link(x), x.created_by ? el('span', { class: 'muted' }, ` by ${x.created_by}`) : '', q ? el('q', { class: 'last-seen-quote' }, q) : null); }))) : null; })() : null,
