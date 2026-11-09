@@ -107,6 +107,7 @@ import { restockDraft } from './world-place.js';
 import { npcStats, NPC_CLASS_OPTIONS } from './npc-stats.js';
 import { patchEntry, setEntryState, stateBadges, syncWorld, descendantsOf, tagChip } from './world-store.js';
 import { dayFor } from './world-hours.js';
+import { namedIn } from './session-named.js';
 
 // Pages used now and then load when first opened, so world pages start faster.
 const lazyView = (load, name) => async (...args) => (await load())[name](...args);
@@ -323,8 +324,7 @@ function sessionList(list) {
     e.fields.players ? el('p', { class: 'muted small' }, `Players: ${e.fields.players.replace(/\n+/g, ', ')}`) : null,
     e.fields.xp ? el('p', { class: 'muted small' }, `XP: ${e.fields.xp}`) : null,
     // Who came up, on the session list: who and what the log names (or connects to), up to eight.
-    (() => { const ids = [...new Set([...mentions([e.summary, e.body, ...Object.values(e.fields || {})].join('\n')), ...(e.links || []).map((l) => l.id)])];
-      const named = ids.map((id) => getEntry(id)).filter((x) => x && x.id !== e.id && x.kind !== 'session');
+    (() => { const named = namedIn(e);
       return named.length ? el('p', { class: 'small session-named' }, el('span', { class: 'muted' }, 'Came up: '), named.slice(0, 8).map((x, i) => [i ? ', ' : '', link(x)]), named.length > 8 ? el('span', { class: 'muted' }, ` and ${named.length - 8} more`) : '') : null; })())));
 }
 
@@ -883,8 +883,7 @@ function lastSeenLine(e) {
 
 // In this session: the people, places, quests and things a session's log names (or connects to), grouped by kind.
 function inSessionCard(e) {
-  const ids = [...new Set([...mentions([e.summary, e.body, ...Object.values(e.fields || {})].join('\n')), ...(e.links || []).map((l) => l.id)])];
-  const named = ids.map((id) => getEntry(id)).filter((x) => x && x.id !== e.id && x.kind !== 'session');
+  const named = namedIn(e);
   if (!named.length) return null;
   const groups = new Map();
   for (const x of named) { const k = kindLabel(x.kind); if (!groups.has(k)) groups.set(k, []); groups.get(k).push(x); }

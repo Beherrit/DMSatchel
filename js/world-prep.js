@@ -90,6 +90,7 @@ import { deadlineOf, deadlineText } from './deadline.js';
 import { moonlight, nightLight } from './moonlight.js';
 import { sceneFor } from './world-scene.js';
 import { appearances, quoteOf } from './appearances.js';
+import { namedIn } from './session-named.js';
 
 const ACTIVE_PC = (e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
 const card = (title, ...kids) => el('section', { class: 'card prep-card' }, el('h3', {}, title), ...kids);
@@ -112,6 +113,8 @@ function lastTime() {
     el('p', { class: 'muted small' }, [last.fields?.played_on, last.fields?.world_date, last.fields?.gm && `GM ${last.fields.gm}`].filter(Boolean).join(' · ')),
     last.summary ? el('p', {}, last.summary) : null,
     last.fields?.next ? el('div', { class: 'prep-next' }, el('strong', {}, 'Next time: '), richText(last.fields.next)) : null,
+    // Last time, in prep: who and what came up in it.
+    (() => { const named = namedIn(last); return named.length ? el('p', { class: 'small prep-came-up' }, el('strong', {}, 'Came up: '), named.slice(0, 12).map((x, i) => [i ? ', ' : '', link(x)])) : null; })(),
     el('p', {}, link(last, 'Read the full session')));
 }
 

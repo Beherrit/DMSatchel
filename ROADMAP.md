@@ -755,7 +755,7 @@ to the log at the bottom.
 407. [x] **Session numbers in order.** What needs writing flags sessions with a missing or repeated number.
 408. [x] **Logs still to write.** What needs writing lists sessions whose log is empty or only a line.
 409. [x] **Who came up, on the session list.** The list of sessions shows under each who and what its log names.
-410. [ ] **Last time, in prep.** Session prep's "Last time" card lists who and what came up in the last session.
+410. [x] **Last time, in prep.** Session prep's "Last time" card lists who and what came up in the last session.
 411. [ ] **Link names as you write.** Editing a session log, the form offers the names it could link ("Bramwell, The
     Bell") with a button that links them in the text.
 412. [ ] **Last time on the map.** An NPC's map pin popup quotes the line from the last session that named them.
@@ -1176,3 +1176,4 @@ to the log at the bottom.
 - Session numbers in order: What needs writing flags "No session numbered 3, 4.", numbers used more than once (with the sessions) and sessions with no number. Pure in session-checks.js.
 - Logs still to write: What needs writing lists "Logs still to write (2)": sessions with no log yet or only a line (under 60 characters of text), newest first, each with a "Write it" button.
 - Who came up, on the session list: each session in the list of sessions now says "Came up: Ann, The Bell": who and what its log names or connects to (up to eight, then "and N more").
+- Last time, in prep: session prep's "Last time" card adds "Came up: Ann, The Bell", who and what the last session's log names. The session page, the session list and prep now share one helper for it (session-named.js).
