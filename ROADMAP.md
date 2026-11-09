@@ -760,7 +760,7 @@ to the log at the bottom.
     Bell") with a button that links them in the text.
 412. [x] **Last time on the map.** An NPC's map pin popup quotes the line from the last session that named them.
 413. [x] **Last session, for players.** The party page says which session was last and who and what came up in it.
-414. [ ] **Link names in journals too.** Writing a journal entry, the form offers the names it could link, as session
+414. [x] **Link names in journals too.** Writing a journal entry, the form offers the names it could link, as session
     logs do.
 415. [ ] **Unlinked names in journals.** What needs writing finds unlinked names in journal entries as well as
     session logs.
@@ -1186,3 +1186,4 @@ to the log at the bottom.
 - Link names as you write: under a session log's text, the form says "Names you could link: Bramwell, The Bell" as you type, with a "Link them" button that turns them into [[links]] in the text before saving.
 - Last time on the map: an NPC's map pin popup quotes the line from the last session that named them: "Last time (Session 1): Bought nails from Bramwell, who grumbled."
 - Last session, for players: the party page tells everyone "📖 Last session: Session 2 · came up: Ann, The Bell" (the party's own characters left out of the list).
+- Link names in journals too: writing a journal entry, the form offers "Names you could link: Bramwell" with the same "Link them" button as session logs.

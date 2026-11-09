@@ -692,7 +692,7 @@ function viewEdit(id, kindForNew) {
     fieldsBox,
     area('body', 'Description & notes', e.body, 8, 'Link to other entries with [[double brackets]], e.g. [[The Silver Hand]]. **Bold**, *italic*, “- ” for a list, “## ” for a small heading, “> ” for text to read aloud.'),
     // Link names as you write: in a session log, the entries it names as plain text, with a button to link them.
-    e.kind === 'session' ? linkHint() : null,
+    ['session', 'journal'].includes(e.kind) ? linkHint() : null,
     gm ? area('secret', 'GM-only secrets', e.secret, 4, 'Players never see this. Only this world’s GMs can read it.') : null,
     input('tags', 'Tags', (e.tags || []).join(', '), { placeholder: 'comma separated, e.g. north, war, session-12' }),
     el('div', { class: 'field wide' }, el('label', {}, 'Connections'), linksBox,
@@ -1003,7 +1003,7 @@ function turnUpBox(e) {
   return el('details', { class: 'turn-up' }, el('summary', {}, `Who might turn up (${due.length})`), el('p', { class: 'muted small' }, turnUpNote), turnUpList(due));
 }
 
-// Link names as you write: under a session log's text, the entries it names without [[links]], and a button that
+// Link names as you write: under a session log's (or journal entry's) text, the entries it names without [[links]], and a button that
 // links them in the text (the GM saves the form as usual).
 function linkHint() {
   const out = el('p', { class: 'small link-hint', 'aria-live': 'polite' });
