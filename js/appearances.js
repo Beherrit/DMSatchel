@@ -62,3 +62,15 @@ export function sessionsWith(entries, idsIn, id) {
     return ids.has(id);
   });
 }
+
+// Met together: pairs of entries (of the given kinds) named in the same session logs, `min` times or more.
+// → [{ a, b, count }] (a < b by id), most often first.
+export function metTogether(entries, idsIn, kinds = ['npc'], min = 2) {
+  const byId = new Map((entries || []).map((e) => [e.id, e])), pairs = new Map();
+  for (const s of sessionOrder(entries)) {
+    const ids = [...new Set([...idsIn([s.summary, s.body, ...Object.values(s.fields || {})].join('\n')), ...(s.links || []).map((l) => l.id)])]
+      .filter((id) => kinds.includes(byId.get(id)?.kind)).sort();
+    for (let i = 0; i < ids.length; i++) for (let j = i + 1; j < ids.length; j++) { const k = `${ids[i]}|${ids[j]}`; pairs.set(k, (pairs.get(k) || 0) + 1); }
+  }
+  return [...pairs].filter(([, n]) => n >= min).map(([k, count]) => { const [a, b] = k.split('|'); return { a, b, count }; }).sort((x, y) => y.count - x.count || `${x.a}${x.b}`.localeCompare(`${y.a}${y.b}`));
+}

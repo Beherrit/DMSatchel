@@ -1808,3 +1808,4 @@ details.quest-group > summary .section-title { display: inline }
 .cast-sort { margin: 0 0 10px }
 @media print { .cast-sort { display: none } }
 .first-met { display: block; margin-top: 2px }
+.edge.together { stroke-dasharray: 6 3; opacity: .5 }

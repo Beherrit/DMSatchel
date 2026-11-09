@@ -766,7 +766,7 @@ to the log at the bottom.
     session logs.
 416. [x] **First met.** An NPC's page says which session the party first met them in, and where.
 417. [x] **First met, on the cast list.** Who's who says when each person was first met.
-418. [ ] **Met together.** The relationship web can show, as faint lines, NPCs whose names come up in the same
+418. [x] **Met together.** The relationship web can show, as faint lines, NPCs whose names come up in the same
     session logs (twice or more), toggled on like acquaintances.
 419. [ ] **In this entry, for journals.** A journal entry's page lists who and what it names, grouped, as session
     pages do.
@@ -1199,3 +1199,4 @@ to the log at the bottom.
 - First met: an NPC met in more than one session now says "🤝 First met in Session 1, at The Inn" under where they were last seen (appearances() now also remembers the first session).
 - First met, on the cast list: Who's who now reads "Met in 2 sessions · last in Session 2 · first in Session 1" for anyone met more than once.
 - A full sweep: all 405 browser tests rerun; no crashes or page errors. Two flags, a timeout in the secrets test and a 403 in the dialogs test, both pass on rerun (the same load flakes as before).
+- Met together: the relationship web has a "Met together (from the logs)" option, off by default, that draws a faint dashed line between NPCs the session logs name in the same sessions twice or more ("Ann — in the same session logs 2 times — Bo"). Pure in appearances.js (metTogether).

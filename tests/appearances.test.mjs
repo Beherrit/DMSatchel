@@ -53,3 +53,13 @@ test('appearances remembers the first session too', async () => {
   assert.equal(a.get('ann').first.name, 'Session 1'); assert.equal(a.get('ann').last.name, 'Session 3');
   assert.equal(a.get('bo').first.name, 'Session 4');
 });
+
+test('metTogether pairs NPCs named in the same logs, twice or more', async () => {
+  const { metTogether } = await import('../js/appearances.js');
+  const S = (n, body) => ({ kind: 'session', id: `s${n}`, name: `Session ${n}`, body, fields: { number: String(n) } });
+  const idsIn = (t) => [...t.matchAll(/\[\[([^\]]+)\]\]/g)].map((m) => m[1]);
+  const ents = [{ id: 'ann', kind: 'npc' }, { id: 'bo', kind: 'npc' }, { id: 'cy', kind: 'npc' }, { id: 'inn', kind: 'location' },
+    S(1, '[[ann]] [[bo]] [[inn]]'), S(2, '[[ann]] [[bo]] [[cy]]'), S(3, '[[bo]] [[cy]] [[inn]]')];
+  assert.deepEqual(metTogether(ents, idsIn), [{ a: 'ann', b: 'bo', count: 2 }, { a: 'bo', b: 'cy', count: 2 }]);
+  assert.deepEqual(metTogether(ents, idsIn, ['npc'], 3), []);
+});
