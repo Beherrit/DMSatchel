@@ -89,7 +89,7 @@ import { dayWeather, forecast } from './forecast.js';
 import { deadlineOf, deadlineText } from './deadline.js';
 import { moonlight, nightLight } from './moonlight.js';
 import { sceneFor } from './world-scene.js';
-import { appearances } from './appearances.js';
+import { appearances, quoteOf } from './appearances.js';
 
 const ACTIVE_PC = (e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
 const card = (title, ...kids) => el('section', { class: 'card prep-card' }, el('h3', {}, title), ...kids);
@@ -194,6 +194,16 @@ function turnUpSection(prep) {
   const due = turnUp(town);
   if (!due.length) return null;
   return card(`Who might turn up in ${town.name}`, el('p', { class: 'muted small' }, turnUpNote), turnUpList(due));
+}
+
+// Key people gone quiet: key NPCs the logs haven't mentioned for five sessions or more, wherever they are.
+function keyQuietSection() {
+  const seen = appearances(worldEntries(), mentions);
+  const quiet = worldEntries().filter((e) => e.kind === 'npc' && (e.tags || []).includes('key') && e.fields?.status !== 'Dead' && seen.get(e.id)?.ago >= 5)
+    .sort((a, b) => seen.get(b.id).ago - seen.get(a.id).ago || byName(a, b)).slice(0, 8);
+  if (!quiet.length) return null;
+  return card('Key people gone quiet', el('p', { class: 'muted small' }, 'Key NPCs the session logs haven’t mentioned for five sessions or more. Time they came back?'),
+    list(quiet, (p) => { const s = seen.get(p.id), q = quoteOf(s.last, p, 140); return [link(p), el('span', { class: 'muted small' }, ` · last in `, link(s.last), `, ${s.ago} sessions ago`), q ? el('q', { class: 'small last-seen-quote' }, q) : null]; }));
 }
 
 function questsSection() {
@@ -345,7 +355,7 @@ export async function viewPrep(rerender) {
       el('button', { class: 'btn small', type: 'button', onclick: async () => { await letRumorsSpread(); rerender(); } }, 'Let rumors spread'),
       el('a', { class: 'btn small', href: '#world/calendar' }, 'Move time on')),
     el('div', { class: 'prep-columns' },
-      el('div', { class: 'prep-main' }, remindersCard(prep), waitingCard(rerender), worriesCard(), giftsCard(), nextMovesCard(rerender), shoppingPrepCard(), readingPrepCard(), lastTime(), betweenSection(table), whereSection(prep, rerender), card('Read-aloud', ...readAloudList(prep)), secretsCard(prep, next), turnUpSection(prep), questsSection(), scratchPad(prep)),
+      el('div', { class: 'prep-main' }, remindersCard(prep), waitingCard(rerender), worriesCard(), giftsCard(), nextMovesCard(rerender), shoppingPrepCard(), readingPrepCard(), lastTime(), betweenSection(table), whereSection(prep, rerender), card('Read-aloud', ...readAloudList(prep)), secretsCard(prep, next), turnUpSection(prep), keyQuietSection(), questsSection(), scratchPad(prep)),
       el('div', { class: 'prep-side' }, world.info?.rsvp ? card('Who’s coming', rsvpCard({ compact: true })) : null, checklistCard(prep, next), clockCard(), partySection(), spotlightSection(), clocksSection(), calendarSection(), threadsSection(gmThreads, table))));
 }
 
