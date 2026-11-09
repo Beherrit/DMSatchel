@@ -1,7 +1,8 @@
 // "What needs writing" (GMs): thin spots to fill in before the party gets there. Route: #world/todo
-import { el } from './dom.js';
+import { el, toast } from './dom.js';
 import { isGm } from './api.js';
-import { worldEntries, link, kindLabel, byName, getEntry, notice } from './world-store.js';
+import { worldEntries, link, kindLabel, byName, getEntry, notice, patchEntry } from './world-store.js';
+import { unlinkedIn, linkNames } from './unlinked.js';
 import { thinSpots, missingLinks } from './thin.js';
 import { KINDS, KIND_ORDER } from './world-schema.js';
 import { routineIssues } from './world-routine.js';
@@ -22,6 +23,24 @@ function makePlace(name, npc) {
   for (let p = at, i = 0; p && i < 12; p = p.parent_id && getEntry(p.parent_id), i++) if (p.kind === 'settlement') { at = p; break; }
   const title = name.replace(/^(at|in) /i, '').replace(/^\w/, (c) => c.toUpperCase());
   window.dispatchEvent(new CustomEvent('world:draft', { detail: { kind: 'location', name: title, parent_id: at?.id || null } }));
+}
+
+// Names left unlinked: entries the session logs name as plain text, with a button to link them for the GM.
+function unlinkedSection() {
+  const all = worldEntries();
+  const rows = all.filter((e) => e.kind === 'session' && e.body).map((s) => ({ s, found: unlinkedIn(s.body, all) })).filter((x) => x.found.length)
+    .sort((a, b) => (parseFloat(b.s.fields?.number) || 0) - (parseFloat(a.s.fields?.number) || 0));
+  if (!rows.length) return null;
+  const linkThem = async (s, found, btn) => {
+    btn.disabled = true;
+    try { await patchEntry(getEntry(s.id) || s, { body: linkNames((getEntry(s.id) || s).body, found.map((f) => f.entry)) }); toast(`Linked ${found.length} name${found.length === 1 ? '' : 's'} in ${s.name}`); window.dispatchEvent(new Event('world:rerender')); }
+    catch (err) { toast(err.message, 'bad'); btn.disabled = false; }
+  };
+  return el('section', { class: 'card todo-group unlinked-names' }, el('h3', {}, `Names left unlinked in the logs (${rows.length})`),
+    el('p', { class: 'muted small' }, 'Session logs that name entries without [[links]], so they don’t count as mentioned (last seen, who came up, gone quiet).'),
+    el('ul', { class: 'plain todo-list' }, rows.slice(0, 30).map(({ s, found }) => el('li', {}, el('span', {}, link(s), ': ',
+      found.map((f, i) => [i ? ', ' : '', link(f.entry), f.count > 1 ? el('span', { class: 'muted' }, ` ×${f.count}`) : ''])),
+      (() => { const b = el('button', { class: 'btn small', type: 'button' }, 'Link them'); b.onclick = () => linkThem(s, found, b); return b; })()))));
 }
 
 // Routines that don't read: lines the clock can't read, and places named that aren't in the world, to fix in one go.
@@ -63,6 +82,7 @@ export function viewTodo() {
       el('p', { class: 'small' }, el('a', { href: '#world/dupes' }, 'Likely duplicates'), ': entries that may be the same thing, to merge.')),
     missingSection(missing),
     routinesSection(routines),
+    unlinkedSection(),
     GROUPS.map(([k, title, hint]) => {
       const list = [...spots[k]].sort(byName);
       return list.length ? el('section', { class: 'card todo-group' }, el('h3', {}, `${title} (${list.length})`), el('p', { class: 'muted small' }, hint),

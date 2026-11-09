@@ -750,7 +750,7 @@ to the log at the bottom.
 404. [x] **Threads in the new log.** A session log started from prep lists the quests in play, so the GM can note
     what moved.
 405. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
-406. [ ] **Names left unlinked.** What needs writing finds names of entries that session logs mention as plain text,
+406. [x] **Names left unlinked.** What needs writing finds names of entries that session logs mention as plain text,
     without [[links]], and links them in one click for the GM.
 407. [ ] **Session numbers in order.** What needs writing flags sessions with a missing or repeated number.
 408. [ ] **Logs still to write.** What needs writing lists sessions whose log is empty or only a line.
@@ -1167,3 +1167,4 @@ to the log at the bottom.
 - Key people gone quiet: session prep has a "Key people gone quiet" card listing key NPCs the logs haven't mentioned for five sessions or more, wherever they are, longest first, each with when they were last in the log and the line.
 - Every session, for quests and places: quests and places that have come up in more than one session fold out "Every time it came up (2)", each session newest first with its line, as NPCs and characters do.
 - Threads in the new log: a session log started from prep ends with "Threads in play (link the ones that moved): Find the cat; Ring the Bell", plain names so they don't count as mentioned until the GM links the ones that moved.
+- Names left unlinked: What needs writing lists session logs that name entries as plain text without [[links]] ("Session 1: Bramwell ×2, The Bell"), matching whole names of four letters or more, longest first. A "Link them" button turns those mentions into links (existing links are kept), so they count for last seen, who came up and gone quiet.
