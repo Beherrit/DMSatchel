@@ -22,3 +22,10 @@ export function onWatch(shifts, minutes) {
 }
 
 export const hhmm = (m) => `${String(Math.floor((m % 1440) / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+
+// The orders as plain text: "Marching order (front to back): Bo, Ann\nWatches: 22:00–02:00 Ann; 02:00–06:00 Bo".
+// nameOf(id) → a name ('' to leave someone out).
+export function ordersText(march, watch, nameOf) {
+  const m = cleanOrder(march).map(nameOf).filter(Boolean), w = watchShifts(watch).map((s) => ({ ...s, name: nameOf(s.id) })).filter((s) => s.name);
+  return [m.length ? `Marching order (front to back): ${m.join(', ')}` : '', w.length ? `Watches: ${w.map((s) => `${hhmm(s.from)}–${hhmm(s.to)} ${s.name}`).join('; ')}` : ''].filter(Boolean).join('\n');
+}

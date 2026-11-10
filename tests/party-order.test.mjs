@@ -17,3 +17,10 @@ test('watchShifts and onWatch: the night split between the watchers', () => {
   assert.equal(onWatch(s, 12 * 60), null);
   assert.deepEqual(watchShifts([]), []);
 });
+
+test('ordersText: the orders as plain text', async () => {
+  const { ordersText } = await import('../js/party-order.js');
+  const names = { a: 'Ann', b: 'Bo' };
+  assert.equal(ordersText(['b', 'a', 'x'], ['a', 'b'], (id) => names[id] || ''), 'Marching order (front to back): Bo, Ann\nWatches: 22:00–02:00 Ann; 02:00–06:00 Bo');
+  assert.equal(ordersText([], [], () => ''), '');
+});
