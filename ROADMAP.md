@@ -903,6 +903,12 @@ to the log at the bottom.
 515. [x] **A tavern's favourites.** A tavern's page lists what the party orders there most.
 516. [x] **Wishlists.** A character can keep a wishlist (one item per line).
 517. [x] **Someone wants this.** Shops and market stalls mark goods on a character's wishlist ("⭐ Ann wants this").
+518. [ ] **What the party wants.** The party page lists everyone's wishlists and where in the party's town each item
+    is for sale today.
+519. [ ] **Got it.** Buying something on your wishlist offers to take it off the list.
+520. [ ] **Wishes in the palette.** Ctrl+K "wishlist" lists the party's wishes and where they're sold.
+521. [ ] **What they want, in prep.** Session prep lists the wishes the shops and stalls in the party's town could
+    grant.
 
 ## Ideas parking lot
 
