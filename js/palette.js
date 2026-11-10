@@ -10,8 +10,8 @@ import { nearWord, wordsOf } from './name-check.js';
 let M = null;
 async function loadData() {
   if (!M) {
-    const [rules, items, store, hours, calendar, wh, routine, appearances] = await Promise.all([import('./rules2024.js'), import('./magic-items.js'), import('./world-store.js'), import('./shop-hours.js'), import('./calendar.js'), import('./world-hours.js'), import('./world-routine.js'), import('./appearances.js')]);
-    M = { ...rules, MAGIC_ITEMS: items.MAGIC_ITEMS, store, hours, calendar, wh, routine, appearances, changes: [] };
+    const [rules, items, store, hours, calendar, wh, routine, appearances, week] = await Promise.all([import('./rules2024.js'), import('./magic-items.js'), import('./world-store.js'), import('./shop-hours.js'), import('./calendar.js'), import('./world-hours.js'), import('./world-routine.js'), import('./appearances.js'), import('./week-in-town.js')]);
+    M = { ...rules, MAGIC_ITEMS: items.MAGIC_ITEMS, store, hours, calendar, wh, routine, appearances, week, changes: [] };
     // Shipped changes (What's new), fetched alongside without holding the box up.
     Promise.all([import('./changelog.js'), fetch('/ROADMAP.md').then((r) => (r.ok ? r.text() : ''))])
       .then(([c, md]) => { M.changes = c.changelog(md); if (dialog?.open) render(); }).catch(() => {});
@@ -120,6 +120,15 @@ function render() {
     input.setAttribute('aria-activedescendant', `pal-${active}`);
     return;
   }
+  // "Market": the towns with a market day, and when each is next (soonest first; holidays skipped), above the
+  // ordinary matches for the word.
+  let markets = [];
+  if (/^(markets?|market days?)$/.test(q)) {
+    const cal = M.calendar.cleanCalendar(M.store.world.info?.cal);
+    markets = M.store.worldEntries().filter((e) => e.kind === 'settlement' && e.fields?.market_day).map((e) => ({ e, m: cal ? M.week.nextMarket(cal, e) : null }))
+      .sort((a, b) => (a.m ? a.m.inDays : 1e9) - (b.m ? b.m.inDays : 1e9) || a.e.name.localeCompare(b.e.name)).slice(0, 20)
+      .map(({ e, m }) => ({ label: e.name, group: 'Market day', href: `#world/e/${e.id}`, hint: m ? (m.inDays === 0 ? `🧺 Market day today (${m.weekday})` : `🧺 Next market ${m.weekday}, ${M.week.inDaysText(m.inDays)}`) : `🧺 Market on ${e.fields.market_day}s` }));
+  }
   // "Open now": every shop and tavern open at the world's hour, by name.
   if (/^(open now|what'?s open( now)?|what’s open( now)?)$/.test(q)) {
     items = all.filter((it) => it.openNow).sort((a, b) => a.label.localeCompare(b.label)).slice(0, 40);
@@ -131,6 +140,7 @@ function render() {
     return;
   }
   items = all.map((it) => [score(it, q), it]).filter(([s]) => s > 0).sort((a, b) => b[0] - a[0] || a[1].label.localeCompare(b[1].label)).slice(0, 40).map(([, it]) => it);
+  if (markets.length) items = [...markets, ...items.filter((it) => !markets.some((m) => m.href === it.href))].slice(0, 40);
   // Nothing typed yet: the entries you opened last come first.
   if (!q) {
     let recent = [];
