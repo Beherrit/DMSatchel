@@ -5,6 +5,8 @@ import { el, toast, setKids } from './dom.js';
 import { isGm, isMember, session } from './api.js';
 import { worldEntries, createEntry, patchEntry, getEntry, link, when, byName, richText, notice } from './world-store.js';
 import { DOWNTIME_ACTIVITIES } from './world-schema.js';
+import { GOODS, coinText } from './economy.js';
+import { craftEstimate } from './crafting.js';
 
 const ACTIVE = (e) => !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
 const downtimeOf = (charId) => worldEntries().filter((d) => d.kind === 'downtime' && d.fields?.character === charId);
@@ -17,6 +19,8 @@ function item(d, { showChar = true, resolve = null } = {}) {
     el('div', { class: 'entry-head' }, el('div', {}, showChar && ch ? [link(ch), ' · '] : null, el('strong', {}, f.activity || 'Downtime'),
       f.days ? el('span', { class: 'muted small' }, f.done && !f.resolved ? ` · ${Math.min(+f.done, +f.days || +f.done)} of ${f.days} days` : ` · ${f.days} day${String(f.days) === '1' ? '' : 's'}`) : null, f.cost ? el('span', { class: 'muted small' }, ` · ${f.cost}`) : null),
       el('span', { class: `tag${f.resolved ? '' : ' waiting-tag'}` }, f.resolved ? 'Resolved' : +f.days > 0 && +f.done >= +f.days ? 'Ready to resolve' : 'Waiting for a GM')),
+    // What's being crafted, with the SRD 5.2 estimate when it's on the price list.
+    f.craft ? (() => { const e = craftEstimate(f.craft); return el('p', { class: 'small craft-line' }, `🔨 Making: ${f.craft}`, e ? el('span', { class: 'muted' }, ` (materials ${coinText(e.materialsCp)}, ${e.days} day${e.days === 1 ? '' : 's'} of work)`) : null); })() : null,
     d.summary ? el('p', {}, d.summary) : null,
     f.outcome ? el('div', { class: 'downtime-outcome' }, el('span', { class: 'label' }, 'Outcome'), richText(f.outcome)) : null,
     el('p', { class: 'muted small' }, `${d.owner || d.created_by || 'Someone'}, ${when(d.created_at)}${d.visibility === 'gm' ? ' · only the GMs and the player can see this' : ''} · `, link(d, 'Open')),
@@ -44,6 +48,20 @@ function fileForm(after, preset) {
   const days = el('input', { type: 'text', id: 'dt-days', inputmode: 'numeric', placeholder: 'e.g. 5' });
   const cost = el('input', { type: 'text', id: 'dt-cost', placeholder: 'e.g. 25 gp' });
   const what = el('textarea', { id: 'dt-what', rows: 3, placeholder: 'What they do, where, and what they hope to get out of it.' });
+  // Crafting costs: for crafting, the item to make; on the price list, the SRD 5.2 estimate (materials and days).
+  const craft = el('input', { type: 'text', id: 'dt-craft', list: 'dt-craft-list', placeholder: 'e.g. Longsword', autocomplete: 'off' });
+  const craftList = el('datalist', { id: 'dt-craft-list' }, GOODS.map((g) => el('option', { value: g[0] })));
+  const estimate = el('p', { class: 'small craft-estimate', 'aria-live': 'polite' });
+  const showEstimate = () => {
+    const e = craft.value.trim() ? craftEstimate(craft.value) : null;
+    estimate.textContent = !craft.value.trim() ? 'Name an item from the price list for an estimate (or describe anything else below).'
+      : e ? `${e.name} (${coinText(Math.round(e.gp * 100))}): raw materials ${coinText(e.materialsCp)}, ${e.days} day${e.days === 1 ? '' : 's'} of work. They need proficiency with the right tools.`
+        : 'Not on the price list: a GM will set the cost and time.';
+  };
+  craft.addEventListener('input', showEstimate);
+  const craftBox = el('div', { class: 'field wide craft-box' }, el('label', { for: 'dt-craft' }, 'Item to craft'), craft, craftList, estimate);
+  const showCraft = () => { craftBox.hidden = act.value !== 'Crafting'; showEstimate(); };
+  act.addEventListener('change', showCraft); showCraft();
   const priv = el('input', { type: 'checkbox', id: 'dt-private' });
   const status = el('p', { class: 'form-status', role: 'status' });
   const form = el('form', { class: 'card edit-form downtime-form' }, el('h3', {}, 'File downtime'),
@@ -52,6 +70,7 @@ function fileForm(after, preset) {
       el('div', { class: 'field' }, el('label', { for: 'dt-act' }, 'Activity'), act),
       el('div', { class: 'field' }, el('label', { for: 'dt-days' }, 'Days spent'), days),
       el('div', { class: 'field' }, el('label', { for: 'dt-cost' }, 'Cost (optional)'), cost),
+      craftBox,
       el('div', { class: 'field wide' }, el('label', { for: 'dt-what' }, 'What they do'), what)),
     el('label', { class: 'check' }, priv, ' Keep it between me and the GMs'),
     status, el('div', { class: 'btnrow' }, el('button', { class: 'btn primary', type: 'submit' }, 'File it')));
@@ -61,7 +80,7 @@ function fileForm(after, preset) {
     const c = getEntry(ch.value);
     try {
       await createEntry({ kind: 'downtime', name: `${c.name}: ${act.value}`, summary: what.value.trim(), visibility: priv.checked ? 'gm' : 'all',
-        fields: { character: c.id, activity: act.value, days: days.value.trim(), cost: cost.value.trim() } });
+        fields: { character: c.id, activity: act.value, days: days.value.trim(), cost: cost.value.trim(), ...(act.value === 'Crafting' && craft.value.trim() ? { craft: craft.value.trim().slice(0, 120) } : {}) } });
       toast(isGm() ? 'Downtime filed' : 'Filed: a GM will write how it goes');
       after();
     } catch (err) { status.textContent = err.message; status.className = 'form-status error'; }

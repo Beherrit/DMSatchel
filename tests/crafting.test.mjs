@@ -1,0 +1,26 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { findGood, craftEstimate } from '../js/crafting.js';
+
+const goods = [['Longsword', 15, 'Weapons'], ['Plate armor', 1500, 'Armor'], ['Rope (50 feet)', 1, 'Adventuring gear'], ['Chain mail', 75, 'Armor']];
+
+test('findGood: by name, or the start of it', () => {
+  assert.equal(findGood('longsword', goods).gp, 15);
+  assert.equal(findGood('rope', goods).name, 'Rope (50 feet)');
+  assert.equal(findGood('a flying carpet', goods), null);
+  assert.equal(findGood('', goods), null);
+});
+
+test('craftEstimate: half the price in materials, price ÷ 10 days, divided among helpers', () => {
+  assert.deepEqual(craftEstimate('Longsword', 1, goods), { name: 'Longsword', gp: 15, materialsCp: 750, days: 2, daysEach: 2, helpers: 1 });
+  assert.deepEqual(craftEstimate('Plate armor', 1, goods), { name: 'Plate armor', gp: 1500, materialsCp: 75000, days: 150, daysEach: 150, helpers: 1 });
+  assert.equal(craftEstimate('Plate armor', 4, goods).daysEach, 38);
+  assert.equal(craftEstimate('rope', 1, goods).days, 1);
+  assert.equal(craftEstimate('Chain mail', 3, goods).daysEach, 3);
+  assert.equal(craftEstimate('nothing', 1, goods), null);
+});
+
+test('craftEstimate: works on the real price list', () => {
+  const e = craftEstimate('Shortbow');
+  assert.ok(e && e.gp === 25 && e.days === 3 && e.materialsCp === 1250);
+});
