@@ -933,7 +933,7 @@ to the log at the bottom.
 539. [x] **Watch order.** GMs set who keeps watch in the night; the party page shows each watch's hours.
 540. [x] **Orders on the sheet.** The printable GM sheet lists the marching order and the night's watches.
 541. [x] **Whose watch is it?** At night the clock card says whose watch it is now.
-542. [ ] **Watches at camp.** Making camp shows the night's watches from the time camp is made, and when trouble comes,
+542. [x] **Watches at camp.** Making camp shows the night's watches from the time camp is made, and when trouble comes,
     about when and on whose watch.
 543. [ ] **Marching order on the map.** The party's marker on a map shows the marching order.
 544. [ ] **Copy the orders.** The marching order and watches can be copied as plain text.
@@ -1489,3 +1489,4 @@ to the log at the bottom.
 - Watch order: GMs set who keeps watch the same way, and the night (22:00–06:00) is split evenly between them ("22:00–00:40: Ann").
 - Orders on the sheet: the printable GM sheet has "🥾 Marching and watches": the marching order and each watch's hours.
 - Whose watch is it?: at night the clock card says who the watch order puts on now ("🌙 Bo is on watch (till 06:00).").
+- Watches at camp: the make-camp dialog lists the night's watches from the time camp is made ("🌙 Watches: Ann 20:00–00:00, Bo 00:00–04:00"), and when trouble comes it says about when and on whose watch ("About 02:10, on Bo’s watch").

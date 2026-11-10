@@ -10,6 +10,8 @@ import { nightRoll, tableRows, CAMP_MINUTES } from './camp.js';
 import { encounterCard, partyDefaults, placeTerrains, monsterSource } from './encounter-ui.js';
 import { rollEncounter } from './encounters.js';
 import { formatDate, today } from './calendar.js';
+import { watchShifts, onWatch, hhmm } from './party-order.js';
+import { partyOrder } from './world-orders.js';
 
 const ACTIVE = (c) => c.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(c.fields?.status);
 
@@ -45,6 +47,7 @@ function campDialog(rerender) {
   const boxes = chars.map((c) => ({ c, cb: el('input', { type: 'checkbox', id: `cp-${c.id}`, checked: true }) }));
   const odds = el('select', { id: 'cp-odds' }, [[0, 'No roll'], [6, '1 in 6'], [3, '1 in 3']].map(([v, t]) => el('option', { value: v, selected: v === 6 || null }, t)));
   const result = el('div', { class: 'camp-night' });
+  const start = Number(world.info?.clock?.minutes) || 0, shifts = watchShifts(partyOrder().watch, start % 1440, CAMP_MINUTES / 60);
   const go = el('button', { class: 'btn primary', type: 'submit' }, 'Make camp');
   const form = el('form', { class: 'dialog-body', method: 'dialog' },
     el('h2', { id: 'cp-title' }, here ? `Camp near ${here.name}` : 'Make camp'),
@@ -52,6 +55,9 @@ function campDialog(rerender) {
     el('div', { class: 'field' }, el('label', { for: 'cp-odds' }, 'Trouble in the night'), odds),
     el('p', { class: 'muted small' }, table ? `Rolled on ${table.place.name}’s encounter table.` : here ? `No encounter table here: an encounter for ${here.name}’s terrain is rolled.` : 'The party isn’t anywhere on the map: an encounter for open road is rolled.'),
     el('p', { class: 'muted small' }, 'The clock moves on eight hours.'),
+    // Watches at camp: the party's watch order, split over the eight hours from now.
+    shifts.length ? el('p', { class: 'small camp-watches' }, '🌙 Watches: ', shifts.map((s, i) => [i ? ', ' : '', `${getEntry(s.id)?.name} ${hhmm(s.from)}–${hhmm(s.to)}`]), '.')
+      : el('p', { class: 'muted small' }, 'No watch order set: set one on the party page.'),
     result,
     el('div', { class: 'btnrow' }, go, el('button', { class: 'btn', type: 'button', onclick: () => d.close() }, 'Not now')));
   const d = el('dialog', { class: 'dialog', 'aria-labelledby': 'cp-title' }, form);
@@ -66,13 +72,16 @@ function campDialog(rerender) {
       world.info = { ...world.info, clock: r.clock, ...(r.cal ? { cal: r.cal } : {}) };
       woke = r.cal && r.days ? ` It’s ${formatDate(r.cal, today(r.cal), { weekday: true })}.` : '';
     } catch (err) { toast(`Rested, but the clock didn’t move: ${err.message}`, 'bad'); }
-    const night = nightRoll(makeRng(`${Date.now()}-${Math.random()}`), Number(odds.value), table?.rows || []);
+    const rng = makeRng(`${Date.now()}-${Math.random()}`), night = nightRoll(rng, Number(odds.value), table?.rows || []);
+    // When trouble comes: an hour in the night, and whose watch that is.
+    const at = (start % 1440) + rng.int(CAMP_MINUTES), watcher = onWatch(shifts, at);
     toast(`The party made camp and rested${failed.length ? ` (these sheets didn’t update: ${failed.join(', ')})` : ''}.${woke}`, failed.length ? 'bad' : undefined);
     rerender();
     if (!night.happens) { d.close(); return; }
     // Something comes in the night: show it here, for the GM to run.
     const party = partyDefaults();
     setKids(result, el('h3', {}, 'In the night…'),
+      el('p', { class: 'small camp-when' }, `About ${hhmm(at)}${watcher ? `, on ${getEntry(watcher.id)?.name}’s watch` : shifts.length ? '' : ', with no one set on watch'}.`),
       night.row ? el('article', { class: 'card' }, el('div', { class: 'eyebrow' }, `Rolled ${night.roll} on d${night.die}`), el('p', { class: 'lede' }, night.row))
         : encounterCard(rollEncounter({ terrain: here ? placeTerrains(here) : ['road'], level: party.level, size: party.size, difficulty: 'Moderate', ...monsterSource() }), { title: here ? `Night near ${here.name}` : 'Night on the road', place: here }));
     go.replaceWith(el('button', { class: 'btn primary', type: 'button', onclick: () => d.close() }, 'Done'));
