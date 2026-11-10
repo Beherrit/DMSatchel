@@ -45,6 +45,7 @@ import { routeMiles, milesText, travelDayOptions } from './map-route.js';
 import { travel } from './encounters.js';
 import { worldCalendar, todayText, daysPassed } from './world-calendar.js';
 import { advance, formatDate, today, cleanCalendar } from './calendar.js';
+import { nextMarket, inDaysText } from './week-in-town.js';
 import { journeyOnMap } from './journey.js';
 import { controllers, powerSlots } from './control.js';
 import { journey, chainOf, notePartyMove } from './world-journey.js';
@@ -287,6 +288,9 @@ export async function viewMap(id, focusPin) {
           const u = h.open && entry.fields?.type === 'Tavern' ? untilChange(entry, nowMinutes(), dayFor(entry)) : null;
           if (u?.open && u.mins <= 60) return el('p', { class: 'small pin-hours last-orders' }, `🍺 Last orders: it shuts in ${u.mins} min.`);
           return el('p', { class: `small pin-hours${h.open ? '' : ' shut'}` }, h.open ? '🟢 ' : '🔒 ', h.text[0].toUpperCase() + h.text.slice(1), '.'); })(),
+        // Market day on the map: a settlement's pin says it's market day today, or when the next one is.
+        (() => { if (entry?.kind !== 'settlement' || !entry.fields?.market_day) return null; const cal = cleanCalendar(world.info?.cal), m = cal && nextMarket(cal, entry, 14);
+          return m ? el('p', { class: 'small pin-market' }, m.inDays === 0 ? '🧺 Market day today.' : `🧺 Next market: ${m.weekday}, ${inDaysText(m.inDays)}.`) : null; })(),
         // Where they are, on their pin: an NPC's routine now, and their usual day.
         entry?.kind === 'npc' ? routineNow(entry) : null,
         // Sessions here: the sessions whose log mentions this place, newest first.
