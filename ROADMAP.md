@@ -915,6 +915,11 @@ to the log at the bottom.
 524. [x] **Use the estimate.** One click puts the estimate's days and materials cost into the activity.
 525. [x] **Hand over what was made.** When a GM resolves a crafting activity, they can put the item in the
     character's pack.
+526. [ ] **The right tools.** The crafting estimate names the artisan's tools the item needs (smith's tools for a
+    longsword, leatherworker's tools for leather armor…).
+527. [ ] **Got the tools?** The estimate checks the crafter's pack for those tools and says if they're missing.
+528. [ ] **Pay for the materials.** A GM can take the raw materials' cost from the crafter's purse in one click.
+529. [ ] **What the party has made.** The numbers page lists what the party has crafted.
 
 ## Ideas parking lot
 
