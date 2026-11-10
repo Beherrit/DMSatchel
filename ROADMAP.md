@@ -898,7 +898,7 @@ to the log at the bottom.
     they're packed away.
 512. [x] **The keeper at their stall.** A stall whose keeper was made an NPC links to them.
 513. [x] **Stalls in the palette.** Ctrl+K "stalls" lists today's market stalls and their goods.
-514. [ ] **The stall total.** The buy-from-a-stall form shows the total and the character's purse before paying, like
+514. [x] **The stall total.** The buy-from-a-stall form shows the total and the character's purse before paying, like
     a shop's.
 515. [ ] **A tavern's favourites.** A tavern's page lists what the party orders there most.
 516. [ ] **Wishlists.** A character can keep a wishlist (one item per line).
@@ -1421,3 +1421,4 @@ to the log at the bottom.
 - When the stalls pack up: the stalls card says "🕰 Up till 17:00 (another 3 h)", "Going up at 06:00" or "Packed away at 17:00" by the world's clock, and players only see the buy form while the stalls are up (as the server requires).
 - The keeper at their stall: once a stall's keeper is an NPC in the town, the stall says "kept by" them with a link instead of offering to make one.
 - Stalls in the palette: Ctrl+K "stalls" lists today's market stalls in every town with its market on, each with its goods and prices, opening the town's Market tab.
+- The stall total: the buy-from-a-stall form says what it comes to and what the character has ("2 × Candles (10) costs 1 sp 8 cp. Ann has 50 gp."), flagged when they can't afford it.

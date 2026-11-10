@@ -326,7 +326,15 @@ function stallBuy(place, stalls, rerender) {
   const item = el('select', { id: 'stall-item', 'aria-label': 'What to buy' }, opts.map(({ st, g }, i) => el('option', { value: String(i) }, `${g.name} (${st.name}, ${g.price})`)));
   const qty = el('input', { type: 'number', id: 'stall-qty', min: 1, max: 20, value: 1, class: 'hp-amt', 'aria-label': 'How many' });
   const who = el('select', { id: 'stall-who', 'aria-label': 'For' }, chars.map((c) => el('option', { value: c.id }, c.name)));
-  const form = el('form', { class: 'buy-form stall-buy' }, el('div', { class: 'controls' }, item, qty, chars.length > 1 ? [el('span', {}, 'for'), who] : null, el('button', { class: 'btn small primary', type: 'submit' }, 'Buy')));
+  // The stall total: what it comes to and what the character has, before they pay (as a shop's form does).
+  const total = el('p', { class: 'small stall-total', 'aria-live': 'polite' });
+  const show = () => { const pick = opts[Number(item.value)], c = world.entries.get(who.value), n = Math.max(1, Math.min(20, Math.round(Number(qty.value) || 1)));
+    if (!pick || !c) { total.textContent = ''; return; }
+    const cost = pick.g.cp * n, have = Number(playOf(c).cp) || 0;
+    total.textContent = `${n} × ${pick.g.name} costs ${coinText(cost)}. ${c.name} has ${coinText(have)}.`; total.classList.toggle('bad-line', cost > have); };
+  for (const x of [item, qty, who]) x.addEventListener('input', show);
+  show();
+  const form = el('form', { class: 'buy-form stall-buy' }, el('div', { class: 'controls' }, item, qty, chars.length > 1 ? [el('span', {}, 'for'), who] : null, el('button', { class: 'btn small primary', type: 'submit' }, 'Buy')), total);
   form.addEventListener('submit', async (ev) => {
     ev.preventDefault();
     const pick = opts[Number(item.value)], c = world.entries.get(who.value), base = playOf(c);
