@@ -843,6 +843,10 @@ to the log at the bottom.
 467. [x] **The week on the GM sheet.** The printable GM sheet lists the week ahead in the party's town.
 468. [x] **Shut that day.** A calendar day's card says which of the party's town's shops are shut that day, and why.
 469. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
+470. [ ] **Open for the holiday.** The week in town says which shops stay open on a holiday.
+471. [ ] **Birthdays in the week.** The week in town lists the birthdays of the people who live there.
+472. [ ] **Next market on the party page.** The party page says when the next market day is in the party's town.
+473. [ ] **Markets in the palette.** Ctrl+K "market" lists the towns with market days and when each is next.
 
 ## Ideas parking lot
 
