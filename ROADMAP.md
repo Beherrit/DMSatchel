@@ -946,7 +946,7 @@ to the log at the bottom.
 550. [x] **Hirelings march and watch.** The marching order and watch order can include the party's hired NPCs.
 551. [x] **The watch's hours.** GMs set when the night's watch starts and how long it lasts (the default 22:00 for
     eight hours).
-552. [ ] **Orders in the palette.** Ctrl+K "marching" or "watch" shows the party's orders.
+552. [x] **Orders in the palette.** Ctrl+K "marching" or "watch" shows the party's orders.
 553. [ ] **My place and watch.** A character's page says where they march and which watch they keep.
 
 ## Ideas parking lot
@@ -1509,3 +1509,4 @@ to the log at the bottom.
 - Print check: the GM sheet printed to A4 (PDF) shows the market stalls, the week in town and marching and watches as whole blocks in the grid, nothing wider than the page, the app's tools and navigation hidden, and no block split across pages.
 - Hirelings march and watch: the orders editors offer the party's hired NPCs (marked "hired") alongside the characters, and the server sends them to everyone who can see them.
 - The watch's hours: the watch order's editor sets when the watch starts and how long it lasts (1–12 hours; 22:00 for eight by default), saved with prep, and the party page, the GM sheet, the clock card and the copied text all follow it.
+- Orders in the palette: Ctrl+K "marching", "watch" or "orders" lists the marching order ("Bo · In front", "Ann · 2nd in line", "Cy · At the back") and the night's watches with their hours, each opening the party page.

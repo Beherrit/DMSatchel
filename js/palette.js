@@ -10,8 +10,8 @@ import { nearWord, wordsOf } from './name-check.js';
 let M = null;
 async function loadData() {
   if (!M) {
-    const [rules, items, store, hours, calendar, wh, routine, appearances, week, wishes] = await Promise.all([import('./rules2024.js'), import('./magic-items.js'), import('./world-store.js'), import('./shop-hours.js'), import('./calendar.js'), import('./world-hours.js'), import('./world-routine.js'), import('./appearances.js'), import('./week-in-town.js'), import('./world-wishes.js')]);
-    M = { ...rules, MAGIC_ITEMS: items.MAGIC_ITEMS, store, hours, calendar, wh, routine, appearances, week, wishes, changes: [] };
+    const [rules, items, store, hours, calendar, wh, routine, appearances, week, wishes, orders, porder] = await Promise.all([import('./rules2024.js'), import('./magic-items.js'), import('./world-store.js'), import('./shop-hours.js'), import('./calendar.js'), import('./world-hours.js'), import('./world-routine.js'), import('./appearances.js'), import('./week-in-town.js'), import('./world-wishes.js'), import('./world-orders.js'), import('./party-order.js')]);
+    M = { ...rules, MAGIC_ITEMS: items.MAGIC_ITEMS, store, hours, calendar, wh, routine, appearances, week, wishes, orders, porder, changes: [] };
     // Shipped changes (What's new), fetched alongside without holding the box up.
     Promise.all([import('./changelog.js'), fetch('/ROADMAP.md').then((r) => (r.ok ? r.text() : ''))])
       .then(([c, md]) => { M.changes = c.changelog(md); if (dialog?.open) render(); }).catch(() => {});
@@ -144,6 +144,14 @@ function render() {
     wishItems = M.wishes.partyWishes(town?.kind === 'settlement' ? town : null).slice(0, 30).map((w) => ({ label: w.wish.text, group: `${w.who.name} wishes`, href: `#world/e/${w.who.id}`,
       hint: w.at.length ? `⭐ For sale: ${w.at.slice(0, 2).map((x) => `${typeof x.where === 'string' ? x.where : x.where.name} (${cp(x.good.cp)})`).join(', ')}` : '⭐ Not for sale here today' }));
   }
+  // "Marching" / "watch": the party's orders, front to back, and the night's watches.
+  let orderItems = [];
+  if (/^(marching( order)?|watch(es| order)?|night watch(es)?|orders?)$/.test(q)) {
+    const o = M.orders.partyOrder(), name = (id) => M.store.getEntry(id);
+    orderItems = [...o.march.map((id, i) => ({ id, i })).filter((x) => name(x.id)).map(({ id, i }) => ({ label: name(id).name, group: 'Marching order', href: '#world/party', hint: `🥾 ${i === 0 ? 'In front' : i === o.march.length - 1 ? 'At the back' : `${M.calendar.ordinal(i + 1)} in line`}` })),
+      ...M.orders.nightShifts().filter((x) => name(x.id)).map((x) => ({ label: name(x.id).name, group: 'Night watch', href: '#world/party', hint: `🌙 ${M.porder.hhmm(x.from)}–${M.porder.hhmm(x.to)}` }))];
+    if (!orderItems.length) orderItems = [{ label: 'Marching and watches', group: 'Party', href: '#world/party', hint: 'Not set yet: GMs set them on the party page' }];
+  }
   // "Market": the towns with a market day, and when each is next (soonest first; holidays skipped), above the
   // ordinary matches for the word.
   let markets = [];
@@ -168,6 +176,7 @@ function render() {
   if (holidays.length) items = [...holidays, ...items].slice(0, 40);
   if (stallItems.length) items = [...stallItems, ...items].slice(0, 40);
   if (wishItems.length) items = [...wishItems, ...items].slice(0, 40);
+  if (orderItems.length) items = [...orderItems, ...items].slice(0, 40);
   // Nothing typed yet: the entries you opened last come first.
   if (!q) {
     let recent = [];
