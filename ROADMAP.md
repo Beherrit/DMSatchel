@@ -909,6 +909,12 @@ to the log at the bottom.
 520. [x] **Wishes in the palette.** Ctrl+K "wishes" lists the wishes you may see and where they're sold in town.
 521. [x] **What they want, in prep.** Session prep lists the wishes the shops and stalls in the party's town could
     grant.
+522. [ ] **Crafting costs.** Filing a crafting downtime for an item on the price list shows what the raw materials
+    cost (half its price) and how long it takes (its price in GP ÷ 10 days, rounded up), as the SRD 5.2 rules have it.
+523. [ ] **Many hands.** The crafting estimate divides the days among the characters helping.
+524. [ ] **Use the estimate.** One click puts the estimate's days and materials cost into the activity.
+525. [ ] **Hand over what was made.** When a GM resolves a crafting activity, they can put the item in the
+    character's pack.
 
 ## Ideas parking lot
 
