@@ -876,7 +876,7 @@ to the log at the bottom.
 494. [x] **Buy from a stall.** A player can buy from a market stall for their character, paid from their purse like
     a shop (the server checks it's market day and the price).
 495. [x] **Stalls on the GM sheet.** On market day the printable GM sheet lists the stalls in the party's town.
-496. [ ] **A stall keeper as an NPC.** A GM can turn a stall's keeper into an NPC in the town with one click.
+496. [x] **A stall keeper as an NPC.** A GM can turn a stall's keeper into an NPC in the town with one click.
 497. [ ] **Stalls on the party page.** On market day the party page lists the stalls in the party's town.
 
 ## Ideas parking lot
@@ -1378,3 +1378,4 @@ to the log at the bottom.
 - Market-day crowds: by day on the party's town's market day, the scene line adds "It's market day: the square is busy with stalls" ("going up" at dawn); not at night or on a holiday.
 - Buy from a stall: on market day the stalls card has "Buy from a stall" (players for their own characters), paid from the purse into the pack and the log; the server works out the same stalls and prices (prices are whole coins, so what's shown is what's paid) and refuses off market day, on a holiday, or once the stalls are packed away (17:00 till dawn).
 - Stalls on the GM sheet: on market day the printable sheet lists "🧺 Market stalls in Brindle", each stall's keeper and goods with prices.
+- A stall keeper as an NPC: each stall on the Market tab has "Make the keeper an NPC" for GMs, a new-NPC form in the town already filled in (a name and ancestry seeded by the stall, "Market stall keeper", who they are).
