@@ -9,6 +9,7 @@ import { repeatsBetween } from './repeats.js';
 import { onThisDay, yearsAgoText } from './onthisday.js';
 import { journeyDays } from './journey.js';
 import { PRESETS, makeCalendar, cleanCalendar, toDays, fromDays, advance, today, formatDate, parseDate, moonPhase, moonEvent, holidaysOn } from './calendar.js';
+import { namedIn } from './session-named.js';
 
 // Fields that hold an in-world date, by kind.
 const DATE_FIELDS = { event: ['date'], session: ['world_date'], journal: ['date'], handout: ['found'], quest: ['deadline'] };
@@ -122,7 +123,9 @@ export function viewCalendar(arg, sub, rerender) {
       holidaysOn(cal, d).map((h) => el('p', { class: 'holiday' }, `🎉 ${h.name}`)),
       births.filter((x) => x.n === n).map((x) => el('p', { class: 'birthday' }, '🎂 ', link(x.entry), x.age ? ` turns ${x.age}` : '’s birthday')),
       arrivals.filter((x) => x.n === n).map((x) => el('p', { class: 'arrival' }, '⚑ The party arrived in ', link(getEntry(x.id)))),
-      items.length ? el('ul', { class: 'entry-list' }, items.map((x) => el('li', {}, x.repeat ? '↻ ' : '', link(x.entry), el('span', { class: 'kind-tag' }, x.repeat ? x.entry.fields.repeats.toLowerCase() : kindLabel(x.entry.kind))))) : el('p', { class: 'muted small' }, 'Nothing recorded on this day.'),
+      items.length ? el('ul', { class: 'entry-list' }, items.map((x) => el('li', {}, x.repeat ? '↻ ' : '', link(x.entry), el('span', { class: 'kind-tag' }, x.repeat ? x.entry.fields.repeats.toLowerCase() : kindLabel(x.entry.kind)),
+        // Who came up that day: for a session set on this day, who and what its log names.
+        x.entry.kind === 'session' ? (() => { const named = namedIn(x.entry); return named.length ? el('div', { class: 'small muted cal-came-up' }, 'Came up: ', named.slice(0, 8).map((y, i) => [i ? ', ' : '', link(y)])) : null; })() : null))) : el('p', { class: 'muted small' }, 'Nothing recorded on this day.'),
       isGm() ? el('div', { class: 'btnrow' },
         n !== nowN ? el('button', { class: 'btn small', type: 'button', onclick: async () => { if (await saveCal({ ...cal, ...d }, `Today is now ${formatDate(cal, d)}`)) rerender(); } }, 'Make this today') : null,
         el('button', { class: 'btn small ghost', type: 'button', onclick: () => window.dispatchEvent(new CustomEvent('world:draft', { detail: { kind: 'event', name: '', fields: { date: formatDate(cal, d), sort: String(d.year) } } })) }, '+ Event on this day')) : null));

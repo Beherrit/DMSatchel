@@ -833,7 +833,7 @@ to the log at the bottom.
 459. [x] **A town at another hour.** A settlement's page can preview who's about and what's open at another hour.
 460. [x] **Only where people are.** A map toggle dims the pins with nobody there right now.
 461. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
-462. [ ] **Who came up that day.** A day on the calendar lists the sessions set on it and who and what came up in
+462. [x] **Who came up that day.** A day on the calendar lists the sessions set on it and who and what came up in
     them.
 463. [ ] **Market days on the calendar.** The calendar month marks the party's town's market days.
 464. [ ] **No market on a holiday.** When a market day falls on a holiday, the town's page says there's no market.
@@ -1307,3 +1307,4 @@ to the log at the bottom.
 - What if we skip ahead: the clock card folds out "What would change if we skip ahead?": for the next morning, midday, evening and night, what would change in the party's town ("→ Night: Smithy shuts; Ada leaves"), worked out without moving the clock.
 - A town at another hour: a settlement's page folds out "See Brindle at another hour", with a slider that shows who's about and what's open at that hour ("About town at 18:00: Ada at The Bell until 19:00"), without moving the world's clock.
 - Only where people are: an "Only where people are" button on the map dims the place pins with nobody there right now (or at the previewed hour), until hovered.
+- #462 Who came up that day: sessions on a calendar day list who and what their logs name.
