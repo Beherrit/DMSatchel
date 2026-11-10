@@ -10,8 +10,8 @@ import { nearWord, wordsOf } from './name-check.js';
 let M = null;
 async function loadData() {
   if (!M) {
-    const [rules, items, store, hours, calendar, wh, routine, appearances, week] = await Promise.all([import('./rules2024.js'), import('./magic-items.js'), import('./world-store.js'), import('./shop-hours.js'), import('./calendar.js'), import('./world-hours.js'), import('./world-routine.js'), import('./appearances.js'), import('./week-in-town.js')]);
-    M = { ...rules, MAGIC_ITEMS: items.MAGIC_ITEMS, store, hours, calendar, wh, routine, appearances, week, changes: [] };
+    const [rules, items, store, hours, calendar, wh, routine, appearances, week, wishes] = await Promise.all([import('./rules2024.js'), import('./magic-items.js'), import('./world-store.js'), import('./shop-hours.js'), import('./calendar.js'), import('./world-hours.js'), import('./world-routine.js'), import('./appearances.js'), import('./week-in-town.js'), import('./world-wishes.js')]);
+    M = { ...rules, MAGIC_ITEMS: items.MAGIC_ITEMS, store, hours, calendar, wh, routine, appearances, week, wishes, changes: [] };
     // Shipped changes (What's new), fetched alongside without holding the box up.
     Promise.all([import('./changelog.js'), fetch('/ROADMAP.md').then((r) => (r.ok ? r.text() : ''))])
       .then(([c, md]) => { M.changes = c.changelog(md); if (dialog?.open) render(); }).catch(() => {});
@@ -135,6 +135,15 @@ function render() {
   if (/^(stalls?|market stalls?)$/.test(q)) {
     stallItems = M.store.worldEntries().filter((e) => e.kind === 'settlement').flatMap((t) => M.routine.todaysStalls(t).map((st) => ({ label: st.name, group: `Stall in ${t.name}`, href: `#world/e/${t.id}/market`, hint: st.goods.map((g) => `${g.name} ${g.price}`).join(', ') }))).slice(0, 30);
   }
+  // "Wishes": the open wishes this person may see (their own characters', or everyone's for GMs), with where each is
+  // for sale in the party's town today.
+  let wishItems = [];
+  if (/^(wish(es|list)?|wish lists?)$/.test(q)) {
+    let town = null; try { town = M.routine.partyTown(); } catch { town = null; }
+    const cp = (n) => { const g = Math.floor(n / 100), sv = Math.floor((n % 100) / 10), c = n % 10; return [g && `${g} gp`, sv && `${sv} sp`, c && `${c} cp`].filter(Boolean).join(' ') || '0 gp'; };
+    wishItems = M.wishes.partyWishes(town?.kind === 'settlement' ? town : null).slice(0, 30).map((w) => ({ label: w.wish.text, group: `${w.who.name} wishes`, href: `#world/e/${w.who.id}`,
+      hint: w.at.length ? `⭐ For sale: ${w.at.slice(0, 2).map((x) => `${typeof x.where === 'string' ? x.where : x.where.name} (${cp(x.good.cp)})`).join(', ')}` : '⭐ Not for sale here today' }));
+  }
   // "Market": the towns with a market day, and when each is next (soonest first; holidays skipped), above the
   // ordinary matches for the word.
   let markets = [];
@@ -158,6 +167,7 @@ function render() {
   if (markets.length) items = [...markets, ...items.filter((it) => !markets.some((m) => m.href === it.href))].slice(0, 40);
   if (holidays.length) items = [...holidays, ...items].slice(0, 40);
   if (stallItems.length) items = [...stallItems, ...items].slice(0, 40);
+  if (wishItems.length) items = [...wishItems, ...items].slice(0, 40);
   // Nothing typed yet: the entries you opened last come first.
   if (!q) {
     let recent = [];
