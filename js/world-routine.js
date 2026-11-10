@@ -1,12 +1,12 @@
 // Where are they now?: an NPC's page says where their daily routine puts them at the world's current hour, and a
 // place's page lists who is there now. Read from the clock the GMs move on (Time and light).
-import { el, setKids, toast } from './dom.js';
+import { el, setKids, toast, copyText } from './dom.js';
 import { world, worldEntries, link, findByName, getEntry, patchEntry, linkedTo } from './world-store.js';
 import { whereAt, aboutTown, regularsAt, townByHour, rollRoutine, dayOf, dueLater, busiestHour, crossPaths, atTaverns, ownerDay, timeAt, routineCheck } from './routine.js';
 import { holidayToday, nextHoliday, tradingHours, openText, tradeDay, isMarketDay, marketToday } from './shop-hours.js';
 import { openBounties } from './bounty.js';
 import { cleanCalendar } from './calendar.js';
-import { weekInTown, weekDayText } from './week-in-town.js';
+import { weekInTown, weekDayText, weekText } from './week-in-town.js';
 import { makeRng, randomSeed } from './rng.js';
 import { isHired } from './hirelings.js';
 import { isGm, previewing } from './api.js';
@@ -365,7 +365,8 @@ export function weekInTownBox(town) {
   if (!week.length) return null;
   const label = (d) => (d.today ? 'Today' : `${d.weekday ? `${d.weekday} ` : ''}${d.date.day} ${cal.months[d.date.month].name}`);
   return el('details', { class: 'week-in-town' }, el('summary', {}, `The week in ${town.name} (${week.length})`),
-    el('ul', { class: 'plain small' }, week.map((d) => el('li', {}, el('strong', {}, `${label(d)}: `), weekDayText(d)))));
+    el('ul', { class: 'plain small' }, week.map((d) => el('li', {}, el('strong', {}, `${label(d)}: `), weekDayText(d)))),
+    el('button', { class: 'btn small ghost week-copy', type: 'button', onclick: () => copyText(weekText(town.name, week, label)) }, 'Copy as text'));
 }
 
 // What changed when time moves: where the party is (its town, or the place itself), a snapshot of its shops (open or

@@ -36,3 +36,8 @@ export function weekDayText(d) {
   if (off.length) bits.push(`day off: ${off.join(', ')}`);
   return bits.join(' · ');
 }
+
+// The whole week as plain text, for a handout or a chat: "The week in Brindle\n- Starday 6 Thawmoon: 🧺 market day".
+export function weekText(townName, week, label) {
+  return [`The week in ${townName}`, ...week.map((d) => `- ${label(d)}: ${weekDayText(d)}`)].join('\n');
+}

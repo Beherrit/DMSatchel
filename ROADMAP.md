@@ -839,7 +839,7 @@ to the log at the bottom.
 464. [x] **No market on a holiday.** When a market day falls on a holiday, the town's page says there's no market.
 465. [x] **The week in town.** A settlement's page shows the coming week: holidays, market day, and which shops take
     a day off when.
-466. [ ] **Copy the week.** The week in town can be copied as plain text, for a handout or a chat.
+466. [x] **Copy the week.** The week in town can be copied as plain text, for a handout or a chat.
 467. [ ] **The week on the GM sheet.** The printable GM sheet lists the week ahead in the party's town.
 468. [ ] **Shut that day.** A calendar day's card says which of the party's town's shops are shut that day, and why.
 469. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
@@ -1315,3 +1315,4 @@ to the log at the bottom.
 - Market days on the calendar: the month marks the party's town's market days with a basket, and a day's card says "Market day in Brindle" (or that there's no market on a holiday).
 - No market on a holiday: when the market weekday falls on a holiday the town's page says "No market today: it's Bridge Day", shops don't open early, and "coming up" skips to the next real market day.
 - The week in town: a settlement's page folds out "The week in Brindle", the coming seven days with their holidays, market day (or no market on a holiday), and which shops shut for a holiday or take their day off.
+- Copy the week: the week in town has a "Copy as text" button ("The week in Brindle" with a line a day), for a handout or a chat.

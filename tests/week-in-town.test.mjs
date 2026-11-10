@@ -29,3 +29,10 @@ test('weekInTown: no market on a holiday, today flagged, nothing to say → empt
   assert.equal(weekInTown({ ...cal, holidays: [] }, { fields: { market_day: wd(5) } }, [])[0].today, true);
   assert.deepEqual(weekInTown(null, town, []), []);
 });
+
+test('weekText: the week as plain text', async () => {
+  const { weekText } = await import('../js/week-in-town.js');
+  const town = { fields: { market_day: wd(6) } };
+  const w = weekInTown(cal, town, []);
+  assert.equal(weekText('Brindle', w, (d) => `Day ${d.date.day}`), 'The week in Brindle\n- Day 6: 🧺 market day\n- Day 7: 🎉 Bridge Day');
+});
