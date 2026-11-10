@@ -98,7 +98,7 @@ import { familySection, clanTree, viewFamily } from './world-family.js';
 import { knowsButtons, knownSection } from './world-known.js';
 import { startCard, markPartySeen } from './onboarding.js';
 import { viewCalendar, worldCalendar, todayText, onThisDayCard } from './world-calendar.js';
-import { parseDate, toDays, yearLength } from './calendar.js';
+import { parseDate, toDays, yearLength, parseHolidayLines } from './calendar.js';
 import { nextShut } from './week-in-town.js';
 import { sheetSection } from './sheet-ui.js';
 import { pictureField, figure, thumb } from './image-ui.js';
@@ -701,7 +701,7 @@ function viewEdit(id, kindForNew) {
       const box = type === 'long' ? el('textarea', { id: `ff-${k}`, 'data-field': k, rows: 3 }, v) : el('input', { type: 'text', id: `ff-${k}`, 'data-field': k, value: v });
       const roll = rollButton(() => kindSel.value, k, box, label, () => ({ type: fieldsBox.querySelector('[data-field="type"]')?.value, role: fieldsBox.querySelector('[data-field="role"]')?.value || '', places: k === 'routine' ? placesAbout(e) : [] }));
       const head = roll ? el('div', { class: 'label-row' }, el('label', { for: `ff-${k}` }, label), roll) : el('label', { for: `ff-${k}` }, label);
-      return el('div', { class: `field${type === 'long' ? ' wide' : ''}` }, head, box, k === 'routine' ? routinePreview(box) : k === 'hours' ? hoursHint(box) : null);
+      return el('div', { class: `field${type === 'long' ? ' wide' : ''}` }, head, box, k === 'routine' ? routinePreview(box) : k === 'hours' ? hoursHint(box) : k === 'holidays' && kindSel.value === 'settlement' ? localHolidaysHint(box) : null);
     }), gm ? el('p', { class: 'field wide own-fields' }, customFieldsButton(kindSel.value, renderFields)) : null);
   }
   function collectFields() { for (const f of fieldsBox.querySelectorAll('[data-field]')) e.fields[f.dataset.field] = f.value; }
@@ -1084,6 +1084,21 @@ function linkHint(selfId = null) {
 }
 
 // Hours as you type: under a place's Opening hours field, how it reads them.
+// Check the local holidays: as the GM types, which lines the calendar reads (and when they fall) and which it can't.
+function localHolidaysHint(box) {
+  const out = el('p', { class: 'small muted holidays-preview', 'aria-live': 'polite' });
+  const draw = () => {
+    const cal = worldCalendar();
+    if (!box.value.trim()) { out.textContent = cal ? 'One per line: the name, then the date, e.g. “Founding Day, 3 ' + cal.months[0].name + '”. The town’s shops shut on them.' : 'Set up the calendar first, then write one per line: the name, then the date.'; out.classList.remove('bad-line'); return; }
+    if (!cal) { out.textContent = 'The world has no calendar yet, so these can’t fall on a day.'; out.classList.add('bad-line'); return; }
+    const { holidays, bad } = parseHolidayLines(cal, box.value);
+    out.textContent = [holidays.length ? `Reads: ${holidays.map((h) => `${h.name} (${h.day} ${cal.months[h.month].name})`).join(', ')}.` : '', bad.length ? `Can’t read: ${bad.join(', ')}. Write it like “Founding Day, 3 ${cal.months[0].name}”.` : ''].filter(Boolean).join(' ');
+    out.classList.toggle('bad-line', bad.length > 0);
+  };
+  box.addEventListener('input', draw); draw();
+  return out;
+}
+
 function hoursHint(box) {
   const out = el('p', { class: 'small muted hours-preview', 'aria-live': 'polite' });
   const draw = () => { out.textContent = hoursPreview(box.value); out.classList.toggle('bad-line', !!box.value.trim() && out.textContent.startsWith('Can’t')); };
