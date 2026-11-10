@@ -40,7 +40,7 @@ import { journeySection } from './world-journey.js';
 import { wishedBy } from './world-wishes.js';
 import { itemsNamed } from './play-cards.js';
 import { sceneFor } from './world-scene.js';
-import { openNowLine, partyTown, weekInTownBox } from './world-routine.js';
+import { openNowLine, partyTown, weekInTownBox, todaysStalls } from './world-routine.js';
 import { nextMarket, inDaysText } from './week-in-town.js';
 import { cleanCalendar, withLocal } from './calendar.js';
 
@@ -383,6 +383,10 @@ export async function viewParty(rerender) {
       // Next market, for players: when the party's town next has its market (holidays skipped).
       (() => { const t = partyTown(), cal = withLocal(cleanCalendar(world.info?.cal), t), m = t?.kind === 'settlement' && cal ? nextMarket(cal, t) : null;
         return m ? el('p', { class: 'small party-market' }, `🧺 ${m.inDays === 0 ? `Market day in ${t.name} today` : `Next market in ${t.name}: ${m.weekday}, ${inDaysText(m.inDays)}`}.`) : null; })(),
+      // Stalls on the party page: on market day, the travelling stalls in the party's town (buy them on its Market tab).
+      (() => { const t = partyTown(), ss = todaysStalls(t); return ss.length ? el('details', { class: 'party-stalls' }, el('summary', {}, `🧺 Market stalls in ${t.name} today (${ss.length})`),
+        el('ul', { class: 'plain small' }, ss.map((st) => el('li', {}, el('strong', {}, st.name), ': ', st.goods.map((g) => `${g.name} ${g.price}`).join(', ')))),
+        el('a', { class: 'small', href: `#world/e/${t.id}/market` }, 'Buy from the stalls →')) : null; })(),
       // The week on the party page: the coming week in the party's town, folded away.
       (() => { const t = partyTown(); return t ? weekInTownBox(t) : null; })(),
       // Last session, for players: which it was and who and what came up in it.
