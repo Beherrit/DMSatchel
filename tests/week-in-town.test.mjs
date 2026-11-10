@@ -36,3 +36,10 @@ test('weekText: the week as plain text', async () => {
   const w = weekInTown(cal, town, []);
   assert.equal(weekText('Brindle', w, (d) => `Day ${d.date.day}`), 'The week in Brindle\n- Day 6: 🧺 market day\n- Day 7: 🎉 Bridge Day');
 });
+
+test('weekInTown: shops open for the holiday', () => {
+  const shops = [{ name: 'Bakery', fields: { type: 'Shop', stock: 'x', holiday_open: 'Yes' } }, { name: 'Smithy', fields: { type: 'Shop', stock: 'x' } }];
+  const w = weekInTown(cal, { fields: {} }, shops);
+  assert.deepEqual(w[0].open, ['Bakery']);
+  assert.equal(weekDayText(w[0]), '🎉 Bridge Day · shut for the holiday: Smithy · open for the holiday: Bakery');
+});

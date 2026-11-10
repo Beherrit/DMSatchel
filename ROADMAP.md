@@ -843,7 +843,7 @@ to the log at the bottom.
 467. [x] **The week on the GM sheet.** The printable GM sheet lists the week ahead in the party's town.
 468. [x] **Shut that day.** A calendar day's card says which of the party's town's shops are shut that day, and why.
 469. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
-470. [ ] **Open for the holiday.** The week in town says which shops stay open on a holiday.
+470. [x] **Open for the holiday.** The week in town says which shops stay open on a holiday.
 471. [ ] **Birthdays in the week.** The week in town lists the birthdays of the people who live there.
 472. [ ] **Next market on the party page.** The party page says when the next market day is in the party's town.
 473. [ ] **Markets in the palette.** Ctrl+K "market" lists the towns with market days and when each is next.
@@ -1323,3 +1323,4 @@ to the log at the bottom.
 - The week on the GM sheet: the printable sheet has "📅 The week in Brindle" for the party's town, the same days as the town's page.
 - A full sweep (#441): all 453 browser tests clean against sweep #425; five that failed under load late in the run pass on rerun.
 - Shut that day: a calendar day's card says which of the party's town's shops are shut ("🔒 Shut in Brindle: Smithy (day off)", or for the holiday).
+- Open for the holiday: the week in town and a calendar day's card name the shops that trade on a holiday ("🔓 Open for the holiday: Bakery").

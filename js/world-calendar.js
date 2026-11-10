@@ -126,9 +126,10 @@ export function viewCalendar(arg, sub, rerender) {
       holidaysOn(cal, d).map((h) => el('p', { class: 'holiday' }, `🎉 ${h.name}`)),
       town && isMarketDay(town, weekday(cal, d)) ? el('p', { class: 'small cal-market-line' }, holidaysOn(cal, d).length ? `No market in ${town.name}: it’s a holiday.` : `🧺 Market day in ${town.name}.`) : null,
       // Shut that day: which of the party's town's shops are shut, and why (a holiday, or their day off).
-      (() => { if (!shopTown) return null; const sh = dayInTown(cal, shopTown, townShops(shopTown), d).shut; if (!sh.length) return null;
+      (() => { if (!shopTown) return null; const din = dayInTown(cal, shopTown, townShops(shopTown), d), sh = din.shut;
         const off = sh.filter((x) => x.why === 'day off').map((x) => x.name), hol = sh.filter((x) => x.why === 'holiday').map((x) => x.name);
-        return el('p', { class: 'small cal-shut' }, `🔒 Shut in ${shopTown.name}: `, [hol.length ? `${hol.join(', ')} (for the holiday)` : '', off.length ? `${off.join(', ')} (day off)` : ''].filter(Boolean).join('; '), '.'); })(),
+        return [sh.length ? el('p', { class: 'small cal-shut' }, `🔒 Shut in ${shopTown.name}: `, [hol.length ? `${hol.join(', ')} (for the holiday)` : '', off.length ? `${off.join(', ')} (day off)` : ''].filter(Boolean).join('; '), '.') : null,
+          din.open.length ? el('p', { class: 'small cal-open' }, `🔓 Open for the holiday: ${din.open.join(', ')}.`) : null]; })(),
       births.filter((x) => x.n === n).map((x) => el('p', { class: 'birthday' }, '🎂 ', link(x.entry), x.age ? ` turns ${x.age}` : '’s birthday')),
       arrivals.filter((x) => x.n === n).map((x) => el('p', { class: 'arrival' }, '⚑ The party arrived in ', link(getEntry(x.id)))),
       items.length ? el('ul', { class: 'entry-list' }, items.map((x) => el('li', {}, x.repeat ? '↻ ' : '', link(x.entry), el('span', { class: 'kind-tag' }, x.repeat ? x.entry.fields.repeats.toLowerCase() : kindLabel(x.entry.kind)),

@@ -16,18 +16,20 @@ export function weekInTown(cal, town, shops = [], days = 7) {
   return out;
 }
 
-// One day in town: → { date, weekday, holidays, market, noMarket, shut: [{ name, why }] } (see weekInTown).
+// One day in town: → { date, weekday, holidays, market, noMarket, shut: [{ name, why }], open: [names open for a holiday] } (see weekInTown).
 export function dayInTown(cal, town, shops, date) {
   const wd = Array.isArray(cal.weekdays) && cal.weekdays.length ? weekday(cal, date) || '' : '';
   const holidays = Array.isArray(cal.holidays) ? holidaysOn(cal, date).map((h) => h.name) : [];
   const marketWd = !!wd && isMarketDay(town, wd);
-  const shut = [];
+  const shut = [], open = [];
   for (const s of shops) {
     const o = shopOpen(s, 12 * 60, { holiday: holidays[0] || '', weekday: wd });
     if (o.holiday) shut.push({ name: s.name, why: 'holiday' });
     else if (o.dayOff) shut.push({ name: s.name, why: 'day off' });
+    // Open for the holiday: a shop that chose to trade on festival days (taverns always do, so they aren't listed).
+    else if (holidays.length && /^yes$/i.test(String(s?.fields?.holiday_open || '').trim())) open.push(s.name);
   }
-  return { date, weekday: wd, holidays, market: marketWd && !holidays.length, noMarket: marketWd && !!holidays.length, shut };
+  return { date, weekday: wd, holidays, market: marketWd && !holidays.length, noMarket: marketWd && !!holidays.length, shut, open };
 }
 
 // One line of the week: "🎉 Bridge Day · no market · shut: Smithy, Tanner".
@@ -38,6 +40,7 @@ export function weekDayText(d) {
   const off = d.shut.filter((s) => s.why === 'day off').map((s) => s.name), hol = d.shut.filter((s) => s.why === 'holiday').map((s) => s.name);
   if (hol.length) bits.push(`shut for the holiday: ${hol.join(', ')}`);
   if (off.length) bits.push(`day off: ${off.join(', ')}`);
+  if (d.open?.length) bits.push(`open for the holiday: ${d.open.join(', ')}`);
   return bits.join(' · ');
 }
 
