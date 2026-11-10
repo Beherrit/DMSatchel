@@ -46,6 +46,7 @@ import { travel } from './encounters.js';
 import { worldCalendar, todayText, daysPassed } from './world-calendar.js';
 import { advance, formatDate, today, cleanCalendar, withLocal, upcomingHolidays, holidayTitle } from './calendar.js';
 import { nextMarket, inDaysText } from './week-in-town.js';
+import { partyOrder } from './world-orders.js';
 import { journeyOnMap } from './journey.js';
 import { controllers, powerSlots } from './control.js';
 import { journey, chainOf, notePartyMove } from './world-journey.js';
@@ -295,6 +296,9 @@ export async function viewMap(id, focusPin) {
         // Market day on the map: a settlement's pin says it's market day today, or when the next one is.
         (() => { if (entry?.kind !== 'settlement' || !entry.fields?.market_day) return null; const cal = withLocal(cleanCalendar(world.info?.cal), entry), m = cal && nextMarket(cal, entry, 14);
           return m ? el('p', { class: 'small pin-market' }, m.inDays === 0 ? '🧺 Market day today.' : `🧺 Next market: ${m.weekday}, ${inDaysText(m.inDays)}.`) : null; })(),
+        // Marching order on the map: on the pin of the place the party is in.
+        (() => { if (!entry || !partyChain().includes(entry.id)) return null; const m = partyOrder().march.map((id) => getEntry(id)).filter(Boolean);
+          return m.length ? el('p', { class: 'small pin-march' }, '🥾 Marching: ', m.map((c, i) => [i ? ' → ' : '', link(c)])) : null; })(),
         // Where they are, on their pin: an NPC's routine now, and their usual day.
         entry?.kind === 'npc' ? routineNow(entry) : null,
         // Sessions here: the sessions whose log mentions this place, newest first.
@@ -476,7 +480,9 @@ export async function viewMap(id, focusPin) {
       const w = dayWeather(place.id, placeTerrains(place), worldCalendar());
       // The time on the party's marker: the world's hour and part of the day, with the weather.
       const m = world.info?.clock?.minutes, time = m === undefined ? '' : `It's ${hhmm(m)}, ${partOfDay(m)}. `;
-      const sky = skyIcon(w), said = `${time}Today: ${w.line}`;
+      // Marching order on the map: front to back, on the party's marker.
+      const march = partyOrder().march.map((id) => getEntry(id)?.name).filter(Boolean);
+      const sky = skyIcon(w), said = `${time}Today: ${w.line}${march.length ? ` Marching: ${march.join(' → ')}.` : ''}`;
       return [el('button', { class: 'pin party-token', type: 'button', style: `left:${at.pin.x * 100}%;top:${at.pin.y * 100}%`, title: `The party is ${at.exact ? 'here' : `in ${place.name}`}. ${said}`,
         'aria-label': `The party is ${at.exact ? `here, in ${place.name}` : `in ${place.name}, in ${at.pin.label}`}. ${said}`, onclick: (ev) => { ev.stopPropagation(); showPin(at.pin); } },
         el('span', { class: 'glyph', 'aria-hidden': 'true' }, '⚑'), el('span', { class: 'pin-label' }, at.exact ? 'The party' : `The party (${place.name})`, sky ? el('span', { class: 'party-weather', 'aria-hidden': 'true' }, ` ${sky}`) : null))];
