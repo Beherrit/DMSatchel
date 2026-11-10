@@ -821,6 +821,13 @@ to the log at the bottom.
 452. [x] **Wanted, at a glance.** A map pin where someone wanted is right now gets a 🎯 mark.
 453. [x] **Find a person on the map.** The map's "Find a pin" also finds NPCs by name and points to the pin where they
     are now.
+454. [ ] **A map key.** The map explains its marks in a small key: the head-count, 🎯 for someone wanted, a dimmed pin
+    for a shut shop, the party's flag.
+455. [ ] **Who's where, by name.** A map toggle labels each pin with the names of the people there now, not just a
+    count.
+456. [ ] **The map at another hour.** A slider on the map previews who's where and what's open at another hour,
+    without moving the world's clock.
+457. [ ] **Night on the map.** At night the map darkens a little and says how much the moon lights it.
 
 ## Ideas parking lot
 
