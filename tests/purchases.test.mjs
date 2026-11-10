@@ -20,3 +20,10 @@ test('spending: what each character spent, biggest first', () => {
   assert.deepEqual(spending([ann, bo]).map((x) => [x.who.name, x.cp, x.count]), [['Ann', 108, 2], ['Bo', 0, 1]]);
   assert.deepEqual(spending([]), []);
 });
+
+test('topGoods: the goods bought most often', async () => {
+  const { topGoods } = await import('../js/purchases.js');
+  const c1 = ch('a', 'Ann', [{ at: '1', text: 'Bought Rope at Smithy for 1 gp', cp: -100, items: [{ name: 'Rope', qty: 1 }] }, { at: '2', text: 'Ordered 2 × Pale ale at The Bell for 8 cp', cp: -8, items: [{ name: 'Pale ale', qty: 2 }] }]);
+  const c2 = ch('b', 'Bo', [{ at: '3', text: 'Ordered Pale ale at The Bell for 4 cp', cp: -4, items: [{ name: 'pale ale', qty: 1 }] }, { at: '4', text: 'Gave Rope to Ann', items: [{ name: 'Rope', qty: -1 }] }]);
+  assert.deepEqual(topGoods([c1, c2]), [{ name: 'Pale ale', qty: 3, times: 2 }, { name: 'Rope', qty: 1, times: 1 }]);
+});
