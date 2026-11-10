@@ -943,6 +943,11 @@ to the log at the bottom.
 547. [x] **Phone check, again.** The crafting form, the orders editor and the party page's new sections fit a phone.
 548. [x] **A big party page.** The party page stays quick in a big world (hundreds of entries, long logs).
 549. [x] **Print check.** The printable GM sheet's new blocks (stalls, the week, orders) print cleanly.
+550. [ ] **Hirelings march and watch.** The marching order and watch order can include the party's hired NPCs.
+551. [ ] **The watch's hours.** GMs set when the night's watch starts and how long it lasts (the default 22:00 for
+    eight hours).
+552. [ ] **Orders in the palette.** Ctrl+K "marching" or "watch" shows the party's orders.
+553. [ ] **My place and watch.** A character's page says where they march and which watch they keep.
 
 ## Ideas parking lot
 
