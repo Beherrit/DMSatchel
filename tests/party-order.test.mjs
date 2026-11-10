@@ -24,3 +24,11 @@ test('ordersText: the orders as plain text', async () => {
   assert.equal(ordersText(['b', 'a', 'x'], ['a', 'b'], (id) => names[id] || ''), 'Marching order (front to back): Bo, Ann\nWatches: 22:00–02:00 Ann; 02:00–06:00 Bo');
   assert.equal(ordersText([], [], () => ''), '');
 });
+
+test('cleanWatchTime: a sensible start and length, else 22:00 for eight hours', async () => {
+  const { cleanWatchTime } = await import('../js/party-order.js');
+  assert.deepEqual(cleanWatchTime(21 * 60, 9), { start: 1260, hours: 9 });
+  assert.deepEqual(cleanWatchTime(undefined, undefined), { start: 1320, hours: 8 });
+  assert.deepEqual(cleanWatchTime(-5, 40), { start: 1320, hours: 8 });
+  assert.deepEqual(cleanWatchTime('1200', '6'), { start: 1200, hours: 6 });
+});

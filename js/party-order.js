@@ -1,6 +1,12 @@
 // The party's orders: marching order (front to back) and the night's watch order, as lists of character ids, and the
 // watches' hours. Pure, shared by the page and the server.
 
+// The night's watch: when it starts (minutes past midnight) and how many hours it lasts; 22:00 for eight by default.
+export const cleanWatchTime = (start, hours) => {
+  const s = Number(start), h = Number(hours);
+  return { start: Number.isFinite(s) && s >= 0 && s < 1440 ? Math.round(s) : 22 * 60, hours: Number.isFinite(h) && h >= 1 && h <= 12 ? Math.round(h) : 8 };
+};
+
 // A clean list: up to 12 distinct ids (strings), in the order given.
 export const cleanOrder = (list) => [...new Set((Array.isArray(list) ? list : []).map((x) => String(x || '').slice(0, 40)).filter(Boolean))].slice(0, 12);
 
@@ -25,7 +31,7 @@ export const hhmm = (m) => `${String(Math.floor((m % 1440) / 60)).padStart(2, '0
 
 // The orders as plain text: "Marching order (front to back): Bo, Ann\nWatches: 22:00–02:00 Ann; 02:00–06:00 Bo".
 // nameOf(id) → a name ('' to leave someone out).
-export function ordersText(march, watch, nameOf) {
-  const m = cleanOrder(march).map(nameOf).filter(Boolean), w = watchShifts(watch).map((s) => ({ ...s, name: nameOf(s.id) })).filter((s) => s.name);
+export function ordersText(march, watch, nameOf, start = 22 * 60, hours = 8) {
+  const m = cleanOrder(march).map(nameOf).filter(Boolean), w = watchShifts(watch, start, hours).map((s) => ({ ...s, name: nameOf(s.id) })).filter((s) => s.name);
   return [m.length ? `Marching order (front to back): ${m.join(', ')}` : '', w.length ? `Watches: ${w.map((s) => `${hhmm(s.from)}–${hhmm(s.to)} ${s.name}`).join('; ')}` : ''].filter(Boolean).join('\n');
 }

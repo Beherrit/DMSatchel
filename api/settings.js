@@ -20,7 +20,7 @@
 // PATCH {show: entryId | null}  (GM) show an entry to everyone with the world open (revealing it if hidden), or stop.
 // PATCH {custom_fields: {kind, list}}  (GM) the world's own fields for one kind of entry (an empty list removes them)
 import { route, send, fail, sql, requireOwner, requireGm, postDiscord } from './_lib/core.js';
-import { cleanOrder } from '../js/party-order.js';
+import { cleanOrder, cleanWatchTime } from '../js/party-order.js';
 import { cleanCalendar, advance, formatDate, today } from '../js/calendar.js';
 import { addStop, removeStop } from '../js/journey.js';
 import { applyChecklist } from '../js/checklist.js';
@@ -254,6 +254,8 @@ export default route({
         // The party's orders: marching order (front to back) and the night's watch order, as character ids.
         march: p.march === undefined ? cleanOrder(cur.march) : cleanOrder(p.march),
         watch: p.watch === undefined ? cleanOrder(cur.watch) : cleanOrder(p.watch),
+        // The watch's hours: when it starts (minutes past midnight) and how long it lasts.
+        ...(() => { const t = cleanWatchTime(p.watch_start === undefined ? cur.watch_start : p.watch_start, p.watch_hours === undefined ? cur.watch_hours : p.watch_hours); return { watch_start: t.start, watch_hours: t.hours }; })(),
         updated_by: req.gm.name, updated_at: new Date().toISOString(),
       };
       // Where the party has been: a stop each time they move somewhere new.
