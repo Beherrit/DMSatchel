@@ -938,7 +938,7 @@ to the log at the bottom.
 543. [x] **Marching order on the map.** The party's marker on a map shows the marching order.
 544. [x] **Copy the orders.** The marching order and watches can be copied as plain text.
 545. [x] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
-546. [ ] **Accessibility check.** The newer pages and forms (market stalls and their buy form, crafting downtime, the
+546. [x] **Accessibility check.** The newer pages and forms (market stalls and their buy form, crafting downtime, the
     party's orders, the calendar's town picker, the numbers page) pass an automated WCAG A/AA check, light and dark.
 547. [ ] **Phone check, again.** The crafting form, the orders editor and the party page's new sections fit a phone.
 548. [ ] **A big party page.** The party page stays quick in a big world (hundreds of entries, long logs).
@@ -1498,3 +1498,4 @@ to the log at the bottom.
 - Marching order on the map: the party's marker says the marching order in its tooltip, and the pin of the place the party is in shows "🥾 Marching: Bo → Ann".
 - Copy the orders: "Marching and watches" has Copy as text ("Marching order (front to back): Bo, Ann" / "Watches: 22:00–02:00 Ann; 02:00–06:00 Bo").
 - A full sweep (#545): all 523 browser tests clean against sweep #493, first time through (covering downtime, marching order and watches).
+- Accessibility check: axe (WCAG A/AA) over the Market tab with the stalls' buy form open, a town's week, the crafting downtime form, the party page with every new section and the orders editors open, the calendar, the numbers page, a character and a shop: clean in light; in dark the downtime "Waiting for a GM" tag was white on light gold (2.2:1) and now uses the page colour on gold.

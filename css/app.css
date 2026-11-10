@@ -911,7 +911,7 @@ body.gated .mainnav, body.gated #toolnav, body.gated #panels, body.gated #notebo
 .downtime-outcome { background: var(--sunk); border-radius: 6px; padding: 8px 10px; margin: 6px 0 }
 .downtime-outcome .label { display: block; font-size: calc(12px * var(--ts, 1)); text-transform: uppercase; letter-spacing: .06em; color: var(--muted) }
 .downtime-resolve textarea { width: 100%; margin: 6px 0 }
-.waiting-tag { background: var(--brass); color: #fff }
+.waiting-tag { background: var(--brass); color: var(--bg) }
 .downtime-section { margin-top: 18px }
 
 /* Fog of war */
