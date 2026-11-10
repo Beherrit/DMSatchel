@@ -100,7 +100,7 @@ import { startCard, markPartySeen } from './onboarding.js';
 import { viewCalendar, worldCalendar, todayText, onThisDayCard } from './world-calendar.js';
 import { parseDate, toDays, yearLength, parseHolidayLines } from './calendar.js';
 import { nextShut } from './week-in-town.js';
-import { customersAt, purchases, spots, goodsAt } from './purchases.js';
+import { customersAt, purchases, spots, goodsAt, orderedAt } from './purchases.js';
 import { coinText } from './economy.js';
 import { sheetSection } from './sheet-ui.js';
 import { pictureField, figure, thumb } from './image-ui.js';
@@ -642,9 +642,10 @@ function customersLine(place, kind) {
   if (!cs.length) return null;
   const n = (x) => (kind === 'tavern' ? `${x.count} order${x.count === 1 ? '' : 's'}` : `${x.count} purchase${x.count === 1 ? '' : 's'}${x.cp ? `, ${coinText(x.cp)}` : ''}`);
   // A shop's best sellers: what the party buys there most.
-  const gs = kind === 'shop' ? goodsAt(worldEntries().filter((c) => c.kind === 'character'), place.name).slice(0, 5) : [];
+  // A tavern's favourites: what the party orders there most.
+  const chars = worldEntries().filter((c) => c.kind === 'character'), gs = (kind === 'shop' ? goodsAt(chars, place.name) : orderedAt(chars, place.name)).slice(0, 5);
   return [el('p', { class: `small customers-line ${kind}` }, kind === 'tavern' ? '🍺 At the bar most: ' : '🛍 Best customers: ', cs.map((x, i) => [i ? ', ' : '', link(x.who), el('span', { class: 'muted' }, ` (${n(x)})`)])),
-    gs.length ? el('p', { class: 'small best-sellers' }, '📦 Sells most: ', gs.map((g, i) => [i ? ', ' : '', g.name, el('span', { class: 'muted' }, ` (${g.qty})`)])) : null];
+    gs.length ? el('p', { class: `small best-sellers ${kind}` }, kind === 'shop' ? '📦 Sells most: ' : '🍲 The party’s favourites: ', gs.map((g, i) => [i ? ', ' : '', g.name, el('span', { class: 'muted' }, ` (${g.qty})`)])) : null];
 }
 
 // A shop's next day off: when it's next shut all day (its weekly day off, or a holiday it doesn't trade on).

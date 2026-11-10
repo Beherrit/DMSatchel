@@ -62,3 +62,17 @@ export function goodsAt(characters, placeName) {
 
 // The shopping as plain text: "What the party bought\n- Ann: Bought Rope at Smithy for 1 gp (Nov 8)".
 export const shoppingText = (list, dateOf = (iso) => String(iso || '').slice(0, 10)) => ['What the party bought', ...list.map((p) => `- ${p.who.name}: ${p.text}${p.at ? ` (${dateOf(p.at)})` : ''}`)].join('\n');
+
+// What's ordered at a tavern: from the order lines ("Ordered 2 × Pale ale at The Bell for 8 cp", "Put Stew on the
+// party’s tab at The Bell (5 cp)"), the dishes and drinks by how often. → [{ name, qty, times }].
+export function orderedAt(characters, placeName) {
+  const by = new Map();
+  for (const p of purchases(characters)) {
+    if (placeOf(p.text) !== placeName) continue;
+    const m = /^(?:Ordered|Put) (?:(\d+) × )?(.+?) (?:at |on the party’s tab at )/.exec(p.text);
+    if (!m) continue;
+    const qty = Number(m[1]) || 1, k = m[2].toLowerCase(), x = by.get(k) || { name: m[2], qty: 0, times: 0 };
+    x.qty += qty; x.times += 1; by.set(k, x);
+  }
+  return [...by.values()].sort((a, b) => b.times - a.times || b.qty - a.qty || a.name.localeCompare(b.name));
+}

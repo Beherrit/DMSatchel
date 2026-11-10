@@ -54,3 +54,9 @@ test('shoppingText: the purchases as a list', async () => {
   const c = ch('a', 'Ann', [{ at: '2026-11-08T10:00:00Z', text: 'Bought Rope at Smithy for 1 gp', cp: -100 }]);
   assert.equal(shoppingText(ps([c])), 'What the party bought\n- Ann: Bought Rope at Smithy for 1 gp (2026-11-08)');
 });
+
+test('orderedAt: a tavern’s favourites from the order lines', async () => {
+  const { orderedAt } = await import('../js/purchases.js');
+  const c = ch('a', 'Ann', [{ at: '1', text: 'Ordered 2 × Pale ale at The Bell for 8 cp', cp: -8 }, { at: '2', text: 'Put Pale ale on the party’s tab at The Bell (4 cp)' }, { at: '3', text: 'Ordered Stew at The Bell for 5 cp', cp: -5 }, { at: '4', text: 'Ordered Stew at The Crow for 5 cp', cp: -5 }]);
+  assert.deepEqual(orderedAt([c], 'The Bell'), [{ name: 'Pale ale', qty: 3, times: 2 }, { name: 'Stew', qty: 1, times: 1 }]);
+});
