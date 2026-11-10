@@ -11,7 +11,11 @@ import { isHired } from './hirelings.js';
 import { isGm, previewing } from './api.js';
 import { hhmm, partOfDay } from './clock.js';
 
-const now = () => world.info?.clock?.minutes ?? null;
+// The map at another hour: a scoped override of the clock, for previews (atMinutes), so nothing else is moved.
+let override = null;
+const now = () => override ?? world.info?.clock?.minutes ?? null;
+export const nowMinutes = () => now();
+export function atMinutes(m, fn) { const prev = override; override = m; try { return fn(); } finally { override = prev; } }
 // The place a routine names: as written, then without "at"/"in", then without "the" ("at the Bell" → The Bell).
 const placeOf = (name) => {
   const a = name.replace(/^(at|in) /i, '');

@@ -8,7 +8,7 @@ import { world, worldEntries, getEntry, findByName, mentions, link, kindLabel, n
 import { playOf, characterOf, changePlay } from './sheet-ui.js';
 import { readList, withRations } from './shopping.js';
 import { overloaded, overloadedText } from './weights.js';
-import { aroundNow, laterLine, busiestLine, ownerDayLine, routineNow, whereNow } from './world-routine.js';
+import { aroundNow, laterLine, busiestLine, ownerDayLine, routineNow, whereNow, atMinutes, nowMinutes } from './world-routine.js';
 import { openText, holidayToday, untilChange } from './shop-hours.js';
 import { festivalSpecial } from './menu.js';
 import { openBounties } from './bounty.js';
@@ -30,8 +30,8 @@ function mapKey() {
 let wantedIds = new Set();
 
 // Open or shut on the map: a shop's (or tavern's) hours by the world's clock and today's holiday, or null.
-const hoursOf = (entry) => (entry && (entry.fields?.stock || entry.fields?.menu) && world.info?.clock?.minutes !== undefined
-  ? openText(entry, world.info.clock.minutes, dayFor(entry)) : null);
+const hoursOf = (entry) => (entry && (entry.fields?.stock || entry.fields?.menu) && nowMinutes() !== null
+  ? openText(entry, nowMinutes(), dayFor(entry)) : null);
 import { hhmm, partOfDay } from './clock.js';
 import { rationsFor } from './party-glance.js';
 import { dayWeather, weatherSlowdown, skyIcon } from './forecast.js';
@@ -139,6 +139,8 @@ export async function viewMap(id, focusPin) {
   const stage = el('div', { class: 'map-stage' });
   const img = el('img', { src: imageUrl(map), alt: map.name, draggable: 'false' });
   const layer = el('div', { class: 'pin-layer' });
+  // The map at another hour: minutes to preview (null: the world's own clock).
+  let previewMin = null;
   const pop = el('div', { class: 'pin-pop', hidden: true });
   // Fog of war: one canvas pixel per cell, stretched over the map (the browser's smoothing softens the edges).
   const fogCanvas = el('canvas', { class: `fog-layer${isGm() ? ' gm' : ''}`, 'aria-hidden': 'true' });
@@ -259,7 +261,8 @@ export async function viewMap(id, focusPin) {
     pop.style.left = `${Math.min(Math.max(8, x + 14), r.width - 300)}px`;
     pop.style.top = `${Math.min(Math.max(8, y - 10), Math.max(8, r.height - pop.offsetHeight - 8))}px`;
   }
-  function showPin(pin, edit) {
+  function showPin(pin, edit) { return previewMin === null ? showPinNow(pin, edit) : atMinutes(previewMin, () => showPinNow(pin, edit)); }
+  function showPinNow(pin, edit) {
     openPin = pin; pop.hidden = false;
     const entry = pin.entry_id && getEntry(pin.entry_id);
     if (edit) setKids(pop, pinForm(pin, !pins.includes(pin)));
@@ -278,7 +281,7 @@ export async function viewMap(id, focusPin) {
         // Open or shut, by the clock.
         (() => { const h = hoursOf(entry); if (!h) return null;
           // Last orders on the map: a tavern's last hour.
-          const u = h.open && entry.fields?.type === 'Tavern' ? untilChange(entry, world.info.clock.minutes, dayFor(entry)) : null;
+          const u = h.open && entry.fields?.type === 'Tavern' ? untilChange(entry, nowMinutes(), dayFor(entry)) : null;
           if (u?.open && u.mins <= 60) return el('p', { class: 'small pin-hours last-orders' }, `🍺 Last orders: it shuts in ${u.mins} min.`);
           return el('p', { class: `small pin-hours${h.open ? '' : ' shut'}` }, h.open ? '🟢 ' : '🔒 ', h.text[0].toUpperCase() + h.text.slice(1), '.'); })(),
         // Where they are, on their pin: an NPC's routine now, and their usual day.
@@ -430,8 +433,15 @@ export async function viewMap(id, focusPin) {
   const namesBtn = el('button', { class: 'btn small', type: 'button', 'aria-pressed': 'false', title: 'Label each pin with who is there right now', onclick: () => {
     namesOn = !namesOn; namesBtn.setAttribute('aria-pressed', String(namesOn)); renderPins();
   } }, 'Who’s where');
+  // The map at another hour: preview who's where and what's open, without moving the world's clock.
+  const hourOut = el('span', { class: 'small map-hour-out' }, 'now');
+  const hourIn = el('input', { type: 'range', min: '0', max: '23', step: '1', value: String(Math.floor((world.info?.clock?.minutes ?? 480) / 60) % 24), 'aria-label': 'Preview the map at another hour' });
+  const nowBtn = el('button', { class: 'btn small ghost', type: 'button', hidden: true, onclick: () => { previewMin = null; hourOut.textContent = 'now'; nowBtn.hidden = true; renderPins(); if (openPin) showPin(openPin); } }, 'Back to now');
+  hourIn.addEventListener('input', () => { previewMin = Number(hourIn.value) * 60; hourOut.textContent = `${String(hourIn.value).padStart(2, '0')}:00 (preview)`; nowBtn.hidden = false; renderPins(); if (openPin) showPin(openPin); });
+  const hourBox = world.info?.clock ? el('label', { class: 'map-hour' }, '🕰 ', hourIn, ' ', hourOut) : null;
 
-  function renderPins() {
+  function renderPins() { return previewMin === null ? renderPinsNow() : atMinutes(previewMin, renderPinsNow); }
+  function renderPinsNow() {
     const q = filter.value.trim().toLowerCase();
     setKids(layer, ...partyMarks.map((m) => el('button', { class: 'pin mark party-mark', type: 'button', style: `left:${m.x * 100}%;top:${m.y * 100}%`, title: `${m.label} (${m.by})`, 'aria-label': `${m.by}’s marker: ${m.label}`,
       onclick: (ev) => { ev.stopPropagation(); partyMarkInfo(m); } }, el('span', { class: 'glyph', 'aria-hidden': 'true' }, '✦'), el('span', { class: 'pin-label' }, `${m.label} · ${m.by}`))),
@@ -631,7 +641,7 @@ export async function viewMap(id, focusPin) {
     isMember() ? markBtn : null,
     map.miles ? measureBtn : null,
     journeyBtn,
-    holdBtn, namesBtn,
+    holdBtn, namesBtn, hourBox, nowBtn,
     scaleControl());
 
   const entry = map.entry_id && getEntry(map.entry_id);

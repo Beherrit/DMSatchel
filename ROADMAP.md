@@ -825,7 +825,7 @@ to the log at the bottom.
     for a shut shop, the party's flag.
 455. [x] **Who's where, by name.** A map toggle labels each pin with the names of the people there now, not just a
     count.
-456. [ ] **The map at another hour.** A slider on the map previews who's where and what's open at another hour,
+456. [x] **The map at another hour.** A slider on the map previews who's where and what's open at another hour,
     without moving the world's clock.
 457. [ ] **Night on the map.** At night the map darkens a little and says how much the moon lights it.
 
@@ -1291,3 +1291,4 @@ to the log at the bottom.
 - Find a person on the map: the map's "Find a pin" box also finds NPCs by name: "🕰 Bram at Back room (The Bell)", pointing to the pin for where their routine has them now (or the nearest place around it with a pin); clicking it centres the map there and opens the pin.
 - A map key: the map's side panel folds out a "Map key" explaining the marks: the head-count, 🎯 for someone wanted, a dimmed pin for a shut shop, the party's ⚑, and the double ring of a place with its own map.
 - Who's where, by name: a "Who's where" button on the map labels each pin with the names of the people there now ("Ada, Bram, Cy +2"), alongside the count.
+- The map at another hour: a 🕰 slider on the map previews another hour: pins' head-counts, names, open or shut, wanted marks and popups all follow it ("22:00 (preview)"), and "Back to now" returns. The world's clock isn't moved (a scoped atMinutes() override in world-routine.js).

@@ -1819,3 +1819,5 @@ details.quest-group > summary .section-title { display: inline }
 .key-dim { opacity: .55; filter: grayscale(.7) }
 /* Who's where, by name (#455) */
 .pin-names { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); margin-top: 2px; white-space: nowrap; font-size: 11px; padding: 0 4px; border-radius: 4px; background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgb(0 0 0 / .25); pointer-events: none }
+/* The map at another hour (#456) */
+.map-hour { display: inline-flex; align-items: center; gap: 6px; font-size: calc(13px * var(--ts, 1)) } .map-hour input { width: 120px }
