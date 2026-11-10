@@ -44,8 +44,8 @@ import { addTrade } from '../js/shop-trade.js';
 import { addGift, giftWhat, wantsMatch } from '../js/gifts.js';
 import { addAsk } from '../js/shop-asks.js';
 import { addTab, readTab, tabTotal, splitTab } from '../js/tab.js';
-import { shopOpen, holidayToday, holidayTomorrow, evePrice, shutText, tradeDay, isMarketDay } from '../js/shop-hours.js';
-import { cleanCalendar } from '../js/calendar.js';
+import { shopOpen, holidayToday, holidayTomorrow, evePrice, shutText, tradeDay, isMarketDay, marketToday } from '../js/shop-hours.js';
+import { cleanCalendar, withLocal } from '../js/calendar.js';
 import { shopStanding, sellWithStanding } from '../js/standing-price.js';
 import { coinText, GOODS } from '../js/economy.js';
 import { cleanMusic } from '../js/music.js';
@@ -147,16 +147,24 @@ async function loadOne(id, worldId) {
 }
 
 // What the history keeps for a version (the same shape an edit saves).
-// Today for one shop: the world's holiday and weekday, and whether it's market day in the settlement the shop is in
-// (its nearest settlement up the parent chain), when its shops open two hours early.
-async function shopDay(shop, req) {
-  const day = tradeDay(cleanCalendar(req.world.cal));
-  if (!day.weekday || !shop.parent_id) return day;
+// The settlement a shop or tavern is in (its nearest settlement up the parent chain): { name, fields } or null.
+async function townOfPlace(place, req) {
+  if (!place?.parent_id) return null;
   const rows = await sql`WITH RECURSIVE up AS (
-      SELECT id, parent_id, kind, fields, 0 AS d FROM entries WHERE id = ${shop.parent_id} AND world_id = ${req.world.id}
-      UNION ALL SELECT e.id, e.parent_id, e.kind, e.fields, up.d + 1 FROM entries e JOIN up ON e.id = up.parent_id WHERE e.world_id = ${req.world.id} AND up.d < 12)
-    SELECT fields FROM up WHERE kind = 'settlement' ORDER BY d LIMIT 1`;
-  return { ...day, market: isMarketDay(rows[0] || null, day.weekday) };
+      SELECT id, parent_id, kind, name, fields, 0 AS d FROM entries WHERE id = ${place.parent_id} AND world_id = ${req.world.id}
+      UNION ALL SELECT e.id, e.parent_id, e.kind, e.name, e.fields, up.d + 1 FROM entries e JOIN up ON e.id = up.parent_id WHERE e.world_id = ${req.world.id} AND up.d < 12)
+    SELECT name, fields FROM up WHERE kind = 'settlement' ORDER BY d LIMIT 1`;
+  return rows[0] || null;
+}
+// A place's calendar: the world's, with its town's own holidays (the settlement's "holidays" field) added.
+const placeCalendar = async (place, req) => withLocal(cleanCalendar(req.world.cal), await townOfPlace(place, req));
+
+// Today for one shop: the holiday (the world's or its town's own) and weekday, and whether it's market day in its
+// settlement (when its shops open two hours early; never on a holiday).
+async function shopDay(shop, req) {
+  const town = await townOfPlace(shop, req);
+  const day = tradeDay(withLocal(cleanCalendar(req.world.cal), town));
+  return { ...day, market: marketToday(town, day) };
 }
 
 const snapshot = (r) => ({ kind: r.kind, name: r.name, summary: r.summary, body: r.body, fields: r.fields, secret: r.secret, tags: r.tags, links: r.links, parent_id: r.parent_id, visibility: r.visibility });
@@ -454,7 +462,7 @@ export default route({
       if (!inn || inn.deleted || !visibleTo(inn, req) || !readMenu(inn.fields?.menu)) return fail(res, 404, 'That menu isn’t up.');
       if (!ch || ch.deleted || ch.kind !== 'character') return fail(res, 404, 'Pick a character.');
       if (!req.isGmHere && ch.owner_id !== req.gm.id) return fail(res, 403, 'You can only order for your own character.');
-      const holiday = holidayToday(cleanCalendar(req.world.cal)), festival = festivalSpecial(inn.fields.menu, holiday, inn.id);
+      const holiday = holidayToday(await placeCalendar(inn, req)), festival = festivalSpecial(inn.fields.menu, holiday, inn.id);
       const item = menuItem(inn.fields.menu, clip(b.item, 120), festival);
       if (!item) return fail(res, 400, 'That isn’t on the menu.');
       // Holiday prices: a fifth more on a holiday (the festival special is already priced for the day).
@@ -487,7 +495,7 @@ export default route({
       const r = buyFrom(shop.fields.stock, clip(b.item, 200), b.qty);
       if (r.error) return fail(res, 400, r.error);
       // Holiday prices on the shelf: the day before a holiday, festive goods cost a quarter more.
-      r.cp = evePrice(r.cp, r.name, holidayTomorrow(cleanCalendar(req.world.cal)));
+      r.cp = evePrice(r.cp, r.name, holidayTomorrow(await placeCalendar(shop, req)));
       let p = {}; try { p = JSON.parse(ch.fields?.play || '{}') || {}; } catch { p = {}; }
       if (!Number.isFinite(p.cp)) p.cp = Math.max(0, Math.round(Number(b.base?.cp) || 0));
       if (p.inventory === undefined) p.inventory = clip(b.base?.inventory, 15000);

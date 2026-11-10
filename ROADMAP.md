@@ -857,7 +857,7 @@ to the log at the bottom.
 479. [x] **The week on the party page.** Players can fold out the week in the party's town on the party page.
 480. [x] **Days off on the Market tab.** A settlement's Market tab says each shop's weekly day off by its hours.
 481. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
-482. [ ] **Local holidays everywhere.** The party's town's own holidays also count in "Coming up", on the GM sheet,
+482. [x] **Local holidays everywhere.** The party's town's own holidays also count in "Coming up", on the GM sheet,
     and for tavern festival prices.
 483. [ ] **Check the local holidays.** Saving a settlement warns about local holiday lines the calendar can't read.
 484. [ ] **Which town's holidays.** The calendar can show another town's local holidays, not just the party's town's.
@@ -1350,3 +1350,4 @@ to the log at the bottom.
 - Local holidays: a settlement has a "Local holidays" field ("Founding Day, 5 Thawmoon", one per line); on those days its shops shut and its taverns hold a festival, and they show in its week, on its map pin's market line, on the clock card and on the calendar ("Founding Day (Brindle)") while the party is there.
 - The week on the party page: players can fold out "The week in Brindle" on the party page (market day, holidays, local ones too, days off, birthdays), with Copy as text.
 - Days off on the Market tab: each shop says its weekly day off and whether it trades on holidays ("shut Toildays · open on holidays"), and the tab's open-now count honours the town's own holidays.
+- Local holidays everywhere: a town's own holidays also count in "Coming up", on the GM sheet, for tavern holiday prices and festival specials, and for festive goods on the eve; the server shuts the town's shops and prices orders by the town's calendar too.

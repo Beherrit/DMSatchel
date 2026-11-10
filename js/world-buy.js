@@ -14,10 +14,10 @@ import { stockItems, sellTo, HAGGLES, readHaggle, haggleFor, setHaggle, withHagg
 import { inventoryLines } from './handover.js';
 import { readList, listFirst } from './shopping.js';
 import { shopOpen, shutText, holidayTomorrow, evePrice, isFestive } from './shop-hours.js';
-import { cleanCalendar } from './calendar.js';
+import { cleanCalendar, withLocal } from './calendar.js';
 import { ownerIn } from './world-routine.js';
 import { shopStanding, sellWithStanding } from './standing-price.js';
-import { dayFor } from './world-hours.js';
+import { dayFor, townOfShop } from './world-hours.js';
 
 const ACTIVE = (e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
 
@@ -112,7 +112,7 @@ function hagglePart(shop, chars, rerender) {
 
 function buyPart(shop, stock, chars, rerender) {
   // Holiday prices on the shelf: the day before a holiday, festive goods cost a quarter more.
-  const eve = holidayTomorrow(cleanCalendar(world.info?.cal));
+  const eve = holidayTomorrow(withLocal(cleanCalendar(world.info?.cal), townOfShop(shop)));
   // Friends get a discount (or enemies pay more): the party's open standing with whoever holds this place.
   const found = shopStanding(shop, worldEntries(), world.standings?.log);
   const stand = found && found.holder.visibility !== 'gm' && found.holder.status !== 'suggested' ? found : null;

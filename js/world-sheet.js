@@ -27,7 +27,7 @@ import { isHired } from './hirelings.js';
 import { hhmm, readClock, leftText, partOfDay } from './clock.js';
 import { dayFor } from './world-hours.js';
 import { moonlight } from './moonlight.js';
-import { today } from './calendar.js';
+import { today, withLocal } from './calendar.js';
 import { sceneFor } from './world-scene.js';
 import { appearances, quoteOf } from './appearances.js';
 
@@ -74,7 +74,7 @@ export async function viewSessionSheet() {
     el('header', { class: 'ss-head' },
       el('h2', {}, `${world.info?.name || 'The world'}: session ${n}`),
       el('p', {}, [cal ? todayText(cal) : '', new Date().toLocaleDateString(undefined, { dateStyle: 'medium' }), here ? `The party is in ${here.name}` : 'The party is on the road'].filter(Boolean).join(' · ')),
-      holidayNote(cal),
+      holidayNote((() => { const t = partyTown(); return t?.kind === 'settlement' ? withLocal(cal, t) : cal; })()),
       // The scene on the sheet: the scene-setter line to read out.
       (() => { const t = here ? sceneFor(here) : ''; return t ? el('p', { class: 'ss-scene' }, `🎬 ${t}`) : null; })()),
     el('div', { class: 'ss-grid' },

@@ -13,7 +13,8 @@ import { holidayToday } from './shop-hours.js';
 import { coinText } from './economy.js';
 import { playOf, restOf } from './sheet-ui.js';
 import { roomsOf, nightCosts, minutesToMorning } from './inn.js';
-import { formatDate, today, cleanCalendar } from './calendar.js';
+import { formatDate, today, cleanCalendar, withLocal } from './calendar.js';
+import { townOfShop } from './world-hours.js';
 
 const ACTIVE = (c) => c.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(c.fields?.status);
 
@@ -80,14 +81,16 @@ function menuBody(m, festival = null) {
 
 // Order from the menu: food or drink for a character (players: their own), paid from their sheet by the server.
 // Festival specials: today's holiday dish or drink at this tavern, if today is a holiday.
-const festivalOf = (inn) => festivalSpecial(inn.fields?.menu, holidayToday(cleanCalendar(world.info?.cal)), inn.id);
+// A tavern's calendar: the world's, with its town's own holidays.
+const innCal = (inn) => withLocal(cleanCalendar(world.info?.cal), townOfShop(inn));
+const festivalOf = (inn) => festivalSpecial(inn.fields?.menu, holidayToday(innCal(inn)), inn.id);
 
 function orderPart(inn, m, rerender) {
   if (!isMember() || previewing()) return null;
   const chars = worldEntries().filter((c) => c.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(c.fields?.status) && (isGm() || c.owner_id === session.gm?.id)).sort((a, b) => a.name.localeCompare(b.name));
   const nights = new Set(roomsOf(m).map((x) => x.name));
   // Holiday prices: a fifth more today (the festival special keeps its own price).
-  const hol = holidayToday(cleanCalendar(world.info?.cal)), fest = festivalOf(inn);
+  const hol = holidayToday(innCal(inn)), fest = festivalOf(inn);
   const items = [...(fest ? [fest] : []), ...[...(m.special ? [m.special] : []), ...m.sections.filter((s) => !/night/i.test(s.title)).flatMap((s) => s.items)].map((x) => ({ ...x, cp: holidayPrice(x.cp, hol) }))].filter((x) => x.cp > 0 && !nights.has(x.name));
   if (!chars.length || !items.length) return null;
   const who = el('select', { 'aria-label': 'Who’s ordering' }, chars.map((c) => el('option', { value: c.id }, c.name)));
@@ -172,7 +175,7 @@ export function menuCard(e, town, rerender) {
       el('div', { class: 'entry-head' }, el('h3', { id: `mn-${e.id}` }, `Bill of fare${m ? `: ${QUALITY[m.quality]}` : ''}`),
         m && !draft ? el('div', { class: 'btnrow' }, gm && roomsOf(m).length ? el('button', { class: 'btn small', type: 'button', onclick: () => stayDialog(e, m, rerender) }, 'Stay the night…') : null,
           el('button', { class: 'btn small ghost', type: 'button', onclick: print }, 'Print')) : null),
-      m && !draft && holidayToday(cleanCalendar(world.info?.cal)) ? el('p', { class: 'small menu-holiday' }, `🎉 Holiday prices today: a fifth more than the board says (the festival special excepted).`) : null,
+      m && !draft && holidayToday(innCal(e)) ? el('p', { class: 'small menu-holiday' }, `🎉 Holiday prices today: a fifth more than the board says (the festival special excepted).`) : null,
       m ? menuBody(m, draft ? null : festivalOf(e)) : el('p', { class: 'muted small' }, `What’s on the board tonight: drinks, dishes and a bed, priced for ${town ? town.name : 'a town this size'}.`),
       m && !draft ? orderPart(e, m, rerender) : null,
       m && !draft ? tabPart(e, rerender) : null,
