@@ -857,6 +857,12 @@ to the log at the bottom.
 479. [x] **The week on the party page.** Players can fold out the week in the party's town on the party page.
 480. [x] **Days off on the Market tab.** A settlement's Market tab says each shop's weekly day off by its hours.
 481. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
+482. [ ] **Local holidays everywhere.** The party's town's own holidays also count in "Coming up", on the GM sheet,
+    and for tavern festival prices.
+483. [ ] **Check the local holidays.** Saving a settlement warns about local holiday lines the calendar can't read.
+484. [ ] **Which town's holidays.** The calendar can show another town's local holidays, not just the party's town's.
+485. [ ] **The 200th Founding Day.** A local holiday written with a year counts its anniversaries ("the 200th Founding
+    Day").
 
 ## Ideas parking lot
 
