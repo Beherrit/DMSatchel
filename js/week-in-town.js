@@ -67,3 +67,15 @@ export function nextMarket(cal, town, within = 60) {
   return null;
 }
 export const inDaysText = (k) => (k === 0 ? 'today' : k === 1 ? 'tomorrow' : `in ${k} days`);
+
+// A shop's next day shut (from tomorrow): its weekly day off, or a holiday it doesn't trade on.
+// → { inDays, weekday, why: 'day off' | 'holiday', holiday? } or null (open every day for `within` days).
+export function nextShut(cal, shop, within = 60) {
+  if (!cal || !Array.isArray(cal.months) || !cal.months.length) return null;
+  const from = toDays(cal, { year: cal.year, month: cal.month, day: cal.day });
+  for (let n = from + 1; n <= from + within; n++) {
+    const d = dayInTown(cal, null, [shop], fromDays(cal, n)), s = d.shut[0];
+    if (s) return { inDays: n - from, weekday: d.weekday, why: s.why, ...(s.why === 'holiday' ? { holiday: d.holidays[0] } : {}) };
+  }
+  return null;
+}

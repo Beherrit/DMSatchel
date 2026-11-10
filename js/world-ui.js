@@ -99,6 +99,7 @@ import { knowsButtons, knownSection } from './world-known.js';
 import { startCard, markPartySeen } from './onboarding.js';
 import { viewCalendar, worldCalendar, todayText, onThisDayCard } from './world-calendar.js';
 import { parseDate, toDays, yearLength } from './calendar.js';
+import { nextShut } from './week-in-town.js';
 import { sheetSection } from './sheet-ui.js';
 import { pictureField, figure, thumb } from './image-ui.js';
 import { renderStats, renderSpells } from './statblock-ui.js';
@@ -440,12 +441,12 @@ function viewEntry(id, tab) {
     tableSection(e),
     e.kind === 'encounter' && e.fields?.enc ? (() => { try { return encounterCard(JSON.parse(e.fields.enc), { title: 'Saved encounter', save: false }); } catch { return null; } })() : null,
     attendanceSection(e, rerenderWorld),
-    e.kind === 'location' && e.fields?.type === 'Tavern' && e.fields?.menu && !e.fields?.stock ? closingLine(e) : null,
+    e.kind === 'location' && e.fields?.type === 'Tavern' && e.fields?.menu && !e.fields?.stock ? [closingLine(e), nextShutLine(e)] : null,
     e.kind === 'location' && e.fields?.type === 'Tavern' ? menuCard(e, trailTown(e), rerenderWorld) : null,
     e.fields?.stock || (e.kind === 'location' && e.fields?.type === 'Shop' && isGm()) ? el('section', { class: 'card shop-card' },
       el('p', { class: 'shelf-title' }, e.name),
       el('p', { class: 'shelf-hours' }, hoursSign(e)),
-      closingLine(e),
+      closingLine(e), nextShutLine(e),
       el('div', { class: 'entry-head' }, el('h3', {}, 'For sale'),
         // Print the shelf: just the shop's prices, to hand round the table.
         e.fields?.stock ? el('button', { class: 'btn small ghost', type: 'button', onclick: () => { document.body.classList.add('print-shelf'); window.print(); setTimeout(() => document.body.classList.remove('print-shelf'), 500); } }, 'Print the shelf') : null,
@@ -620,6 +621,15 @@ function placeSummary(e) {
 }
 
 // ---- editing -----------------------------------------------------------------------------------
+
+// A shop's next day off: when it's next shut all day (its weekly day off, or a holiday it doesn't trade on).
+function nextShutLine(shop) {
+  if (!(shop.fields?.stock || shop.fields?.menu)) return null;
+  const cal = worldCalendar(), x = cal && nextShut(cal, shop, 30);
+  if (!x) return null;
+  const when = x.inDays === 1 ? 'tomorrow' : `${x.weekday ? `${x.weekday}, ` : ''}in ${x.inDays} days`;
+  return el('p', { class: 'small muted next-shut' }, `📅 Next shut ${when}: ${x.why === 'holiday' ? `for ${x.holiday}` : 'its day off'}.`);
+}
 
 // Closing time: how long until a shop shuts, or opens, by the world's clock (and today's holiday).
 function closingLine(shop) {

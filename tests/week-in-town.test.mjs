@@ -59,3 +59,12 @@ test('nextMarket: today, later, skipping a holiday', async () => {
   assert.equal(nextMarket(cal, { fields: {} }), null);
   assert.equal(inDaysText(0), 'today'); assert.equal(inDaysText(1), 'tomorrow'); assert.equal(inDaysText(3), 'in 3 days');
 });
+
+test('nextShut: a shop’s next day off or holiday', async () => {
+  const { nextShut } = await import('../js/week-in-town.js');
+  const shop = { name: 'Smithy', fields: { type: 'Shop', stock: 'x', closed_on: wd(9) } };
+  assert.deepEqual(nextShut(cal, shop), { inDays: 2, weekday: wd(7), why: 'holiday', holiday: 'Bridge Day' });
+  assert.deepEqual(nextShut({ ...cal, holidays: [] }, shop), { inDays: 4, weekday: wd(9), why: 'day off' });
+  assert.equal(nextShut({ ...cal, holidays: [] }, { name: 'X', fields: { type: 'Shop', stock: 'x' } }), null);
+  assert.equal(nextShut(cal, { name: 'Bell', fields: { type: 'Tavern', menu: 'ale' } }), null); // taverns keep holidays open
+});

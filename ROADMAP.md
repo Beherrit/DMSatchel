@@ -849,7 +849,7 @@ to the log at the bottom.
 473. [x] **Markets in the palette.** Ctrl+K "market" lists the towns with market days and when each is next.
 474. [x] **Market day on the map.** A settlement's map pin says when it's market day there (today, or next).
 475. [x] **Next market in prep.** Session prep says when the next market day is in the party's town.
-476. [ ] **A shop's next day off.** A shop's page says when it's next shut: its day off, or a holiday.
+476. [x] **A shop's next day off.** A shop's page says when it's next shut: its day off, or a holiday.
 477. [ ] **Tomorrow in town.** The clock card says what tomorrow brings in the party's town (a holiday, market day,
     shops shut, a birthday).
 
@@ -1334,3 +1334,4 @@ to the log at the bottom.
 - Markets in the palette: Ctrl+K "market" lists the towns with market days first, soonest next market first ("🧺 Next market Restday, in 9 days"), then the ordinary matches.
 - Market day on the map: a settlement's pin says "🧺 Market day today" or "Next market: Moonday, in 3 days".
 - Next market in prep: session prep's "Where the party is" card says "🧺 Next market in Brindle: Starday, tomorrow" (or that it's market day today).
+- A shop's next day off: a shop's page says when it's next shut all day ("📅 Next shut tomorrow: its day off", or "for Bridge Day"); taverns that keep holidays open don't.
