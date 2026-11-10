@@ -101,6 +101,7 @@ import { viewCalendar, worldCalendar, todayText, onThisDayCard } from './world-c
 import { parseDate, toDays, yearLength, parseHolidayLines } from './calendar.js';
 import { nextShut } from './week-in-town.js';
 import { customersAt, purchases, spots, goodsAt, orderedAt } from './purchases.js';
+import { toolsInPack, craftableWith } from './crafting.js';
 import { coinText } from './economy.js';
 import { sheetSection } from './sheet-ui.js';
 import { pictureField, figure, thumb } from './image-ui.js';
@@ -419,7 +420,7 @@ function viewEntry(id, tab) {
       e.summary ? el('p', { class: 'lede' }, richInline(e.summary)) : null,
       fieldRows.length ? el('dl', { class: 'traits' }, fieldRows.flatMap(([l, v, type]) => [el('dt', {}, l), el('dd', {}, type === 'long' ? richText(v) : /^https:\/\/\S+$/.test(v) ? el('a', { href: v, target: '_blank', rel: 'noopener' }, /dndbeyond\.com/.test(v) ? 'Open on D&D Beyond ↗' : 'Open link ↗') : el('span', {}, v))])) : null),
     sinceLastCard(e), comingUpCard(e),
-    routineNow(e), patronLine(e), hauntsLine(e), membersNowCard(e), crossPathsLine(e), mindingLine(e), ownerDayLine(e), festivalLine(e), marketDayLine(e), weekInTownBox(e), openNowLine(e), wantedCard(e), hereNow(e), laterLine(e), regularsLine(e), busiestLine(e), townHoursBox(e), townPreviewBox(e), turnUpBox(e), rollTownButton(e, rerenderWorld),
+    routineNow(e), patronLine(e), hauntsLine(e), toolsLine(e), membersNowCard(e), crossPathsLine(e), mindingLine(e), ownerDayLine(e), festivalLine(e), marketDayLine(e), weekInTownBox(e), openNowLine(e), wantedCard(e), hereNow(e), laterLine(e), regularsLine(e), busiestLine(e), townHoursBox(e), townPreviewBox(e), turnUpBox(e), rollTownButton(e, rerenderWorld),
     e.kind === 'npc' || e.fields?.stats || e.fields?.spells ? statSection(e) : null,
     e.kind === 'clan' ? clanTree(e, rerenderWorld) : null,
     e.kind === 'npc' || e.kind === 'character' ? familySection(e, rerenderWorld) : null,
@@ -625,6 +626,16 @@ function placeSummary(e) {
 }
 
 // ---- editing -----------------------------------------------------------------------------------
+
+// What these tools could make: on a character's page, the artisan's tools in their pack and a few things each can make.
+function toolsLine(c) {
+  if (c.kind !== 'character') return null;
+  let inv = ''; try { inv = JSON.parse(c.fields?.play || '{}')?.inventory || ''; } catch { inv = ''; }
+  const tools = toolsInPack(inv);
+  if (!tools.length) return null;
+  return el('div', { class: 'small tools-line' }, tools.map((t) => { const can = craftableWith(t);
+    return el('p', {}, `🔨 With ${t}, ${c.name} could make `, can.slice(0, 5).map((g) => g.name).join(', '), can.length > 5 ? el('span', { class: 'muted' }, ` and ${can.length - 5} more`) : '', '.'); }));
+}
 
 // Favourite haunts: on a character's page, the tavern they order at most and the shop they buy from most (from their log).
 function hauntsLine(c) {

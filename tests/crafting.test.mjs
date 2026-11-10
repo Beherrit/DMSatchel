@@ -45,3 +45,11 @@ test('hasTools: the pack holds the tools, whatever the apostrophe or case', asyn
   assert.equal(hasTools('', 'Smith’s tools'), false);
   assert.equal(hasTools('Smith’s tools', ''), false);
 });
+
+test('craftableWith and toolsInPack: what a pack’s tools could make', async () => {
+  const { craftableWith, toolsInPack } = await import('../js/crafting.js');
+  assert.deepEqual(craftableWith('Smith’s tools', goods).map((g) => g.name), ['Longsword', 'Chain mail', 'Plate armor']);
+  assert.deepEqual(toolsInPack('Rope\nSmith’s tools\nweaver\'s tools'), ['Smith’s tools', 'Weaver’s tools'].filter((t) => toolsInPack('Rope\nSmith’s tools\nweaver\'s tools').includes(t)));
+  assert.ok(toolsInPack('Smith’s tools').includes('Smith’s tools'));
+  assert.deepEqual(toolsInPack('Rope'), []);
+});

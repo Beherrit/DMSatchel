@@ -50,3 +50,12 @@ export function hasTools(inventory, tool) {
   const t = key(tool);
   return !!t && String(inventory || '').split('\n').some((l) => key(l).includes(t));
 }
+
+// What these tools could make: the goods on the price list usually made with them, cheapest first. → [{ name, gp }].
+export const craftableWith = (tool, goods = GOODS) => goods.filter((g) => toolsFor(g[0], g[2]) === tool).map((g) => ({ name: g[0], gp: g[1] })).sort((a, b) => a.gp - b.gp || a.name.localeCompare(b.name));
+
+// The artisan's tools a pack holds (from those the price list's goods need). → [tool names].
+export function toolsInPack(inventory, goods = GOODS) {
+  const all = [...new Set(goods.map((g) => toolsFor(g[0], g[2])).filter(Boolean))];
+  return all.filter((t) => hasTools(inventory, t));
+}
