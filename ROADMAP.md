@@ -872,7 +872,7 @@ to the log at the bottom.
 491. [x] **Market stalls.** On market day, a settlement's Market tab lists a few travelling stalls and what they
     sell, the same all day (seeded by the town and the date).
 492. [x] **Market-day crowds.** On market day the scene line says the square is busy with stalls.
-493. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
+493. [x] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 494. [x] **Buy from a stall.** A player can buy from a market stall for their character, paid from their purse like
     a shop (the server checks it's market day and the price).
 495. [x] **Stalls on the GM sheet.** On market day the printable GM sheet lists the stalls in the party's town.
@@ -1475,3 +1475,4 @@ to the log at the bottom.
 - Downtime totals: a character's downtime section sums it up ("📊 3 activities, 9 days spent, 17 gp 5 sp in costs (10 gp paid)"), counting days done so far on open activities and crafting materials where no cost is written.
 - A new contact: carousing and building-contacts downtime has a GM button "Start a new contact", a new-NPC form already filled in (a name, in the party's town, "A contact [[Ann]] made while carousing in Brindle").
 - Anything this time?: the party page notes active characters with no downtime filed since the last session (players see their own; GMs everyone's), with a button to file it ("⏳ No downtime since Session 4 for Ann").
+- A full sweep (#493): all 514 browser tests clean against sweep #489, first time through (covering the crafting, wish and downtime work since).
