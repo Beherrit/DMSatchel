@@ -842,7 +842,7 @@ to the log at the bottom.
 466. [x] **Copy the week.** The week in town can be copied as plain text, for a handout or a chat.
 467. [x] **The week on the GM sheet.** The printable GM sheet lists the week ahead in the party's town.
 468. [x] **Shut that day.** A calendar day's card says which of the party's town's shops are shut that day, and why.
-469. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
+469. [x] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 470. [x] **Open for the holiday.** The week in town says which shops stay open on a holiday.
 471. [x] **Birthdays in the week.** The week in town lists the birthdays of the people who live there.
 472. [x] **Next market on the party page.** The party page says when the next market day is in the party's town.
@@ -1425,3 +1425,4 @@ to the log at the bottom.
 - A tavern's favourites: a tavern's page lists what the party orders there most ("🍲 The party’s favourites: Pale ale (2), Stew (1)"), read from the order lines in the characters' logs.
 - Wishlists: a character has a "Wishlist" field (one item per line) that its player can keep; additive, so existing characters are untouched.
 - Someone wants this: a shop's shelf and the market stalls mark goods on an active character's wishlist ("⭐ Ann, Bo want this"), matched loosely ("rope" finds "Rope (50 feet)", "a good lantern" finds "Hooded lantern").
+- A full sweep (#469): all 483 browser tests clean against sweep #461; t-minding timed out under load and passes on rerun.
