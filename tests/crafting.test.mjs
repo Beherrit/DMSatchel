@@ -12,8 +12,8 @@ test('findGood: by name, or the start of it', () => {
 });
 
 test('craftEstimate: half the price in materials, price ÷ 10 days, divided among helpers', () => {
-  assert.deepEqual(craftEstimate('Longsword', 1, goods), { name: 'Longsword', gp: 15, materialsCp: 750, days: 2, daysEach: 2, helpers: 1 });
-  assert.deepEqual(craftEstimate('Plate armor', 1, goods), { name: 'Plate armor', gp: 1500, materialsCp: 75000, days: 150, daysEach: 150, helpers: 1 });
+  assert.deepEqual(craftEstimate('Longsword', 1, goods), { name: 'Longsword', gp: 15, materialsCp: 750, days: 2, daysEach: 2, helpers: 1, tools: 'Smith’s tools' });
+  assert.deepEqual(craftEstimate('Plate armor', 1, goods), { name: 'Plate armor', gp: 1500, materialsCp: 75000, days: 150, daysEach: 150, helpers: 1, tools: 'Smith’s tools' });
   assert.equal(craftEstimate('Plate armor', 4, goods).daysEach, 38);
   assert.equal(craftEstimate('rope', 1, goods).days, 1);
   assert.equal(craftEstimate('Chain mail', 3, goods).daysEach, 3);
@@ -23,4 +23,16 @@ test('craftEstimate: half the price in materials, price ÷ 10 days, divided amon
 test('craftEstimate: works on the real price list', () => {
   const e = craftEstimate('Shortbow');
   assert.ok(e && e.gp === 25 && e.days === 3 && e.materialsCp === 1250);
+});
+
+test('toolsFor: the artisan’s tools an item is usually made with', async () => {
+  const { toolsFor } = await import('../js/crafting.js');
+  assert.equal(toolsFor('Longsword', 'Weapons'), 'Smith’s tools');
+  assert.equal(toolsFor('Longbow', 'Weapons'), 'Woodcarver’s tools');
+  assert.equal(toolsFor('Leather armor', 'Armor'), 'Leatherworker’s tools');
+  assert.equal(toolsFor('Padded armor', 'Armor'), 'Weaver’s tools');
+  assert.equal(toolsFor('Hooded lantern', 'Adventuring gear'), 'Tinker’s tools');
+  assert.equal(toolsFor('Antitoxin (vial)', 'Alchemy'), 'Herbalism kit');
+  assert.equal(toolsFor('Lute', 'Instruments'), 'Woodcarver’s tools');
+  assert.equal(toolsFor('Diamond', 'Gems & jewelry'), '');
 });

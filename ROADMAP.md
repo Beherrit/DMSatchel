@@ -915,7 +915,7 @@ to the log at the bottom.
 524. [x] **Use the estimate.** One click puts the estimate's days and materials cost into the activity.
 525. [x] **Hand over what was made.** When a GM resolves a crafting activity, they can put the item in the
     character's pack.
-526. [ ] **The right tools.** The crafting estimate names the artisan's tools the item needs (smith's tools for a
+526. [x] **The right tools.** The crafting estimate names the artisan's tools the item needs (smith's tools for a
     longsword, leatherworker's tools for leather armor…).
 527. [ ] **Got the tools?** The estimate checks the crafter's pack for those tools and says if they're missing.
 528. [ ] **Pay for the materials.** A GM can take the raw materials' cost from the crafter's purse in one click.
@@ -1452,3 +1452,4 @@ to the log at the bottom.
 - Many hands: the crafting estimate takes the number of crafters and divides the days among them ("150 days of work, or 50 days each with 3 crafting").
 - Use the estimate: a "Use the estimate" button fills in the activity's days (each) and cost (the raw materials).
 - Hand over what was made: a crafting activity's GM box has "Put the Longsword in Ann’s pack", which adds it to the character's pack (logged "Crafted Longsword") and marks it handed over (GM-only) so it can't be given twice.
+- The right tools: the crafting estimate and the activity name the artisan's tools an item is usually made with ("Usually made with Smith’s tools"; woodcarver's for bows, leatherworker's for leather armor, weaver's for padded armor and rope, tinker's for lanterns and locks…).

@@ -22,7 +22,7 @@ function item(d, { showChar = true, resolve = null } = {}) {
       f.days ? el('span', { class: 'muted small' }, f.done && !f.resolved ? ` · ${Math.min(+f.done, +f.days || +f.done)} of ${f.days} days` : ` · ${f.days} day${String(f.days) === '1' ? '' : 's'}`) : null, f.cost ? el('span', { class: 'muted small' }, ` · ${f.cost}`) : null),
       el('span', { class: `tag${f.resolved ? '' : ' waiting-tag'}` }, f.resolved ? 'Resolved' : +f.days > 0 && +f.done >= +f.days ? 'Ready to resolve' : 'Waiting for a GM')),
     // What's being crafted, with the SRD 5.2 estimate when it's on the price list.
-    f.craft ? (() => { const e = craftEstimate(f.craft); return el('p', { class: 'small craft-line' }, `🔨 Making: ${f.craft}`, e ? el('span', { class: 'muted' }, ` (materials ${coinText(e.materialsCp)}, ${e.days} day${e.days === 1 ? '' : 's'} of work)`) : null); })() : null,
+    f.craft ? (() => { const e = craftEstimate(f.craft); return el('p', { class: 'small craft-line' }, `🔨 Making: ${f.craft}`, e ? el('span', { class: 'muted' }, ` (materials ${coinText(e.materialsCp)}, ${e.days} day${e.days === 1 ? '' : 's'} of work${e.tools ? `, ${e.tools}` : ''})`) : null); })() : null,
     d.summary ? el('p', {}, d.summary) : null,
     f.outcome ? el('div', { class: 'downtime-outcome' }, el('span', { class: 'label' }, 'Outcome'), richText(f.outcome)) : null,
     el('p', { class: 'muted small' }, `${d.owner || d.created_by || 'Someone'}, ${when(d.created_at)}${d.visibility === 'gm' ? ' · only the GMs and the player can see this' : ''} · `, link(d, 'Open')),
@@ -71,7 +71,7 @@ function fileForm(after, preset) {
     const e = craft.value.trim() ? craftEstimate(craft.value, helpers.value) : null;
     use.hidden = !e;
     estimate.textContent = !craft.value.trim() ? 'Name an item from the price list for an estimate (or describe anything else below).'
-      : e ? `${e.name} (${coinText(Math.round(e.gp * 100))}): raw materials ${coinText(e.materialsCp)}, ${e.days} day${e.days === 1 ? '' : 's'} of work${e.helpers > 1 ? `, or ${e.daysEach} day${e.daysEach === 1 ? '' : 's'} each with ${e.helpers} crafting` : ''}. They need proficiency with the right tools.`
+      : e ? `${e.name} (${coinText(Math.round(e.gp * 100))}): raw materials ${coinText(e.materialsCp)}, ${e.days} day${e.days === 1 ? '' : 's'} of work${e.helpers > 1 ? `, or ${e.daysEach} day${e.daysEach === 1 ? '' : 's'} each with ${e.helpers} crafting` : ''}. ${e.tools ? `Usually made with ${e.tools}, and they need proficiency with them.` : 'They need proficiency with the right tools.'}`
         : 'Not on the price list: a GM will set the cost and time.';
   };
   craft.addEventListener('input', showEstimate); helpers.addEventListener('input', showEstimate);
