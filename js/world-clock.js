@@ -10,7 +10,7 @@ import { worldCalendar } from './world-calendar.js';
 import { readClock, LIGHTS, STEPS, partOfDay, hhmm, leftText, fuelFor, lightName, JUMPS, untilNext } from './clock.js';
 import { changePlay } from './sheet-ui.js';
 import { takeItem } from './handover.js';
-import { outAndAbout, partyTown, townSnapshot } from './world-routine.js';
+import { outAndAbout, partyTown, townSnapshot, atMinutes } from './world-routine.js';
 import { clockDiff, diffText } from './clock-diff.js';
 import { formatDate, today, cleanCalendar } from './calendar.js';
 import { holidayToday, holidayTomorrow } from './shop-hours.js';
@@ -75,6 +75,14 @@ export function clockCard() {
         send({ add_light: { name: called, minutes: Number(mins) } }, `${called} lit`);
       };
       tools = el('div', { class: 'clock-tools' },
+        // What if we skip ahead: what each jump would change in the party's town, worked out without moving the clock.
+        (() => { const town = partyTown(); if (!town) return null;
+          const out = el('ul', { class: 'plain small skip-preview' });
+          const box = el('details', { class: 'skip-ahead' }, el('summary', { class: 'small' }, 'What would change if we skip ahead?'), out);
+          box.addEventListener('toggle', () => { if (!box.open) return; const before = townSnapshot(town);
+            setKids(out, JUMPS.map(([label, t]) => { const after = atMinutes((c.minutes + untilNext(c.minutes, t)) % 1440, () => townSnapshot(town)); const d = diffText(clockDiff(before, after), 4).replace(/ went to /g, ' goes to ').replace(/ opened/g, ' opens').replace(/ shut(?=;|$| and)/g, ' shuts').replace(/ left(?=;|$| and)/g, ' leaves');
+              return el('li', {}, el('strong', {}, `→ ${label}: `), d || el('span', { class: 'muted' }, 'nothing much changes')); })); });
+          return box; })(),
         // Jump to a time of day: the next morning, midday, evening or night (always forward, so days roll on).
         el('div', { class: 'btnrow clock-jumps', role: 'group', 'aria-label': 'Jump to a time of day' }, JUMPS.map(([label, t]) => el('button', { class: 'btn small ghost', type: 'button', title: `On to the next ${label.toLowerCase()} (${hhmm(t)})`, onclick: () => send({ advance: untilNext(c.minutes, t) }, `On to ${label.toLowerCase()}`) }, `→ ${label}`))),
         el('div', { class: 'btnrow' }, STEPS.map(([m, label]) => el('button', { class: 'btn small', type: 'button', onclick: () => send({ advance: m }) }, label)),

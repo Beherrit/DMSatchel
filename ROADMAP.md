@@ -828,7 +828,7 @@ to the log at the bottom.
 456. [x] **The map at another hour.** A slider on the map previews who's where and what's open at another hour,
     without moving the world's clock.
 457. [x] **Night on the map.** At night the map darkens a little and says how much the moon lights it.
-458. [ ] **What if we skip ahead.** The clock card can preview what would change in the party's town by the next
+458. [x] **What if we skip ahead.** The clock card can preview what would change in the party's town by the next
     morning, evening or night before the GM moves time (shops opening, who'd come and go).
 459. [ ] **A town at another hour.** A settlement's page can preview who's about and what's open at another hour.
 460. [ ] **Only where people are.** A map toggle dims the pins with nobody there right now.
@@ -1298,3 +1298,4 @@ to the log at the bottom.
 - Who's where, by name: a "Who's where" button on the map labels each pin with the names of the people there now ("Ada, Bram, Cy +2"), alongside the count.
 - The map at another hour: a 🕰 slider on the map previews another hour: pins' head-counts, names, open or shut, wanted marks and popups all follow it ("22:00 (preview)"), and "Back to now" returns. The world's clock isn't moved (a scoped atMinutes() override in world-routine.js).
 - Night on the map: from 20:00 to 05:00 (or when the hour preview says so) the map image darkens and a line under the toolbar says how much the moon lights it, clouds and all: "🌙 Night: New moon: no moon to see by, so bring a light."
+- What if we skip ahead: the clock card folds out "What would change if we skip ahead?": for the next morning, midday, evening and night, what would change in the party's town ("→ Night: Smithy shuts; Ada leaves"), worked out without moving the clock.
