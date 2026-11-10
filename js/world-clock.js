@@ -10,9 +10,10 @@ import { worldCalendar } from './world-calendar.js';
 import { readClock, LIGHTS, STEPS, partOfDay, hhmm, leftText, fuelFor, lightName, JUMPS, untilNext } from './clock.js';
 import { changePlay } from './sheet-ui.js';
 import { takeItem } from './handover.js';
-import { outAndAbout, partyTown, townSnapshot, atMinutes } from './world-routine.js';
+import { outAndAbout, partyTown, townSnapshot, atMinutes, townWeek } from './world-routine.js';
+import { weekDayText } from './week-in-town.js';
 import { clockDiff, diffText } from './clock-diff.js';
-import { formatDate, today, cleanCalendar } from './calendar.js';
+import { formatDate, today, cleanCalendar, toDays } from './calendar.js';
 import { holidayToday, holidayTomorrow } from './shop-hours.js';
 import { moonlight } from './moonlight.js';
 
@@ -96,6 +97,12 @@ export function clockCard() {
       lastChange ? el('p', { class: 'small clock-changed' }, `⏩ ${lastChange}`) : null,
       // Holidays on the clock: a holiday shuts the shops (the taverns stay open).
       (() => { const h = holidayToday(cleanCalendar(world.info?.cal)); return h ? el('p', { class: 'small clock-holiday' }, `🎉 ${h}: the shops are shut today; the taverns are open.`) : null; })(),
+      // Tomorrow in town: what tomorrow brings in the party's town (market day, days off, birthdays); a holiday
+      // has its own line just below, so it isn't said twice.
+      (() => { try { const town = partyTown(), tw = townWeek(town), cal = cleanCalendar(world.info?.cal); if (!tw || !cal) return null;
+        const n = toDays(cal, today(cal)) + 1, d = tw.week.find((x) => x.n === n); if (!d) return null;
+        const t = weekDayText({ ...d, holidays: [], shut: d.shut.filter((x) => x.why === 'day off') });
+        return t ? el('p', { class: 'small clock-tomorrow' }, `📅 Tomorrow in ${town.name}: ${t}.`) : null; } catch { return null; } })(),
       // Eve of a holiday on the clock: festive goods cost more today, and the shops shut tomorrow.
       (() => { const h = holidayTomorrow(cleanCalendar(world.info?.cal)); return h ? el('p', { class: 'small clock-eve' }, `🎉 ${h} tomorrow: festive goods cost a quarter more today, and the shops will be shut.`) : null; })(),
       // Moonlight at night: how much the moons light the way (from 20:00 to 05:00).
