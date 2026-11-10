@@ -892,6 +892,12 @@ to the log at the bottom.
 507. [x] **Busiest taverns.** The numbers page ranks taverns by the party's orders there.
 508. [x] **A shop's best sellers.** A shop's page lists what the party buys there most.
 509. [x] **Copy the shopping.** What the party bought can be copied as plain text.
+510. [ ] **Phone check.** The week in town, the market stalls and their buy form, and the calendar's town picker fit
+    a phone screen without sideways scrolling.
+511. [ ] **When the stalls pack up.** The stalls card says how long the stalls are up by the world's clock, or that
+    they're packed away.
+512. [ ] **The keeper at their stall.** A stall whose keeper was made an NPC links to them.
+513. [ ] **Stalls in the palette.** Ctrl+K "stalls" lists today's market stalls and their goods.
 
 ## Ideas parking lot
 
