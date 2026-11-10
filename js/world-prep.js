@@ -35,6 +35,7 @@ import { nextMovesCard } from './world-nextmove.js';
 import { shoppingPrepCard } from './world-shopping.js';
 import { partyRows, worries } from './party-glance.js';
 import { aroundNow, festivalLine, wantedPrepLine, whereNow, whereBits } from './world-routine.js';
+import { nextMarket, inDaysText } from './week-in-town.js';
 import { waitingOnGm } from './waiting.js';
 import { giftsSince, giftWhat } from './gifts.js';
 import { lastSession } from './recap.js';
@@ -168,7 +169,10 @@ function whereSection(prep, rerender) {
         catch (err) { toast(err.message, 'bad'); }
       } }, prep.scene_aloud ? 'In the read-aloud list ✓' : 'Read aloud')) : null,
     // The festival: on a holiday, who's at the taverns in town now (and on other days, when the next one is).
-    (() => { const t = here.kind === 'settlement' ? here : town; return t ? [festivalLine(t), wantedPrepLine(t)] : null; })(),
+    (() => { const t = here.kind === 'settlement' ? here : town; return t ? [festivalLine(t), wantedPrepLine(t),
+      // Next market in prep: when the town's market is next (today, or which day), holidays skipped.
+      (() => { const cal = cleanCalendar(world.info?.cal), m = cal && t.kind === 'settlement' ? nextMarket(cal, t, 14) : null;
+        return m ? el('p', { class: 'small prep-market' }, m.inDays === 0 ? `🧺 Market day in ${t.name} today: stalls in the square, and the shops open two hours early.` : `🧺 Next market in ${t.name}: ${m.weekday}, ${inDaysText(m.inDays)}.`) : null; })()] : null; })(),
     el('div', { class: 'prep-grid' },
       el('div', {}, (() => {
         // Who's around for the scene: NPCs whose daily routine puts them here (or somewhere inside) right now.
