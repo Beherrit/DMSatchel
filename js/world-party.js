@@ -388,6 +388,14 @@ export async function viewParty(rerender) {
       (() => { const t = partyTown(), ss = todaysStalls(t); return ss.length ? el('details', { class: 'party-stalls' }, el('summary', {}, `🧺 Market stalls in ${t.name} today (${ss.length})`),
         el('ul', { class: 'plain small' }, ss.map((st) => el('li', {}, el('strong', {}, st.name), ': ', st.goods.map((g) => `${g.name} ${g.price}`).join(', ')))),
         el('a', { class: 'small', href: `#world/e/${t.id}/market` }, 'Buy from the stalls →')) : null; })(),
+      // Anything this time?: active characters with no downtime filed since the last session (players: their own).
+      (() => { const last = sessionOrder(worldEntries())[0]; if (!last) return null;
+        const since = String(last.fields?.date || last.created_at || '').slice(0, 10);
+        const filed = new Set(worldEntries().filter((d) => d.kind === 'downtime' && String(d.created_at || '').slice(0, 10) >= since).map((d) => d.fields?.character));
+        const quiet = worldEntries().filter((c) => c.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(c.fields?.status) && (isGm() || c.owner_id === session.gm?.id) && !filed.has(c.id)).sort((a, b) => a.name.localeCompare(b.name));
+        if (!quiet.length) return null;
+        return el('p', { class: 'small party-downtime-nudge' }, `⏳ No downtime since ${last.name} for `, quiet.map((c, i) => [i ? ', ' : '', link(c)]), '. ',
+          el('a', { class: 'btn small ghost', href: `#world/downtime${!isGm() && quiet.length === 1 ? `/${quiet[0].id}` : ''}` }, 'File downtime')); })(),
       // What the party wishes for: the open wishes this person may see (GMs: everyone's; players: their own), and where
       // in the party's town each is for sale today.
       (() => { const t = partyTown(), ws = partyWishes(t?.kind === 'settlement' ? t : null); if (!ws.length) return null;

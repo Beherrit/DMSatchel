@@ -927,7 +927,7 @@ to the log at the bottom.
 534. [x] **Pay the cost.** Any downtime activity with a cost can have it taken from the character's purse by a GM.
 535. [x] **Downtime totals.** A character's page totals the days and coin their downtime has taken.
 536. [x] **A new contact.** Resolving carousing or building contacts can start a new NPC who knows the character.
-537. [ ] **Anything this time?** The party page reminds players whose characters haven't filed downtime since the
+537. [x] **Anything this time?** The party page reminds players whose characters haven't filed downtime since the
     last session.
 
 ## Ideas parking lot
@@ -1474,3 +1474,4 @@ to the log at the bottom.
 - Pay the cost: any downtime activity with a cost has a GM button to take it from the character's purse ("Take 10 gp from Ann", logged "Paid 10 gp for Carousing"), once; crafting with no cost written still takes the raw materials.
 - Downtime totals: a character's downtime section sums it up ("📊 3 activities, 9 days spent, 17 gp 5 sp in costs (10 gp paid)"), counting days done so far on open activities and crafting materials where no cost is written.
 - A new contact: carousing and building-contacts downtime has a GM button "Start a new contact", a new-NPC form already filled in (a name, in the party's town, "A contact [[Ann]] made while carousing in Brindle").
+- Anything this time?: the party page notes active characters with no downtime filed since the last session (players see their own; GMs everyone's), with a button to file it ("⏳ No downtime since Session 4 for Ann").
