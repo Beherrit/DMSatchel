@@ -425,6 +425,11 @@ export async function viewMap(id, focusPin) {
     if (holdsOn) { const all = [...world.entries.values()].filter((e) => e.status !== 'suggested'); hold = controllers(all); slots = powerSlots(all); }
     renderPins();
   } }, 'Who holds what');
+  // Who's where, by name: label each pin with the names of the people there now.
+  let namesOn = false;
+  const namesBtn = el('button', { class: 'btn small', type: 'button', 'aria-pressed': 'false', title: 'Label each pin with who is there right now', onclick: () => {
+    namesOn = !namesOn; namesBtn.setAttribute('aria-pressed', String(namesOn)); renderPins();
+  } }, 'Who’s where');
 
   function renderPins() {
     const q = filter.value.trim().toLowerCase();
@@ -460,6 +465,7 @@ export async function viewMap(id, focusPin) {
         title: held ? `${said}: held by ${held.by.name}` : said, 'aria-label': held ? `${said}, held by ${held.by.name}` : said, onclick: (ev) => { ev.stopPropagation(); showPin(p); },
       }, el('span', { class: 'glyph', 'aria-hidden': 'true' }, PIN_ICONS[p.icon || 'poi'][1]), el('span', { class: 'pin-label' }, p.label),
         here ? el('span', { class: 'pin-count', 'aria-hidden': 'true' }, String(here)) : null,
+        namesOn && here ? el('span', { class: 'pin-names', 'aria-hidden': 'true' }, around.slice(0, 3).map((x) => x.npc.entry.name).join(', ') + (here > 3 ? ` +${here - 3}` : '')) : null,
         hunted ? el('span', { class: 'pin-wanted-mark', 'aria-hidden': 'true' }, '🎯') : null);
     }));
     drawHoldKey();
@@ -625,7 +631,7 @@ export async function viewMap(id, focusPin) {
     isMember() ? markBtn : null,
     map.miles ? measureBtn : null,
     journeyBtn,
-    holdBtn,
+    holdBtn, namesBtn,
     scaleControl());
 
   const entry = map.entry_id && getEntry(map.entry_id);

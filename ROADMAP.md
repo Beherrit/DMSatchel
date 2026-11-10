@@ -823,7 +823,7 @@ to the log at the bottom.
     are now.
 454. [x] **A map key.** The map explains its marks in a small key: the head-count, 🎯 for someone wanted, a dimmed pin
     for a shut shop, the party's flag.
-455. [ ] **Who's where, by name.** A map toggle labels each pin with the names of the people there now, not just a
+455. [x] **Who's where, by name.** A map toggle labels each pin with the names of the people there now, not just a
     count.
 456. [ ] **The map at another hour.** A slider on the map previews who's where and what's open at another hour,
     without moving the world's clock.
@@ -1290,3 +1290,4 @@ to the log at the bottom.
 - Wanted, at a glance: a map pin where someone with an open bounty is right now gets a small 🎯 mark, and says "someone wanted is here" in its label.
 - Find a person on the map: the map's "Find a pin" box also finds NPCs by name: "🕰 Bram at Back room (The Bell)", pointing to the pin for where their routine has them now (or the nearest place around it with a pin); clicking it centres the map there and opens the pin.
 - A map key: the map's side panel folds out a "Map key" explaining the marks: the head-count, 🎯 for someone wanted, a dimmed pin for a shut shop, the party's ⚑, and the double ring of a place with its own map.
+- Who's where, by name: a "Who's where" button on the map labels each pin with the names of the people there now ("Ada, Bram, Cy +2"), alongside the count.

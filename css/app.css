@@ -1817,3 +1817,5 @@ details.quest-group > summary .section-title { display: inline }
 .map-key { margin: 0 0 10px } .map-key ul { margin: 6px 0 0 } .map-key li { margin: 3px 0 }
 .key-mark { display: inline-block; min-width: 20px; text-align: center } .key-count { position: static; display: inline-block }
 .key-dim { opacity: .55; filter: grayscale(.7) }
+/* Who's where, by name (#455) */
+.pin-names { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); margin-top: 2px; white-space: nowrap; font-size: 11px; padding: 0 4px; border-radius: 4px; background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgb(0 0 0 / .25); pointer-events: none }
