@@ -29,6 +29,7 @@ import { coinChart } from './world-coinchart.js';
 import { payrollCard } from './world-hire.js';
 import { whoHas } from './who-has.js';
 import { campButton } from './world-camp.js';
+import { ordersCard } from './world-orders.js';
 
 const ACTIVE = (e) => !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
 
@@ -419,7 +420,7 @@ export async function viewParty(rerender) {
           writers.length ? el('span', { class: 'party-last-writers' }, ` · ✍ written up by ${writers.length > 1 ? `${writers.slice(0, -1).join(', ')} and ${writers[writers.length - 1]}` : writers[0]}`) : '', ' ', write); })(),
       isGm() ? el('div', { class: 'btnrow' }, campButton(rerender)) : null),
     el('div', { class: 'party-grid' },
-      el('div', { class: 'party-main' }, isGm() ? glanceTable(chars.filter(ACTIVE)) : null, members(chars), partyBondsSection(), advancementSection(),
+      el('div', { class: 'party-main' }, isGm() ? glanceTable(chars.filter(ACTIVE)) : null, members(chars), ordersCard(rerender), partyBondsSection(), advancementSection(),
         el('section', {}, el('h3', { class: 'section-title' }, 'Current quests'),
           quests.length ? el('ul', { class: 'entry-list' }, quests.map((q) => el('li', {}, link(q), world.info?.next_move === q.id ? el('span', { class: 'tag', title: 'Your pick for what’s next' }, '★ your pick') : null, progressBadge(q), q.fields?.reward ? el('span', { class: 'muted small' }, `Reward: ${q.fields.reward}`) : null)))
             : el('p', { class: 'muted' }, 'No active quests.'),

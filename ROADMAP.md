@@ -929,8 +929,8 @@ to the log at the bottom.
 536. [x] **A new contact.** Resolving carousing or building contacts can start a new NPC who knows the character.
 537. [x] **Anything this time?** The party page reminds players whose characters haven't filed downtime since the
     last session.
-538. [ ] **Marching order.** GMs set the party's marching order (front to back) on the party page; everyone sees it.
-539. [ ] **Watch order.** GMs set who keeps watch in the night; the party page shows each watch's hours.
+538. [x] **Marching order.** GMs set the party's marching order (front to back) on the party page; everyone sees it.
+539. [x] **Watch order.** GMs set who keeps watch in the night; the party page shows each watch's hours.
 540. [ ] **Orders on the sheet.** The printable GM sheet lists the marching order and the night's watches.
 541. [ ] **Whose watch is it?** At night the clock card says whose watch it is now.
 
@@ -1480,3 +1480,5 @@ to the log at the bottom.
 - A new contact: carousing and building-contacts downtime has a GM button "Start a new contact", a new-NPC form already filled in (a name, in the party's town, "A contact [[Ann]] made while carousing in Brindle").
 - Anything this time?: the party page notes active characters with no downtime filed since the last session (players see their own; GMs everyone's), with a button to file it ("⏳ No downtime since Session 4 for Ann").
 - A full sweep (#493): all 514 browser tests clean against sweep #489, first time through (covering the crafting, wish and downtime work since).
+- Marching order: the party page has "Marching and watches"; GMs tick and order the characters (front to back), saved with session prep, and everyone sees it ("🥾 Bo → Ann"), minus characters they can't see.
+- Watch order: GMs set who keeps watch the same way, and the night (22:00–06:00) is split evenly between them ("22:00–00:40: Ann").

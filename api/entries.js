@@ -47,6 +47,7 @@ import { addTab, readTab, tabTotal, splitTab } from '../js/tab.js';
 import { shopOpen, holidayToday, holidayTomorrow, evePrice, shutText, tradeDay, isMarketDay, marketToday } from '../js/shop-hours.js';
 import { cleanCalendar, withLocal } from '../js/calendar.js';
 import { marketStalls, STALLS_OPEN, STALLS_SHUT } from '../js/market-stalls.js';
+import { cleanOrder } from '../js/party-order.js';
 import { shopStanding, sellWithStanding } from '../js/standing-price.js';
 import { coinText, GOODS } from '../js/economy.js';
 import { cleanMusic } from '../js/music.js';
@@ -258,6 +259,9 @@ export default route({
         ...(following ? { following } : {}),
         // Where the party is (from session prep), when this person can see that place.
         party_at: partyAt(w, rows, req),
+        // The party's orders (marching and watch), the characters this person can see.
+        party_order: (() => { const sees = (id) => { const r = byId.get(id); return Boolean(r && !r.deleted && r.kind === 'character' && visibleTo(r, req)); };
+          return { march: cleanOrder(w.prep?.march).filter(sees), watch: cleanOrder(w.prep?.watch).filter(sees) }; })(),
         // Where the party has been: stops at places this person can see.
         journey: journeyFor(w.prep?.journey, (id) => { const r = byId.get(id); return r && !r.deleted && visibleTo(r, req); }),
         // Reading for next session: what this person can see of it, with who has read each (GMs) or whether they have.
