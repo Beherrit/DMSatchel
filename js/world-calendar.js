@@ -8,8 +8,10 @@ import { monthLines } from './calendar-month.js';
 import { repeatsBetween } from './repeats.js';
 import { onThisDay, yearsAgoText } from './onthisday.js';
 import { journeyDays } from './journey.js';
-import { PRESETS, makeCalendar, cleanCalendar, toDays, fromDays, advance, today, formatDate, parseDate, moonPhase, moonEvent, holidaysOn } from './calendar.js';
+import { PRESETS, makeCalendar, cleanCalendar, toDays, fromDays, advance, today, formatDate, parseDate, moonPhase, moonEvent, holidaysOn, weekday } from './calendar.js';
 import { namedIn } from './session-named.js';
+import { partyTown } from './world-routine.js';
+import { isMarketDay } from './shop-hours.js';
 
 // Fields that hold an in-world date, by kind.
 const DATE_FIELDS = { event: ['date'], session: ['world_date'], journal: ['date'], handout: ['found'], quest: ['deadline'] };
@@ -121,6 +123,7 @@ export function viewCalendar(arg, sub, rerender) {
       el('div', { class: 'entry-head' }, el('h3', {}, formatDate(cal, d, { weekday: true })), n === nowN ? el('span', { class: 'tag' }, 'Today') : el('span', { class: 'muted small' }, `${Math.abs(n - nowN)} days ${n < nowN ? 'ago' : 'from now'}`)),
       cal.moons.length ? el('p', { class: 'small' }, cal.moons.map((m) => { const p = moonPhase(cal, m, d); return `${p.icon} ${m.name}: ${p.name.toLowerCase()}`; }).join(' · ')) : null,
       holidaysOn(cal, d).map((h) => el('p', { class: 'holiday' }, `🎉 ${h.name}`)),
+      town && isMarketDay(town, weekday(cal, d)) ? el('p', { class: 'small cal-market-line' }, holidaysOn(cal, d).length ? `No market in ${town.name}: it’s a holiday.` : `🧺 Market day in ${town.name}.`) : null,
       births.filter((x) => x.n === n).map((x) => el('p', { class: 'birthday' }, '🎂 ', link(x.entry), x.age ? ` turns ${x.age}` : '’s birthday')),
       arrivals.filter((x) => x.n === n).map((x) => el('p', { class: 'arrival' }, '⚑ The party arrived in ', link(getEntry(x.id)))),
       items.length ? el('ul', { class: 'entry-list' }, items.map((x) => el('li', {}, x.repeat ? '↻ ' : '', link(x.entry), el('span', { class: 'kind-tag' }, x.repeat ? x.entry.fields.repeats.toLowerCase() : kindLabel(x.entry.kind)),
@@ -130,6 +133,10 @@ export function viewCalendar(arg, sub, rerender) {
         n !== nowN ? el('button', { class: 'btn small', type: 'button', onclick: async () => { if (await saveCal({ ...cal, ...d }, `Today is now ${formatDate(cal, d)}`)) rerender(); } }, 'Make this today') : null,
         el('button', { class: 'btn small ghost', type: 'button', onclick: () => window.dispatchEvent(new CustomEvent('world:draft', { detail: { kind: 'event', name: '', fields: { date: formatDate(cal, d), sort: String(d.year) } } })) }, '+ Event on this day')) : null));
   };
+
+  // Market days: the party's town's market weekday, marked on the month (no market on a holiday).
+  const town = (() => { try { const t = partyTown(); return t?.kind === 'settlement' && t.fields?.market_day ? t : null; } catch { return null; } })();
+  const marketOn = (d) => !!town && !holidaysOn(cal, d).length && isMarketDay(town, weekday(cal, d));
 
   const cells = [];
   for (let i = 0; i < offset; i++) cells.push(el('div', { class: 'cal-cell blank', 'aria-hidden': 'true' }));
@@ -142,7 +149,7 @@ export function viewCalendar(arg, sub, rerender) {
       ev.currentTarget.parentElement.querySelectorAll('.selected').forEach((c) => c.classList.remove('selected'));
       ev.currentTarget.classList.add('selected'); showDay(d);
     } },
-      el('span', { class: 'cal-day' }, day, full.length ? el('span', { class: 'cal-moon' }, full.join('')) : null),
+      el('span', { class: 'cal-day' }, day, full.length || marketOn(d) ? el('span', { class: 'cal-moon' }, marketOn(d) ? el('span', { class: 'cal-market', title: `Market day in ${town.name}` }, '🧺') : null, full.join('')) : null),
       hol.map((h) => el('span', { class: 'cal-hol' }, h.name)),
       births.filter((x) => x.n === n).map((x) => el('span', { class: 'cal-item cal-bday', title: birthdayText(x) }, `🎂 ${x.entry.name}`)),
       arrivals.filter((x) => x.n === n).map((x) => el('span', { class: 'cal-item cal-journey', title: `The party arrived in ${getEntry(x.id).name}` }, `⚑ ${getEntry(x.id).name}`)),

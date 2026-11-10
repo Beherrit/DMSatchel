@@ -835,7 +835,7 @@ to the log at the bottom.
 461. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 462. [x] **Who came up that day.** A day on the calendar lists the sessions set on it and who and what came up in
     them.
-463. [ ] **Market days on the calendar.** The calendar month marks the party's town's market days.
+463. [x] **Market days on the calendar.** The calendar month marks the party's town's market days.
 464. [ ] **No market on a holiday.** When a market day falls on a holiday, the town's page says there's no market.
 465. [ ] **The week in town.** A settlement's page shows the coming week: holidays, market day, and which shops take
     a day off when.
@@ -1308,3 +1308,4 @@ to the log at the bottom.
 - A town at another hour: a settlement's page folds out "See Brindle at another hour", with a slider that shows who's about and what's open at that hour ("About town at 18:00: Ada at The Bell until 19:00"), without moving the world's clock.
 - Only where people are: an "Only where people are" button on the map dims the place pins with nobody there right now (or at the previewed hour), until hovered.
 - Who came up that day: a session listed on a calendar day shows who and what its log names ("Came up: Ann, The Bell").
+- Market days on the calendar: the month marks the party's town's market days with a basket, and a day's card says "Market day in Brindle" (or that there's no market on a holiday).
