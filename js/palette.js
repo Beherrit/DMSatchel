@@ -60,7 +60,7 @@ function baseItems() {
 function entryItems() {
   // Open now in search: a shop or tavern says whether it's open by the world's clock.
   const info = M.store.world.info || {}, holiday = info.clock?.minutes === undefined ? '' : M.hours.tradeDay(M.calendar.cleanCalendar(info.cal));
-  const hours = (e) => (info.clock?.minutes === undefined || e.kind !== 'location' || !(e.fields?.stock || e.fields?.menu) ? null : M.hours.openText(e, info.clock.minutes, { ...holiday, market: M.hours.marketToday(M.wh.townOfShop(e), holiday) }));
+  const hours = (e) => (info.clock?.minutes === undefined || e.kind !== 'location' || !(e.fields?.stock || e.fields?.menu) ? null : M.hours.openText(e, info.clock.minutes, M.wh.dayFor(e)));
   const open = (e) => { const o = hours(e); return o ? `${o.open ? '🟢' : '🔒'} ${o.text}` : ''; };
   return M.store.worldEntries().map((e) => ({ label: e.name, group: M.store.kindLabel(e.kind), href: `#world/e/${e.id}`, openNow: hours(e)?.open, hint: [open(e), e.summary || (e.fields?.routine ? `Routine: ${String(e.fields.routine).slice(0, 90)}` : '')].filter(Boolean).join(' · '), haystack: `${e.name} ${(e.tags || []).join(' ')} ${Object.values(e.fields || {}).join(' ')}` }));
 }
@@ -125,7 +125,7 @@ function render() {
   let markets = [];
   if (/^(markets?|market days?)$/.test(q)) {
     const cal = M.calendar.cleanCalendar(M.store.world.info?.cal);
-    markets = M.store.worldEntries().filter((e) => e.kind === 'settlement' && e.fields?.market_day).map((e) => ({ e, m: cal ? M.week.nextMarket(cal, e) : null }))
+    markets = M.store.worldEntries().filter((e) => e.kind === 'settlement' && e.fields?.market_day).map((e) => ({ e, m: cal ? M.week.nextMarket(M.calendar.withLocal(cal, e), e) : null }))
       .sort((a, b) => (a.m ? a.m.inDays : 1e9) - (b.m ? b.m.inDays : 1e9) || a.e.name.localeCompare(b.e.name)).slice(0, 20)
       .map(({ e, m }) => ({ label: e.name, group: 'Market day', href: `#world/e/${e.id}`, hint: m ? (m.inDays === 0 ? `🧺 Market day today (${m.weekday})` : `🧺 Next market ${m.weekday}, ${M.week.inDaysText(m.inDays)}`) : `🧺 Market on ${e.fields.market_day}s` }));
   }

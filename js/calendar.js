@@ -112,3 +112,22 @@ export function moonEvent(cal, moon, date) {
   const half = moon.cycle / 2;
   return age >= half - 0.5 && age < half + 0.5 ? 'full' : null;
 }
+
+// Holidays written one per line, "Name, date" ("Founding Day, 3 Thawmoon"): → { holidays: [{ name, month, day }], bad: [names] }.
+export function parseHolidayLines(cal, text) {
+  const holidays = [], bad = [];
+  for (const l of String(text || '').split('\n').map((x) => x.trim()).filter(Boolean)) {
+    const i = l.indexOf(','), name = (i < 0 ? l : l.slice(0, i).trim()).slice(0, 60);
+    const d = i < 0 ? null : parseDate(cal, l.slice(i + 1));
+    if (!d || !name) bad.push(name || l); else holidays.push({ name, month: d.month, day: d.day });
+  }
+  return { holidays, bad };
+}
+
+// A town's calendar: the world's, plus the town's own festival days (its "holidays" field), each marked local.
+export function withLocal(cal, town) {
+  if (!cal || !town?.fields?.holidays) return cal;
+  let local = [];
+  try { local = parseHolidayLines(cal, town.fields.holidays).holidays.map((h) => ({ ...h, local: town.name })); } catch { local = []; }
+  return local.length ? { ...cal, holidays: [...(Array.isArray(cal.holidays) ? cal.holidays : []), ...local] } : cal;
+}

@@ -852,7 +852,7 @@ to the log at the bottom.
 476. [x] **A shop's next day off.** A shop's page says when it's next shut: its day off, or a holiday.
 477. [x] **Tomorrow in town.** The clock card says what tomorrow brings in the party's town (a holiday, market day,
     shops shut, a birthday).
-478. [ ] **Local holidays.** A settlement can have its own festival days (e.g. "Founding Day, 3 Thawmoon"): its shops
+478. [x] **Local holidays.** A settlement can have its own festival days (e.g. "Founding Day, 3 Thawmoon"): its shops
     shut, and they show in its week and on the calendar when the party is there.
 479. [ ] **The week on the party page.** Players can fold out the week in the party's town on the party page.
 480. [ ] **Days off on the Market tab.** A settlement's Market tab says each shop's weekly day off by its hours.
@@ -1341,3 +1341,4 @@ to the log at the bottom.
 - Next market in prep: session prep's "Where the party is" card says "🧺 Next market in Brindle: Starday, tomorrow" (or that it's market day today).
 - A shop's next day off: a shop's page says when it's next shut all day ("📅 Next shut tomorrow: its day off", or "for Bridge Day"); taverns that keep holidays open don't.
 - Tomorrow in town: the clock card says what tomorrow brings in the party's town ("📅 Tomorrow in Brindle: 🎂 Ada’s birthday (40) · 🧺 market day · day off: Smithy"); a holiday keeps its own line.
+- Local holidays: a settlement has a "Local holidays" field ("Founding Day, 5 Thawmoon", one per line); on those days its shops shut and its taverns hold a festival, and they show in its week, on its map pin's market line, on the clock card and on the calendar ("Founding Day (Brindle)") while the party is there.

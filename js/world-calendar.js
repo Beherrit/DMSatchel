@@ -8,8 +8,10 @@ import { monthLines } from './calendar-month.js';
 import { repeatsBetween } from './repeats.js';
 import { onThisDay, yearsAgoText } from './onthisday.js';
 import { journeyDays } from './journey.js';
-import { PRESETS, makeCalendar, cleanCalendar, toDays, fromDays, advance, today, formatDate, parseDate, moonPhase, moonEvent, holidaysOn, weekday } from './calendar.js';
+import { PRESETS, makeCalendar, cleanCalendar, toDays, fromDays, advance, today, formatDate, parseDate, moonPhase, moonEvent, holidaysOn, weekday, withLocal } from './calendar.js';
 import { namedIn } from './session-named.js';
+
+const hName = (h) => (h.local ? `${h.name} (${h.local})` : h.name);
 import { partyTown, townShops } from './world-routine.js';
 import { dayInTown } from './week-in-town.js';
 import { isMarketDay } from './shop-hours.js';
@@ -123,10 +125,10 @@ export function viewCalendar(arg, sub, rerender) {
     setKids(detail, el('div', { class: 'card' },
       el('div', { class: 'entry-head' }, el('h3', {}, formatDate(cal, d, { weekday: true })), n === nowN ? el('span', { class: 'tag' }, 'Today') : el('span', { class: 'muted small' }, `${Math.abs(n - nowN)} days ${n < nowN ? 'ago' : 'from now'}`)),
       cal.moons.length ? el('p', { class: 'small' }, cal.moons.map((m) => { const p = moonPhase(cal, m, d); return `${p.icon} ${m.name}: ${p.name.toLowerCase()}`; }).join(' · ')) : null,
-      holidaysOn(cal, d).map((h) => el('p', { class: 'holiday' }, `🎉 ${h.name}`)),
-      town && isMarketDay(town, weekday(cal, d)) ? el('p', { class: 'small cal-market-line' }, holidaysOn(cal, d).length ? `No market in ${town.name}: it’s a holiday.` : `🧺 Market day in ${town.name}.`) : null,
+      holidaysOn(lcal, d).map((h) => el('p', { class: 'holiday' }, `🎉 ${hName(h)}`)),
+      town && isMarketDay(town, weekday(cal, d)) ? el('p', { class: 'small cal-market-line' }, holidaysOn(lcal, d).length ? `No market in ${town.name}: it’s a holiday.` : `🧺 Market day in ${town.name}.`) : null,
       // Shut that day: which of the party's town's shops are shut, and why (a holiday, or their day off).
-      (() => { if (!shopTown) return null; const din = dayInTown(cal, shopTown, townShops(shopTown), d), sh = din.shut;
+      (() => { if (!shopTown) return null; const din = dayInTown(lcal, shopTown, townShops(shopTown), d), sh = din.shut;
         const off = sh.filter((x) => x.why === 'day off').map((x) => x.name), hol = sh.filter((x) => x.why === 'holiday').map((x) => x.name);
         return [sh.length ? el('p', { class: 'small cal-shut' }, `🔒 Shut in ${shopTown.name}: `, [hol.length ? `${hol.join(', ')} (for the holiday)` : '', off.length ? `${off.join(', ')} (day off)` : ''].filter(Boolean).join('; '), '.') : null,
           din.open.length ? el('p', { class: 'small cal-open' }, `🔓 Open for the holiday: ${din.open.join(', ')}.`) : null]; })(),
@@ -143,21 +145,23 @@ export function viewCalendar(arg, sub, rerender) {
   // Market days: the party's town's market weekday, marked on the month (no market on a holiday).
   const town = (() => { try { const t = partyTown(); return t?.kind === 'settlement' && t.fields?.market_day ? t : null; } catch { return null; } })();
   const shopTown = (() => { try { const t = partyTown(); return t?.kind === 'settlement' ? t : null; } catch { return null; } })();
-  const marketOn = (d) => !!town && !holidaysOn(cal, d).length && isMarketDay(town, weekday(cal, d));
+  // Local holidays: the party's town's own festival days count on its calendar (marked with the town's name).
+  const lcal = shopTown ? withLocal(cal, shopTown) : cal;
+  const marketOn = (d) => !!town && !holidaysOn(lcal, d).length && isMarketDay(town, weekday(cal, d));
 
   const cells = [];
   for (let i = 0; i < offset; i++) cells.push(el('div', { class: 'cal-cell blank', 'aria-hidden': 'true' }));
   for (let day = 1; day <= cal.months[shown.month].days; day++) {
     const d = { ...shown, day }, n = first + day - 1;
     const items = dated.filter((x) => x.n === n);
-    const hol = holidaysOn(cal, d);
+    const hol = holidaysOn(lcal, d);
     const full = cal.moons.map((m) => ({ new: '🌑', full: '🌕' })[moonEvent(cal, m, d)]).filter(Boolean);
     cells.push(el('button', { type: 'button', class: `cal-cell${n === nowN ? ' today' : ''}${hol.length ? ' holiday' : ''}`, 'aria-label': formatDate(cal, d, { weekday: true }), onclick: (ev) => {
       ev.currentTarget.parentElement.querySelectorAll('.selected').forEach((c) => c.classList.remove('selected'));
       ev.currentTarget.classList.add('selected'); showDay(d);
     } },
       el('span', { class: 'cal-day' }, day, full.length || marketOn(d) ? el('span', { class: 'cal-moon' }, marketOn(d) ? el('span', { class: 'cal-market', title: `Market day in ${town.name}` }, '🧺') : null, full.join('')) : null),
-      hol.map((h) => el('span', { class: 'cal-hol' }, h.name)),
+      hol.map((h) => el('span', { class: `cal-hol${h.local ? ' local' : ''}`, title: h.local ? `${h.name}: a holiday in ${h.local}` : h.name }, h.name)),
       births.filter((x) => x.n === n).map((x) => el('span', { class: 'cal-item cal-bday', title: birthdayText(x) }, `🎂 ${x.entry.name}`)),
       arrivals.filter((x) => x.n === n).map((x) => el('span', { class: 'cal-item cal-journey', title: `The party arrived in ${getEntry(x.id).name}` }, `⚑ ${getEntry(x.id).name}`)),
       items.map((x, i) => el('span', { class: `cal-item k-${x.entry.kind}${i >= 3 ? ' cal-extra' : ''}`, title: x.entry.kind === 'session' ? `Played: ${x.entry.name}` : x.entry.name }, x.entry.kind === 'session' ? `▶ ${x.entry.name}` : x.entry.kind === 'quest' ? `⏳ ${x.entry.name}` : x.repeat ? `↻ ${x.entry.name}` : x.entry.name)),
@@ -178,7 +182,7 @@ export function viewCalendar(arg, sub, rerender) {
 
   // What's coming: holidays and dated entries in the next 60 days.
   const soon = [];
-  for (let i = 1; i <= 60; i++) { const d = fromDays(cal, nowN + i); for (const h of holidaysOn(cal, d)) soon.push({ n: nowN + i, label: h.name, d }); }
+  for (let i = 1; i <= 60; i++) { const d = fromDays(cal, nowN + i); for (const h of holidaysOn(lcal, d)) soon.push({ n: nowN + i, label: hName(h), d }); }
   for (const x of dated) if (x.n > nowN && x.n <= nowN + 60) soon.push({ n: x.n, entry: x.entry, d: x.date });
   soon.sort((a, b) => a.n - b.n);
 
@@ -186,7 +190,7 @@ export function viewCalendar(arg, sub, rerender) {
     el('div', { class: 'card cal-today' },
       el('div', {}, el('span', { class: 'eyebrow' }, 'Today in the world'), el('strong', { class: 'cal-now' }, formatDate(cal, now, { weekday: true }))),
       cal.moons.length ? el('p', { class: 'small' }, cal.moons.map((m) => { const p = moonPhase(cal, m, now); return `${p.icon} ${m.name}: ${p.name.toLowerCase()}`; }).join(' · ')) : null,
-      holidaysOn(cal, now).map((h) => el('p', { class: 'holiday' }, `🎉 Today is ${h.name}`)),
+      holidaysOn(lcal, now).map((h) => el('p', { class: 'holiday' }, `🎉 Today is ${hName(h)}`)),
       isGm() ? el('div', { class: 'btnrow days-pass' }, el('span', { class: 'muted small' }, 'Time passes:'), pass(1, '+1 day'), pass(cal.weekdays.length, '+1 week'), pass(cal.months[now.month].days, '+1 month'),
         custom, el('button', { class: 'btn small ghost', type: 'button', onclick: async () => {
           const n = Math.round(Number(custom.value) || 0); if (!n) { custom.focus(); return; }

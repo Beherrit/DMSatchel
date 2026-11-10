@@ -26,7 +26,7 @@ export const KINDS = {
   },
   settlement: {
     label: 'Settlement', plural: 'Settlements', blurb: 'Cities, towns, villages and outposts.',
-    fields: [['market_day', 'Market day (a weekday)'], ['size', 'Size', 'select', ['Hamlet', 'Village', 'Town', 'City', 'Metropolis', 'Fortress', 'Outpost']], ['population', 'Population'], ['ruler', 'Led by'], ['government', 'Government'], ['known_for', 'Known for', 'long'], ['trouble', 'Current trouble', 'long'], ['landmarks', 'Landmarks', 'long'], ['economy', 'Trade & economy', 'long'], ['defenses', 'Defenses', 'long'], ['peoples', 'Peoples & culture', 'long'], ['market', 'Market conditions', 'long'], ['encounters', 'Encounter table', 'long']],
+    fields: [['market_day', 'Market day (a weekday)'], ['holidays', 'Local holidays (one per line: name, date)', 'long'], ['size', 'Size', 'select', ['Hamlet', 'Village', 'Town', 'City', 'Metropolis', 'Fortress', 'Outpost']], ['population', 'Population'], ['ruler', 'Led by'], ['government', 'Government'], ['known_for', 'Known for', 'long'], ['trouble', 'Current trouble', 'long'], ['landmarks', 'Landmarks', 'long'], ['economy', 'Trade & economy', 'long'], ['defenses', 'Defenses', 'long'], ['peoples', 'Peoples & culture', 'long'], ['market', 'Market conditions', 'long'], ['encounters', 'Encounter table', 'long']],
   },
   location: {
     label: 'Location', plural: 'Locations', blurb: 'Dungeons, ruins, taverns, shops and landmarks.',

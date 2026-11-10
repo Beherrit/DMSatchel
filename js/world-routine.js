@@ -5,7 +5,7 @@ import { world, worldEntries, link, findByName, getEntry, patchEntry, linkedTo }
 import { whereAt, aboutTown, regularsAt, townByHour, rollRoutine, dayOf, dueLater, busiestHour, crossPaths, atTaverns, ownerDay, timeAt, routineCheck } from './routine.js';
 import { holidayToday, nextHoliday, tradingHours, openText, tradeDay, isMarketDay, marketToday } from './shop-hours.js';
 import { openBounties } from './bounty.js';
-import { cleanCalendar } from './calendar.js';
+import { cleanCalendar, withLocal } from './calendar.js';
 import { weekInTown, weekDayText, weekText } from './week-in-town.js';
 import { makeRng, randomSeed } from './rng.js';
 import { isHired } from './hirelings.js';
@@ -127,7 +127,7 @@ export function townHoursBox(town) {
   const npcs = worldEntries().filter((x) => x.kind === 'npc' && x.fields?.routine && !isHired(x) && !['Dead', 'Missing'].includes(x.fields?.status)).map((x) => ({ id: x.id, name: x.name, routine: x.fields.routine, entry: x }));
   const t = townByHour(npcs, placeOf, inside);
   // Shops in the town by the hour: which are open at each of the table's hours, today.
-  const day = tradeDay(cleanCalendar(world.info?.cal)), market = marketToday(town, day);
+  const day = tradeDay(withLocal(cleanCalendar(world.info?.cal), town)), market = marketToday(town, day);
   const shops = worldEntries().filter((x) => x.kind === 'location' && x.id !== town.id && (x.fields?.stock || x.fields?.menu) && inside(x)).sort((a, b) => a.name.localeCompare(b.name));
   if (!t.rows.length && !shops.length) return null;
   const openAt = (m) => shops.filter((x) => openText(x, m, { ...day, market }).open);
@@ -237,7 +237,7 @@ export const routinePlace = (name) => placeOf(name);
 // are not) and who's at each tavern in town right now, from routines.
 export function festivalLine(town) {
   if (town.kind !== 'settlement') return null;
-  const cal = cleanCalendar(world.info?.cal);
+  const cal = withLocal(cleanCalendar(world.info?.cal), town);
   const holiday = holidayToday(cal);
   // The next festival: when today isn't one, when the next is (within a month).
   if (!holiday) {
@@ -337,7 +337,7 @@ export function openNowLine(town, always = false) {
   const m = now();
   if (m === null) return null;
   const inside = (p) => { for (let x = p, i = 0; x && i < 12; x = x.parent_id && getEntry(x.parent_id), i++) if (x.id === town.id) return true; return false; };
-  const day = tradeDay(cleanCalendar(world.info?.cal));
+  const day = tradeDay(withLocal(cleanCalendar(world.info?.cal), town));
   const shops = worldEntries().filter((x) => x.kind === 'location' && x.id !== town.id && (x.fields?.stock || x.fields?.menu) && inside(x))
     .map((x) => ({ x, o: openText(x, m, { ...day, market: marketToday(town, day) }) }));
   const open = shops.filter((s) => s.o.open), shut = shops.length - open.length;
@@ -349,7 +349,7 @@ export function openNowLine(town, always = false) {
 // Market day: on a settlement's market day, its page says so.
 export function marketDayLine(town) {
   if (town.kind !== 'settlement' || !town.fields?.market_day) return null;
-  const day = tradeDay(cleanCalendar(world.info?.cal));
+  const day = tradeDay(withLocal(cleanCalendar(world.info?.cal), town));
   if (day.holiday && isMarketDay(town, day.weekday)) return el('p', { class: 'small market-day no-market' }, el('strong', {}, '🧺 No market today: '), `it’s ${day.holiday}, and the stalls stay packed away.`);
   return isMarketDay(town, day.weekday) ? el('p', { class: 'small market-day' }, el('strong', {}, '🧺 Market day today: '), 'stalls in the square, and the shops open two hours early.') : null;
 }
@@ -363,7 +363,7 @@ export function townShops(town) {
 // → { week, label(day) } for a settlement, or null (not a settlement, no calendar, or a quiet week).
 export function townWeek(town) {
   if (town?.kind !== 'settlement') return null;
-  const cal = cleanCalendar(world.info?.cal);
+  const cal = withLocal(cleanCalendar(world.info?.cal), town);
   if (!cal) return null;
   // Who lives there: the town's people (anywhere inside it), for their birthdays.
   const inside = (p) => { for (let x = p, i = 0; x && i < 12; x = x.parent_id && getEntry(x.parent_id), i++) if (x.id === town.id) return true; return false; };
@@ -392,7 +392,7 @@ export function townSnapshot(town) {
   const m = now();
   if (!town || m === null) return null;
   const inside = (p) => { for (let x = p, i = 0; x && i < 12; x = x.parent_id && getEntry(x.parent_id), i++) if (x.id === town.id) return true; return false; };
-  const day = tradeDay(cleanCalendar(world.info?.cal)), market = marketToday(town, day);
+  const day = tradeDay(withLocal(cleanCalendar(world.info?.cal), town)), market = marketToday(town, day);
   const shops = worldEntries().filter((x) => x.kind === 'location' && x.id !== town.id && (x.fields?.stock || x.fields?.menu) && inside(x))
     .map((x) => ({ id: x.id, name: x.name, open: openText(x, m, { ...day, market }).open }));
   const people = (aroundNow(town)?.list || []).map(({ npc, place }) => ({ id: npc.entry.id, name: npc.entry.name, place: place.id === town.id ? `about ${town.name}` : place.name }));

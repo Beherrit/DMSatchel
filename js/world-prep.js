@@ -8,7 +8,7 @@ import { api, isGm, session } from './api.js';
 import { world, worldEntries, getEntry, link, kindLabel, byName, descendantsOf, trail, whenTime, notice, richText, mentions, patchEntry } from './world-store.js';
 import { PLACE_KINDS } from './world-schema.js';
 import { worldCalendar, todayText, datedEntries } from './world-calendar.js';
-import { toDays, fromDays, today, holidaysOn, formatDate, cleanCalendar } from './calendar.js';
+import { toDays, fromDays, today, holidaysOn, formatDate, cleanCalendar, withLocal } from './calendar.js';
 import { clockFace } from './world-clocks.js';
 import { rumorsAt, letRumorsSpread } from './world-rumors.js';
 import { encounterCard, partyDefaults, placeTerrains, monsterSource } from './encounter-ui.js';
@@ -171,7 +171,7 @@ function whereSection(prep, rerender) {
     // The festival: on a holiday, who's at the taverns in town now (and on other days, when the next one is).
     (() => { const t = here.kind === 'settlement' ? here : town; return t ? [festivalLine(t), wantedPrepLine(t),
       // Next market in prep: when the town's market is next (today, or which day), holidays skipped.
-      (() => { const cal = cleanCalendar(world.info?.cal), m = cal && t.kind === 'settlement' ? nextMarket(cal, t, 14) : null;
+      (() => { const cal = withLocal(cleanCalendar(world.info?.cal), t), m = cal && t.kind === 'settlement' ? nextMarket(cal, t, 14) : null;
         return m ? el('p', { class: 'small prep-market' }, m.inDays === 0 ? `🧺 Market day in ${t.name} today: stalls in the square, and the shops open two hours early.` : `🧺 Next market in ${t.name}: ${m.weekday}, ${inDaysText(m.inDays)}.`) : null; })()] : null; })(),
     el('div', { class: 'prep-grid' },
       el('div', {}, (() => {
