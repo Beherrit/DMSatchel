@@ -130,6 +130,11 @@ function render() {
       return { label: `${t[0].toUpperCase()}${t.slice(1)}${h.local ? ` (${h.local})` : ''}`, group: 'Holiday', href: `#world/calendar/${date.year}/${date.month}`, hint: `🎉 ${date.day} ${cal.months[date.month].name} · ${M.week.inDaysText(inDays)}` };
     });
   }
+  // "Stalls": today's market stalls in every town having its market, each with its goods.
+  let stallItems = [];
+  if (/^(stalls?|market stalls?)$/.test(q)) {
+    stallItems = M.store.worldEntries().filter((e) => e.kind === 'settlement').flatMap((t) => M.routine.todaysStalls(t).map((st) => ({ label: st.name, group: `Stall in ${t.name}`, href: `#world/e/${t.id}/market`, hint: st.goods.map((g) => `${g.name} ${g.price}`).join(', ') }))).slice(0, 30);
+  }
   // "Market": the towns with a market day, and when each is next (soonest first; holidays skipped), above the
   // ordinary matches for the word.
   let markets = [];
@@ -152,6 +157,7 @@ function render() {
   items = all.map((it) => [score(it, q), it]).filter(([s]) => s > 0).sort((a, b) => b[0] - a[0] || a[1].label.localeCompare(b[1].label)).slice(0, 40).map(([, it]) => it);
   if (markets.length) items = [...markets, ...items.filter((it) => !markets.some((m) => m.href === it.href))].slice(0, 40);
   if (holidays.length) items = [...holidays, ...items].slice(0, 40);
+  if (stallItems.length) items = [...stallItems, ...items].slice(0, 40);
   // Nothing typed yet: the entries you opened last come first.
   if (!q) {
     let recent = [];

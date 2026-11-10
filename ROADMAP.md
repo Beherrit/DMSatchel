@@ -897,7 +897,7 @@ to the log at the bottom.
 511. [x] **When the stalls pack up.** The stalls card says how long the stalls are up by the world's clock, or that
     they're packed away.
 512. [x] **The keeper at their stall.** A stall whose keeper was made an NPC links to them.
-513. [ ] **Stalls in the palette.** Ctrl+K "stalls" lists today's market stalls and their goods.
+513. [x] **Stalls in the palette.** Ctrl+K "stalls" lists today's market stalls and their goods.
 
 ## Ideas parking lot
 
@@ -1415,3 +1415,4 @@ to the log at the bottom.
 - Phone check: at 375px the town's week, the calendar's town picker and the party page fit; the market stalls card no longer pushed the page sideways (its grid column now shrinks, and the buy form's controls wrap).
 - When the stalls pack up: the stalls card says "🕰 Up till 17:00 (another 3 h)", "Going up at 06:00" or "Packed away at 17:00" by the world's clock, and players only see the buy form while the stalls are up (as the server requires).
 - The keeper at their stall: once a stall's keeper is an NPC in the town, the stall says "kept by" them with a link instead of offering to make one.
+- Stalls in the palette: Ctrl+K "stalls" lists today's market stalls in every town with its market on, each with its goods and prices, opening the town's Market tab.
