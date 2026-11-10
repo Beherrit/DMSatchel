@@ -905,7 +905,7 @@ to the log at the bottom.
 517. [x] **Someone wants this.** Shops and market stalls mark goods on a character's wishlist ("⭐ Ann wants this").
 518. [x] **What the party wishes for.** The party page lists the open wishes this person may see (GMs: everyone's;
     players: their own) and where in the party's town each is for sale today.
-519. [ ] **Got it.** Buying something on your wishlist offers to take it off the list.
+519. [x] **Got it.** Buying something on your wishlist offers to take it off the list.
 520. [ ] **Wishes in the palette.** Ctrl+K "wishes" lists the wishes you may see and where they're sold in town.
 521. [ ] **What they want, in prep.** Session prep lists the wishes the shops and stalls in the party's town could
     grant.
@@ -1434,3 +1434,4 @@ to the log at the bottom.
 - A full sweep (#469): all 483 browser tests clean against sweep #461; t-minding timed out under load and passes on rerun.
 - Fix for #516 and #517: they duplicated the existing wish lists (#100) with a new plain-text "Wishlist" field that every player could read. The field is now hidden and private like wish lists (the server only sends it to the character's player and the GMs), nothing written in it is lost, and the character's wish list offers to move its lines in. Shops' shelves and market stalls now mark goods from the real wish lists ("⭐ Ann wishes for this"), so players only ever see their own characters' wishes.
 - What the party wishes for: the party page folds out the open wishes this person may see (GMs: everyone's; players: "Your wishes") and where each is for sale in the party's town today, cheapest first, shops and market stalls alike.
+- Got it: after buying something on the character's wish list at a shop or a market stall, the page offers "⭐ Rope was on Ann’s wish list. Tick it off".

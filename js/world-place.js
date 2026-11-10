@@ -10,7 +10,7 @@ import { dayWeather } from './forecast.js';
 import { toDays, today, cleanCalendar, withLocal } from './calendar.js';
 import { openText, holidayToday, typicalHours, tradeDay, marketToday } from './shop-hours.js';
 import { stallsText, stallsHours } from './market-stalls.js';
-import { wishMark } from './world-wishes.js';
+import { wishMark, noteBuy, lastBuyPrompt } from './world-wishes.js';
 import { hhmm } from './clock.js';
 import { counterGap, whereNow, whereBits, todaysStalls } from './world-routine.js';
 import { deadlineOf, deadlineText } from './deadline.js';
@@ -342,11 +342,12 @@ function stallBuy(place, stalls, rerender) {
     try {
       const r = await api('entries', { method: 'PATCH', body: { stall: { town: place.id, stall: pick.st.name, item: pick.g.name, character: c.id, qty: Number(qty.value) || 1, base: { cp: base.cp, inventory: base.inventory } } } });
       for (const e of r.entries) world.entries.set(e.id, e);
+      noteBuy(c, r.bought.name);
       toast(`${c.name} bought ${r.bought.qty > 1 ? `${r.bought.qty} × ` : ''}${r.bought.name} for ${coinText(r.bought.cp)}`);
       rerender();
     } catch (err) { toast(err.message, 'bad'); }
   });
-  return el('details', { class: 'buy-box' }, el('summary', {}, 'Buy from a stall'), form);
+  return [lastBuyPrompt(rerender), el('details', { class: 'buy-box' }, el('summary', {}, 'Buy from a stall'), form)];
 }
 
 // Open now: by the world's clock (and today's holiday), whether a shop is open, or null with no clock.

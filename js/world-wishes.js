@@ -61,3 +61,22 @@ export function sellersIn(town) {
 
 // The wishes this person may see (their own characters', or everyone's for GMs), with where each is sold in town.
 export const partyWishes = (town) => wishBoard(worldEntries().filter((c) => c.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(c.fields?.status)), town ? sellersIn(town) : []);
+
+// Got it: after a character buys something on their wish list, offer to tick the wish off. → an element, or null.
+export function gotItPrompt(character, itemName, rerender) {
+  const c = getEntry(character.id) || character, list = readWishes(c);
+  const hit = wishersFor(itemName, [c])[0];
+  if (!hit) return null;
+  return el('p', { class: 'small wish-got-prompt' }, `⭐ ${hit.wish.text[0].toUpperCase()}${hit.wish.text.slice(1)} was on ${c.name}’s wish list. `, el('button', { class: 'btn small', type: 'button', onclick: async () => {
+    try { await patchEntry(c, { fields: { wishes: JSON.stringify(setGot(list, hit.wish.id, true)) } }); toast('Wish come true!'); rerender(); } catch (err) { toast(err.message, 'bad'); }
+  } }, 'Tick it off'));
+}
+
+// The last thing bought in this browser (for a few minutes), so the page can offer "Tick it off" after it redraws.
+let lastBuy = null;
+export const noteBuy = (character, itemName) => { lastBuy = { id: character.id, item: itemName, at: Date.now() }; };
+export function lastBuyPrompt(rerender) {
+  if (!lastBuy || Date.now() - lastBuy.at > 10 * 60 * 1000) return null;
+  const c = getEntry(lastBuy.id);
+  return c ? gotItPrompt(c, lastBuy.item, () => { lastBuy = null; rerender(); }) : null;
+}

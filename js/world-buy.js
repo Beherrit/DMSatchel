@@ -18,6 +18,7 @@ import { cleanCalendar, withLocal } from './calendar.js';
 import { ownerIn } from './world-routine.js';
 import { shopStanding, sellWithStanding } from './standing-price.js';
 import { dayFor, townOfShop } from './world-hours.js';
+import { noteBuy, lastBuyPrompt } from './world-wishes.js';
 
 const ACTIVE = (e) => e.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
 
@@ -162,11 +163,13 @@ function buyPart(shop, stock, chars, rerender) {
     try {
       const r = await api('entries', { method: 'PATCH', body: { buy: { shop: shop.id, character: c.id, item: item.value, qty: Number(qty.value) || 1, base: { cp: base.cp, inventory: base.inventory } } } });
       for (const e of r.entries) world.entries.set(e.id, e);
+      noteBuy(c, r.bought.name);
       toast(`${c.name} bought ${r.bought.qty > 1 ? `${r.bought.qty} × ` : ''}${r.bought.name} for ${coinText(r.bought.cp)}${r.bought.haggle ? ' (haggled)' : ''}`);
       rerender();
     } catch (err) { toast(err.message, 'bad'); }
   });
-  return el('details', { class: 'buy-box' }, el('summary', {}, 'Buy something'), form);
+  // Got it: a wish just bought, offered for ticking off.
+  return [lastBuyPrompt(rerender), el('details', { class: 'buy-box' }, el('summary', {}, 'Buy something'), form)];
 }
 
 function sellPart(shop, chars, rerender) {
