@@ -841,7 +841,7 @@ to the log at the bottom.
     a day off when.
 466. [x] **Copy the week.** The week in town can be copied as plain text, for a handout or a chat.
 467. [x] **The week on the GM sheet.** The printable GM sheet lists the week ahead in the party's town.
-468. [ ] **Shut that day.** A calendar day's card says which of the party's town's shops are shut that day, and why.
+468. [x] **Shut that day.** A calendar day's card says which of the party's town's shops are shut that day, and why.
 469. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 
 ## Ideas parking lot
@@ -1318,3 +1318,4 @@ to the log at the bottom.
 - Copy the week: the week in town has a "Copy as text" button ("The week in Brindle" with a line a day), for a handout or a chat.
 - The week on the GM sheet: the printable sheet has "📅 The week in Brindle" for the party's town, the same days as the town's page.
 - A full sweep (#441): all 453 browser tests clean against sweep #425; five that failed under load late in the run pass on rerun.
+- Shut that day: a calendar day's card says which of the party's town's shops are shut ("🔒 Shut in Brindle: Smithy (day off)", or for the holiday).

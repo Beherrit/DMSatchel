@@ -355,14 +355,17 @@ export function marketDayLine(town) {
 }
 
 // The week in town: the coming seven days in a settlement: holidays, market day, and which shops shut when.
+// The shops and taverns in a town (anywhere inside it), by name.
+export function townShops(town) {
+  const inside = (p) => { for (let x = p, i = 0; x && i < 12; x = x.parent_id && getEntry(x.parent_id), i++) if (x.id === town.id) return true; return false; };
+  return worldEntries().filter((x) => x.kind === 'location' && x.id !== town.id && (x.fields?.stock || x.fields?.menu) && inside(x)).sort((a, b) => a.name.localeCompare(b.name));
+}
 // → { week, label(day) } for a settlement, or null (not a settlement, no calendar, or a quiet week).
 export function townWeek(town) {
   if (town?.kind !== 'settlement') return null;
   const cal = cleanCalendar(world.info?.cal);
   if (!cal) return null;
-  const inside = (p) => { for (let x = p, i = 0; x && i < 12; x = x.parent_id && getEntry(x.parent_id), i++) if (x.id === town.id) return true; return false; };
-  const shops = worldEntries().filter((x) => x.kind === 'location' && x.id !== town.id && (x.fields?.stock || x.fields?.menu) && inside(x)).sort((a, b) => a.name.localeCompare(b.name));
-  const week = weekInTown(cal, town, shops);
+  const week = weekInTown(cal, town, townShops(town));
   if (!week.length) return null;
   return { week, label: (d) => (d.today ? 'Today' : `${d.weekday ? `${d.weekday} ` : ''}${d.date.day} ${cal.months[d.date.month].name}`) };
 }

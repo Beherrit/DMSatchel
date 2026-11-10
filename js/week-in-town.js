@@ -7,23 +7,27 @@ import { shopOpen, isMarketDay } from './shop-hours.js';
 //      shut: [{ name, why: 'holiday' | 'day off' }] }], only days with something to say.
 export function weekInTown(cal, town, shops = [], days = 7) {
   if (!cal || !Array.isArray(cal.months) || !cal.months.length) return [];
-  const hasWeek = Array.isArray(cal.weekdays) && cal.weekdays.length;
   const from = toDays(cal, { year: cal.year, month: cal.month, day: cal.day });
   const out = [];
   for (let n = from; n < from + days; n++) {
-    const date = fromDays(cal, n), wd = hasWeek ? weekday(cal, date) || '' : '';
-    const holidays = Array.isArray(cal.holidays) ? holidaysOn(cal, date).map((h) => h.name) : [];
-    const marketWd = !!wd && isMarketDay(town, wd);
-    const shut = [];
-    for (const s of shops) {
-      const o = shopOpen(s, 12 * 60, { holiday: holidays[0] || '', weekday: wd });
-      if (o.holiday) shut.push({ name: s.name, why: 'holiday' });
-      else if (o.dayOff) shut.push({ name: s.name, why: 'day off' });
-    }
-    const day = { n, date, weekday: wd, today: n === from, holidays, market: marketWd && !holidays.length, noMarket: marketWd && !!holidays.length, shut };
-    if (holidays.length || marketWd || shut.length) out.push(day);
+    const day = { n, ...dayInTown(cal, town, shops, fromDays(cal, n)), today: n === from };
+    if (day.holidays.length || day.market || day.noMarket || day.shut.length) out.push(day);
   }
   return out;
+}
+
+// One day in town: → { date, weekday, holidays, market, noMarket, shut: [{ name, why }] } (see weekInTown).
+export function dayInTown(cal, town, shops, date) {
+  const wd = Array.isArray(cal.weekdays) && cal.weekdays.length ? weekday(cal, date) || '' : '';
+  const holidays = Array.isArray(cal.holidays) ? holidaysOn(cal, date).map((h) => h.name) : [];
+  const marketWd = !!wd && isMarketDay(town, wd);
+  const shut = [];
+  for (const s of shops) {
+    const o = shopOpen(s, 12 * 60, { holiday: holidays[0] || '', weekday: wd });
+    if (o.holiday) shut.push({ name: s.name, why: 'holiday' });
+    else if (o.dayOff) shut.push({ name: s.name, why: 'day off' });
+  }
+  return { date, weekday: wd, holidays, market: marketWd && !holidays.length, noMarket: marketWd && !!holidays.length, shut };
 }
 
 // One line of the week: "🎉 Bridge Day · no market · shut: Smithy, Tanner".
