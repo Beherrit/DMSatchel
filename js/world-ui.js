@@ -98,10 +98,12 @@ import { familySection, clanTree, viewFamily } from './world-family.js';
 import { knowsButtons, knownSection } from './world-known.js';
 import { startCard, markPartySeen } from './onboarding.js';
 import { viewCalendar, worldCalendar, todayText, onThisDayCard } from './world-calendar.js';
-import { parseDate, toDays, yearLength, parseHolidayLines } from './calendar.js';
+import { parseDate, toDays, yearLength, parseHolidayLines, ordinal } from './calendar.js';
 import { nextShut } from './week-in-town.js';
 import { customersAt, purchases, spots, goodsAt, orderedAt } from './purchases.js';
 import { toolsInPack, craftableWith } from './crafting.js';
+import { partyOrder, nightShifts } from './world-orders.js';
+import { hhmm as hhmmW } from './party-order.js';
 import { coinText } from './economy.js';
 import { sheetSection } from './sheet-ui.js';
 import { pictureField, figure, thumb } from './image-ui.js';
@@ -420,7 +422,7 @@ function viewEntry(id, tab) {
       e.summary ? el('p', { class: 'lede' }, richInline(e.summary)) : null,
       fieldRows.length ? el('dl', { class: 'traits' }, fieldRows.flatMap(([l, v, type]) => [el('dt', {}, l), el('dd', {}, type === 'long' ? richText(v) : /^https:\/\/\S+$/.test(v) ? el('a', { href: v, target: '_blank', rel: 'noopener' }, /dndbeyond\.com/.test(v) ? 'Open on D&D Beyond ↗' : 'Open link ↗') : el('span', {}, v))])) : null),
     sinceLastCard(e), comingUpCard(e),
-    routineNow(e), patronLine(e), hauntsLine(e), toolsLine(e), membersNowCard(e), crossPathsLine(e), mindingLine(e), ownerDayLine(e), festivalLine(e), marketDayLine(e), weekInTownBox(e), openNowLine(e), wantedCard(e), hereNow(e), laterLine(e), regularsLine(e), busiestLine(e), townHoursBox(e), townPreviewBox(e), turnUpBox(e), rollTownButton(e, rerenderWorld),
+    routineNow(e), patronLine(e), hauntsLine(e), toolsLine(e), orderLine(e), membersNowCard(e), crossPathsLine(e), mindingLine(e), ownerDayLine(e), festivalLine(e), marketDayLine(e), weekInTownBox(e), openNowLine(e), wantedCard(e), hereNow(e), laterLine(e), regularsLine(e), busiestLine(e), townHoursBox(e), townPreviewBox(e), turnUpBox(e), rollTownButton(e, rerenderWorld),
     e.kind === 'npc' || e.fields?.stats || e.fields?.spells ? statSection(e) : null,
     e.kind === 'clan' ? clanTree(e, rerenderWorld) : null,
     e.kind === 'npc' || e.kind === 'character' ? familySection(e, rerenderWorld) : null,
@@ -626,6 +628,15 @@ function placeSummary(e) {
 }
 
 // ---- editing -----------------------------------------------------------------------------------
+
+// My place and watch: where a character (or hired NPC) marches and which watch they keep.
+function orderLine(c) {
+  if (!['character', 'npc'].includes(c.kind)) return null;
+  const o = partyOrder(), i = o.march.indexOf(c.id), w = nightShifts().find((x) => x.id === c.id);
+  if (i < 0 && !w) return null;
+  const place = i < 0 ? '' : i === 0 ? 'marches in front' : i === o.march.length - 1 ? 'marches at the back' : `marches ${ordinal(i + 1)} in line`;
+  return el('p', { class: 'small order-line' }, `🥾 ${c.name} `, [place, w ? `keeps the ${hhmmW(w.from)}–${hhmmW(w.to)} watch` : ''].filter(Boolean).join(' and '), '. ', el('a', { href: '#world/party' }, 'The party’s orders'));
+}
 
 // What these tools could make: on a character's page, the artisan's tools in their pack and a few things each can make.
 function toolsLine(c) {
