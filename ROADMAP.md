@@ -888,6 +888,10 @@ to the log at the bottom.
 503. [x] **Most-bought goods.** The numbers page lists the goods the party buys most.
 504. [x] **The tavern's regulars at the bar.** A tavern's page lists the characters who order there most.
 505. [x] **A shop's best customers.** A shop's page lists the characters who've bought the most there.
+506. [ ] **Favourite haunts.** A character's page names the tavern they order at most and the shop they buy from most.
+507. [ ] **Busiest taverns.** The numbers page ranks taverns by the party's orders there.
+508. [ ] **A shop's best sellers.** A shop's page lists what the party buys there most.
+509. [ ] **Copy the shopping.** What the party bought can be copied as plain text.
 
 ## Ideas parking lot
 
