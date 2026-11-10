@@ -51,15 +51,21 @@ function fileForm(after, preset) {
   // Crafting costs: for crafting, the item to make; on the price list, the SRD 5.2 estimate (materials and days).
   const craft = el('input', { type: 'text', id: 'dt-craft', list: 'dt-craft-list', placeholder: 'e.g. Longsword', autocomplete: 'off' });
   const craftList = el('datalist', { id: 'dt-craft-list' }, GOODS.map((g) => el('option', { value: g[0] })));
+  // Many hands: characters crafting together divide the days.
+  const helpers = el('input', { type: 'number', id: 'dt-helpers', min: 1, max: 20, value: 1, class: 'hp-amt', 'aria-label': 'Crafters working on it' });
   const estimate = el('p', { class: 'small craft-estimate', 'aria-live': 'polite' });
+  // Use the estimate: puts its days (each) and the materials' cost into the activity.
+  const use = el('button', { class: 'btn small craft-use', type: 'button', hidden: true, onclick: () => { const e = craftEstimate(craft.value, helpers.value); if (!e) return; days.value = String(e.daysEach); cost.value = coinText(e.materialsCp); toast('Days and cost filled in'); } }, 'Use the estimate');
   const showEstimate = () => {
-    const e = craft.value.trim() ? craftEstimate(craft.value) : null;
+    const e = craft.value.trim() ? craftEstimate(craft.value, helpers.value) : null;
+    use.hidden = !e;
     estimate.textContent = !craft.value.trim() ? 'Name an item from the price list for an estimate (or describe anything else below).'
-      : e ? `${e.name} (${coinText(Math.round(e.gp * 100))}): raw materials ${coinText(e.materialsCp)}, ${e.days} day${e.days === 1 ? '' : 's'} of work. They need proficiency with the right tools.`
+      : e ? `${e.name} (${coinText(Math.round(e.gp * 100))}): raw materials ${coinText(e.materialsCp)}, ${e.days} day${e.days === 1 ? '' : 's'} of work${e.helpers > 1 ? `, or ${e.daysEach} day${e.daysEach === 1 ? '' : 's'} each with ${e.helpers} crafting` : ''}. They need proficiency with the right tools.`
         : 'Not on the price list: a GM will set the cost and time.';
   };
-  craft.addEventListener('input', showEstimate);
-  const craftBox = el('div', { class: 'field wide craft-box' }, el('label', { for: 'dt-craft' }, 'Item to craft'), craft, craftList, estimate);
+  craft.addEventListener('input', showEstimate); helpers.addEventListener('input', showEstimate);
+  const craftBox = el('div', { class: 'field wide craft-box' }, el('label', { for: 'dt-craft' }, 'Item to craft'), craft, craftList,
+    el('div', { class: 'controls' }, el('label', { for: 'dt-helpers', class: 'small' }, 'Crafters'), helpers, use), estimate);
   const showCraft = () => { craftBox.hidden = act.value !== 'Crafting'; showEstimate(); };
   act.addEventListener('change', showCraft); showCraft();
   const priv = el('input', { type: 'checkbox', id: 'dt-private' });

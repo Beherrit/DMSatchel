@@ -911,8 +911,8 @@ to the log at the bottom.
     grant.
 522. [x] **Crafting costs.** Filing a crafting downtime for an item on the price list shows what the raw materials
     cost (half its price) and how long it takes (its price in GP ÷ 10 days, rounded up), as the SRD 5.2 rules have it.
-523. [ ] **Many hands.** The crafting estimate divides the days among the characters helping.
-524. [ ] **Use the estimate.** One click puts the estimate's days and materials cost into the activity.
+523. [x] **Many hands.** The crafting estimate divides the days among the characters helping.
+524. [x] **Use the estimate.** One click puts the estimate's days and materials cost into the activity.
 525. [ ] **Hand over what was made.** When a GM resolves a crafting activity, they can put the item in the
     character's pack.
 
@@ -1444,3 +1444,5 @@ to the log at the bottom.
 - Wishes in the palette: Ctrl+K "wishes" lists the open wishes you may see (players: their own characters'; GMs: everyone's), each with where it's for sale in the party's town today.
 - What they want, in prep: session prep's party card lists the wishes the party's town could grant today ("🛍 Wishes Brindle could grant today: Ann’s “rope” at Smithy (Rope (50 feet), 1 gp)"), shops and market stalls alike.
 - Crafting costs: choosing Crafting when filing downtime asks for the item (with the SRD price list as suggestions) and shows the SRD 5.2 estimate: raw materials at half its price and its price in GP ÷ 10 days of work ("Longsword (15 gp): raw materials 7 gp 5 sp, 2 days of work"); the activity keeps the item and shows the estimate.
+- Many hands: the crafting estimate takes the number of crafters and divides the days among them ("150 days of work, or 50 days each with 3 crafting").
+- Use the estimate: a "Use the estimate" button fills in the activity's days (each) and cost (the raw materials).
