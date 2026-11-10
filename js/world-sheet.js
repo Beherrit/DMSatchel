@@ -22,6 +22,8 @@ import { deadlineOf, deadlineText } from './deadline.js';
 import { holidayToday, holidayTomorrow, EVE_MARKUP, openText } from './shop-hours.js';
 import { aroundNow, dueInHere, partyTown, townWeek, todaysStalls } from './world-routine.js';
 import { weekDayText } from './week-in-town.js';
+import { partyOrder } from './world-orders.js';
+import { watchShifts, hhmm as hhmmW } from './party-order.js';
 import { dayLine } from './routine.js';
 import { isHired } from './hirelings.js';
 import { hhmm, readClock, leftText, partOfDay } from './clock.js';
@@ -105,6 +107,10 @@ export async function viewSessionSheet() {
       // Stalls on the sheet: on market day, the travelling stalls in the party's town and what they sell.
       (() => { const t = partyTown(), ss = todaysStalls(t); return ss.length ? block(`🧺 Market stalls in ${t.name}`, el('ul', { class: 'ss-list ss-stalls' }, ss.map((st) =>
         el('li', {}, el('strong', {}, st.name), ` (${st.keeper}): `, st.goods.map((g) => `${g.name} ${g.price}`).join(', '))))) : null; })(),
+      // Orders on the sheet: the marching order and the night's watches.
+      (() => { const { march, watch } = partyOrder(), shifts = watchShifts(watch); if (!march.length && !shifts.length) return null;
+        return block('🥾 Marching and watches', march.length ? el('p', { class: 'ss-march' }, el('strong', {}, 'Marching: '), march.map((id) => getEntry(id)?.name).filter(Boolean).join(' → ')) : null,
+          shifts.length ? el('ul', { class: 'ss-list ss-watch' }, shifts.map((s) => el('li', {}, `${hhmmW(s.from)}–${hhmmW(s.to)}: ${getEntry(s.id)?.name || ''}`))) : null); })(),
       // The week on the sheet: the coming week in the party's town (holidays, market day, shops shut).
       (() => { const t = partyTown(), tw = t && townWeek(t); return tw ? block(`📅 The week in ${t.name}`, el('ul', { class: 'ss-list ss-week' }, tw.week.map((d) => el('li', {}, el('strong', {}, `${tw.label(d)}: `), weekDayText(d))))) : null; })(),
       people.length ? block(`Who’s around (${people.length})`, el('ul', { class: 'ss-list' }, people.map((p) => {

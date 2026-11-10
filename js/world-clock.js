@@ -16,6 +16,8 @@ import { clockDiff, diffText } from './clock-diff.js';
 import { formatDate, today, cleanCalendar, toDays, withLocal } from './calendar.js';
 import { holidayToday, holidayTomorrow } from './shop-hours.js';
 import { moonlight } from './moonlight.js';
+import { watchShifts, onWatch, hhmm as hhmmW } from './party-order.js';
+import { partyOrder } from './world-orders.js';
 
 // Tonight's sky where the party is (the same seeded weather as prep and the map), for the moonlight line.
 export function skyHere() {
@@ -95,6 +97,8 @@ export function clockCard() {
       el('p', { class: 'clock-now' }, el('strong', {}, hhmm(c.minutes)), ` · ${partOfDay(c.minutes)}`),
       // What changed when time last moved (this browser), in the party's town.
       lastChange ? el('p', { class: 'small clock-changed' }, `⏩ ${lastChange}`) : null,
+      // Whose watch is it?: at night, the watch the party's watch order puts on now.
+      (() => { const s = onWatch(watchShifts(partyOrder().watch), c.minutes), who = s && getEntry(s.id); return who ? el('p', { class: 'small clock-watch' }, `🌙 ${who.name} is on watch (till ${hhmmW(s.to)}).`) : null; })(),
       // Holidays on the clock: a holiday shuts the shops (the taverns stay open).
       (() => { const h = holidayToday(withLocal(cleanCalendar(world.info?.cal), partyTown())); return h ? el('p', { class: 'small clock-holiday' }, `🎉 ${h}: the shops are shut today; the taverns are open.`) : null; })(),
       // Tomorrow in town: what tomorrow brings in the party's town (market day, days off, birthdays); a holiday

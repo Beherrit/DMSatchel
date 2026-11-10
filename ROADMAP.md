@@ -931,8 +931,8 @@ to the log at the bottom.
     last session.
 538. [x] **Marching order.** GMs set the party's marching order (front to back) on the party page; everyone sees it.
 539. [x] **Watch order.** GMs set who keeps watch in the night; the party page shows each watch's hours.
-540. [ ] **Orders on the sheet.** The printable GM sheet lists the marching order and the night's watches.
-541. [ ] **Whose watch is it?** At night the clock card says whose watch it is now.
+540. [x] **Orders on the sheet.** The printable GM sheet lists the marching order and the night's watches.
+541. [x] **Whose watch is it?** At night the clock card says whose watch it is now.
 
 ## Ideas parking lot
 
@@ -1482,3 +1482,5 @@ to the log at the bottom.
 - A full sweep (#493): all 514 browser tests clean against sweep #489, first time through (covering the crafting, wish and downtime work since).
 - Marching order: the party page has "Marching and watches"; GMs tick and order the characters (front to back), saved with session prep, and everyone sees it ("🥾 Bo → Ann"), minus characters they can't see.
 - Watch order: GMs set who keeps watch the same way, and the night (22:00–06:00) is split evenly between them ("22:00–00:40: Ann").
+- Orders on the sheet: the printable GM sheet has "🥾 Marching and watches": the marching order and each watch's hours.
+- Whose watch is it?: at night the clock card says who the watch order puts on now ("🌙 Bo is on watch (till 06:00).").
