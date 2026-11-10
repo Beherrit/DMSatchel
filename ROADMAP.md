@@ -938,6 +938,11 @@ to the log at the bottom.
 543. [x] **Marching order on the map.** The party's marker on a map shows the marching order.
 544. [x] **Copy the orders.** The marching order and watches can be copied as plain text.
 545. [x] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
+546. [ ] **Accessibility check.** The newer pages and forms (market stalls and their buy form, crafting downtime, the
+    party's orders, the calendar's town picker, the numbers page) pass an automated WCAG A/AA check, light and dark.
+547. [ ] **Phone check, again.** The crafting form, the orders editor and the party page's new sections fit a phone.
+548. [ ] **A big party page.** The party page stays quick in a big world (hundreds of entries, long logs).
+549. [ ] **Print check.** The printable GM sheet's new blocks (stalls, the week, orders) print cleanly.
 
 ## Ideas parking lot
 
