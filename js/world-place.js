@@ -303,14 +303,18 @@ function stallsCard(place, rerender) {
     el('ul', { class: 'plain small stall-list' }, stalls.map((st) => el('li', {}, el('strong', {}, st.name), el('span', { class: 'muted' }, ` (${st.keeper})`), ': ',
       st.goods.map((g, i) => [i ? ', ' : '', `${g.name} `, el('span', { class: 'stall-price' }, g.price)]),
       // A stall keeper as an NPC: a GM makes the keeper someone in town (a draft to name and save).
-      isGm() ? [' ', el('button', { class: 'btn small ghost stall-npc', type: 'button', onclick: () => keeperDraft(place, st) }, 'Make the keeper an NPC')] : null))),
+      // The keeper at their stall: once made an NPC (in this town, with the stall in their role), the stall links them.
+      (() => { const k = keeperOf(place, st); return k ? [' ', el('span', { class: 'stall-keeper' }, '· kept by ', link(k))] : isGm() ? [' ', el('button', { class: 'btn small ghost stall-npc', type: 'button', onclick: () => keeperDraft(place, st) }, 'Make the keeper an NPC')] : null; })()))),
     hours && !hours.up && !isGm() ? null : stallBuy(place, stalls, rerender));
 }
+
+const keeperRole = (st) => `Market stall keeper (${st.name.toLowerCase()})`;
+const keeperOf = (place, st) => worldEntries().find((n) => n.kind === 'npc' && n.parent_id === place.id && n.fields?.role === keeperRole(st) && !['Dead', 'Missing'].includes(n.fields?.status));
 
 function keeperDraft(place, st) {
   const r = makeRng(`keeper:${place.id}:${st.name}`), ancestry = r.pickW(ANCESTRY_WEIGHTS), name = personName(r, ancestry);
   sendDraft({ kind: 'npc', name, parent_id: place.id, summary: `${st.keeper[0].toUpperCase()}${st.keeper.slice(1)}, who keeps the ${st.name.toLowerCase()} on market days in ${place.name}.`,
-    fields: { ancestry, role: `Market stall keeper (${st.name.toLowerCase()})`, status: 'Alive' } });
+    fields: { ancestry, role: keeperRole(st), status: 'Alive' } });
 }
 
 // Buy from a stall: a character (players: their own) pays from their purse; the server checks the day and the price.
