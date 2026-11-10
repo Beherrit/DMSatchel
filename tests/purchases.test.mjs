@@ -27,3 +27,12 @@ test('topGoods: the goods bought most often', async () => {
   const c2 = ch('b', 'Bo', [{ at: '3', text: 'Ordered Pale ale at The Bell for 4 cp', cp: -4, items: [{ name: 'pale ale', qty: 1 }] }, { at: '4', text: 'Gave Rope to Ann', items: [{ name: 'Rope', qty: -1 }] }]);
   assert.deepEqual(topGoods([c1, c2]), [{ name: 'Pale ale', qty: 3, times: 2 }, { name: 'Rope', qty: 1, times: 1 }]);
 });
+
+test('customersAt: who bought at a place, by name, not a place with a longer name', async () => {
+  const { customersAt } = await import('../js/purchases.js');
+  const c1 = ch('a', 'Ann', [{ at: '1', text: 'Ordered Pale ale at The Bell for 4 cp', cp: -4 }, { at: '2', text: 'Put Stew on the party’s tab at The Bell (5 cp)' }, { at: '3', text: 'Bought Rope at The Bell Tower for 1 gp', cp: -100 }]);
+  const c2 = ch('b', 'Bo', [{ at: '4', text: 'Ordered 3 × Pale ale at The Bell for 1 sp 2 cp', cp: -12 }]);
+  assert.deepEqual(customersAt([c1, c2], 'The Bell').map((x) => [x.who.name, x.count, x.cp]), [['Ann', 2, 4], ['Bo', 1, 12]]);
+  assert.deepEqual(customersAt([c1, c2], 'The Bell Tower').map((x) => [x.who.name, x.count]), [['Ann', 1]]);
+  assert.deepEqual(customersAt([c1], ''), []);
+});

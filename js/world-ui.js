@@ -100,6 +100,8 @@ import { startCard, markPartySeen } from './onboarding.js';
 import { viewCalendar, worldCalendar, todayText, onThisDayCard } from './world-calendar.js';
 import { parseDate, toDays, yearLength, parseHolidayLines } from './calendar.js';
 import { nextShut } from './week-in-town.js';
+import { customersAt } from './purchases.js';
+import { coinText } from './economy.js';
 import { sheetSection } from './sheet-ui.js';
 import { pictureField, figure, thumb } from './image-ui.js';
 import { renderStats, renderSpells } from './statblock-ui.js';
@@ -443,10 +445,12 @@ function viewEntry(id, tab) {
     attendanceSection(e, rerenderWorld),
     e.kind === 'location' && e.fields?.type === 'Tavern' && e.fields?.menu && !e.fields?.stock ? [closingLine(e), nextShutLine(e)] : null,
     e.kind === 'location' && e.fields?.type === 'Tavern' ? menuCard(e, trailTown(e), rerenderWorld) : null,
+    // The tavern's regulars at the bar: the characters who order here most (from their logs).
+    e.kind === 'location' && e.fields?.type === 'Tavern' ? customersLine(e, 'tavern') : null,
     e.fields?.stock || (e.kind === 'location' && e.fields?.type === 'Shop' && isGm()) ? el('section', { class: 'card shop-card' },
       el('p', { class: 'shelf-title' }, e.name),
       el('p', { class: 'shelf-hours' }, hoursSign(e)),
-      closingLine(e), nextShutLine(e),
+      closingLine(e), nextShutLine(e), e.fields?.type === 'Tavern' ? null : customersLine(e, 'shop'),
       el('div', { class: 'entry-head' }, el('h3', {}, 'For sale'),
         // Print the shelf: just the shop's prices, to hand round the table.
         e.fields?.stock ? el('button', { class: 'btn small ghost', type: 'button', onclick: () => { document.body.classList.add('print-shelf'); window.print(); setTimeout(() => document.body.classList.remove('print-shelf'), 500); } }, 'Print the shelf') : null,
@@ -621,6 +625,14 @@ function placeSummary(e) {
 }
 
 // ---- editing -----------------------------------------------------------------------------------
+
+// Customers: who buys here most (a shop's best customers, or a tavern's regulars at the bar), from the characters' logs.
+function customersLine(place, kind) {
+  const cs = customersAt(worldEntries().filter((c) => c.kind === 'character'), place.name).slice(0, 5);
+  if (!cs.length) return null;
+  const n = (x) => (kind === 'tavern' ? `${x.count} order${x.count === 1 ? '' : 's'}` : `${x.count} purchase${x.count === 1 ? '' : 's'}${x.cp ? `, ${coinText(x.cp)}` : ''}`);
+  return el('p', { class: `small customers-line ${kind}` }, kind === 'tavern' ? '🍺 At the bar most: ' : '🛍 Best customers: ', cs.map((x, i) => [i ? ', ' : '', link(x.who), el('span', { class: 'muted' }, ` (${n(x)})`)]));
+}
 
 // A shop's next day off: when it's next shut all day (its weekly day off, or a holiday it doesn't trade on).
 function nextShutLine(shop) {

@@ -25,3 +25,14 @@ export function topGoods(characters) {
   for (const p of purchases(characters)) for (const it of p.items) { const k = it.name.toLowerCase(), x = by.get(k) || { name: it.name, qty: 0, times: 0 }; x.qty += it.qty; x.times += 1; if (/^[a-z]/.test(x.name) && /^[A-Z]/.test(it.name)) x.name = it.name; by.set(k, x); }
   return [...by.values()].sort((a, b) => b.times - a.times || b.qty - a.qty || a.name.localeCompare(b.name));
 }
+
+// A place's customers: the characters whose logged purchases were at this place (a shop, stall or tavern by name),
+// → [{ who, count, cp }], most purchases first.
+export function customersAt(characters, placeName) {
+  const name = String(placeName || '').trim();
+  if (!name) return [];
+  const re = new RegExp(` at ${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?= for | \\(|$)`);
+  const by = new Map();
+  for (const p of purchases(characters)) if (re.test(p.text)) { const x = by.get(p.who.id) || { who: p.who, count: 0, cp: 0 }; x.count += 1; x.cp += p.cp; by.set(p.who.id, x); }
+  return [...by.values()].sort((a, b) => b.count - a.count || b.cp - a.cp || a.who.name.localeCompare(b.who.name));
+}

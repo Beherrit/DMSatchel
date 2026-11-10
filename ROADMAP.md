@@ -886,8 +886,8 @@ to the log at the bottom.
 501. [x] **Coin spent.** The numbers page shows what each character has spent at shops, stalls and taverns.
 502. [x] **Who has written about it.** The party page's last-session line says which players have written about it.
 503. [x] **Most-bought goods.** The numbers page lists the goods the party buys most.
-504. [ ] **The tavern's regulars at the bar.** A tavern's page lists the characters who order there most.
-505. [ ] **A shop's best customers.** A shop's page lists the characters who've bought the most there.
+504. [x] **The tavern's regulars at the bar.** A tavern's page lists the characters who order there most.
+505. [x] **A shop's best customers.** A shop's page lists the characters who've bought the most there.
 
 ## Ideas parking lot
 
@@ -1396,3 +1396,5 @@ to the log at the bottom.
 - Coin spent: the numbers page ranks characters by what they've spent at shops, market stalls and taverns (from each sheet's recent log).
 - Who has written about it: the party page's last-session line says who has written it up ("✍ written up by Pip and Bo").
 - Most-bought goods: the numbers page lists what the party buys most often at shops, stalls and taverns ("Pale ale bought twice (3 in all)").
+- The tavern's regulars at the bar: a tavern's page says who orders there most ("🍺 At the bar most: Ann (2 orders), Bo (1 order)"), from the characters' logs.
+- A shop's best customers: a shop's page says who has bought the most there ("🛍 Best customers: Ann (1 purchase, 1 gp)").
