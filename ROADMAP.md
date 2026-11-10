@@ -867,6 +867,12 @@ to the log at the bottom.
 487. [x] **Holidays on the map.** A settlement's map pin says when its next holiday is (today, or in how many days).
 488. [x] **The week ahead in prep.** Prep's week-ahead weather marks holidays and market days in the party's town.
 489. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
+490. [ ] **What happens on the day.** A local holiday line can say what happens ("Founding Day, 5 Thawmoon 841 — a
+    parade and a bonfire"), shown on the town's festival card and the calendar.
+491. [ ] **Market stalls.** On market day, a settlement's Market tab lists a few travelling stalls and what they
+    sell, the same all day (seeded by the town and the date).
+492. [ ] **Market-day crowds.** On market day the scene line says the square is busy with stalls.
+493. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 
 ## Ideas parking lot
 
