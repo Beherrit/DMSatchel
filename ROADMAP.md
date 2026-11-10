@@ -852,6 +852,11 @@ to the log at the bottom.
 476. [x] **A shop's next day off.** A shop's page says when it's next shut: its day off, or a holiday.
 477. [x] **Tomorrow in town.** The clock card says what tomorrow brings in the party's town (a holiday, market day,
     shops shut, a birthday).
+478. [ ] **Local holidays.** A settlement can have its own festival days (e.g. "Founding Day, 3 Thawmoon"): its shops
+    shut, and they show in its week and on the calendar when the party is there.
+479. [ ] **The week on the party page.** Players can fold out the week in the party's town on the party page.
+480. [ ] **Days off on the Market tab.** A settlement's Market tab says each shop's weekly day off by its hours.
+481. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 
 ## Ideas parking lot
 
