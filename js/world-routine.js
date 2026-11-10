@@ -5,7 +5,7 @@ import { world, worldEntries, link, findByName, getEntry, patchEntry, linkedTo }
 import { whereAt, aboutTown, regularsAt, townByHour, rollRoutine, dayOf, dueLater, busiestHour, crossPaths, atTaverns, ownerDay, timeAt, routineCheck } from './routine.js';
 import { holidayToday, nextHoliday, tradingHours, openText, tradeDay, isMarketDay, marketToday } from './shop-hours.js';
 import { openBounties } from './bounty.js';
-import { cleanCalendar, withLocal } from './calendar.js';
+import { cleanCalendar, withLocal, holidayTitle } from './calendar.js';
 import { weekInTown, weekDayText, weekText } from './week-in-town.js';
 import { makeRng, randomSeed } from './rng.js';
 import { isHired } from './hirelings.js';
@@ -251,7 +251,9 @@ export function festivalLine(town) {
   const taverns = worldEntries().filter((x) => isTavern(x) && x.id !== town.id && inside(x));
   const a = aroundNow(town);
   const groups = a ? atTaverns(a.list, taverns, tavernOf) : taverns.map((t) => ({ tavern: t, people: [] }));
-  const head = el('p', { class: 'festival-head' }, el('strong', {}, `🎉 ${holiday} today`), ': a festival day. The shops are shut', taverns.length ? '; the taverns are open.' : '.');
+  // The 200th Founding Day: a local holiday with a first year is counted.
+  const hObj = (cal.holidays || []).find((h) => h.month === cal.month && h.day === cal.day && h.name === holiday), title = hObj ? holidayTitle(hObj, cal.year) : holiday;
+  const head = el('p', { class: 'festival-head' }, el('strong', {}, `🎉 ${title[0].toUpperCase()}${title.slice(1)} today`), ': a festival day. The shops are shut', taverns.length ? '; the taverns are open.' : '.');
   if (!groups.length) return el('section', { class: 'card festival-card', 'aria-label': 'Festival day' }, head);
   return el('section', { class: 'card festival-card', 'aria-label': 'Festival day' }, head,
     el('ul', { class: 'festival-taverns small' }, groups.map(({ tavern, people }) => el('li', {}, link(tavern), ': ',

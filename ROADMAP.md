@@ -861,7 +861,7 @@ to the log at the bottom.
     and for tavern festival prices.
 483. [x] **Check the local holidays.** Saving a settlement warns about local holiday lines the calendar can't read.
 484. [x] **Which town's holidays.** The calendar can show another town's local holidays, not just the party's town's.
-485. [ ] **The 200th Founding Day.** A local holiday written with a year counts its anniversaries ("the 200th Founding
+485. [x] **The 200th Founding Day.** A local holiday written with a year counts its anniversaries ("the 200th Founding
     Day").
 
 ## Ideas parking lot
@@ -1353,3 +1353,4 @@ to the log at the bottom.
 - Local holidays everywhere: a town's own holidays also count in "Coming up", on the GM sheet, for tavern holiday prices and festival specials, and for festive goods on the eve; the server shuts the town's shops and prices orders by the town's calendar too.
 - Check the local holidays: as the GM types a settlement's local holidays, the form says which lines it reads and when they fall ("Reads: Founding Day (5 Thawmoon)") and which it can't, with an example of the format.
 - Which town's holidays: the calendar has a "Town" picker (where the party is, any settlement with local holidays or a market day, or no town) that sets whose local holidays, market days and shops' days off the month shows.
+- The 200th Founding Day: a local holiday written with the year it was first held ("Founding Day, 5 Thawmoon 841") is counted on the town's festival card, in its week and on the calendar ("the 200th Founding Day").

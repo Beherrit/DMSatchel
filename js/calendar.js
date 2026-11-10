@@ -119,7 +119,9 @@ export function parseHolidayLines(cal, text) {
   for (const l of String(text || '').split('\n').map((x) => x.trim()).filter(Boolean)) {
     const i = l.indexOf(','), name = (i < 0 ? l : l.slice(0, i).trim()).slice(0, 60);
     const d = i < 0 ? null : parseDate(cal, l.slice(i + 1));
-    if (!d || !name) bad.push(name || l); else holidays.push({ name, month: d.month, day: d.day });
+    // A year in the date ("Founding Day, 5 Thawmoon 840") is when it was first held, for counting anniversaries.
+    const nums = l.slice(i + 1).match(/-?\d+/g) || [];
+    if (!d || !name) bad.push(name || l); else holidays.push({ name, month: d.month, day: d.day, ...(nums.length >= 2 ? { since: d.year } : {}) });
   }
   return { holidays, bad };
 }
@@ -131,3 +133,9 @@ export function withLocal(cal, town) {
   try { local = parseHolidayLines(cal, town.fields.holidays).holidays.map((h) => ({ ...h, local: town.name })); } catch { local = []; }
   return local.length ? { ...cal, holidays: [...(Array.isArray(cal.holidays) ? cal.holidays : []), ...local] } : cal;
 }
+
+// "1st", "2nd", "3rd", "11th", "200th".
+export const ordinal = (n) => { const t = n % 100, u = n % 10; return `${n}${t >= 11 && t <= 13 ? 'th' : u === 1 ? 'st' : u === 2 ? 'nd' : u === 3 ? 'rd' : 'th'}`; };
+// A holiday's name in a given year: "the 200th Founding Day" when it has a first year (and this isn't before it).
+// (since is the year it was first held, so that year's is the 1st.)
+export const holidayTitle = (h, year) => (h?.since !== undefined && year >= h.since ? `the ${ordinal(year - h.since + 1)} ${h.name}` : h?.name || '');

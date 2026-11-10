@@ -1,6 +1,6 @@
 // The week in town: the coming days in a settlement, with its holidays, its market day, and which of its shops and
 // taverns shut on which day (a weekly day off, or a holiday). Pure: works on a calendar, a town and its shops.
-import { toDays, fromDays, holidaysOn, weekday } from './calendar.js';
+import { toDays, fromDays, holidaysOn, weekday, holidayTitle } from './calendar.js';
 import { shopOpen, isMarketDay } from './shop-hours.js';
 import { birthdaysBetween } from './birthdays.js';
 
@@ -24,7 +24,8 @@ export function weekInTown(cal, town, shops = [], days = 7, people = []) {
 // One day in town: → { date, weekday, holidays, market, noMarket, shut: [{ name, why }], open: [names open for a holiday] } (see weekInTown).
 export function dayInTown(cal, town, shops, date) {
   const wd = Array.isArray(cal.weekdays) && cal.weekdays.length ? weekday(cal, date) || '' : '';
-  const holidays = Array.isArray(cal.holidays) ? holidaysOn(cal, date).map((h) => h.name) : [];
+  // A local holiday with a first year is counted: "the 200th Founding Day".
+  const holidays = Array.isArray(cal.holidays) ? holidaysOn(cal, date).map((h) => holidayTitle(h, date.year)) : [];
   const marketWd = !!wd && isMarketDay(town, wd);
   const shut = [], open = [];
   for (const s of shops) {

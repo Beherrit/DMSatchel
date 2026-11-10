@@ -1089,10 +1089,10 @@ function localHolidaysHint(box) {
   const out = el('p', { class: 'small muted holidays-preview', 'aria-live': 'polite' });
   const draw = () => {
     const cal = worldCalendar();
-    if (!box.value.trim()) { out.textContent = cal ? 'One per line: the name, then the date, e.g. “Founding Day, 3 ' + cal.months[0].name + '”. The town’s shops shut on them.' : 'Set up the calendar first, then write one per line: the name, then the date.'; out.classList.remove('bad-line'); return; }
+    if (!box.value.trim()) { out.textContent = cal ? 'One per line: the name, then the date, e.g. “Founding Day, 3 ' + cal.months[0].name + '”; add the year it was first held to count them (“the 200th Founding Day”). The town’s shops shut on them.' : 'Set up the calendar first, then write one per line: the name, then the date.'; out.classList.remove('bad-line'); return; }
     if (!cal) { out.textContent = 'The world has no calendar yet, so these can’t fall on a day.'; out.classList.add('bad-line'); return; }
     const { holidays, bad } = parseHolidayLines(cal, box.value);
-    out.textContent = [holidays.length ? `Reads: ${holidays.map((h) => `${h.name} (${h.day} ${cal.months[h.month].name})`).join(', ')}.` : '', bad.length ? `Can’t read: ${bad.join(', ')}. Write it like “Founding Day, 3 ${cal.months[0].name}”.` : ''].filter(Boolean).join(' ');
+    out.textContent = [holidays.length ? `Reads: ${holidays.map((h) => `${h.name} (${h.day} ${cal.months[h.month].name}${h.since !== undefined ? `, first held ${h.since}` : ''})`).join(', ')}.` : '', bad.length ? `Can’t read: ${bad.join(', ')}. Write it like “Founding Day, 3 ${cal.months[0].name}”.` : ''].filter(Boolean).join(' ');
     out.classList.toggle('bad-line', bad.length > 0);
   };
   box.addEventListener('input', draw); draw();
