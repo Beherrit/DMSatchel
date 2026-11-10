@@ -34,8 +34,8 @@ import { readingPrepCard } from './world-reading.js';
 import { nextMovesCard } from './world-nextmove.js';
 import { shoppingPrepCard } from './world-shopping.js';
 import { partyRows, worries } from './party-glance.js';
-import { aroundNow, festivalLine, wantedPrepLine, whereNow, whereBits } from './world-routine.js';
-import { nextMarket, inDaysText } from './week-in-town.js';
+import { aroundNow, festivalLine, wantedPrepLine, whereNow, whereBits, townWeek } from './world-routine.js';
+import { nextMarket, inDaysText, weekDayText } from './week-in-town.js';
 import { waitingOnGm } from './waiting.js';
 import { giftsSince, giftWhat } from './gifts.js';
 import { lastSession } from './recap.js';
@@ -147,6 +147,10 @@ function whereSection(prep, rerender) {
   // Same weather all (in-world) day: seeded by place and date, so redrawing the page doesn't change it.
   const weather = dayWeather(here.id, terrain, cal);
   const week = forecast(here.id, terrain, cal, 7).slice(1);
+  // The town's days for the week (by days from today), for the week-ahead weather.
+  const townDays = new Map();
+  try { const t = here.kind === 'settlement' ? here : townOf(here), tw = t && cal ? townWeek(t) : null, t0 = cal ? toDays(cal, today(cal)) : 0;
+    for (const x of tw?.week || []) townDays.set(x.n - t0, x); } catch { /* no calendar */ }
   const encBox = el('div');
   const party = partyDefaults();
   // Set the scene: one line to read out, from the time, the weather, the light and any festival.
@@ -189,7 +193,9 @@ function whereSection(prep, rerender) {
         shops.length ? el('p', { class: 'small' }, `${shops.length} shop${shops.length === 1 ? '' : 's'}: `, shops.slice(0, 6).flatMap((s, i) => [i ? ', ' : '', link(s)])) : null),
       el('div', {}, el('h4', {}, 'Weather'), el('p', {}, weather.line), weather.rules.length ? el('p', { class: 'muted small' }, weather.rules[0]) : null,
         el('details', { class: 'forecast' }, el('summary', {}, 'The week ahead'),
-          el('ul', { class: 'plain forecast-list' }, week.map((d) => el('li', {}, el('strong', {}, d.label), el('span', { class: 'small' }, d.weather.line), d.weather.rules.length ? el('span', { class: 'muted small' }, d.weather.rules[0]) : null)))),
+          el('ul', { class: 'plain forecast-list' }, week.map((d, i) => el('li', {}, el('strong', {}, d.label), el('span', { class: 'small' }, d.weather.line), d.weather.rules.length ? el('span', { class: 'muted small' }, d.weather.rules[0]) : null,
+            // The week ahead in town: holidays, market day, days off and birthdays on each day's weather.
+            (() => { const x = townDays.get(i + 1); return x ? el('span', { class: 'small forecast-town' }, weekDayText(x)) : null; })())))),
         el('h4', {}, 'If trouble comes'),
         (() => { const saved = [here, ...inside].filter((e) => e.kind === 'encounter'); return saved.length ? el('ul', { class: 'plain prep-list' }, saved.map((x) => el('li', {}, '⚔ ', link(x), x.fields?.difficulty ? el('span', { class: 'muted small' }, ` ${x.fields.difficulty}`) : null, x.fields?.when ? el('div', { class: 'muted small' }, x.fields.when) : null))) : null; })(),
         el('div', { class: 'btnrow' }, el('button', { class: 'btn small', type: 'button', onclick: () => setKids(encBox, encounterCard(rollEncounter({ terrain, level: party.level, size: party.size, difficulty: 'Moderate', ...monsterSource() }), { title: `Near ${here.name}`, place: here }), lightNote()) }, 'Roll an encounter'),

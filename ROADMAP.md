@@ -865,7 +865,7 @@ to the log at the bottom.
     Day").
 486. [x] **Holidays in the palette.** Ctrl+K "holidays" lists the coming holidays, the party's town's own included.
 487. [x] **Holidays on the map.** A settlement's map pin says when its next holiday is (today, or in how many days).
-488. [ ] **The week ahead in prep.** Prep's week-ahead weather marks holidays and market days in the party's town.
+488. [x] **The week ahead in prep.** Prep's week-ahead weather marks holidays and market days in the party's town.
 489. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 
 ## Ideas parking lot
@@ -1361,3 +1361,4 @@ to the log at the bottom.
 - A full sweep (#461): all 478 browser tests clean against sweep #441; four that the container restart cut off pass on rerun.
 - Holidays in the palette: Ctrl+K "holidays" lists the coming 90 days' holidays first, the party's town's own included and counted ("The 200th Founding Day (Brindle) · today"), each opening its month on the calendar.
 - Holidays on the map: a settlement's pin says its next holiday within a month, its own local ones included ("🎉 The 200th Founding Day today: the shops are shut", "🎉 Midsummer in 4 days").
+- The week ahead in prep: each day of prep's week-ahead weather also says what's on in the party's town ("🧺 market day", "🎉 the 200th Founding Day", days off, birthdays).
