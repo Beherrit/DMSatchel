@@ -17,7 +17,8 @@ export function renderMarket(m) {
 
 const NOTE_CLASS = { Shortage: 'bad', Surplus: 'good', Banned: 'muted', Contraband: 'warn', Festival: 'warn' };
 
-export function renderStock(text) {
+// wanted(name): who wants this good (characters, from their wishlists), marked on its row.
+export function renderStock(text, { wanted = null } = {}) {
   const lines = String(text || '').split('\n');
   if (!lines.some((l) => l.includes('|'))) return null;
   const box = el('div', { class: 'stock' });
@@ -38,7 +39,7 @@ export function renderStock(text) {
       const now = parsePrice(m ? m[1] : priceCell), usual = m ? parsePrice(m[2]) : now;
       const dir = now > usual * 1.08 ? 'up' : now < usual * 0.92 ? 'down' : '';
       tbody.append(el('tr', { class: /out of stock/.test(stock) ? 'oos' : '', 'data-name': name.toLowerCase() },
-        el('td', {}, name), el('td', { class: `price ${dir}` }, m ? m[1] : priceCell, m ? el('s', { class: 'usual' }, m[2]) : null),
+        el('td', {}, name, (() => { const w = wanted ? wanted(name) : []; return w.length ? el('span', { class: 'wish-pill small', title: 'On their wishlist' }, ` ⭐ ${w.map((c) => c.name).join(', ')} want${w.length === 1 ? 's' : ''} this`) : null; })()), el('td', { class: `price ${dir}` }, m ? m[1] : priceCell, m ? el('s', { class: 'usual' }, m[2]) : null),
         el('td', { class: 'qty' }, stock), el('td', {}, note ? el('span', { class: `note-pill ${NOTE_CLASS[note.split(' ')[0]] || (/Cursed/.test(note) ? 'bad' : '')}` }, note) : null)));
       continue;
     }

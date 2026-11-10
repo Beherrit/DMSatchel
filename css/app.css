@@ -1831,3 +1831,4 @@ details.quest-group > summary .section-title { display: inline }
 .market-stalls .entry-head { flex-wrap: wrap; gap: 6px }
 .stall-buy .controls { display: flex; flex-wrap: wrap; gap: 6px; align-items: center }
 .stall-buy select { max-width: 100%; min-width: 0 }
+.wish-pill { color: var(--brass); font-weight: 600 }

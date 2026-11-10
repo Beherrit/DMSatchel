@@ -902,7 +902,7 @@ to the log at the bottom.
     a shop's.
 515. [x] **A tavern's favourites.** A tavern's page lists what the party orders there most.
 516. [x] **Wishlists.** A character can keep a wishlist (one item per line).
-517. [ ] **Someone wants this.** Shops and market stalls mark goods on a character's wishlist ("⭐ Ann wants this").
+517. [x] **Someone wants this.** Shops and market stalls mark goods on a character's wishlist ("⭐ Ann wants this").
 
 ## Ideas parking lot
 
@@ -1424,3 +1424,4 @@ to the log at the bottom.
 - The stall total: the buy-from-a-stall form says what it comes to and what the character has ("2 × Candles (10) costs 1 sp 8 cp. Ann has 50 gp."), flagged when they can't afford it.
 - A tavern's favourites: a tavern's page lists what the party orders there most ("🍲 The party’s favourites: Pale ale (2), Stew (1)"), read from the order lines in the characters' logs.
 - Wishlists: a character has a "Wishlist" field (one item per line) that its player can keep; additive, so existing characters are untouched.
+- Someone wants this: a shop's shelf and the market stalls mark goods on an active character's wishlist ("⭐ Ann, Bo want this"), matched loosely ("rope" finds "Rope (50 feet)", "a good lantern" finds "Hooded lantern").
