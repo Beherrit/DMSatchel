@@ -34,7 +34,8 @@ import { readingPrepCard } from './world-reading.js';
 import { nextMovesCard } from './world-nextmove.js';
 import { shoppingPrepCard } from './world-shopping.js';
 import { partyRows, worries } from './party-glance.js';
-import { aroundNow, festivalLine, wantedPrepLine, whereNow, whereBits, townWeek } from './world-routine.js';
+import { aroundNow, festivalLine, wantedPrepLine, whereNow, whereBits, townWeek, partyTown } from './world-routine.js';
+import { partyWishes } from './world-wishes.js';
 import { nextMarket, inDaysText, weekDayText } from './week-in-town.js';
 import { waitingOnGm } from './waiting.js';
 import { giftsSince, giftWhat } from './gifts.js';
@@ -284,6 +285,11 @@ function partySection() {
         activeGoals(readGoals(c)).length ? el('div', { class: 'small prep-goals' }, el('strong', {}, 'Wants: '), activeGoals(readGoals(c)).slice(0, 3).map((g) => g.text.replace(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g, (_, a, b) => b || a)).join(' · ')) : null,
         openWishes(readWishes(c)).length ? el('div', { class: 'small prep-goals' }, el('strong', {}, 'Wishes for: '), openWishes(readWishes(c)).slice(0, 4).map((w) => stripMarks(w.text).replace(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g, (_, a, b) => b || a)).join(' · ')) : null);
     })) : empty('No active characters yet.'),
+    // What they want, in prep: the wishes the shops and stalls in the party's town could grant today.
+    (() => { let t = null; try { t = partyTown(); } catch { t = null; } if (t?.kind !== 'settlement') return null;
+      const can = partyWishes(t).filter((w) => w.at.length); if (!can.length) return null;
+      return el('p', { class: 'small prep-wish-sale' }, el('strong', {}, `🛍 Wishes ${t.name} could grant today: `), can.slice(0, 6).map((w, i) => { const x = w.at[0];
+        return [i ? '; ' : '', link(w.who), `’s “${w.wish.text}” at `, typeof x.where === 'string' ? x.where : link(x.where), ` (${x.good.name}, ${coinText(x.good.cp)})`]; })); })(),
     el('a', { class: 'small', href: '#world/party' }, 'Party page and treasury'));
 }
 

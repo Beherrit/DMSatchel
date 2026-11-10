@@ -907,7 +907,7 @@ to the log at the bottom.
     players: their own) and where in the party's town each is for sale today.
 519. [x] **Got it.** Buying something on your wishlist offers to take it off the list.
 520. [x] **Wishes in the palette.** Ctrl+K "wishes" lists the wishes you may see and where they're sold in town.
-521. [ ] **What they want, in prep.** Session prep lists the wishes the shops and stalls in the party's town could
+521. [x] **What they want, in prep.** Session prep lists the wishes the shops and stalls in the party's town could
     grant.
 
 ## Ideas parking lot
@@ -1436,3 +1436,4 @@ to the log at the bottom.
 - What the party wishes for: the party page folds out the open wishes this person may see (GMs: everyone's; players: "Your wishes") and where each is for sale in the party's town today, cheapest first, shops and market stalls alike.
 - Got it: after buying something on the character's wish list at a shop or a market stall, the page offers "⭐ Rope was on Ann’s wish list. Tick it off".
 - Wishes in the palette: Ctrl+K "wishes" lists the open wishes you may see (players: their own characters'; GMs: everyone's), each with where it's for sale in the party's town today.
+- What they want, in prep: session prep's party card lists the wishes the party's town could grant today ("🛍 Wishes Brindle could grant today: Ann’s “rope” at Smithy (Rope (50 feet), 1 gp)"), shops and market stalls alike.
