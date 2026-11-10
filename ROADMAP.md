@@ -924,6 +924,11 @@ to the log at the bottom.
 531. [x] **Craft it.** A craftable wish has a "Craft it" button that opens the downtime form ready to file.
 532. [x] **What these tools could make.** A character's page says what the artisan's tools in their pack can make.
 533. [x] **Done about.** An open crafting activity says about when it will be finished on the in-world calendar.
+534. [ ] **Pay the cost.** Any downtime activity with a cost can have it taken from the character's purse by a GM.
+535. [ ] **Downtime totals.** A character's page totals the days and coin their downtime has taken.
+536. [ ] **A new contact.** Resolving carousing or building contacts can start a new NPC who knows the character.
+537. [ ] **Anything this time?** The party page reminds players whose characters haven't filed downtime since the
+    last session.
 
 ## Ideas parking lot
 
