@@ -913,7 +913,7 @@ to the log at the bottom.
     cost (half its price) and how long it takes (its price in GP ÷ 10 days, rounded up), as the SRD 5.2 rules have it.
 523. [x] **Many hands.** The crafting estimate divides the days among the characters helping.
 524. [x] **Use the estimate.** One click puts the estimate's days and materials cost into the activity.
-525. [ ] **Hand over what was made.** When a GM resolves a crafting activity, they can put the item in the
+525. [x] **Hand over what was made.** When a GM resolves a crafting activity, they can put the item in the
     character's pack.
 
 ## Ideas parking lot
@@ -1446,3 +1446,4 @@ to the log at the bottom.
 - Crafting costs: choosing Crafting when filing downtime asks for the item (with the SRD price list as suggestions) and shows the SRD 5.2 estimate: raw materials at half its price and its price in GP ÷ 10 days of work ("Longsword (15 gp): raw materials 7 gp 5 sp, 2 days of work"); the activity keeps the item and shows the estimate.
 - Many hands: the crafting estimate takes the number of crafters and divides the days among them ("150 days of work, or 50 days each with 3 crafting").
 - Use the estimate: a "Use the estimate" button fills in the activity's days (each) and cost (the raw materials).
+- Hand over what was made: a crafting activity's GM box has "Put the Longsword in Ann’s pack", which adds it to the character's pack (logged "Crafted Longsword") and marks it handed over (GM-only) so it can't be given twice.

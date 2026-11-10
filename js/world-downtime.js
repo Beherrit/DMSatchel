@@ -7,6 +7,8 @@ import { worldEntries, createEntry, patchEntry, getEntry, link, when, byName, ri
 import { DOWNTIME_ACTIVITIES } from './world-schema.js';
 import { GOODS, coinText } from './economy.js';
 import { craftEstimate } from './crafting.js';
+import { changePlay } from './sheet-ui.js';
+import { giveItem } from './handover.js';
 
 const ACTIVE = (e) => !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
 const downtimeOf = (charId) => worldEntries().filter((d) => d.kind === 'downtime' && d.fields?.character === charId);
@@ -35,7 +37,16 @@ function resolveBox(d, after) {
     try { await patchEntry(d, { fields: { outcome: text.value.trim(), resolved: d.fields?.resolved || new Date().toISOString() } }); toast('Outcome saved: the player can see it'); after(); }
     catch (err) { toast(err.message, 'bad'); }
   };
-  return el('div', { class: 'downtime-resolve' }, text, el('div', { class: 'btnrow' }, el('button', { class: 'btn small primary', type: 'button', onclick: save }, d.fields?.resolved ? 'Update outcome' : 'Resolve')));
+  // Hand over what was made: a crafting activity's item into the character's pack (once), logged on their sheet.
+  const f = d.fields || {}, ch = getEntry(f.character);
+  const hand = f.craft && ch && !f.handed ? el('button', { class: 'btn small craft-hand', type: 'button', onclick: async () => {
+    try {
+      await changePlay(ch, (p) => { p.inventory = giveItem(p.inventory, f.craft, 1, 'their own work'); }, `Crafted ${f.craft}`);
+      await patchEntry(getEntry(d.id) || d, { fields: { handed: new Date().toISOString() } });
+      toast(`${f.craft} is in ${ch.name}’s pack`); after();
+    } catch (err) { toast(err.message, 'bad'); }
+  } }, `Put the ${f.craft} in ${ch.name}’s pack`) : f.handed ? el('span', { class: 'muted small' }, `✓ ${f.craft} handed over`) : null;
+  return el('div', { class: 'downtime-resolve' }, text, el('div', { class: 'btnrow' }, el('button', { class: 'btn small primary', type: 'button', onclick: save }, d.fields?.resolved ? 'Update outcome' : 'Resolve'), hand));
 }
 
 function fileForm(after, preset) {

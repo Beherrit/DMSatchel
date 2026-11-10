@@ -94,6 +94,8 @@ export const KINDS = {
     fields: [['character', 'Character', 'hidden'], ['activity', 'Activity', 'select', DOWNTIME_ACTIVITIES], ['days', 'Days spent'], ['cost', 'Cost'],
       // What a crafting activity makes (an item from the price list, or anything), for the estimate and the hand-over.
       ['craft', 'Item to craft', 'hidden'],
+      // When a GM put the crafted item in the character's pack (so it isn't handed over twice).
+      ['handed', 'Handed over', 'hidden', null, { gmOnly: true }],
       // Days that have passed on the calendar toward it (see downtime-days.js).
       ['done', 'Days done', 'hidden'],
       ['outcome', 'Outcome (from the GM)', 'long', null, { gmOnly: true }], ['resolved', 'Resolved on', 'hidden', null, { gmOnly: true }]],
