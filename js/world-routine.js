@@ -253,7 +253,9 @@ export function festivalLine(town) {
   const groups = a ? atTaverns(a.list, taverns, tavernOf) : taverns.map((t) => ({ tavern: t, people: [] }));
   // The 200th Founding Day: a local holiday with a first year is counted.
   const hObj = (cal.holidays || []).find((h) => h.month === cal.month && h.day === cal.day && h.name === holiday), title = hObj ? holidayTitle(hObj, cal.year) : holiday;
-  const head = el('p', { class: 'festival-head' }, el('strong', {}, `🎉 ${title[0].toUpperCase()}${title.slice(1)} today`), ': a festival day. The shops are shut', taverns.length ? '; the taverns are open.' : '.');
+  const head = [el('p', { class: 'festival-head' }, el('strong', {}, `🎉 ${title[0].toUpperCase()}${title.slice(1)} today`), ': a festival day. The shops are shut', taverns.length ? '; the taverns are open.' : '.'),
+    // What happens on the day: a local holiday's note ("a parade and a bonfire").
+    hObj?.note ? el('p', { class: 'small festival-note' }, `${hObj.note[0].toUpperCase()}${hObj.note.slice(1)}${/[.!?]$/.test(hObj.note) ? '' : '.'}`) : null];
   if (!groups.length) return el('section', { class: 'card festival-card', 'aria-label': 'Festival day' }, head);
   return el('section', { class: 'card festival-card', 'aria-label': 'Festival day' }, head,
     el('ul', { class: 'festival-taverns small' }, groups.map(({ tavern, people }) => el('li', {}, link(tavern), ': ',

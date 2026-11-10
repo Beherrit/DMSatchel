@@ -867,7 +867,7 @@ to the log at the bottom.
 487. [x] **Holidays on the map.** A settlement's map pin says when its next holiday is (today, or in how many days).
 488. [x] **The week ahead in prep.** Prep's week-ahead weather marks holidays and market days in the party's town.
 489. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
-490. [ ] **What happens on the day.** A local holiday line can say what happens ("Founding Day, 5 Thawmoon 841 — a
+490. [x] **What happens on the day.** A local holiday line can say what happens ("Founding Day, 5 Thawmoon 841 — a
     parade and a bonfire"), shown on the town's festival card and the calendar.
 491. [ ] **Market stalls.** On market day, a settlement's Market tab lists a few travelling stalls and what they
     sell, the same all day (seeded by the town and the date).
@@ -1368,3 +1368,4 @@ to the log at the bottom.
 - Holidays in the palette: Ctrl+K "holidays" lists the coming 90 days' holidays first, the party's town's own included and counted ("The 200th Founding Day (Brindle) · today"), each opening its month on the calendar.
 - Holidays on the map: a settlement's pin says its next holiday within a month, its own local ones included ("🎉 The 200th Founding Day today: the shops are shut", "🎉 Midsummer in 4 days").
 - The week ahead in prep: each day of prep's week-ahead weather also says what's on in the party's town ("🧺 market day", "🎉 the 200th Founding Day", days off, birthdays).
+- What happens on the day: a local holiday line can end with a dash and what happens ("Founding Day, 5 Thawmoon 841 — a parade and a bonfire"); the town's festival card and the calendar day say it, and the form's check reads it back.

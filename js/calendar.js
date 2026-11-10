@@ -118,10 +118,12 @@ export function parseHolidayLines(cal, text) {
   const holidays = [], bad = [];
   for (const l of String(text || '').split('\n').map((x) => x.trim()).filter(Boolean)) {
     const i = l.indexOf(','), name = (i < 0 ? l : l.slice(0, i).trim()).slice(0, 60);
-    const d = i < 0 ? null : parseDate(cal, l.slice(i + 1));
+    // What happens on the day, after a dash: "Founding Day, 5 Thawmoon 841 — a parade and a bonfire".
+    const rest = i < 0 ? '' : l.slice(i + 1), dash = rest.search(/\s[—–-]\s/), when = dash < 0 ? rest : rest.slice(0, dash), note = dash < 0 ? '' : rest.slice(dash + 3).trim().slice(0, 200);
+    const d = i < 0 ? null : parseDate(cal, when);
     // A year in the date ("Founding Day, 5 Thawmoon 840") is when it was first held, for counting anniversaries.
-    const nums = l.slice(i + 1).match(/-?\d+/g) || [];
-    if (!d || !name) bad.push(name || l); else holidays.push({ name, month: d.month, day: d.day, ...(nums.length >= 2 ? { since: d.year } : {}) });
+    const nums = when.match(/-?\d+/g) || [];
+    if (!d || !name) bad.push(name || l); else holidays.push({ name, month: d.month, day: d.day, ...(nums.length >= 2 ? { since: d.year } : {}), ...(note ? { note } : {}) });
   }
   return { holidays, bad };
 }

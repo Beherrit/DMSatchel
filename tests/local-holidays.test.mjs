@@ -43,3 +43,9 @@ test('upcomingHolidays: today and the coming days, soonest first, local ones too
   assert.equal(u[0].holiday.local, 'Brindle');
   assert.deepEqual(upcomingHolidays({ ...cal, holidays: [] }), []);
 });
+
+test('a local holiday can say what happens on the day', () => {
+  const r = parseHolidayLines(cal, 'Founding Day, 5 Thawmoon 841 — a parade and a bonfire\nLamp Night, 6 Thawmoon - lanterns on the river\nMid-Winter Fair, 7 Thawmoon');
+  assert.deepEqual(r.holidays, [{ name: 'Founding Day', month: 1, day: 5, since: 841, note: 'a parade and a bonfire' }, { name: 'Lamp Night', month: 1, day: 6, note: 'lanterns on the river' }, { name: 'Mid-Winter Fair', month: 1, day: 7 }]);
+  assert.deepEqual(r.bad, []);
+});
