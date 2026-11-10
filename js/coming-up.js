@@ -25,7 +25,7 @@ export function comingUp(cal, char, quests, days = 7, { markets = [] } = {}) {
   // Market day coming up: the next market day in each town given (just the first, so it isn't every week's list).
   const norm = (w) => String(w || '').trim().toLowerCase().replace(/s$/, '');
   if (Array.isArray(cal.weekdays) && cal.weekdays.length) for (const mk of markets) {
-    for (let n = from; n <= to; n++) { const d = fromDays(cal, n); if (norm(weekday(cal, d)) === norm(mk.day)) { out.push({ n, date: d, icon: '🧺', text: `Market day in ${mk.town}` }); break; } }
+    for (let n = from; n <= to; n++) { const d = fromDays(cal, n); if (norm(weekday(cal, d)) === norm(mk.day) && !holidaysOn(cal, d).length) { out.push({ n, date: d, icon: '🧺', text: `Market day in ${mk.town}` }); break; } }
   }
   return out.map((x) => ({ ...x, in: x.n - from })).sort((a, b) => a.n - b.n);
 }

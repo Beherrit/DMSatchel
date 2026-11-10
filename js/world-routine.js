@@ -3,7 +3,7 @@
 import { el, setKids, toast } from './dom.js';
 import { world, worldEntries, link, findByName, getEntry, patchEntry, linkedTo } from './world-store.js';
 import { whereAt, aboutTown, regularsAt, townByHour, rollRoutine, dayOf, dueLater, busiestHour, crossPaths, atTaverns, ownerDay, timeAt, routineCheck } from './routine.js';
-import { holidayToday, nextHoliday, tradingHours, openText, tradeDay, isMarketDay } from './shop-hours.js';
+import { holidayToday, nextHoliday, tradingHours, openText, tradeDay, isMarketDay, marketToday } from './shop-hours.js';
 import { openBounties } from './bounty.js';
 import { cleanCalendar } from './calendar.js';
 import { makeRng, randomSeed } from './rng.js';
@@ -126,7 +126,7 @@ export function townHoursBox(town) {
   const npcs = worldEntries().filter((x) => x.kind === 'npc' && x.fields?.routine && !isHired(x) && !['Dead', 'Missing'].includes(x.fields?.status)).map((x) => ({ id: x.id, name: x.name, routine: x.fields.routine, entry: x }));
   const t = townByHour(npcs, placeOf, inside);
   // Shops in the town by the hour: which are open at each of the table's hours, today.
-  const day = tradeDay(cleanCalendar(world.info?.cal)), market = isMarketDay(town, day.weekday);
+  const day = tradeDay(cleanCalendar(world.info?.cal)), market = marketToday(town, day);
   const shops = worldEntries().filter((x) => x.kind === 'location' && x.id !== town.id && (x.fields?.stock || x.fields?.menu) && inside(x)).sort((a, b) => a.name.localeCompare(b.name));
   if (!t.rows.length && !shops.length) return null;
   const openAt = (m) => shops.filter((x) => openText(x, m, { ...day, market }).open);
@@ -338,7 +338,7 @@ export function openNowLine(town, always = false) {
   const inside = (p) => { for (let x = p, i = 0; x && i < 12; x = x.parent_id && getEntry(x.parent_id), i++) if (x.id === town.id) return true; return false; };
   const day = tradeDay(cleanCalendar(world.info?.cal));
   const shops = worldEntries().filter((x) => x.kind === 'location' && x.id !== town.id && (x.fields?.stock || x.fields?.menu) && inside(x))
-    .map((x) => ({ x, o: openText(x, m, { ...day, market: isMarketDay(town, day.weekday) }) }));
+    .map((x) => ({ x, o: openText(x, m, { ...day, market: marketToday(town, day) }) }));
   const open = shops.filter((s) => s.o.open), shut = shops.length - open.length;
   if ((!shut && !always) || !shops.length) return null;
   return el('p', { class: 'small open-now-town' }, always ? `🕰 Open now in ${town.name} (${hhmm(m)}): ` : `🕰 Open now (${hhmm(m)}): `,
@@ -349,6 +349,7 @@ export function openNowLine(town, always = false) {
 export function marketDayLine(town) {
   if (town.kind !== 'settlement' || !town.fields?.market_day) return null;
   const day = tradeDay(cleanCalendar(world.info?.cal));
+  if (day.holiday && isMarketDay(town, day.weekday)) return el('p', { class: 'small market-day no-market' }, el('strong', {}, '🧺 No market today: '), `it’s ${day.holiday}, and the stalls stay packed away.`);
   return isMarketDay(town, day.weekday) ? el('p', { class: 'small market-day' }, el('strong', {}, '🧺 Market day today: '), 'stalls in the square, and the shops open two hours early.') : null;
 }
 
@@ -363,7 +364,7 @@ export function townSnapshot(town) {
   const m = now();
   if (!town || m === null) return null;
   const inside = (p) => { for (let x = p, i = 0; x && i < 12; x = x.parent_id && getEntry(x.parent_id), i++) if (x.id === town.id) return true; return false; };
-  const day = tradeDay(cleanCalendar(world.info?.cal)), market = isMarketDay(town, day.weekday);
+  const day = tradeDay(cleanCalendar(world.info?.cal)), market = marketToday(town, day);
   const shops = worldEntries().filter((x) => x.kind === 'location' && x.id !== town.id && (x.fields?.stock || x.fields?.menu) && inside(x))
     .map((x) => ({ id: x.id, name: x.name, open: openText(x, m, { ...day, market }).open }));
   const people = (aroundNow(town)?.list || []).map(({ npc, place }) => ({ id: npc.entry.id, name: npc.entry.name, place: place.id === town.id ? `about ${town.name}` : place.name }));

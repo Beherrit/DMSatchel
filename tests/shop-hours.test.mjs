@@ -147,3 +147,12 @@ test('hoursPreview reads the Hours field back', async () => {
   assert.equal(hoursPreview(''), '');
   assert.match(hoursPreview('whenever'), /^Can’t read that/);
 });
+
+test('marketToday: the market weekday, but not on a holiday', async () => {
+  const { marketToday } = await import('../js/shop-hours.js');
+  const town = { fields: { market_day: 'Fireday' } };
+  assert.equal(marketToday(town, { weekday: 'Fireday', holiday: '' }), true);
+  assert.equal(marketToday(town, { weekday: 'Fireday', holiday: 'Bridge Day' }), false);
+  assert.equal(marketToday(town, { weekday: 'Starday', holiday: '' }), false);
+  assert.equal(marketToday(town, null), false);
+});

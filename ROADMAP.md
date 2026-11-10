@@ -836,7 +836,7 @@ to the log at the bottom.
 462. [x] **Who came up that day.** A day on the calendar lists the sessions set on it and who and what came up in
     them.
 463. [x] **Market days on the calendar.** The calendar month marks the party's town's market days.
-464. [ ] **No market on a holiday.** When a market day falls on a holiday, the town's page says there's no market.
+464. [x] **No market on a holiday.** When a market day falls on a holiday, the town's page says there's no market.
 465. [ ] **The week in town.** A settlement's page shows the coming week: holidays, market day, and which shops take
     a day off when.
 
@@ -1309,3 +1309,4 @@ to the log at the bottom.
 - Only where people are: an "Only where people are" button on the map dims the place pins with nobody there right now (or at the previewed hour), until hovered.
 - Who came up that day: a session listed on a calendar day shows who and what its log names ("Came up: Ann, The Bell").
 - Market days on the calendar: the month marks the party's town's market days with a basket, and a day's card says "Market day in Brindle" (or that there's no market on a holiday).
+- No market on a holiday: when the market weekday falls on a holiday the town's page says "No market today: it's Bridge Day", shops don't open early, and "coming up" skips to the next real market day.
