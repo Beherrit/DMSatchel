@@ -894,7 +894,7 @@ to the log at the bottom.
 509. [x] **Copy the shopping.** What the party bought can be copied as plain text.
 510. [x] **Phone check.** The week in town, the market stalls and their buy form, and the calendar's town picker fit
     a phone screen without sideways scrolling.
-511. [ ] **When the stalls pack up.** The stalls card says how long the stalls are up by the world's clock, or that
+511. [x] **When the stalls pack up.** The stalls card says how long the stalls are up by the world's clock, or that
     they're packed away.
 512. [ ] **The keeper at their stall.** A stall whose keeper was made an NPC links to them.
 513. [ ] **Stalls in the palette.** Ctrl+K "stalls" lists today's market stalls and their goods.
@@ -1413,3 +1413,4 @@ to the log at the bottom.
 - A shop's best sellers: a shop's page lists what the party buys there most ("📦 Sells most: Nails (3), Rope (1)").
 - Copy the shopping: "What the party bought" on the party page has Copy as text, a dated list of the latest purchases.
 - Phone check: at 375px the town's week, the calendar's town picker and the party page fit; the market stalls card no longer pushed the page sideways (its grid column now shrinks, and the buy form's controls wrap).
+- When the stalls pack up: the stalls card says "🕰 Up till 17:00 (another 3 h)", "Going up at 06:00" or "Packed away at 17:00" by the world's clock, and players only see the buy form while the stalls are up (as the server requires).

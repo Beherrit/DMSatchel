@@ -48,3 +48,13 @@ export function marketStalls(seed, size = 'Town') {
 
 // The stalls as plain text, one stall a line: "Spice cart (a spice trader from the south): Pepper (1 oz) 2 sp, …".
 export const stallsText = (stalls) => stalls.map((s) => `${s.name} (${s.keeper}): ${s.goods.map((g) => `${g.name} ${g.price}`).join(', ')}`).join('\n');
+
+// When the stalls are up, by the world's clock (minutes): → { up, text }. "Up till 17:00 (another 3 h)", "Packed away
+// at 17:00", "Going up at 06:00 (in 2 h)".
+export function stallsHours(minutes) {
+  const m = ((Math.round(Number(minutes) || 0) % 1440) + 1440) % 1440, h = (x) => `${String(Math.floor(x / 60)).padStart(2, '0')}:${String(x % 60).padStart(2, '0')}`;
+  const left = (x) => (x >= 60 ? `${Math.floor(x / 60)} h${x % 60 ? ` ${x % 60} min` : ''}` : `${x} min`);
+  if (m >= STALLS_OPEN && m < STALLS_SHUT) return { up: true, text: `Up till ${h(STALLS_SHUT)} (another ${left(STALLS_SHUT - m)})` };
+  if (m < STALLS_OPEN) return { up: false, text: `Going up at ${h(STALLS_OPEN)} (in ${left(STALLS_OPEN - m)})` };
+  return { up: false, text: `Packed away at ${h(STALLS_SHUT)}` };
+}

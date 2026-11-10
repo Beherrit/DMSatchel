@@ -23,3 +23,12 @@ test('marketStalls: the price shown is the price paid, in whole coins', async ()
     if (g.cp >= 10000) assert.equal(g.cp % 100, 0); else if (g.cp >= 100) assert.equal(g.cp % 10, 0);
   }
 });
+
+test('stallsHours: up, going up, packed away', async () => {
+  const { stallsHours } = await import('../js/market-stalls.js');
+  assert.deepEqual(stallsHours(14 * 60), { up: true, text: 'Up till 17:00 (another 3 h)' });
+  assert.deepEqual(stallsHours(16 * 60 + 30), { up: true, text: 'Up till 17:00 (another 30 min)' });
+  assert.deepEqual(stallsHours(4 * 60), { up: false, text: 'Going up at 06:00 (in 2 h)' });
+  assert.deepEqual(stallsHours(20 * 60), { up: false, text: 'Packed away at 17:00' });
+  assert.equal(stallsHours(1440 + 600).up, true);
+});

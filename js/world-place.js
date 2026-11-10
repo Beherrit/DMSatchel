@@ -9,7 +9,7 @@ import { worldCalendar } from './world-calendar.js';
 import { dayWeather } from './forecast.js';
 import { toDays, today, cleanCalendar, withLocal } from './calendar.js';
 import { openText, holidayToday, typicalHours, tradeDay, marketToday } from './shop-hours.js';
-import { stallsText } from './market-stalls.js';
+import { stallsText, stallsHours } from './market-stalls.js';
 import { hhmm } from './clock.js';
 import { counterGap, whereNow, whereBits, todaysStalls } from './world-routine.js';
 import { deadlineOf, deadlineText } from './deadline.js';
@@ -295,13 +295,16 @@ function marketSection(place, rerender) {
 function stallsCard(place, rerender) {
   const stalls = todaysStalls(place);
   if (!stalls.length) return null;
+  const hours = world.info?.clock?.minutes === undefined ? null : stallsHours(world.info.clock.minutes);
   return el('div', { class: 'card market-stalls' }, el('div', { class: 'entry-head' }, el('h4', {}, `🧺 Market stalls today (${stalls.length})`),
     el('button', { class: 'btn small ghost', type: 'button', onclick: () => copyText(`Market day in ${place.name}\n${stallsText(stalls)}`) }, 'Copy as text')),
+    // When the stalls pack up: by the world's clock (the server refuses sales outside these hours).
+    hours ? el('p', { class: `small stalls-hours${hours.up ? '' : ' shut'}` }, `🕰 ${hours.text}.`) : null,
     el('ul', { class: 'plain small stall-list' }, stalls.map((st) => el('li', {}, el('strong', {}, st.name), el('span', { class: 'muted' }, ` (${st.keeper})`), ': ',
       st.goods.map((g, i) => [i ? ', ' : '', `${g.name} `, el('span', { class: 'stall-price' }, g.price)]),
       // A stall keeper as an NPC: a GM makes the keeper someone in town (a draft to name and save).
       isGm() ? [' ', el('button', { class: 'btn small ghost stall-npc', type: 'button', onclick: () => keeperDraft(place, st) }, 'Make the keeper an NPC')] : null))),
-    stallBuy(place, stalls, rerender));
+    hours && !hours.up && !isGm() ? null : stallBuy(place, stalls, rerender));
 }
 
 function keeperDraft(place, st) {
