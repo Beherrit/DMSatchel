@@ -6,8 +6,8 @@ import { isGm, isMember, session } from './api.js';
 import { worldEntries, createEntry, patchEntry, getEntry, link, when, byName, richText, notice } from './world-store.js';
 import { DOWNTIME_ACTIVITIES } from './world-schema.js';
 import { GOODS, coinText } from './economy.js';
-import { craftEstimate } from './crafting.js';
-import { changePlay } from './sheet-ui.js';
+import { craftEstimate, hasTools } from './crafting.js';
+import { changePlay, playOf } from './sheet-ui.js';
 import { giveItem } from './handover.js';
 
 const ACTIVE = (e) => !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
@@ -65,18 +65,22 @@ function fileForm(after, preset) {
   // Many hands: characters crafting together divide the days.
   const helpers = el('input', { type: 'number', id: 'dt-helpers', min: 1, max: 20, value: 1, class: 'hp-amt', 'aria-label': 'Crafters working on it' });
   const estimate = el('p', { class: 'small craft-estimate', 'aria-live': 'polite' });
+  const toolNote = el('p', { class: 'small bad-line craft-tools', 'aria-live': 'polite' });
   // Use the estimate: puts its days (each) and the materials' cost into the activity.
   const use = el('button', { class: 'btn small craft-use', type: 'button', hidden: true, onclick: () => { const e = craftEstimate(craft.value, helpers.value); if (!e) return; days.value = String(e.daysEach); cost.value = coinText(e.materialsCp); toast('Days and cost filled in'); } }, 'Use the estimate');
   const showEstimate = () => {
     const e = craft.value.trim() ? craftEstimate(craft.value, helpers.value) : null;
     use.hidden = !e;
+    // Got the tools?: the crafter's pack, checked for the tools the item needs.
+    const who = getEntry(ch.value), missing = e?.tools && who && !hasTools(playOf(who).inventory, e.tools);
+    toolNote.textContent = missing ? `⚠ ${who.name}’s pack has no ${e.tools}.` : '';
     estimate.textContent = !craft.value.trim() ? 'Name an item from the price list for an estimate (or describe anything else below).'
       : e ? `${e.name} (${coinText(Math.round(e.gp * 100))}): raw materials ${coinText(e.materialsCp)}, ${e.days} day${e.days === 1 ? '' : 's'} of work${e.helpers > 1 ? `, or ${e.daysEach} day${e.daysEach === 1 ? '' : 's'} each with ${e.helpers} crafting` : ''}. ${e.tools ? `Usually made with ${e.tools}, and they need proficiency with them.` : 'They need proficiency with the right tools.'}`
         : 'Not on the price list: a GM will set the cost and time.';
   };
-  craft.addEventListener('input', showEstimate); helpers.addEventListener('input', showEstimate);
+  craft.addEventListener('input', showEstimate); helpers.addEventListener('input', showEstimate); ch.addEventListener('change', showEstimate);
   const craftBox = el('div', { class: 'field wide craft-box' }, el('label', { for: 'dt-craft' }, 'Item to craft'), craft, craftList,
-    el('div', { class: 'controls' }, el('label', { for: 'dt-helpers', class: 'small' }, 'Crafters'), helpers, use), estimate);
+    el('div', { class: 'controls' }, el('label', { for: 'dt-helpers', class: 'small' }, 'Crafters'), helpers, use), estimate, toolNote);
   const showCraft = () => { craftBox.hidden = act.value !== 'Crafting'; showEstimate(); };
   act.addEventListener('change', showCraft); showCraft();
   const priv = el('input', { type: 'checkbox', id: 'dt-private' });

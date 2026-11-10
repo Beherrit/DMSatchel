@@ -36,3 +36,11 @@ test('toolsFor: the artisan’s tools an item is usually made with', async () =>
   assert.equal(toolsFor('Lute', 'Instruments'), 'Woodcarver’s tools');
   assert.equal(toolsFor('Diamond', 'Gems & jewelry'), '');
 });
+
+test('hasTools: the pack holds the tools, whatever the apostrophe or case', async () => {
+  const { hasTools } = await import('../js/crafting.js');
+  assert.equal(hasTools('Rope\nsmith\'s tools (from the Smithy)', 'Smith’s tools'), true);
+  assert.equal(hasTools('Rope\nTinker’s tools', 'Smith’s tools'), false);
+  assert.equal(hasTools('', 'Smith’s tools'), false);
+  assert.equal(hasTools('Smith’s tools', ''), false);
+});

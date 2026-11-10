@@ -42,3 +42,10 @@ export function toolsFor(name, category = '') {
   for (const [re, tool] of TOOL_RULES) if (re.test(String(name || ''))) return tool;
   return ['Weapons', 'Armor'].includes(category) ? 'Smith’s tools' : category === 'Instruments' ? 'Woodcarver’s tools' : '';
 }
+
+// Got the tools?: whether a pack (inventory text, one item a line) holds these tools ("Smith's tools", any case).
+export function hasTools(inventory, tool) {
+  const key = (s) => String(s || '').toLowerCase().replace(/[’']/g, '').replace(/\s+/g, ' ').trim();
+  const t = key(tool);
+  return !!t && String(inventory || '').split('\n').some((l) => key(l).includes(t));
+}
