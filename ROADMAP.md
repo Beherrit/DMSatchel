@@ -847,6 +847,11 @@ to the log at the bottom.
 471. [x] **Birthdays in the week.** The week in town lists the birthdays of the people who live there.
 472. [x] **Next market on the party page.** The party page says when the next market day is in the party's town.
 473. [x] **Markets in the palette.** Ctrl+K "market" lists the towns with market days and when each is next.
+474. [ ] **Market day on the map.** A settlement's map pin says when it's market day there (today, or next).
+475. [ ] **Next market in prep.** Session prep says when the next market day is in the party's town.
+476. [ ] **A shop's next day off.** A shop's page says when it's next shut: its day off, or a holiday.
+477. [ ] **Tomorrow in town.** The clock card says what tomorrow brings in the party's town (a holiday, market day,
+    shops shut, a birthday).
 
 ## Ideas parking lot
 
