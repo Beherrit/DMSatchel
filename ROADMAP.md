@@ -779,7 +779,7 @@ to the log at the bottom.
     ("2 weeks later").
 424. [x] **Days in the world, per session.** The session list says how many in-world days passed between sessions,
     from their in-world dates.
-425. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
+425. [x] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 426. [x] **The gap on a session's page.** A session's page says how long after the one before it was played, and how
     many in-world days passed.
 427. [x] **Pace of play.** The world's numbers page says how often the table meets on average, and how many in-world
@@ -1279,3 +1279,4 @@ to the log at the bottom.
 - New on the cast list: Who's who tags the people first met in the latest session "✨ new".
 - Sessions here: a place's map pin popup lists "📜 In 2 session logs: Session 2, Session 1", newest first (six, then "and N more").
 - How many are here: a map pin for a place shows a small count of the people the routines put there (or somewhere inside it) right now, and says it in its label for screen readers ("The Bell, 2 here now").
+- A full sweep: all 440 browser tests rerun; no crashes or page errors, and the same flags as the last sweep (the deliberate error-path 400s).
