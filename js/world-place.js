@@ -281,6 +281,9 @@ function marketSection(place, rerender) {
     slot,
     shops.length ? el('div', {}, el('h4', {}, 'Shops'), openNowLine(shops), counterGaps(shops), el('ul', { class: 'entry-list' }, shops.map((e) => el('li', {}, link(e), el('span', { class: 'kind-tag' }, e.fields?.shop_type || e.fields?.type),
       (() => { const h = hoursNow(e); return h ? el('span', { class: `small shop-hours${h.open ? ' open' : ' shut'}` }, h.text) : null; })(),
+      // Days off on the Market tab: a shop's weekly day off, and whether it trades on holidays.
+      (() => { const off = String(e.fields?.closed_on || '').trim(), hol = /^yes$/i.test(String(e.fields?.holiday_open || '').trim());
+        return off || hol ? el('span', { class: 'small muted shop-dayoff' }, [off ? `shut ${off.replace(/s$/i, '')}s` : '', hol ? 'open on holidays' : ''].filter(Boolean).join(' · ')) : null; })(),
       e.fields?.owner ? el('span', { class: 'muted small' }, e.fields.owner) : null,
       e.parent_id !== place.id && getEntry(e.parent_id) ? el('span', { class: 'muted small' }, 'in ', link(getEntry(e.parent_id))) : null)))) : el('p', { class: 'muted small' }, 'No shops yet.'));
 }
@@ -290,7 +293,7 @@ const hoursNow = (shop) => (world.info?.clock?.minutes === undefined ? null : op
 function openNowLine(shops) {
   if (world.info?.clock?.minutes === undefined) return null;
   const hs = shops.map(hoursNow), open = hs.filter((h) => h.open).length, shut = hs.length - open;
-  const holiday = holidayToday(cleanCalendar(world.info?.cal));
+  const holiday = shops.length ? dayFor(shops[0]).holiday : holidayToday(cleanCalendar(world.info?.cal)); // the town's own holidays count
   return el('p', { class: 'small muted shops-open-now' }, `🕰 ${hhmm(world.info.clock.minutes)}: ${open} open, ${shut} shut`,
     shut ? (holiday && hs.some((h) => !h.open && h.text.endsWith(holiday)) ? ` (shut for ${holiday})` : (world.info.clock.minutes >= 20 * 60 || world.info.clock.minutes < 6 * 60) ? ' (for the night)' : '') : '', '.');
 }
