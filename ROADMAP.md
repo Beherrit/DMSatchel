@@ -866,7 +866,7 @@ to the log at the bottom.
 486. [x] **Holidays in the palette.** Ctrl+K "holidays" lists the coming holidays, the party's town's own included.
 487. [x] **Holidays on the map.** A settlement's map pin says when its next holiday is (today, or in how many days).
 488. [x] **The week ahead in prep.** Prep's week-ahead weather marks holidays and market days in the party's town.
-489. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
+489. [x] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 490. [x] **What happens on the day.** A local holiday line can say what happens ("Founding Day, 5 Thawmoon 841 — a
     parade and a bonfire"), shown on the town's festival card and the calendar.
 491. [x] **Market stalls.** On market day, a settlement's Market tab lists a few travelling stalls and what they
@@ -1465,3 +1465,4 @@ to the log at the bottom.
 - Craft it: that wish has a "Craft it" button that opens the downtime form for the character, set to Crafting with the item filled in and its estimate showing.
 - What these tools could make: a character's page names the artisan's tools in their pack and a few things each could make, cheapest first ("🔨 With Smith’s tools, Ann could make Darts (10), Sickle, Dagger… and 23 more").
 - Done about: an open downtime activity with days still to go says when it should be finished on the in-world calendar ("done about 9 Thawmoon 1040"), on the downtime page and the character's page.
+- A full sweep (#489): all 511 browser tests clean against sweep #481, first time through.
