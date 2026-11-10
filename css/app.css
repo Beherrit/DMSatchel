@@ -1826,3 +1826,8 @@ details.quest-group > summary .section-title { display: inline }
 .map-night { margin: 4px 0 }
 /* Only where people are (#460) */
 .pin.empty { opacity: .3 } .pin.empty:hover, .pin.empty:focus-visible { opacity: 1 }
+/* Market stalls: long goods lists and option labels wrap on a phone instead of widening the page. */
+.market-stalls { min-width: 0; max-width: 100%; overflow-wrap: anywhere; grid-template-columns: minmax(0, 1fr) }
+.market-stalls .entry-head { flex-wrap: wrap; gap: 6px }
+.stall-buy .controls { display: flex; flex-wrap: wrap; gap: 6px; align-items: center }
+.stall-buy select { max-width: 100%; min-width: 0 }

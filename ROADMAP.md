@@ -892,7 +892,7 @@ to the log at the bottom.
 507. [x] **Busiest taverns.** The numbers page ranks taverns by the party's orders there.
 508. [x] **A shop's best sellers.** A shop's page lists what the party buys there most.
 509. [x] **Copy the shopping.** What the party bought can be copied as plain text.
-510. [ ] **Phone check.** The week in town, the market stalls and their buy form, and the calendar's town picker fit
+510. [x] **Phone check.** The week in town, the market stalls and their buy form, and the calendar's town picker fit
     a phone screen without sideways scrolling.
 511. [ ] **When the stalls pack up.** The stalls card says how long the stalls are up by the world's clock, or that
     they're packed away.
@@ -1412,3 +1412,4 @@ to the log at the bottom.
 - Busiest taverns: the numbers page ranks taverns by the party's orders there ("The Bell 3 orders").
 - A shop's best sellers: a shop's page lists what the party buys there most ("📦 Sells most: Nails (3), Rope (1)").
 - Copy the shopping: "What the party bought" on the party page has Copy as text, a dated list of the latest purchases.
+- Phone check: at 375px the town's week, the calendar's town picker and the party page fit; the market stalls card no longer pushed the page sideways (its grid column now shrinks, and the buy form's controls wrap).
