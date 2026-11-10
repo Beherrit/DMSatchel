@@ -941,7 +941,7 @@ to the log at the bottom.
 546. [x] **Accessibility check.** The newer pages and forms (market stalls and their buy form, crafting downtime, the
     party's orders, the calendar's town picker, the numbers page) pass an automated WCAG A/AA check, light and dark.
 547. [x] **Phone check, again.** The crafting form, the orders editor and the party page's new sections fit a phone.
-548. [ ] **A big party page.** The party page stays quick in a big world (hundreds of entries, long logs).
+548. [x] **A big party page.** The party page stays quick in a big world (hundreds of entries, long logs).
 549. [ ] **Print check.** The printable GM sheet's new blocks (stalls, the week, orders) print cleanly.
 
 ## Ideas parking lot
@@ -1500,3 +1500,4 @@ to the log at the bottom.
 - A full sweep (#545): all 523 browser tests clean against sweep #493, first time through (covering downtime, marching order and watches).
 - Accessibility check: axe (WCAG A/AA) over the Market tab with the stalls' buy form open, a town's week, the crafting downtime form, the party page with every new section and the orders editors open, the calendar, the numbers page, a character and a shop: clean in light; in dark the downtime "Waiting for a GM" tag was white on light gold (2.2:1) and now uses the page colour on gold.
 - Phone check, again: at 375px the crafting form (with an estimate), the party page with every new section open and a character's page fit without sideways scrolling; the orders editor's ↑ ↓ buttons are now 40×36 on a phone (they were 29×26), with the order numbers kept.
+- A big party page: in a test world of 2,590 entries (2,000 NPCs, 150 sessions, 80 characters with full 30-line logs and wish lists, 40 towns with shops) the party page renders in 50–120 ms, and the other pages the recent work touched stay under 200 ms warm (prep about 170 ms, 334 ms cold; the GM sheet about 160 ms; a town's page 60–150 ms); nothing needed speeding up.
