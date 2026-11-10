@@ -36,3 +36,15 @@ test('customersAt: who bought at a place, by name, not a place with a longer nam
   assert.deepEqual(customersAt([c1, c2], 'The Bell Tower').map((x) => [x.who.name, x.count]), [['Ann', 1]]);
   assert.deepEqual(customersAt([c1], ''), []);
 });
+
+test('placeOf, spots and goodsAt: where the party buys, and what', async () => {
+  const { placeOf, spots, goodsAt, purchases: ps } = await import('../js/purchases.js');
+  assert.equal(placeOf('Bought Rope at Smithy for 1 gp'), 'Smithy');
+  assert.equal(placeOf('Put Stew on the party’s tab at The Bell (5 cp)'), 'The Bell');
+  assert.equal(placeOf('Bought Candles at the candle and lamp stall in Brindle market for 9 cp'), 'the candle and lamp stall in Brindle market');
+  assert.equal(placeOf('Got 5 gp'), '');
+  const c = ch('a', 'Ann', [{ at: '1', text: 'Ordered Pale ale at The Bell for 4 cp', cp: -4, items: [{ name: 'Pale ale', qty: 1 }] }, { at: '2', text: 'Ordered Stew at The Crow for 5 cp', cp: -5 }, { at: '3', text: 'Ordered 2 × Pale ale at The Bell for 8 cp', cp: -8, items: [{ name: 'Pale ale', qty: 2 }] }, { at: '4', text: 'Bought Rope at Smithy for 1 gp', cp: -100, items: [{ name: 'Rope', qty: 1 }] }]);
+  assert.deepEqual(spots(ps([c]), 'tavern').map((x) => [x.place, x.count]), [['The Bell', 2], ['The Crow', 1]]);
+  assert.deepEqual(spots(ps([c]), 'shop').map((x) => [x.place, x.count]), [['Smithy', 1]]);
+  assert.deepEqual(goodsAt([c], 'The Bell'), [{ name: 'Pale ale', qty: 3, times: 2 }]);
+});

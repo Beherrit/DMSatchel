@@ -100,7 +100,7 @@ import { startCard, markPartySeen } from './onboarding.js';
 import { viewCalendar, worldCalendar, todayText, onThisDayCard } from './world-calendar.js';
 import { parseDate, toDays, yearLength, parseHolidayLines } from './calendar.js';
 import { nextShut } from './week-in-town.js';
-import { customersAt } from './purchases.js';
+import { customersAt, purchases, spots } from './purchases.js';
 import { coinText } from './economy.js';
 import { sheetSection } from './sheet-ui.js';
 import { pictureField, figure, thumb } from './image-ui.js';
@@ -419,7 +419,7 @@ function viewEntry(id, tab) {
       e.summary ? el('p', { class: 'lede' }, richInline(e.summary)) : null,
       fieldRows.length ? el('dl', { class: 'traits' }, fieldRows.flatMap(([l, v, type]) => [el('dt', {}, l), el('dd', {}, type === 'long' ? richText(v) : /^https:\/\/\S+$/.test(v) ? el('a', { href: v, target: '_blank', rel: 'noopener' }, /dndbeyond\.com/.test(v) ? 'Open on D&D Beyond ↗' : 'Open link ↗') : el('span', {}, v))])) : null),
     sinceLastCard(e), comingUpCard(e),
-    routineNow(e), patronLine(e), membersNowCard(e), crossPathsLine(e), mindingLine(e), ownerDayLine(e), festivalLine(e), marketDayLine(e), weekInTownBox(e), openNowLine(e), wantedCard(e), hereNow(e), laterLine(e), regularsLine(e), busiestLine(e), townHoursBox(e), townPreviewBox(e), turnUpBox(e), rollTownButton(e, rerenderWorld),
+    routineNow(e), patronLine(e), hauntsLine(e), membersNowCard(e), crossPathsLine(e), mindingLine(e), ownerDayLine(e), festivalLine(e), marketDayLine(e), weekInTownBox(e), openNowLine(e), wantedCard(e), hereNow(e), laterLine(e), regularsLine(e), busiestLine(e), townHoursBox(e), townPreviewBox(e), turnUpBox(e), rollTownButton(e, rerenderWorld),
     e.kind === 'npc' || e.fields?.stats || e.fields?.spells ? statSection(e) : null,
     e.kind === 'clan' ? clanTree(e, rerenderWorld) : null,
     e.kind === 'npc' || e.kind === 'character' ? familySection(e, rerenderWorld) : null,
@@ -625,6 +625,16 @@ function placeSummary(e) {
 }
 
 // ---- editing -----------------------------------------------------------------------------------
+
+// Favourite haunts: on a character's page, the tavern they order at most and the shop they buy from most (from their log).
+function hauntsLine(c) {
+  if (c.kind !== 'character') return null;
+  const ps = purchases([c]), inn = spots(ps, 'tavern')[0], shop = spots(ps, 'shop')[0];
+  if (!inn && !shop) return null;
+  const place = (x) => { const e = findByName(x.place); return e ? link(e) : x.place; };
+  return el('p', { class: 'small haunts-line' }, inn ? ['🍺 Usually orders at ', place(inn), el('span', { class: 'muted' }, ` (${inn.count}×)`)] : null, inn && shop ? ' · ' : null,
+    shop ? ['🛍 Buys most at ', place(shop), el('span', { class: 'muted' }, ` (${shop.count}×)`)] : null);
+}
 
 // Customers: who buys here most (a shop's best customers, or a tavern's regulars at the bar), from the characters' logs.
 function customersLine(place, kind) {
