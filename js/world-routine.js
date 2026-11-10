@@ -412,3 +412,18 @@ export function membersNowCard(org) {
   return el('section', { class: 'card members-now', 'aria-label': 'Members about now' }, el('h3', {}, `🕰 Members about now (${hhmm(now())})`),
     el('ul', { class: 'plain' }, rows.slice(0, 20).map(({ npc, w }) => el('li', {}, link(npc), whereBits(w)))));
 }
+
+// A town at another hour: preview who's about and what's open at another hour, without moving the world's clock.
+export function townPreviewBox(town) {
+  if (town.kind !== 'settlement' || now() === null) return null;
+  const out = el('div', { class: 'town-preview-out', 'aria-live': 'polite' });
+  const label = el('span', { class: 'small' });
+  const slider = el('input', { type: 'range', min: '0', max: '23', step: '1', value: String(Math.floor(now() / 60) % 24), 'aria-label': `See ${town.name} at another hour` });
+  const draw = () => { const h = Number(slider.value); label.textContent = `${String(h).padStart(2, '0')}:00`; setKids(out, atMinutes(h * 60, () => [hereNow(town), openNowLine(town, true)].filter(Boolean)) || []); if (!out.children.length) out.append(el('p', { class: 'muted small' }, 'Nobody about, and nothing open.'));
+    // It's a preview, not now: "About town at 18:00", "Open at 18:00".
+    for (const p of out.querySelectorAll('p')) { const t = p.firstChild; if (t?.nodeType === 3) t.textContent = t.textContent.replace(/About town now \((\d\d:\d\d)\)/, 'About town at $1').replace(/Open now in (.+?) \((\d\d:\d\d)\)/, 'Open in $1 at $2'); } };
+  slider.addEventListener('input', draw);
+  const box = el('details', { class: 'town-preview' }, el('summary', { class: 'small' }, `See ${town.name} at another hour`), el('label', { class: 'map-hour' }, '🕰 ', slider, ' ', label), out);
+  box.addEventListener('toggle', () => { if (box.open) draw(); });
+  return box;
+}
