@@ -817,7 +817,7 @@ to the log at the bottom.
 448. [x] **New last time, in prep.** Session prep's "Last time" card names who and what was new in it.
 449. [x] **New on the cast list.** Who's who marks the people first met in the latest session.
 450. [x] **Sessions here.** A place's map pin popup lists the sessions whose log mentions it.
-451. [ ] **How many are here.** A map pin shows a small count of the people the routines put there right now.
+451. [x] **How many are here.** A map pin shows a small count of the people the routines put there right now.
 452. [ ] **Wanted, at a glance.** A map pin where someone wanted is right now gets a 🎯 mark.
 453. [ ] **Find a person on the map.** The map's "Find a pin" also finds NPCs by name and points to the pin where they
     are now.
@@ -1278,3 +1278,4 @@ to the log at the bottom.
 - New last time, in prep: session prep's "Last time" card names "✨ New last time: Bo, The Market".
 - New on the cast list: Who's who tags the people first met in the latest session "✨ new".
 - Sessions here: a place's map pin popup lists "📜 In 2 session logs: Session 2, Session 1", newest first (six, then "and N more").
+- How many are here: a map pin for a place shows a small count of the people the routines put there (or somewhere inside it) right now, and says it in its label for screen readers ("The Bell, 2 here now").

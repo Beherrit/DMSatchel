@@ -1810,3 +1810,5 @@ details.quest-group > summary .section-title { display: inline }
 .first-met { display: block; margin-top: 2px }
 .edge.together { stroke-dasharray: 6 3; opacity: .5 }
 .first-log { display: block; margin-top: 2px }
+/* How many are here (#451) */
+.pin-count { position: absolute; top: -6px; right: -8px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; background: var(--accent, #555); color: #fff; font-size: 10px; line-height: 16px; text-align: center; pointer-events: none }
