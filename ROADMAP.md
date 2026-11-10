@@ -933,6 +933,11 @@ to the log at the bottom.
 539. [x] **Watch order.** GMs set who keeps watch in the night; the party page shows each watch's hours.
 540. [x] **Orders on the sheet.** The printable GM sheet lists the marching order and the night's watches.
 541. [x] **Whose watch is it?** At night the clock card says whose watch it is now.
+542. [ ] **Watches at camp.** Making camp shows the night's watches from the time camp is made, and when trouble comes,
+    about when and on whose watch.
+543. [ ] **Marching order on the map.** The party's marker on a map shows the marching order.
+544. [ ] **Copy the orders.** The marching order and watches can be copied as plain text.
+545. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 
 ## Ideas parking lot
 
