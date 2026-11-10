@@ -898,6 +898,11 @@ to the log at the bottom.
     they're packed away.
 512. [x] **The keeper at their stall.** A stall whose keeper was made an NPC links to them.
 513. [x] **Stalls in the palette.** Ctrl+K "stalls" lists today's market stalls and their goods.
+514. [ ] **The stall total.** The buy-from-a-stall form shows the total and the character's purse before paying, like
+    a shop's.
+515. [ ] **A tavern's favourites.** A tavern's page lists what the party orders there most.
+516. [ ] **Wishlists.** A character can keep a wishlist (one item per line).
+517. [ ] **Someone wants this.** Shops and market stalls mark goods on a character's wishlist ("⭐ Ann wants this").
 
 ## Ideas parking lot
 
