@@ -856,7 +856,7 @@ to the log at the bottom.
     shut, and they show in its week and on the calendar when the party is there.
 479. [x] **The week on the party page.** Players can fold out the week in the party's town on the party page.
 480. [x] **Days off on the Market tab.** A settlement's Market tab says each shop's weekly day off by its hours.
-481. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
+481. [x] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 482. [x] **Local holidays everywhere.** The party's town's own holidays also count in "Coming up", on the GM sheet,
     and for tavern festival prices.
 483. [x] **Check the local holidays.** Saving a settlement warns about local holiday lines the calendar can't read.
@@ -919,7 +919,7 @@ to the log at the bottom.
     longsword, leatherworker's tools for leather armor…).
 527. [x] **Got the tools?** The estimate checks the crafter's pack for those tools and says if they're missing.
 528. [x] **Pay for the materials.** A GM can take the raw materials' cost from the crafter's purse in one click.
-529. [ ] **What the party has made.** The numbers page lists what the party has crafted.
+529. [x] **What the party has made.** The numbers page lists what the party has crafted.
 
 ## Ideas parking lot
 
@@ -1455,3 +1455,5 @@ to the log at the bottom.
 - The right tools: the crafting estimate and the activity name the artisan's tools an item is usually made with ("Usually made with Smith’s tools"; woodcarver's for bows, leatherworker's for leather armor, weaver's for padded armor and rope, tinker's for lanterns and locks…).
 - Got the tools?: the crafting estimate checks the chosen character's pack for the tools and warns when they're missing ("⚠ Ann’s pack has no Smith’s tools.").
 - Pay for the materials: a crafting activity's GM box has "Take 7 gp 5 sp for materials from Ann", which takes the raw materials' cost from the purse (logged), refuses when they can't afford it, and marks it paid (GM-only) so it's only taken once.
+- What the party has made: the numbers page lists finished crafting ("🔨 Hooded lantern by Bo"), newest first.
+- A full sweep (#481): all 503 browser tests clean against sweep #469 (a block cut off when the preview server died, and a few load timeouts, pass on rerun; the new t-stallsame prints its own pass line).

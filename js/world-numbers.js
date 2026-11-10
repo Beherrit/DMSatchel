@@ -53,6 +53,10 @@ export function viewNumbers() {
       ranked('Most-bought goods', topGoods(worldEntries().filter((c) => c.kind === 'character')).slice(0, 8).map((g) => [g.name, g]), (g) => `bought ${g.times === 1 ? 'once' : g.times === 2 ? 'twice' : `${g.times} times`}${g.qty !== g.times ? ` (${g.qty} in all)` : ''}`),
       // Busiest taverns: the party's orders at each tavern (from the characters' logs), linked when it's in the world.
       ranked('Busiest taverns', spots(purchases(worldEntries().filter((c) => c.kind === 'character')), 'tavern').slice(0, 8).map((x) => [findByName(x.place) || x.place, x]), (x) => plural(x.count, 'order')),
+      // What the party has made: crafting downtime that's done (resolved, or the item handed over), newest first.
+      (() => { const made = worldEntries().filter((d) => d.kind === 'downtime' && d.fields?.craft && (d.fields.resolved || d.fields.handed)).sort((a, b) => String(b.fields.resolved || b.updated_at).localeCompare(String(a.fields.resolved || a.updated_at)));
+        return made.length ? el('section', { class: 'card num-card crafted' }, el('h3', {}, `What the party has made (${made.length})`),
+          el('ul', { class: 'num-list plain-list' }, made.slice(0, 10).map((d) => { const c = getEntry(d.fields.character); return el('li', {}, `🔨 ${d.fields.craft}`, el('span', { class: 'muted small' }, ' by '), c ? link(c) : 'someone'); }))) : null; })(),
       ranked('Busiest places', s.busiestPlaces, (n) => `${n} inside`),
       ranked('Who has written the most', s.writers, (n) => plural(n, 'entry', 'entries')),
       el('section', { class: 'card num-card' }, el('h3', {}, 'Records'),
