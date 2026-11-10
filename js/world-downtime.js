@@ -10,6 +10,9 @@ import { formatDate, fromDays, toDays, today } from './calendar.js';
 import { GOODS, coinText, parseCoins } from './economy.js';
 import { craftEstimate, hasTools } from './crafting.js';
 import { changePlay, playOf } from './sheet-ui.js';
+import { makeRng } from './rng.js';
+import { personName, ANCESTRY_WEIGHTS } from './names.js';
+import { partyTown } from './world-routine.js';
 import { giveItem } from './handover.js';
 
 const ACTIVE = (e) => !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
@@ -62,7 +65,13 @@ function resolveBox(d, after) {
       toast(`${coinText(owed)} taken from ${ch.name}’s purse`); after();
     } catch (err) { toast(err.message, 'bad'); }
   } }, written > 0 ? `Take ${coinText(owed)} from ${ch.name}` : `Take ${coinText(owed)} for materials from ${ch.name}`) : f.paid && owed > 0 ? el('span', { class: 'muted small' }, written > 0 ? '✓ Paid' : '✓ Materials paid') : null;
-  return el('div', { class: 'downtime-resolve' }, text, el('div', { class: 'btnrow' }, el('button', { class: 'btn small primary', type: 'button', onclick: save }, d.fields?.resolved ? 'Update outcome' : 'Resolve'), pay, hand));
+  // A new contact: carousing or building contacts can start an NPC who knows the character, in the party's town.
+  const contact = ch && ['Carousing', 'Building contacts'].includes(f.activity) ? el('button', { class: 'btn small ghost dt-contact', type: 'button', onclick: () => {
+    const r = makeRng(`contact:${d.id}`), ancestry = r.pickW(ANCESTRY_WEIGHTS), town = (() => { try { const t = partyTown(); return t?.kind === 'settlement' ? t : null; } catch { return null; } })();
+    window.dispatchEvent(new CustomEvent('world:draft', { detail: { kind: 'npc', name: personName(r, ancestry), ...(town ? { parent_id: town.id } : {}),
+      summary: `A contact [[${ch.name}]] made while ${f.activity === 'Carousing' ? 'carousing' : 'building contacts'}${town ? ` in ${town.name}` : ''}.`, fields: { ancestry, status: 'Alive' } } }));
+  } }, 'Start a new contact') : null;
+  return el('div', { class: 'downtime-resolve' }, text, el('div', { class: 'btnrow' }, el('button', { class: 'btn small primary', type: 'button', onclick: save }, d.fields?.resolved ? 'Update outcome' : 'Resolve'), pay, hand, contact));
 }
 
 // Craft it: a wish (or anything) can open the form ready to file crafting: setCraftPreset(characterId, item), then go
