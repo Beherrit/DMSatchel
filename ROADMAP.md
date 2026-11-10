@@ -940,7 +940,7 @@ to the log at the bottom.
 545. [x] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 546. [x] **Accessibility check.** The newer pages and forms (market stalls and their buy form, crafting downtime, the
     party's orders, the calendar's town picker, the numbers page) pass an automated WCAG A/AA check, light and dark.
-547. [ ] **Phone check, again.** The crafting form, the orders editor and the party page's new sections fit a phone.
+547. [x] **Phone check, again.** The crafting form, the orders editor and the party page's new sections fit a phone.
 548. [ ] **A big party page.** The party page stays quick in a big world (hundreds of entries, long logs).
 549. [ ] **Print check.** The printable GM sheet's new blocks (stalls, the week, orders) print cleanly.
 
@@ -1499,3 +1499,4 @@ to the log at the bottom.
 - Copy the orders: "Marching and watches" has Copy as text ("Marching order (front to back): Bo, Ann" / "Watches: 22:00–02:00 Ann; 02:00–06:00 Bo").
 - A full sweep (#545): all 523 browser tests clean against sweep #493, first time through (covering downtime, marching order and watches).
 - Accessibility check: axe (WCAG A/AA) over the Market tab with the stalls' buy form open, a town's week, the crafting downtime form, the party page with every new section and the orders editors open, the calendar, the numbers page, a character and a shop: clean in light; in dark the downtime "Waiting for a GM" tag was white on light gold (2.2:1) and now uses the page colour on gold.
+- Phone check, again: at 375px the crafting form (with an estimate), the party page with every new section open and a character's page fit without sideways scrolling; the orders editor's ↑ ↓ buttons are now 40×36 on a phone (they were 29×26), with the order numbers kept.
