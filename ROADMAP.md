@@ -819,7 +819,7 @@ to the log at the bottom.
 450. [x] **Sessions here.** A place's map pin popup lists the sessions whose log mentions it.
 451. [x] **How many are here.** A map pin shows a small count of the people the routines put there right now.
 452. [x] **Wanted, at a glance.** A map pin where someone wanted is right now gets a 🎯 mark.
-453. [ ] **Find a person on the map.** The map's "Find a pin" also finds NPCs by name and points to the pin where they
+453. [x] **Find a person on the map.** The map's "Find a pin" also finds NPCs by name and points to the pin where they
     are now.
 
 ## Ideas parking lot
@@ -1281,3 +1281,4 @@ to the log at the bottom.
 - How many are here: a map pin for a place shows a small count of the people the routines put there (or somewhere inside it) right now, and says it in its label for screen readers ("The Bell, 2 here now").
 - A full sweep: all 440 browser tests rerun; no crashes or page errors, and the same flags as the last sweep (the deliberate error-path 400s).
 - Wanted, at a glance: a map pin where someone with an open bounty is right now gets a small 🎯 mark, and says "someone wanted is here" in its label.
+- Find a person on the map: the map's "Find a pin" box also finds NPCs by name: "🕰 Bram at Back room (The Bell)", pointing to the pin for where their routine has them now (or the nearest place around it with a pin); clicking it centres the map there and opens the pin.

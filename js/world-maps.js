@@ -8,7 +8,7 @@ import { world, worldEntries, getEntry, findByName, mentions, link, kindLabel, n
 import { playOf, characterOf, changePlay } from './sheet-ui.js';
 import { readList, withRations } from './shopping.js';
 import { overloaded, overloadedText } from './weights.js';
-import { aroundNow, laterLine, busiestLine, ownerDayLine, routineNow } from './world-routine.js';
+import { aroundNow, laterLine, busiestLine, ownerDayLine, routineNow, whereNow } from './world-routine.js';
 import { openText, holidayToday, untilChange } from './shop-hours.js';
 import { festivalSpecial } from './menu.js';
 import { openBounties } from './bounty.js';
@@ -452,9 +452,16 @@ export async function viewMap(id, focusPin) {
     }));
     drawHoldKey();
     const shown = pins.filter((p) => !q || `${p.label} ${getEntry(p.entry_id)?.name || ''}`.toLowerCase().includes(q)).sort((a, b) => String(a.label).localeCompare(String(b.label)));
-    setKids(list, ...(shown.length ? shown.map((p) => el('li', {}, el('button', { class: 'linkish', type: 'button', onclick: () => { centerOn(p); showPin(p); } },
+    // Find a person on the map: NPCs whose name matches, and the pin where their routine has them now (their place, or
+    // the nearest place around it that has a pin on this map).
+    const pinOf = (place) => { for (let x = place, i = 0; x && i < 12; x = x.parent_id && getEntry(x.parent_id), i++) { const hit = pins.find((pp) => pp.entry_id === x.id); if (hit) return hit; } return null; };
+    const people = q.length >= 2 ? worldEntries().filter((e) => e.kind === 'npc' && e.name.toLowerCase().includes(q)).map((e) => ({ e, w: whereNow(e) }))
+      .map((x) => ({ ...x, pin: x.w && !x.w.party && typeof x.w.place !== 'string' ? pinOf(x.w.place) : null })).filter((x) => x.pin).slice(0, 8) : [];
+    const personRows = people.map(({ e, w, pin }) => el('li', { class: 'pin-person' }, el('button', { class: 'linkish', type: 'button', onclick: () => { centerOn(pin); showPin(pin); } },
+      '🕰 ', e.name, el('span', { class: 'muted small' }, ` at ${w.place.name}${w.place.id === pin.entry_id ? '' : ` (${pin.label})`}`))));
+    setKids(list, ...personRows, ...(shown.length ? shown.map((p) => el('li', {}, el('button', { class: 'linkish', type: 'button', onclick: () => { centerOn(p); showPin(p); } },
       el('span', { class: `glyph pin-${p.icon || 'poi'}` }, PIN_ICONS[p.icon || 'poi'][1]), ' ', p.label), p.secret ? el('span', { class: 'tag' }, 'GM') : null))
-      : [el('li', { class: 'muted small' }, pins.length ? 'No pins match.' : 'No pins yet.')]));
+      : personRows.length ? [] : [el('li', { class: 'muted small' }, pins.length ? 'No pins match.' : 'No pins yet.')]));
     drawMine(); drawJourney();
   }
   filter.addEventListener('input', renderPins);
