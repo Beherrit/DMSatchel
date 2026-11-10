@@ -42,6 +42,7 @@ import { itemsNamed } from './play-cards.js';
 import { sceneFor } from './world-scene.js';
 import { openNowLine, partyTown, weekInTownBox, todaysStalls } from './world-routine.js';
 import { nextMarket, inDaysText } from './week-in-town.js';
+import { purchases } from './purchases.js';
 import { cleanCalendar, withLocal } from './calendar.js';
 
 // GMs: every active character in one table: hit points (flagged in words when low or down), coin, days of rations,
@@ -387,6 +388,9 @@ export async function viewParty(rerender) {
       (() => { const t = partyTown(), ss = todaysStalls(t); return ss.length ? el('details', { class: 'party-stalls' }, el('summary', {}, `🧺 Market stalls in ${t.name} today (${ss.length})`),
         el('ul', { class: 'plain small' }, ss.map((st) => el('li', {}, el('strong', {}, st.name), ': ', st.goods.map((g) => `${g.name} ${g.price}`).join(', ')))),
         el('a', { class: 'small', href: `#world/e/${t.id}/market` }, 'Buy from the stalls →')) : null; })(),
+      // What the party bought: the latest purchases from shops, stalls and taverns, from the characters' logs.
+      (() => { const ps = purchases(worldEntries().filter((c) => c.kind === 'character')); return ps.length ? el('details', { class: 'party-bought' }, el('summary', {}, `🛒 What the party bought (${ps.length})`),
+        el('ul', { class: 'plain small' }, ps.slice(0, 12).map((x) => el('li', {}, link(x.who), `: ${x.text}`, el('span', { class: 'muted' }, ` · ${when(x.at)}`))))) : null; })(),
       // The week on the party page: the coming week in the party's town, folded away.
       (() => { const t = partyTown(); return t ? weekInTownBox(t) : null; })(),
       // Last session, for players: which it was and who and what came up in it.
