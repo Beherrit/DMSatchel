@@ -920,6 +920,10 @@ to the log at the bottom.
 527. [x] **Got the tools?** The estimate checks the crafter's pack for those tools and says if they're missing.
 528. [x] **Pay for the materials.** A GM can take the raw materials' cost from the crafter's purse in one click.
 529. [x] **What the party has made.** The numbers page lists what the party has crafted.
+530. [ ] **Could be crafted.** A wish for something on the price list says what crafting it would take.
+531. [ ] **Craft it.** A craftable wish has a "Craft it" button that opens the downtime form ready to file.
+532. [ ] **What these tools could make.** A character's page says what the artisan's tools in their pack can make.
+533. [ ] **Done about.** An open crafting activity says about when it will be finished on the in-world calendar.
 
 ## Ideas parking lot
 
