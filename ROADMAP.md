@@ -818,7 +818,7 @@ to the log at the bottom.
 449. [x] **New on the cast list.** Who's who marks the people first met in the latest session.
 450. [x] **Sessions here.** A place's map pin popup lists the sessions whose log mentions it.
 451. [x] **How many are here.** A map pin shows a small count of the people the routines put there right now.
-452. [ ] **Wanted, at a glance.** A map pin where someone wanted is right now gets a 🎯 mark.
+452. [x] **Wanted, at a glance.** A map pin where someone wanted is right now gets a 🎯 mark.
 453. [ ] **Find a person on the map.** The map's "Find a pin" also finds NPCs by name and points to the pin where they
     are now.
 
@@ -1280,3 +1280,4 @@ to the log at the bottom.
 - Sessions here: a place's map pin popup lists "📜 In 2 session logs: Session 2, Session 1", newest first (six, then "and N more").
 - How many are here: a map pin for a place shows a small count of the people the routines put there (or somewhere inside it) right now, and says it in its label for screen readers ("The Bell, 2 here now").
 - A full sweep: all 440 browser tests rerun; no crashes or page errors, and the same flags as the last sweep (the deliberate error-path 400s).
+- Wanted, at a glance: a map pin where someone with an open bounty is right now gets a small 🎯 mark, and says "someone wanted is here" in its label.

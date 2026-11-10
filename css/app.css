@@ -1812,3 +1812,4 @@ details.quest-group > summary .section-title { display: inline }
 .first-log { display: block; margin-top: 2px }
 /* How many are here (#451) */
 .pin-count { position: absolute; top: -6px; right: -8px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; background: var(--accent, #555); color: #fff; font-size: 10px; line-height: 16px; text-align: center; pointer-events: none }
+.pin-wanted-mark { position: absolute; bottom: -8px; right: -8px; font-size: 12px; pointer-events: none }

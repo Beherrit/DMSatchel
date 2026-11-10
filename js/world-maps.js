@@ -14,6 +14,9 @@ import { festivalSpecial } from './menu.js';
 import { openBounties } from './bounty.js';
 import { coinText } from './economy.js';
 
+// Wanted, at a glance: the NPCs with an open bounty (worked out once per drawing of the pins).
+let wantedIds = new Set();
+
 // Open or shut on the map: a shop's (or tavern's) hours by the world's clock and today's holiday, or null.
 const hoursOf = (entry) => (entry && (entry.fields?.stock || entry.fields?.menu) && world.info?.clock?.minutes !== undefined
   ? openText(entry, world.info.clock.minutes, dayFor(entry)) : null);
@@ -430,18 +433,22 @@ export async function viewMap(id, focusPin) {
         'aria-label': `The party is ${at.exact ? `here, in ${place.name}` : `in ${place.name}, in ${at.pin.label}`}. ${said}`, onclick: (ev) => { ev.stopPropagation(); showPin(at.pin); } },
         el('span', { class: 'glyph', 'aria-hidden': 'true' }, '⚑'), el('span', { class: 'pin-label' }, at.exact ? 'The party' : `The party (${place.name})`, sky ? el('span', { class: 'party-weather', 'aria-hidden': 'true' }, ` ${sky}`) : null))];
     })(),
+    ...(() => { wantedIds = new Set(openBounties(worldEntries()).map((b) => b.entry.id)); return []; })(),
     ...pins.map((p) => {
       const held = holdsOn && p.entry_id && hold.get(p.entry_id);
       const slot = held ? slots.get(held.by.id) ?? -1 : null;
       const hours = hoursOf(p.entry_id && getEntry(p.entry_id));
       // How many are here: the people the routines put at this place (or inside it) right now.
-      const pe = p.entry_id && getEntry(p.entry_id), here = pe && PLACE_KINDS.includes(pe.kind) ? aroundNow(pe)?.list.length || 0 : 0;
-      const said = `${p.label}${hours ? ` (${hours.text})` : ''}${here ? `, ${here} here now` : ''}`;
+      const pe = p.entry_id && getEntry(p.entry_id), around = pe && PLACE_KINDS.includes(pe.kind) ? aroundNow(pe)?.list || [] : [], here = around.length;
+      // Wanted, at a glance: someone with an open bounty is here right now.
+      const hunted = around.some((x) => wantedIds.has(x.npc.entry.id));
+      const said = `${p.label}${hours ? ` (${hours.text})` : ''}${here ? `, ${here} here now` : ''}${hunted ? ', someone wanted is here' : ''}`;
       return el('button', {
         class: `pin pin-${p.icon || 'poi'}${p.secret ? ' secret' : ''}${hours && !hours.open ? ' shut' : ''}${p.entry_id && mapsOf(p.entry_id).some((m) => m.id !== map.id) ? ' has-map' : ''}${held ? ` held hold-${slot < 0 ? 'other' : slot}` : ''}`, type: 'button', 'data-id': p.id, style: `left:${p.x * 100}%;top:${p.y * 100}%`,
         title: held ? `${said}: held by ${held.by.name}` : said, 'aria-label': held ? `${said}, held by ${held.by.name}` : said, onclick: (ev) => { ev.stopPropagation(); showPin(p); },
       }, el('span', { class: 'glyph', 'aria-hidden': 'true' }, PIN_ICONS[p.icon || 'poi'][1]), el('span', { class: 'pin-label' }, p.label),
-        here ? el('span', { class: 'pin-count', 'aria-hidden': 'true' }, String(here)) : null);
+        here ? el('span', { class: 'pin-count', 'aria-hidden': 'true' }, String(here)) : null,
+        hunted ? el('span', { class: 'pin-wanted-mark', 'aria-hidden': 'true' }, '🎯') : null);
     }));
     drawHoldKey();
     const shown = pins.filter((p) => !q || `${p.label} ${getEntry(p.entry_id)?.name || ''}`.toLowerCase().includes(q)).sort((a, b) => String(a.label).localeCompare(String(b.label)));
