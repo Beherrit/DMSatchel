@@ -863,6 +863,10 @@ to the log at the bottom.
 484. [x] **Which town's holidays.** The calendar can show another town's local holidays, not just the party's town's.
 485. [x] **The 200th Founding Day.** A local holiday written with a year counts its anniversaries ("the 200th Founding
     Day").
+486. [ ] **Holidays in the palette.** Ctrl+K "holidays" lists the coming holidays, the party's town's own included.
+487. [ ] **Holidays on the map.** A settlement's map pin says when its next holiday is (today, or in how many days).
+488. [ ] **The week ahead in prep.** Prep's week-ahead weather marks holidays and market days in the party's town.
+489. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 
 ## Ideas parking lot
 
