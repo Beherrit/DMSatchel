@@ -365,7 +365,10 @@ export function townWeek(town) {
   if (town?.kind !== 'settlement') return null;
   const cal = cleanCalendar(world.info?.cal);
   if (!cal) return null;
-  const week = weekInTown(cal, town, townShops(town));
+  // Who lives there: the town's people (anywhere inside it), for their birthdays.
+  const inside = (p) => { for (let x = p, i = 0; x && i < 12; x = x.parent_id && getEntry(x.parent_id), i++) if (x.id === town.id) return true; return false; };
+  const people = worldEntries().filter((x) => x.kind === 'npc' && x.fields?.born && inside(x));
+  const week = weekInTown(cal, town, townShops(town), 7, people);
   if (!week.length) return null;
   return { week, label: (d) => (d.today ? 'Today' : `${d.weekday ? `${d.weekday} ` : ''}${d.date.day} ${cal.months[d.date.month].name}`) };
 }

@@ -2,16 +2,21 @@
 // taverns shut on which day (a weekly day off, or a holiday). Pure: works on a calendar, a town and its shops.
 import { toDays, fromDays, holidaysOn, weekday } from './calendar.js';
 import { shopOpen, isMarketDay } from './shop-hours.js';
+import { birthdaysBetween } from './birthdays.js';
 
 // → [{ n, date, weekday, today, holidays: [names], market (bool), noMarket (bool: market weekday, but a holiday),
 //      shut: [{ name, why: 'holiday' | 'day off' }] }], only days with something to say.
-export function weekInTown(cal, town, shops = [], days = 7) {
+// people: who lives in the town, for their birthdays ({ name, age|null } on the day's births).
+export function weekInTown(cal, town, shops = [], days = 7, people = []) {
   if (!cal || !Array.isArray(cal.months) || !cal.months.length) return [];
   const from = toDays(cal, { year: cal.year, month: cal.month, day: cal.day });
   const out = [];
+  let bdays = [];
+  try { bdays = people.length ? birthdaysBetween(cal, people, from, from + days - 1) : []; } catch { bdays = []; }
   for (let n = from; n < from + days; n++) {
-    const day = { n, ...dayInTown(cal, town, shops, fromDays(cal, n)), today: n === from };
-    if (day.holidays.length || day.market || day.noMarket || day.shut.length) out.push(day);
+    const births = bdays.filter((b) => b.n === n).map((b) => ({ name: b.entry.name, age: b.age }));
+    const day = { n, ...dayInTown(cal, town, shops, fromDays(cal, n)), today: n === from, births };
+    if (day.holidays.length || day.market || day.noMarket || day.shut.length || births.length) out.push(day);
   }
   return out;
 }
@@ -35,6 +40,7 @@ export function dayInTown(cal, town, shops, date) {
 // One line of the week: "🎉 Bridge Day · no market · shut: Smithy, Tanner".
 export function weekDayText(d) {
   const bits = [...d.holidays.map((h) => `🎉 ${h}`)];
+  for (const b of d.births || []) bits.push(`🎂 ${b.name}’s birthday${b.age !== null && b.age !== undefined ? ` (${b.age})` : ''}`);
   if (d.market) bits.push('🧺 market day');
   if (d.noMarket) bits.push('no market (holiday)');
   const off = d.shut.filter((s) => s.why === 'day off').map((s) => s.name), hol = d.shut.filter((s) => s.why === 'holiday').map((s) => s.name);

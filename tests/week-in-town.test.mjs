@@ -43,3 +43,10 @@ test('weekInTown: shops open for the holiday', () => {
   assert.deepEqual(w[0].open, ['Bakery']);
   assert.equal(weekDayText(w[0]), '🎉 Bridge Day · shut for the holiday: Smithy · open for the holiday: Bakery');
 });
+
+test('weekInTown: birthdays of the people who live there', () => {
+  const people = [{ kind: 'npc', name: 'Ada', fields: { born: '8 Thawmoon 1000' } }, { kind: 'npc', name: 'Bo', fields: { born: '20 Thawmoon' } }];
+  const w = weekInTown({ ...cal, holidays: [] }, { fields: {} }, [], 7, people);
+  assert.equal(w.length, 1); assert.deepEqual(w[0].births, [{ name: 'Ada', age: 40 }]);
+  assert.equal(weekDayText(w[0]), '🎂 Ada’s birthday (40)');
+});
