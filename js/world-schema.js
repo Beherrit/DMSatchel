@@ -96,6 +96,8 @@ export const KINDS = {
       ['craft', 'Item to craft', 'hidden'],
       // When a GM put the crafted item in the character's pack (so it isn't handed over twice).
       ['handed', 'Handed over', 'hidden', null, { gmOnly: true }],
+      // When a GM took the raw materials' cost from the crafter's purse (so it isn't taken twice).
+      ['paid', 'Materials paid', 'hidden', null, { gmOnly: true }],
       // Days that have passed on the calendar toward it (see downtime-days.js).
       ['done', 'Days done', 'hidden'],
       ['outcome', 'Outcome (from the GM)', 'long', null, { gmOnly: true }], ['resolved', 'Resolved on', 'hidden', null, { gmOnly: true }]],

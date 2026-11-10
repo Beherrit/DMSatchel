@@ -46,7 +46,16 @@ function resolveBox(d, after) {
       toast(`${f.craft} is in ${ch.name}’s pack`); after();
     } catch (err) { toast(err.message, 'bad'); }
   } }, `Put the ${f.craft} in ${ch.name}’s pack`) : f.handed ? el('span', { class: 'muted small' }, `✓ ${f.craft} handed over`) : null;
-  return el('div', { class: 'downtime-resolve' }, text, el('div', { class: 'btnrow' }, el('button', { class: 'btn small primary', type: 'button', onclick: save }, d.fields?.resolved ? 'Update outcome' : 'Resolve'), hand));
+  // Pay for the materials: the estimate's raw materials, taken from the crafter's purse (once), logged on their sheet.
+  const est = f.craft ? craftEstimate(f.craft) : null;
+  const pay = est && ch && !f.paid ? el('button', { class: 'btn small craft-pay', type: 'button', onclick: async () => {
+    try {
+      await changePlay(ch, (p) => { if ((Number(p.cp) || 0) < est.materialsCp) throw new Error(`${ch.name} has only ${coinText(Number(p.cp) || 0)}; the materials cost ${coinText(est.materialsCp)}.`); p.cp -= est.materialsCp; }, `Paid ${coinText(est.materialsCp)} for materials (${f.craft})`);
+      await patchEntry(getEntry(d.id) || d, { fields: { paid: new Date().toISOString() } });
+      toast(`${coinText(est.materialsCp)} taken from ${ch.name}’s purse`); after();
+    } catch (err) { toast(err.message, 'bad'); }
+  } }, `Take ${coinText(est.materialsCp)} for materials from ${ch.name}`) : f.paid && est ? el('span', { class: 'muted small' }, '✓ Materials paid') : null;
+  return el('div', { class: 'downtime-resolve' }, text, el('div', { class: 'btnrow' }, el('button', { class: 'btn small primary', type: 'button', onclick: save }, d.fields?.resolved ? 'Update outcome' : 'Resolve'), pay, hand));
 }
 
 function fileForm(after, preset) {

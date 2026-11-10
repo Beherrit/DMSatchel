@@ -918,7 +918,7 @@ to the log at the bottom.
 526. [x] **The right tools.** The crafting estimate names the artisan's tools the item needs (smith's tools for a
     longsword, leatherworker's tools for leather armor…).
 527. [x] **Got the tools?** The estimate checks the crafter's pack for those tools and says if they're missing.
-528. [ ] **Pay for the materials.** A GM can take the raw materials' cost from the crafter's purse in one click.
+528. [x] **Pay for the materials.** A GM can take the raw materials' cost from the crafter's purse in one click.
 529. [ ] **What the party has made.** The numbers page lists what the party has crafted.
 
 ## Ideas parking lot
@@ -1454,3 +1454,4 @@ to the log at the bottom.
 - Hand over what was made: a crafting activity's GM box has "Put the Longsword in Ann’s pack", which adds it to the character's pack (logged "Crafted Longsword") and marks it handed over (GM-only) so it can't be given twice.
 - The right tools: the crafting estimate and the activity name the artisan's tools an item is usually made with ("Usually made with Smith’s tools"; woodcarver's for bows, leatherworker's for leather armor, weaver's for padded armor and rope, tinker's for lanterns and locks…).
 - Got the tools?: the crafting estimate checks the chosen character's pack for the tools and warns when they're missing ("⚠ Ann’s pack has no Smith’s tools.").
+- Pay for the materials: a crafting activity's GM box has "Take 7 gp 5 sp for materials from Ann", which takes the raw materials' cost from the purse (logged), refuses when they can't afford it, and marks it paid (GM-only) so it's only taken once.
