@@ -828,6 +828,11 @@ to the log at the bottom.
 456. [x] **The map at another hour.** A slider on the map previews who's where and what's open at another hour,
     without moving the world's clock.
 457. [x] **Night on the map.** At night the map darkens a little and says how much the moon lights it.
+458. [ ] **What if we skip ahead.** The clock card can preview what would change in the party's town by the next
+    morning, evening or night before the GM moves time (shops opening, who'd come and go).
+459. [ ] **A town at another hour.** A settlement's page can preview who's about and what's open at another hour.
+460. [ ] **Only where people are.** A map toggle dims the pins with nobody there right now.
+461. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 
 ## Ideas parking lot
 
