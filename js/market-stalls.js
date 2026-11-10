@@ -1,7 +1,7 @@
 // Market stalls: on a town's market day, a few travelling stalls set up in the square. Seeded by the town and the
 // date, so everyone sees the same stalls all day and a different set next market day. Pure, so it can be tested.
 import { makeRng } from './rng.js';
-import { fmtPrice } from './economy.js';
+import { coinText } from './economy.js';
 
 // [stall, keeper's trade, [[item, price in gp], ...]]
 const STALLS = [
@@ -21,19 +21,27 @@ const STALLS = [
   ['Livestock pen', 'a drover', [['Chicken', 0.02], ['Goat', 1], ['Pig', 3], ['Mule', 8], ['Riding horse', 75]]],
 ];
 
+// The stalls are up from dawn till late afternoon (minutes of the day).
+export const STALLS_OPEN = 6 * 60, STALLS_SHUT = 17 * 60;
+
 // How many stalls by the town's size.
 const COUNT = { Hamlet: 2, Village: 3, Town: 4, City: 5, Metropolis: 6, Fortress: 2, Outpost: 2 };
 
-// → [{ name, keeper, goods: [{ name, price (text), gp }] }], or [] with no seed.
+// → [{ name, keeper, goods: [{ name, cp, gp, price (text) }] }], or [] with no seed.
 export function marketStalls(seed, size = 'Town') {
   if (!seed) return [];
   const rng = makeRng(`stalls:${seed}`);
   const pool = STALLS.slice(), out = [];
   for (let k = Math.min(COUNT[size] || 4, pool.length); k > 0; k--) {
     const [name, keeper, goods] = pool.splice(rng.int(pool.length), 1)[0];
-    const some = goods.slice().sort(() => rng.next() - 0.5).slice(0, rng.range(2, Math.min(4, goods.length)));
+    // A seeded shuffle (Fisher–Yates), so the server and every browser pick the same goods.
+    const mixed = goods.slice();
+    for (let i = mixed.length - 1; i > 0; i--) { const j = rng.int(i + 1); [mixed[i], mixed[j]] = [mixed[j], mixed[i]]; }
+    const some = mixed.slice(0, rng.range(2, Math.min(4, goods.length)));
     // Market prices: a stall haggles a little, so each price wanders up or down by up to a fifth.
-    out.push({ name, keeper, goods: some.map(([g, gp]) => { const p = Math.max(0.01, Math.round(gp * (0.8 + rng.next() * 0.4) * 100) / 100); return { name: g, gp: p, price: fmtPrice(p) }; }) });
+    // Whole coins: copper under a gold piece, silver up to a hundred gold, gold above, so the price shown is the price paid.
+    out.push({ name, keeper, goods: some.map(([g, gp]) => { const raw = Math.max(1, Math.round(gp * (0.8 + rng.next() * 0.4) * 100)), cp = raw >= 10000 ? Math.round(raw / 100) * 100 : raw >= 100 ? Math.round(raw / 10) * 10 : raw;
+      return { name: g, cp, gp: cp / 100, price: coinText(cp) }; }) });
   }
   return out;
 }

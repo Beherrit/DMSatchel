@@ -14,3 +14,12 @@ test('marketStalls: seeded by town and date, sized by the town', () => {
   assert.deepEqual(marketStalls(''), []);
   assert.equal(stallsText(a).split('\n').length, 4);
 });
+
+test('marketStalls: the price shown is the price paid, in whole coins', async () => {
+  const { coinText } = await import('../js/economy.js');
+  for (let k = 0; k < 40; k++) for (const s of marketStalls(`seed${k}`, 'Metropolis')) for (const g of s.goods) {
+    assert.ok(Number.isInteger(g.cp) && g.cp >= 1);
+    assert.equal(g.price, coinText(g.cp));
+    if (g.cp >= 10000) assert.equal(g.cp % 100, 0); else if (g.cp >= 100) assert.equal(g.cp % 10, 0);
+  }
+});

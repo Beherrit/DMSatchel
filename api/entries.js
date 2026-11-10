@@ -46,6 +46,7 @@ import { addAsk } from '../js/shop-asks.js';
 import { addTab, readTab, tabTotal, splitTab } from '../js/tab.js';
 import { shopOpen, holidayToday, holidayTomorrow, evePrice, shutText, tradeDay, isMarketDay, marketToday } from '../js/shop-hours.js';
 import { cleanCalendar, withLocal } from '../js/calendar.js';
+import { marketStalls, STALLS_OPEN, STALLS_SHUT } from '../js/market-stalls.js';
 import { shopStanding, sellWithStanding } from '../js/standing-price.js';
 import { coinText, GOODS } from '../js/economy.js';
 import { cleanMusic } from '../js/music.js';
@@ -484,6 +485,33 @@ export default route({
         WHERE id = ${ch.id} AND world_id = ${req.world.id}`;
       await record(ch.id, req.gm.id, 'order', null);
       return send(res, 200, { entries: [shape(await loadOne(inn.id, req.world.id), req), shape(await loadOne(ch.id, req.world.id), req)], ordered: { name: item.name, qty, cp, tab: onTab } });
+    }
+    // Buy from a market stall: the town's stalls today are seeded by the town and the date (market-stalls.js), so the
+    // server works out the same stalls and prices; only on market day (not a holiday), and only while they're up.
+    if (req.body.stall) {
+      const b = req.body.stall;
+      const town = await loadOne(String(b.town || '').slice(0, 40), req.world.id), ch = await loadOne(String(b.character || '').slice(0, 40), req.world.id);
+      if (!town || town.deleted || town.kind !== 'settlement' || !visibleTo(town, req)) return fail(res, 404, 'That town isn’t there.');
+      const cal = withLocal(cleanCalendar(req.world.cal), town);
+      if (!cal || !marketToday(town, tradeDay(cal))) return fail(res, 400, `It isn’t market day in ${town.name}.`);
+      const mins = readClock(req.world.clock).minutes % 1440;
+      if (!req.isGmHere && (mins < STALLS_OPEN || mins >= STALLS_SHUT)) return fail(res, 400, 'The stalls are packed away: they’re up from dawn till late afternoon.');
+      if (!ch || ch.deleted || ch.kind !== 'character') return fail(res, 404, 'Pick a character.');
+      if (!req.isGmHere && ch.owner_id !== req.gm.id) return fail(res, 403, 'You can only buy for your own character.');
+      const stall = marketStalls(`${town.id}:${cal.year}-${cal.month}-${cal.day}`, town.fields?.size || 'Town').find((x) => x.name === clip(b.stall, 80));
+      const good = stall?.goods.find((g) => g.name === clip(b.item, 120));
+      if (!good) return fail(res, 400, 'That stall isn’t selling that today.');
+      const qty = Math.max(1, Math.min(20, Math.round(Number(b.qty) || 1))), cp = good.cp * qty;
+      let p = {}; try { p = JSON.parse(ch.fields?.play || '{}') || {}; } catch { p = {}; }
+      if (!Number.isFinite(p.cp)) p.cp = Math.max(0, Math.round(Number(b.base?.cp) || 0));
+      if (p.inventory === undefined) p.inventory = clip(b.base?.inventory, 15000);
+      if (cp > p.cp) return fail(res, 400, `${ch.name} doesn’t have enough coin: that costs ${coinText(cp)} and they have ${coinText(p.cp)}.`);
+      p.cp -= cp; p.inventory = clip(giveItem(p.inventory, good.name, qty, `${stall.name}, ${town.name} market`), 15000);
+      addLog(p, `Bought ${qty > 1 ? `${qty} × ` : ''}${good.name} at the ${stall.name.toLowerCase()} in ${town.name} market for ${coinText(cp)}`, req.gm.name, undefined, { cp: -cp, items: [{ name: good.name, qty }] });
+      await sql`UPDATE entries SET fields = fields || jsonb_build_object('play', ${JSON.stringify(p)}::text), updated_by = ${req.gm.id}, updated_at = now(), version = version + 1
+        WHERE id = ${ch.id} AND world_id = ${req.world.id}`;
+      await record(ch.id, req.gm.id, 'buy', null);
+      return send(res, 200, { entries: [shape(await loadOne(ch.id, req.world.id), req)], bought: { name: good.name, qty, cp } });
     }
     if (req.body.buy) {
       const b = req.body.buy;

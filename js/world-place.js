@@ -18,7 +18,8 @@ import { glanceOf } from './glance.js';
 import { visitedPlaces } from './visited.js';
 import { thumb } from './image-ui.js';
 import { el, toast, setKids, copyText } from './dom.js';
-import { isGm } from './api.js';
+import { isGm, isMember, previewing, session, api } from './api.js';
+import { playOf } from './sheet-ui.js';
 import { KINDS, PLACE_KINDS, CHILD_PLACES } from './world-schema.js';
 import {
   world, worldEntries, getEntry, link, kindLabel, byName, notice, nameList, findByName, createEntries, patchEntry,
@@ -26,7 +27,7 @@ import {
 } from './world-store.js';
 import { npcDraft, questDraft, tavernDraft, shopDraft, settlementDraft, areaDraft, orgDraft } from './generators.js';
 import { pinsFor } from './world-maps.js';
-import { generateShop, rollMarket, marketText, parseMarket, stockText, SHOP_TYPES, ECONOMIES } from './economy.js';
+import { generateShop, rollMarket, marketText, parseMarket, stockText, SHOP_TYPES, ECONOMIES, coinText } from './economy.js';
 import { renderMarket, renderStock } from './shop-ui.js';
 import { personName, ANCESTRY_WEIGHTS } from './names.js';
 import { makeRng } from './rng.js';
@@ -280,7 +281,7 @@ function marketSection(place, rerender) {
       typeSel, el('button', { class: 'btn primary small', type: 'button', onclick: openShop }, 'Open a shop'),
       shops.length ? el('button', { class: 'btn small ghost', type: 'button', onclick: restockAll }, `Restock all ${shops.length} at today’s prices`) : null) : null,
     slot,
-    stallsCard(place),
+    stallsCard(place, rerender),
     shops.length ? el('div', {}, el('h4', {}, 'Shops'), openNowLine(shops), counterGaps(shops), el('ul', { class: 'entry-list' }, shops.map((e) => el('li', {}, link(e), el('span', { class: 'kind-tag' }, e.fields?.shop_type || e.fields?.type),
       (() => { const h = hoursNow(e); return h ? el('span', { class: `small shop-hours${h.open ? ' open' : ' shut'}` }, h.text) : null; })(),
       // Days off on the Market tab: a shop's weekly day off, and whether it trades on holidays.
@@ -291,7 +292,7 @@ function marketSection(place, rerender) {
 }
 
 // Market stalls: on the town's market day (not on a holiday), the travelling stalls in the square, the same all day.
-function stallsCard(place) {
+function stallsCard(place, rerender) {
   if (place.kind !== 'settlement' || !place.fields?.market_day) return null;
   const cal = withLocal(cleanCalendar(world.info?.cal), place);
   if (!cal || !marketToday(place, tradeDay(cal))) return null;
@@ -300,7 +301,31 @@ function stallsCard(place) {
   return el('div', { class: 'card market-stalls' }, el('div', { class: 'entry-head' }, el('h4', {}, `🧺 Market stalls today (${stalls.length})`),
     el('button', { class: 'btn small ghost', type: 'button', onclick: () => copyText(`Market day in ${place.name}\n${stallsText(stalls)}`) }, 'Copy as text')),
     el('ul', { class: 'plain small stall-list' }, stalls.map((st) => el('li', {}, el('strong', {}, st.name), el('span', { class: 'muted' }, ` (${st.keeper})`), ': ',
-      st.goods.map((g, i) => [i ? ', ' : '', `${g.name} `, el('span', { class: 'stall-price' }, g.price)])))));
+      st.goods.map((g, i) => [i ? ', ' : '', `${g.name} `, el('span', { class: 'stall-price' }, g.price)])))),
+    stallBuy(place, stalls, rerender));
+}
+
+// Buy from a stall: a character (players: their own) pays from their purse; the server checks the day and the price.
+function stallBuy(place, stalls, rerender) {
+  if (!isMember() || previewing()) return null;
+  const chars = worldEntries().filter((c) => c.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(c.fields?.status) && (isGm() || c.owner_id === session.gm?.id)).sort((a, b) => a.name.localeCompare(b.name));
+  if (!chars.length) return null;
+  const opts = stalls.flatMap((st) => st.goods.map((g) => ({ st, g })));
+  const item = el('select', { id: 'stall-item', 'aria-label': 'What to buy' }, opts.map(({ st, g }, i) => el('option', { value: String(i) }, `${g.name} (${st.name}, ${g.price})`)));
+  const qty = el('input', { type: 'number', id: 'stall-qty', min: 1, max: 20, value: 1, class: 'hp-amt', 'aria-label': 'How many' });
+  const who = el('select', { id: 'stall-who', 'aria-label': 'For' }, chars.map((c) => el('option', { value: c.id }, c.name)));
+  const form = el('form', { class: 'buy-form stall-buy' }, el('div', { class: 'controls' }, item, qty, chars.length > 1 ? [el('span', {}, 'for'), who] : null, el('button', { class: 'btn small primary', type: 'submit' }, 'Buy')));
+  form.addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const pick = opts[Number(item.value)], c = world.entries.get(who.value), base = playOf(c);
+    try {
+      const r = await api('entries', { method: 'PATCH', body: { stall: { town: place.id, stall: pick.st.name, item: pick.g.name, character: c.id, qty: Number(qty.value) || 1, base: { cp: base.cp, inventory: base.inventory } } } });
+      for (const e of r.entries) world.entries.set(e.id, e);
+      toast(`${c.name} bought ${r.bought.qty > 1 ? `${r.bought.qty} × ` : ''}${r.bought.name} for ${coinText(r.bought.cp)}`);
+      rerender();
+    } catch (err) { toast(err.message, 'bad'); }
+  });
+  return el('details', { class: 'buy-box' }, el('summary', {}, 'Buy from a stall'), form);
 }
 
 // Open now: by the world's clock (and today's holiday), whether a shop is open, or null with no clock.

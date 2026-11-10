@@ -873,7 +873,7 @@ to the log at the bottom.
     sell, the same all day (seeded by the town and the date).
 492. [x] **Market-day crowds.** On market day the scene line says the square is busy with stalls.
 493. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
-494. [ ] **Buy from a stall.** A player can buy from a market stall for their character, paid from their purse like
+494. [x] **Buy from a stall.** A player can buy from a market stall for their character, paid from their purse like
     a shop (the server checks it's market day and the price).
 495. [ ] **Stalls on the GM sheet.** On market day the printable GM sheet lists the stalls in the party's town.
 496. [ ] **A stall keeper as an NPC.** A GM can turn a stall's keeper into an NPC in the town with one click.
@@ -1376,3 +1376,4 @@ to the log at the bottom.
 - What happens on the day: a local holiday line can end with a dash and what happens ("Founding Day, 5 Thawmoon 841 — a parade and a bonfire"); the town's festival card and the calendar day say it, and the form's check reads it back.
 - Market stalls: on market day (not a holiday) a settlement's Market tab lists travelling stalls in the square (two to six by the town's size), each keeper and a few goods at haggled prices, the same all day and different next market; Copy as text for a handout.
 - Market-day crowds: by day on the party's town's market day, the scene line adds "It's market day: the square is busy with stalls" ("going up" at dawn); not at night or on a holiday.
+- Buy from a stall: on market day the stalls card has "Buy from a stall" (players for their own characters), paid from the purse into the pack and the log; the server works out the same stalls and prices (prices are whole coins, so what's shown is what's paid) and refuses off market day, on a holiday, or once the stalls are packed away (17:00 till dawn).
