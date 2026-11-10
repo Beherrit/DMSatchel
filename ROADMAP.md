@@ -937,7 +937,7 @@ to the log at the bottom.
     about when and on whose watch.
 543. [x] **Marching order on the map.** The party's marker on a map shows the marching order.
 544. [x] **Copy the orders.** The marching order and watches can be copied as plain text.
-545. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
+545. [x] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 
 ## Ideas parking lot
 
@@ -1492,3 +1492,4 @@ to the log at the bottom.
 - Watches at camp: the make-camp dialog lists the night's watches from the time camp is made ("🌙 Watches: Ann 20:00–00:00, Bo 00:00–04:00"), and when trouble comes it says about when and on whose watch ("About 02:10, on Bo’s watch").
 - Marching order on the map: the party's marker says the marching order in its tooltip, and the pin of the place the party is in shows "🥾 Marching: Bo → Ann".
 - Copy the orders: "Marching and watches" has Copy as text ("Marching order (front to back): Bo, Ann" / "Watches: 22:00–02:00 Ann; 02:00–06:00 Bo").
+- A full sweep (#545): all 523 browser tests clean against sweep #493, first time through (covering downtime, marching order and watches).
