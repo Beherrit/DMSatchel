@@ -34,3 +34,12 @@ test('local holidays with a first year count their anniversaries', async () => {
   assert.equal(holidayTitle(r.holidays[1], 1040), 'Lamp Night');
   assert.deepEqual([1, 2, 3, 4, 11, 12, 13, 21, 22, 101, 111].map(ordinal), ['1st', '2nd', '3rd', '4th', '11th', '12th', '13th', '21st', '22nd', '101st', '111th']);
 });
+
+test('upcomingHolidays: today and the coming days, soonest first, local ones too', async () => {
+  const { upcomingHolidays } = await import('../js/calendar.js');
+  const c = withLocal({ ...cal, holidays: [{ name: 'Midsummer', month: 2, day: 1 }] }, { name: 'Brindle', fields: { holidays: 'Founding Day, 5 Thawmoon' } });
+  const u = upcomingHolidays(c, 60);
+  assert.deepEqual(u.map((x) => [x.holiday.name, x.inDays > 0]), [['Founding Day', false], ['Midsummer', true]]);
+  assert.equal(u[0].holiday.local, 'Brindle');
+  assert.deepEqual(upcomingHolidays({ ...cal, holidays: [] }), []);
+});

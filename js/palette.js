@@ -120,6 +120,16 @@ function render() {
     input.setAttribute('aria-activedescendant', `pal-${active}`);
     return;
   }
+  // "Holidays": the coming holidays (the next 90 days), the party's town's own included, soonest first.
+  let holidays = [];
+  if (/^(holidays?|festivals?)$/.test(q)) {
+    let town = null; try { town = M.routine.partyTown(); } catch { town = null; }
+    const cal = M.calendar.withLocal(M.calendar.cleanCalendar(M.store.world.info?.cal), town?.kind === 'settlement' ? town : null);
+    holidays = M.calendar.upcomingHolidays(cal, 90).slice(0, 20).map(({ holiday: h, date, inDays }) => {
+      const t = M.calendar.holidayTitle(h, date.year);
+      return { label: `${t[0].toUpperCase()}${t.slice(1)}${h.local ? ` (${h.local})` : ''}`, group: 'Holiday', href: `#world/calendar/${date.year}/${date.month}`, hint: `🎉 ${date.day} ${cal.months[date.month].name} · ${M.week.inDaysText(inDays)}` };
+    });
+  }
   // "Market": the towns with a market day, and when each is next (soonest first; holidays skipped), above the
   // ordinary matches for the word.
   let markets = [];
@@ -141,6 +151,7 @@ function render() {
   }
   items = all.map((it) => [score(it, q), it]).filter(([s]) => s > 0).sort((a, b) => b[0] - a[0] || a[1].label.localeCompare(b[1].label)).slice(0, 40).map(([, it]) => it);
   if (markets.length) items = [...markets, ...items.filter((it) => !markets.some((m) => m.href === it.href))].slice(0, 40);
+  if (holidays.length) items = [...holidays, ...items].slice(0, 40);
   // Nothing typed yet: the entries you opened last come first.
   if (!q) {
     let recent = [];

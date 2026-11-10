@@ -139,3 +139,11 @@ export const ordinal = (n) => { const t = n % 100, u = n % 10; return `${n}${t >
 // A holiday's name in a given year: "the 200th Founding Day" when it has a first year (and this isn't before it).
 // (since is the year it was first held, so that year's is the 1st.)
 export const holidayTitle = (h, year) => (h?.since !== undefined && year >= h.since ? `the ${ordinal(year - h.since + 1)} ${h.name}` : h?.name || '');
+
+// The coming holidays from today (today included): → [{ holiday, date, inDays }], soonest first.
+export function upcomingHolidays(cal, within = 90) {
+  if (!cal || !Array.isArray(cal.holidays) || !cal.holidays.length || !Array.isArray(cal.months) || !cal.months.length) return [];
+  const t0 = toDays(cal, { year: cal.year, month: cal.month, day: cal.day }), out = [];
+  for (let k = 0; k <= within; k++) { const date = fromDays(cal, t0 + k); for (const h of holidaysOn(cal, date)) out.push({ holiday: h, date, inDays: k }); }
+  return out;
+}

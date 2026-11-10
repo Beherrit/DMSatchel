@@ -832,7 +832,7 @@ to the log at the bottom.
     morning, evening or night before the GM moves time (shops opening, who'd come and go).
 459. [x] **A town at another hour.** A settlement's page can preview who's about and what's open at another hour.
 460. [x] **Only where people are.** A map toggle dims the pins with nobody there right now.
-461. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
+461. [x] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 462. [x] **Who came up that day.** A day on the calendar lists the sessions set on it and who and what came up in
     them.
 463. [x] **Market days on the calendar.** The calendar month marks the party's town's market days.
@@ -863,7 +863,7 @@ to the log at the bottom.
 484. [x] **Which town's holidays.** The calendar can show another town's local holidays, not just the party's town's.
 485. [x] **The 200th Founding Day.** A local holiday written with a year counts its anniversaries ("the 200th Founding
     Day").
-486. [ ] **Holidays in the palette.** Ctrl+K "holidays" lists the coming holidays, the party's town's own included.
+486. [x] **Holidays in the palette.** Ctrl+K "holidays" lists the coming holidays, the party's town's own included.
 487. [ ] **Holidays on the map.** A settlement's map pin says when its next holiday is (today, or in how many days).
 488. [ ] **The week ahead in prep.** Prep's week-ahead weather marks holidays and market days in the party's town.
 489. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
@@ -1358,3 +1358,5 @@ to the log at the bottom.
 - Check the local holidays: as the GM types a settlement's local holidays, the form says which lines it reads and when they fall ("Reads: Founding Day (5 Thawmoon)") and which it can't, with an example of the format.
 - Which town's holidays: the calendar has a "Town" picker (where the party is, any settlement with local holidays or a market day, or no town) that sets whose local holidays, market days and shops' days off the month shows.
 - The 200th Founding Day: a local holiday written with the year it was first held ("Founding Day, 5 Thawmoon 841") is counted on the town's festival card, in its week and on the calendar ("the 200th Founding Day").
+- A full sweep (#461): all 478 browser tests clean against sweep #441; four that the container restart cut off pass on rerun.
+- Holidays in the palette: Ctrl+K "holidays" lists the coming 90 days' holidays first, the party's town's own included and counted ("The 200th Founding Day (Brindle) · today"), each opening its month on the calendar.
