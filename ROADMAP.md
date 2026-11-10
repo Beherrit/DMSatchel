@@ -804,7 +804,7 @@ to the log at the bottom.
     the mark back.
 440. [x] **Unlinked names in quests and places.** What needs writing also finds unlinked names in the descriptions
     of quests and places, not only logs and journals.
-441. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
+441. [x] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 442. [x] **Link names in descriptions too.** Quest and place forms offer the names their description could link, as
     session logs do.
 443. [x] **Playing since.** The world's numbers page says when the first session was played and how long ago.
@@ -1317,3 +1317,4 @@ to the log at the bottom.
 - The week in town: a settlement's page folds out "The week in Brindle", the coming seven days with their holidays, market day (or no market on a holiday), and which shops shut for a holiday or take their day off.
 - Copy the week: the week in town has a "Copy as text" button ("The week in Brindle" with a line a day), for a handout or a chat.
 - The week on the GM sheet: the printable sheet has "📅 The week in Brindle" for the party's town, the same days as the town's page.
+- A full sweep (#441): all 453 browser tests clean against sweep #425; five that failed under load late in the run pass on rerun.
