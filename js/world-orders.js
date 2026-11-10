@@ -4,8 +4,10 @@ import { el, toast, copyText } from './dom.js';
 import { api, isGm } from './api.js';
 import { world, worldEntries, getEntry, link } from './world-store.js';
 import { cleanOrder, watchShifts, hhmm, ordersText } from './party-order.js';
+import { isHired } from './hirelings.js';
 
-const ACTIVE = (c) => c.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(c.fields?.status);
+// Who can march and keep watch: active characters, and the NPCs hired to travel with the party.
+const ACTIVE = (c) => (c.kind === 'character' && !['Retired', 'Dead', 'Missing'].includes(c.fields?.status)) || isHired(c);
 export const partyOrder = () => ({ march: cleanOrder(world.info?.party_order?.march), watch: cleanOrder(world.info?.party_order?.watch) });
 
 async function saveOrder(key, ids, rerender) {
@@ -23,7 +25,7 @@ function editor(key, ids, rerender) {
   const order = list.map((c) => ({ c, on: ids.includes(c.id) }));
   const box = el('ol', { class: 'plain order-edit' });
   const draw = () => box.replaceChildren(...order.map((x, i) => el('li', {},
-    el('label', { class: 'check' }, el('input', { type: 'checkbox', checked: x.on || null, onchange: (ev) => { x.on = ev.target.checked; } }), ` ${x.c.name}`),
+    el('label', { class: 'check' }, el('input', { type: 'checkbox', checked: x.on || null, onchange: (ev) => { x.on = ev.target.checked; } }), ` ${x.c.name}`, x.c.kind === 'npc' ? el('span', { class: 'muted small' }, ' (hired)') : null),
     el('button', { class: 'btn small ghost', type: 'button', 'aria-label': `Move ${x.c.name} up`, disabled: i === 0 || null, onclick: () => { [order[i - 1], order[i]] = [order[i], order[i - 1]]; draw(); } }, '↑'),
     el('button', { class: 'btn small ghost', type: 'button', 'aria-label': `Move ${x.c.name} down`, disabled: i === order.length - 1 || null, onclick: () => { [order[i + 1], order[i]] = [order[i], order[i + 1]]; draw(); } }, '↓'))));
   draw();

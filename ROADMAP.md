@@ -943,7 +943,7 @@ to the log at the bottom.
 547. [x] **Phone check, again.** The crafting form, the orders editor and the party page's new sections fit a phone.
 548. [x] **A big party page.** The party page stays quick in a big world (hundreds of entries, long logs).
 549. [x] **Print check.** The printable GM sheet's new blocks (stalls, the week, orders) print cleanly.
-550. [ ] **Hirelings march and watch.** The marching order and watch order can include the party's hired NPCs.
+550. [x] **Hirelings march and watch.** The marching order and watch order can include the party's hired NPCs.
 551. [ ] **The watch's hours.** GMs set when the night's watch starts and how long it lasts (the default 22:00 for
     eight hours).
 552. [ ] **Orders in the palette.** Ctrl+K "marching" or "watch" shows the party's orders.
@@ -1507,3 +1507,4 @@ to the log at the bottom.
 - Phone check, again: at 375px the crafting form (with an estimate), the party page with every new section open and a character's page fit without sideways scrolling; the orders editor's ↑ ↓ buttons are now 40×36 on a phone (they were 29×26), with the order numbers kept.
 - A big party page: in a test world of 2,590 entries (2,000 NPCs, 150 sessions, 80 characters with full 30-line logs and wish lists, 40 towns with shops) the party page renders in 50–120 ms, and the other pages the recent work touched stay under 200 ms warm (prep about 170 ms, 334 ms cold; the GM sheet about 160 ms; a town's page 60–150 ms); nothing needed speeding up.
 - Print check: the GM sheet printed to A4 (PDF) shows the market stalls, the week in town and marching and watches as whole blocks in the grid, nothing wider than the page, the app's tools and navigation hidden, and no block split across pages.
+- Hirelings march and watch: the orders editors offer the party's hired NPCs (marked "hired") alongside the characters, and the server sends them to everyone who can see them.

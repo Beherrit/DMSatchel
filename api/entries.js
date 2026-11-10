@@ -259,8 +259,8 @@ export default route({
         ...(following ? { following } : {}),
         // Where the party is (from session prep), when this person can see that place.
         party_at: partyAt(w, rows, req),
-        // The party's orders (marching and watch), the characters this person can see.
-        party_order: (() => { const sees = (id) => { const r = byId.get(id); return Boolean(r && !r.deleted && r.kind === 'character' && visibleTo(r, req)); };
+        // The party's orders (marching and watch): the characters and hired NPCs this person can see.
+        party_order: (() => { const sees = (id) => { const r = byId.get(id); return Boolean(r && !r.deleted && ['character', 'npc'].includes(r.kind) && visibleTo(r, req)); };
           return { march: cleanOrder(w.prep?.march).filter(sees), watch: cleanOrder(w.prep?.watch).filter(sees) }; })(),
         // Where the party has been: stops at places this person can see.
         journey: journeyFor(w.prep?.journey, (id) => { const r = byId.get(id); return r && !r.deleted && visibleTo(r, req); }),
