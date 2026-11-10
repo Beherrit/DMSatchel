@@ -9,9 +9,9 @@ import { worldCalendar } from './world-calendar.js';
 import { dayWeather } from './forecast.js';
 import { toDays, today, cleanCalendar, withLocal } from './calendar.js';
 import { openText, holidayToday, typicalHours, tradeDay, marketToday } from './shop-hours.js';
-import { marketStalls, stallsText } from './market-stalls.js';
+import { stallsText } from './market-stalls.js';
 import { hhmm } from './clock.js';
-import { counterGap, whereNow, whereBits } from './world-routine.js';
+import { counterGap, whereNow, whereBits, todaysStalls } from './world-routine.js';
 import { deadlineOf, deadlineText } from './deadline.js';
 import { controllers } from './control.js';
 import { glanceOf } from './glance.js';
@@ -293,10 +293,7 @@ function marketSection(place, rerender) {
 
 // Market stalls: on the town's market day (not on a holiday), the travelling stalls in the square, the same all day.
 function stallsCard(place, rerender) {
-  if (place.kind !== 'settlement' || !place.fields?.market_day) return null;
-  const cal = withLocal(cleanCalendar(world.info?.cal), place);
-  if (!cal || !marketToday(place, tradeDay(cal))) return null;
-  const stalls = marketStalls(`${place.id}:${cal.year}-${cal.month}-${cal.day}`, place.fields?.size || 'Town');
+  const stalls = todaysStalls(place);
   if (!stalls.length) return null;
   return el('div', { class: 'card market-stalls' }, el('div', { class: 'entry-head' }, el('h4', {}, `🧺 Market stalls today (${stalls.length})`),
     el('button', { class: 'btn small ghost', type: 'button', onclick: () => copyText(`Market day in ${place.name}\n${stallsText(stalls)}`) }, 'Copy as text')),

@@ -7,6 +7,7 @@ import { holidayToday, nextHoliday, tradingHours, openText, tradeDay, isMarketDa
 import { openBounties } from './bounty.js';
 import { cleanCalendar, withLocal, holidayTitle } from './calendar.js';
 import { weekInTown, weekDayText, weekText } from './week-in-town.js';
+import { marketStalls } from './market-stalls.js';
 import { makeRng, randomSeed } from './rng.js';
 import { isHired } from './hirelings.js';
 import { isGm, previewing } from './api.js';
@@ -359,6 +360,14 @@ export function marketDayLine(town) {
 }
 
 // The week in town: the coming seven days in a settlement: holidays, market day, and which shops shut when.
+// Today's market stalls in a town: on its market day (not a holiday) the seeded travelling stalls, else [].
+export function todaysStalls(town) {
+  if (town?.kind !== 'settlement' || !town.fields?.market_day) return [];
+  const cal = withLocal(cleanCalendar(world.info?.cal), town);
+  if (!cal || !marketToday(town, tradeDay(cal))) return [];
+  return marketStalls(`${town.id}:${cal.year}-${cal.month}-${cal.day}`, town.fields?.size || 'Town');
+}
+
 // The shops and taverns in a town (anywhere inside it), by name.
 export function townShops(town) {
   const inside = (p) => { for (let x = p, i = 0; x && i < 12; x = x.parent_id && getEntry(x.parent_id), i++) if (x.id === town.id) return true; return false; };

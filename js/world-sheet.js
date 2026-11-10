@@ -20,7 +20,7 @@ import { musicFor } from './music.js';
 import { dayWeather } from './forecast.js';
 import { deadlineOf, deadlineText } from './deadline.js';
 import { holidayToday, holidayTomorrow, EVE_MARKUP, openText } from './shop-hours.js';
-import { aroundNow, dueInHere, partyTown, townWeek } from './world-routine.js';
+import { aroundNow, dueInHere, partyTown, townWeek, todaysStalls } from './world-routine.js';
 import { weekDayText } from './week-in-town.js';
 import { dayLine } from './routine.js';
 import { isHired } from './hirelings.js';
@@ -102,6 +102,9 @@ export async function viewSessionSheet() {
       // Due in later: who the routines bring here before the night's out, and about when.
       (() => { const d = here ? dueInHere(here) : []; return d.length ? block('🌙 Due in later', el('ul', { class: 'ss-list ss-later' }, d.slice(0, 10).map(({ npc, at, place }) =>
         el('li', {}, el('strong', {}, npc.entry.name), ` about ${hhmm(at)}`, place && place.id !== here.id ? ` at ${place.name}` : '')))) : null; })(),
+      // Stalls on the sheet: on market day, the travelling stalls in the party's town and what they sell.
+      (() => { const t = partyTown(), ss = todaysStalls(t); return ss.length ? block(`🧺 Market stalls in ${t.name}`, el('ul', { class: 'ss-list ss-stalls' }, ss.map((st) =>
+        el('li', {}, el('strong', {}, st.name), ` (${st.keeper}): `, st.goods.map((g) => `${g.name} ${g.price}`).join(', '))))) : null; })(),
       // The week on the sheet: the coming week in the party's town (holidays, market day, shops shut).
       (() => { const t = partyTown(), tw = t && townWeek(t); return tw ? block(`📅 The week in ${t.name}`, el('ul', { class: 'ss-list ss-week' }, tw.week.map((d) => el('li', {}, el('strong', {}, `${tw.label(d)}: `), weekDayText(d))))) : null; })(),
       people.length ? block(`Who’s around (${people.length})`, el('ul', { class: 'ss-list' }, people.map((p) => {
