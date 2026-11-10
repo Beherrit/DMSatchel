@@ -889,8 +889,8 @@ to the log at the bottom.
 504. [x] **The tavern's regulars at the bar.** A tavern's page lists the characters who order there most.
 505. [x] **A shop's best customers.** A shop's page lists the characters who've bought the most there.
 506. [x] **Favourite haunts.** A character's page names the tavern they order at most and the shop they buy from most.
-507. [ ] **Busiest taverns.** The numbers page ranks taverns by the party's orders there.
-508. [ ] **A shop's best sellers.** A shop's page lists what the party buys there most.
+507. [x] **Busiest taverns.** The numbers page ranks taverns by the party's orders there.
+508. [x] **A shop's best sellers.** A shop's page lists what the party buys there most.
 509. [ ] **Copy the shopping.** What the party bought can be copied as plain text.
 
 ## Ideas parking lot
@@ -1403,3 +1403,5 @@ to the log at the bottom.
 - The tavern's regulars at the bar: a tavern's page says who orders there most ("🍺 At the bar most: Ann (2 orders), Bo (1 order)"), from the characters' logs.
 - A shop's best customers: a shop's page says who has bought the most there ("🛍 Best customers: Ann (1 purchase, 1 gp)").
 - Favourite haunts: a character's page names where they usually order and where they buy most ("🍺 Usually orders at The Bell (2×) · 🛍 Buys most at Smithy (1×)"), linked when the place is in the world.
+- Busiest taverns: the numbers page ranks taverns by the party's orders there ("The Bell 3 orders").
+- A shop's best sellers: a shop's page lists what the party buys there most ("📦 Sells most: Nails (3), Rope (1)").

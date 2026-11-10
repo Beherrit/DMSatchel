@@ -1,13 +1,13 @@
 // The world in numbers: counts and fun facts from what this person can see. Route: #world/numbers
 import { el } from './dom.js';
-import { worldEntries, link, kindLabel, mentions, notice, getEntry } from './world-store.js';
+import { worldEntries, link, kindLabel, mentions, notice, getEntry, findByName } from './world-store.js';
 import { appearances, sessionOrder } from './appearances.js';
 import { sessionGaps, pace, playingSince } from './session-gaps.js';
 import { worldCalendar } from './world-calendar.js';
 import { KINDS } from './world-schema.js';
 import { worldStats } from './world-stats.js';
 import { journalWriters } from './journal-streaks.js';
-import { spending, topGoods } from './purchases.js';
+import { spending, topGoods, spots, purchases } from './purchases.js';
 import { coinText } from './economy.js';
 
 const compact = (n) => (n >= 10000 ? new Intl.NumberFormat(undefined, { notation: 'compact', maximumFractionDigits: 1 }).format(n) : n.toLocaleString());
@@ -51,6 +51,8 @@ export function viewNumbers() {
           el('p', { class: 'muted small' }, 'From each sheet’s recent log: shops, market stalls and taverns.')) : null; })(),
       // Most-bought goods: what the party buys most, from the characters' recent logs.
       ranked('Most-bought goods', topGoods(worldEntries().filter((c) => c.kind === 'character')).slice(0, 8).map((g) => [g.name, g]), (g) => `bought ${g.times === 1 ? 'once' : g.times === 2 ? 'twice' : `${g.times} times`}${g.qty !== g.times ? ` (${g.qty} in all)` : ''}`),
+      // Busiest taverns: the party's orders at each tavern (from the characters' logs), linked when it's in the world.
+      ranked('Busiest taverns', spots(purchases(worldEntries().filter((c) => c.kind === 'character')), 'tavern').slice(0, 8).map((x) => [findByName(x.place) || x.place, x]), (x) => plural(x.count, 'order')),
       ranked('Busiest places', s.busiestPlaces, (n) => `${n} inside`),
       ranked('Who has written the most', s.writers, (n) => plural(n, 'entry', 'entries')),
       el('section', { class: 'card num-card' }, el('h3', {}, 'Records'),
