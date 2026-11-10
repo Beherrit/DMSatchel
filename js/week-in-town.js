@@ -54,3 +54,16 @@ export function weekDayText(d) {
 export function weekText(townName, week, label) {
   return [`The week in ${townName}`, ...week.map((d) => `- ${label(d)}: ${weekDayText(d)}`)].join('\n');
 }
+
+// The next market day in a town, from today (today counts), skipping any that fall on a holiday.
+// → { n, date, weekday, inDays } or null (no market day, no weekdays, or none within `within` days).
+export function nextMarket(cal, town, within = 60) {
+  if (!cal || !town?.fields?.market_day || !Array.isArray(cal.weekdays) || !cal.weekdays.length) return null;
+  const from = toDays(cal, { year: cal.year, month: cal.month, day: cal.day });
+  for (let n = from; n <= from + within; n++) {
+    const date = fromDays(cal, n), wd = weekday(cal, date);
+    if (isMarketDay(town, wd) && !(Array.isArray(cal.holidays) && holidaysOn(cal, date).length)) return { n, date, weekday: wd, inDays: n - from };
+  }
+  return null;
+}
+export const inDaysText = (k) => (k === 0 ? 'today' : k === 1 ? 'tomorrow' : `in ${k} days`);

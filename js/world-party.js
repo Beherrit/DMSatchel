@@ -41,6 +41,8 @@ import { wishedBy } from './world-wishes.js';
 import { itemsNamed } from './play-cards.js';
 import { sceneFor } from './world-scene.js';
 import { openNowLine, partyTown } from './world-routine.js';
+import { nextMarket, inDaysText } from './week-in-town.js';
+import { cleanCalendar } from './calendar.js';
 
 // GMs: every active character in one table: hit points (flagged in words when low or down), coin, days of rations,
 // exhaustion and conditions.
@@ -378,6 +380,9 @@ export async function viewParty(rerender) {
       (() => { const t = sceneFor(); return t ? el('p', { class: 'party-scene' }, '📍 ', t) : null; })(),
       // Open now, for players: what's open in the town the party is in.
       openNowLine(partyTown(), true),
+      // Next market, for players: when the party's town next has its market (holidays skipped).
+      (() => { const t = partyTown(), cal = cleanCalendar(world.info?.cal), m = t?.kind === 'settlement' && cal ? nextMarket(cal, t) : null;
+        return m ? el('p', { class: 'small party-market' }, `🧺 ${m.inDays === 0 ? `Market day in ${t.name} today` : `Next market in ${t.name}: ${m.weekday}, ${inDaysText(m.inDays)}`}.`) : null; })(),
       // Last session, for players: which it was and who and what came up in it.
       (() => { const last = sessionOrder(worldEntries())[0]; if (!last) return null; const named = namedIn(last).filter((x) => x.kind !== 'character');
         // Write about the last session: a journal entry started with a link to it.

@@ -50,3 +50,12 @@ test('weekInTown: birthdays of the people who live there', () => {
   assert.equal(w.length, 1); assert.deepEqual(w[0].births, [{ name: 'Ada', age: 40 }]);
   assert.equal(weekDayText(w[0]), '🎂 Ada’s birthday (40)');
 });
+
+test('nextMarket: today, later, skipping a holiday', async () => {
+  const { nextMarket, inDaysText } = await import('../js/week-in-town.js');
+  assert.equal(nextMarket(cal, { fields: { market_day: wd(5) } }).inDays, 0);
+  assert.equal(nextMarket(cal, { fields: { market_day: wd(6) } }).inDays, 1);
+  assert.equal(nextMarket(cal, { fields: { market_day: wd(7) } }).inDays, 9); // the 7th is Bridge Day
+  assert.equal(nextMarket(cal, { fields: {} }), null);
+  assert.equal(inDaysText(0), 'today'); assert.equal(inDaysText(1), 'tomorrow'); assert.equal(inDaysText(3), 'in 3 days');
+});

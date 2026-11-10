@@ -845,7 +845,7 @@ to the log at the bottom.
 469. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 470. [x] **Open for the holiday.** The week in town says which shops stay open on a holiday.
 471. [x] **Birthdays in the week.** The week in town lists the birthdays of the people who live there.
-472. [ ] **Next market on the party page.** The party page says when the next market day is in the party's town.
+472. [x] **Next market on the party page.** The party page says when the next market day is in the party's town.
 473. [ ] **Markets in the palette.** Ctrl+K "market" lists the towns with market days and when each is next.
 
 ## Ideas parking lot
@@ -1325,3 +1325,4 @@ to the log at the bottom.
 - Shut that day: a calendar day's card says which of the party's town's shops are shut ("🔒 Shut in Brindle: Smithy (day off)", or for the holiday).
 - Open for the holiday: the week in town and a calendar day's card name the shops that trade on a holiday ("🔓 Open for the holiday: Bakery").
 - Birthdays in the week: the week in town lists the birthdays of the people who live there ("🎂 Ada’s birthday (40)"), on the town's page, the GM sheet and the copied text.
+- Next market on the party page: "🧺 Next market in Brindle: Restday, in 9 days" (a market day on a holiday is skipped), or "Market day in Brindle today".
