@@ -1,6 +1,6 @@
 // The party page: who's in the party, the shared treasury and loot log, current quests, handouts and the journal.
 // Route: #world/party
-import { el, toast, confirmButton, setKids } from './dom.js';
+import { el, toast, confirmButton, setKids, copyText } from './dom.js';
 import { api, isGm, isMember, session } from './api.js';
 import { world, worldEntries, getEntry, byName, link, when, richText, setEntryState, patchEntry, mentions } from './world-store.js';
 import { appearances, sceneOf, sessionOrder } from './appearances.js';
@@ -42,7 +42,7 @@ import { itemsNamed } from './play-cards.js';
 import { sceneFor } from './world-scene.js';
 import { openNowLine, partyTown, weekInTownBox, todaysStalls } from './world-routine.js';
 import { nextMarket, inDaysText } from './week-in-town.js';
-import { purchases } from './purchases.js';
+import { purchases, shoppingText } from './purchases.js';
 import { cleanCalendar, withLocal } from './calendar.js';
 
 // GMs: every active character in one table: hit points (flagged in words when low or down), coin, days of rations,
@@ -390,7 +390,8 @@ export async function viewParty(rerender) {
         el('a', { class: 'small', href: `#world/e/${t.id}/market` }, 'Buy from the stalls →')) : null; })(),
       // What the party bought: the latest purchases from shops, stalls and taverns, from the characters' logs.
       (() => { const ps = purchases(worldEntries().filter((c) => c.kind === 'character')); return ps.length ? el('details', { class: 'party-bought' }, el('summary', {}, `🛒 What the party bought (${ps.length})`),
-        el('ul', { class: 'plain small' }, ps.slice(0, 12).map((x) => el('li', {}, link(x.who), `: ${x.text}`, el('span', { class: 'muted' }, ` · ${when(x.at)}`))))) : null; })(),
+        el('ul', { class: 'plain small' }, ps.slice(0, 12).map((x) => el('li', {}, link(x.who), `: ${x.text}`, el('span', { class: 'muted' }, ` · ${when(x.at)}`)))),
+        el('button', { class: 'btn small ghost bought-copy', type: 'button', onclick: () => copyText(shoppingText(ps.slice(0, 30), when)) }, 'Copy as text')) : null; })(),
       // The week on the party page: the coming week in the party's town, folded away.
       (() => { const t = partyTown(); return t ? weekInTownBox(t) : null; })(),
       // Last session, for players: which it was and who and what came up in it.

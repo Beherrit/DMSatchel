@@ -891,7 +891,7 @@ to the log at the bottom.
 506. [x] **Favourite haunts.** A character's page names the tavern they order at most and the shop they buy from most.
 507. [x] **Busiest taverns.** The numbers page ranks taverns by the party's orders there.
 508. [x] **A shop's best sellers.** A shop's page lists what the party buys there most.
-509. [ ] **Copy the shopping.** What the party bought can be copied as plain text.
+509. [x] **Copy the shopping.** What the party bought can be copied as plain text.
 
 ## Ideas parking lot
 
@@ -1405,3 +1405,4 @@ to the log at the bottom.
 - Favourite haunts: a character's page names where they usually order and where they buy most ("🍺 Usually orders at The Bell (2×) · 🛍 Buys most at Smithy (1×)"), linked when the place is in the world.
 - Busiest taverns: the numbers page ranks taverns by the party's orders there ("The Bell 3 orders").
 - A shop's best sellers: a shop's page lists what the party buys there most ("📦 Sells most: Nails (3), Rope (1)").
+- Copy the shopping: "What the party bought" on the party page has Copy as text, a dated list of the latest purchases.

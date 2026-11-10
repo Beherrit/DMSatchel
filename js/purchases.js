@@ -59,3 +59,6 @@ export function goodsAt(characters, placeName) {
   for (const p of purchases(characters)) if (placeOf(p.text) === placeName) for (const it of p.items) { const k = it.name.toLowerCase(), x = by.get(k) || { name: it.name, qty: 0, times: 0 }; x.qty += it.qty; x.times += 1; by.set(k, x); }
   return [...by.values()].sort((a, b) => b.times - a.times || b.qty - a.qty || a.name.localeCompare(b.name));
 }
+
+// The shopping as plain text: "What the party bought\n- Ann: Bought Rope at Smithy for 1 gp (Nov 8)".
+export const shoppingText = (list, dateOf = (iso) => String(iso || '').slice(0, 10)) => ['What the party bought', ...list.map((p) => `- ${p.who.name}: ${p.text}${p.at ? ` (${dateOf(p.at)})` : ''}`)].join('\n');

@@ -48,3 +48,9 @@ test('placeOf, spots and goodsAt: where the party buys, and what', async () => {
   assert.deepEqual(spots(ps([c]), 'shop').map((x) => [x.place, x.count]), [['Smithy', 1]]);
   assert.deepEqual(goodsAt([c], 'The Bell'), [{ name: 'Pale ale', qty: 3, times: 2 }]);
 });
+
+test('shoppingText: the purchases as a list', async () => {
+  const { shoppingText, purchases: ps } = await import('../js/purchases.js');
+  const c = ch('a', 'Ann', [{ at: '2026-11-08T10:00:00Z', text: 'Bought Rope at Smithy for 1 gp', cp: -100 }]);
+  assert.equal(shoppingText(ps([c])), 'What the party bought\n- Ann: Bought Rope at Smithy for 1 gp (2026-11-08)');
+});
