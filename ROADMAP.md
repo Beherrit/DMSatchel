@@ -901,7 +901,7 @@ to the log at the bottom.
 514. [x] **The stall total.** The buy-from-a-stall form shows the total and the character's purse before paying, like
     a shop's.
 515. [x] **A tavern's favourites.** A tavern's page lists what the party orders there most.
-516. [ ] **Wishlists.** A character can keep a wishlist (one item per line).
+516. [x] **Wishlists.** A character can keep a wishlist (one item per line).
 517. [ ] **Someone wants this.** Shops and market stalls mark goods on a character's wishlist ("⭐ Ann wants this").
 
 ## Ideas parking lot
@@ -1423,3 +1423,4 @@ to the log at the bottom.
 - Stalls in the palette: Ctrl+K "stalls" lists today's market stalls in every town with its market on, each with its goods and prices, opening the town's Market tab.
 - The stall total: the buy-from-a-stall form says what it comes to and what the character has ("2 × Candles (10) costs 1 sp 8 cp. Ann has 50 gp."), flagged when they can't afford it.
 - A tavern's favourites: a tavern's page lists what the party orders there most ("🍲 The party’s favourites: Pale ale (2), Stew (1)"), read from the order lines in the characters' logs.
+- Wishlists: a character has a "Wishlist" field (one item per line) that its player can keep; additive, so existing characters are untouched.

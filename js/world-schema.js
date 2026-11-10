@@ -50,7 +50,7 @@ export const KINDS = {
   },
   character: {
     label: 'Player Character', plural: 'Player Characters', blurb: 'The heroes, past and present.',
-    fields: [['player', 'Player'], ['species', 'Species'], ['class', 'Class'], ['level', 'Level'], ['background', 'Background'], ['born', 'Birthday (in-world date)'], ['status', 'Status', 'select', ['Active', 'Retired', 'Dead', 'Missing']], ['lifestyle', 'Lifestyle', 'select', ['Wretched', 'Squalid', 'Poor', 'Modest', 'Comfortable', 'Wealthy', 'Aristocratic']], ['sheet', 'Sheet & backstory', 'long'],
+    fields: [['player', 'Player'], ['species', 'Species'], ['class', 'Class'], ['level', 'Level'], ['background', 'Background'], ['born', 'Birthday (in-world date)'], ['status', 'Status', 'select', ['Active', 'Retired', 'Dead', 'Missing']], ['lifestyle', 'Lifestyle', 'select', ['Wretched', 'Squalid', 'Poor', 'Modest', 'Comfortable', 'Wealthy', 'Aristocratic']], ['wishlist', 'Wishlist (one item per line)', 'long'], ['sheet', 'Sheet & backstory', 'long'],
       // Kept out of forms: the Character Forge recipe (rebuilds the full sheet) and the live play state.
       ['forge', 'Forge recipe', 'hidden'], ['play', 'Play state', 'hidden'], ['known', 'What they know', 'hidden'],
       // How NPCs and powers feel about this character (see attitudes.js); only GMs set it.
