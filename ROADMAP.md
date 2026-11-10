@@ -873,6 +873,11 @@ to the log at the bottom.
     sell, the same all day (seeded by the town and the date).
 492. [x] **Market-day crowds.** On market day the scene line says the square is busy with stalls.
 493. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
+494. [ ] **Buy from a stall.** A player can buy from a market stall for their character, paid from their purse like
+    a shop (the server checks it's market day and the price).
+495. [ ] **Stalls on the GM sheet.** On market day the printable GM sheet lists the stalls in the party's town.
+496. [ ] **A stall keeper as an NPC.** A GM can turn a stall's keeper into an NPC in the town with one click.
+497. [ ] **Stalls on the party page.** On market day the party page lists the stalls in the party's town.
 
 ## Ideas parking lot
 
