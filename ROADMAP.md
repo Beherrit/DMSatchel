@@ -929,6 +929,10 @@ to the log at the bottom.
 536. [x] **A new contact.** Resolving carousing or building contacts can start a new NPC who knows the character.
 537. [x] **Anything this time?** The party page reminds players whose characters haven't filed downtime since the
     last session.
+538. [ ] **Marching order.** GMs set the party's marching order (front to back) on the party page; everyone sees it.
+539. [ ] **Watch order.** GMs set who keeps watch in the night; the party page shows each watch's hours.
+540. [ ] **Orders on the sheet.** The printable GM sheet lists the marching order and the night's watches.
+541. [ ] **Whose watch is it?** At night the clock card says whose watch it is now.
 
 ## Ideas parking lot
 
