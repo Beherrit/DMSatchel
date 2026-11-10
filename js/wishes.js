@@ -35,3 +35,16 @@ export function wishMatches(wishText, itemName) {
 // Who hopes for this item: [{ character, wish }] over the characters given (open wishes only).
 export const wishersFor = (itemName, characters) =>
   (characters || []).flatMap((c) => openWishes(readWishes(c)).filter((w) => wishMatches(w.text, itemName)).map((wish) => ({ character: c, wish })));
+
+// Where a wish is for sale: sellers are [{ where, goods: [{ name, cp }] }] → [{ where, good }], cheapest first.
+export function whereToBuy(wishText, sellers) {
+  const out = [];
+  for (const s of sellers || []) for (const g of s.goods || []) if (wishMatches(wishText, g.name)) out.push({ where: s.where, good: g });
+  return out.sort((a, b) => a.good.cp - b.good.cp);
+}
+
+// The wish board: the open wishes of these characters, each with where it's for sale. → [{ who, wish, at }].
+export const wishBoard = (characters, sellers) => (characters || []).flatMap((c) => openWishes(readWishes(c)).map((wish) => ({ who: c, wish, at: whereToBuy(wish.text, sellers) })));
+
+// An older plain-text wish list (fields.wishlist, one per line) as wish texts, to move into the wish list.
+export const oldWishlist = (c) => String(c?.fields?.wishlist || '').split('\n').map((x) => x.replace(/^[-*•]\s*/, '').trim()).filter(Boolean).slice(0, 40);

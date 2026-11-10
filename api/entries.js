@@ -109,6 +109,7 @@ function shape(row, req) {
     if (row.fields?.goals && !mine) out.fields = { ...out.fields, goals: goalsForOthers(row.fields.goals) };
     // A character's wish list: only its player (and the GMs).
     if (row.fields?.wishes && !mine) { out.fields = { ...out.fields }; delete out.fields.wishes; }
+    if (row.fields?.wishlist && !mine) { out.fields = { ...out.fields }; delete out.fields.wishlist; }
     // The world's own GM-only fields stay with the GMs, even on a player's own entries.
     const hide = secretCustomKeys(row.kind, customOf(req)).filter((k) => out.fields?.[k]);
     if (hide.length) { out.fields = { ...out.fields }; for (const k of hide) delete out.fields[k]; }

@@ -50,7 +50,7 @@ export const KINDS = {
   },
   character: {
     label: 'Player Character', plural: 'Player Characters', blurb: 'The heroes, past and present.',
-    fields: [['player', 'Player'], ['species', 'Species'], ['class', 'Class'], ['level', 'Level'], ['background', 'Background'], ['born', 'Birthday (in-world date)'], ['status', 'Status', 'select', ['Active', 'Retired', 'Dead', 'Missing']], ['lifestyle', 'Lifestyle', 'select', ['Wretched', 'Squalid', 'Poor', 'Modest', 'Comfortable', 'Wealthy', 'Aristocratic']], ['wishlist', 'Wishlist (one item per line)', 'long'], ['sheet', 'Sheet & backstory', 'long'],
+    fields: [['player', 'Player'], ['species', 'Species'], ['class', 'Class'], ['level', 'Level'], ['background', 'Background'], ['born', 'Birthday (in-world date)'], ['status', 'Status', 'select', ['Active', 'Retired', 'Dead', 'Missing']], ['lifestyle', 'Lifestyle', 'select', ['Wretched', 'Squalid', 'Poor', 'Modest', 'Comfortable', 'Wealthy', 'Aristocratic']], ['sheet', 'Sheet & backstory', 'long'],
       // Kept out of forms: the Character Forge recipe (rebuilds the full sheet) and the live play state.
       ['forge', 'Forge recipe', 'hidden'], ['play', 'Play state', 'hidden'], ['known', 'What they know', 'hidden'],
       // How NPCs and powers feel about this character (see attitudes.js); only GMs set it.
@@ -59,6 +59,9 @@ export const KINDS = {
       ['goals', 'Goals', 'hidden'],
       // What the player hopes the character finds or earns (see wishes.js); only the player and the GMs see it.
       ['wishes', 'Wish list', 'hidden'],
+      // An older plain-text wish list (one per line), kept so nothing written in it is lost; private like wishes, and
+      // its player can move it into the wish list above.
+      ['wishlist', 'Old wish list', 'hidden'],
       // When a character's story ends (see hall.js): how, when (in-world) and their player's epitaph.
       ['fate', 'How it ended', 'hidden'], ['fate_day', 'When it ended', 'hidden'], ['epitaph', 'Epitaph', 'hidden']],
   },

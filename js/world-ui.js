@@ -37,7 +37,7 @@ import { initLinkSuggest } from './link-suggest.js';
 import { bulkControls } from './world-bulk.js';
 import { customFieldsButton } from './world-fields.js';
 import { goalsSection } from './world-goals.js';
-import { wishesSection } from './world-wishes.js';
+import { wishesSection, wishMark } from './world-wishes.js';
 import { farewellCard } from './world-hall.js';
 import { noteRead, readsLine } from './world-reads.js';
 import { readingCard, noteReading } from './world-reading.js';
@@ -101,7 +101,6 @@ import { viewCalendar, worldCalendar, todayText, onThisDayCard } from './world-c
 import { parseDate, toDays, yearLength, parseHolidayLines } from './calendar.js';
 import { nextShut } from './week-in-town.js';
 import { customersAt, purchases, spots, goodsAt, orderedAt } from './purchases.js';
-import { wantersOf } from './wishlist.js';
 import { coinText } from './economy.js';
 import { sheetSection } from './sheet-ui.js';
 import { pictureField, figure, thumb } from './image-ui.js';
@@ -459,7 +458,7 @@ function viewEntry(id, tab) {
         const town = trailTown(e);
         try { await patchEntry(e, { fields: restockDraft(e, town) }); toast(town ? `Restocked at ${town.name}’s prices` : 'Restocked'); rerenderWorld(); } catch (err) { toast(err.message, 'bad'); }
       } }, e.fields?.stock ? 'Restock' : 'Stock this shop') : null),
-      renderStock(e.fields?.stock, { wanted: (n) => wantersOf(worldEntries().filter((c) => c.kind === 'character' && !['Retired', 'Dead'].includes(c.fields?.status)), n) }) || el('p', { class: 'muted' }, 'No stock listed yet.'), buyBox(e, rerenderWorld), asksBox(e, rerenderWorld), tradeLedger(e)) : null,
+      renderStock(e.fields?.stock, { mark: wishMark }) || el('p', { class: 'muted' }, 'No stock listed yet.'), buyBox(e, rerenderWorld), asksBox(e, rerenderWorld), tradeLedger(e)) : null,
     e.body ? el('section', {}, contentsNav(e.body), richText(e.body, { anchors: true })) : null,
     isGm() && e.secret ? el('aside', { class: 'secret' }, el('div', { class: 'eyebrow' }, 'GM only'), richText(e.secret)) : null,
     mentionsCard(e, rerenderWorld),

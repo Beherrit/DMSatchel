@@ -10,7 +10,7 @@ import { dayWeather } from './forecast.js';
 import { toDays, today, cleanCalendar, withLocal } from './calendar.js';
 import { openText, holidayToday, typicalHours, tradeDay, marketToday } from './shop-hours.js';
 import { stallsText, stallsHours } from './market-stalls.js';
-import { wantersOf } from './wishlist.js';
+import { wishMark } from './world-wishes.js';
 import { hhmm } from './clock.js';
 import { counterGap, whereNow, whereBits, todaysStalls } from './world-routine.js';
 import { deadlineOf, deadlineText } from './deadline.js';
@@ -302,7 +302,7 @@ function stallsCard(place, rerender) {
     // When the stalls pack up: by the world's clock (the server refuses sales outside these hours).
     hours ? el('p', { class: `small stalls-hours${hours.up ? '' : ' shut'}` }, `🕰 ${hours.text}.`) : null,
     el('ul', { class: 'plain small stall-list' }, stalls.map((st) => el('li', {}, el('strong', {}, st.name), el('span', { class: 'muted' }, ` (${st.keeper})`), ': ',
-      st.goods.map((g, i) => [i ? ', ' : '', `${g.name} `, el('span', { class: 'stall-price' }, g.price), (() => { const w = wantersOf(worldEntries().filter((c) => c.kind === 'character' && !['Retired', 'Dead'].includes(c.fields?.status)), g.name); return w.length ? el('span', { class: 'wish-pill' }, ` ⭐ ${w.map((c) => c.name).join(', ')} want${w.length === 1 ? 's' : ''} this`) : null; })()]),
+      st.goods.map((g, i) => [i ? ', ' : '', `${g.name} `, el('span', { class: 'stall-price' }, g.price), wishMark(g.name)]),
       // A stall keeper as an NPC: a GM makes the keeper someone in town (a draft to name and save).
       // The keeper at their stall: once made an NPC (in this town, with the stall in their role), the stall links them.
       (() => { const k = keeperOf(place, st); return k ? [' ', el('span', { class: 'stall-keeper' }, '· kept by ', link(k))] : isGm() ? [' ', el('button', { class: 'btn small ghost stall-npc', type: 'button', onclick: () => keeperDraft(place, st) }, 'Make the keeper an NPC')] : null; })()))),

@@ -37,7 +37,7 @@ export { coinText, parseCoins } from './economy.js';
 import { coinText, parseCoins, GOODS } from './economy.js';
 import { tableCard } from './world-profiles.js';
 import { journeySection } from './world-journey.js';
-import { wishedBy } from './world-wishes.js';
+import { wishedBy, partyWishes } from './world-wishes.js';
 import { itemsNamed } from './play-cards.js';
 import { sceneFor } from './world-scene.js';
 import { openNowLine, partyTown, weekInTownBox, todaysStalls } from './world-routine.js';
@@ -388,6 +388,13 @@ export async function viewParty(rerender) {
       (() => { const t = partyTown(), ss = todaysStalls(t); return ss.length ? el('details', { class: 'party-stalls' }, el('summary', {}, `🧺 Market stalls in ${t.name} today (${ss.length})`),
         el('ul', { class: 'plain small' }, ss.map((st) => el('li', {}, el('strong', {}, st.name), ': ', st.goods.map((g) => `${g.name} ${g.price}`).join(', ')))),
         el('a', { class: 'small', href: `#world/e/${t.id}/market` }, 'Buy from the stalls →')) : null; })(),
+      // What the party wishes for: the open wishes this person may see (GMs: everyone's; players: their own), and where
+      // in the party's town each is for sale today.
+      (() => { const t = partyTown(), ws = partyWishes(t?.kind === 'settlement' ? t : null); if (!ws.length) return null;
+        const found = ws.filter((w) => w.at.length).length;
+        // Players only receive their own characters' wishes (the server keeps the rest), so they see their own here.
+        return el('details', { class: 'party-wants' }, el('summary', {}, `⭐ ${isGm() ? 'What the party wishes for' : 'Your wishes'} (${ws.length}${found ? `, ${found} for sale in ${t.name}` : ''})`),
+          el('ul', { class: 'plain small' }, ws.map((w) => el('li', {}, link(w.who), `: ${w.wish.text}`, w.at.length ? el('span', { class: 'wish-at' }, ' · ', w.at.slice(0, 3).map((x, i) => [i ? ', ' : '', typeof x.where === 'string' ? x.where : link(x.where), ` (${x.good.name}, ${coinText(x.good.cp)})`])) : null)))); })(),
       // What the party bought: the latest purchases from shops, stalls and taverns, from the characters' logs.
       (() => { const ps = purchases(worldEntries().filter((c) => c.kind === 'character')); return ps.length ? el('details', { class: 'party-bought' }, el('summary', {}, `🛒 What the party bought (${ps.length})`),
         el('ul', { class: 'plain small' }, ps.slice(0, 12).map((x) => el('li', {}, link(x.who), `: ${x.text}`, el('span', { class: 'muted' }, ` · ${when(x.at)}`)))),
