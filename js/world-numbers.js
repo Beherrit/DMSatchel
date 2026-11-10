@@ -6,6 +6,7 @@ import { sessionGaps, pace, playingSince } from './session-gaps.js';
 import { worldCalendar } from './world-calendar.js';
 import { KINDS } from './world-schema.js';
 import { worldStats } from './world-stats.js';
+import { journalWriters } from './journal-streaks.js';
 
 const compact = (n) => (n >= 10000 ? new Intl.NumberFormat(undefined, { notation: 'compact', maximumFractionDigits: 1 }).format(n) : n.toLocaleString());
 const tile = (label, value, sub) => el('div', { class: 'stat-tile card' }, el('span', { class: 'stat-label' }, label), el('span', { class: 'stat-value' }, compact(value)), sub ? el('span', { class: 'stat-sub small' }, sub) : null);
@@ -35,6 +36,12 @@ export function viewNumbers() {
       ranked('Who comes up most in the logs', [...appearances(worldEntries(), mentions)].map(([id, a]) => [getEntry(id), a.count])
         .filter(([x, n]) => x && n > 1 && ['npc', 'character', 'location', 'settlement', 'region', 'area', 'quest', 'faction'].includes(x.kind))
         .sort((a, b) => b[1] - a[1] || a[0].name.localeCompare(b[0].name)).slice(0, 8), (n) => `in ${plural(n, 'session')}`),
+      // Who writes the journals: entries per writer, and their best run of sessions in a row written about.
+      (() => { const ss = sessionOrder(worldEntries()).slice().reverse(), ids = new Set(ss.map((x) => x.id));
+        const js = worldEntries().filter((x) => x.kind === 'journal').map((x) => ({ author: x.owner || x.fields?.character || '', about: [...new Set([...mentions([x.summary, x.body].join('\n')), ...(x.links || []).map((l) => l.id)])].filter((id) => ids.has(id)) }));
+        const w = journalWriters(ss.map((x) => x.id), js).slice(0, 8);
+        return w.length ? el('section', { class: 'card num-card journal-writers' }, el('h3', {}, 'Who writes the journals'),
+          el('ol', { class: 'num-list' }, w.map((x) => el('li', {}, el('span', {}, x.author), el('span', { class: 'muted small' }, ` ${plural(x.entries, 'entry', 'entries')}${x.best > 1 ? ` · ${x.best} sessions in a row${x.now > 1 && x.now < x.best ? ` (${x.now} now)` : x.now === x.best ? ', going now' : ''}` : ''}`))))) : null; })(),
       ranked('Busiest places', s.busiestPlaces, (n) => `${n} inside`),
       ranked('Who has written the most', s.writers, (n) => plural(n, 'entry', 'entries')),
       el('section', { class: 'card num-card' }, el('h3', {}, 'Records'),
