@@ -7,6 +7,8 @@ import { worldCalendar } from './world-calendar.js';
 import { KINDS } from './world-schema.js';
 import { worldStats } from './world-stats.js';
 import { journalWriters } from './journal-streaks.js';
+import { spending } from './purchases.js';
+import { coinText } from './economy.js';
 
 const compact = (n) => (n >= 10000 ? new Intl.NumberFormat(undefined, { notation: 'compact', maximumFractionDigits: 1 }).format(n) : n.toLocaleString());
 const tile = (label, value, sub) => el('div', { class: 'stat-tile card' }, el('span', { class: 'stat-label' }, label), el('span', { class: 'stat-value' }, compact(value)), sub ? el('span', { class: 'stat-sub small' }, sub) : null);
@@ -42,6 +44,11 @@ export function viewNumbers() {
         const w = journalWriters(ss.map((x) => x.id), js).slice(0, 8);
         return w.length ? el('section', { class: 'card num-card journal-writers' }, el('h3', {}, 'Who writes the journals'),
           el('ol', { class: 'num-list' }, w.map((x) => el('li', {}, el('span', {}, x.author), el('span', { class: 'muted small' }, ` ${plural(x.entries, 'entry', 'entries')}${x.best > 1 ? ` · ${x.best} sessions in a row${x.now > 1 && x.now < x.best ? ` (${x.now} now)` : x.now === x.best ? ', going now' : ''}` : ''}`))))) : null; })(),
+      // Coin spent: what each character has spent at shops, stalls and taverns (from their logs, the last 30 lines each).
+      (() => { const sp = spending(worldEntries().filter((c) => c.kind === 'character')).filter((x) => x.cp > 0).slice(0, 8);
+        return sp.length ? el('section', { class: 'card num-card coin-spent' }, el('h3', {}, 'Coin spent'),
+          el('ol', { class: 'num-list' }, sp.map((x) => el('li', {}, link(x.who), el('span', { class: 'muted small' }, ` ${coinText(x.cp)} on ${plural(x.count, 'purchase')}`)))),
+          el('p', { class: 'muted small' }, 'From each sheet’s recent log: shops, market stalls and taverns.')) : null; })(),
       ranked('Busiest places', s.busiestPlaces, (n) => `${n} inside`),
       ranked('Who has written the most', s.writers, (n) => plural(n, 'entry', 'entries')),
       el('section', { class: 'card num-card' }, el('h3', {}, 'Records'),

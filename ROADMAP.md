@@ -883,7 +883,7 @@ to the log at the bottom.
     characters' logs.
 500. [x] **Who writes the journals.** The numbers page shows how many journal entries each player has written and
     for how many sessions in a row.
-501. [ ] **Coin spent.** The numbers page shows what each character has spent at shops, stalls and taverns.
+501. [x] **Coin spent.** The numbers page shows what each character has spent at shops, stalls and taverns.
 
 ## Ideas parking lot
 
@@ -1389,3 +1389,4 @@ to the log at the bottom.
 - Weather on the calendar: today's and the coming six days' cards on the calendar show the forecast where the party is ("🌦 Forecast in Brindle: scattered clouds, 18°C"), the same seeded weather as prep.
 - What the party bought: the party page folds out "🛒 What the party bought", the latest purchases from shops, market stalls and taverns (and tabs) from the characters' logs, newest first with the date.
 - Who writes the journals: the numbers page ranks journal writers by entries, with their best run of sessions in a row written about ("3 sessions in a row", "going now").
+- Coin spent: the numbers page ranks characters by what they've spent at shops, market stalls and taverns (from each sheet's recent log).
