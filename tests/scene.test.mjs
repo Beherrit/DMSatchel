@@ -8,3 +8,10 @@ test('sceneLine sets the scene in one line', () => {
     'Night in Brindle: clear, 5°C (41°F), wind strong. Full moon: bright enough to read by outdoors. The party’s torch is burning. It’s Bridge Day: the shops are shut and the taverns are full.'.replace(/’/g, "'"));
   assert.equal(sceneLine({}), '');
 });
+
+test('sceneLine: market-day crowds by day, not at night or on a holiday', () => {
+  assert.match(sceneLine({ place: 'Brindle', part: 'morning', market: true }), /It's market day: the square is busy with stalls\./);
+  assert.match(sceneLine({ place: 'Brindle', part: 'dawn', market: true }), /stalls going up/);
+  assert.doesNotMatch(sceneLine({ place: 'Brindle', part: 'night', market: true }), /market/);
+  assert.doesNotMatch(sceneLine({ place: 'Brindle', part: 'morning', market: true, holiday: 'Bridge Day' }), /market/);
+});

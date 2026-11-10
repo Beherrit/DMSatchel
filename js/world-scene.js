@@ -3,7 +3,7 @@
 import { world, getEntry } from './world-store.js';
 import { cleanCalendar, today, withLocal } from './calendar.js';
 import { readClock, partOfDay } from './clock.js';
-import { holidayToday } from './shop-hours.js';
+import { holidayToday, tradeDay, marketToday } from './shop-hours.js';
 import { moonlight } from './moonlight.js';
 import { sceneLine } from './scene.js';
 import { dayWeather } from './forecast.js';
@@ -20,5 +20,7 @@ export function sceneFor(here = world.info?.party_at && getEntry(world.info.part
   const m = world.info?.clock?.minutes, c = cleanCalendar(world.info?.cal), night = m !== undefined && (m % 1440 >= 20 * 60 || m % 1440 < 5 * 60);
   const ml = night && c ? moonlight(c, today(c), weather?.sky || '') : null;
   return sceneLine({ place: (townOf(here) || here).name, part: m === undefined ? '' : partOfDay(m), weather: weather?.line || '', moon: ml?.text || '',
-    holiday: c ? holidayToday(withLocal(c, townOf(here))) : '', lights: readClock(world.info?.clock).lights.map((l) => l.name) });
+    holiday: c ? holidayToday(withLocal(c, townOf(here))) : '',
+    // Market-day crowds: the party's town's market day (its own holidays count, so no market on one).
+    market: (() => { const t = townOf(here); return !!(c && t && marketToday(t, tradeDay(withLocal(c, t)))); })(), lights: readClock(world.info?.clock).lights.map((l) => l.name) });
 }
