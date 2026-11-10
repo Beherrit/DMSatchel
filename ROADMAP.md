@@ -878,7 +878,7 @@ to the log at the bottom.
 495. [x] **Stalls on the GM sheet.** On market day the printable GM sheet lists the stalls in the party's town.
 496. [x] **A stall keeper as an NPC.** A GM can turn a stall's keeper into an NPC in the town with one click.
 497. [x] **Stalls on the party page.** On market day the party page lists the stalls in the party's town.
-498. [ ] **Weather on the calendar.** A calendar day's card in the coming week shows the forecast where the party is.
+498. [x] **Weather on the calendar.** A calendar day's card in the coming week shows the forecast where the party is.
 499. [ ] **What the party bought.** The party page lists recent purchases from shops, stalls and taverns, from the
     characters' logs.
 500. [ ] **Who writes the journals.** The numbers page shows how many journal entries each player has written and
@@ -1386,3 +1386,4 @@ to the log at the bottom.
 - Stalls on the GM sheet: on market day the printable sheet lists "🧺 Market stalls in Brindle", each stall's keeper and goods with prices.
 - A stall keeper as an NPC: each stall on the Market tab has "Make the keeper an NPC" for GMs, a new-NPC form in the town already filled in (a name and ancestry seeded by the stall, "Market stall keeper", who they are).
 - Stalls on the party page: on market day players can fold out "🧺 Market stalls in Brindle today", each stall's goods and prices, with a link to buy on the town's Market tab.
+- Weather on the calendar: today's and the coming six days' cards on the calendar show the forecast where the party is ("🌦 Forecast in Brindle: scattered clouds, 18°C"), the same seeded weather as prep.

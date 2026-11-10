@@ -10,6 +10,8 @@ import { onThisDay, yearsAgoText } from './onthisday.js';
 import { journeyDays } from './journey.js';
 import { PRESETS, makeCalendar, cleanCalendar, toDays, fromDays, advance, today, formatDate, parseDate, moonPhase, moonEvent, holidaysOn, weekday, withLocal, holidayTitle } from './calendar.js';
 import { namedIn } from './session-named.js';
+import { dayWeather } from './forecast.js';
+import { placeTerrains } from './encounter-ui.js';
 
 // The town the calendar shows local days for: '' (the party's town), a settlement's id, or 'none'.
 let calTown = '';
@@ -129,6 +131,9 @@ export function viewCalendar(arg, sub, rerender) {
       el('div', { class: 'entry-head' }, el('h3', {}, formatDate(cal, d, { weekday: true })), n === nowN ? el('span', { class: 'tag' }, 'Today') : el('span', { class: 'muted small' }, `${Math.abs(n - nowN)} days ${n < nowN ? 'ago' : 'from now'}`)),
       cal.moons.length ? el('p', { class: 'small' }, cal.moons.map((m) => { const p = moonPhase(cal, m, d); return `${p.icon} ${m.name}: ${p.name.toLowerCase()}`; }).join(' · ')) : null,
       holidaysOn(lcal, d).map((h) => el('p', { class: 'holiday' }, `🎉 ${cap(hName(h, d.year))}${h.note ? `: ${h.note}` : ''}`)),
+      // Weather on the calendar: today and the coming week, the forecast where the party is (the same seeded roll as prep).
+      (() => { const k = toDays(cal, d) - nowN, here = world.info?.party_at && getEntry(world.info.party_at); if (!here || k < 0 || k > 6) return null;
+        try { const w = dayWeather(here.id, placeTerrains(here), cal, k); return w ? el('p', { class: 'small cal-weather' }, `🌦 ${k === 0 ? 'Today' : 'Forecast'} in ${(() => { try { return partyTown()?.name || here.name; } catch { return here.name; } })()}: ${w.line}`) : null; } catch { return null; } })(),
       town && isMarketDay(town, weekday(cal, d)) ? el('p', { class: 'small cal-market-line' }, holidaysOn(lcal, d).length ? `No market in ${town.name}: it’s a holiday.` : `🧺 Market day in ${town.name}.`) : null,
       // Shut that day: which of the party's town's shops are shut, and why (a holiday, or their day off).
       (() => { if (!shopTown) return null; const din = dayInTown(lcal, shopTown, townShops(shopTown), d), sh = din.shut;
