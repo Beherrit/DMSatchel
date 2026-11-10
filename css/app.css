@@ -1813,3 +1813,7 @@ details.quest-group > summary .section-title { display: inline }
 /* How many are here (#451) */
 .pin-count { position: absolute; top: -6px; right: -8px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; background: var(--accent, #555); color: #fff; font-size: 10px; line-height: 16px; text-align: center; pointer-events: none }
 .pin-wanted-mark { position: absolute; bottom: -8px; right: -8px; font-size: 12px; pointer-events: none }
+/* A map key (#454) */
+.map-key { margin: 0 0 10px } .map-key ul { margin: 6px 0 0 } .map-key li { margin: 3px 0 }
+.key-mark { display: inline-block; min-width: 20px; text-align: center } .key-count { position: static; display: inline-block }
+.key-dim { opacity: .55; filter: grayscale(.7) }

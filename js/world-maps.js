@@ -14,6 +14,18 @@ import { festivalSpecial } from './menu.js';
 import { openBounties } from './bounty.js';
 import { coinText } from './economy.js';
 
+// A map key: what the marks on the pins mean.
+function mapKey() {
+  const row = (mark, text) => el('li', {}, el('span', { class: 'key-mark', 'aria-hidden': 'true' }, mark), ' ', text);
+  return el('details', { class: 'map-key small' }, el('summary', {}, 'Map key'),
+    el('ul', { class: 'plain' },
+      row(el('span', { class: 'pin-count key-count' }, '2'), 'people there right now (from their routines)'),
+      row('🎯', 'someone with a bounty is there now'),
+      row(el('span', { class: 'key-dim' }, '◆'), 'a dimmed pin: the shop is shut just now'),
+      row('⚑', 'where the party is'),
+      row('◎', 'a double ring: the place has a map of its own (open it from the pin)')));
+}
+
 // Wanted, at a glance: the NPCs with an open bounty (worked out once per drawing of the pins).
 let wantedIds = new Set();
 
@@ -627,7 +639,7 @@ export async function viewMap(id, focusPin) {
         catch (err) { toast(err.message, 'bad'); }
       }, 'btn ghost small')) : null),
     toolbar, holdKey, fogTools, measureBar, viewport, status,
-    el('div', { class: 'map-side' }, el('h3', { class: 'section-title' }, 'Pins'), filter, list, myBox),
+    el('div', { class: 'map-side' }, mapKey(), el('h3', { class: 'section-title' }, 'Pins'), filter, list, myBox),
     el('p', { class: 'muted small' }, `Last changed ${whenTime(map.updated_at)}${map.updated_by ? ` by ${map.updated_by}` : ''}. Drag to pan; scroll, pinch or use + and − to zoom.`),
     nameList());
 
