@@ -6,6 +6,7 @@ import { whereAt, aboutTown, regularsAt, townByHour, rollRoutine, dayOf, dueLate
 import { holidayToday, nextHoliday, tradingHours, openText, tradeDay, isMarketDay, marketToday } from './shop-hours.js';
 import { openBounties } from './bounty.js';
 import { cleanCalendar } from './calendar.js';
+import { weekInTown, weekDayText } from './week-in-town.js';
 import { makeRng, randomSeed } from './rng.js';
 import { isHired } from './hirelings.js';
 import { isGm, previewing } from './api.js';
@@ -351,6 +352,20 @@ export function marketDayLine(town) {
   const day = tradeDay(cleanCalendar(world.info?.cal));
   if (day.holiday && isMarketDay(town, day.weekday)) return el('p', { class: 'small market-day no-market' }, el('strong', {}, '🧺 No market today: '), `it’s ${day.holiday}, and the stalls stay packed away.`);
   return isMarketDay(town, day.weekday) ? el('p', { class: 'small market-day' }, el('strong', {}, '🧺 Market day today: '), 'stalls in the square, and the shops open two hours early.') : null;
+}
+
+// The week in town: the coming seven days in a settlement: holidays, market day, and which shops shut when.
+export function weekInTownBox(town) {
+  if (town.kind !== 'settlement') return null;
+  const cal = cleanCalendar(world.info?.cal);
+  if (!cal) return null;
+  const inside = (p) => { for (let x = p, i = 0; x && i < 12; x = x.parent_id && getEntry(x.parent_id), i++) if (x.id === town.id) return true; return false; };
+  const shops = worldEntries().filter((x) => x.kind === 'location' && x.id !== town.id && (x.fields?.stock || x.fields?.menu) && inside(x)).sort((a, b) => a.name.localeCompare(b.name));
+  const week = weekInTown(cal, town, shops);
+  if (!week.length) return null;
+  const label = (d) => (d.today ? 'Today' : `${d.weekday ? `${d.weekday} ` : ''}${d.date.day} ${cal.months[d.date.month].name}`);
+  return el('details', { class: 'week-in-town' }, el('summary', {}, `The week in ${town.name} (${week.length})`),
+    el('ul', { class: 'plain small' }, week.map((d) => el('li', {}, el('strong', {}, `${label(d)}: `), weekDayText(d)))));
 }
 
 // What changed when time moves: where the party is (its town, or the place itself), a snapshot of its shops (open or
