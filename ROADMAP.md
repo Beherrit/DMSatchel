@@ -1307,4 +1307,4 @@ to the log at the bottom.
 - What if we skip ahead: the clock card folds out "What would change if we skip ahead?": for the next morning, midday, evening and night, what would change in the party's town ("→ Night: Smithy shuts; Ada leaves"), worked out without moving the clock.
 - A town at another hour: a settlement's page folds out "See Brindle at another hour", with a slider that shows who's about and what's open at that hour ("About town at 18:00: Ada at The Bell until 19:00"), without moving the world's clock.
 - Only where people are: an "Only where people are" button on the map dims the place pins with nobody there right now (or at the previewed hour), until hovered.
-- #462 Who came up that day: sessions on a calendar day list who and what their logs name.
+- Who came up that day: a session listed on a calendar day shows who and what its log names ("Came up: Ann, The Bell").
