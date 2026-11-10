@@ -4,7 +4,7 @@ import { el, toast, confirmButton, setKids } from './dom.js';
 import { api, isGm, isMember, session } from './api.js';
 import { world, worldEntries, getEntry, byName, link, when, richText, setEntryState, patchEntry, mentions } from './world-store.js';
 import { appearances, sceneOf, sessionOrder } from './appearances.js';
-import { namedIn } from './session-named.js';
+import { namedIn, journalsAbout } from './session-named.js';
 import { PLACE_KINDS } from './world-schema.js';
 import { thumb } from './image-ui.js';
 import { lastShownLine } from './world-show.js';
@@ -397,7 +397,10 @@ export async function viewParty(rerender) {
       (() => { const last = sessionOrder(worldEntries())[0]; if (!last) return null; const named = namedIn(last).filter((x) => x.kind !== 'character');
         // Write about the last session: a journal entry started with a link to it.
         const write = isMember() ? el('button', { class: 'btn small ghost', type: 'button', onclick: () => window.dispatchEvent(new CustomEvent('world:draft', { detail: { kind: 'journal', name: `After ${last.name}`, body: `About [[${last.name}]]:\n\n` } })) }, `Write about ${last.name}`) : null;
-        return el('p', { class: 'small party-last-session' }, '📖 Last session: ', link(last), named.length ? [' · came up: ', named.slice(0, 8).map((x, i) => [i ? ', ' : '', link(x)])] : '', ' ', write); })(),
+        // Who has written about it: the writers of the journal entries about the last session.
+        const writers = [...new Set(journalsAbout(last.id).map((j) => j.owner || j.fields?.character || '').filter(Boolean))];
+        return el('p', { class: 'small party-last-session' }, '📖 Last session: ', link(last), named.length ? [' · came up: ', named.slice(0, 8).map((x, i) => [i ? ', ' : '', link(x)])] : '',
+          writers.length ? el('span', { class: 'party-last-writers' }, ` · ✍ written up by ${writers.length > 1 ? `${writers.slice(0, -1).join(', ')} and ${writers[writers.length - 1]}` : writers[0]}`) : '', ' ', write); })(),
       isGm() ? el('div', { class: 'btnrow' }, campButton(rerender)) : null),
     el('div', { class: 'party-grid' },
       el('div', { class: 'party-main' }, isGm() ? glanceTable(chars.filter(ACTIVE)) : null, members(chars), partyBondsSection(), advancementSection(),
