@@ -869,7 +869,7 @@ to the log at the bottom.
 489. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 490. [x] **What happens on the day.** A local holiday line can say what happens ("Founding Day, 5 Thawmoon 841 — a
     parade and a bonfire"), shown on the town's festival card and the calendar.
-491. [ ] **Market stalls.** On market day, a settlement's Market tab lists a few travelling stalls and what they
+491. [x] **Market stalls.** On market day, a settlement's Market tab lists a few travelling stalls and what they
     sell, the same all day (seeded by the town and the date).
 492. [ ] **Market-day crowds.** On market day the scene line says the square is busy with stalls.
 493. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
@@ -1369,3 +1369,4 @@ to the log at the bottom.
 - Holidays on the map: a settlement's pin says its next holiday within a month, its own local ones included ("🎉 The 200th Founding Day today: the shops are shut", "🎉 Midsummer in 4 days").
 - The week ahead in prep: each day of prep's week-ahead weather also says what's on in the party's town ("🧺 market day", "🎉 the 200th Founding Day", days off, birthdays).
 - What happens on the day: a local holiday line can end with a dash and what happens ("Founding Day, 5 Thawmoon 841 — a parade and a bonfire"); the town's festival card and the calendar day say it, and the form's check reads it back.
+- Market stalls: on market day (not a holiday) a settlement's Market tab lists travelling stalls in the square (two to six by the town's size), each keeper and a few goods at haggled prices, the same all day and different next market; Copy as text for a handout.

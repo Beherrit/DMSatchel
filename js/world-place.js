@@ -7,8 +7,9 @@ import { progressBadge } from './world-objectives.js';
 import { wildsSection, placeTerrains } from './encounter-ui.js';
 import { worldCalendar } from './world-calendar.js';
 import { dayWeather } from './forecast.js';
-import { toDays, today, cleanCalendar } from './calendar.js';
-import { openText, holidayToday, typicalHours } from './shop-hours.js';
+import { toDays, today, cleanCalendar, withLocal } from './calendar.js';
+import { openText, holidayToday, typicalHours, tradeDay, marketToday } from './shop-hours.js';
+import { marketStalls, stallsText } from './market-stalls.js';
 import { hhmm } from './clock.js';
 import { counterGap, whereNow, whereBits } from './world-routine.js';
 import { deadlineOf, deadlineText } from './deadline.js';
@@ -16,7 +17,7 @@ import { controllers } from './control.js';
 import { glanceOf } from './glance.js';
 import { visitedPlaces } from './visited.js';
 import { thumb } from './image-ui.js';
-import { el, toast, setKids } from './dom.js';
+import { el, toast, setKids, copyText } from './dom.js';
 import { isGm } from './api.js';
 import { KINDS, PLACE_KINDS, CHILD_PLACES } from './world-schema.js';
 import {
@@ -279,6 +280,7 @@ function marketSection(place, rerender) {
       typeSel, el('button', { class: 'btn primary small', type: 'button', onclick: openShop }, 'Open a shop'),
       shops.length ? el('button', { class: 'btn small ghost', type: 'button', onclick: restockAll }, `Restock all ${shops.length} at today’s prices`) : null) : null,
     slot,
+    stallsCard(place),
     shops.length ? el('div', {}, el('h4', {}, 'Shops'), openNowLine(shops), counterGaps(shops), el('ul', { class: 'entry-list' }, shops.map((e) => el('li', {}, link(e), el('span', { class: 'kind-tag' }, e.fields?.shop_type || e.fields?.type),
       (() => { const h = hoursNow(e); return h ? el('span', { class: `small shop-hours${h.open ? ' open' : ' shut'}` }, h.text) : null; })(),
       // Days off on the Market tab: a shop's weekly day off, and whether it trades on holidays.
@@ -286,6 +288,19 @@ function marketSection(place, rerender) {
         return off || hol ? el('span', { class: 'small muted shop-dayoff' }, [off ? `shut ${off.replace(/s$/i, '')}s` : '', hol ? 'open on holidays' : ''].filter(Boolean).join(' · ')) : null; })(),
       e.fields?.owner ? el('span', { class: 'muted small' }, e.fields.owner) : null,
       e.parent_id !== place.id && getEntry(e.parent_id) ? el('span', { class: 'muted small' }, 'in ', link(getEntry(e.parent_id))) : null)))) : el('p', { class: 'muted small' }, 'No shops yet.'));
+}
+
+// Market stalls: on the town's market day (not on a holiday), the travelling stalls in the square, the same all day.
+function stallsCard(place) {
+  if (place.kind !== 'settlement' || !place.fields?.market_day) return null;
+  const cal = withLocal(cleanCalendar(world.info?.cal), place);
+  if (!cal || !marketToday(place, tradeDay(cal))) return null;
+  const stalls = marketStalls(`${place.id}:${cal.year}-${cal.month}-${cal.day}`, place.fields?.size || 'Town');
+  if (!stalls.length) return null;
+  return el('div', { class: 'card market-stalls' }, el('div', { class: 'entry-head' }, el('h4', {}, `🧺 Market stalls today (${stalls.length})`),
+    el('button', { class: 'btn small ghost', type: 'button', onclick: () => copyText(`Market day in ${place.name}\n${stallsText(stalls)}`) }, 'Copy as text')),
+    el('ul', { class: 'plain small stall-list' }, stalls.map((st) => el('li', {}, el('strong', {}, st.name), el('span', { class: 'muted' }, ` (${st.keeper})`), ': ',
+      st.goods.map((g, i) => [i ? ', ' : '', `${g.name} `, el('span', { class: 'stall-price' }, g.price)])))));
 }
 
 // Open now: by the world's clock (and today's holiday), whether a shop is open, or null with no clock.
