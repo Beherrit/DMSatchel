@@ -11,6 +11,8 @@ import { journeyDays } from './journey.js';
 import { PRESETS, makeCalendar, cleanCalendar, toDays, fromDays, advance, today, formatDate, parseDate, moonPhase, moonEvent, holidaysOn, weekday, withLocal } from './calendar.js';
 import { namedIn } from './session-named.js';
 
+// The town the calendar shows local days for: '' (the party's town), a settlement's id, or 'none'.
+let calTown = '';
 const hName = (h) => (h.local ? `${h.name} (${h.local})` : h.name);
 import { partyTown, townShops } from './world-routine.js';
 import { dayInTown } from './week-in-town.js';
@@ -143,9 +145,19 @@ export function viewCalendar(arg, sub, rerender) {
   };
 
   // Market days: the party's town's market weekday, marked on the month (no market on a holiday).
-  const town = (() => { try { const t = partyTown(); return t?.kind === 'settlement' && t.fields?.market_day ? t : null; } catch { return null; } })();
-  const shopTown = (() => { try { const t = partyTown(); return t?.kind === 'settlement' ? t : null; } catch { return null; } })();
-  // Local holidays: the party's town's own festival days count on its calendar (marked with the town's name).
+  // Which town's days: the party's town by default, or another settlement picked above the month (its local holidays,
+  // market day and shops' days off), or none.
+  const party = (() => { try { const t = partyTown(); return t?.kind === 'settlement' ? t : null; } catch { return null; } })();
+  const towns = worldEntries().filter((e) => e.kind === 'settlement' && (e.fields?.holidays || e.fields?.market_day)).sort((a, b) => a.name.localeCompare(b.name));
+  const picked = calTown === 'none' ? null : calTown ? getEntry(calTown) : null;
+  const shopTown = calTown === 'none' ? null : picked?.kind === 'settlement' ? picked : party;
+  const town = shopTown?.fields?.market_day ? shopTown : null;
+  const townPick = towns.length && (towns.length > 1 || towns[0].id !== party?.id) ? el('label', { class: 'small cal-town' }, 'Town: ',
+    el('select', { 'aria-label': 'Whose local holidays and market days to show', onchange: (ev) => { calTown = ev.target.value; rerender(); } },
+      el('option', { value: '' }, party ? `Where the party is (${party.name})` : 'Where the party is'),
+      towns.filter((t) => t.id !== party?.id).map((t) => el('option', { value: t.id, selected: calTown === t.id }, t.name)),
+      el('option', { value: 'none', selected: calTown === 'none' }, 'No town'))) : null;
+  // Local holidays: the town's own festival days count on its calendar (marked with the town's name).
   const lcal = shopTown ? withLocal(cal, shopTown) : cal;
   const marketOn = (d) => !!town && !holidaysOn(lcal, d).length && isMarketDay(town, weekday(cal, d));
 
@@ -203,7 +215,7 @@ export function viewCalendar(arg, sub, rerender) {
       el('h3', {}, `${cal.months[shown.month].name} ${shown.year}${cal.era ? ` ${cal.era}` : ''}`),
       el('button', { class: 'btn small', type: 'button', 'aria-label': 'Next month', onclick: () => go(...next) }, '›'),
       shown.year !== now.year || shown.month !== now.month ? el('button', { class: 'btn small ghost', type: 'button', onclick: () => go(now.year, now.month) }, 'Today') : null,
-      el('button', { class: 'btn small ghost cal-print', type: 'button', onclick: printMonth }, 'Print this month')),
+      el('button', { class: 'btn small ghost cal-print', type: 'button', onclick: printMonth }, 'Print this month'), townPick),
     el('div', { class: 'cal-grid', style: `--cols:${cal.weekdays.length}` },
       cal.weekdays.map((w) => el('div', { class: 'cal-wd' }, w.slice(0, 3))), cells),
     monthList),
