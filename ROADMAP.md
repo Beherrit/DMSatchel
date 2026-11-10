@@ -925,7 +925,7 @@ to the log at the bottom.
 532. [x] **What these tools could make.** A character's page says what the artisan's tools in their pack can make.
 533. [x] **Done about.** An open crafting activity says about when it will be finished on the in-world calendar.
 534. [x] **Pay the cost.** Any downtime activity with a cost can have it taken from the character's purse by a GM.
-535. [ ] **Downtime totals.** A character's page totals the days and coin their downtime has taken.
+535. [x] **Downtime totals.** A character's page totals the days and coin their downtime has taken.
 536. [ ] **A new contact.** Resolving carousing or building contacts can start a new NPC who knows the character.
 537. [ ] **Anything this time?** The party page reminds players whose characters haven't filed downtime since the
     last session.
@@ -1472,3 +1472,4 @@ to the log at the bottom.
 - Done about: an open downtime activity with days still to go says when it should be finished on the in-world calendar ("done about 9 Thawmoon 1040"), on the downtime page and the character's page.
 - A full sweep (#489): all 511 browser tests clean against sweep #481, first time through.
 - Pay the cost: any downtime activity with a cost has a GM button to take it from the character's purse ("Take 10 gp from Ann", logged "Paid 10 gp for Carousing"), once; crafting with no cost written still takes the raw materials.
+- Downtime totals: a character's downtime section sums it up ("📊 3 activities, 9 days spent, 17 gp 5 sp in costs (10 gp paid)"), counting days done so far on open activities and crafting materials where no cost is written.

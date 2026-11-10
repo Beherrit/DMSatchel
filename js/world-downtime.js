@@ -156,5 +156,10 @@ export function downtimeSection(e) {
   if (!list.length && !canFile) return null;
   return el('section', { class: 'downtime-section' },
     el('div', { class: 'entry-head' }, el('h3', {}, 'Downtime'), canFile ? el('a', { class: 'btn small', href: `#world/downtime/${e.id}` }, 'File downtime') : null),
+    // Downtime totals: the days spent (or done so far) and what it has cost (and how much of that is paid).
+    (() => { if (list.length < 2) return null; let days = 0, cost = 0, paid = 0;
+      for (const d of list) { const f = d.fields || {}, n = f.resolved ? +f.days || 0 : Math.min(+f.done || 0, +f.days || +f.done || 0); days += n;
+        const c = parseCoins(f.cost) || (f.craft ? craftEstimate(f.craft)?.materialsCp || 0 : 0); cost += c; if (f.paid) paid += c; }
+      return el('p', { class: 'small muted downtime-totals' }, `📊 ${list.length} activities, ${days} day${days === 1 ? '' : 's'} spent${cost ? `, ${coinText(cost)} in costs${paid && paid < cost ? ` (${coinText(paid)} paid)` : paid ? ', all paid' : ''}` : ''}.`); })(),
     list.length ? el('ul', { class: 'downtime-list' }, list.map((d) => item(d, { showChar: false }))) : el('p', { class: 'muted small' }, 'Nothing yet. What do they do between sessions?'));
 }
