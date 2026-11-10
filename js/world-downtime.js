@@ -5,6 +5,8 @@ import { el, toast, setKids } from './dom.js';
 import { isGm, isMember, session } from './api.js';
 import { worldEntries, createEntry, patchEntry, getEntry, link, when, byName, richText, notice } from './world-store.js';
 import { DOWNTIME_ACTIVITIES } from './world-schema.js';
+import { worldCalendar } from './world-calendar.js';
+import { formatDate, fromDays, toDays, today } from './calendar.js';
 import { GOODS, coinText } from './economy.js';
 import { craftEstimate, hasTools } from './crafting.js';
 import { changePlay, playOf } from './sheet-ui.js';
@@ -20,6 +22,9 @@ function item(d, { showChar = true, resolve = null } = {}) {
   return el('li', { class: `card downtime-item${f.resolved ? ' is-resolved' : ' is-waiting'}${d.visibility === 'gm' ? ' is-hidden' : ''}` },
     el('div', { class: 'entry-head' }, el('div', {}, showChar && ch ? [link(ch), ' · '] : null, el('strong', {}, f.activity || 'Downtime'),
       f.days ? el('span', { class: 'muted small' }, f.done && !f.resolved ? ` · ${Math.min(+f.done, +f.days || +f.done)} of ${f.days} days` : ` · ${f.days} day${String(f.days) === '1' ? '' : 's'}`) : null, f.cost ? el('span', { class: 'muted small' }, ` · ${f.cost}`) : null),
+      // Done about: an open activity's finish, on the in-world calendar (today plus the days still to go).
+      (() => { const left = (+f.days || 0) - (+f.done || 0), cal = worldCalendar(); if (f.resolved || !(+f.days > 0) || left <= 0 || !cal) return null;
+        try { return el('span', { class: 'muted small done-about' }, ` · done about ${formatDate(cal, fromDays(cal, toDays(cal, today(cal)) + left))}`); } catch { return null; } })(),
       el('span', { class: `tag${f.resolved ? '' : ' waiting-tag'}` }, f.resolved ? 'Resolved' : +f.days > 0 && +f.done >= +f.days ? 'Ready to resolve' : 'Waiting for a GM')),
     // What's being crafted, with the SRD 5.2 estimate when it's on the price list.
     f.craft ? (() => { const e = craftEstimate(f.craft); return el('p', { class: 'small craft-line' }, `🔨 Making: ${f.craft}`, e ? el('span', { class: 'muted' }, ` (materials ${coinText(e.materialsCp)}, ${e.days} day${e.days === 1 ? '' : 's'} of work${e.tools ? `, ${e.tools}` : ''})`) : null); })() : null,

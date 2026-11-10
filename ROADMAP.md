@@ -923,7 +923,7 @@ to the log at the bottom.
 530. [x] **Could be crafted.** A wish for something on the price list says what crafting it would take.
 531. [x] **Craft it.** A craftable wish has a "Craft it" button that opens the downtime form ready to file.
 532. [x] **What these tools could make.** A character's page says what the artisan's tools in their pack can make.
-533. [ ] **Done about.** An open crafting activity says about when it will be finished on the in-world calendar.
+533. [x] **Done about.** An open crafting activity says about when it will be finished on the in-world calendar.
 
 ## Ideas parking lot
 
@@ -1464,3 +1464,4 @@ to the log at the bottom.
 - Could be crafted: an open wish for something on the price list says what making it would take ("🔨 Could be crafted: 2 days of work, materials 7 gp 5 sp, Smith’s tools").
 - Craft it: that wish has a "Craft it" button that opens the downtime form for the character, set to Crafting with the item filled in and its estimate showing.
 - What these tools could make: a character's page names the artisan's tools in their pack and a few things each could make, cheapest first ("🔨 With Smith’s tools, Ann could make Darts (10), Sickle, Dagger… and 23 more").
+- Done about: an open downtime activity with days still to go says when it should be finished on the in-world calendar ("done about 9 Thawmoon 1040"), on the downtime page and the character's page.
