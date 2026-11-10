@@ -7,7 +7,7 @@ import { worldEntries, createEntry, patchEntry, getEntry, link, when, byName, ri
 import { DOWNTIME_ACTIVITIES } from './world-schema.js';
 import { worldCalendar } from './world-calendar.js';
 import { formatDate, fromDays, toDays, today } from './calendar.js';
-import { GOODS, coinText } from './economy.js';
+import { GOODS, coinText, parseCoins } from './economy.js';
 import { craftEstimate, hasTools } from './crafting.js';
 import { changePlay, playOf } from './sheet-ui.js';
 import { giveItem } from './handover.js';
@@ -51,15 +51,17 @@ function resolveBox(d, after) {
       toast(`${f.craft} is in ${ch.name}’s pack`); after();
     } catch (err) { toast(err.message, 'bad'); }
   } }, `Put the ${f.craft} in ${ch.name}’s pack`) : f.handed ? el('span', { class: 'muted small' }, `✓ ${f.craft} handed over`) : null;
-  // Pay for the materials: the estimate's raw materials, taken from the crafter's purse (once), logged on their sheet.
-  const est = f.craft ? craftEstimate(f.craft) : null;
-  const pay = est && ch && !f.paid ? el('button', { class: 'btn small craft-pay', type: 'button', onclick: async () => {
+  // Pay the cost: the activity's cost (or, for crafting with none written, the estimate's raw materials), taken from the
+  // character's purse once and logged on their sheet.
+  const est = f.craft ? craftEstimate(f.craft) : null, written = parseCoins(f.cost);
+  const owed = written > 0 ? written : est ? est.materialsCp : 0, what = written > 0 ? `${f.activity || 'downtime'}${f.craft ? ` (${f.craft})` : ''}` : `materials (${f.craft})`;
+  const pay = owed > 0 && ch && !f.paid ? el('button', { class: 'btn small craft-pay', type: 'button', onclick: async () => {
     try {
-      await changePlay(ch, (p) => { if ((Number(p.cp) || 0) < est.materialsCp) throw new Error(`${ch.name} has only ${coinText(Number(p.cp) || 0)}; the materials cost ${coinText(est.materialsCp)}.`); p.cp -= est.materialsCp; }, `Paid ${coinText(est.materialsCp)} for materials (${f.craft})`);
+      await changePlay(ch, (p) => { if ((Number(p.cp) || 0) < owed) throw new Error(`${ch.name} has only ${coinText(Number(p.cp) || 0)}; it costs ${coinText(owed)}.`); p.cp -= owed; }, `Paid ${coinText(owed)} for ${what}`);
       await patchEntry(getEntry(d.id) || d, { fields: { paid: new Date().toISOString() } });
-      toast(`${coinText(est.materialsCp)} taken from ${ch.name}’s purse`); after();
+      toast(`${coinText(owed)} taken from ${ch.name}’s purse`); after();
     } catch (err) { toast(err.message, 'bad'); }
-  } }, `Take ${coinText(est.materialsCp)} for materials from ${ch.name}`) : f.paid && est ? el('span', { class: 'muted small' }, '✓ Materials paid') : null;
+  } }, written > 0 ? `Take ${coinText(owed)} from ${ch.name}` : `Take ${coinText(owed)} for materials from ${ch.name}`) : f.paid && owed > 0 ? el('span', { class: 'muted small' }, written > 0 ? '✓ Paid' : '✓ Materials paid') : null;
   return el('div', { class: 'downtime-resolve' }, text, el('div', { class: 'btnrow' }, el('button', { class: 'btn small primary', type: 'button', onclick: save }, d.fields?.resolved ? 'Update outcome' : 'Resolve'), pay, hand));
 }
 
