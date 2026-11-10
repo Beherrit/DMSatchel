@@ -5,6 +5,10 @@ import { isGm, session } from './api.js';
 import { getEntry, patchEntry, richText, worldEntries } from './world-store.js';
 import { readWishes, addWish, setGot, removeWish, wishersFor, wishBoard, oldWishlist } from './wishes.js';
 import { stockItems } from './purchase.js';
+import { craftEstimate } from './crafting.js';
+import { coinText } from './economy.js';
+import { setCraftPreset } from './world-downtime.js';
+import { stripMarks } from './rich.js';
 import { townShops, todaysStalls } from './world-routine.js';
 
 export function wishesSection(c, rerender) {
@@ -25,8 +29,12 @@ export function wishesSection(c, rerender) {
     order.length ? el('ul', { class: 'plain wish-list' }, order.map((w) => {
       const box = el('input', { type: 'checkbox', checked: w.got || null, 'aria-label': `Came true: ${w.text}` });
       box.addEventListener('change', () => save(setGot(list, w.id, box.checked), box.checked ? 'Wish come true!' : null));
+      // Could be crafted: a wish on the price list says what making it would take, with a button to file it as downtime.
+      const est = w.got ? null : craftEstimate(stripMarks(w.text));
       return el('li', { class: `wish${w.got ? ' got' : ''}` }, box, el('span', { class: 'wish-text' }, richText(w.text)),
-        el('button', { class: 'btn small ghost', type: 'button', 'aria-label': `Remove wish: ${w.text}`, onclick: () => save(removeWish(list, w.id)) }, '✕'));
+        el('button', { class: 'btn small ghost', type: 'button', 'aria-label': `Remove wish: ${w.text}`, onclick: () => save(removeWish(list, w.id)) }, '✕'),
+        est ? el('div', { class: 'small muted wish-craft' }, `🔨 Could be crafted: ${est.days} day${est.days === 1 ? '' : 's'} of work, materials ${coinText(est.materialsCp)}${est.tools ? `, ${est.tools}` : ''}. `,
+          el('button', { class: 'btn small ghost wish-craft-it', type: 'button', onclick: () => { setCraftPreset(c.id, est.name); location.hash = `#world/downtime/${c.id}`; } }, 'Craft it')) : null);
     })) : el('p', { class: 'muted small' }, 'Magic items, places, titles, people: what would this character love to find or earn? The GMs can weave it in.'),
     add,
     // An older plain-text wish list on this character: one click moves its lines into the wish list.

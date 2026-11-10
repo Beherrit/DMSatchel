@@ -920,8 +920,8 @@ to the log at the bottom.
 527. [x] **Got the tools?** The estimate checks the crafter's pack for those tools and says if they're missing.
 528. [x] **Pay for the materials.** A GM can take the raw materials' cost from the crafter's purse in one click.
 529. [x] **What the party has made.** The numbers page lists what the party has crafted.
-530. [ ] **Could be crafted.** A wish for something on the price list says what crafting it would take.
-531. [ ] **Craft it.** A craftable wish has a "Craft it" button that opens the downtime form ready to file.
+530. [x] **Could be crafted.** A wish for something on the price list says what crafting it would take.
+531. [x] **Craft it.** A craftable wish has a "Craft it" button that opens the downtime form ready to file.
 532. [ ] **What these tools could make.** A character's page says what the artisan's tools in their pack can make.
 533. [ ] **Done about.** An open crafting activity says about when it will be finished on the in-world calendar.
 
@@ -1461,3 +1461,5 @@ to the log at the bottom.
 - Pay for the materials: a crafting activity's GM box has "Take 7 gp 5 sp for materials from Ann", which takes the raw materials' cost from the purse (logged), refuses when they can't afford it, and marks it paid (GM-only) so it's only taken once.
 - What the party has made: the numbers page lists finished crafting ("🔨 Hooded lantern by Bo"), newest first.
 - A full sweep (#481): all 503 browser tests clean against sweep #469 (a block cut off when the preview server died, and a few load timeouts, pass on rerun; the new t-stallsame prints its own pass line).
+- Could be crafted: an open wish for something on the price list says what making it would take ("🔨 Could be crafted: 2 days of work, materials 7 gp 5 sp, Smith’s tools").
+- Craft it: that wish has a "Craft it" button that opens the downtime form for the character, set to Crafting with the item filled in and its estimate showing.

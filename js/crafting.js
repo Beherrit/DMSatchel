@@ -3,7 +3,8 @@
 // working together divide the days. Prices come from the SRD price list in economy.js. Pure.
 import { GOODS } from './economy.js';
 
-const norm = (s) => String(s || '').toLowerCase().replace(/\s+/g, ' ').trim();
+// (A leading "a", "an", "the" or "some" doesn't count, so a wish for "a longsword" finds the longsword.)
+const norm = (s) => String(s || '').toLowerCase().replace(/\s+/g, ' ').trim().replace(/^(a|an|the|some) /, '');
 
 // The good on the price list by name (exact, or the one it starts with). → { name, gp, category } or null.
 export function findGood(name, goods = GOODS) {

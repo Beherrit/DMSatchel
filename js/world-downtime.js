@@ -58,6 +58,11 @@ function resolveBox(d, after) {
   return el('div', { class: 'downtime-resolve' }, text, el('div', { class: 'btnrow' }, el('button', { class: 'btn small primary', type: 'button', onclick: save }, d.fields?.resolved ? 'Update outcome' : 'Resolve'), pay, hand));
 }
 
+// Craft it: a wish (or anything) can open the form ready to file crafting: setCraftPreset(characterId, item), then go
+// to #world/downtime/<character>. Used once.
+let craftPreset = null;
+export const setCraftPreset = (character, item) => { craftPreset = { character, item }; };
+
 function fileForm(after, preset) {
   const mine = worldEntries().filter((e) => e.kind === 'character' && ACTIVE(e) && (isGm() || e.owner_id === session.gm?.id)).sort(byName);
   if (!mine.length) return el('div', { class: 'card' }, el('p', { class: 'muted' }, isGm() ? 'There are no active player characters yet.' : 'Make or claim a character first, then you can file their downtime here.'),
@@ -91,6 +96,7 @@ function fileForm(after, preset) {
   const craftBox = el('div', { class: 'field wide craft-box' }, el('label', { for: 'dt-craft' }, 'Item to craft'), craft, craftList,
     el('div', { class: 'controls' }, el('label', { for: 'dt-helpers', class: 'small' }, 'Crafters'), helpers, use), estimate, toolNote);
   const showCraft = () => { craftBox.hidden = act.value !== 'Crafting'; showEstimate(); };
+  if (craftPreset && (!preset || craftPreset.character === preset)) { act.value = 'Crafting'; craft.value = craftPreset.item; craftPreset = null; }
   act.addEventListener('change', showCraft); showCraft();
   const priv = el('input', { type: 'checkbox', id: 'dt-private' });
   const status = el('p', { class: 'form-status', role: 'status' });

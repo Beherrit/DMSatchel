@@ -9,6 +9,7 @@ test('findGood: by name, or the start of it', () => {
   assert.equal(findGood('rope', goods).name, 'Rope (50 feet)');
   assert.equal(findGood('a flying carpet', goods), null);
   assert.equal(findGood('', goods), null);
+  assert.equal(findGood('a longsword', goods).name, 'Longsword');
 });
 
 test('craftEstimate: half the price in materials, price ÷ 10 days, divided among helpers', () => {
