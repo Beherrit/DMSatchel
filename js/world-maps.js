@@ -50,6 +50,8 @@ import { controllers, powerSlots } from './control.js';
 import { journey, chainOf, notePartyMove } from './world-journey.js';
 import { dayFor } from './world-hours.js';
 import { appearances, quoteOf, sessionsWith } from './appearances.js';
+import { moonlight } from './moonlight.js';
+import { skyHere } from './world-clock.js';
 
 // The party's place, then each place above it (for the party token).
 const partyChain = () => { const at = world.info?.party_at && getEntry(world.info.party_at); return at ? [at.id, ...trail(at).reverse().map((p) => p.id)] : []; };
@@ -141,6 +143,7 @@ export async function viewMap(id, focusPin) {
   const layer = el('div', { class: 'pin-layer' });
   // The map at another hour: minutes to preview (null: the world's own clock).
   let previewMin = null;
+  const nightLine = el('p', { class: 'small map-night', hidden: true, 'aria-live': 'polite' });
   const pop = el('div', { class: 'pin-pop', hidden: true });
   // Fog of war: one canvas pixel per cell, stretched over the map (the browser's smoothing softens the edges).
   const fogCanvas = el('canvas', { class: `fog-layer${isGm() ? ' gm' : ''}`, 'aria-hidden': 'true' });
@@ -442,6 +445,11 @@ export async function viewMap(id, focusPin) {
 
   function renderPins() { return previewMin === null ? renderPinsNow() : atMinutes(previewMin, renderPinsNow); }
   function renderPinsNow() {
+    // Night on the map: darker, and how much the moon lights it (follows an hour preview too).
+    const nm = nowMinutes(), night = nm !== null && (nm % 1440 >= 20 * 60 || nm % 1440 < 5 * 60), c = cleanCalendar(world.info?.cal);
+    viewport.classList.toggle('night', night);
+    const ml = night && c ? moonlight(c, today(c), skyHere()) : null;
+    nightLine.hidden = !night; nightLine.textContent = night ? `🌙 Night${ml ? `: ${ml.text}` : ''}.` : '';
     const q = filter.value.trim().toLowerCase();
     setKids(layer, ...partyMarks.map((m) => el('button', { class: 'pin mark party-mark', type: 'button', style: `left:${m.x * 100}%;top:${m.y * 100}%`, title: `${m.label} (${m.by})`, 'aria-label': `${m.by}’s marker: ${m.label}`,
       onclick: (ev) => { ev.stopPropagation(); partyMarkInfo(m); } }, el('span', { class: 'glyph', 'aria-hidden': 'true' }, '✦'), el('span', { class: 'pin-label' }, `${m.label} · ${m.by}`))),
@@ -654,7 +662,7 @@ export async function viewMap(id, focusPin) {
         try { await api('maps', { method: 'DELETE', query: { id: map.id } }); world.maps = (world.maps || []).filter((m) => m.id !== map.id); toast('Map deleted'); location.hash = 'world/maps'; }
         catch (err) { toast(err.message, 'bad'); }
       }, 'btn ghost small')) : null),
-    toolbar, holdKey, fogTools, measureBar, viewport, status,
+    toolbar, nightLine, holdKey, fogTools, measureBar, viewport, status,
     el('div', { class: 'map-side' }, mapKey(), el('h3', { class: 'section-title' }, 'Pins'), filter, list, myBox),
     el('p', { class: 'muted small' }, `Last changed ${whenTime(map.updated_at)}${map.updated_by ? ` by ${map.updated_by}` : ''}. Drag to pan; scroll, pinch or use + and − to zoom.`),
     nameList());

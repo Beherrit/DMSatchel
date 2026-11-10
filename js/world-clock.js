@@ -17,7 +17,7 @@ import { holidayToday, holidayTomorrow } from './shop-hours.js';
 import { moonlight } from './moonlight.js';
 
 // Tonight's sky where the party is (the same seeded weather as prep and the map), for the moonlight line.
-function skyHere() {
+export function skyHere() {
   const place = world.info?.party_at && getEntry(world.info.party_at);
   try { return place ? dayWeather(place.id, placeTerrains(place), worldCalendar()).sky || '' : ''; } catch { return ''; }
 }
