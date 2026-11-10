@@ -40,7 +40,7 @@ import { journeySection } from './world-journey.js';
 import { wishedBy } from './world-wishes.js';
 import { itemsNamed } from './play-cards.js';
 import { sceneFor } from './world-scene.js';
-import { openNowLine, partyTown } from './world-routine.js';
+import { openNowLine, partyTown, weekInTownBox } from './world-routine.js';
 import { nextMarket, inDaysText } from './week-in-town.js';
 import { cleanCalendar, withLocal } from './calendar.js';
 
@@ -383,6 +383,8 @@ export async function viewParty(rerender) {
       // Next market, for players: when the party's town next has its market (holidays skipped).
       (() => { const t = partyTown(), cal = withLocal(cleanCalendar(world.info?.cal), t), m = t?.kind === 'settlement' && cal ? nextMarket(cal, t) : null;
         return m ? el('p', { class: 'small party-market' }, `🧺 ${m.inDays === 0 ? `Market day in ${t.name} today` : `Next market in ${t.name}: ${m.weekday}, ${inDaysText(m.inDays)}`}.`) : null; })(),
+      // The week on the party page: the coming week in the party's town, folded away.
+      (() => { const t = partyTown(); return t ? weekInTownBox(t) : null; })(),
       // Last session, for players: which it was and who and what came up in it.
       (() => { const last = sessionOrder(worldEntries())[0]; if (!last) return null; const named = namedIn(last).filter((x) => x.kind !== 'character');
         // Write about the last session: a journal entry started with a link to it.
