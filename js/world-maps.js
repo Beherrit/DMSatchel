@@ -436,6 +436,11 @@ export async function viewMap(id, focusPin) {
   const namesBtn = el('button', { class: 'btn small', type: 'button', 'aria-pressed': 'false', title: 'Label each pin with who is there right now', onclick: () => {
     namesOn = !namesOn; namesBtn.setAttribute('aria-pressed', String(namesOn)); renderPins();
   } }, 'Who’s where');
+  // Only where people are: dim the place pins with nobody there right now.
+  let peopleOnly = false;
+  const peopleBtn = el('button', { class: 'btn small', type: 'button', 'aria-pressed': 'false', title: 'Dim the places with nobody there right now', onclick: () => {
+    peopleOnly = !peopleOnly; peopleBtn.setAttribute('aria-pressed', String(peopleOnly)); renderPins();
+  } }, 'Only where people are');
   // The map at another hour: preview who's where and what's open, without moving the world's clock.
   const hourOut = el('span', { class: 'small map-hour-out' }, 'now');
   const hourIn = el('input', { type: 'range', min: '0', max: '23', step: '1', value: String(Math.floor((world.info?.clock?.minutes ?? 480) / 60) % 24), 'aria-label': 'Preview the map at another hour' });
@@ -479,7 +484,7 @@ export async function viewMap(id, focusPin) {
       const hunted = around.some((x) => wantedIds.has(x.npc.entry.id));
       const said = `${p.label}${hours ? ` (${hours.text})` : ''}${here ? `, ${here} here now` : ''}${hunted ? ', someone wanted is here' : ''}`;
       return el('button', {
-        class: `pin pin-${p.icon || 'poi'}${p.secret ? ' secret' : ''}${hours && !hours.open ? ' shut' : ''}${p.entry_id && mapsOf(p.entry_id).some((m) => m.id !== map.id) ? ' has-map' : ''}${held ? ` held hold-${slot < 0 ? 'other' : slot}` : ''}`, type: 'button', 'data-id': p.id, style: `left:${p.x * 100}%;top:${p.y * 100}%`,
+        class: `pin pin-${p.icon || 'poi'}${p.secret ? ' secret' : ''}${hours && !hours.open ? ' shut' : ''}${peopleOnly && pe && PLACE_KINDS.includes(pe.kind) && !here ? ' empty' : ''}${p.entry_id && mapsOf(p.entry_id).some((m) => m.id !== map.id) ? ' has-map' : ''}${held ? ` held hold-${slot < 0 ? 'other' : slot}` : ''}`, type: 'button', 'data-id': p.id, style: `left:${p.x * 100}%;top:${p.y * 100}%`,
         title: held ? `${said}: held by ${held.by.name}` : said, 'aria-label': held ? `${said}, held by ${held.by.name}` : said, onclick: (ev) => { ev.stopPropagation(); showPin(p); },
       }, el('span', { class: 'glyph', 'aria-hidden': 'true' }, PIN_ICONS[p.icon || 'poi'][1]), el('span', { class: 'pin-label' }, p.label),
         here ? el('span', { class: 'pin-count', 'aria-hidden': 'true' }, String(here)) : null,
@@ -649,7 +654,7 @@ export async function viewMap(id, focusPin) {
     isMember() ? markBtn : null,
     map.miles ? measureBtn : null,
     journeyBtn,
-    holdBtn, namesBtn, hourBox, nowBtn,
+    holdBtn, namesBtn, peopleBtn, hourBox, nowBtn,
     scaleControl());
 
   const entry = map.entry_id && getEntry(map.entry_id);

@@ -1824,3 +1824,5 @@ details.quest-group > summary .section-title { display: inline }
 /* Night on the map (#457) */
 .map-viewport.night img { filter: brightness(.62) saturate(.8) }
 .map-night { margin: 4px 0 }
+/* Only where people are (#460) */
+.pin.empty { opacity: .3 } .pin.empty:hover, .pin.empty:focus-visible { opacity: 1 }
