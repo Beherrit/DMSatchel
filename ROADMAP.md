@@ -878,6 +878,12 @@ to the log at the bottom.
 495. [x] **Stalls on the GM sheet.** On market day the printable GM sheet lists the stalls in the party's town.
 496. [x] **A stall keeper as an NPC.** A GM can turn a stall's keeper into an NPC in the town with one click.
 497. [x] **Stalls on the party page.** On market day the party page lists the stalls in the party's town.
+498. [ ] **Weather on the calendar.** A calendar day's card in the coming week shows the forecast where the party is.
+499. [ ] **What the party bought.** The party page lists recent purchases from shops, stalls and taverns, from the
+    characters' logs.
+500. [ ] **Who writes the journals.** The numbers page shows how many journal entries each player has written and
+    for how many sessions in a row.
+501. [ ] **Coin spent.** The numbers page shows what each character has spent at shops, stalls and taverns.
 
 ## Ideas parking lot
 
