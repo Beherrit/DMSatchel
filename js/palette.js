@@ -10,8 +10,8 @@ import { nearWord, wordsOf } from './name-check.js';
 let M = null;
 async function loadData() {
   if (!M) {
-    const [rules, items, store, hours, calendar, wh, routine, appearances, week, wishes, orders, porder, guild, econ] = await Promise.all([import('./rules2024.js'), import('./magic-items.js'), import('./world-store.js'), import('./shop-hours.js'), import('./calendar.js'), import('./world-hours.js'), import('./world-routine.js'), import('./appearances.js'), import('./week-in-town.js'), import('./world-wishes.js'), import('./world-orders.js'), import('./party-order.js'), import('./world-guild.js'), import('./economy.js')]);
-    M = { ...rules, MAGIC_ITEMS: items.MAGIC_ITEMS, store, hours, calendar, wh, routine, appearances, week, wishes, orders, porder, guild, econ, changes: [] };
+    const [rules, items, store, hours, calendar, wh, routine, appearances, week, wishes, orders, porder, guild, econ, wlang, lang] = await Promise.all([import('./rules2024.js'), import('./magic-items.js'), import('./world-store.js'), import('./shop-hours.js'), import('./calendar.js'), import('./world-hours.js'), import('./world-routine.js'), import('./appearances.js'), import('./week-in-town.js'), import('./world-wishes.js'), import('./world-orders.js'), import('./party-order.js'), import('./world-guild.js'), import('./economy.js'), import('./world-languages.js'), import('./languages.js')]);
+    M = { ...rules, MAGIC_ITEMS: items.MAGIC_ITEMS, store, hours, calendar, wh, routine, appearances, week, wishes, orders, porder, guild, econ, wlang, lang, changes: [] };
     // Shipped changes (What's new), fetched alongside without holding the box up.
     Promise.all([import('./changelog.js'), fetch('/ROADMAP.md').then((r) => (r.ok ? r.text() : ''))])
       .then(([c, md]) => { M.changes = c.changelog(md); if (dialog?.open) render(); }).catch(() => {});
@@ -158,6 +158,15 @@ function render() {
     duesItems = M.guild.duesOwed().slice(0, 30).map((x) => ({ label: `${x.who.name}: ${M.econ.coinText(x.cp)}`, group: `Dues to ${x.org.name}`, href: `#world/e/${x.org.id}`, hint: `🏛 Owed for ${x.month}` }));
     if (!duesItems.length) duesItems = [{ label: 'No dues owed', group: 'Guilds', href: '#world/k/guild', hint: 'Everyone is paid up this month (or no guild names its dues)' }];
   }
+  // "Who speaks Elvish": the characters and NPCs who do (their "Languages" field, or a Forge character's sheet).
+  let langItems = [];
+  const sp = /^(?:who speaks|speaks|speakers of|who knows)\s+(.+)$/.exec(q);
+  if (sp) {
+    const tongue = sp[1].replace(/[?.]$/, '').trim();
+    langItems = M.store.worldEntries().filter((e) => ['character', 'npc'].includes(e.kind) && M.lang.speaks(M.wlang.languagesOfEntry(e), tongue)).sort((a, b) => a.kind.localeCompare(b.kind) || a.name.localeCompare(b.name)).slice(0, 30)
+      .map((e) => ({ label: e.name, group: `Speaks ${tongue[0].toUpperCase()}${tongue.slice(1)}`, href: `#world/e/${e.id}`, hint: `🗣 ${M.wlang.languagesOfEntry(e).join(', ')}` }));
+    if (!langItems.length) langItems = [{ label: `Nobody speaks ${tongue[0].toUpperCase()}${tongue.slice(1)}`, group: 'Languages', href: '#world/party', hint: 'No character or NPC lists it among their languages' }];
+  }
   // "Market": the towns with a market day, and when each is next (soonest first; holidays skipped), above the
   // ordinary matches for the word.
   let markets = [];
@@ -184,6 +193,7 @@ function render() {
   if (wishItems.length) items = [...wishItems, ...items].slice(0, 40);
   if (orderItems.length) items = [...orderItems, ...items].slice(0, 40);
   if (duesItems.length) items = [...duesItems, ...items].slice(0, 40);
+  if (langItems.length) items = [...langItems, ...items].slice(0, 40);
   // Nothing typed yet: the entries you opened last come first.
   if (!q) {
     let recent = [];

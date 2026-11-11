@@ -966,7 +966,7 @@ to the log at the bottom.
 567. [x] **Who can talk to them.** An NPC's page says which party members share a language with them, or that
     nobody does.
 568. [x] **The party's tongues.** The party page lists the languages the party speaks between them, and who speaks each.
-569. [ ] **Who speaks it?** Ctrl+K "who speaks Elvish" lists the characters and NPCs who do.
+569. [x] **Who speaks it?** Ctrl+K "who speaks Elvish" lists the characters and NPCs who do.
 
 ## Ideas parking lot
 
@@ -1545,3 +1545,4 @@ to the log at the bottom.
 - Languages: characters and NPCs have a "Languages" field (additive; any separators), and Forge characters' sheet languages count too.
 - Who can talk to them: an NPC's page says what they speak and who in the party (active characters and hirelings) shares a language ("🗣 Speaks Dwarvish, Giant. The party can talk with them: Bo (Dwarvish)."), or that nobody does.
 - The party's tongues: the party page folds out "🗣 Languages the party speaks", each language with who speaks it.
+- Who speaks it?: Ctrl+K "who speaks Elvish" (or "speaks Elvish") lists the characters and NPCs who do, with all their languages, or says nobody does.
