@@ -978,6 +978,10 @@ to the log at the bottom.
 576. [x] **Fulfilled.** A prophecy whose signs have all come to pass says so, and the numbers page lists prophecies
     and how close each is.
 577. [x] **Signs in the log.** Ticking a sign offers to note it in the latest session's log.
+578. [ ] **When it came to pass.** A sign ticked off keeps the in-world date it came to pass, shown beside it.
+579. [ ] **Prophecies in the palette.** Ctrl+K "omens" or "prophecies" lists them with how close each is.
+580. [ ] **Bound to a prophecy.** A quest linked to a prophecy says so, with how close the prophecy is.
+581. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 
 ## Ideas parking lot
 
