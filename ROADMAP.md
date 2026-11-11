@@ -972,6 +972,12 @@ to the log at the bottom.
 571. [x] **Languages on NPC cards.** The printable NPC cards show what each NPC speaks.
 572. [x] **Lost in translation.** Session prep's "Who's around" flags the NPCs nobody in the party can talk to.
 573. [x] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
+574. [ ] **Prophecies.** Lore can be a Prophecy with a list of signs (secret ones hidden from players), ticked off as
+    they come to pass.
+575. [ ] **Omens.** The front page shows the next sign still to come for each prophecy the players know.
+576. [ ] **Fulfilled.** A prophecy whose signs have all come to pass says so, and the numbers page lists prophecies
+    and how close each is.
+577. [ ] **Signs in the log.** Ticking a sign offers to note it in the latest session's log.
 
 ## Ideas parking lot
 
