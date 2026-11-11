@@ -7,6 +7,8 @@ import { worldCalendar } from './world-calendar.js';
 import { KINDS } from './world-schema.js';
 import { worldStats } from './world-stats.js';
 import { journalWriters } from './journal-streaks.js';
+import { isProphecy } from './world-objectives.js';
+import { readObjectives, progress } from './objectives.js';
 import { averageLength, lengthText } from './session-timer.js';
 import { spending, topGoods, spots, purchases } from './purchases.js';
 import { coinText } from './economy.js';
@@ -60,6 +62,9 @@ export function viewNumbers() {
       (() => { const made = worldEntries().filter((d) => d.kind === 'downtime' && d.fields?.craft && (d.fields.resolved || d.fields.handed)).sort((a, b) => String(b.fields.resolved || b.updated_at).localeCompare(String(a.fields.resolved || a.updated_at)));
         return made.length ? el('section', { class: 'card num-card crafted' }, el('h3', {}, `What the party has made (${made.length})`),
           el('ul', { class: 'num-list plain-list' }, made.slice(0, 10).map((d) => { const c = getEntry(d.fields.character); return el('li', {}, `🔨 ${d.fields.craft}`, el('span', { class: 'muted small' }, ' by '), c ? link(c) : 'someone'); }))) : null; })(),
+      // Prophecies: how close each is, by its signs come to pass.
+      ranked('Prophecies', worldEntries().filter(isProphecy).map((p) => [p, progress(readObjectives(p))]).filter(([, pr]) => pr.total).sort((a, b) => b[1].pct - a[1].pct || a[0].name.localeCompare(b[0].name)).slice(0, 8),
+        (pr) => (pr.done === pr.total ? '✨ fulfilled' : `${pr.done} of ${pr.total} signs`)),
       ranked('Busiest places', s.busiestPlaces, (n) => `${n} inside`),
       ranked('Who has written the most', s.writers, (n) => plural(n, 'entry', 'entries')),
       el('section', { class: 'card num-card' }, el('h3', {}, 'Records'),

@@ -2,7 +2,7 @@
 // progress badge for quest boards and the party page.
 import { el, toast } from './dom.js';
 import { isGm } from './api.js';
-import { getEntry, patchEntry, richText, worldEntries } from './world-store.js';
+import { getEntry, patchEntry, richText, richInline, worldEntries } from './world-store.js';
 import { sessionOrder } from './appearances.js';
 import { stripMarks } from './rich.js';
 import { readObjectives, progress, addObjective, updateObjective, removeObjective, moveObjective } from './objectives.js';
@@ -35,6 +35,8 @@ export function objectivesSection(q, rerender) {
   add?.addEventListener('submit', (ev) => { ev.preventDefault(); if (!text.value.trim()) { text.focus(); return; } save(addObjective(list, text.value, secret.checked)); });
   return el('section', { class: 'card objectives' },
     el('div', { class: 'entry-head' }, el('h3', {}, W.title), list.length ? el('span', { class: 'muted small' }, `${p.done} of ${p.total} ${W.done}`) : null),
+    // Fulfilled: every sign has come to pass.
+    signs && p.total && p.done === p.total ? el('p', { class: 'prophecy-fulfilled' }, el('strong', {}, '✨ Fulfilled: '), 'every sign has come to pass.') : null,
     list.length ? el('div', { class: 'obj-bar big', role: 'progressbar', 'aria-valuemin': 0, 'aria-valuemax': p.total, 'aria-valuenow': p.done, 'aria-label': W.bar }, el('span', { style: `width:${p.pct}%` })) : null,
     list.length ? el('ol', { class: 'obj-list' }, list.map((o, i) => el('li', { class: `${o.done ? 'done' : ''}${o.secret ? ' is-secret' : ''}` },
       gm ? el('input', { type: 'checkbox', checked: o.done || null, 'aria-label': `${W.tick}: ${o.text}`, onchange: async (ev) => { const done = ev.target.checked; await save(updateObjective(list, o.id, { done })); if (signs && done) noteSign(q, o.text); } })
@@ -55,4 +57,14 @@ async function noteSign(prophecy, text) {
   if (!last || !confirm(`Note it in ${last.name}’s log?`)) return;
   const line = `A sign came to pass ([[${prophecy.name}]]): ${stripMarks(text)}`;
   try { await patchEntry(getEntry(last.id) || last, { body: `${String(last.body || '').replace(/\s+$/, '')}${last.body ? '\n\n' : ''}${line}` }); toast(`Noted in ${last.name}`); } catch (err) { toast(err.message, 'bad'); }
+}
+
+// Omens: on the front page, each prophecy this person knows, with the next sign still to come (what they can see of it).
+export function omensCard() {
+  const ps = worldEntries().filter(isProphecy).map((p) => ({ p, list: readObjectives(p) })).filter((x) => x.list.length);
+  if (!ps.length) return null;
+  return el('section', { class: 'card omens' }, el('h3', {}, '🔮 Omens'),
+    el('ul', { class: 'plain small' }, ps.map(({ p, list }) => { const pr = progress(list), next = list.find((o) => !o.done);
+      return el('li', {}, el('a', { href: `#world/e/${p.id}` }, p.name), el('span', { class: 'muted' }, ` (${pr.done} of ${pr.total})`), ': ',
+        next ? ['still to come: ', richInline(next.text)] : el('strong', {}, 'fulfilled')); })));
 }

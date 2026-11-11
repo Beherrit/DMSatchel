@@ -974,8 +974,8 @@ to the log at the bottom.
 573. [x] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 574. [x] **Prophecies.** Lore can be a Prophecy with a list of signs (secret ones hidden from players), ticked off as
     they come to pass.
-575. [ ] **Omens.** The front page shows the next sign still to come for each prophecy the players know.
-576. [ ] **Fulfilled.** A prophecy whose signs have all come to pass says so, and the numbers page lists prophecies
+575. [x] **Omens.** The front page shows the next sign still to come for each prophecy the players know.
+576. [x] **Fulfilled.** A prophecy whose signs have all come to pass says so, and the numbers page lists prophecies
     and how close each is.
 577. [x] **Signs in the log.** Ticking a sign offers to note it in the latest session's log.
 
@@ -1563,3 +1563,5 @@ to the log at the bottom.
 - A full sweep (#573): all 543 browser tests clean against sweep #557, first time through (covering guild dues, the session timer and languages); accessibility still clean light and dark.
 - Prophecies: lore has a "Prophecy" category, and a prophecy's page has "Signs", a checklist like a quest's objectives ("2 of 3 come to pass"): GMs add, hide, reveal and tick signs; players never receive the secret ones (the server leaves them out).
 - Signs in the log: ticking a sign as come to pass offers to note it in the latest session's log ("A sign came to pass ([[The Drowned Bell]]): The bells ring with no one to ring them").
+- Omens: the world's front page has "🔮 Omens": each prophecy this person knows, with the next sign still to come ("The Drowned Bell (1 of 2): still to come: A red moon").
+- Fulfilled: a prophecy whose signs have all come to pass says "✨ Fulfilled" on its page and in the omens, and the numbers page lists prophecies by how close each is.

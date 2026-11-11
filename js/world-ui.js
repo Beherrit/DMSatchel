@@ -28,7 +28,7 @@ import { recapButton } from './world-recap.js';
 import { showButton, checkShown } from './world-show.js';
 import { attitudesOfCharacter, attitudesToward } from './world-attitudes.js';
 import { noteBox, myNotesSection } from './world-notes.js';
-import { objectivesSection } from './world-objectives.js';
+import { objectivesSection, omensCard } from './world-objectives.js';
 import { whatsNewCard } from './world-whatsnew.js';
 import { attendanceSection } from './world-attendance.js';
 import { revealButton } from './world-reveal.js';
@@ -260,6 +260,7 @@ function viewHome() {
     previouslyCard(),
     readingCard(),
     onThisDayCard(),
+    omensCard(),
     aroundPartyCard(),
     quoteCard(),
     // Open for newcomers (no earlier visit, or session zero not read yet), folded for everyone else.
