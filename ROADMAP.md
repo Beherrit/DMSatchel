@@ -959,8 +959,8 @@ to the log at the bottom.
 561. [x] **Dues in the palette.** Ctrl+K "dues" lists the dues still owed this month.
 562. [x] **Session timer.** Session prep has a timer the GM starts when play begins and stops at the end; it can save
     how long the session ran to its log.
-563. [ ] **How long it ran.** Session pages and the session list show how long each session ran.
-564. [ ] **Average session.** The numbers page shows how long sessions run on average.
+563. [x] **How long it ran.** Session pages and the session list show how long each session ran.
+564. [x] **Average session.** The numbers page shows how long sessions run on average.
 565. [x] **Time for a break.** The running timer suggests a break every ninety minutes.
 
 ## Ideas parking lot
@@ -1535,3 +1535,5 @@ to the log at the bottom.
 - Dues in the palette: Ctrl+K "dues" lists the dues still owed this month, each opening the guild.
 - Session timer: session prep has "⏱ Session timer": start it when play begins, and "Stop and save to Session 12" saves how long it ran to that session's new "How long it ran" field (additive); it's kept in the GM's browser, per world, so a reload doesn't lose it.
 - Time for a break: the running timer suggests a break every ninety minutes ("☕ 1 h 30 min in: time for a short break?"), until the GM marks it done.
+- How long it ran: a session's page shows its length, and the session list adds " · ran 4 h 20 min" (lengths written by hand read too: "3h", "2.5 hours", "3:15").
+- Average session: the numbers page has an "Average session" tile ("3 h 40 min, over 2 sessions").
