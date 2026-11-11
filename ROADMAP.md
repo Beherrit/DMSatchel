@@ -952,7 +952,7 @@ to the log at the bottom.
     beside the NPC members it already shows.
 555. [x] **Dues due.** A guild with dues ("5 gp a month") says what its member characters owe each in-world month.
 556. [x] **Pay the dues.** A GM can take a member's dues from their purse in one click, logged.
-557. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
+557. [x] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 
 ## Ideas parking lot
 
@@ -1519,3 +1519,4 @@ to the log at the bottom.
 - Guild members: a guild's (or faction's or clan's) page has "Members of the party", the player characters connected to it either way, beside the NPC members it already showed.
 - Dues due: when a guild's "Dues & benefits" names an amount and a period ("5 gp a month", "2 sp per tenday", "50 gp a year"), each member says what they owe for this in-world month, or that it's paid (read from their sheet's log, so nothing new is stored).
 - Pay the dues: GMs get "Take the dues" beside each member who owes, which takes the month's dues from their purse (refusing when they can't pay) and logs "Paid 5 gp dues to the Masons for Thawmoon 1040".
+- A full sweep (#557): all 535 browser tests clean against sweep #545, first time through (the four new checks print their own results: no accessibility violations light or dark, and the big-world pages all under 200 ms).
