@@ -1,6 +1,8 @@
 // NPC table cards: a compact card per NPC (who they are, how they sound, what they want, a stat line, how they feel
 // about the party and, for GMs, their secret) to print as a set. Route: #world/cards/<place id> · /prep · /n:<npc id>
 import { el, setKids } from './dom.js';
+import { languagesOfEntry, partySpeakers } from './world-languages.js';
+import { sharedWith } from './languages.js';
 import { api, isGm } from './api.js';
 import { worldEntries, getEntry, descendantsOf, byName, notice, link, mentions } from './world-store.js';
 import { appearances, quoteOf } from './appearances.js';
@@ -30,6 +32,9 @@ export function npcCard(e, { gm = isGm(), onRemove } = {}) {
     row('Looks', f.appearance, 120), row('Voice', f.voice, 110), row('Manner', f.personality, 130), row('Wants', f.wants, 130),
     // Where they'll be: their usual day (hirelings go with the party), and any bounty on their head.
     (() => { const d = isHired(e) ? 'with the party' : dayLine(f.routine); return d ? el('p', { class: 'small npc-card-day' }, el('strong', {}, 'Day: '), cut(d, 140)) : null; })(),
+    // Languages on NPC cards: what they speak, flagged when nobody in the party shares one.
+    (() => { const ls = languagesOfEntry(e); if (!ls.length) return null; const party = partySpeakers(), none = party.length && !sharedWith(ls, party).length;
+      return el('p', { class: 'small npc-card-langs' }, el('strong', {}, '🗣 Speaks: '), ls.join(', '), none ? el('em', {}, ' (nobody in the party does)') : null); })(),
     (() => { const b = String(f.bounty || '').trim() && openBounties([e])[0]; return b ? el('p', { class: 'small npc-card-bounty' }, el('strong', {}, '🎯 Wanted: '), b.text, b.by ? ` (${b.by})` : '') : null; })(),
     statLine(e) ? el('p', { class: 'npc-card-stats' }, cut(statLine(e), 140)) : null,
     att.length ? el('p', { class: 'small' }, el('strong', {}, 'Feels about: '), att.map((x) => `${x.character.name} ${x.a.toLowerCase()}`).join(', ')) : null,
