@@ -10,8 +10,8 @@ import { nearWord, wordsOf } from './name-check.js';
 let M = null;
 async function loadData() {
   if (!M) {
-    const [rules, items, store, hours, calendar, wh, routine, appearances, week, wishes, orders, porder, guild, econ, wlang, lang] = await Promise.all([import('./rules2024.js'), import('./magic-items.js'), import('./world-store.js'), import('./shop-hours.js'), import('./calendar.js'), import('./world-hours.js'), import('./world-routine.js'), import('./appearances.js'), import('./week-in-town.js'), import('./world-wishes.js'), import('./world-orders.js'), import('./party-order.js'), import('./world-guild.js'), import('./economy.js'), import('./world-languages.js'), import('./languages.js')]);
-    M = { ...rules, MAGIC_ITEMS: items.MAGIC_ITEMS, store, hours, calendar, wh, routine, appearances, week, wishes, orders, porder, guild, econ, wlang, lang, changes: [] };
+    const [rules, items, store, hours, calendar, wh, routine, appearances, week, wishes, orders, porder, guild, econ, wlang, lang, objs] = await Promise.all([import('./rules2024.js'), import('./magic-items.js'), import('./world-store.js'), import('./shop-hours.js'), import('./calendar.js'), import('./world-hours.js'), import('./world-routine.js'), import('./appearances.js'), import('./week-in-town.js'), import('./world-wishes.js'), import('./world-orders.js'), import('./party-order.js'), import('./world-guild.js'), import('./economy.js'), import('./world-languages.js'), import('./languages.js'), import('./objectives.js')]);
+    M = { ...rules, MAGIC_ITEMS: items.MAGIC_ITEMS, store, hours, calendar, wh, routine, appearances, week, wishes, orders, porder, guild, econ, wlang, lang, objs, changes: [] };
     // Shipped changes (What's new), fetched alongside without holding the box up.
     Promise.all([import('./changelog.js'), fetch('/ROADMAP.md').then((r) => (r.ok ? r.text() : ''))])
       .then(([c, md]) => { M.changes = c.changelog(md); if (dialog?.open) render(); }).catch(() => {});
@@ -167,6 +167,14 @@ function render() {
       .map((e) => ({ label: e.name, group: `Speaks ${tongue[0].toUpperCase()}${tongue.slice(1)}`, href: `#world/e/${e.id}`, hint: `🗣 ${M.wlang.languagesOfEntry(e).join(', ')}` }));
     if (!langItems.length) langItems = [{ label: `Nobody speaks ${tongue[0].toUpperCase()}${tongue.slice(1)}`, group: 'Languages', href: '#world/party', hint: 'No character or NPC lists it among their languages' }];
   }
+  // "Omens" / "prophecies": the prophecies this person knows, with how close each is and the next sign to come.
+  let omenItems = [];
+  if (/^(omens?|prophec(y|ies)|signs)$/.test(q)) {
+    omenItems = M.store.worldEntries().filter((e) => e.kind === 'lore' && e.fields?.category === 'Prophecy').map((e) => ({ e, list: M.objs.readObjectives(e) }))
+      .map(({ e, list }) => { const pr = M.objs.progress(list), next = list.find((o) => !o.done);
+        return { pr, item: { label: e.name, group: 'Prophecy', href: `#world/e/${e.id}`, hint: pr.total ? (pr.done === pr.total ? '✨ Fulfilled' : `🔮 ${pr.done} of ${pr.total} signs · next: ${next.text.replace(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g, (_, a, b) => b || a).slice(0, 60)}`) : '🔮 No signs yet' } }; })
+      .sort((a, b) => b.pr.pct - a.pr.pct).map((x) => x.item).slice(0, 20);
+  }
   // "Market": the towns with a market day, and when each is next (soonest first; holidays skipped), above the
   // ordinary matches for the word.
   let markets = [];
@@ -194,6 +202,7 @@ function render() {
   if (orderItems.length) items = [...orderItems, ...items].slice(0, 40);
   if (duesItems.length) items = [...duesItems, ...items].slice(0, 40);
   if (langItems.length) items = [...langItems, ...items].slice(0, 40);
+  if (omenItems.length) items = [...omenItems, ...items].slice(0, 40);
   // Nothing typed yet: the entries you opened last come first.
   if (!q) {
     let recent = [];

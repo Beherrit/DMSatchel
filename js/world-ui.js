@@ -28,7 +28,7 @@ import { recapButton } from './world-recap.js';
 import { showButton, checkShown } from './world-show.js';
 import { attitudesOfCharacter, attitudesToward } from './world-attitudes.js';
 import { noteBox, myNotesSection } from './world-notes.js';
-import { objectivesSection, omensCard } from './world-objectives.js';
+import { objectivesSection, omensCard, boundLine } from './world-objectives.js';
 import { whatsNewCard } from './world-whatsnew.js';
 import { attendanceSection } from './world-attendance.js';
 import { revealButton } from './world-reveal.js';
@@ -447,6 +447,7 @@ function viewEntry(id, tab) {
     e.kind === 'character' ? downtimeSection(e) : null,
     attitudesToward(e, rerenderWorld),
     rewardCard(e, rerenderWorld),
+    boundLine(e),
     objectivesSection(e, rerenderWorld),
     chainSection(e, rerenderWorld),
     tableSection(e),

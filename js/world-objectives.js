@@ -65,6 +65,16 @@ async function noteSign(prophecy, text) {
   try { await patchEntry(getEntry(last.id) || last, { body: `${String(last.body || '').replace(/\s+$/, '')}${last.body ? '\n\n' : ''}${line}` }); toast(`Noted in ${last.name}`); } catch (err) { toast(err.message, 'bad'); }
 }
 
+// Bound to a prophecy: on a quest's page, the prophecies it's linked with (either way), and how close each is.
+export function boundLine(q) {
+  if (q.kind !== 'quest') return null;
+  const ids = new Set([...(q.links || []).map((l) => l.id), ...worldEntries().filter((e) => (e.links || []).some((l) => l.id === q.id)).map((e) => e.id)]);
+  const ps = [...ids].map(getEntry).filter(isProphecy);
+  if (!ps.length) return null;
+  return el('p', { class: 'small bound-line' }, '🔮 Bound to ', ps.map((p, i) => { const pr = progress(readObjectives(p));
+    return [i ? ', ' : '', el('a', { href: `#world/e/${p.id}` }, p.name), el('span', { class: 'muted' }, pr.total ? (pr.done === pr.total ? ' (fulfilled)' : ` (${pr.done} of ${pr.total} signs)`) : '')]; }), '.');
+}
+
 // Omens: on the front page, each prophecy this person knows, with the next sign still to come (what they can see of it).
 export function omensCard() {
   const ps = worldEntries().filter(isProphecy).map((p) => ({ p, list: readObjectives(p) })).filter((x) => x.list.length);
