@@ -151,7 +151,9 @@ export const KINDS = {
   },
   lore: {
     label: 'Lore', plural: 'Lore & Rules', blurb: 'Myths, cultures, languages, calendars and house rules.',
-    fields: [['category', 'Category', 'select', ['History', 'Myth', 'Culture', 'Language', 'Calendar', 'Cosmology', 'Magic', 'House rule', 'Other']], ['source', 'Who knows this']],
+    fields: [['category', 'Category', 'select', ['History', 'Myth', 'Culture', 'Language', 'Calendar', 'Cosmology', 'Magic', 'House rule', 'Prophecy', 'Other']], ['source', 'Who knows this'],
+      // A prophecy's signs: a checklist like a quest's objectives (secret ones stay with the GMs).
+      ['objectives', 'Signs', 'hidden', null, { gmOnly: true }]],
   },
 };
 
