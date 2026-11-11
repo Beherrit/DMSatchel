@@ -37,6 +37,7 @@ import { partyRows, worries } from './party-glance.js';
 import { aroundNow, festivalLine, wantedPrepLine, whereNow, whereBits, townWeek, partyTown } from './world-routine.js';
 import { partyWishes } from './world-wishes.js';
 import { timerCard } from './world-timer.js';
+import { tongueFlag } from './world-languages.js';
 import { nextMarket, inDaysText, weekDayText } from './week-in-town.js';
 import { waitingOnGm } from './waiting.js';
 import { giftsSince, giftWhat } from './gifts.js';
@@ -183,9 +184,9 @@ function whereSection(prep, rerender) {
       el('div', {}, (() => {
         // Who's around for the scene: NPCs whose daily routine puts them here (or somewhere inside) right now.
         const a = aroundNow(here);
-        return a?.list.length ? [el('h4', {}, `Around now (${hhmm(a.m)})`), list(a.list, ({ npc, place, until }) => [link(npc.entry), place.id === here.id ? null : el('span', { class: 'small' }, [' at ', link(place)]), until !== null ? el('span', { class: 'muted small' }, ` until ${hhmm(until)}`) : null])] : null;
+        return a?.list.length ? [el('h4', {}, `Around now (${hhmm(a.m)})`), list(a.list, ({ npc, place, until }) => [link(npc.entry), tongueFlag(npc.entry), place.id === here.id ? null : el('span', { class: 'small' }, [' at ', link(place)]), until !== null ? el('span', { class: 'muted small' }, ` until ${hhmm(until)}`) : null])] : null;
       })(), el('h4', {}, `People (${people.length})`),
-        people.length ? list([...key, ...people.filter((p) => !key.includes(p))].slice(0, 12), (p) => [link(p), el('span', { class: 'muted small' }, ` ${p.fields?.role || ''}`), key.includes(p) ? el('span', { class: 'tag' }, 'key') : null, attitudeLine(p) ? el('div', {}, attitudeLine(p)) : null])
+        people.length ? list([...key, ...people.filter((p) => !key.includes(p))].slice(0, 12), (p) => [link(p), el('span', { class: 'muted small' }, ` ${p.fields?.role || ''}`), key.includes(p) ? el('span', { class: 'tag' }, 'key') : null, tongueFlag(p), attitudeLine(p) ? el('div', {}, attitudeLine(p)) : null])
           : empty('Nobody recorded here.'),
         people.length > 12 ? el('a', { class: 'small', href: `#world/e/${here.id}/people` }, `All ${people.length}`) : null),
       el('div', {}, el('h4', {}, `Jobs on the board (${jobs.length})`),

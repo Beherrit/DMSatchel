@@ -1834,3 +1834,4 @@ details.quest-group > summary .section-title { display: inline }
 .wish-pill { color: var(--brass); font-weight: 600 }
 /* The orders editor's arrows: comfortable to tap on a phone. */
 @media (max-width: 640px) { .order-edit { counter-reset: ord } .order-edit button { min-width: 40px; min-height: 36px } .order-edit li { display: flex; align-items: center; gap: 4px } .order-edit li::before { counter-increment: ord; content: counter(ord) "."; color: var(--muted); min-width: 1.4em } .order-edit .check { flex: 1 } }
+.tongue-flag { margin-left: .4em }

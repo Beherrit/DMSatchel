@@ -40,3 +40,11 @@ export function tonguesCard() {
   return el('details', { class: 'party-tongues' }, el('summary', {}, `🗣 Languages the party speaks (${t.length})`),
     el('ul', { class: 'plain small' }, t.map((x) => el('li', {}, el('strong', {}, `${x.language}: `), x.speakers.map((w, i) => [i ? ', ' : '', link(w)])))));
 }
+
+// Lost in translation: a small flag for an NPC nobody in the party can talk to (or null).
+export function tongueFlag(npc) {
+  if (npc?.kind !== 'npc' || isHired(npc)) return null;
+  const mine = languagesOfEntry(npc); if (!mine.length) return null;
+  const party = partySpeakers(); if (!party.length || sharedWith(mine, party).length) return null;
+  return el('span', { class: 'tag tongue-flag', title: `Speaks ${mine.join(', ')}; nobody in the party does` }, '🗣 no common tongue');
+}
