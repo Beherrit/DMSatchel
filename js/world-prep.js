@@ -36,6 +36,7 @@ import { shoppingPrepCard } from './world-shopping.js';
 import { partyRows, worries } from './party-glance.js';
 import { aroundNow, festivalLine, wantedPrepLine, whereNow, whereBits, townWeek, partyTown } from './world-routine.js';
 import { partyWishes } from './world-wishes.js';
+import { timerCard } from './world-timer.js';
 import { nextMarket, inDaysText, weekDayText } from './week-in-town.js';
 import { waitingOnGm } from './waiting.js';
 import { giftsSince, giftWhat } from './gifts.js';
@@ -375,6 +376,7 @@ export async function viewPrep(rerender) {
   return el('div', { class: 'w-view prep-view' },
     el('div', { class: 'panel-head row' }, el('div', {}, el('h2', {}, `Prep for session ${next}`), el('p', {}, 'Everything you need before the table: where things stand, what’s about to happen, and your notes.')),
       el('div', { class: 'btnrow' }, recapButton('btn'), el('a', { class: 'btn', href: '#world/sheet' }, 'Printable sheet'), el('a', { class: 'btn', href: '#world/cards/prep' }, 'NPC cards'), el('button', { class: 'btn primary', type: 'button', onclick: startSession(prep) }, `Start session ${next}`))),
+    timerCard(rerender),
     el('div', { class: 'btnrow prep-actions' }, el('span', { class: 'muted small' }, 'Between sessions:'),
       el('a', { class: 'btn small', href: '#world/clocks' }, 'Faction turn'),
       el('button', { class: 'btn small', type: 'button', onclick: async () => { await letRumorsSpread(); rerender(); } }, 'Let rumors spread'),

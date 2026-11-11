@@ -957,11 +957,11 @@ to the log at the bottom.
 559. [x] **Ranks.** A member's rank in a guild comes from the link's label ("journeyman of"), shown on the members list.
 560. [x] **My guilds.** A character's page lists their guilds (and factions and clans), with their rank and dues.
 561. [x] **Dues in the palette.** Ctrl+K "dues" lists the dues still owed this month.
-562. [ ] **Session timer.** Session prep has a timer the GM starts when play begins and stops at the end; it can save
+562. [x] **Session timer.** Session prep has a timer the GM starts when play begins and stops at the end; it can save
     how long the session ran to its log.
 563. [ ] **How long it ran.** Session pages and the session list show how long each session ran.
 564. [ ] **Average session.** The numbers page shows how long sessions run on average.
-565. [ ] **Time for a break.** The running timer suggests a break every ninety minutes.
+565. [x] **Time for a break.** The running timer suggests a break every ninety minutes.
 
 ## Ideas parking lot
 
@@ -1533,3 +1533,5 @@ to the log at the bottom.
 - Ranks: a member's rank comes from the label on the link between them ("journeyman of" → Journeyman, "spy for" → Spy; plain "member of" gives none), shown on the guild's members list.
 - My guilds: a character's page says what they belong to, with rank and this month's dues ("🏛 Belongs to the Masons (Journeyman) · owes 5 gp for Thawmoon 1040").
 - Dues in the palette: Ctrl+K "dues" lists the dues still owed this month, each opening the guild.
+- Session timer: session prep has "⏱ Session timer": start it when play begins, and "Stop and save to Session 12" saves how long it ran to that session's new "How long it ran" field (additive); it's kept in the GM's browser, per world, so a reload doesn't lose it.
+- Time for a break: the running timer suggests a break every ninety minutes ("☕ 1 h 30 min in: time for a short break?"), until the GM marks it done.
