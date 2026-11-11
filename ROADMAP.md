@@ -953,6 +953,10 @@ to the log at the bottom.
 555. [x] **Dues due.** A guild with dues ("5 gp a month") says what its member characters owe each in-world month.
 556. [x] **Pay the dues.** A GM can take a member's dues from their purse in one click, logged.
 557. [x] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
+558. [ ] **Dues on the party page.** The party page lists guild dues still owed this month (players: their own).
+559. [ ] **Ranks.** A member's rank in a guild comes from the link's label ("journeyman of"), shown on the members list.
+560. [ ] **My guilds.** A character's page lists their guilds (and factions and clans), with their rank and dues.
+561. [ ] **Dues in the palette.** Ctrl+K "dues" lists the dues still owed this month.
 
 ## Ideas parking lot
 
