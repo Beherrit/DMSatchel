@@ -948,6 +948,11 @@ to the log at the bottom.
     eight hours).
 552. [x] **Orders in the palette.** Ctrl+K "marching" or "watch" shows the party's orders.
 553. [x] **My place and watch.** A character's page says where they march and which watch they keep.
+554. [ ] **Guild members.** A guild's page lists its members: characters and NPCs who name it in a "Guilds" field or
+    are linked to it as members.
+555. [ ] **Dues due.** A guild with dues ("5 gp a month") says what its member characters owe each in-world month.
+556. [ ] **Pay the dues.** A GM can take a member's dues from their purse in one click, logged.
+557. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 
 ## Ideas parking lot
 
