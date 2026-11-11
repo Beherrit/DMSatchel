@@ -9,6 +9,7 @@ import { worldStats } from './world-stats.js';
 import { journalWriters } from './journal-streaks.js';
 import { isProphecy } from './world-objectives.js';
 import { readObjectives, progress } from './objectives.js';
+import { readSolved } from './riddle.js';
 import { averageLength, lengthText } from './session-timer.js';
 import { spending, topGoods, spots, purchases } from './purchases.js';
 import { coinText } from './economy.js';
@@ -65,6 +66,12 @@ export function viewNumbers() {
       // Prophecies: how close each is, by its signs come to pass.
       ranked('Prophecies', worldEntries().filter(isProphecy).map((p) => [p, progress(readObjectives(p))]).filter(([, pr]) => pr.total).sort((a, b) => b[1].pct - a[1].pct || a[0].name.localeCompare(b[0].name)).slice(0, 8),
         (pr) => (pr.done === pr.total ? '✨ fulfilled' : `${pr.done} of ${pr.total} signs`)),
+      // Riddles solved: each riddle (a handout with an answer) and who solved it, solved ones first.
+      (() => { const rs = worldEntries().filter((h) => h.kind === 'handout' && (h.fields?.answer || h.fields?.riddle === 'yes')).map((h) => ({ h, by: readSolved(h.fields?.solved) }))
+        .sort((a, b) => b.by.length - a.by.length || a.h.name.localeCompare(b.h.name));
+        if (!rs.length) return null; const done = rs.filter((r) => r.by.length).length;
+        return el('section', { class: 'card num-card riddles' }, el('h3', {}, `Riddles solved (${done} of ${rs.length})`),
+          el('ul', { class: 'num-list plain-list' }, rs.slice(0, 10).map((r) => el('li', {}, `🧩 `, link(r.h), el('span', { class: 'muted small' }, r.by.length ? ` solved by ${r.by.map((x) => x.name).join(', ')}` : ' unsolved'))))); })(),
       ranked('Busiest places', s.busiestPlaces, (n) => `${n} inside`),
       ranked('Who has written the most', s.writers, (n) => plural(n, 'entry', 'entries')),
       el('section', { class: 'card num-card' }, el('h3', {}, 'Records'),
