@@ -967,7 +967,7 @@ to the log at the bottom.
     nobody does.
 568. [x] **The party's tongues.** The party page lists the languages the party speaks between them, and who speaks each.
 569. [x] **Who speaks it?** Ctrl+K "who speaks Elvish" lists the characters and NPCs who do.
-570. [ ] **An interpreter.** When nobody in the party shares a language with an NPC, their page suggests NPCs who
+570. [x] **An interpreter.** When nobody in the party shares a language with an NPC, their page suggests NPCs who
     could interpret (who speak one of theirs and one of the party's), nearby first.
 571. [ ] **Languages on NPC cards.** The printable NPC cards show what each NPC speaks.
 572. [ ] **Lost in translation.** Session prep's "Who's around" flags the NPCs nobody in the party can talk to.
@@ -1551,3 +1551,4 @@ to the log at the bottom.
 - Who can talk to them: an NPC's page says what they speak and who in the party (active characters and hirelings) shares a language ("🗣 Speaks Dwarvish, Giant. The party can talk with them: Bo (Dwarvish)."), or that nobody does.
 - The party's tongues: the party page folds out "🗣 Languages the party speaks", each language with who speaks it.
 - Who speaks it?: Ctrl+K "who speaks Elvish" (or "speaks Elvish") lists the characters and NPCs who do, with all their languages, or says nobody does.
+- An interpreter: when nobody in the party shares a language with an NPC, their page suggests up to three NPCs who speak one of theirs and one of the party's, those in the same town first ("An interpreter? Near Elf (Elvish, Sylvan), Far Druid (Sylvan, Common)").
