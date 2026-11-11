@@ -948,10 +948,10 @@ to the log at the bottom.
     eight hours).
 552. [x] **Orders in the palette.** Ctrl+K "marching" or "watch" shows the party's orders.
 553. [x] **My place and watch.** A character's page says where they march and which watch they keep.
-554. [ ] **Guild members.** A guild's page lists its members: characters and NPCs who name it in a "Guilds" field or
-    are linked to it as members.
-555. [ ] **Dues due.** A guild with dues ("5 gp a month") says what its member characters owe each in-world month.
-556. [ ] **Pay the dues.** A GM can take a member's dues from their purse in one click, logged.
+554. [x] **Guild members.** A guild's page lists the player characters connected to it (either way) as its members,
+    beside the NPC members it already shows.
+555. [x] **Dues due.** A guild with dues ("5 gp a month") says what its member characters owe each in-world month.
+556. [x] **Pay the dues.** A GM can take a member's dues from their purse in one click, logged.
 557. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 
 ## Ideas parking lot
@@ -1516,3 +1516,6 @@ to the log at the bottom.
 - The watch's hours: the watch order's editor sets when the watch starts and how long it lasts (1–12 hours; 22:00 for eight by default), saved with prep, and the party page, the GM sheet, the clock card and the copied text all follow it.
 - Orders in the palette: Ctrl+K "marching", "watch" or "orders" lists the marching order ("Bo · In front", "Ann · 2nd in line", "Cy · At the back") and the night's watches with their hours, each opening the party page.
 - My place and watch: a character's (or hired NPC's) page says where they march and which watch they keep ("🥾 Ann marches 2nd in line and keeps the 22:00–02:00 watch"), with a link to the party's orders.
+- Guild members: a guild's (or faction's or clan's) page has "Members of the party", the player characters connected to it either way, beside the NPC members it already showed.
+- Dues due: when a guild's "Dues & benefits" names an amount and a period ("5 gp a month", "2 sp per tenday", "50 gp a year"), each member says what they owe for this in-world month, or that it's paid (read from their sheet's log, so nothing new is stored).
+- Pay the dues: GMs get "Take the dues" beside each member who owes, which takes the month's dues from their purse (refusing when they can't pay) and logs "Paid 5 gp dues to the Masons for Thawmoon 1040".
