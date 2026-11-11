@@ -103,7 +103,7 @@ import { nextShut } from './week-in-town.js';
 import { customersAt, purchases, spots, goodsAt, orderedAt } from './purchases.js';
 import { toolsInPack, craftableWith } from './crafting.js';
 import { partyOrder, nightShifts } from './world-orders.js';
-import { guildMembersCard } from './world-guild.js';
+import { guildMembersCard, membershipsOf } from './world-guild.js';
 import { hhmm as hhmmW } from './party-order.js';
 import { coinText } from './economy.js';
 import { sheetSection } from './sheet-ui.js';
@@ -423,7 +423,7 @@ function viewEntry(id, tab) {
       e.summary ? el('p', { class: 'lede' }, richInline(e.summary)) : null,
       fieldRows.length ? el('dl', { class: 'traits' }, fieldRows.flatMap(([l, v, type]) => [el('dt', {}, l), el('dd', {}, type === 'long' ? richText(v) : /^https:\/\/\S+$/.test(v) ? el('a', { href: v, target: '_blank', rel: 'noopener' }, /dndbeyond\.com/.test(v) ? 'Open on D&D Beyond ↗' : 'Open link ↗') : el('span', {}, v))])) : null),
     sinceLastCard(e), comingUpCard(e),
-    routineNow(e), patronLine(e), hauntsLine(e), toolsLine(e), orderLine(e), membersNowCard(e), guildMembersCard(e, rerenderWorld), crossPathsLine(e), mindingLine(e), ownerDayLine(e), festivalLine(e), marketDayLine(e), weekInTownBox(e), openNowLine(e), wantedCard(e), hereNow(e), laterLine(e), regularsLine(e), busiestLine(e), townHoursBox(e), townPreviewBox(e), turnUpBox(e), rollTownButton(e, rerenderWorld),
+    routineNow(e), patronLine(e), hauntsLine(e), toolsLine(e), orderLine(e), myGuildsLine(e), membersNowCard(e), guildMembersCard(e, rerenderWorld), crossPathsLine(e), mindingLine(e), ownerDayLine(e), festivalLine(e), marketDayLine(e), weekInTownBox(e), openNowLine(e), wantedCard(e), hereNow(e), laterLine(e), regularsLine(e), busiestLine(e), townHoursBox(e), townPreviewBox(e), turnUpBox(e), rollTownButton(e, rerenderWorld),
     e.kind === 'npc' || e.fields?.stats || e.fields?.spells ? statSection(e) : null,
     e.kind === 'clan' ? clanTree(e, rerenderWorld) : null,
     e.kind === 'npc' || e.kind === 'character' ? familySection(e, rerenderWorld) : null,
@@ -629,6 +629,14 @@ function placeSummary(e) {
 }
 
 // ---- editing -----------------------------------------------------------------------------------
+
+// My guilds: on a character's page, the guilds, factions and clans they belong to, with rank and this month's dues.
+function myGuildsLine(c) {
+  if (c.kind !== 'character') return null;
+  const ms = membershipsOf(c); if (!ms.length) return null;
+  return el('p', { class: 'small my-guilds' }, '🏛 Belongs to ', ms.map((m, i) => [i ? ', ' : '', link(m.org), m.rank ? ` (${m.rank})` : '',
+    m.dues ? el('span', { class: `muted${m.dues.paid ? '' : ' dues-owed'}` }, m.dues.paid ? ` · dues paid for ${m.dues.month}` : ` · owes ${coinText(m.dues.cp)} for ${m.dues.month}`) : '']), '.');
+}
 
 // My place and watch: where a character (or hired NPC) marches and which watch they keep.
 function orderLine(c) {

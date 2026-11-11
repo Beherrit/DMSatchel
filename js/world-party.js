@@ -30,6 +30,7 @@ import { payrollCard } from './world-hire.js';
 import { whoHas } from './who-has.js';
 import { campButton } from './world-camp.js';
 import { ordersCard } from './world-orders.js';
+import { duesOwed } from './world-guild.js';
 
 const ACTIVE = (e) => !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
 
@@ -389,6 +390,9 @@ export async function viewParty(rerender) {
       (() => { const t = partyTown(), ss = todaysStalls(t); return ss.length ? el('details', { class: 'party-stalls' }, el('summary', {}, `🧺 Market stalls in ${t.name} today (${ss.length})`),
         el('ul', { class: 'plain small' }, ss.map((st) => el('li', {}, el('strong', {}, st.name), ': ', st.goods.map((g) => `${g.name} ${g.price}`).join(', ')))),
         el('a', { class: 'small', href: `#world/e/${t.id}/market` }, 'Buy from the stalls →')) : null; })(),
+      // Dues on the party page: guild dues still owed this month (players: their own characters').
+      (() => { const owed = duesOwed(); if (!owed.length) return null;
+        return el('p', { class: 'small party-dues' }, `🏛 Dues owed for ${owed[0].month}: `, owed.map((x, i) => [i ? '; ' : '', link(x.who), ` ${coinText(x.cp)} to `, link(x.org)]), '.'); })(),
       // Anything this time?: active characters with no downtime filed since the last session (players: their own).
       (() => { const last = sessionOrder(worldEntries())[0]; if (!last) return null;
         const since = String(last.fields?.date || last.created_at || '').slice(0, 10);

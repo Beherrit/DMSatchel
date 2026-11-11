@@ -953,10 +953,10 @@ to the log at the bottom.
 555. [x] **Dues due.** A guild with dues ("5 gp a month") says what its member characters owe each in-world month.
 556. [x] **Pay the dues.** A GM can take a member's dues from their purse in one click, logged.
 557. [x] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
-558. [ ] **Dues on the party page.** The party page lists guild dues still owed this month (players: their own).
-559. [ ] **Ranks.** A member's rank in a guild comes from the link's label ("journeyman of"), shown on the members list.
-560. [ ] **My guilds.** A character's page lists their guilds (and factions and clans), with their rank and dues.
-561. [ ] **Dues in the palette.** Ctrl+K "dues" lists the dues still owed this month.
+558. [x] **Dues on the party page.** The party page lists guild dues still owed this month (players: their own).
+559. [x] **Ranks.** A member's rank in a guild comes from the link's label ("journeyman of"), shown on the members list.
+560. [x] **My guilds.** A character's page lists their guilds (and factions and clans), with their rank and dues.
+561. [x] **Dues in the palette.** Ctrl+K "dues" lists the dues still owed this month.
 
 ## Ideas parking lot
 
@@ -1524,3 +1524,7 @@ to the log at the bottom.
 - Dues due: when a guild's "Dues & benefits" names an amount and a period ("5 gp a month", "2 sp per tenday", "50 gp a year"), each member says what they owe for this in-world month, or that it's paid (read from their sheet's log, so nothing new is stored).
 - Pay the dues: GMs get "Take the dues" beside each member who owes, which takes the month's dues from their purse (refusing when they can't pay) and logs "Paid 5 gp dues to the Masons for Thawmoon 1040".
 - A full sweep (#557): all 535 browser tests clean against sweep #545, first time through (the four new checks print their own results: no accessibility violations light or dark, and the big-world pages all under 200 ms).
+- Dues on the party page: "🏛 Dues owed for Thawmoon 1040: Ann 5 gp to the Masons…" (players see their own characters').
+- Ranks: a member's rank comes from the label on the link between them ("journeyman of" → Journeyman, "spy for" → Spy; plain "member of" gives none), shown on the guild's members list.
+- My guilds: a character's page says what they belong to, with rank and this month's dues ("🏛 Belongs to the Masons (Journeyman) · owes 5 gp for Thawmoon 1040").
+- Dues in the palette: Ctrl+K "dues" lists the dues still owed this month, each opening the guild.
