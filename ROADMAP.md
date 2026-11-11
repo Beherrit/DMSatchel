@@ -982,10 +982,10 @@ to the log at the bottom.
 579. [x] **Prophecies in the palette.** Ctrl+K "omens" or "prophecies" lists them with how close each is.
 580. [x] **Bound to a prophecy.** A quest linked to a prophecy says so, with how close the prophecy is.
 581. [x] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
-582. [ ] **Riddles.** A handout can carry a riddle's answer, which only the GMs ever see.
-583. [ ] **Guesses.** Players answer a riddle on its handout; the server checks the guess (any case or punctuation)
+582. [x] **Riddles.** A handout can carry a riddle's answer, which only the GMs ever see.
+583. [x] **Guesses.** Players answer a riddle on its handout; the server checks the guess (any case or punctuation)
     and records who solved it.
-584. [ ] **Hints.** GMs list hints for a riddle and reveal them one at a time.
+584. [x] **Hints.** GMs list hints for a riddle and reveal them one at a time.
 585. [ ] **Riddles solved.** The numbers page lists the riddles and who solved each.
 
 ## Ideas parking lot
@@ -1578,3 +1578,6 @@ to the log at the bottom.
 - Prophecies in the palette: Ctrl+K "omens", "prophecies" or "signs" lists them, closest first ("🔮 1 of 2 signs · next: A Red Moon rises", "✨ Fulfilled").
 - Bound to a prophecy: a quest linked with a prophecy (either way) says so on its page ("🔮 Bound to The Drowned Bell (1 of 2 signs)").
 - A full sweep (#581): all 546 browser tests clean against sweep #573, first time through (covering languages and prophecies); accessibility still clean light and dark.
+- Riddles: a handout can carry a riddle's answer (several accepted, separated by |) in a GM-only field; the server never sends it to players, however the handout reached them (shared ones too), and its page has "🧩 Riddle".
+- Guesses: players answer on the handout; the server checks the guess whatever its case, spacing, punctuation or a leading "the", says if it isn't right, and records who solved it ("✔ Solved by Pip").
+- Hints: GMs list hints one per line and reveal them one at a time ("Reveal hint 2 of 3"); players only ever receive the hints shown so far.

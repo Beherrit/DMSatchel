@@ -48,6 +48,7 @@ import { shopOpen, holidayToday, holidayTomorrow, evePrice, shutText, tradeDay, 
 import { cleanCalendar, withLocal } from '../js/calendar.js';
 import { marketStalls, STALLS_OPEN, STALLS_SHUT } from '../js/market-stalls.js';
 import { cleanOrder, cleanWatchTime } from '../js/party-order.js';
+import { isRight, addSolver, shownHints } from '../js/riddle.js';
 import { shopStanding, sellWithStanding } from '../js/standing-price.js';
 import { coinText, GOODS } from '../js/economy.js';
 import { cleanMusic } from '../js/music.js';
@@ -114,6 +115,14 @@ function shape(row, req) {
     // The world's own GM-only fields stay with the GMs, even on a player's own entries.
     const hide = secretCustomKeys(row.kind, customOf(req)).filter((k) => out.fields?.[k]);
     if (hide.length) { out.fields = { ...out.fields }; for (const k of hide) delete out.fields[k]; }
+  }
+  // A riddle's answer stays with the GMs (however the handout reached this person), and only the hints shown so far
+  // reach players: it's a riddle all the same.
+  if (!gmView && row.kind === 'handout' && (row.fields?.answer || row.fields?.hints)) {
+    out.fields = { ...out.fields, ...(row.fields.answer ? { riddle: 'yes' } : {}) };
+    delete out.fields.answer;
+    const hints = shownHints(row.fields.hints, row.fields.hints_shown).join('\n');
+    if (hints) out.fields.hints = hints; else delete out.fields.hints;
   }
   return out;
 }
@@ -491,6 +500,20 @@ export default route({
         WHERE id = ${ch.id} AND world_id = ${req.world.id}`;
       await record(ch.id, req.gm.id, 'order', null);
       return send(res, 200, { entries: [shape(await loadOne(inn.id, req.world.id), req), shape(await loadOne(ch.id, req.world.id), req)], ordered: { name: item.name, qty, cp, tab: onTab } });
+    }
+    // Answer a riddle: a member's guess at a handout's riddle, checked here (the answer never leaves the server); a right
+    // one is recorded with who solved it.
+    if (req.body.guess) {
+      const b = req.body.guess;
+      const h = await loadOne(String(b.handout || '').slice(0, 40), req.world.id);
+      if (!h || h.deleted || h.kind !== 'handout' || !visibleTo(h, req) || !h.fields?.answer) return fail(res, 404, 'That riddle isn’t there.');
+      const guess = clip(b.text, 200);
+      if (!String(guess || '').trim()) return fail(res, 400, 'Say your answer.');
+      if (!isRight(guess, h.fields.answer)) return send(res, 200, { correct: false });
+      const solved = addSolver(h.fields.solved, req.gm.name);
+      await sql`UPDATE entries SET fields = fields || jsonb_build_object('solved', ${JSON.stringify(solved)}::text), updated_at = now(), version = version + 1 WHERE id = ${h.id} AND world_id = ${req.world.id}`;
+      await record(h.id, req.gm.id, 'solved', null);
+      return send(res, 200, { correct: true, entries: [shape(await loadOne(h.id, req.world.id), req)] });
     }
     // Buy from a market stall: the town's stalls today are seeded by the town and the date (market-stalls.js), so the
     // server works out the same stalls and prices; only on market day (not a holiday), and only while they're up.
