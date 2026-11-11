@@ -962,10 +962,10 @@ to the log at the bottom.
 563. [x] **How long it ran.** Session pages and the session list show how long each session ran.
 564. [x] **Average session.** The numbers page shows how long sessions run on average.
 565. [x] **Time for a break.** The running timer suggests a break every ninety minutes.
-566. [ ] **Languages.** Characters and NPCs get a "Languages" field (Forge characters already know theirs).
-567. [ ] **Who can talk to them.** An NPC's page says which party members share a language with them, or that
+566. [x] **Languages.** Characters and NPCs get a "Languages" field (Forge characters already know theirs).
+567. [x] **Who can talk to them.** An NPC's page says which party members share a language with them, or that
     nobody does.
-568. [ ] **The party's tongues.** The party page lists the languages the party speaks between them, and who speaks each.
+568. [x] **The party's tongues.** The party page lists the languages the party speaks between them, and who speaks each.
 569. [ ] **Who speaks it?** Ctrl+K "who speaks Elvish" lists the characters and NPCs who do.
 
 ## Ideas parking lot
@@ -1542,3 +1542,6 @@ to the log at the bottom.
 - Time for a break: the running timer suggests a break every ninety minutes ("☕ 1 h 30 min in: time for a short break?"), until the GM marks it done.
 - How long it ran: a session's page shows its length, and the session list adds " · ran 4 h 20 min" (lengths written by hand read too: "3h", "2.5 hours", "3:15").
 - Average session: the numbers page has an "Average session" tile ("3 h 40 min, over 2 sessions").
+- Languages: characters and NPCs have a "Languages" field (additive; any separators), and Forge characters' sheet languages count too.
+- Who can talk to them: an NPC's page says what they speak and who in the party (active characters and hirelings) shares a language ("🗣 Speaks Dwarvish, Giant. The party can talk with them: Bo (Dwarvish)."), or that nobody does.
+- The party's tongues: the party page folds out "🗣 Languages the party speaks", each language with who speaks it.

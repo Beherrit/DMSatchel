@@ -104,6 +104,7 @@ import { customersAt, purchases, spots, goodsAt, orderedAt } from './purchases.j
 import { toolsInPack, craftableWith } from './crafting.js';
 import { partyOrder, nightShifts } from './world-orders.js';
 import { guildMembersCard, membershipsOf } from './world-guild.js';
+import { talkLine } from './world-languages.js';
 import { hhmm as hhmmW } from './party-order.js';
 import { coinText } from './economy.js';
 import { parseLength, lengthText } from './session-timer.js';
@@ -426,7 +427,7 @@ function viewEntry(id, tab) {
       e.summary ? el('p', { class: 'lede' }, richInline(e.summary)) : null,
       fieldRows.length ? el('dl', { class: 'traits' }, fieldRows.flatMap(([l, v, type]) => [el('dt', {}, l), el('dd', {}, type === 'long' ? richText(v) : /^https:\/\/\S+$/.test(v) ? el('a', { href: v, target: '_blank', rel: 'noopener' }, /dndbeyond\.com/.test(v) ? 'Open on D&D Beyond ↗' : 'Open link ↗') : el('span', {}, v))])) : null),
     sinceLastCard(e), comingUpCard(e),
-    routineNow(e), patronLine(e), hauntsLine(e), toolsLine(e), orderLine(e), myGuildsLine(e), membersNowCard(e), guildMembersCard(e, rerenderWorld), crossPathsLine(e), mindingLine(e), ownerDayLine(e), festivalLine(e), marketDayLine(e), weekInTownBox(e), openNowLine(e), wantedCard(e), hereNow(e), laterLine(e), regularsLine(e), busiestLine(e), townHoursBox(e), townPreviewBox(e), turnUpBox(e), rollTownButton(e, rerenderWorld),
+    routineNow(e), patronLine(e), hauntsLine(e), toolsLine(e), orderLine(e), myGuildsLine(e), talkLine(e), membersNowCard(e), guildMembersCard(e, rerenderWorld), crossPathsLine(e), mindingLine(e), ownerDayLine(e), festivalLine(e), marketDayLine(e), weekInTownBox(e), openNowLine(e), wantedCard(e), hereNow(e), laterLine(e), regularsLine(e), busiestLine(e), townHoursBox(e), townPreviewBox(e), turnUpBox(e), rollTownButton(e, rerenderWorld),
     e.kind === 'npc' || e.fields?.stats || e.fields?.spells ? statSection(e) : null,
     e.kind === 'clan' ? clanTree(e, rerenderWorld) : null,
     e.kind === 'npc' || e.kind === 'character' ? familySection(e, rerenderWorld) : null,
