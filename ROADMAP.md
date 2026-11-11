@@ -982,6 +982,11 @@ to the log at the bottom.
 579. [x] **Prophecies in the palette.** Ctrl+K "omens" or "prophecies" lists them with how close each is.
 580. [x] **Bound to a prophecy.** A quest linked to a prophecy says so, with how close the prophecy is.
 581. [x] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
+582. [ ] **Riddles.** A handout can carry a riddle's answer, which only the GMs ever see.
+583. [ ] **Guesses.** Players answer a riddle on its handout; the server checks the guess (any case or punctuation)
+    and records who solved it.
+584. [ ] **Hints.** GMs list hints for a riddle and reveal them one at a time.
+585. [ ] **Riddles solved.** The numbers page lists the riddles and who solved each.
 
 ## Ideas parking lot
 
