@@ -978,7 +978,7 @@ to the log at the bottom.
 576. [x] **Fulfilled.** A prophecy whose signs have all come to pass says so, and the numbers page lists prophecies
     and how close each is.
 577. [x] **Signs in the log.** Ticking a sign offers to note it in the latest session's log.
-578. [ ] **When it came to pass.** A sign ticked off keeps the in-world date it came to pass, shown beside it.
+578. [x] **When it came to pass.** A sign ticked off keeps the in-world date it came to pass, shown beside it.
 579. [ ] **Prophecies in the palette.** Ctrl+K "omens" or "prophecies" lists them with how close each is.
 580. [ ] **Bound to a prophecy.** A quest linked to a prophecy says so, with how close the prophecy is.
 581. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
@@ -1569,3 +1569,4 @@ to the log at the bottom.
 - Signs in the log: ticking a sign as come to pass offers to note it in the latest session's log ("A sign came to pass ([[The Drowned Bell]]): The bells ring with no one to ring them").
 - Omens: the world's front page has "🔮 Omens": each prophecy this person knows, with the next sign still to come ("The Drowned Bell (1 of 2): still to come: A red moon").
 - Fulfilled: a prophecy whose signs have all come to pass says "✨ Fulfilled" on its page and in the omens, and the numbers page lists prophecies by how close each is.
+- When it came to pass: ticking a prophecy's sign keeps the in-world date (in its signs list, so nothing new is stored elsewhere), shown beside it ("· came to pass 5 Thawmoon 1040"); unticking clears it.

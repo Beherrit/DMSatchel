@@ -4,6 +4,10 @@ import { el, toast } from './dom.js';
 import { isGm } from './api.js';
 import { getEntry, patchEntry, richText, richInline, worldEntries } from './world-store.js';
 import { sessionOrder } from './appearances.js';
+import { worldCalendar } from './world-calendar.js';
+import { formatDate, today } from './calendar.js';
+
+const inWorldToday = () => { const cal = worldCalendar(); try { return cal ? formatDate(cal, today(cal)) : undefined; } catch { return undefined; } };
 import { stripMarks } from './rich.js';
 import { readObjectives, progress, addObjective, updateObjective, removeObjective, moveObjective } from './objectives.js';
 
@@ -39,9 +43,11 @@ export function objectivesSection(q, rerender) {
     signs && p.total && p.done === p.total ? el('p', { class: 'prophecy-fulfilled' }, el('strong', {}, '✨ Fulfilled: '), 'every sign has come to pass.') : null,
     list.length ? el('div', { class: 'obj-bar big', role: 'progressbar', 'aria-valuemin': 0, 'aria-valuemax': p.total, 'aria-valuenow': p.done, 'aria-label': W.bar }, el('span', { style: `width:${p.pct}%` })) : null,
     list.length ? el('ol', { class: 'obj-list' }, list.map((o, i) => el('li', { class: `${o.done ? 'done' : ''}${o.secret ? ' is-secret' : ''}` },
-      gm ? el('input', { type: 'checkbox', checked: o.done || null, 'aria-label': `${W.tick}: ${o.text}`, onchange: async (ev) => { const done = ev.target.checked; await save(updateObjective(list, o.id, { done })); if (signs && done) noteSign(q, o.text); } })
+      gm ? el('input', { type: 'checkbox', checked: o.done || null, 'aria-label': `${W.tick}: ${o.text}`, onchange: async (ev) => { const done = ev.target.checked; await save(updateObjective(list, o.id, { done, when: done && signs ? inWorldToday() : undefined })); if (signs && done) noteSign(q, o.text); } })
         : el('span', { class: 'obj-tick', 'aria-label': o.done ? 'done' : 'not done yet' }, o.done ? '✔' : '○'),
       el('span', { class: 'obj-text' }, richText(o.text)),
+      // When it came to pass: the in-world date a sign was ticked off.
+      o.done && o.when ? el('span', { class: 'muted small obj-when' }, ` · came to pass ${o.when}`) : null,
       o.secret ? el('span', { class: 'tag' }, 'secret') : null,
       gm ? el('span', { class: 'obj-tools' },
         el('button', { class: 'btn small ghost', type: 'button', onclick: () => save(updateObjective(list, o.id, { secret: !o.secret }), o.secret ? 'Revealed to players' : 'Hidden from players') }, o.secret ? 'Reveal' : 'Hide'),

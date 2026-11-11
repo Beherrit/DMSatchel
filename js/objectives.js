@@ -5,7 +5,7 @@ const parse = (s) => { try { const v = typeof s === 'string' ? JSON.parse(s) : s
 
 export const readObjectives = (quest) => parse(quest?.fields?.objectives)
   .filter((o) => o && typeof o.text === 'string' && o.text.trim())
-  .map((o) => ({ id: String(o.id || ''), text: o.text.slice(0, 300), done: Boolean(o.done), secret: Boolean(o.secret) }));
+  .map((o) => ({ id: String(o.id || ''), text: o.text.slice(0, 300), done: Boolean(o.done), secret: Boolean(o.secret), ...(o.done && o.when ? { when: String(o.when).slice(0, 60) } : {}) }));
 
 // What players may see: everything but the secret steps.
 export const forPlayers = (raw) => JSON.stringify(parse(raw).filter((o) => o && !o.secret));
