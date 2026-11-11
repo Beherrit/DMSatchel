@@ -967,6 +967,11 @@ to the log at the bottom.
     nobody does.
 568. [x] **The party's tongues.** The party page lists the languages the party speaks between them, and who speaks each.
 569. [x] **Who speaks it?** Ctrl+K "who speaks Elvish" lists the characters and NPCs who do.
+570. [ ] **An interpreter.** When nobody in the party shares a language with an NPC, their page suggests NPCs who
+    could interpret (who speak one of theirs and one of the party's), nearby first.
+571. [ ] **Languages on NPC cards.** The printable NPC cards show what each NPC speaks.
+572. [ ] **Lost in translation.** Session prep's "Who's around" flags the NPCs nobody in the party can talk to.
+573. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 
 ## Ideas parking lot
 
