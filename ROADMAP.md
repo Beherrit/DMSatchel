@@ -962,6 +962,11 @@ to the log at the bottom.
 563. [x] **How long it ran.** Session pages and the session list show how long each session ran.
 564. [x] **Average session.** The numbers page shows how long sessions run on average.
 565. [x] **Time for a break.** The running timer suggests a break every ninety minutes.
+566. [ ] **Languages.** Characters and NPCs get a "Languages" field (Forge characters already know theirs).
+567. [ ] **Who can talk to them.** An NPC's page says which party members share a language with them, or that
+    nobody does.
+568. [ ] **The party's tongues.** The party page lists the languages the party speaks between them, and who speaks each.
+569. [ ] **Who speaks it?** Ctrl+K "who speaks Elvish" lists the characters and NPCs who do.
 
 ## Ideas parking lot
 
