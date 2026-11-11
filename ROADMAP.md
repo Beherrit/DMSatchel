@@ -957,6 +957,11 @@ to the log at the bottom.
 559. [x] **Ranks.** A member's rank in a guild comes from the link's label ("journeyman of"), shown on the members list.
 560. [x] **My guilds.** A character's page lists their guilds (and factions and clans), with their rank and dues.
 561. [x] **Dues in the palette.** Ctrl+K "dues" lists the dues still owed this month.
+562. [ ] **Session timer.** Session prep has a timer the GM starts when play begins and stops at the end; it can save
+    how long the session ran to its log.
+563. [ ] **How long it ran.** Session pages and the session list show how long each session ran.
+564. [ ] **Average session.** The numbers page shows how long sessions run on average.
+565. [ ] **Time for a break.** The running timer suggests a break every ninety minutes.
 
 ## Ideas parking lot
 
