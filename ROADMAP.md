@@ -992,6 +992,10 @@ to the log at the bottom.
     only see once someone has solved it.
 588. [x] **Wrong guesses.** GMs see the wrong guesses at a riddle, who made them and when.
 589. [x] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
+590. [ ] **Traps.** GMs keep a list of traps on a place, each armed, found, disarmed or sprung.
+591. [ ] **Traps in prep.** Session prep lists the armed traps where the party is (and anywhere inside).
+592. [ ] **Traps on the map.** For GMs, a place's pin marks how many armed traps it holds.
+593. [ ] **Found traps.** Players see a trap once it's found (or disarmed or sprung); the server never sends armed ones.
 
 ## Ideas parking lot
 
