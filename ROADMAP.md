@@ -1000,6 +1000,10 @@ to the log at the bottom.
 595. [x] **It went off.** Marking a trap sprung (or found) offers to note it in the latest session's log.
 596. [x] **Trap tally.** The numbers page counts the traps found, disarmed and sprung (GMs also see how many are armed).
 597. [x] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
+598. [ ] **On the day.** A session's page lists the purchases made on the day it was played.
+599. [ ] **Solved that day.** A session's page lists the riddles solved on the day it was played.
+600. [ ] **Signs that day.** A session's page lists the prophecy signs that came to pass on its in-world date.
+601. [ ] **Copy the day.** The session's "On the day" can be copied as plain text.
 
 ## Ideas parking lot
 
