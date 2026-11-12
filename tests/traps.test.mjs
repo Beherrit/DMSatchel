@@ -12,4 +12,5 @@ test('traps: add, set, remove, and what players may see', () => {
   assert.deepEqual(JSON.parse(trapsForPlayers(place.fields.traps)).map((t) => t.text), ['Poison needle in the lock']);
   assert.equal(removeTrap(l, l[0].id).length, 1);
   assert.deepEqual(readTraps({ fields: { traps: 'bad' } }), []);
+  const s = setTrap(l, l[0].id, 'sprung', 'T1'); assert.equal(s[0].at, 'T1'); assert.equal(setTrap(s, l[0].id, 'armed')[0].at, undefined);
 });
