@@ -987,6 +987,11 @@ to the log at the bottom.
     and records who solved it.
 584. [x] **Hints.** GMs list hints for a riddle and reveal them one at a time.
 585. [x] **Riddles solved.** The numbers page lists the riddles and who solved each.
+586. [ ] **Riddles still open.** The party page lists the riddles nobody has solved yet.
+587. [ ] **What solving it gives.** A riddle can say what solving it brings ("The door swings open"), which players
+    only see once someone has solved it.
+588. [ ] **Wrong guesses.** GMs see the wrong guesses at a riddle, who made them and when.
+589. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 
 ## Ideas parking lot
 
