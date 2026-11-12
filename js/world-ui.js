@@ -32,7 +32,7 @@ import { objectivesSection, omensCard, boundLine } from './world-objectives.js';
 import { riddleCard } from './world-riddle.js';
 import { trapsCard } from './world-traps.js';
 import { onTheDayCard } from './world-onday.js';
-import { dreamsSection, dreamersLine } from './world-dreams.js';
+import { dreamsSection, dreamersLine, dreamJournalButton } from './world-dreams.js';
 import { whatsNewCard } from './world-whatsnew.js';
 import { attendanceSection } from './world-attendance.js';
 import { revealButton } from './world-reveal.js';
@@ -455,6 +455,7 @@ function viewEntry(id, tab) {
     riddleCard(e, rerenderWorld),
     dreamsSection(e, rerenderWorld),
     dreamersLine(e),
+    dreamJournalButton(e),
     trapsCard(e, rerenderWorld),
     objectivesSection(e, rerenderWorld),
     chainSection(e, rerenderWorld),

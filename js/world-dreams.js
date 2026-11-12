@@ -1,7 +1,7 @@
 // Dreams: GMs send a character a dream, a handout shared with that character's player alone (the GMs see it too). A
 // character's page lists their dreams; a dream can be tied to a prophecy, whose page tells GMs who has dreamed of it.
 import { el, toast } from './dom.js';
-import { api, isGm } from './api.js';
+import { api, isGm, session } from './api.js';
 import { world, worldEntries, getEntry, createEntry, link, when, richText } from './world-store.js';
 import { isProphecy } from './world-objectives.js';
 
@@ -14,23 +14,30 @@ function sendDialog(c, rerender) {
   const text = el('textarea', { id: 'dream-text', rows: 6, placeholder: 'What they dream, told to them alone.' });
   const prophecies = worldEntries().filter(isProphecy).sort((a, b) => a.name.localeCompare(b.name));
   const of = prophecies.length ? el('select', { id: 'dream-of' }, el('option', { value: '' }, '— not tied to a prophecy —'), prophecies.map((p) => el('option', { value: p.id }, p.name))) : null;
+  // A shared dream: other played characters can dream it too (each gets their own copy, shared with their player).
+  const others = worldEntries().filter((x) => x.kind === 'character' && x.id !== c.id && x.owner_id && !['Retired', 'Dead', 'Missing'].includes(x.fields?.status)).sort((a, b) => a.name.localeCompare(b.name));
+  const also = others.map((x) => ({ x, cb: el('input', { type: 'checkbox', id: `dream-also-${x.id}` }) }));
   const go = el('button', { class: 'btn primary', type: 'submit' }, 'Send the dream');
   const form = el('form', { class: 'dialog-body', method: 'dialog' }, el('h2', { id: 'dream-title' }, `A dream for ${c.name}`),
     el('p', { class: 'muted small' }, `Only ${c.name}’s player and the GMs will see it.`),
     el('div', { class: 'field' }, el('label', { for: 'dream-name' }, 'Title'), name),
     el('div', { class: 'field' }, el('label', { for: 'dream-text' }, 'The dream'), text),
     of ? el('div', { class: 'field' }, el('label', { for: 'dream-of' }, 'A dream of'), of) : null,
+    also.length ? el('fieldset', { class: 'plain-fieldset dream-also' }, el('legend', {}, 'A shared dream: they dream it too'), also.map(({ x, cb }) => el('label', { class: 'check', for: `dream-also-${x.id}` }, cb, ` ${x.name}`))) : null,
     el('div', { class: 'btnrow' }, go, el('button', { class: 'btn', type: 'button', onclick: () => d.close() }, 'Not now')));
   const d = el('dialog', { class: 'dialog', 'aria-labelledby': 'dream-title' }, form);
   form.addEventListener('submit', async (ev) => {
     ev.preventDefault(); if (!text.value.trim()) { text.focus(); return; }
     go.disabled = true;
     try {
-      const h = await createEntry({ kind: 'handout', name: name.value.trim() || 'A dream', visibility: 'gm', summary: `A dream, sent to ${c.name}.`,
-        fields: { from: 'A dream', text: text.value.trim(), dream_for: c.id }, links: [{ id: c.id, label: 'dreamed by' }, ...(of?.value ? [{ id: of.value, label: 'a dream of' }] : [])] });
-      const r = await api('entries', { method: 'PATCH', body: { id: h.id, share: [c.owner_id] } });
-      world.entries.set(r.entry.id, r.entry);
-      toast(`Dream sent to ${c.name}`); d.close(); rerender();
+      const who = [c, ...also.filter((y) => y.cb.checked).map((y) => y.x)];
+      for (const w of who) {
+        const h = await createEntry({ kind: 'handout', name: name.value.trim() || 'A dream', visibility: 'gm', summary: `A dream, sent to ${w.name}${who.length > 1 ? ` (shared with ${who.filter((o) => o !== w).map((o) => o.name).join(', ')})` : ''}.`,
+          fields: { from: 'A dream', text: text.value.trim(), dream_for: w.id }, links: [{ id: w.id, label: 'dreamed by' }, ...(of?.value ? [{ id: of.value, label: 'a dream of' }] : [])] });
+        const r = await api('entries', { method: 'PATCH', body: { id: h.id, share: [w.owner_id] } });
+        world.entries.set(r.entry.id, r.entry);
+      }
+      toast(who.length > 1 ? `Dream sent to ${who.map((w) => w.name).join(', ')}` : `Dream sent to ${c.name}`); d.close(); rerender();
     } catch (err) { toast(err.message, 'bad'); go.disabled = false; }
   });
   d.addEventListener('close', () => d.remove());
@@ -55,4 +62,12 @@ export function dreamersLine(p) {
   const ds = allDreams().filter((h) => (h.links || []).some((l) => l.id === p.id));
   if (!ds.length) return null;
   return el('p', { class: 'small dreamers-line' }, '🌙 Dreamed of by ', ds.map((h, i) => { const c = getEntry(h.fields.dream_for); return [i ? ', ' : '', c ? link(c) : 'someone', ' (', link(h, 'the dream'), ')']; }), '.');
+}
+
+// Write about the dream: on a dream's page, its dreamer's player can start a journal entry about it.
+export function dreamJournalButton(h) {
+  if (h.kind !== 'handout' || !h.fields?.dream_for) return null;
+  const c = getEntry(h.fields.dream_for);
+  if (!c || isGm() || c.owner_id !== session.gm?.id) return null;
+  return el('button', { class: 'btn small dream-write', type: 'button', onclick: () => window.dispatchEvent(new CustomEvent('world:draft', { detail: { kind: 'journal', name: `${c.name}’s dream`, body: `About [[${h.name}]]:\n\n`, fields: { character: c.name, kind: 'Diary' } } })) }, 'Write about this dream');
 }

@@ -1013,9 +1013,9 @@ to the log at the bottom.
 607. [x] **Dreams.** A character's page lists the dreams sent to them, newest first.
 608. [x] **Dreams of a prophecy.** A dream can be tied to a prophecy; the prophecy's page tells GMs who has dreamed of it.
 609. [x] **Dreams in the palette.** Ctrl+K "dreams" lists the dreams you may see.
-610. [ ] **Dreamed that day.** A session's "On the day" lists the dreams sent that day (for GMs, and each player their own).
-611. [ ] **A shared dream.** GMs can send the same dream to several characters at once.
-612. [ ] **Write about the dream.** A dream's page offers its dreamer's player a journal entry about it.
+610. [x] **Dreamed that day.** A session's "On the day" lists the dreams sent that day (for GMs, and each player their own).
+611. [x] **A shared dream.** GMs can send the same dream to several characters at once.
+612. [x] **Write about the dream.** A dream's page offers its dreamer's player a journal entry about it.
 613. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 
 ## Ideas parking lot
@@ -1636,3 +1636,6 @@ to the log at the bottom.
 - Dreams: a character's page lists "🌙 Dreams" sent to them, newest first, with what they dreamed; other players never receive them.
 - Dreams of a prophecy: a dream can be tied to a prophecy, and the prophecy's page tells GMs who has dreamed of it.
 - Dreams in the palette: Ctrl+K "dreams" lists the dreams you may see (players: their own characters'), newest first.
+- Dreamed that day: a session's "On the day" lists the dreams sent that day (GMs see all; each player only receives their own).
+- A shared dream: the dream dialog lets GMs tick other played characters to dream it too; each gets their own copy, shared with their player alone.
+- Write about the dream: a dream's page offers its dreamer's player "Write about this dream", a journal draft linked to it.
