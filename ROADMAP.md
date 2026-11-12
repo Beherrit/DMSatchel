@@ -999,7 +999,7 @@ to the log at the bottom.
 594. [x] **Traps on the sheet.** The printable GM sheet lists the armed traps where the party is.
 595. [x] **It went off.** Marking a trap sprung (or found) offers to note it in the latest session's log.
 596. [x] **Trap tally.** The numbers page counts the traps found, disarmed and sprung (GMs also see how many are armed).
-597. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
+597. [x] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 
 ## Ideas parking lot
 
@@ -1606,3 +1606,4 @@ to the log at the bottom.
 - Traps on the sheet: the printable GM sheet has "⚠ Armed traps" where the party is and anywhere inside.
 - It went off: marking a trap sprung or found offers to note it in the latest session's log ("A trap went off at [[The Vault]]: Pit under the rug").
 - Trap tally: the numbers page has a "Traps" tile, found, disarmed and sprung (GMs also see how many are still armed; players' counts only cover what they've been sent).
+- A full sweep (#597): all 552 browser tests clean against sweep #589, first time through (covering traps); accessibility still clean light and dark.
