@@ -1008,6 +1008,11 @@ to the log at the bottom.
 603. [x] **Written that day.** "On the day" lists the journal entries written on the day.
 604. [x] **Filed that day.** "On the day" lists the downtime filed on the day.
 605. [x] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
+606. [ ] **Send a dream.** From a character's page, GMs send a dream: a handout only that character's player (and the
+    GMs) can see.
+607. [ ] **Dreams.** A character's page lists the dreams sent to them, newest first.
+608. [ ] **Dreams of a prophecy.** A dream can be tied to a prophecy; the prophecy's page tells GMs who has dreamed of it.
+609. [ ] **Dreams in the palette.** Ctrl+K "dreams" lists the dreams you may see.
 
 ## Ideas parking lot
 

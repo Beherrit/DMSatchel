@@ -121,7 +121,9 @@ export const KINDS = {
       ['reward', 'What solving it brings (players see it once solved)', 'long', null, { gmOnly: true }],
       ['hints_shown', 'Hints shown', 'hidden', null, { gmOnly: true }], ['solved', 'Solved by', 'hidden', null, { gmOnly: true }],
       // Wrong guesses at the riddle (who, what, when), kept for the GMs.
-      ['guesses', 'Wrong guesses', 'hidden', null, { gmOnly: true }]],
+      ['guesses', 'Wrong guesses', 'hidden', null, { gmOnly: true }],
+      // A dream: the character it was sent to (the handout is shared with their player alone).
+      ['dream_for', 'Dreamed by', 'hidden', null, { gmOnly: true }]],
   },
   creature: {
     label: 'Creature', plural: 'Bestiary', blurb: 'Monsters from your books, in short: what they are and what they do.',
