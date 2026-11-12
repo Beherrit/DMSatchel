@@ -987,10 +987,10 @@ to the log at the bottom.
     and records who solved it.
 584. [x] **Hints.** GMs list hints for a riddle and reveal them one at a time.
 585. [x] **Riddles solved.** The numbers page lists the riddles and who solved each.
-586. [ ] **Riddles still open.** The party page lists the riddles nobody has solved yet.
-587. [ ] **What solving it gives.** A riddle can say what solving it brings ("The door swings open"), which players
+586. [x] **Riddles still open.** The party page lists the riddles nobody has solved yet.
+587. [x] **What solving it gives.** A riddle can say what solving it brings ("The door swings open"), which players
     only see once someone has solved it.
-588. [ ] **Wrong guesses.** GMs see the wrong guesses at a riddle, who made them and when.
+588. [x] **Wrong guesses.** GMs see the wrong guesses at a riddle, who made them and when.
 589. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 
 ## Ideas parking lot
@@ -1587,3 +1587,6 @@ to the log at the bottom.
 - Guesses: players answer on the handout; the server checks the guess whatever its case, spacing, punctuation or a leading "the", says if it isn't right, and records who solved it ("✔ Solved by Pip").
 - Hints: GMs list hints one per line and reveal them one at a time ("Reveal hint 2 of 3"); players only ever receive the hints shown so far.
 - Riddles solved: the numbers page lists the riddles and who solved each ("Riddles solved (1 of 2)"), never their answers.
+- Riddles still open: the party page lists the riddles nobody has solved yet ("🧩 Riddles still unsolved: The sphinx").
+- What solving it gives: a riddle can say what solving it brings ("The door swings open"); GMs always see it, players only once someone has solved it (the server holds it back until then).
+- Wrong guesses: wrong answers are kept for the GMs (the last 30: who, what, when), shown under the riddle; players never receive them.

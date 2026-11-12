@@ -2,8 +2,8 @@
 // never reaches players), who has solved it, and for GMs the answer and a button to reveal the next hint.
 import { el, toast } from './dom.js';
 import { api, isGm, isMember, previewing } from './api.js';
-import { world, getEntry, patchEntry } from './world-store.js';
-import { readSolved, hintsOf, shownHints } from './riddle.js';
+import { world, getEntry, patchEntry, richInline, when, worldEntries, link } from './world-store.js';
+import { readSolved, hintsOf, shownHints, readGuesses } from './riddle.js';
 
 export function riddleCard(h, rerender) {
   if (h.kind !== 'handout') return null;
@@ -29,6 +29,17 @@ export function riddleCard(h, rerender) {
     gm ? el('p', { class: 'small riddle-answer' }, el('strong', {}, 'Answer: '), f.answer.split('|').map((x) => x.trim()).join(' or '), el('span', { class: 'muted' }, ' (only GMs see this)')) : null,
     shown.length ? el('ol', { class: 'small riddle-hints' }, shown.map((x) => el('li', {}, x))) : null,
     reveal,
+    // What solving it brings: GMs always see it; players once someone has solved the riddle.
+    f.reward && (gm || solved.length) ? el('p', { class: 'riddle-reward' }, el('strong', {}, solved.length ? '🗝 Solved: ' : '🗝 When it’s solved: '), richInline(f.reward)) : null,
+    // Wrong guesses, for the GMs: who guessed what, and when.
+    gm && readGuesses(f.guesses).length ? el('details', { class: 'small riddle-guesses' }, el('summary', {}, `Wrong guesses (${readGuesses(f.guesses).length})`),
+      el('ul', { class: 'plain' }, readGuesses(f.guesses).slice().reverse().map((g) => el('li', {}, `“${g.text}”`, el('span', { class: 'muted' }, ` · ${g.name}${g.at ? `, ${when(g.at)}` : ''}`))))) : null,
     solved.length ? el('p', { class: 'small riddle-solved' }, `✔ Solved by ${solved.map((x) => x.name).join(', ')}`) : form ? null : el('p', { class: 'muted small' }, 'Nobody has solved it yet.'),
     form, out);
+}
+
+// Riddles still open: the riddles nobody has solved yet (what this person can see), for the party page.
+export function openRiddlesLine() {
+  const open = worldEntries().filter((h) => h.kind === 'handout' && (h.fields?.answer || h.fields?.riddle === 'yes') && !readSolved(h.fields?.solved).length).sort((a, b) => a.name.localeCompare(b.name));
+  return open.length ? el('p', { class: 'small party-riddles' }, `🧩 Riddles still unsolved: `, open.slice(0, 8).map((h, i) => [i ? ', ' : '', link(h)]), '.') : null;
 }

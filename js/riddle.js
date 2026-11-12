@@ -11,6 +11,10 @@ export const isRight = (guess, answer) => { const g = norm(guess); return !!g &&
 export const readSolved = (raw) => { try { const v = typeof raw === 'string' ? JSON.parse(raw) : raw; return Array.isArray(v) ? v.filter((x) => x && x.name).map((x) => ({ name: String(x.name).slice(0, 80), at: String(x.at || '').slice(0, 40) })) : []; } catch { return []; } };
 export const addSolver = (raw, name, at = new Date().toISOString()) => { const list = readSolved(raw); return list.some((x) => x.name === name) ? list : [...list, { name: String(name).slice(0, 80), at }]; };
 
+// Wrong guesses: [{ name, text, at }], newest last, the last 30 kept.
+export const readGuesses = (raw) => { try { const v = typeof raw === 'string' ? JSON.parse(raw) : raw; return Array.isArray(v) ? v.filter((x) => x && x.text).map((x) => ({ name: String(x.name || '').slice(0, 80), text: String(x.text).slice(0, 200), at: String(x.at || '').slice(0, 40) })) : []; } catch { return []; } };
+export const addGuess = (raw, name, text, at = new Date().toISOString()) => [...readGuesses(raw), { name: String(name).slice(0, 80), text: String(text).trim().slice(0, 200), at }].slice(-30);
+
 // Hints: one per line; the first `shown` of them are revealed.
 export const hintsOf = (text) => String(text || '').split('\n').map((x) => x.trim()).filter(Boolean).slice(0, 12);
 export const shownHints = (text, shown) => hintsOf(text).slice(0, Math.max(0, Math.min(12, Math.round(Number(shown) || 0))));

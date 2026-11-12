@@ -20,3 +20,11 @@ test('solvers and hints', () => {
   assert.deepEqual(shownHints('a\nb', 9), ['a', 'b']);
   assert.equal(hintsOf('').length, 0);
 });
+
+test('wrong guesses: newest last, the last 30', async () => {
+  const { addGuess, readGuesses } = await import('../js/riddle.js');
+  let g = addGuess('', 'Pip', ' a shadow ', 't1'); g = addGuess(JSON.stringify(g), 'Bo', 'silence', 't2');
+  assert.deepEqual(g, [{ name: 'Pip', text: 'a shadow', at: 't1' }, { name: 'Bo', text: 'silence', at: 't2' }]);
+  let many = ''; for (let i = 0; i < 40; i++) many = JSON.stringify(addGuess(many, 'x', `g${i}`, String(i)));
+  assert.equal(readGuesses(many).length, 30); assert.equal(readGuesses(many)[0].text, 'g10');
+});

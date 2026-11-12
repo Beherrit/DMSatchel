@@ -48,7 +48,7 @@ import { shopOpen, holidayToday, holidayTomorrow, evePrice, shutText, tradeDay, 
 import { cleanCalendar, withLocal } from '../js/calendar.js';
 import { marketStalls, STALLS_OPEN, STALLS_SHUT } from '../js/market-stalls.js';
 import { cleanOrder, cleanWatchTime } from '../js/party-order.js';
-import { isRight, addSolver, shownHints } from '../js/riddle.js';
+import { isRight, addSolver, shownHints, addGuess, readSolved } from '../js/riddle.js';
 import { shopStanding, sellWithStanding } from '../js/standing-price.js';
 import { coinText, GOODS } from '../js/economy.js';
 import { cleanMusic } from '../js/music.js';
@@ -118,9 +118,11 @@ function shape(row, req) {
   }
   // A riddle's answer stays with the GMs (however the handout reached this person), and only the hints shown so far
   // reach players: it's a riddle all the same.
-  if (!gmView && row.kind === 'handout' && (row.fields?.answer || row.fields?.hints)) {
+  if (!gmView && row.kind === 'handout' && (row.fields?.answer || row.fields?.hints || row.fields?.reward || row.fields?.guesses)) {
     out.fields = { ...out.fields, ...(row.fields.answer ? { riddle: 'yes' } : {}) };
-    delete out.fields.answer;
+    delete out.fields.answer; delete out.fields.guesses;
+    // What solving it brings: only once someone has solved it.
+    if (!readSolved(row.fields.solved).length) delete out.fields.reward;
     const hints = shownHints(row.fields.hints, row.fields.hints_shown).join('\n');
     if (hints) out.fields.hints = hints; else delete out.fields.hints;
   }
@@ -509,7 +511,11 @@ export default route({
       if (!h || h.deleted || h.kind !== 'handout' || !visibleTo(h, req) || !h.fields?.answer) return fail(res, 404, 'That riddle isn’t there.');
       const guess = clip(b.text, 200);
       if (!String(guess || '').trim()) return fail(res, 400, 'Say your answer.');
-      if (!isRight(guess, h.fields.answer)) return send(res, 200, { correct: false });
+      if (!isRight(guess, h.fields.answer)) {
+        // Wrong guesses: kept for the GMs (who, what, when).
+        await sql`UPDATE entries SET fields = fields || jsonb_build_object('guesses', ${JSON.stringify(addGuess(h.fields.guesses, req.gm.name, guess))}::text) WHERE id = ${h.id} AND world_id = ${req.world.id}`;
+        return send(res, 200, { correct: false });
+      }
       const solved = addSolver(h.fields.solved, req.gm.name);
       await sql`UPDATE entries SET fields = fields || jsonb_build_object('solved', ${JSON.stringify(solved)}::text), updated_at = now(), version = version + 1 WHERE id = ${h.id} AND world_id = ${req.world.id}`;
       await record(h.id, req.gm.id, 'solved', null);

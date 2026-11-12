@@ -118,7 +118,10 @@ export const KINDS = {
       // A riddle: its answer (several accepted, separated by "|") and hints, one per line, revealed one at a time. Players
       // never receive the answer or the hints not yet shown (the server leaves them out); who solved it is kept by the server.
       ['answer', 'Riddle answer (only GMs see it; several with |)', 'text', null, { gmOnly: true }], ['hints', 'Riddle hints, one per line (revealed one at a time)', 'long', null, { gmOnly: true }],
-      ['hints_shown', 'Hints shown', 'hidden', null, { gmOnly: true }], ['solved', 'Solved by', 'hidden', null, { gmOnly: true }]],
+      ['reward', 'What solving it brings (players see it once solved)', 'long', null, { gmOnly: true }],
+      ['hints_shown', 'Hints shown', 'hidden', null, { gmOnly: true }], ['solved', 'Solved by', 'hidden', null, { gmOnly: true }],
+      // Wrong guesses at the riddle (who, what, when), kept for the GMs.
+      ['guesses', 'Wrong guesses', 'hidden', null, { gmOnly: true }]],
   },
   creature: {
     label: 'Creature', plural: 'Bestiary', blurb: 'Monsters from your books, in short: what they are and what they do.',
