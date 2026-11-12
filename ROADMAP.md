@@ -1004,6 +1004,10 @@ to the log at the bottom.
 599. [x] **Solved that day.** A session's page lists the riddles solved on the day it was played.
 600. [x] **Signs that day.** A session's page lists the prophecy signs that came to pass on its in-world date.
 601. [x] **Copy the day.** The session's "On the day" can be copied as plain text.
+602. [ ] **Traps that day.** A trap keeps when it was found, disarmed or sprung, and a session's "On the day" lists those.
+603. [ ] **Written that day.** "On the day" lists the journal entries written on the day.
+604. [ ] **Filed that day.** "On the day" lists the downtime filed on the day.
+605. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 
 ## Ideas parking lot
 
