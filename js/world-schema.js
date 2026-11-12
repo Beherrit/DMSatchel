@@ -22,7 +22,7 @@ export const KINDS = {
   },
   area: {
     label: 'Area', plural: 'Areas & Districts', blurb: 'Forests, valleys, coasts, city districts and wild lands inside a region.',
-    fields: [['type', 'Type', 'select', ['Forest', 'Hills', 'Mountains', 'Valley', 'Coast', 'Island', 'Swamp', 'Desert', 'Plains', 'Underdark', 'City district', 'Borderland', 'Other']], ['terrain', 'Terrain & climate'], ['controlled_by', 'Controlled by'], ['features', 'Notable features', 'long'], ['dangers', 'Dangers & encounters', 'long'], ['resources', 'Resources', 'long'], ['encounters', 'Encounter table', 'long']],
+    fields: [['type', 'Type', 'select', ['Forest', 'Hills', 'Mountains', 'Valley', 'Coast', 'Island', 'Swamp', 'Desert', 'Plains', 'Underdark', 'City district', 'Borderland', 'Other']], ['traps', 'Traps', 'hidden', null, { gmOnly: true }], ['terrain', 'Terrain & climate'], ['controlled_by', 'Controlled by'], ['features', 'Notable features', 'long'], ['dangers', 'Dangers & encounters', 'long'], ['resources', 'Resources', 'long'], ['encounters', 'Encounter table', 'long']],
   },
   settlement: {
     label: 'Settlement', plural: 'Settlements', blurb: 'Cities, towns, villages and outposts.',
@@ -30,7 +30,7 @@ export const KINDS = {
   },
   location: {
     label: 'Location', plural: 'Locations', blurb: 'Dungeons, ruins, taverns, shops and landmarks.',
-    fields: [['type', 'Type', 'select', ['Dungeon', 'Ruin', 'Tavern', 'Shop', 'Temple', 'Landmark', 'Lair', 'Castle', 'Wilderness', 'Room', 'Other']], ['owner', 'Owner or occupant'], ['minder', 'Minds it when the owner’s out'], ['hours', 'Opening hours (e.g. 10–18, 6pm–2am)'], ['closed_on', 'Shut every (a weekday)'], ['holiday_open', 'Open on holidays', 'select', ['Yes', 'No']], ['shop_type', 'Shop type'], ['features', 'Notable features', 'long'], ['dangers', 'Dangers', 'long'], ['treasure', 'Treasure', 'long'], ['stock', 'Stock & prices', 'long'], ['encounters', 'Encounter table', 'long']],
+    fields: [['type', 'Type', 'select', ['Dungeon', 'Ruin', 'Tavern', 'Shop', 'Temple', 'Landmark', 'Lair', 'Castle', 'Wilderness', 'Room', 'Other']], ['traps', 'Traps', 'hidden', null, { gmOnly: true }], ['owner', 'Owner or occupant'], ['minder', 'Minds it when the owner’s out'], ['hours', 'Opening hours (e.g. 10–18, 6pm–2am)'], ['closed_on', 'Shut every (a weekday)'], ['holiday_open', 'Open on holidays', 'select', ['Yes', 'No']], ['shop_type', 'Shop type'], ['features', 'Notable features', 'long'], ['dangers', 'Dangers', 'long'], ['treasure', 'Treasure', 'long'], ['stock', 'Stock & prices', 'long'], ['encounters', 'Encounter table', 'long']],
   },
   faction: {
     label: 'Faction', plural: 'Factions', blurb: 'Political powers, cults, armies and secret societies.',

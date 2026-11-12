@@ -992,10 +992,10 @@ to the log at the bottom.
     only see once someone has solved it.
 588. [x] **Wrong guesses.** GMs see the wrong guesses at a riddle, who made them and when.
 589. [x] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
-590. [ ] **Traps.** GMs keep a list of traps on a place, each armed, found, disarmed or sprung.
-591. [ ] **Traps in prep.** Session prep lists the armed traps where the party is (and anywhere inside).
-592. [ ] **Traps on the map.** For GMs, a place's pin marks how many armed traps it holds.
-593. [ ] **Found traps.** Players see a trap once it's found (or disarmed or sprung); the server never sends armed ones.
+590. [x] **Traps.** GMs keep a list of traps on a place, each armed, found, disarmed or sprung.
+591. [x] **Traps in prep.** Session prep lists the armed traps where the party is (and anywhere inside).
+592. [x] **Traps on the map.** For GMs, a place's pin marks how many armed traps it holds.
+593. [x] **Found traps.** Players see a trap once it's found (or disarmed or sprung); the server never sends armed ones.
 
 ## Ideas parking lot
 
@@ -1595,3 +1595,7 @@ to the log at the bottom.
 - What solving it gives: a riddle can say what solving it brings ("The door swings open"); GMs always see it, players only once someone has solved it (the server holds it back until then).
 - Wrong guesses: wrong answers are kept for the GMs (the last 30: who, what, when), shown under the riddle; players never receive them.
 - A full sweep (#589): all 550 browser tests clean against sweep #581, first time through (covering riddles; the two new riddle checks print their own results, no leaks); accessibility still clean light and dark.
+- Traps: a location's or area's page has "Traps" for GMs: add a trap and mark it armed, found, disarmed or sprung (additive, GM-only field).
+- Traps in prep: session prep lists the armed traps where the party is and anywhere inside ("⚠ Armed traps here (1): The Vault: Falling block").
+- Traps on the map: for GMs, a place's pin carries ⚠ (with a count when there are several) for armed traps at it or inside it; players never see it.
+- Found traps: players see "Traps found here" with the traps found, disarmed or sprung; the server never sends them an armed trap, however the place reached them.

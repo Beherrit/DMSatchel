@@ -47,6 +47,7 @@ import { worldCalendar, todayText, daysPassed } from './world-calendar.js';
 import { advance, formatDate, today, cleanCalendar, withLocal, upcomingHolidays, holidayTitle } from './calendar.js';
 import { nextMarket, inDaysText } from './week-in-town.js';
 import { partyOrder } from './world-orders.js';
+import { armedTrapsIn } from './world-traps.js';
 import { journeyOnMap } from './journey.js';
 import { controllers, powerSlots } from './control.js';
 import { journey, chainOf, notePartyMove } from './world-journey.js';
@@ -496,14 +497,17 @@ export async function viewMap(id, focusPin) {
       const pe = p.entry_id && getEntry(p.entry_id), around = pe && PLACE_KINDS.includes(pe.kind) ? aroundNow(pe)?.list || [] : [], here = around.length;
       // Wanted, at a glance: someone with an open bounty is here right now.
       const hunted = around.some((x) => wantedIds.has(x.npc.entry.id));
-      const said = `${p.label}${hours ? ` (${hours.text})` : ''}${here ? `, ${here} here now` : ''}${hunted ? ', someone wanted is here' : ''}`;
+      // Traps on the map, for GMs: how many armed traps the place (or anywhere inside it) holds.
+      const traps = isGm() && pe && ['location', 'area', 'settlement', 'region'].includes(pe.kind) ? armedTrapsIn(pe).length : 0;
+      const said = `${p.label}${hours ? ` (${hours.text})` : ''}${here ? `, ${here} here now` : ''}${hunted ? ', someone wanted is here' : ''}${traps ? `, ${traps} armed trap${traps === 1 ? '' : 's'}` : ''}`;
       return el('button', {
         class: `pin pin-${p.icon || 'poi'}${p.secret ? ' secret' : ''}${hours && !hours.open ? ' shut' : ''}${peopleOnly && pe && PLACE_KINDS.includes(pe.kind) && !here ? ' empty' : ''}${p.entry_id && mapsOf(p.entry_id).some((m) => m.id !== map.id) ? ' has-map' : ''}${held ? ` held hold-${slot < 0 ? 'other' : slot}` : ''}`, type: 'button', 'data-id': p.id, style: `left:${p.x * 100}%;top:${p.y * 100}%`,
         title: held ? `${said}: held by ${held.by.name}` : said, 'aria-label': held ? `${said}, held by ${held.by.name}` : said, onclick: (ev) => { ev.stopPropagation(); showPin(p); },
       }, el('span', { class: 'glyph', 'aria-hidden': 'true' }, PIN_ICONS[p.icon || 'poi'][1]), el('span', { class: 'pin-label' }, p.label),
         here ? el('span', { class: 'pin-count', 'aria-hidden': 'true' }, String(here)) : null,
         namesOn && here ? el('span', { class: 'pin-names', 'aria-hidden': 'true' }, around.slice(0, 3).map((x) => x.npc.entry.name).join(', ') + (here > 3 ? ` +${here - 3}` : '')) : null,
-        hunted ? el('span', { class: 'pin-wanted-mark', 'aria-hidden': 'true' }, '🎯') : null);
+        hunted ? el('span', { class: 'pin-wanted-mark', 'aria-hidden': 'true' }, '🎯') : null,
+        traps ? el('span', { class: 'pin-trap-mark', 'aria-hidden': 'true' }, `⚠${traps > 1 ? traps : ''}`) : null);
     }));
     drawHoldKey();
     const shown = pins.filter((p) => !q || `${p.label} ${getEntry(p.entry_id)?.name || ''}`.toLowerCase().includes(q)).sort((a, b) => String(a.label).localeCompare(String(b.label)));

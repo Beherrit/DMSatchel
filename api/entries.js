@@ -49,6 +49,7 @@ import { cleanCalendar, withLocal } from '../js/calendar.js';
 import { marketStalls, STALLS_OPEN, STALLS_SHUT } from '../js/market-stalls.js';
 import { cleanOrder, cleanWatchTime } from '../js/party-order.js';
 import { isRight, addSolver, shownHints, addGuess, readSolved } from '../js/riddle.js';
+import { trapsForPlayers } from '../js/traps.js';
 import { shopStanding, sellWithStanding } from '../js/standing-price.js';
 import { coinText, GOODS } from '../js/economy.js';
 import { cleanMusic } from '../js/music.js';
@@ -115,6 +116,12 @@ function shape(row, req) {
     // The world's own GM-only fields stay with the GMs, even on a player's own entries.
     const hide = secretCustomKeys(row.kind, customOf(req)).filter((k) => out.fields?.[k]);
     if (hide.length) { out.fields = { ...out.fields }; for (const k of hide) delete out.fields[k]; }
+  }
+  // Traps: players only ever receive the ones found, disarmed or sprung (never an armed one), however the place
+  // reached them.
+  if (!gmView && row.fields?.traps) {
+    const shown = trapsForPlayers(row.fields.traps);
+    out.fields = { ...out.fields }; if (shown === '[]') delete out.fields.traps; else out.fields.traps = shown;
   }
   // A riddle's answer stays with the GMs (however the handout reached this person), and only the hints shown so far
   // reach players: it's a riddle all the same.

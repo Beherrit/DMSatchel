@@ -30,6 +30,7 @@ import { attitudesOfCharacter, attitudesToward } from './world-attitudes.js';
 import { noteBox, myNotesSection } from './world-notes.js';
 import { objectivesSection, omensCard, boundLine } from './world-objectives.js';
 import { riddleCard } from './world-riddle.js';
+import { trapsCard } from './world-traps.js';
 import { whatsNewCard } from './world-whatsnew.js';
 import { attendanceSection } from './world-attendance.js';
 import { revealButton } from './world-reveal.js';
@@ -450,6 +451,7 @@ function viewEntry(id, tab) {
     rewardCard(e, rerenderWorld),
     boundLine(e),
     riddleCard(e, rerenderWorld),
+    trapsCard(e, rerenderWorld),
     objectivesSection(e, rerenderWorld),
     chainSection(e, rerenderWorld),
     tableSection(e),

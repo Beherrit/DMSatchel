@@ -38,6 +38,7 @@ import { aroundNow, festivalLine, wantedPrepLine, whereNow, whereBits, townWeek,
 import { partyWishes } from './world-wishes.js';
 import { timerCard } from './world-timer.js';
 import { tongueFlag } from './world-languages.js';
+import { trapsPrepLine } from './world-traps.js';
 import { nextMarket, inDaysText, weekDayText } from './week-in-town.js';
 import { waitingOnGm } from './waiting.js';
 import { giftsSince, giftWhat } from './gifts.js';
@@ -176,6 +177,7 @@ function whereSection(prep, rerender) {
         catch (err) { toast(err.message, 'bad'); }
       } }, prep.scene_aloud ? 'In the read-aloud list ✓' : 'Read aloud')) : null,
     // The festival: on a holiday, who's at the taverns in town now (and on other days, when the next one is).
+    trapsPrepLine(here),
     (() => { const t = here.kind === 'settlement' ? here : town; return t ? [festivalLine(t), wantedPrepLine(t),
       // Next market in prep: when the town's market is next (today, or which day), holidays skipped.
       (() => { const cal = withLocal(cleanCalendar(world.info?.cal), t), m = cal && t.kind === 'settlement' ? nextMarket(cal, t, 14) : null;
