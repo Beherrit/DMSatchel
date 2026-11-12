@@ -31,6 +31,7 @@ import { noteBox, myNotesSection } from './world-notes.js';
 import { objectivesSection, omensCard, boundLine } from './world-objectives.js';
 import { riddleCard } from './world-riddle.js';
 import { trapsCard } from './world-traps.js';
+import { onTheDayCard } from './world-onday.js';
 import { whatsNewCard } from './world-whatsnew.js';
 import { attendanceSection } from './world-attendance.js';
 import { revealButton } from './world-reveal.js';
@@ -494,6 +495,8 @@ function viewEntry(id, tab) {
       return el('p', { class: 'muted small session-gap-line' }, `After `, link(prev), bits.length ? `: ${bits.join(' · ')}` : ''); })() : null,
     ['session', 'journal'].includes(e.kind) ? el('div', { class: 'btnrow' }, el('button', { class: 'btn small ghost session-copy', type: 'button', onclick: () => copyText(sessionText(e)) }, 'Copy as text')) : null,
     ['session', 'journal'].includes(e.kind) ? inSessionCard(e) : null,
+    // On the day: what happened the day a session was played (purchases, riddles solved, signs come to pass).
+    onTheDayCard(e),
     // What the players wrote: journal entries that link to this session.
     e.kind === 'session' ? (() => { const js = journalsAbout(e.id);
       return js.length ? el('section', { class: 'card session-journals' }, el('h3', {}, `What the players wrote (${js.length})`),

@@ -1000,10 +1000,10 @@ to the log at the bottom.
 595. [x] **It went off.** Marking a trap sprung (or found) offers to note it in the latest session's log.
 596. [x] **Trap tally.** The numbers page counts the traps found, disarmed and sprung (GMs also see how many are armed).
 597. [x] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
-598. [ ] **On the day.** A session's page lists the purchases made on the day it was played.
-599. [ ] **Solved that day.** A session's page lists the riddles solved on the day it was played.
-600. [ ] **Signs that day.** A session's page lists the prophecy signs that came to pass on its in-world date.
-601. [ ] **Copy the day.** The session's "On the day" can be copied as plain text.
+598. [x] **On the day.** A session's page lists the purchases made on the day it was played.
+599. [x] **Solved that day.** A session's page lists the riddles solved on the day it was played.
+600. [x] **Signs that day.** A session's page lists the prophecy signs that came to pass on its in-world date.
+601. [x] **Copy the day.** The session's "On the day" can be copied as plain text.
 
 ## Ideas parking lot
 
@@ -1611,3 +1611,7 @@ to the log at the bottom.
 - It went off: marking a trap sprung or found offers to note it in the latest session's log ("A trap went off at [[The Vault]]: Pit under the rug").
 - Trap tally: the numbers page has a "Traps" tile, found, disarmed and sprung (GMs also see how many are still armed; players' counts only cover what they've been sent).
 - A full sweep (#597): all 552 browser tests clean against sweep #589, first time through (covering traps); accessibility still clean light and dark.
+- On the day: a session's page has "On the day", the purchases made on the real date it was played (from the characters' logs).
+- Solved that day: it lists the riddles solved that day, and by whom.
+- Signs that day: it lists the prophecy signs that came to pass on the session's in-world date.
+- Copy the day: "On the day" has Copy as text ("On the day: Session 4" with a line for each sign, riddle and purchase).
