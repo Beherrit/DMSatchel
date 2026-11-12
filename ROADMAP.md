@@ -991,7 +991,7 @@ to the log at the bottom.
 587. [x] **What solving it gives.** A riddle can say what solving it brings ("The door swings open"), which players
     only see once someone has solved it.
 588. [x] **Wrong guesses.** GMs see the wrong guesses at a riddle, who made them and when.
-589. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
+589. [x] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 
 ## Ideas parking lot
 
@@ -1590,3 +1590,4 @@ to the log at the bottom.
 - Riddles still open: the party page lists the riddles nobody has solved yet ("🧩 Riddles still unsolved: The sphinx").
 - What solving it gives: a riddle can say what solving it brings ("The door swings open"); GMs always see it, players only once someone has solved it (the server holds it back until then).
 - Wrong guesses: wrong answers are kept for the GMs (the last 30: who, what, when), shown under the riddle; players never receive them.
+- A full sweep (#589): all 550 browser tests clean against sweep #581, first time through (covering riddles; the two new riddle checks print their own results, no leaks); accessibility still clean light and dark.
