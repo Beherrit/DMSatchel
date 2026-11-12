@@ -1007,7 +1007,7 @@ to the log at the bottom.
 602. [x] **Traps that day.** A trap keeps when it was found, disarmed or sprung, and a session's "On the day" lists those.
 603. [x] **Written that day.** "On the day" lists the journal entries written on the day.
 604. [x] **Filed that day.** "On the day" lists the downtime filed on the day.
-605. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
+605. [x] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 
 ## Ideas parking lot
 
@@ -1622,3 +1622,4 @@ to the log at the bottom.
 - Traps that day: a trap marked found, disarmed or sprung keeps when (inside its traps list; re-arming clears it), and "On the day" lists those ("The Vault: Pit (sprung)").
 - Written that day: "On the day" lists the journal entries written on the day, with who wrote them.
 - Filed that day: "On the day" lists the downtime filed on the day; all three go in the copied text too.
+- A full sweep (#605): all 553 browser tests clean against sweep #597 (t-sheetlog timed out under load and passes on rerun); accessibility still clean light and dark.
