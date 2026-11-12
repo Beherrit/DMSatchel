@@ -23,6 +23,7 @@ import { holidayToday, holidayTomorrow, EVE_MARKUP, openText } from './shop-hour
 import { aroundNow, dueInHere, partyTown, townWeek, todaysStalls } from './world-routine.js';
 import { weekDayText } from './week-in-town.js';
 import { partyOrder, nightShifts } from './world-orders.js';
+import { armedTrapsIn } from './world-traps.js';
 import { watchShifts, hhmm as hhmmW } from './party-order.js';
 import { dayLine } from './routine.js';
 import { isHired } from './hirelings.js';
@@ -107,6 +108,8 @@ export async function viewSessionSheet() {
       // Stalls on the sheet: on market day, the travelling stalls in the party's town and what they sell.
       (() => { const t = partyTown(), ss = todaysStalls(t); return ss.length ? block(`🧺 Market stalls in ${t.name}`, el('ul', { class: 'ss-list ss-stalls' }, ss.map((st) =>
         el('li', {}, el('strong', {}, st.name), ` (${st.keeper}): `, st.goods.map((g) => `${g.name} ${g.price}`).join(', '))))) : null; })(),
+      // Traps on the sheet: the armed traps where the party is (and anywhere inside).
+      (() => { const ts = here ? armedTrapsIn(here) : []; return ts.length ? block(`⚠ Armed traps (${ts.length})`, el('ul', { class: 'ss-list ss-traps' }, ts.slice(0, 12).map(({ place, trap }) => el('li', {}, place.id === here.id ? '' : `${place.name}: `, trap.text)))) : null; })(),
       // Orders on the sheet: the marching order and the night's watches.
       (() => { const { march } = partyOrder(), shifts = nightShifts(); if (!march.length && !shifts.length) return null;
         return block('🥾 Marching and watches', march.length ? el('p', { class: 'ss-march' }, el('strong', {}, 'Marching: '), march.map((id) => getEntry(id)?.name).filter(Boolean).join(' → ')) : null,

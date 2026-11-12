@@ -4,6 +4,7 @@
 import { el, toast } from './dom.js';
 import { isGm } from './api.js';
 import { getEntry, patchEntry, worldEntries, link } from './world-store.js';
+import { sessionOrder } from './appearances.js';
 import { readTraps, addTrap, setTrap, removeTrap, TRAP_STATES } from './traps.js';
 
 const ICON = { armed: '⚠', found: '👁', disarmed: '✔', sprung: '💥' };
@@ -21,7 +22,7 @@ export function trapsCard(place, rerender) {
     gm ? el('p', { class: 'muted small' }, 'Players only see a trap once it’s found, disarmed or sprung.') : null,
     list.length ? el('ul', { class: 'plain trap-list' }, list.map((t) => el('li', { class: `trap ${t.state}` }, el('span', { 'aria-hidden': 'true' }, `${ICON[t.state]} `), t.text,
       gm ? el('span', { class: 'trap-tools' }, ' ',
-        el('select', { 'aria-label': `State of: ${t.text}`, onchange: (ev) => save(setTrap(list, t.id, ev.target.value)) }, TRAP_STATES.map((s) => el('option', { value: s, selected: s === t.state || null }, s))),
+        el('select', { 'aria-label': `State of: ${t.text}`, onchange: async (ev) => { const st = ev.target.value; await save(setTrap(list, t.id, st)); if (st === 'sprung' || st === 'found') noteTrap(place, t.text, st); } }, TRAP_STATES.map((s) => el('option', { value: s, selected: s === t.state || null }, s))),
         el('button', { class: 'btn small ghost', type: 'button', 'aria-label': `Remove trap: ${t.text}`, onclick: () => save(removeTrap(list, t.id)) }, '✕'))
         : el('span', { class: 'muted small' }, ` · ${t.state}`)))) : el('p', { class: 'muted small' }, 'No traps here.'),
     add);
@@ -40,4 +41,19 @@ export function trapsPrepLine(here) {
   const ts = armedTrapsIn(here); if (!ts.length) return null;
   return el('div', { class: 'small prep-traps' }, el('strong', {}, `⚠ Armed traps here (${ts.length}): `),
     el('ul', { class: 'plain' }, ts.slice(0, 10).map(({ place, trap }) => el('li', {}, place.id === here.id ? '' : [link(place), ': '], trap.text))));
+}
+
+// It went off: a trap sprung (or found) can be noted in the latest session's log.
+async function noteTrap(place, text, state) {
+  const last = sessionOrder(worldEntries())[0];
+  if (!last || !confirm(`Note it in ${last.name}’s log?`)) return;
+  const line = `${state === 'sprung' ? 'A trap went off' : 'A trap was found'} at [[${place.name}]]: ${text}`;
+  try { await patchEntry(getEntry(last.id) || last, { body: `${String(last.body || '').replace(/\s+$/, '')}${last.body ? '\n\n' : ''}${line}` }); toast(`Noted in ${last.name}`); } catch (err) { toast(err.message, 'bad'); }
+}
+
+// Trap tally: the traps found, disarmed and sprung across the world (GMs also see the armed ones). → { armed, found, disarmed, sprung }.
+export function trapTally() {
+  const n = { armed: 0, found: 0, disarmed: 0, sprung: 0 };
+  for (const p of worldEntries().filter((x) => PLACES.includes(x.kind))) for (const t of readTraps(p)) n[t.state] += 1;
+  return n;
 }

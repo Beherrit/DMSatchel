@@ -10,6 +10,8 @@ import { journalWriters } from './journal-streaks.js';
 import { isProphecy } from './world-objectives.js';
 import { readObjectives, progress } from './objectives.js';
 import { readSolved } from './riddle.js';
+import { trapTally } from './world-traps.js';
+import { isGm } from './api.js';
 import { averageLength, lengthText } from './session-timer.js';
 import { spending, topGoods, spots, purchases } from './purchases.js';
 import { coinText } from './economy.js';
@@ -35,6 +37,9 @@ export function viewNumbers() {
       (() => { const p = playingSince(sessionOrder(worldEntries()), new Date().toISOString().slice(0, 10)); return p ? tile('Playing since', p.date, p.ago) : null; })(),
       // Average session: how long sessions run, from the lengths written on their logs.
       (() => { const a = averageLength(worldEntries().filter((x) => x.kind === 'session').map((x) => x.fields?.length)); return a ? tile('Average session', lengthText(a.minutes), `over ${plural(a.count, 'session')}`) : null; })(),
+      // Trap tally: found, disarmed and sprung (GMs also see how many are still armed).
+      (() => { const t = trapTally(), seen = t.found + t.disarmed + t.sprung; if (!seen && !(isGm() && t.armed)) return null;
+        return tile('Traps', seen, [t.disarmed && `${t.disarmed} disarmed`, t.sprung && `${t.sprung} sprung`, t.found && `${t.found} found`, isGm() && t.armed && `${t.armed} still armed`].filter(Boolean).join(', ')); })(),
       // Pace of play: how often the table meets, and how many in-world days pass per session.
       (() => { const p = pace(sessionGaps(sessionOrder(worldEntries()), worldCalendar())); if (p.real === null && p.world === null) return null;
         return tile('Pace of play', p.real !== null ? (p.real === 0 ? 'Same day' : `Every ${p.real} day${p.real === 1 ? '' : 's'}`) : '—', p.world !== null ? `${p.world} in-world day${p.world === 1 ? '' : 's'} a session` : null); })()),
