@@ -996,6 +996,10 @@ to the log at the bottom.
 591. [x] **Traps in prep.** Session prep lists the armed traps where the party is (and anywhere inside).
 592. [x] **Traps on the map.** For GMs, a place's pin marks how many armed traps it holds.
 593. [x] **Found traps.** Players see a trap once it's found (or disarmed or sprung); the server never sends armed ones.
+594. [ ] **Traps on the sheet.** The printable GM sheet lists the armed traps where the party is.
+595. [ ] **It went off.** Marking a trap sprung (or found) offers to note it in the latest session's log.
+596. [ ] **Trap tally.** The numbers page counts the traps found, disarmed and sprung (GMs also see how many are armed).
+597. [ ] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
 
 ## Ideas parking lot
 
