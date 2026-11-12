@@ -1008,11 +1008,11 @@ to the log at the bottom.
 603. [x] **Written that day.** "On the day" lists the journal entries written on the day.
 604. [x] **Filed that day.** "On the day" lists the downtime filed on the day.
 605. [x] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
-606. [ ] **Send a dream.** From a character's page, GMs send a dream: a handout only that character's player (and the
+606. [x] **Send a dream.** From a character's page, GMs send a dream: a handout only that character's player (and the
     GMs) can see.
-607. [ ] **Dreams.** A character's page lists the dreams sent to them, newest first.
-608. [ ] **Dreams of a prophecy.** A dream can be tied to a prophecy; the prophecy's page tells GMs who has dreamed of it.
-609. [ ] **Dreams in the palette.** Ctrl+K "dreams" lists the dreams you may see.
+607. [x] **Dreams.** A character's page lists the dreams sent to them, newest first.
+608. [x] **Dreams of a prophecy.** A dream can be tied to a prophecy; the prophecy's page tells GMs who has dreamed of it.
+609. [x] **Dreams in the palette.** Ctrl+K "dreams" lists the dreams you may see.
 
 ## Ideas parking lot
 
@@ -1628,3 +1628,7 @@ to the log at the bottom.
 - Written that day: "On the day" lists the journal entries written on the day, with who wrote them.
 - Filed that day: "On the day" lists the downtime filed on the day; all three go in the copied text too.
 - A full sweep (#605): all 553 browser tests clean against sweep #597 (t-sheetlog timed out under load and passes on rerun); accessibility still clean light and dark.
+- Send a dream: a played character's page has "Send a dream…" for GMs: a title and the dream, which becomes a hidden handout shared with that character's player alone (additive GM-only "dream_for" field).
+- Dreams: a character's page lists "🌙 Dreams" sent to them, newest first, with what they dreamed; other players never receive them.
+- Dreams of a prophecy: a dream can be tied to a prophecy, and the prophecy's page tells GMs who has dreamed of it.
+- Dreams in the palette: Ctrl+K "dreams" lists the dreams you may see (players: their own characters'), newest first.

@@ -175,6 +175,13 @@ function render() {
         return { pr, item: { label: e.name, group: 'Prophecy', href: `#world/e/${e.id}`, hint: pr.total ? (pr.done === pr.total ? '✨ Fulfilled' : `🔮 ${pr.done} of ${pr.total} signs · next: ${next.text.replace(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g, (_, a, b) => b || a).slice(0, 60)}`) : '🔮 No signs yet' } }; })
       .sort((a, b) => b.pr.pct - a.pr.pct).map((x) => x.item).slice(0, 20);
   }
+  // "Dreams": the dreams this person may see (their own characters', or all for GMs), newest first.
+  let dreamItems = [];
+  if (/^(dreams?|my dreams)$/.test(q)) {
+    dreamItems = M.store.worldEntries().filter((h) => h.kind === 'handout' && h.fields?.dream_for).sort((a, b) => String(b.created_at).localeCompare(String(a.created_at))).slice(0, 20)
+      .map((h) => ({ label: h.name, group: `Dream · ${M.store.getEntry(h.fields.dream_for)?.name || 'someone'}`, href: `#world/e/${h.id}`, hint: `🌙 ${String(h.fields?.text || '').slice(0, 70)}` }));
+    if (!dreamItems.length) dreamItems = [{ label: 'No dreams yet', group: 'Dreams', href: '#world/party', hint: 'GMs send dreams from a character’s page' }];
+  }
   // "Market": the towns with a market day, and when each is next (soonest first; holidays skipped), above the
   // ordinary matches for the word.
   let markets = [];
@@ -203,6 +210,7 @@ function render() {
   if (duesItems.length) items = [...duesItems, ...items].slice(0, 40);
   if (langItems.length) items = [...langItems, ...items].slice(0, 40);
   if (omenItems.length) items = [...omenItems, ...items].slice(0, 40);
+  if (dreamItems.length) items = [...dreamItems, ...items].slice(0, 40);
   // Nothing typed yet: the entries you opened last come first.
   if (!q) {
     let recent = [];
