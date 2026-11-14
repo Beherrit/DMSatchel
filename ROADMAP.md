@@ -1017,10 +1017,10 @@ to the log at the bottom.
 611. [x] **A shared dream.** GMs can send the same dream to several characters at once.
 612. [x] **Write about the dream.** A dream's page offers its dreamer's player a journal entry about it.
 613. [x] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
-614. [ ] **A quiet pause.** Any player can ask, anonymously, for the game to pause or move on (an X-card): the server
+614. [x] **A quiet pause.** Any player can ask, anonymously, for the game to pause or move on (an X-card): the server
     keeps only when, never who.
-615. [ ] **The GM sees it.** The GM's pages show a banner when someone has asked for a pause, until the GM marks it seen.
-616. [ ] **Check-ins.** GMs ask "How's everyone doing?" and players answer 👍 😐 👎 anonymously; the GM sees the tally.
+615. [x] **The GM sees it.** The GM's pages show a banner when someone has asked for a pause, until the GM marks it seen.
+616. [x] **Check-ins.** GMs ask "How's everyone doing?" and players answer 👍 😐 👎 anonymously; the GM sees the tally.
 617. [ ] **A full sweep.** Run the whole browser suite again (a fresh baseline).
 
 ## Ideas parking lot
@@ -1645,3 +1645,6 @@ to the log at the bottom.
 - A shared dream: the dream dialog lets GMs tick other played characters to dream it too; each gets their own copy, shared with their player alone.
 - Write about the dream: a dream's page offers its dreamer's player "Write about this dream", a journal draft linked to it.
 - A full sweep (#613): all 556 browser tests clean against sweep #605, first time through (covering dreams); accessibility still clean light and dark.
+- A quiet pause: the party page has "⏸ Ask for a pause" for players: it tells the GM someone would like to pause or move on, and the server keeps only when, never who.
+- The GM sees it: GMs get a bar at the foot of every page ("⏸ Someone asked to pause or move on · just now") until they mark it seen; it arrives with the regular refresh, so no reload is needed.
+- Check-ins: GMs "Check in with the table" with a question; players answer 👍 😐 👎 from the bar, once each, counted apart from who answered so no answer can be traced; GMs see the tally and close it.

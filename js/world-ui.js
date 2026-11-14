@@ -33,6 +33,7 @@ import { riddleCard } from './world-riddle.js';
 import { trapsCard } from './world-traps.js';
 import { onTheDayCard } from './world-onday.js';
 import { dreamsSection, dreamersLine, dreamJournalButton } from './world-dreams.js';
+import { drawBar } from './world-safety.js';
 import { whatsNewCard } from './world-whatsnew.js';
 import { attendanceSection } from './world-attendance.js';
 import { revealButton } from './world-reveal.js';
@@ -912,7 +913,7 @@ export async function showWorld(parts, { keepScroll = false } = {}) {
   }
   if (!world.loaded) { setKids(main, el('p', { class: 'muted' }, 'Loading the world…')); await loadWorld(); if (world.loaded) setTimeout(checkShown, 300); }
   if (world.error) { setKids(main, notice('Couldn’t load the world', world.error.message, el('button', { class: 'btn', type: 'button', onclick: () => { loadWorld(true).then(() => showWorld(parts)); } }, 'Try again'))); return; }
-  renderSide();
+  renderSide(); drawBar();
   const [view, arg] = parts;
   let node;
   if (view === 'k') node = arg === 'rumor' ? viewRumors(rerenderWorld) : viewKind(arg);

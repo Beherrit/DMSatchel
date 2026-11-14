@@ -33,6 +33,7 @@ import { ordersCard } from './world-orders.js';
 import { duesOwed } from './world-guild.js';
 import { tonguesCard } from './world-languages.js';
 import { openRiddlesLine } from './world-riddle.js';
+import { safetyTools } from './world-safety.js';
 
 const ACTIVE = (e) => !['Retired', 'Dead', 'Missing'].includes(e.fields?.status);
 
@@ -426,7 +427,7 @@ export async function viewParty(rerender) {
         const writers = [...new Set(journalsAbout(last.id).map((j) => j.owner || j.fields?.character || '').filter(Boolean))];
         return el('p', { class: 'small party-last-session' }, '📖 Last session: ', link(last), named.length ? [' · came up: ', named.slice(0, 8).map((x, i) => [i ? ', ' : '', link(x)])] : '',
           writers.length ? el('span', { class: 'party-last-writers' }, ` · ✍ written up by ${writers.length > 1 ? `${writers.slice(0, -1).join(', ')} and ${writers[writers.length - 1]}` : writers[0]}`) : '', ' ', write); })(),
-      isGm() ? el('div', { class: 'btnrow' }, campButton(rerender)) : null),
+      el('div', { class: 'btnrow' }, isGm() ? campButton(rerender) : null, safetyTools())),
     el('div', { class: 'party-grid' },
       el('div', { class: 'party-main' }, isGm() ? glanceTable(chars.filter(ACTIVE)) : null, members(chars), ordersCard(rerender), tonguesCard(), partyBondsSection(), advancementSection(),
         el('section', {}, el('h3', { class: 'section-title' }, 'Current quests'),

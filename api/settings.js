@@ -21,6 +21,7 @@
 // PATCH {custom_fields: {kind, list}}  (GM) the world's own fields for one kind of entry (an empty list removes them)
 import { route, send, fail, sql, requireOwner, requireGm, postDiscord } from './_lib/core.js';
 import { cleanOrder, cleanWatchTime } from '../js/party-order.js';
+import { newCheckin } from '../js/safety.js';
 import { cleanCalendar, advance, formatDate, today } from '../js/calendar.js';
 import { addStop, removeStop } from '../js/journey.js';
 import { applyChecklist } from '../js/checklist.js';
@@ -237,6 +238,16 @@ export default route({
       const list = (Array.isArray(req.world.prep?.not_links) ? req.world.prep.not_links : []).filter((x) => x !== id);
       await sql`UPDATE worlds SET prep = jsonb_set(COALESCE(prep, '{}'::jsonb), '{not_links}', ${JSON.stringify(list)}::jsonb) WHERE id = ${req.world.id}`;
       return send(res, 200, { not_links: list });
+    }
+    // Table safety (GMs): mark the pauses seen; open a check-in (a question), or close it.
+    if (req.body.pause_seen) {
+      await sql`UPDATE worlds SET prep = jsonb_set(COALESCE(prep, '{}'::jsonb), '{pause_seen}', ${JSON.stringify(new Date().toISOString())}::jsonb) WHERE id = ${req.world.id}`;
+      return send(res, 200, { ok: true });
+    }
+    if (req.body.checkin !== undefined) {
+      const c = req.body.checkin === null ? null : newCheckin(req.body.checkin?.question);
+      await sql`UPDATE worlds SET prep = jsonb_set(COALESCE(prep, '{}'::jsonb), '{checkin}', ${JSON.stringify(c)}::jsonb) WHERE id = ${req.world.id}`;
+      return send(res, 200, { checkin: c });
     }
     if (req.body.journey_remove !== undefined) {
       const list = removeStop(req.world.prep?.journey, String(req.body.journey_remove));

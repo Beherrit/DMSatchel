@@ -50,6 +50,7 @@ import { marketStalls, STALLS_OPEN, STALLS_SHUT } from '../js/market-stalls.js';
 import { cleanOrder, cleanWatchTime } from '../js/party-order.js';
 import { isRight, addSolver, shownHints, addGuess, readSolved } from '../js/riddle.js';
 import { trapsForPlayers } from '../js/traps.js';
+import { addPause, unseenPauses, answerCheckin } from '../js/safety.js';
 import { shopStanding, sellWithStanding } from '../js/standing-price.js';
 import { coinText, GOODS } from '../js/economy.js';
 import { cleanMusic } from '../js/music.js';
@@ -241,6 +242,9 @@ export default route({
         changed: rows.filter((r) => !r.deleted && visibleTo(r, req)).map((r) => shape(r, req)),
         removed: rows.filter((r) => r.deleted || !visibleTo(r, req)).map((r) => r.id), now, cal: req.world.cal || null, shown: req.world.shown || null,
         ...(req.role ? { notices: activeNotices(req.world.notices) } : {}), clock: readClock(req.world.clock), ask_unread: await askUnread(req),
+        // Table safety, kept fresh between full loads (see the full world below).
+        ...(req.isGmHere ? { pause: unseenPauses(req.world.prep?.pauses, req.world.prep?.pause_seen) } : {}),
+        ...(req.role ? { checkin: req.world.prep?.checkin?.id ? { id: req.world.prep.checkin.id, question: req.world.prep.checkin.question, at: req.world.prep.checkin.at, answered: (req.world.prep.checkin.voted || []).includes(req.gm?.id), ...(req.isGmHere ? { tally: req.world.prep.checkin.tally, count: (req.world.prep.checkin.voted || []).length } : {}) } : null } : {}),
       });
     }
     if (id) {
@@ -278,6 +282,11 @@ export default route({
         // Where the party is (from session prep), when this person can see that place.
         party_at: partyAt(w, rows, req),
         // The party's orders (marching and watch): the characters and hired NPCs this person can see.
+        // Table safety: GMs get the pauses asked for since they last marked them seen (never who); everyone gets the open
+        // check-in's question and whether they've answered, and GMs its tally.
+        ...(req.isGmHere ? { pause: unseenPauses(w.prep?.pauses, w.prep?.pause_seen) } : {}),
+        ...(w.prep?.checkin?.id && req.role ? { checkin: { id: w.prep.checkin.id, question: w.prep.checkin.question, at: w.prep.checkin.at, answered: (w.prep.checkin.voted || []).includes(req.gm?.id),
+          ...(req.isGmHere ? { tally: w.prep.checkin.tally, count: (w.prep.checkin.voted || []).length } : {}) } } : {}),
         party_order: (() => { const sees = (id) => { const r = byId.get(id); return Boolean(r && !r.deleted && ['character', 'npc'].includes(r.kind) && visibleTo(r, req)); };
           const t = cleanWatchTime(w.prep?.watch_start, w.prep?.watch_hours);
           return { march: cleanOrder(w.prep?.march).filter(sees), watch: cleanOrder(w.prep?.watch).filter(sees), watch_start: t.start, watch_hours: t.hours }; })(),
@@ -512,6 +521,23 @@ export default route({
     }
     // Answer a riddle: a member's guess at a handout's riddle, checked here (the answer never leaves the server); a right
     // one is recorded with who solved it.
+    // A quiet pause: any member can ask, anonymously, for the game to pause or move on; only the time is kept.
+    if (req.body.pause) {
+      if (!req.role) return fail(res, 403, 'Join this world first.');
+      const pauses = addPause(req.world.prep?.pauses);
+      await sql`UPDATE worlds SET prep = jsonb_set(COALESCE(prep, '{}'::jsonb), '{pauses}', ${JSON.stringify(pauses)}::jsonb) WHERE id = ${req.world.id}`;
+      return send(res, 200, { ok: true });
+    }
+    // A check-in answer: counted apart from the list of who has answered, so no answer can be traced.
+    if (req.body.checkin_answer !== undefined) {
+      if (!req.role) return fail(res, 403, 'Join this world first.');
+      const c = req.world.prep?.checkin;
+      if (!c?.id) return fail(res, 404, 'There’s no check-in open.');
+      const r = answerCheckin(c, req.gm.id, String(req.body.checkin_answer));
+      if (r.error) return fail(res, 400, r.error);
+      await sql`UPDATE worlds SET prep = jsonb_set(COALESCE(prep, '{}'::jsonb), '{checkin}', ${JSON.stringify(r.checkin)}::jsonb) WHERE id = ${req.world.id}`;
+      return send(res, 200, { ok: true });
+    }
     if (req.body.guess) {
       const b = req.body.guess;
       const h = await loadOne(String(b.handout || '').slice(0, 40), req.world.id);

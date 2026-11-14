@@ -177,6 +177,11 @@ export async function syncWorld(me) {
     world.info = { ...world.info, ask_unread: r.ask_unread };
     window.dispatchEvent(new CustomEvent('world:ask', { detail: { more } }));
   }
+  // Table safety: a pause asked for, or a check-in opened or answered.
+  if ((r.pause !== undefined && stable(r.pause) !== stable(world.info?.pause ?? null)) || (r.checkin !== undefined && stable(r.checkin) !== stable(world.info?.checkin ?? null))) {
+    world.info = { ...world.info, ...(r.pause !== undefined ? { pause: r.pause } : {}), ...(r.checkin !== undefined ? { checkin: r.checkin } : {}) };
+    window.dispatchEvent(new Event('world:safety'));
+  }
   if (r.clock !== undefined && stable(r.clock) !== stable(world.info?.clock ?? null)) {
     world.info = { ...world.info, clock: r.clock };
     window.dispatchEvent(new Event('world:clock'));
