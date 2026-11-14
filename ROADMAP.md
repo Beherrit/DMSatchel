@@ -1022,6 +1022,10 @@ to the log at the bottom.
 615. [x] **The GM sees it.** The GM's pages show a banner when someone has asked for a pause, until the GM marks it seen.
 616. [x] **Check-ins.** GMs ask "How's everyone doing?" and players answer 👍 😐 👎 anonymously; the GM sees the tally.
 617. [x] **A full sweep.** Run the whole browser suite again (a fresh baseline).
+618. [ ] **Pause from anywhere.** Players can ask for a pause from the sidebar on any page, not just the party page.
+619. [ ] **Past check-ins.** Closing a check-in keeps its question and tally (never who answered) for the GMs to look back on.
+620. [ ] **Safety tools explained.** The session zero page tells players about the anonymous pause and check-ins.
+621. [ ] **Pause in the palette.** Ctrl+K "pause" asks for a pause, anonymously.
 
 ## Ideas parking lot
 
