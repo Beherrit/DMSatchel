@@ -1017,6 +1017,11 @@ to the log at the bottom.
 611. [x] **A shared dream.** GMs can send the same dream to several characters at once.
 612. [x] **Write about the dream.** A dream's page offers its dreamer's player a journal entry about it.
 613. [x] **A full sweep.** Run the whole browser suite again and compare it with the last sweep.
+614. [ ] **A quiet pause.** Any player can ask, anonymously, for the game to pause or move on (an X-card): the server
+    keeps only when, never who.
+615. [ ] **The GM sees it.** The GM's pages show a banner when someone has asked for a pause, until the GM marks it seen.
+616. [ ] **Check-ins.** GMs ask "How's everyone doing?" and players answer 👍 😐 👎 anonymously; the GM sees the tally.
+617. [ ] **A full sweep.** Run the whole browser suite again (a fresh baseline).
 
 ## Ideas parking lot
 
