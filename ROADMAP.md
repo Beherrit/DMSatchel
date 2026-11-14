@@ -1021,7 +1021,7 @@ to the log at the bottom.
     keeps only when, never who.
 615. [x] **The GM sees it.** The GM's pages show a banner when someone has asked for a pause, until the GM marks it seen.
 616. [x] **Check-ins.** GMs ask "How's everyone doing?" and players answer 👍 😐 👎 anonymously; the GM sees the tally.
-617. [ ] **A full sweep.** Run the whole browser suite again (a fresh baseline).
+617. [x] **A full sweep.** Run the whole browser suite again (a fresh baseline).
 
 ## Ideas parking lot
 
@@ -1648,3 +1648,4 @@ to the log at the bottom.
 - A quiet pause: the party page has "⏸ Ask for a pause" for players: it tells the GM someone would like to pause or move on, and the server keeps only when, never who.
 - The GM sees it: GMs get a bar at the foot of every page ("⏸ Someone asked to pause or move on · just now") until they mark it seen; it arrives with the regular refresh, so no reload is needed.
 - Check-ins: GMs "Check in with the table" with a question; players answer 👍 😐 👎 from the bar, once each, counted apart from who answered so no answer can be traced; GMs see the tally and close it.
+- A full sweep (#617): all 557 browser tests run with no crashes, timeouts or errors, first time through; the 23 that print their own results show nothing amiss (accessibility clean light and dark). It's the new baseline (the previous sweep outputs were lost).
