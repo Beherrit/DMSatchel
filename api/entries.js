@@ -284,7 +284,7 @@ export default route({
         // The party's orders (marching and watch): the characters and hired NPCs this person can see.
         // Table safety: GMs get the pauses asked for since they last marked them seen (never who); everyone gets the open
         // check-in's question and whether they've answered, and GMs its tally.
-        ...(req.isGmHere ? { pause: unseenPauses(w.prep?.pauses, w.prep?.pause_seen) } : {}),
+        ...(req.isGmHere ? { pause: unseenPauses(w.prep?.pauses, w.prep?.pause_seen), checkins_past: Array.isArray(w.prep?.checkins_past) ? w.prep.checkins_past : [] } : {}),
         ...(w.prep?.checkin?.id && req.role ? { checkin: { id: w.prep.checkin.id, question: w.prep.checkin.question, at: w.prep.checkin.at, answered: (w.prep.checkin.voted || []).includes(req.gm?.id),
           ...(req.isGmHere ? { tally: w.prep.checkin.tally, count: (w.prep.checkin.voted || []).length } : {}) } } : {}),
         party_order: (() => { const sees = (id) => { const r = byId.get(id); return Boolean(r && !r.deleted && ['character', 'npc'].includes(r.kind) && visibleTo(r, req)); };

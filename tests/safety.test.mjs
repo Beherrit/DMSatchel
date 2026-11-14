@@ -18,3 +18,13 @@ test('check-ins: one answer each, counted apart from who answered', () => {
   assert.match(answerCheckin(c, 7, 'meh').error, /already/);
   assert.match(answerCheckin(c, 9, 'great').error, /Pick/);
 });
+
+test('pastCheckins: the closed one kept, tally only, the last 12', async () => {
+  const { pastCheckins } = await import('../js/safety.js');
+  const p = pastCheckins([], { id: 'c1', question: 'Fun?', at: 'a', tally: { up: 2, meh: 0, down: 1 }, voted: [7, 8, 9] }, 'z');
+  assert.deepEqual(p, [{ question: 'Fun?', at: 'a', closed: 'z', tally: { up: 2, meh: 0, down: 1 } }]);
+  assert.equal(JSON.stringify(p).includes('voted'), false);
+  assert.deepEqual(pastCheckins(p, null), p);
+  let many = []; for (let i = 0; i < 20; i++) many = pastCheckins(many, { id: `c${i}`, question: `q${i}`, tally: {} });
+  assert.equal(many.length, 12); assert.equal(many[0].question, 'q8');
+});

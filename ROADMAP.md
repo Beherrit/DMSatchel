@@ -1022,10 +1022,10 @@ to the log at the bottom.
 615. [x] **The GM sees it.** The GM's pages show a banner when someone has asked for a pause, until the GM marks it seen.
 616. [x] **Check-ins.** GMs ask "How's everyone doing?" and players answer 👍 😐 👎 anonymously; the GM sees the tally.
 617. [x] **A full sweep.** Run the whole browser suite again (a fresh baseline).
-618. [ ] **Pause from anywhere.** Players can ask for a pause from the sidebar on any page, not just the party page.
-619. [ ] **Past check-ins.** Closing a check-in keeps its question and tally (never who answered) for the GMs to look back on.
-620. [ ] **Safety tools explained.** The session zero page tells players about the anonymous pause and check-ins.
-621. [ ] **Pause in the palette.** Ctrl+K "pause" asks for a pause, anonymously.
+618. [x] **Pause from anywhere.** Players can ask for a pause from the sidebar on any page, not just the party page.
+619. [x] **Past check-ins.** Closing a check-in keeps its question and tally (never who answered) for the GMs to look back on.
+620. [x] **Safety tools explained.** The session zero page tells players about the anonymous pause and check-ins.
+621. [x] **Pause in the palette.** Ctrl+K "pause" asks for a pause, anonymously.
 
 ## Ideas parking lot
 
@@ -1653,3 +1653,7 @@ to the log at the bottom.
 - The GM sees it: GMs get a bar at the foot of every page ("⏸ Someone asked to pause or move on · just now") until they mark it seen; it arrives with the regular refresh, so no reload is needed.
 - Check-ins: GMs "Check in with the table" with a question; players answer 👍 😐 👎 from the bar, once each, counted apart from who answered so no answer can be traced; GMs see the tally and close it.
 - A full sweep (#617): all 557 browser tests run with no crashes, timeouts or errors, first time through; the 23 that print their own results show nothing amiss (accessibility clean light and dark). It's the new baseline (the previous sweep outputs were lost).
+- Pause from anywhere: players have "⏸ Ask for a pause" in the sidebar on every page.
+- Past check-ins: closing (or replacing) a check-in keeps its question, when and tally (the last 12; never who answered), and GMs see them on the session zero page.
+- Safety tools explained: the session zero page has "Pauses and check-ins", telling everyone how to ask for a pause and that both are anonymous.
+- Pause in the palette: Ctrl+K "pause" (or "x-card") asks for a pause, anonymously.

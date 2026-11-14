@@ -33,7 +33,7 @@ import { riddleCard } from './world-riddle.js';
 import { trapsCard } from './world-traps.js';
 import { onTheDayCard } from './world-onday.js';
 import { dreamsSection, dreamersLine, dreamJournalButton } from './world-dreams.js';
-import { drawBar } from './world-safety.js';
+import { drawBar, safetyTools } from './world-safety.js';
 import { whatsNewCard } from './world-whatsnew.js';
 import { attendanceSection } from './world-attendance.js';
 import { revealButton } from './world-reveal.js';
@@ -193,6 +193,8 @@ function renderSide() {
     favoritesNav(),
     followingNav(session.gm?.name),
     recentNav(),
+    // Pause from anywhere: players can ask for a pause from the sidebar on every page.
+    isPlayer() ? el('div', { class: 'w-safety' }, safetyTools()) : null,
     isPlayer() ? el('div', { class: 'w-gm w-player' }, el('a', { class: 'btn primary small', href: '#world/new/character' }, '+ My character'), el('a', { class: 'btn small', href: '#world/new/journal' }, '+ Journal entry'),
       el('a', { class: 'btn ghost small', href: '#world/new/lore' }, 'Suggest an entry'), el('a', { class: 'btn ghost small', href: '#world/mine' }, 'My things'), el('a', { class: 'btn ghost small', href: '#world/export' }, 'Export')) : null,
     el('nav', { class: 'w-kinds w-tools', 'aria-label': 'World views' },

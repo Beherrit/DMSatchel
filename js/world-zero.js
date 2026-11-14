@@ -3,6 +3,7 @@
 // their own lines and veils, and anything else, optionally without their name. GMs see what the table said and can
 // add it to the primer in one click. Route: #world/zero
 import { el, toast, setKids } from './dom.js';
+import { safetyZeroCard } from './world-safety.js';
 import { api, isGm, isMember } from './api.js';
 import { world, richText, notice, when } from './world-store.js';
 import { TOPICS, RATINGS, summarize, primerEmpty } from './zero.js';
@@ -24,6 +25,7 @@ export async function viewZero() {
     primerCard(data, draw),
     startHereCard({ fresh: true }),
     answerCard(data, draw),
+    safetyZeroCard(),
     isGm() ? tableCard(data, draw) : null);
   draw();
   return view;

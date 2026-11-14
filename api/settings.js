@@ -21,7 +21,7 @@
 // PATCH {custom_fields: {kind, list}}  (GM) the world's own fields for one kind of entry (an empty list removes them)
 import { route, send, fail, sql, requireOwner, requireGm, postDiscord } from './_lib/core.js';
 import { cleanOrder, cleanWatchTime } from '../js/party-order.js';
-import { newCheckin } from '../js/safety.js';
+import { newCheckin, pastCheckins } from '../js/safety.js';
 import { cleanCalendar, advance, formatDate, today } from '../js/calendar.js';
 import { addStop, removeStop } from '../js/journey.js';
 import { applyChecklist } from '../js/checklist.js';
@@ -246,8 +246,10 @@ export default route({
     }
     if (req.body.checkin !== undefined) {
       const c = req.body.checkin === null ? null : newCheckin(req.body.checkin?.question);
-      await sql`UPDATE worlds SET prep = jsonb_set(COALESCE(prep, '{}'::jsonb), '{checkin}', ${JSON.stringify(c)}::jsonb) WHERE id = ${req.world.id}`;
-      return send(res, 200, { checkin: c });
+      // Past check-ins: the one being closed or replaced is kept (question, when, tally; never who answered).
+      const past = pastCheckins(req.world.prep?.checkins_past, req.world.prep?.checkin);
+      await sql`UPDATE worlds SET prep = COALESCE(prep, '{}'::jsonb) || jsonb_build_object('checkin', ${JSON.stringify(c)}::jsonb, 'checkins_past', ${JSON.stringify(past)}::jsonb) WHERE id = ${req.world.id}`;
+      return send(res, 200, { checkin: c, checkins_past: past });
     }
     if (req.body.journey_remove !== undefined) {
       const list = removeStop(req.world.prep?.journey, String(req.body.journey_remove));

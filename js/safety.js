@@ -19,3 +19,10 @@ export function answerCheckin(c, voter, mood) {
   if ((c.voted || []).includes(voter)) return { error: 'You’ve already answered this one.' };
   return { checkin: { ...c, tally: { ...c.tally, [mood]: (Number(c.tally?.[mood]) || 0) + 1 }, voted: [...(c.voted || []), voter] } };
 }
+
+// Past check-ins: when one closes, its question, when and tally are kept (the last 12), never who answered.
+export const pastCheckins = (past, closing, closed = new Date().toISOString()) => {
+  const list = Array.isArray(past) ? past : [];
+  if (!closing?.id) return list.slice(-12);
+  return [...list, { question: String(closing.question || '').slice(0, 140), at: closing.at || '', closed, tally: { up: Number(closing.tally?.up) || 0, meh: Number(closing.tally?.meh) || 0, down: Number(closing.tally?.down) || 0 } }].slice(-12);
+};

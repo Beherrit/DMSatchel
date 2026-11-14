@@ -182,6 +182,11 @@ function render() {
       .map((h) => ({ label: h.name, group: `Dream · ${M.store.getEntry(h.fields.dream_for)?.name || 'someone'}`, href: `#world/e/${h.id}`, hint: `🌙 ${String(h.fields?.text || '').slice(0, 70)}` }));
     if (!dreamItems.length) dreamItems = [{ label: 'No dreams yet', group: 'Dreams', href: '#world/party', hint: 'GMs send dreams from a character’s page' }];
   }
+  // "Pause": ask, anonymously, for the game to pause or move on (players).
+  let pauseItems = [];
+  if (/^(pause|x-?card|ask for a pause|need a break)$/.test(q) && M.store.world.info) {
+    pauseItems = [{ label: '⏸ Ask for a pause', group: 'Table safety', href: '#world', hint: 'Anonymous: the GM sees only that someone asked', run: () => import('./world-safety.js').then((m) => m.askPause()) }];
+  }
   // "Market": the towns with a market day, and when each is next (soonest first; holidays skipped), above the
   // ordinary matches for the word.
   let markets = [];
@@ -211,6 +216,7 @@ function render() {
   if (langItems.length) items = [...langItems, ...items].slice(0, 40);
   if (omenItems.length) items = [...omenItems, ...items].slice(0, 40);
   if (dreamItems.length) items = [...dreamItems, ...items].slice(0, 40);
+  if (pauseItems.length) items = [...pauseItems, ...items].slice(0, 40);
   // Nothing typed yet: the entries you opened last come first.
   if (!q) {
     let recent = [];
@@ -227,6 +233,8 @@ function mark() { [...list.children].forEach((li, i) => { li.classList.toggle('a
 
 function go(it) {
   dialog.close();
+  // An item can run an action instead of opening a page (e.g. asking for a pause).
+  if (it.run) { it.run(); return; }
   location.hash = it.href.slice(1);
   if (it.filter) setTimeout(() => { const f = document.getElementById('ref-filter'); if (f) { f.value = it.filter; f.dispatchEvent(new Event('input')); } }, 50);
 }

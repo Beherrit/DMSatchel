@@ -8,7 +8,7 @@ import { MOODS, MOOD_ICON } from './safety.js';
 
 const ago = (iso) => { const m = Math.max(0, Math.round((Date.now() - Date.parse(iso)) / 60000)); return m < 1 ? 'just now' : m < 60 ? `${m} min ago` : `${Math.round(m / 60)} h ago`; };
 
-async function askPause() {
+export async function askPause() {
   if (!confirm('This tells the GM someone would like to pause or move on. Nobody, not even the GM, sees it was you.')) return;
   try { await api('entries', { method: 'PATCH', body: { pause: true } }); toast('The GM has been told. Thank you for saying.'); } catch (err) { toast(err.message, 'bad'); }
 }
@@ -25,7 +25,7 @@ function barContent() {
   if (isGm() && p?.count) out.push(el('div', { class: 'safety-pause', role: 'alert' }, el('strong', {}, `⏸ Someone asked to pause or move on${p.count > 1 ? ` (${p.count} times)` : ''}`), ` · ${ago(p.last)} · `,
     el('button', { class: 'btn small', type: 'button', onclick: () => gm({ pause_seen: true }, () => { world.info = { ...world.info, pause: { count: 0, last: null } }; }) }, 'Seen')));
   if (c?.id && isGm()) out.push(el('div', { class: 'safety-checkin gm' }, el('strong', {}, `💬 “${c.question}”: `), MOODS.map((m) => `${MOOD_ICON[m]} ${c.tally?.[m] || 0} `), el('span', { class: 'muted' }, `(${c.count || 0} answered) `),
-    el('button', { class: 'btn small ghost', type: 'button', onclick: () => gm({ checkin: null }, () => { world.info = { ...world.info, checkin: null }; }) }, 'Close')));
+    el('button', { class: 'btn small ghost', type: 'button', onclick: () => gm({ checkin: null }, (r) => { world.info = { ...world.info, checkin: null, checkins_past: r.checkins_past || world.info.checkins_past }; }) }, 'Close')));
   if (c?.id && !isGm() && isMember() && !previewing()) out.push(el('div', { class: 'safety-checkin' }, el('strong', {}, `💬 The GM asks: “${c.question}” `),
     c.answered ? el('span', { class: 'muted' }, 'Answered, thank you.') : MOODS.map((m) => el('button', { class: 'btn small', type: 'button', 'aria-label': { up: 'Good', meh: 'So-so', down: 'Not great' }[m], onclick: () => answer(m) }, MOOD_ICON[m])),
     el('span', { class: 'muted small' }, ' (anonymous)')));
@@ -45,4 +45,15 @@ export function safetyTools() {
   if (!isMember() || previewing()) return null;
   if (!isGm()) return el('button', { class: 'btn small ghost safety-ask', type: 'button', title: 'Anonymous: the GM sees only that someone asked', onclick: askPause }, '⏸ Ask for a pause');
   return el('button', { class: 'btn small ghost safety-checkin-ask', type: 'button', onclick: () => { const q = prompt('Ask the table (answers are anonymous):', 'How’s everyone doing?'); if (q !== null) gm({ checkin: { question: q } }, (r) => { world.info = { ...world.info, checkin: { ...r.checkin, answered: false, count: 0 } }; }); } }, '💬 Check in with the table');
+}
+
+// Safety tools explained, on the session zero page: what the pause and check-ins are, and that they're anonymous; for
+// GMs, the past check-ins (question, when, tally).
+export function safetyZeroCard() {
+  const past = isGm() ? (world.info?.checkins_past || []).slice().reverse() : [];
+  return el('section', { class: 'card zero-safety' }, el('h3', {}, 'Pauses and check-ins'),
+    el('p', {}, 'Any time, from the sidebar, the party page or Ctrl+K “pause”, you can ask for the game to pause or move on. The GM is told that someone asked, never who: the site keeps only when.'),
+    el('p', {}, 'Now and then the GM may ask how everyone’s doing. Answer 👍 😐 👎 from the bar at the foot of the page; answers are counted apart from who answered, so nobody can tell which was yours.'),
+    past.length ? el('details', { class: 'zero-checkins' }, el('summary', {}, `Past check-ins (${past.length})`),
+      el('ul', { class: 'plain small' }, past.map((c) => el('li', {}, `“${c.question}”: `, MOODS.map((m) => `${MOOD_ICON[m]} ${c.tally?.[m] || 0} `), el('span', { class: 'muted' }, c.closed ? `· ${new Date(c.closed).toLocaleDateString()}` : ''))))) : null);
 }
